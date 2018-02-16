@@ -12,21 +12,16 @@ import java.io.InputStreamReader;
 import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.Validator;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
 import org.xdi.util.io.HTTPFileDownloader;
-import org.xdi.xml.GluuErrorHandler;
 import org.xml.sax.SAXException;
 
 /**
@@ -34,8 +29,10 @@ import org.xml.sax.SAXException;
  *
  * @author Dmitry Ognyannikov
  */
-public class SAMLMetadataParser {
-    private static final Log log = LogFactory.getLog(SAMLMetadataParser.class);
+public final class SAMLMetadataParser {
+    private static final Log LOG = LogFactory.getLog(SAMLMetadataParser.class);
+
+    private SAMLMetadataParser() { }
 
     public static List<String> getEntityIdFromMetadataFile(File metadataFile) {
         if (!metadataFile.isFile()) {
@@ -46,7 +43,7 @@ public class SAMLMetadataParser {
         List<String> entityIds = handler.getEntityIDs();
 
         if (entityIds == null || entityIds.isEmpty()) {
-            log.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
         }
 
         return entityIds;
@@ -58,7 +55,7 @@ public class SAMLMetadataParser {
         List<String> entityIds = handler.getSpEntityIDs();
 
         if (entityIds == null || entityIds.isEmpty()) {
-            log.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
         }
 
         return entityIds;
@@ -66,17 +63,17 @@ public class SAMLMetadataParser {
 
     public static EntityIDHandler parseMetadata(File metadataFile) {
         if (!metadataFile.exists()) {
-            log.error("Failed to get entityId from metadata file: " + metadataFile.getAbsolutePath());
+            LOG.error("Failed to get entityId from metadata file: " + metadataFile.getAbsolutePath());
             return null;
         }
 
         InputStream is = null;
         try {
             is = FileUtils.openInputStream(metadataFile);
-        
+
             return parseMetadata(is);
         } catch (IOException ex) {
-            log.error("Failed to read SAML metadata file: " + metadataFile.getAbsolutePath(), ex);
+            LOG.error("Failed to read SAML metadata file: " + metadataFile.getAbsolutePath(), ex);
             return null;
         } finally {
             IOUtils.closeQuietly(is);
@@ -93,11 +90,11 @@ public class SAMLMetadataParser {
             handler = new EntityIDHandler();
             saxParser.parse(is, handler);
         } catch (IOException ex) {
-            log.error("Failed to read SAML metadata", ex);
+            LOG.error("Failed to read SAML metadata", ex);
         } catch (ParserConfigurationException e) {
-            log.error("Failed to confugure SAX parser", e);
+            LOG.error("Failed to confugure SAX parser", e);
         } catch (SAXException e) {
-            log.error("Failed to parse SAML metadata", e);
+            LOG.error("Failed to parse SAML metadata", e);
         } finally {
             IOUtils.closeQuietly(isr);
             IOUtils.closeQuietly(is);
@@ -112,9 +109,10 @@ public class SAMLMetadataParser {
     }
 
     public static EntityIDHandler parseMetadata(String metadata) {
-        if (metadata == null)
+        if (metadata == null) {
             return null;
-    
+        }
+
         InputStream is = new StringBufferInputStream(metadata);
         return parseMetadata(is);
     }
