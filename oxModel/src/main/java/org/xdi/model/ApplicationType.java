@@ -32,7 +32,7 @@ public enum ApplicationType implements LdapEnum {
         }
     }
 
-    private ApplicationType(String value, String displayName) {
+    ApplicationType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

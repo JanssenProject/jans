@@ -21,7 +21,7 @@ public class CounterMetricEntry extends MetricEntry {
     @LdapAttribute(name = "oxData")
     private CounterMetricData metricData;
 
-    public CounterMetricEntry() {}
+    public CounterMetricEntry() { }
 
     public CounterMetricEntry(String dn, String id, Date creationDate, CounterMetricData metricData) {
         super(dn, id, creationDate);

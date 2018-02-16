@@ -121,7 +121,7 @@
         </module>
 
         <module name="ParameterNumber">
-            <property name="max" value="10"/>
+            <property name="max" value="20"/>
         </module>
 
         <!-- Checks for whitespace                               -->

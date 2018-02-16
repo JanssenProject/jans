@@ -12,7 +12,7 @@ import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
  */
 public class LdapSampleEntryManager {
 
-    private static final Logger log = Logger.getLogger(LdapSampleEntryManager.class);
+    private static final Logger LOG = Logger.getLogger(LdapSampleEntryManager.class);
 
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
@@ -31,7 +31,7 @@ public class LdapSampleEntryManager {
         Properties connectionProperties = getSampleConnectionProperties();
 
         LdapEntryManager ldapEntryManager = ldapEntryManagerFactory.createEntryManager(connectionProperties);
-        log.debug("Created LdapEntryManager: " + ldapEntryManager);
+        LOG.debug("Created LdapEntryManager: " + ldapEntryManager);
 
         return ldapEntryManager;
     }

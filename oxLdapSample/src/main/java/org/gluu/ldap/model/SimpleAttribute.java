@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.ldap;
+package org.gluu.ldap.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,16 +23,16 @@ import org.xdi.util.StringHelper;
  * Date: 12/30/2016
  */
 @LdapEntry
-@LdapObjectClass(values = {"oxAuthGrant", "top"})
-public class SimpleGrant implements Serializable {
+@LdapObjectClass(values = {"gluuAttribute", "top"})
+public class SimpleAttribute implements Serializable {
 
-    private static final long serialVersionUID = -1234191420188575733L;
+    private static final long serialVersionUID = -1634191420188575733L;
 
     @LdapDN
     private String dn;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
-    protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @LdapCustomObjectClass
     private String[] customObjectClasses;

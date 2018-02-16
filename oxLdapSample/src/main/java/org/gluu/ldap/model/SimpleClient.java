@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.ldap;
+package org.gluu.ldap.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class SimpleClient implements Serializable {
     private String dn;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
-    protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @LdapCustomObjectClass
     private String[] customObjectClasses;

@@ -4,13 +4,14 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.ldap;
+package org.gluu.ldap.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
 import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
@@ -20,19 +21,22 @@ import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
- * Date: 12/30/2016
+ * Date: 11/03/2016
  */
 @LdapEntry
-@LdapObjectClass(values = {"oxAuthSessionId", "top"})
-public class SimpleSession implements Serializable {
+@LdapObjectClass(values = {"gluuPerson", "top"})
+public class SimpleUser implements Serializable {
 
-    private static final long serialVersionUID = -1534191420188575733L;
+    private static final long serialVersionUID = -1634191420188575733L;
 
     @LdapDN
     private String dn;
 
+    @LdapAttribute(name = "uid")
+    private String userId;
+
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
-    protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @LdapCustomObjectClass
     private String[] customObjectClasses;
@@ -43,6 +47,14 @@ public class SimpleSession implements Serializable {
 
     public void setDn(String dn) {
         this.dn = dn;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
