@@ -13,12 +13,14 @@ public class LdapSearchScopeConverter {
     public com.unboundid.ldap.sdk.SearchScope convertToLdapSearchScope(SearchScope searchScope) throws SearchScopeException {
         if (SearchScope.BASE == searchScope) {
             return com.unboundid.ldap.sdk.SearchScope.BASE;
-        } if (SearchScope.ONE == searchScope) {
+        }
+        if (SearchScope.ONE == searchScope) {
             return com.unboundid.ldap.sdk.SearchScope.ONE;
-        } if (SearchScope.SUB == searchScope) {
+        }
+        if (SearchScope.SUB == searchScope) {
             return com.unboundid.ldap.sdk.SearchScope.SUB;
         }
-    
+
         throw new SearchScopeException(String.format("Unknown search scope '%s'", searchScope));
     }
 

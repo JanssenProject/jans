@@ -40,21 +40,23 @@ import com.unboundid.ldif.LDIFReader;
  */
 public final class LdifDataUtility {
 
-    private static final Logger log = Logger.getLogger(LdifDataUtility.class);
+    private static final Logger LOG = Logger.getLogger(LdifDataUtility.class);
 
-    //Just define the singleton as a static field in a separate class.
-    // The semantics of Java guarantee that the field will not be initialized until the field is referenced,
-    // and that any thread which accesses the field will see all of the writes resulting from initializing that field.
+    // Just define the singleton as a static field in a separate class.
+    // The semantics of Java guarantee that the field will not be initialized until
+    // the field is referenced,
+    // and that any thread which accesses the field will see all of the writes
+    // resulting from initializing that field.
     // http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
     private static class Holder {
-        static LdifDataUtility instance = new LdifDataUtility();
+        private static LdifDataUtility INSTANCE = new LdifDataUtility();
     }
 
     private LdifDataUtility() {
     }
 
     public static LdifDataUtility instance() {
-        return Holder.instance;
+        return Holder.INSTANCE;
     }
 
     /**
@@ -121,13 +123,13 @@ public final class LdifDataUtility {
             try {
                 ldifRecord = ldifReader.readChangeRecord(true);
             } catch (LDIFException le) {
-                log.error("Malformed ldif record", le);
+                LOG.error("Malformed ldif record", le);
                 if (!le.mayContinueReading()) {
                     resultCode = ResultCode.DECODING_ERROR;
                     break;
                 }
             } catch (IOException ioe) {
-                log.error("I/O error encountered while reading a change record", ioe);
+                LOG.error("I/O error encountered while reading a change record", ioe);
                 resultCode = ResultCode.LOCAL_ERROR;
                 break;
             }
@@ -149,7 +151,7 @@ public final class LdifDataUtility {
                     continue;
                 }
 
-                log.error("Failed to inserting ldif record", le);
+                LOG.error("Failed to inserting ldif record", le);
             }
         }
 
@@ -163,8 +165,8 @@ public final class LdifDataUtility {
      *            Connection to LDAP server
      * @param ldifFileName
      *            LDIF file
-     * @return true if server contains at least one DN simular to specified in
-     *         ldif file.
+     * @return true if server contains at least one DN simular to specified in ldif
+     *         file.
      */
     public boolean checkIfSerrverHasEntryFromLDIFFile(LDAPConnection connection, String ldifFileName) {
         // Set up the LDIF reader that will be used to read the changes to apply
@@ -180,12 +182,12 @@ public final class LdifDataUtility {
             try {
                 entry = ldifReader.readEntry();
             } catch (LDIFException le) {
-                log.error("Malformed ldif record", le);
+                LOG.error("Malformed ldif record", le);
                 if (!le.mayContinueReading()) {
                     return true;
                 }
             } catch (IOException ioe) {
-                log.error("I/O error encountered while reading a change record", ioe);
+                LOG.error("I/O error encountered while reading a change record", ioe);
                 return true;
             }
 
@@ -203,7 +205,7 @@ public final class LdifDataUtility {
                 }
             } catch (LDAPException le) {
                 if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
-                    log.error("Failed to search ldif record", le);
+                    LOG.error("Failed to search ldif record", le);
                     return true;
                 }
             }
@@ -232,7 +234,7 @@ public final class LdifDataUtility {
                 return ResultCode.LOCAL_ERROR;
             }
         } catch (LDAPSearchException le) {
-            log.error("Failed to search subordinate entries", le);
+            LOG.error("Failed to search subordinate entries", le);
             return ResultCode.LOCAL_ERROR;
         }
 
@@ -246,7 +248,7 @@ public final class LdifDataUtility {
             try {
                 connection.delete(listIterator.previous());
             } catch (LDAPException le) {
-                log.error("Failed to delete entry", le);
+                LOG.error("Failed to delete entry", le);
                 resultCode = ResultCode.LOCAL_ERROR;
                 break;
             }
@@ -265,7 +267,7 @@ public final class LdifDataUtility {
             }
             ldifReader = new LDIFReader(ldifFile);
         } catch (IOException ex) {
-            log.error("I/O error creating the LDIF reader", ex);
+            LOG.error("I/O error creating the LDIF reader", ex);
             return null;
         }
 
@@ -299,12 +301,12 @@ public final class LdifDataUtility {
                 }
 
             } catch (LDIFException le) {
-                log.info("Malformed ldif record " + ldifRecord);
-                log.error("Malformed ldif record", le);
+                LOG.info("Malformed ldif record " + ldifRecord);
+                LOG.error("Malformed ldif record", le);
                 resultCode = ResultCode.DECODING_ERROR;
                 break;
             } catch (IOException ioe) {
-                log.error("I/O error encountered while reading a change record", ioe);
+                LOG.error("I/O error encountered while reading a change record", ioe);
                 resultCode = ResultCode.LOCAL_ERROR;
                 break;
             }
@@ -323,17 +325,17 @@ public final class LdifDataUtility {
         List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
         try {
             for (String pattern : patterns) {
-                String[] targetArray = new String[] { pattern };
-                Filter inumFilter = Filter.createSubstringFilter("inum", null,targetArray, null);
+                String[] targetArray = new String[] {pattern};
+                Filter inumFilter = Filter.createSubstringFilter("inum", null, targetArray, null);
                 Filter searchFilter = Filter.createORFilter(inumFilter);
-                SearchResultEntry sr = connection.searchForEntry(baseDN,SearchScope.SUB, searchFilter, null);
+                SearchResultEntry sr = connection.searchForEntry(baseDN, SearchScope.SUB, searchFilter, null);
                 searchResultEntryList.add(sr);
             }
 
             return searchResultEntryList;
         } catch (LDAPException le) {
             if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
-                log.error("Failed to search ldif record", le);
+                LOG.error("Failed to search ldif record", le);
                 return null;
             }
         }

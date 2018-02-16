@@ -61,9 +61,10 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
-            return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(), genericFilter.getSubAny(), genericFilter.getSubFinal());
+            return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(),
+                    genericFilter.getSubAny(), genericFilter.getSubFinal());
         }
-    
+
         throw new SearchException(String.format("Unknown filter type '%s'", type), com.unboundid.ldap.sdk.ResultCode.PROTOCOL_ERROR_INT_VALUE);
     }
 
