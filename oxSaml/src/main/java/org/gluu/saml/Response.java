@@ -50,12 +50,12 @@ import org.xml.sax.SAXException;
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class Response {
-    private final static SimpleNamespaceContext NAMESPACES;
-    
-    public final static String SAML_RESPONSE_STATUS_SUCCESS = "urn:oasis:names:tc:SAML:2.0:status:Success";
-    public final static String SAML_RESPONSE_STATUS_RESPONDER = "urn:oasis:names:tc:SAML:2.0:status:Responder";
-    public final static String SAML_RESPONSE_STATUS_AUTHNFAILED = "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed";
-    
+    private static final SimpleNamespaceContext NAMESPACES;
+
+    public static final String SAML_RESPONSE_STATUS_SUCCESS = "urn:oasis:names:tc:SAML:2.0:status:Success";
+    public static final String SAML_RESPONSE_STATUS_RESPONDER = "urn:oasis:names:tc:SAML:2.0:status:Responder";
+    public static final String SAML_RESPONSE_STATUS_AUTHNFAILED = "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed";
+
     static {
         HashMap<String, String> preferences = new HashMap<String, String>() {
             {
@@ -117,29 +117,32 @@ public class Response {
     }
 
     public boolean isAuthnFailed() throws Exception {
-            XPath xPath = XPathFactory.newInstance().newXPath();
+        XPath xPath = XPathFactory.newInstance().newXPath();
 
-            xPath.setNamespaceContext(NAMESPACES);
-            XPathExpression query = xPath.compile("/samlp:Response/samlp:Status/samlp:StatusCode");
-            NodeList nodes = (NodeList) query.evaluate(xmlDoc, XPathConstants.NODESET);
-            for (int i = 0; i < nodes.getLength(); i++) {
-                    Node node = nodes.item(i);
+        xPath.setNamespaceContext(NAMESPACES);
+        XPathExpression query = xPath.compile("/samlp:Response/samlp:Status/samlp:StatusCode");
+        NodeList nodes = (NodeList) query.evaluate(xmlDoc, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
 
-                    if (node.getAttributes().getNamedItem("Value") == null)
-                        continue;
-
-                    String statusCode = node.getAttributes().getNamedItem("Value").getNodeValue();
-                    if (SAML_RESPONSE_STATUS_SUCCESS.equalsIgnoreCase(statusCode))
-                        return false;
-                    else if (SAML_RESPONSE_STATUS_AUTHNFAILED.equalsIgnoreCase(statusCode))
-                        return true;
-                    else if (SAML_RESPONSE_STATUS_RESPONDER.equalsIgnoreCase(statusCode))
-                        ;// nothing?
+            if (node.getAttributes().getNamedItem("Value") == null) {
+                continue;
             }
-        
-            return false;
+
+            String statusCode = node.getAttributes().getNamedItem("Value").getNodeValue();
+            if (SAML_RESPONSE_STATUS_SUCCESS.equalsIgnoreCase(statusCode)) {
+                return false;
+            } else if (SAML_RESPONSE_STATUS_AUTHNFAILED.equalsIgnoreCase(statusCode)) {
+                return true;
+            } else if (SAML_RESPONSE_STATUS_RESPONDER.equalsIgnoreCase(statusCode)) {
+                // nothing?
+                continue;
+            }
         }
-    
+
+        return false;
+    }
+
     private void tagIdAttributes(Document xmlDoc) {
         NodeList nodeList = xmlDoc.getElementsByTagName("*");
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -191,8 +194,8 @@ public class Response {
             for (int j = 0; j < nameChildNodes.getLength(); j++) {
                 Node nameChildNode = nameChildNodes.item(j);
 
-        if ("urn:oasis:names:tc:SAML:2.0:assertion".equalsIgnoreCase(nameChildNode.getNamespaceURI())
-                && "AttributeValue".equals(nameChildNode.getLocalName())) {
+                if ("urn:oasis:names:tc:SAML:2.0:assertion".equalsIgnoreCase(nameChildNode.getNamespaceURI())
+                        && "AttributeValue".equals(nameChildNode.getLocalName())) {
                     NodeList valueChildNodes = nameChildNode.getChildNodes();
                     for (int k = 0; k < valueChildNodes.getLength(); k++) {
                         Node valueChildNode = valueChildNodes.item(k);

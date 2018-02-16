@@ -39,9 +39,9 @@ public class SamlConfiguration {
     private X509Certificate certificate;
     private boolean useRequestedAuthnContext;
 
-    protected PrivateKey privateKey;
-    protected String _sigAlg = "SHA256withRSA";
-    protected String _sigAlgUrl = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+    private PrivateKey privateKey;
+    private String sigAlg = "SHA256withRSA";
+    private String sigAlgUrl = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
     public String getIdpSsoTargetUrl() {
         return idpSsoTargetUrl;
@@ -105,29 +105,34 @@ public class SamlConfiguration {
     }
 
     public String getSigAlg() {
-        return _sigAlg;
+        return sigAlg;
     }
-    public void setSigAlg(String val) {
-        this._sigAlg = val;
+
+    public void setSigAlg(String sigAlg) {
+        this.sigAlg = sigAlg;
     }
 
     public String getSigAlgUrl() {
-        return _sigAlgUrl;
+        return sigAlgUrl;
     }
-    public void setSigAlgUrl(String val) {
-        this._sigAlgUrl = val;
+
+    public void setSigAlgUrl(String sigAlgUrl) {
+        this.sigAlgUrl = sigAlgUrl;
     }
 
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
-    public void setPrivateKey(PrivateKey val) {
-        this.privateKey = val;
+
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
     }
 
     /**
      * loads the private key for digital signature
-     * @param prvKeyPath file path to location of private key
+     *
+     * @param prvKeyPath
+     *            file path to location of private key
      * @throws Exception
      */
     public void loadPrivateKey(String prvKeyPath) throws Exception {
