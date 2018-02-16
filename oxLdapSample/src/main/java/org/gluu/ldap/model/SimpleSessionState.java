@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.ldap;
+package org.gluu.ldap.model;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -25,7 +25,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @version December 15, 2015
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthSessionId"})
+@LdapObjectClass(values = { "top", "oxAuthSessionId" })
 public class SimpleSessionState implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
@@ -65,8 +65,8 @@ public class SimpleSessionState implements Serializable {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public String getJwt() {
@@ -89,24 +89,24 @@ public class SimpleSessionState implements Serializable {
         return id;
     }
 
-    public void setId(String p_id) {
-        id = p_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Date getLastUsedAt() {
         return lastUsedAt != null ? new Date(lastUsedAt.getTime()) : null;
     }
 
-    public void setLastUsedAt(Date p_lastUsedAt) {
-        lastUsedAt = p_lastUsedAt != null ? new Date(p_lastUsedAt.getTime()) : null;
+    public void setLastUsedAt(Date lastUsedAt) {
+        this.lastUsedAt = lastUsedAt != null ? new Date(lastUsedAt.getTime()) : null;
     }
 
     public String getUserDn() {
         return userDn;
     }
 
-    public void setUserDn(String p_userDn) {
-        userDn = p_userDn != null ? p_userDn : "";
+    public void setUserDn(String userDn) {
+        this.userDn = userDn != null ? userDn : "";
     }
 
     public Date getAuthenticationTime() {
@@ -124,7 +124,6 @@ public class SimpleSessionState implements Serializable {
     public void setPermissionGranted(Boolean permissionGranted) {
         this.permissionGranted = permissionGranted;
     }
-
 
     public Map<String, String> getSessionAttributes() {
         if (sessionAttributes == null) {
@@ -147,8 +146,12 @@ public class SimpleSessionState implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         SimpleSessionState id1 = (SimpleSessionState) o;
 
@@ -176,4 +179,5 @@ public class SimpleSessionState implements Serializable {
         sb.append('}');
         return sb.toString();
     }
+
 }

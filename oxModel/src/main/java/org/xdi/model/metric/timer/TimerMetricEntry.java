@@ -21,7 +21,7 @@ public class TimerMetricEntry extends MetricEntry {
     @LdapAttribute(name = "oxData")
     private TimerMetricData metricData;
 
-    public TimerMetricEntry() {}
+    public TimerMetricEntry() { }
 
     public TimerMetricEntry(String dn, String id, Date creationDate, TimerMetricData metricData) {
         super(dn, id, creationDate);

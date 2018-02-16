@@ -8,21 +8,24 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.gluu.ldap.model.SimpleSessionState;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.xdi.log.LoggingHelper;
 
 /**
- * @author Yuriy Movchan
- * Date: 01/25/2016
+ * @author Yuriy Movchan Date: 01/25/2016
  */
-public class LdapSampleSimpleSessionSample {
+public final class LdapSampleSimpleSessionSample {
 
-    private static final Logger log;
+    private static final Logger LOG;
 
     static {
         StatusLogger.getLogger().setLevel(Level.OFF);
         LoggingHelper.configureConsoleAppender();
-        log = Logger.getLogger(LdapSampleSimpleSessionSample.class);
+        LOG = Logger.getLogger(LdapSampleSimpleSessionSample.class);
+    }
+
+    private LdapSampleSimpleSessionSample() {
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -35,7 +38,8 @@ public class LdapSampleSimpleSessionSample {
             // Create LDAP entry manager
             String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad561";
             final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
-            final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
+            final String userDn =
+                    "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 
             final SimpleSessionState simpleSessionState = new SimpleSessionState();
             simpleSessionState.setDn(sessionDn);
@@ -44,7 +48,6 @@ public class LdapSampleSimpleSessionSample {
 
             ldapEntryManager.persist(simpleSessionState);
             System.out.println("Persisted");
-
 
             int threadCount = 500;
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount, daemonThreadFactory());
@@ -63,8 +66,9 @@ public class LdapSampleSimpleSessionSample {
                             ldapEntryManager.merge(simpleSessionStateFromLdap);
                             System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn);
                         } catch (Throwable e) {
-                            System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn + ", error:" + e.getMessage());
-//                            e.printStackTrace();
+                            System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn
+                                    + ", error:" + e.getMessage());
+                            // e.printStackTrace();
                         }
                     }
                 });
@@ -78,13 +82,12 @@ public class LdapSampleSimpleSessionSample {
 
     public static ThreadFactory daemonThreadFactory() {
         return new ThreadFactory() {
-            public Thread newThread(Runnable p_r) {
-                Thread thread = new Thread(p_r);
+            public Thread newThread(Runnable runnable) {
+                Thread thread = new Thread(runnable);
                 thread.setDaemon(true);
                 return thread;
             }
         };
     }
-
 
 }

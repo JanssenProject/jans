@@ -20,7 +20,7 @@ import org.xdi.model.metric.MetricType;
  * @author Yuriy Movchan Date: 07/27/2015
  */
 @LdapEntry(sortBy = "startDate")
-@LdapObjectClass(values = {"top", "oxMetric"})
+@LdapObjectClass(values = { "top", "oxMetric" })
 public class MetricEntry {
 
     @LdapDN
@@ -44,7 +44,8 @@ public class MetricEntry {
     @LdapAttribute(name = "creationDate")
     private Date creationDate;
 
-    public MetricEntry() {}
+    public MetricEntry() {
+    }
 
     public MetricEntry(String dn, String id, Date creationDate) {
         this.dn = dn;
@@ -111,9 +112,9 @@ public class MetricEntry {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
-                .append(", applicationType=").append(applicationType).append(", metricType=").append(metricType).append(", creationDate=").append(creationDate)
-                .append("]");
+        builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=")
+                .append(endDate).append(", applicationType=").append(applicationType).append(", metricType=").append(metricType)
+                .append(", creationDate=").append(creationDate).append("]");
         return builder.toString();
     }
 

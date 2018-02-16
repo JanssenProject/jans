@@ -32,9 +32,9 @@ public class TimerMetricData extends MetricData {
     public TimerMetricData() {
     }
 
-    public TimerMetricData(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, String rateUnit, double min,
-            double max, double mean, double stdDev, double median, double value75thPercentile, double value95thPercentile, double value98thPercentile,
-            double value99thPercentile, double value999thPercentile, String durationUnit) {
+    public TimerMetricData(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, String rateUnit,
+            double min, double max, double mean, double stdDev, double median, double value75thPercentile, double value95thPercentile,
+            double value98thPercentile, double value99thPercentile, double value999thPercentile, String durationUnit) {
         this.count = count;
         this.meanRate = meanRate;
         this.oneMinuteRate = oneMinuteRate;
@@ -193,13 +193,13 @@ public class TimerMetricData extends MetricData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TimerMetricData [count=").append(count).append(", meanRate=").append(meanRate).append(", oneMinuteRate=").append(oneMinuteRate)
-                .append(", fiveMinuteRate=").append(fiveMinuteRate).append(", fifteenMinuteRate=").append(fifteenMinuteRate).append(", rateUnit=")
-                .append(rateUnit).append(", min=").append(min).append(", max=").append(max).append(", mean=").append(mean).append(", stdDev=").append(stdDev)
-                .append(", median=").append(median).append(", value75thPercentile=").append(value75thPercentile).append(", value95thPercentile=")
-                .append(value95thPercentile).append(", value98thPercentile=").append(value98thPercentile).append(", value99thPercentile=")
-                .append(value99thPercentile).append(", value999thPercentile=").append(value999thPercentile).append(", durationUnit=").append(durationUnit)
-                .append("]");
+        builder.append("TimerMetricData [count=").append(count).append(", meanRate=").append(meanRate).append(", oneMinuteRate=")
+                .append(oneMinuteRate).append(", fiveMinuteRate=").append(fiveMinuteRate).append(", fifteenMinuteRate=").append(fifteenMinuteRate)
+                .append(", rateUnit=").append(rateUnit).append(", min=").append(min).append(", max=").append(max).append(", mean=").append(mean)
+                .append(", stdDev=").append(stdDev).append(", median=").append(median).append(", value75thPercentile=").append(value75thPercentile)
+                .append(", value95thPercentile=").append(value95thPercentile).append(", value98thPercentile=").append(value98thPercentile)
+                .append(", value99thPercentile=").append(value99thPercentile).append(", value999thPercentile=").append(value999thPercentile)
+                .append(", durationUnit=").append(durationUnit).append("]");
         return builder.toString();
     }
 

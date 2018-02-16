@@ -1,11 +1,12 @@
 package org.xdi.model.uma;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author yuriyz on 05/30/2017.
@@ -99,12 +100,7 @@ public class ClaimDefinition {
 
     @Override
     public String toString() {
-        return "ClaimDefinition{" +
-                "claimTokenFormat=" + claimTokenFormat +
-                ", claimType='" + claimType + '\'' +
-                ", friendlyName='" + friendlyName + '\'' +
-                ", issuer=" + issuer +
-                ", name='" + name + '\'' +
-                '}';
+        return "ClaimDefinition{" + "claimTokenFormat=" + claimTokenFormat + ", claimType='" + claimType + '\'' + ", friendlyName='" + friendlyName
+                + '\'' + ", issuer=" + issuer + ", name='" + name + '\'' + '}';
     }
 }

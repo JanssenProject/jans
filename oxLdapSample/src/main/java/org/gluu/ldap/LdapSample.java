@@ -5,6 +5,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.gluu.ldap.model.SimpleAttribute;
+import org.gluu.ldap.model.SimpleGrant;
+import org.gluu.ldap.model.SimpleSession;
+import org.gluu.ldap.model.SimpleUser;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SearchScope;
@@ -14,18 +18,19 @@ import org.gluu.search.filter.Filter;
 import org.xdi.log.LoggingHelper;
 
 /**
- * @author Yuriy Movchan
- * Date: 11/03/2016
+ * @author Yuriy Movchan Date: 11/03/2016
  */
-public class LdapSample {
+public final class LdapSample {
 
-    private static final Logger log;
+    private static final Logger LOG;
 
     static {
         StatusLogger.getLogger().setLevel(Level.OFF);
         LoggingHelper.configureConsoleAppender();
-        log = Logger.getLogger(LdapSample.class);
+        LOG = Logger.getLogger(LdapSample.class);
     }
+
+    private LdapSample() { }
 
     public static void main(String[] args) {
         // Prepare sample connection details
@@ -37,39 +42,40 @@ public class LdapSample {
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
-            log.debug("User with uid: " + user.getUserId());
+            LOG.debug("User with uid: " + user.getUserId());
         }
 
         if (users.size() > 0) {
             // Add attribute "streetAddress" to first user
             SimpleUser user = users.get(0);
-            user.getCustomAttributes()
-                    .add(new CustomAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
+            user.getCustomAttributes().add(new CustomAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
 
             ldapEntryManager.merge(user);
         }
 
         Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
-        List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
+        List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0,
+                0);
         for (SimpleAttribute attribute : attributes) {
-            log.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
+            LOG.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
         List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
-        log.debug("Found sessions: " + sessions.size());
+        LOG.debug("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, null, 10, 0, 0);
-        log.debug("Found grants: " + grants.size());
+        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] {"oxAuthGrantId"},
+                null, 10, 0, 0);
+        LOG.debug("Found grants: " + grants.size());
 
         try {
-            ListViewResponse<SimpleUser> vlvResponse = ldapEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 10, 100000, 1000, "displayName", SortOrder.ASCENDING, new String[] { "uid", "displayName", "gluuStatus"});
+            ListViewResponse<SimpleUser> vlvResponse = ldapEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 10, 100000, 1000,
+                    "displayName", SortOrder.ASCENDING, new String[] {"uid", "displayName", "gluuStatus"});
 
-            log.debug("Found persons: " + vlvResponse.getTotalResults());
+            LOG.debug("Found persons: " + vlvResponse.getTotalResults());
             System.out.println(vlvResponse.getResult().size());
         } catch (Exception ex) {
-            log.error("Failed to search", ex);
+            LOG.error("Failed to search", ex);
         }
     }
-
 
 }
