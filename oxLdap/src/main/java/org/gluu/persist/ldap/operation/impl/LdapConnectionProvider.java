@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import org.gluu.persist.exception.operation.InvalidConfigurationException;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.FailoverServerSet;
@@ -34,12 +33,12 @@ import com.unboundid.util.ssl.TrustStoreTrustManager;
  */
 public class LdapConnectionProvider {
 
-    private static final Logger log = Logger.getLogger(LdapConnectionProvider.class);
+    private static final Logger LOG = Logger.getLogger(LdapConnectionProvider.class);
 
     private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
     private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
 
-    private static final String[] SSL_PROTOCOLS = { "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3" };
+    private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"};
 
     private LDAPConnectionPool connectionPool;
     private int creationResultCode;
@@ -59,7 +58,8 @@ public class LdapConnectionProvider {
 
     private boolean supportsSubtreeDeleteRequestControl;
 
-    protected LdapConnectionProvider() {}
+    protected LdapConnectionProvider() {
+    }
 
     public LdapConnectionProvider(Properties props) {
         create(props);
@@ -75,13 +75,13 @@ public class LdapConnectionProvider {
             if (clonedProperties.getProperty("bindPassword") != null) {
                 clonedProperties.setProperty("bindPassword", "REDACTED");
             }
-            log.error("Failed to create connection pool with properties: " + clonedProperties, ex);
+            LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
         } catch (Exception ex) {
             Properties clonedProperties = (Properties) props.clone();
             if (clonedProperties.getProperty("bindPassword") != null) {
                 clonedProperties.setProperty("bindPassword", "REDACTED");
             }
-            log.error("Failed to create connection pool with properties: " + clonedProperties, ex);
+            LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
         }
     }
 
@@ -125,7 +125,7 @@ public class LdapConnectionProvider {
         connectionOptions.setAutoReconnect(true);
 
         this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
-    
+
         SSLUtil sslUtil = null;
         FailoverServerSet failoverSet;
         if (this.useSSL) {
@@ -136,7 +136,8 @@ public class LdapConnectionProvider {
             if (StringHelper.isEmpty(sslTrustStoreFile) && StringHelper.isEmpty(sslTrustStorePin)) {
                 sslUtil = new SSLUtil(new TrustAllTrustManager());
             } else {
-                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(sslTrustStoreFile, sslTrustStorePin.toCharArray(), sslTrustStoreFormat, true);
+                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(sslTrustStoreFile, sslTrustStorePin.toCharArray(),
+                        sslTrustStoreFormat, true);
                 sslUtil = new SSLUtil(trustStoreTrustManager);
             }
 
@@ -154,35 +155,35 @@ public class LdapConnectionProvider {
                 this.connectionPool.setMaxWaitTimeMillis(Long.parseLong(connectionMaxWaitTime));
             }
         }
-    
+
         this.binaryAttributes = new ArrayList<String>();
         if (props.containsKey("binaryAttributes")) {
             String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
             this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
         }
-        log.debug("Using next binary attributes: " + this.binaryAttributes);
-    
+        LOG.debug("Using next binary attributes: " + this.binaryAttributes);
+
         this.certificateAttributes = new ArrayList<String>();
         if (props.containsKey("certificateAttributes")) {
             String[] binaryAttrs = StringHelper.split(props.get("certificateAttributes").toString().toLowerCase(), ",");
             this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
         }
-        log.debug("Using next binary certificateAttributes: " + this.certificateAttributes);
-    
+        LOG.debug("Using next binary certificateAttributes: " + this.certificateAttributes);
+
         this.supportedLDAPVersion = determineSupportedLdapVersion();
         this.subschemaSubentry = determineSubschemaSubentry();
         this.supportsSubtreeDeleteRequestControl = supportsSubtreeDeleteRequestControl();
         this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
     }
 
-    private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
-            int maxConnections, SSLUtil sslUtil) throws LDAPException {    
+    private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest,
+            LDAPConnectionOptions connectionOptions, int maxConnections, SSLUtil sslUtil) throws LDAPException {
         String connectionPoolMaxWaitTime = props.getProperty("connection-pool-max-wait-time");
         int connectionPoolMaxWaitTimeSeconds = 30;
         if (StringHelper.isNotEmpty(connectionPoolMaxWaitTime)) {
             connectionPoolMaxWaitTimeSeconds = Integer.parseInt(connectionPoolMaxWaitTime);
         }
-        log.debug("Using LDAP connection pool timeout: '" + connectionPoolMaxWaitTimeSeconds + "'");
+        LOG.debug("Using LDAP connection pool timeout: '" + connectionPoolMaxWaitTimeSeconds + "'");
 
         LDAPConnectionPool createdConnectionPool = null;
         LDAPException lastException = null;
@@ -193,7 +194,7 @@ public class LdapConnectionProvider {
         do {
             attempt++;
             if (attempt > 0) {
-                log.info("Attempting to create connection pool: " + attempt);
+                LOG.info("Attempting to create connection pool: " + attempt);
             }
 
             try {
@@ -205,11 +206,11 @@ public class LdapConnectionProvider {
                 }
                 lastException = ex;
             }
-        
+
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException ex) {
-                log.error("Exception happened in sleep", ex);
+                LOG.error("Exception happened in sleep", ex);
                 return null;
             }
             currentTime = System.currentTimeMillis();
@@ -222,8 +223,8 @@ public class LdapConnectionProvider {
         return createdConnectionPool;
     }
 
-    private LDAPConnectionPool createConnectionPoolImpl(FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
-            int maxConnections, SSLUtil sslUtil) throws LDAPException {
+    private LDAPConnectionPool createConnectionPoolImpl(FailoverServerSet failoverSet, BindRequest bindRequest,
+            LDAPConnectionOptions connectionOptions, int maxConnections, SSLUtil sslUtil) throws LDAPException {
 
         LDAPConnectionPool createdConnectionPool;
         try {
@@ -237,34 +238,36 @@ public class LdapConnectionProvider {
             if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
                 throw ex;
             }
-        
-            log.info("Attempting to use older SSL protocols", ex);
+
+            LOG.info("Attempting to use older SSL protocols", ex);
             createdConnectionPool = createSSLConnectionPoolWithPreviousProtocols(sslUtil, bindRequest, connectionOptions, maxConnections);
             if (createdConnectionPool == null) {
                 throw ex;
             }
         }
-    
+
         return createdConnectionPool;
     }
 
-    private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest, LDAPConnectionOptions connectionOptions, int maxConnections) throws LDAPException {
+    private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest,
+            LDAPConnectionOptions connectionOptions, int maxConnections) throws LDAPException {
         for (int i = 1; i < SSL_PROTOCOLS.length; i++) {
             String protocol = SSL_PROTOCOLS[i];
             try {
-                FailoverServerSet failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(protocol), connectionOptions);
+                FailoverServerSet failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(protocol),
+                        connectionOptions);
                 LDAPConnectionPool connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, maxConnections);
-            
-                log.info("Server supports: '" + protocol + "'");
+
+                LOG.info("Server supports: '" + protocol + "'");
                 return connectionPool;
             } catch (GeneralSecurityException ex) {
-                log.debug("Server not supports: '" + protocol + "'", ex);
+                LOG.debug("Server not supports: '" + protocol + "'", ex);
             } catch (LDAPException ex) {
                 // Error when LDAP server not supports specified encryption
                 if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
                     throw ex;
                 }
-                log.debug("Server not supports: '" + protocol + "'", ex);
+                LOG.debug("Server not supports: '" + protocol + "'", ex);
             }
         }
 
@@ -280,7 +283,7 @@ public class LdapConnectionProvider {
         }
 
         try {
-            String supportedLDAPVersions[] = connectionPool.getRootDSE().getAttributeValues("supportedLDAPVersion");
+            String[] supportedLDAPVersions = connectionPool.getRootDSE().getAttributeValues("supportedLDAPVersion");
             if (ArrayHelper.isEmpty(supportedLDAPVersions)) {
                 return resultSupportedLDAPVersion;
             }
@@ -289,7 +292,7 @@ public class LdapConnectionProvider {
                 resultSupportedLDAPVersion = Math.max(resultSupportedLDAPVersion, Integer.parseInt(supportedLDAPVersion));
             }
         } catch (Exception ex) {
-            log.error("Failed to determine supportedLDAPVersion", ex);
+            LOG.error("Failed to determine supportedLDAPVersion", ex);
         }
 
         return resultSupportedLDAPVersion;
@@ -310,7 +313,7 @@ public class LdapConnectionProvider {
             }
             resultSubschemaSubentry = subschemaSubentry;
         } catch (Exception ex) {
-            log.error("Failed to determine subschemaSubentry", ex);
+            LOG.error("Failed to determine subschemaSubentry", ex);
         }
 
         return resultSubschemaSubentry;
@@ -325,9 +328,10 @@ public class LdapConnectionProvider {
         }
 
         try {
-            supportsSubtreeDeleteRequestControl = connectionPool.getRootDSE().supportsControl(com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl.SUBTREE_DELETE_REQUEST_OID);
+            supportsSubtreeDeleteRequestControl = connectionPool.getRootDSE()
+                    .supportsControl(com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl.SUBTREE_DELETE_REQUEST_OID);
         } catch (Exception ex) {
-            log.error("Failed to determine if LDAP server supports Subtree Delete Request Control", ex);
+            LOG.error("Failed to determine if LDAP server supports Subtree Delete Request Control", ex);
         }
 
         return supportsSubtreeDeleteRequestControl;
@@ -341,7 +345,7 @@ public class LdapConnectionProvider {
         if (connectionPool == null) {
             return false;
         }
-    
+
         return true;
     }
 
@@ -397,8 +401,8 @@ public class LdapConnectionProvider {
     }
 
     /**
-     * This method is used to release back a connection that is no longer been
-     * used or fit to be used
+     * This method is used to release back a connection that is no longer been used
+     * or fit to be used
      *
      * @param connection
      */
@@ -495,11 +499,11 @@ public class LdapConnectionProvider {
         if (StringHelper.isEmpty(attributeName)) {
             return attributeName;
         }
-    
+
         if (attributeName.endsWith(";binary")) {
             return attributeName.substring(0, attributeName.length() - 7);
         }
-    
+
         return attributeName;
     }
 

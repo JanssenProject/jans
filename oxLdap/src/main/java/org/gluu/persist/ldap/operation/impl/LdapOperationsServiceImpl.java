@@ -67,13 +67,13 @@ import com.unboundid.ldif.LDIFChangeRecord;
  */
 public class LdapOperationsServiceImpl implements LdapOperationService {
 
-    private static final Logger log = Logger.getLogger(LdapOperationsServiceImpl.class);
+    private static final Logger LOG = Logger.getLogger(LdapOperationsServiceImpl.class);
 
-    public static final String dn = "dn";
-    public static final String uid = "uid";
-    public static final String success = "success";
-    public static final String userPassword = "userPassword";
-    public static final String objectClass = "objectClass";
+    public static final String DN = "dn";
+    public static final String UID = "uid";
+    public static final String SUCCESS = "success";
+    public static final String USER_PASSWORD = "userPassword";
+    public static final String OBJECT_CLASS = "objectClass";
 
     private LdapConnectionProvider connectionProvider;
     private LdapConnectionProvider bindConnectionProvider;
@@ -91,7 +91,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         this.bindConnectionProvider = bindConnectionProvider;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getConnectionProvider()
      */
     @Override
@@ -99,15 +101,21 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return connectionProvider;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#setConnectionProvider(org.gluu.site.ldap.LdapConnectionProvider)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#setConnectionProvider(org.gluu.
+     * site.ldap.LdapConnectionProvider)
      */
     @Override
     public void setConnectionProvider(LdapConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getBindConnectionProvider()
      */
     @Override
@@ -115,15 +123,21 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return bindConnectionProvider;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#setBindConnectionProvider(org.gluu.site.ldap.LdapConnectionProvider)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#setBindConnectionProvider(org.gluu
+     * .site.ldap.LdapConnectionProvider)
      */
     @Override
     public void setBindConnectionProvider(LdapConnectionProvider bindConnectionProvider) {
         this.bindConnectionProvider = bindConnectionProvider;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getConnectionPool()
      */
     @Override
@@ -131,7 +145,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return connectionProvider.getConnectionPool();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getConnection()
      */
     @Override
@@ -139,16 +155,24 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return connectionProvider.getConnection();
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#releaseConnection(com.unboundid.ldap.sdk.LDAPConnection)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#releaseConnection(com.unboundid.
+     * ldap.sdk.LDAPConnection)
      */
     @Override
     public void releaseConnection(LDAPConnection connection) {
         connectionProvider.releaseConnection(connection);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String,
+     * java.lang.String, java.lang.String)
      */
     @Override
     public boolean authenticate(final String userName, final String password, final String baseDN) throws ConnectionException, SearchException {
@@ -159,8 +183,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String,
+     * java.lang.String)
      */
     @Override
     public boolean authenticate(final String bindDn, final String password) throws ConnectionException {
@@ -171,7 +199,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    private boolean authenticateImpl(final String userName, final String password, final String baseDN) throws SearchException, ConnectionException, LDAPException {
+    private boolean authenticateImpl(final String userName, final String password, final String baseDN)
+            throws SearchException, ConnectionException, LDAPException {
         return authenticateImpl(lookupDnByUid(userName, baseDN), password);
     }
 
@@ -227,7 +256,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * Looks the uid in ldap and return the DN
      */
     protected String lookupDnByUid(String uid, String baseDN) throws SearchException {
-        Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.uid, uid);
+        Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, uid);
         SearchResult searchResult = search(baseDN, filter, 1, 1);
         if ((searchResult != null) && searchResult.getEntryCount() > 0) {
             return searchResult.getSearchEntries().get(0).getDN();
@@ -236,16 +265,23 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String, com.unboundid.ldap.sdk.Filter, int, int)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
+     * com.unboundid.ldap.sdk.Filter, int, int)
      */
     @Override
     public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws SearchException {
         return search(dn, filter, searchLimit, sizeLimit, null, (String[]) null);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String, com.unboundid.ldap.sdk.Filter, int, int, com.unboundid.ldap.sdk.Control[], java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
+     * com.unboundid.ldap.sdk.Filter, int, int, com.unboundid.ldap.sdk.Control[],
+     * java.lang.String)
      */
     @Override
     public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
@@ -253,32 +289,41 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int, int, com.unboundid.ldap.sdk.Control[], java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
+     * com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int, int,
+     * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
     @Override
     public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
-        throws SearchException {
+            throws SearchException {
         return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, org.gluu.site.ldap.persistence.BatchOperation, int, int, int, com.unboundid.ldap.sdk.Control[], java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
+     * com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope,
+     * org.gluu.site.ldap.persistence.BatchOperation, int, int, int,
+     * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
     @Override
-    public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
-            throws SearchException {
+    public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex,
+            int searchLimit, int sizeLimit, Control[] controls, String... attributes) throws SearchException {
         SearchRequest searchRequest;
-    
+
         BatchOperation<T> ldapBatchOperation = null;
         if (batchOperationWraper != null) {
             ldapBatchOperation = (BatchOperation<T>) batchOperationWraper.getBatchOperation();
         }
 
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             // Find whole tree search
             if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
-                log.trace("Search in whole LDAP tree", new Exception());
+                LOG.trace("Search in whole LDAP tree", new Exception());
             }
         }
 
@@ -324,10 +369,10 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
                 do {
                     collectSearchResult = true;
-                    searchRequest.setControls(new Control[]{new SimplePagedResultsControl(searchLimit, cookie)});
+                    searchRequest.setControls(new Control[] {new SimplePagedResultsControl(searchLimit, cookie)});
                     setControls(searchRequest, controls);
                     searchResult = ldapConnection.search(searchRequest);
-                
+
                     if (ldapBatchOperation != null) {
                         collectSearchResult = ldapBatchOperation.collectSearchResult(searchResult.getEntryCount());
                     }
@@ -348,7 +393,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                             cookie = c.getCookie();
                         }
                     } catch (LDAPException ex) {
-                        log.error("Error while accessing cookies" + ex.getMessage());
+                        LOG.error("Error while accessing cookies" + ex.getMessage());
                     }
 
                     if (useSizeLimit) {
@@ -364,18 +409,16 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             }
 
             if (!collectSearchResult) {
-                return new SearchResult(searchResult.getMessageID(), searchResult.getResultCode(),
-                        searchResult.getDiagnosticMessage(), searchResult.getMatchedDN(), searchResult.getReferralURLs(),
-                        searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
-                        searchResult.getResponseControls());
+                return new SearchResult(searchResult.getMessageID(), searchResult.getResultCode(), searchResult.getDiagnosticMessage(),
+                        searchResult.getMatchedDN(), searchResult.getReferralURLs(), searchResultEntries, searchResultReferences,
+                        searchResultEntries.size(), searchResultReferences.size(), searchResult.getResponseControls());
             }
-        
+
             if (!searchResultList.isEmpty()) {
                 SearchResult searchResultTemp = searchResultList.get(0);
-                return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
-                        searchResultTemp.getDiagnosticMessage(), searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(),
-                        searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
-                        searchResultTemp.getResponseControls());
+                return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
+                        searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
+                        searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
             }
         } else {
             setControls(searchRequest, controls);
@@ -389,14 +432,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return searchResult;
     }
 
-    private ASN1OctetString scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPException, InvalidSimplePageControlException {
+    private ASN1OctetString scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope,
+            Control[] controls, int startIndex) throws LDAPException, InvalidSimplePageControlException {
         SearchRequest searchRequest = new SearchRequest(dn, scope, filter, "dn");
 
         int currentStartIndex = startIndex;
         ASN1OctetString cookie = null;
         do {
             int pageSize = Math.min(currentStartIndex, 100);
-            searchRequest.setControls(new Control[]{new SimplePagedResultsControl(pageSize, cookie, true)});
+            searchRequest.setControls(new Control[] {new SimplePagedResultsControl(pageSize, cookie, true)});
             setControls(searchRequest, controls);
             SearchResult searchResult = ldapConnection.search(searchRequest);
 
@@ -407,7 +451,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                     cookie = c.getCookie();
                 }
             } catch (LDAPException ex) {
-                log.error("Error while accessing cookie", ex);
+                LOG.error("Error while accessing cookie", ex);
                 throw new InvalidSimplePageControlException(ex.getResultCode(), "Error while accessing cookie");
             }
         } while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
@@ -415,11 +459,17 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return cookie;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#searchSearchResult(java.lang.String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int, int, int, java.lang.String, org.xdi.ldap.model.SortOrder, org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#searchSearchResult(java.lang.
+     * String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int,
+     * int, int, java.lang.String, org.xdi.ldap.model.SortOrder,
+     * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Override
-    public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count, int searchLimit, String sortBy, SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
+    public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count, int searchLimit, String sortBy,
+            SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
 
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
@@ -462,8 +512,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
         SearchResult searchResultTemp = searchResultList.get(0);
         searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
-                                        searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
-                                        searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
+                searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
+                searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
 
         // Get results info
         vlvResponse.setItemsPerPage(count);
@@ -473,11 +523,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return searchResult;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#searchVirtualListView(java.lang.String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int, int, java.lang.String, org.xdi.ldap.model.SortOrder, org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#searchVirtualListView(java.lang.
+     * String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int,
+     * int, java.lang.String, org.xdi.ldap.model.SortOrder,
+     * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Deprecated
-    public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
+    public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy,
+            SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
 
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
@@ -503,20 +560,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
 
         // Note that the VLV control always requires the server-side sort control.
-        searchRequest.setControls(
-            new ServerSideSortRequestControl(new SortKey(sortBy, reverseOrder)),
-            new VirtualListViewRequestControl(targetOffset, beforeCount, afterCount, contentCount, null)
-        );
+        searchRequest.setControls(new ServerSideSortRequestControl(new SortKey(sortBy, reverseOrder)),
+                new VirtualListViewRequestControl(targetOffset, beforeCount, afterCount, contentCount, null));
 
         SearchResult searchResult = getConnectionPool().search(searchRequest);
 
         /*
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            log.info("##### searchResultEntry = " + searchResultEntry.toString());
-        }
-        */
+         * for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
+         * log.info("##### searchResultEntry = " + searchResultEntry.toString()); }
+         */
 
-        // LDAPTestUtils.assertHasControl(searchResult, VirtualListViewResponseControl.VIRTUAL_LIST_VIEW_RESPONSE_OID);
+        // LDAPTestUtils.assertHasControl(searchResult,
+        // VirtualListViewResponseControl.VIRTUAL_LIST_VIEW_RESPONSE_OID);
 
         VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
 
@@ -541,7 +596,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#lookup(java.lang.String)
      */
     @Override
@@ -549,8 +606,11 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return lookup(dn, (String[]) null);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#lookup(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#lookup(java.lang.String,
+     * java.lang.String)
      */
     @Override
     public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException {
@@ -569,15 +629,19 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#addEntry(java.lang.String, java.util.Collection)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#addEntry(java.lang.String,
+     * java.util.Collection)
      */
     @Override
     public boolean addEntry(String dn, Collection<Attribute> atts) throws DuplicateEntryException, ConnectionException {
         try {
             LDAPResult result = getConnectionPool().add(dn, atts);
-            if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationsServiceImpl.success))
+            if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationsServiceImpl.SUCCESS)) {
                 return true;
+            }
         } catch (final LDAPException ex) {
             int errorCode = ex.getResultCode().intValue();
             if (errorCode == ResultCode.ENTRY_ALREADY_EXISTS_INT_VALUE) {
@@ -599,32 +663,36 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#updateEntry(java.lang.String, java.util.Collection)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#updateEntry(java.lang.String,
+     * java.util.Collection)
      */
     @Override
     public boolean updateEntry(String dn, Collection<Attribute> attrs) throws DuplicateEntryException, ConnectionException {
         List<Modification> mods = new ArrayList<Modification>();
 
         for (Attribute attribute : attrs) {
-
-            if (attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.objectClass)
-                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.dn)
-                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.userPassword)) {
+            if (attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.OBJECT_CLASS)
+                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.DN)
+                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.USER_PASSWORD)) {
                 continue;
-            }
-
-            else {
-                if (attribute.getName() != null && attribute.getValue() != null)
+            } else {
+                if (attribute.getName() != null && attribute.getValue() != null) {
                     mods.add(new Modification(ModificationType.REPLACE, attribute.getName(), attribute.getValue()));
+                }
             }
         }
 
         return updateEntry(dn, mods);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#updateEntry(java.lang.String, java.util.List)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#updateEntry(java.lang.String,
+     * java.util.List)
      */
     @Override
     public boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException {
@@ -661,7 +729,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#delete(java.lang.String)
      */
     @Override
@@ -673,8 +743,11 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#deleteWithSubtree(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#deleteWithSubtree(java.lang.
+     * String)
      */
     @Override
     public void deleteWithSubtree(String dn) throws ConnectionException {
@@ -687,8 +760,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#processChange(com.unboundid.ldif.LDIFChangeRecord)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#processChange(com.unboundid.ldif.
+     * LDIFChangeRecord)
      */
     @Override
     public boolean processChange(LDIFChangeRecord ldifRecord) throws LDAPException {
@@ -702,7 +779,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getSupportedLDAPVersion()
      */
     @Override
@@ -710,7 +789,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return this.connectionProvider.getSupportedLDAPVersion();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#getSubschemaSubentry()
      */
     @Override
@@ -718,7 +799,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return this.connectionProvider.getSubschemaSubentry();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see org.gluu.site.ldap.PlatformOperationFacade#destroy()
      */
     @Override
@@ -729,7 +812,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             try {
                 connectionProvider.closeConnectionPool();
             } catch (Exception ex) {
-                log.error("Failed to close connection pool correctly");
+                LOG.error("Failed to close connection pool correctly");
                 result = false;
             }
         }
@@ -738,7 +821,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             try {
                 bindConnectionProvider.closeConnectionPool();
             } catch (Exception ex) {
-                log.error("Failed to close bind connection pool correctly");
+                LOG.error("Failed to close bind connection pool correctly");
                 result = false;
             }
         }
@@ -746,32 +829,47 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#isBinaryAttribute(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.gluu.site.ldap.PlatformOperationFacade#isBinaryAttribute(java.lang.
+     * String)
      */
     @Override
     public boolean isBinaryAttribute(String attributeName) {
         return this.connectionProvider.isBinaryAttribute(attributeName);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#isCertificateAttribute(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#isCertificateAttribute(java.lang.
+     * String)
      */
     @Override
     public boolean isCertificateAttribute(String attributeName) {
         return this.connectionProvider.isCertificateAttribute(attributeName);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#getCertificateAttributeName(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#getCertificateAttributeName(java.
+     * lang.String)
      */
     @Override
     public String getCertificateAttributeName(String attributeName) {
         return this.connectionProvider.getCertificateAttributeName(attributeName);
     }
 
-    /* (non-Javadoc)
-     * @see org.gluu.site.ldap.PlatformOperationFacade#sortListByAttributes(java.util.List, boolean, java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.gluu.site.ldap.PlatformOperationFacade#sortListByAttributes(java.util.
+     * List, boolean, java.lang.String)
      */
     @Override
     public <T> void sortListByAttributes(List<T> searchResultEntries, boolean caseSensetive, String... sortByAttributes) {
@@ -853,3 +951,4 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
 }
+

@@ -26,7 +26,8 @@ public class LdapBatchOperationWraper<T> {
         this.batchOperation = batchOperation;
     }
 
-    public LdapBatchOperationWraper(BatchOperation<T> batchOperation, LdapEntryManager ldapEntryManager, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations) {
+    public LdapBatchOperationWraper(BatchOperation<T> batchOperation, LdapEntryManager ldapEntryManager, Class<T> entryClass,
+            List<PropertyAnnotation> propertiesAnnotations) {
         this.batchOperation = batchOperation;
         this.ldapEntryManager = ldapEntryManager;
         this.entryClass = entryClass;
@@ -41,7 +42,8 @@ public class LdapBatchOperationWraper<T> {
         if (ldapEntryManager == null) {
             return new ArrayList<T>(0);
         }
-        SearchResultEntry[] searchResultEntry = searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]);
+        SearchResultEntry[] searchResultEntry = searchResult.getSearchEntries()
+                .toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]);
 
         return ldapEntryManager.createEntities(entryClass, propertiesAnnotations, searchResultEntry);
     }

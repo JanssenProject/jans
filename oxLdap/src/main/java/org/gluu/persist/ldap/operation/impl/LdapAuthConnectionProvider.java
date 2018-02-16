@@ -13,13 +13,14 @@ import com.unboundid.ldap.sdk.ResultCode;
  */
 public class LdapAuthConnectionProvider extends LdapConnectionProvider {
 
-    private static final Logger log = Logger.getLogger(LdapAuthConnectionProvider.class);
+    private static final Logger LOG = Logger.getLogger(LdapAuthConnectionProvider.class);
 
     public LdapAuthConnectionProvider(Properties connectionProperties) {
         Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
         create(bindConnectionProperties);
         if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(getCreationResultCode())) {
-            log.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
+            LOG.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. "
+                    + "Attempting to create it using binDN/bindPassword");
             create(connectionProperties);
         }
     }

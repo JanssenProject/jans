@@ -354,7 +354,7 @@ public class SchemaService {
      *
      * @param schemaEntry
      *            Schema
-     * @param objectClass
+     * @param OBJECT_CLASS
      *            Object class name
      * @return Object class schema definition string
      */
@@ -447,7 +447,7 @@ public class SchemaService {
      *
      * @param schemaEntry
      *            Schema
-     * @param objectClass
+     * @param OBJECT_CLASS
      *            Object class name
      * @return List of object classes
      */
