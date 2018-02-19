@@ -18,6 +18,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface IdGeneratorType extends BaseExternalType {
 
-    public String generateId(String appId, String idType, String idPrefix, Map<String, SimpleCustomProperty> configurationAttributes);
+    String generateId(String appId, String idType, String idPrefix, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

@@ -1,12 +1,9 @@
 package org.xdi.service.el;
 
 import java.io.Serializable;
-import java.util.Locale;
 import java.util.Map;
 
-import javax.el.ELContext;
 import javax.el.ExpressionFactory;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
 /**

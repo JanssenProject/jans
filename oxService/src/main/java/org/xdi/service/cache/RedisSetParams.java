@@ -1,15 +1,15 @@
 package org.xdi.service.cache;
 
+import java.util.ArrayList;
+
 import redis.clients.jedis.params.Params;
 import redis.clients.util.SafeEncoder;
 
-import java.util.ArrayList;
-
 /**
- * Taken from here https://github.com/xetorthio/jedis/blob/master/src/main/java/redis/clients/jedis/params/set/SetParams.java
+ * Taken from here
+ * https://github.com/xetorthio/jedis/blob/master/src/main/java/redis/clients/jedis/params/set/SetParams.java
  */
-public class RedisSetParams extends Params {
-
+public final class RedisSetParams extends Params {
 
     private static final String XX = "xx";
     private static final String NX = "nx";

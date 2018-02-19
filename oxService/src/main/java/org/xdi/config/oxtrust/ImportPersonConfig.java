@@ -1,10 +1,11 @@
 package org.xdi.config.oxtrust;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
-import javax.enterprise.inject.Vetoed;
 import java.io.Serializable;
 import java.util.List;
+
+import javax.enterprise.inject.Vetoed;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * oxTrust configuration
@@ -19,7 +20,7 @@ public class ImportPersonConfig implements Configuration, Serializable {
 
     private static final long serialVersionUID = 2686538577505167695L;
 
-    private List <ImportPerson> mappings;
+    private List<ImportPerson> mappings;
 
     public List<ImportPerson> getMappings() {
         return mappings;

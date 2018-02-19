@@ -35,7 +35,7 @@ public class RenderParameters {
     }
 
     public void reset() {
-        this.map.clear();;
+        this.map.clear();
     }
 
 }

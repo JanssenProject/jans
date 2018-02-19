@@ -29,7 +29,7 @@ public enum ScimCustomAtribute implements LdapEnum {
         }
     }
 
-    private ScimCustomAtribute(String value, String displayName) {
+    ScimCustomAtribute(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

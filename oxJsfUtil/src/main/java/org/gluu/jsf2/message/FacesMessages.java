@@ -69,7 +69,7 @@ public class FacesMessages implements Serializable {
         }
 
         Iterator<FacesMessage> messages = facesContext.getMessages();
-        while(messages.hasNext()) {
+        while (messages.hasNext()) {
             messages.next();
             messages.remove();
         }

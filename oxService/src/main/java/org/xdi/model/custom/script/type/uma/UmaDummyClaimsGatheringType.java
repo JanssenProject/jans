@@ -1,8 +1,8 @@
 package org.xdi.model.custom.script.type.uma;
 
-import org.xdi.model.SimpleCustomProperty;
-
 import java.util.Map;
+
+import org.xdi.model.SimpleCustomProperty;
 
 /**
  * @author yuriyz on 06/16/2017.

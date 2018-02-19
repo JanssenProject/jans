@@ -1,17 +1,18 @@
 package org.xdi.service.cache;
 
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisPoolConfig;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -20,7 +21,7 @@ import java.util.Set;
  */
 public class RedisClusterProvider extends AbstractRedisProvider {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RedisClusterProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisClusterProvider.class);
 
     private JedisCluster pool;
 
@@ -89,9 +90,7 @@ public class RedisClusterProvider extends AbstractRedisProvider {
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
-        String status = pool.setex(key.getBytes(),
-                expirationInSeconds,
-                SerializationUtils.serialize((Serializable) object));
+        String status = pool.setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
         LOG.trace("put - key: " + key + ", status: " + status);
     }
 

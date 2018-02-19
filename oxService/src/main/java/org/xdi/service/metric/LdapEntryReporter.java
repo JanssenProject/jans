@@ -40,7 +40,7 @@ import com.codahale.metrics.Timer;
  *
  * @author Yuriy Movchan Date: 08/03/2015
  */
-public class LdapEntryReporter extends ScheduledReporter {
+public final class LdapEntryReporter extends ScheduledReporter {
 
     private final Clock clock;
     private final MetricService metricService;
@@ -49,7 +49,8 @@ public class LdapEntryReporter extends ScheduledReporter {
     /**
      * Returns a new {@link Builder} for {@link LdapEntryReporter}.
      *
-     * @param registry the registry to report
+     * @param registry
+     *            the registry to report
      * @return a {@link Builder} instance for a {@link LdapEntryReporter}
      */
     public static Builder forRegistry(MetricRegistry registry, MetricService metricService) {
@@ -57,11 +58,12 @@ public class LdapEntryReporter extends ScheduledReporter {
     }
 
     /**
-     * A builder for {@link LdapEntryReporter} instances. Defaults to using the default locale and
-     * time zone, writing to {@code System.out}, converting rates to events/second, converting
-     * durations to milliseconds, and not filtering metrics.
+     * A builder for {@link LdapEntryReporter} instances. Defaults to using the
+     * default locale and time zone, writing to {@code System.out}, converting rates
+     * to events/second, converting durations to milliseconds, and not filtering
+     * metrics.
      */
-    public static class Builder {
+    public static final class Builder {
         private final MetricRegistry registry;
         private Clock clock;
         private TimeZone timeZone;
@@ -83,7 +85,8 @@ public class LdapEntryReporter extends ScheduledReporter {
         /**
          * Use the given {@link Clock} instance for the time.
          *
-         * @param clock a {@link Clock} instance
+         * @param clock
+         *            a {@link Clock} instance
          * @return {@code this}
          */
         public Builder withClock(Clock clock) {
@@ -94,7 +97,8 @@ public class LdapEntryReporter extends ScheduledReporter {
         /**
          * Convert rates to the given time unit.
          *
-         * @param rateUnit a unit of time
+         * @param rateUnit
+         *            a unit of time
          * @return {@code this}
          */
         public Builder convertRatesTo(TimeUnit rateUnit) {
@@ -105,7 +109,8 @@ public class LdapEntryReporter extends ScheduledReporter {
         /**
          * Convert durations to the given time unit.
          *
-         * @param durationUnit a unit of time
+         * @param durationUnit
+         *            a unit of time
          * @return {@code this}
          */
         public Builder convertDurationsTo(TimeUnit durationUnit) {
@@ -116,7 +121,8 @@ public class LdapEntryReporter extends ScheduledReporter {
         /**
          * Only report metrics which match the given filter.
          *
-         * @param filter a {@link MetricFilter}
+         * @param filter
+         *            a {@link MetricFilter}
          * @return {@code this}
          */
         public Builder filter(MetricFilter filter) {
@@ -130,21 +136,12 @@ public class LdapEntryReporter extends ScheduledReporter {
          * @return a {@link LdapEntryReporter}
          */
         public LdapEntryReporter build() {
-            return new LdapEntryReporter(registry,
-                                       clock,
-                                       timeZone,
-                                       rateUnit,
-                                       durationUnit,
-                                       filter, metricService);
+            return new LdapEntryReporter(registry, clock, timeZone, rateUnit, durationUnit, filter, metricService);
         }
     }
 
-    private LdapEntryReporter(MetricRegistry registry,
-                            Clock clock,
-                            TimeZone timeZone,
-                            TimeUnit rateUnit,
-                            TimeUnit durationUnit,
-                            MetricFilter filter, MetricService metricService) {
+    private LdapEntryReporter(MetricRegistry registry, Clock clock, TimeZone timeZone, TimeUnit rateUnit, TimeUnit durationUnit, MetricFilter filter,
+            MetricService metricService) {
         super(registry, "ldap-reporter", filter, rateUnit, durationUnit);
         this.clock = clock;
         this.metricService = metricService;
@@ -153,11 +150,8 @@ public class LdapEntryReporter extends ScheduledReporter {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void report(SortedMap<String, Gauge> gauges,
-                       SortedMap<String, Counter> counters,
-                       SortedMap<String, Histogram> histograms,
-                       SortedMap<String, Meter> meters,
-                       SortedMap<String, Timer> timers) {
+    public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters, SortedMap<String, Histogram> histograms,
+            SortedMap<String, Meter> meters, SortedMap<String, Timer> timers) {
         reportImpl(counters, timers);
     }
 
@@ -188,7 +182,7 @@ public class LdapEntryReporter extends ScheduledReporter {
         }
 
         startTime = currentRunTime;
-    
+
         metricService.add(metricEntries, creationTime);
     }
 
@@ -200,10 +194,10 @@ public class LdapEntryReporter extends ScheduledReporter {
             Counter counter = counters.get(metricType.getValue());
             if (counter != null) {
                 long count = counter.getCount();
-            
+
                 // Remove to avoid writing not changed statistic
                 // registeredMetricTypes.remove(metricType);
-            
+
                 CounterMetricData counterMetricData = new CounterMetricData(count);
                 CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
                 counterMetricEntry.setMetricData(counterMetricData);
@@ -212,7 +206,7 @@ public class LdapEntryReporter extends ScheduledReporter {
                 result.add(counterMetricEntry);
             }
         }
-    
+
         return result;
     }
 
@@ -222,26 +216,14 @@ public class LdapEntryReporter extends ScheduledReporter {
         for (MetricType metricType : registeredMetricTypes) {
             Timer timer = timers.get(metricType.getValue());
             if (timer != null) {
-                Snapshot snapshot = timer .getSnapshot();
+                Snapshot snapshot = timer.getSnapshot();
 
-                TimerMetricData timerMetricData = new TimerMetricData(
-                        timer.getCount(),
-                        convertRate(timer.getMeanRate()),
-                        convertRate(timer.getOneMinuteRate()),
-                        convertRate(timer.getFiveMinuteRate()),
-                        convertRate(timer.getFifteenMinuteRate()),
-                        getRateUnit(),
-                        convertDuration(snapshot.getMin()),
-                        convertDuration(snapshot.getMax()),
-                        convertDuration(snapshot.getMean()),
-                        convertDuration(snapshot.getStdDev()),
-                        convertDuration(snapshot.getMedian()),
-                        convertDuration(snapshot.get75thPercentile()),
-                        convertDuration(snapshot.get95thPercentile()),
-                        convertDuration(snapshot.get98thPercentile()),
-                        convertDuration(snapshot.get99thPercentile()),
-                        convertDuration(snapshot.get999thPercentile()),
-                        getDurationUnit());
+                TimerMetricData timerMetricData = new TimerMetricData(timer.getCount(), convertRate(timer.getMeanRate()),
+                        convertRate(timer.getOneMinuteRate()), convertRate(timer.getFiveMinuteRate()), convertRate(timer.getFifteenMinuteRate()),
+                        getRateUnit(), convertDuration(snapshot.getMin()), convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()),
+                        convertDuration(snapshot.getStdDev()), convertDuration(snapshot.getMedian()), convertDuration(snapshot.get75thPercentile()),
+                        convertDuration(snapshot.get95thPercentile()), convertDuration(snapshot.get98thPercentile()),
+                        convertDuration(snapshot.get99thPercentile()), convertDuration(snapshot.get999thPercentile()), getDurationUnit());
                 TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
                 timerMetricEntry.setMetricData(timerMetricData);
                 timerMetricEntry.setMetricType(metricType);
@@ -253,7 +235,8 @@ public class LdapEntryReporter extends ScheduledReporter {
         return result;
     }
 
-    private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries, Date creationTime) {
+    private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries,
+            Date creationTime) {
         for (MetricEntry metricEntry : metricEntries) {
             String id = metricService.getuUiqueIdentifier();
             String dn = metricService.buildDn(id, creationTime, ApplicationType.OX_AUTH);

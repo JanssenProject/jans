@@ -16,22 +16,22 @@ import com.sencha.gxt.widget.core.client.Dialog;
 
 public class ProgressDialog extends Dialog {
 
-    private final AutoProgressBar m_progressBar = new AutoProgressBar();
+    private final AutoProgressBar progressBar = new AutoProgressBar();
 
-    public ProgressDialog(String p_title) {
-        setHeadingText(p_title);
+    public ProgressDialog(String title) {
+        setHeadingText(title);
         setHideOnButtonClick(true);
         setModal(true);
-        setWidget(m_progressBar);
+        setWidget(progressBar);
     }
 
     public AutoProgressBar getProgressBar() {
-        return m_progressBar;
+        return progressBar;
     }
 
     @Override
     public void show() {
         super.show();
-        m_progressBar.auto();
+        progressBar.auto();
     }
 }

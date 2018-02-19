@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author yuriyz
  */
-public class RedisProviderFactory {
+public final class RedisProviderFactory {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RedisProviderFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisProviderFactory.class);
 
     private RedisProviderFactory() {
     }
@@ -20,16 +20,18 @@ public class RedisProviderFactory {
             LOG.debug("Creating RedisProvider ... configuration:" + redisConfiguration);
 
             switch (redisConfiguration.getRedisProviderType()) {
-                case STANDALONE:
-                    return new RedisStandaloneProvider(redisConfiguration);
-                case CLUSTER:
-                    return new RedisClusterProvider(redisConfiguration);
-                case SHARDED:
-                    return new RedisShardedProvider(redisConfiguration);
+            case STANDALONE:
+                return new RedisStandaloneProvider(redisConfiguration);
+            case CLUSTER:
+                return new RedisClusterProvider(redisConfiguration);
+            case SHARDED:
+                return new RedisShardedProvider(redisConfiguration);
+            default:
+                LOG.error("Failed to create RedisProvider. RedisProviderType is not supported by current version of oxcore: "
+                        + redisConfiguration.getRedisProviderType() + ", redisConfiguration:" + redisConfiguration);
+                throw new RuntimeException(
+                        "RedisProviderType is not supported by current version of oxcore: " + redisConfiguration.getRedisProviderType());
             }
-
-            LOG.error("Failed to create RedisProvider. RedisProviderType is not supported by current version of oxcore: " + redisConfiguration.getRedisProviderType() + ", redisConfiguration:" + redisConfiguration);
-            throw new RuntimeException("RedisProviderType is not supported by current version of oxcore: " + redisConfiguration.getRedisProviderType());
         } catch (Exception e) {
             LOG.error("Failed to create RedisProvider.");
             throw new RuntimeException("Error creating RedisProvider", e);

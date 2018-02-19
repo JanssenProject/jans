@@ -19,7 +19,7 @@ import org.xdi.config.oxauth.WebKeysSettings;
  * @version 2.1, 19/04/2015
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthConfiguration"})
+@LdapObjectClass(values = { "top", "oxAuthConfiguration" })
 public class LdapOxAuthConfiguration extends Entry {
 
     private static final long serialVersionUID = 2453308522994526877L;
@@ -49,11 +49,9 @@ public class LdapOxAuthConfiguration extends Entry {
     public LdapOxAuthConfiguration() {
     }
 
-
     public WebKeysSettings getOxWebKeysSettings() {
         return oxWebKeysSettings;
     }
-
 
     public void setOxWebKeysSettings(WebKeysSettings oxWebKeysSettings) {
         this.oxWebKeysSettings = oxWebKeysSettings;
@@ -98,7 +96,6 @@ public class LdapOxAuthConfiguration extends Entry {
     public void setRevision(long revision) {
         this.revision = revision;
     }
-
 
     @Override
     public String toString() {

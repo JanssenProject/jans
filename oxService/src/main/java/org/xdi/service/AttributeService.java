@@ -11,12 +11,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.OxConstants;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.search.filter.Filter;
+
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
 /**
@@ -42,22 +43,23 @@ public abstract class AttributeService implements Serializable {
     protected CacheService cacheService;
 
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
-          String[] targetArray = new String[] { attributeValue };
-          Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
-          List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
+        String[] targetArray = new String[] { attributeValue };
+        Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
+        List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
 
-          return result;
+        return result;
     }
 
-    public String getDefaultSaml2Uri(String name){
+    public String getDefaultSaml2Uri(String name) {
         SchemaEntry schemaEntry = schemaService.getSchema();
         List<String> attributeNames = new ArrayList<String>();
         attributeNames.add(name);
         List<AttributeTypeDefinition> attributeTypes = schemaService.getAttributeTypeDefinitions(schemaEntry, attributeNames);
         AttributeTypeDefinition attributeTypeDefinition = schemaService.getAttributeTypeDefinition(attributeTypes, name);
-        if (attributeTypeDefinition != null)
+        if (attributeTypeDefinition != null) {
             return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
-    
+        }
+
         return "";
     }
 

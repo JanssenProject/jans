@@ -1,13 +1,8 @@
 package org.xdi.service.cache;
 
-import java.util.Set;
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -26,10 +21,12 @@ public class CacheProviderFactory {
     @Inject
     private CacheConfiguration cacheConfiguration;
 
-    @Inject @ApplicationScoped
+    @Inject
+    @ApplicationScoped
     private Instance<CacheProvider> instance;
 
-    @Produces @ApplicationScoped
+    @Produces
+    @ApplicationScoped
     public CacheProvider getCacheProvider() {
         log.debug("Started to create cache provider");
 
@@ -44,15 +41,17 @@ public class CacheProviderFactory {
 
         // Create proxied bean
         switch (cacheProviderType) {
-            case IN_MEMORY:
-                cacheProvider = instance.select(InMemoryCacheProvider.class).get();
-                break;
-            case MEMCACHED:
-                cacheProvider = instance.select(MemcachedProvider.class).get();
-                break;
-            case REDIS:
-                cacheProvider = instance.select(RedisProvider.class).get();
-                break;
+        case IN_MEMORY:
+            cacheProvider = instance.select(InMemoryCacheProvider.class).get();
+            break;
+        case MEMCACHED:
+            cacheProvider = instance.select(MemcachedProvider.class).get();
+            break;
+        case REDIS:
+            cacheProvider = instance.select(RedisProvider.class).get();
+            break;
+        default:
+            throw new RuntimeException("Failed to initialize cacheProvider, cacheProviderType is unsupported: " + cacheProviderType);
         }
 
         if (cacheProvider == null) {
@@ -60,7 +59,7 @@ public class CacheProviderFactory {
         }
 
         cacheProvider.create();
-    
+
         return cacheProvider;
     }
 

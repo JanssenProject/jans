@@ -31,7 +31,7 @@ public enum GluuAttributeUsageType implements LdapEnum {
         }
     }
 
-    private GluuAttributeUsageType(String value, String displayName) {
+    GluuAttributeUsageType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

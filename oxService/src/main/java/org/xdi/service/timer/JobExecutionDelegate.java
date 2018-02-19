@@ -20,11 +20,13 @@ public class JobExecutionDelegate implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         Instance<? extends Job> job = jobInstance.select(context.getJobDetail().getJobClass());
 
-        if (job.isAmbiguous())
+        if (job.isAmbiguous()) {
             throw new IllegalStateException("Cannot produce job: ambiguous instance");
+        }
 
-        if (job.isUnsatisfied())
+        if (job.isUnsatisfied()) {
             throw new IllegalStateException("Cannot produce job: unsatisfied instance");
+        }
 
         job.get().execute(context);
     }

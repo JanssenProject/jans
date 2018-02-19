@@ -47,15 +47,16 @@ public class ExternalScriptService implements Serializable {
 
     public void reload(@Observes @ReloadScript String event) {
         // Get actual list of external configurations
-        List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
+        List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager
+                .getCustomScriptConfigurationsByScriptType(customScriptType);
         addExternalConfigurations(newCustomScriptConfigurations);
-    
+
         this.customScriptConfigurations = newCustomScriptConfigurations;
         this.customScriptConfigurationsNameMap = buildExternalConfigurationsNameMap(customScriptConfigurations);
 
         // Determine default configuration
         this.defaultExternalCustomScript = determineDefaultCustomScriptConfiguration(this.customScriptConfigurations);
-    
+
         // Allow to execute additional logic
         reloadExternal();
     }
@@ -67,8 +68,9 @@ public class ExternalScriptService implements Serializable {
     }
 
     private Map<String, CustomScriptConfiguration> buildExternalConfigurationsNameMap(List<CustomScriptConfiguration> customScriptConfigurations) {
-        Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations.size());
-    
+        Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(
+                customScriptConfigurations.size());
+
         for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
             reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getName()), customScriptConfiguration);
         }
@@ -80,12 +82,11 @@ public class ExternalScriptService implements Serializable {
         CustomScriptConfiguration defaultExternalCustomScript = null;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             // Determine default script. It has lower level than others
-            if ((defaultExternalCustomScript == null) ||
-                    (defaultExternalCustomScript.getLevel() >= customScriptConfiguration.getLevel())) {
+            if ((defaultExternalCustomScript == null) || (defaultExternalCustomScript.getLevel() >= customScriptConfiguration.getLevel())) {
                 defaultExternalCustomScript = customScriptConfiguration;
             }
         }
-    
+
         return defaultExternalCustomScript;
     }
 

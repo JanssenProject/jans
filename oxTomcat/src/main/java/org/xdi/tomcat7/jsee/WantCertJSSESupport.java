@@ -23,7 +23,7 @@ public class WantCertJSSESupport implements SSLSupport {
 
     private static final String TOMCAT_JSSE_SUPPORT = "org.apache.tomcat.util.net.jsse.JSSESupport";
 
-    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
+    private static final org.apache.juli.logging.Log LOG = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
 
     protected SSLSocket ssl;
 
@@ -37,9 +37,10 @@ public class WantCertJSSESupport implements SSLSupport {
             Constructor<?> cons = clazz.getDeclaredConstructor(SSLSocket.class);
             cons.setAccessible(true);
             this.jseeSupport = (SSLSupport) cons.newInstance(sock);
-        } catch (Exception ex) {ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             throw new RuntimeException("Error creating  object " + TOMCAT_JSSE_SUPPORT);
-        
+
         }
     }
 
@@ -70,17 +71,17 @@ public class WantCertJSSESupport implements SSLSupport {
             // Just want certificate
             this.ssl.setWantClientAuth(true);
         }
-    
+
         Object[] result = null;
         try {
-            result =  this.jseeSupport.getPeerCertificateChain(force);
+            result = this.jseeSupport.getPeerCertificateChain(force);
         } catch (java.net.SocketException ex) {
-            if (log.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 // TODO: Review this part later
-                log.error("There is no certs. This issue not exist till OpenJDK 1.7.0_79 or Oracle JDK 1.6.0_37.", ex);
+                LOG.error("There is no certs. This issue not exist till OpenJDK 1.7.0_79 or Oracle JDK 1.6.0_37.", ex);
             }
         }
-    
+
         return result;
     }
 

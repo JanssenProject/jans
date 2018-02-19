@@ -1,13 +1,18 @@
 package org.xdi.service.cache;
 
-import net.spy.memcached.*;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
-import org.slf4j.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.BinaryConnectionFactory;
+import net.spy.memcached.ConnectionFactory;
+import net.spy.memcached.DefaultConnectionFactory;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.
@@ -22,7 +27,8 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
     private MemcachedConfiguration memcachedConfiguration;
 
-    public MemcachedProvider() {}
+    public MemcachedProvider() {
+    }
 
     @PostConstruct
     public void init() {
@@ -36,9 +42,11 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         try {
             final ConnectionFactory connectionFactory;
             if (memcachedConfiguration.getConnectionFactoryType() == MemcachedConnectionFactoryType.BINARY) {
-                connectionFactory = new BinaryConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(), memcachedConfiguration.getBufferSize());
+                connectionFactory = new BinaryConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(),
+                        memcachedConfiguration.getBufferSize());
             } else {
-                connectionFactory = new DefaultConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(), memcachedConfiguration.getBufferSize());
+                connectionFactory = new DefaultConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(),
+                        memcachedConfiguration.getBufferSize());
             }
 
             client = new MemcachedClient(connectionFactory, AddrUtil.getAddresses(memcachedConfiguration.getServers()));
@@ -88,12 +96,13 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         }
     }
 
-    @Override // it is so weird but we use as workaround "region" field to pass "expiration" for put operation
+    @Override // it is so weird but we use as workaround "region" field to pass "expiration"
+              // for put operation
     public void put(String expirationInSeconds, String key, Object object) {
         try {
             int expiration = putExpiration(expirationInSeconds);
             OperationFuture<Boolean> set = client.set(key, expiration, object);
-            OperationStatus status = set.getStatus();// block
+            OperationStatus status = set.getStatus(); // block
             log.trace("set - key:" + key + ", expiration: " + expiration + ", status:" + status + ", get:" + get(key));
         } catch (Exception e) {
             log.error("Failed to put object in cache, key: " + key, e);

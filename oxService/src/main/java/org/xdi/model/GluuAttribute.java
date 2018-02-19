@@ -425,19 +425,26 @@ public class GluuAttribute extends Entry implements Serializable {
         }
         GluuAttribute other = (GluuAttribute) obj;
         if (inum == null) {
-            if (other.inum != null)
+            if (other.inum != null) {
                 return false;
-        } else if (!inum.equals(other.inum))
+            }
+        } else if (!inum.equals(other.inum)) {
             return false;
-        if (custom != other.custom)
+        }
+        if (custom != other.custom) {
             return false;
-        if (dataType != other.dataType)
+        }
+        if (dataType != other.dataType) {
             return false;
+        }
         if (description == null) {
-            if (other.description != null)
+            if (other.description != null) {
                 return false;
-        } else if (!description.equals(other.description))
+            }
+        } else if (!description.equals(other.description)) {
             return false;
+        }
+
         return true;
     }
 

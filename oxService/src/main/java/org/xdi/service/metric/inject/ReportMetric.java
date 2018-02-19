@@ -19,7 +19,7 @@ import javax.inject.Qualifier;
 @Documented
 public @interface ReportMetric {
 
-    public static final class Literal extends AnnotationLiteral<ReportMetric> implements ReportMetric {
+    final class Literal extends AnnotationLiteral<ReportMetric> implements ReportMetric {
 
         public static final Literal INSTANCE = new Literal();
 

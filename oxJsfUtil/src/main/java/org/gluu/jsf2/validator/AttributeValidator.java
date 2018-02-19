@@ -24,12 +24,12 @@ public class AttributeValidator implements Validator {
     @Override
     public void validate(FacesContext context, UIComponent comp, Object value) {
         GluuAttribute attribute = (GluuAttribute) comp.getAttributes().get("attribute");
-    
+
         if (attribute == null) {
             ((UIInput) comp).setValid(true);
             return;
         }
-    
+
         AttributeValidation attributeValidation = attribute.getAttributeValidation();
         Integer minvalue = attributeValidation != null ? attributeValidation.getMinLength() : null;
         Integer maxValue = attributeValidation != null ? attributeValidation.getMaxLength() : null;
@@ -49,7 +49,7 @@ public class AttributeValidator implements Validator {
                 context.addMessage(comp.getClientId(context), message);
             }
         }
-    
+
         //default maxlength
         int max = 400;
         if (maxValue != null) {
@@ -59,19 +59,19 @@ public class AttributeValidator implements Validator {
         // Maximum Length validation
         if ((attributeValue != null) && (attributeValue.length() > max)) {
             ((UIInput) comp).setValid(false);
-    
+
             FacesMessage message = new FacesMessage(attribute.getDisplayName() + " should not exceed " + max + " symbols. ");
             message.setSeverity(FacesMessage.SEVERITY_ERROR);
             context.addMessage(comp.getClientId(context), message);
         }
 
         // Regex Pattern Validation
-    
-        if( (attribute.getName().equalsIgnoreCase("mail")   && ((regexpValue == null) || (StringHelper.isEmpty(regexpValue))))){
-            regexpValue = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@" +
-                    "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
+
+        if ((attribute.getName().equalsIgnoreCase("mail") && ((regexpValue == null) || (StringHelper.isEmpty(regexpValue))))) {
+            regexpValue = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@"
+                    + "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
         }
-    
+
         if ((regexpValue != null) && StringHelper.isNotEmpty(regexpValue)) {
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
             if ((attributeValue != null) && !(attributeValue.trim().equals(""))) {

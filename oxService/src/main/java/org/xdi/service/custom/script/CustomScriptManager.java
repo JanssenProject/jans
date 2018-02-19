@@ -59,10 +59,10 @@ public class CustomScriptManager implements Serializable {
 
     private static final long serialVersionUID = -4225890597520443390L;
 
-    public final static String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+    public static final String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
+    private static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "oxModuleProperty", "gluuStatus" };
+    public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "oxModuleProperty", "gluuStatus" };
 
     @Inject
     protected Logger log;
@@ -76,7 +76,8 @@ public class CustomScriptManager implements Serializable {
     @Inject
     protected AbstractCustomScriptService customScriptService;
 
-    @Inject @ReloadScript
+    @Inject
+    @ReloadScript
     private Event<String> event;
 
     protected List<CustomScriptType> supportedCustomScriptTypes;
@@ -136,7 +137,7 @@ public class CustomScriptManager implements Serializable {
 
     private void reload() {
         boolean modified = reloadImpl();
-    
+
         if (modified) {
             event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
         }
@@ -152,7 +153,7 @@ public class CustomScriptManager implements Serializable {
 
         // Group external authenticator configurations by usage type
         this.customScriptConfigurationsByScriptType = groupCustomScriptConfigurationsByScriptType(this.customScriptConfigurations);
-    
+
         return reloadResult.isModified();
     }
 
@@ -160,7 +161,8 @@ public class CustomScriptManager implements Serializable {
         private Map<String, CustomScriptConfiguration> customScriptConfigurations;
         private boolean modified;
 
-        public ReloadResult(Map<String, CustomScriptConfiguration> customScriptConfigurations, boolean modified) {
+        ReloadResult(Map<String, CustomScriptConfiguration> customScriptConfigurations,
+                boolean modified) {
             this.customScriptConfigurations = customScriptConfigurations;
             this.modified = modified;
         }
@@ -174,17 +176,18 @@ public class CustomScriptManager implements Serializable {
         }
     }
 
-    private ReloadResult reloadCustomScriptConfigurations(
-            Map<String,  CustomScriptConfiguration> customScriptConfigurations, List<CustomScript> newCustomScripts) {
+    private ReloadResult reloadCustomScriptConfigurations(Map<String, CustomScriptConfiguration> customScriptConfigurations,
+            List<CustomScript> newCustomScripts) {
         Map<String, CustomScriptConfiguration> newCustomScriptConfigurations;
-    
+
         boolean modified = false;
 
         if (customScriptConfigurations == null) {
             newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>();
             modified = true;
         } else {
-            // Clone old map to avoid reload not changed scripts because it's time and CPU consuming process
+            // Clone old map to avoid reload not changed scripts because it's time and CPU
+            // consuming process
             newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations);
         }
 
@@ -193,26 +196,29 @@ public class CustomScriptManager implements Serializable {
             if (!newCustomScript.isEnabled()) {
                 continue;
             }
-        
+
             if (ScriptLocationType.FILE == newCustomScript.getLocationType()) {
-                // Replace script revision with file modification time. This should allow to reload script automatically after changing location_type
+                // Replace script revision with file modification time. This should allow to
+                // reload script automatically after changing location_type
                 long fileModifiactionTime = getFileModificationTime(newCustomScript.getLocationPath());
-            
+
                 newCustomScript.setRevision(fileModifiactionTime);
             }
-            
+
             String newSupportedCustomScriptInum = StringHelper.toLowerCase(newCustomScript.getInum());
             newSupportedCustomScriptInums.add(newSupportedCustomScriptInum);
 
             CustomScriptConfiguration prevCustomScriptConfiguration = newCustomScriptConfigurations.get(newSupportedCustomScriptInum);
-            if ((prevCustomScriptConfiguration == null) || (prevCustomScriptConfiguration.getCustomScript().getRevision() != newCustomScript.getRevision())) {
+            if ((prevCustomScriptConfiguration == null)
+                    || (prevCustomScriptConfiguration.getCustomScript().getRevision() != newCustomScript.getRevision())) {
                 // Destroy old version properly before creating new one
                 if (prevCustomScriptConfiguration != null) {
                     destroyCustomScript(prevCustomScriptConfiguration);
                 }
-            
+
                 // Load script entry with all attributes
-                CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(newCustomScript.getScriptType().getCustomScriptModel(), newCustomScript.getDn());
+                CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(newCustomScript.getScriptType().getCustomScriptModel(),
+                        newCustomScript.getDn());
 
                 // Prepare configuration attributes
                 Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
@@ -220,7 +226,7 @@ public class CustomScriptManager implements Serializable {
                 List<SimpleExtendedCustomProperty> simpleCustomProperties = loadedCustomScript.getConfigurationProperties();
                 if (simpleCustomProperties == null) {
                     simpleCustomProperties = new ArrayList<SimpleExtendedCustomProperty>(0);
-                
+
                 }
 
                 for (SimpleCustomProperty simpleCustomProperty : simpleCustomProperties) {
@@ -228,7 +234,8 @@ public class CustomScriptManager implements Serializable {
                 }
 
                 if (ScriptLocationType.FILE == loadedCustomScript.getLocationType()) {
-                    // Replace script revision with file modification time. This should allow to reload script automatically after changing location_type
+                    // Replace script revision with file modification time. This should allow to
+                    // reload script automatically after changing location_type
                     long fileModifiactionTime = getFileModificationTime(loadedCustomScript.getLocationPath());
                     loadedCustomScript.setRevision(fileModifiactionTime);
 
@@ -237,14 +244,15 @@ public class CustomScriptManager implements Serializable {
                         if (StringHelper.isNotEmpty(scriptFromFile)) {
                             loadedCustomScript.setScript(scriptFromFile);
                         }
-                    
+
                     }
                 }
 
                 // Create authenticator
                 BaseExternalType newCustomScriptExternalType = createExternalType(loadedCustomScript, newConfigurationAttributes);
 
-                CustomScriptConfiguration newCustomScriptConfiguration = new CustomScriptConfiguration(loadedCustomScript, newCustomScriptExternalType, newConfigurationAttributes);
+                CustomScriptConfiguration newCustomScriptConfiguration = new CustomScriptConfiguration(loadedCustomScript,
+                        newCustomScriptExternalType, newConfigurationAttributes);
 
                 // Store configuration and authenticator
                 newCustomScriptConfigurations.put(newSupportedCustomScriptInum, newCustomScriptConfiguration);
@@ -274,7 +282,7 @@ public class CustomScriptManager implements Serializable {
     private String loadFromFile(String locationPath) {
         try {
             String scriptFromFile = FileUtils.readFileToString(new File(locationPath));
-        
+
             return scriptFromFile;
         } catch (IOException ex) {
             log.error("Faield to load script from '{}'", locationPath);
@@ -300,13 +308,15 @@ public class CustomScriptManager implements Serializable {
         if (!result) {
             log.error("Failed to destroy custom script '{}' correctly", customScriptInum);
         }
-    
+
         return result;
     }
 
-    private Map<CustomScriptType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsByScriptType(Map<String, CustomScriptConfiguration> customScriptConfigurations) {
-        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType = new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
-    
+    private Map<CustomScriptType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsByScriptType(
+            Map<String, CustomScriptConfiguration> customScriptConfigurations) {
+        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType =
+                new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
+
         for (CustomScriptType customScriptType : this.supportedCustomScriptTypes) {
             List<CustomScriptConfiguration> customConfigurationsByScriptType = new ArrayList<CustomScriptConfiguration>();
             newCustomScriptConfigurationsByScriptType.put(customScriptType, customConfigurationsByScriptType);
@@ -317,7 +327,7 @@ public class CustomScriptManager implements Serializable {
             List<CustomScriptConfiguration> customConfigurationsByScriptType = newCustomScriptConfigurationsByScriptType.get(customScriptType);
             customConfigurationsByScriptType.add(customScriptConfiguration);
         }
-    
+
         return newCustomScriptConfigurationsByScriptType;
     }
 
@@ -340,7 +350,8 @@ public class CustomScriptManager implements Serializable {
         return externalType;
     }
 
-    public BaseExternalType createExternalTypeFromStringWithPythonException(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
+    public BaseExternalType createExternalTypeFromStringWithPythonException(CustomScript customScript,
+            Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
         String script = customScript.getScript();
         if (script == null) {
             return null;
@@ -352,8 +363,8 @@ public class CustomScriptManager implements Serializable {
         InputStream bis = null;
         try {
             bis = new ByteArrayInputStream(script.getBytes("UTF-8"));
-            externalType = pythonService.loadPythonScript(bis, customScriptType.getPythonClass(),
-                    customScriptType.getCustomScriptType(), new PyObject[] { new PyLong(System.currentTimeMillis()) });
+            externalType = pythonService.loadPythonScript(bis, customScriptType.getPythonClass(), customScriptType.getCustomScriptType(),
+                    new PyObject[] { new PyLong(System.currentTimeMillis()) });
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);
         } finally {
@@ -374,7 +385,7 @@ public class CustomScriptManager implements Serializable {
         if (initialized) {
             return externalType;
         }
-    
+
         return null;
     }
 

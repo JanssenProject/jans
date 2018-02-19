@@ -23,7 +23,7 @@ import org.apache.commons.lang.time.DateUtils;
 @FacesConverter("uptimeConverter")
 public class UptimeConverter implements Converter {
 
-    private static final String[] dateFormats = { "D 'days' HH 'hours' mm 'mins' ss 'seconds'" };
+    private static final String[] DATE_FORMATS = { "D 'days' HH 'hours' mm 'mins' ss 'seconds'" };
 
     public Object getAsObject(FacesContext context, UIComponent comp, String value) throws ConverterException {
         if ((value == null) || value.trim().length() == 0) {
@@ -31,7 +31,7 @@ public class UptimeConverter implements Converter {
         }
 
         try {
-            return DateUtils.parseDate(value, dateFormats);
+            return DateUtils.parseDate(value, DATE_FORMATS);
         } catch (ParseException e) {
             throw new ConverterException("Unable to convert " + value + " to seconds!");
         }

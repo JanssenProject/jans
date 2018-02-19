@@ -1,15 +1,17 @@
 package org.xdi.service.cache;
 
+import java.io.Serializable;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import javax.annotation.PreDestroy;
-import java.io.Serializable;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -18,7 +20,7 @@ import java.io.Serializable;
  */
 public class RedisStandaloneProvider extends AbstractRedisProvider {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RedisStandaloneProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisStandaloneProvider.class);
 
     private JedisPool pool;
 
@@ -77,9 +79,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     public void put(int expirationInSeconds, String key, Object object) {
         Jedis jedis = pool.getResource();
         try {
-            String status = jedis.setex(key.getBytes(),
-                    expirationInSeconds,
-                    SerializationUtils.serialize((Serializable) object));
+            String status = jedis.setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
             LOG.trace("put - key: " + key + ", status: " + status);
         } finally {
             jedis.close();

@@ -6,12 +6,17 @@
 
 package org.xdi.model.custom.script;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
+import org.xdi.model.custom.script.type.authz.ConsentGatheringType;
+import org.xdi.model.custom.script.type.authz.DummyConsentGatheringType;
 import org.xdi.model.custom.script.type.client.ClientRegistrationType;
 import org.xdi.model.custom.script.type.client.DummyClientRegistrationType;
 import org.xdi.model.custom.script.type.id.DummyIdGeneratorType;
@@ -26,12 +31,12 @@ import org.xdi.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.xdi.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.xdi.model.custom.script.type.uma.UmaDummyRptPolicyType;
 import org.xdi.model.custom.script.type.uma.UmaRptPolicyType;
-import org.xdi.model.custom.script.type.authz.ConsentGatheringType;
-import org.xdi.model.custom.script.type.authz.DummyConsentGatheringType;
-import org.xdi.model.custom.script.type.user.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.xdi.model.custom.script.type.user.CacheRefreshType;
+import org.xdi.model.custom.script.type.user.DummyCacheRefreshType;
+import org.xdi.model.custom.script.type.user.DummyUpdateUserType;
+import org.xdi.model.custom.script.type.user.DummyUserRegistrationType;
+import org.xdi.model.custom.script.type.user.UpdateUserType;
+import org.xdi.model.custom.script.type.user.UserRegistrationType;
 
 /**
  * List of supported custom scripts
@@ -40,17 +45,27 @@ import java.util.Map;
  */
 public enum CustomScriptType implements LdapEnum {
 
-    PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class, "PersonAuthentication", new DummyPersonAuthenticationType()),
-    APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession", new DummyApplicationSessionType()),
-    CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
+    PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
+            "PersonAuthentication", new DummyPersonAuthenticationType()),
+    APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
+            new DummyApplicationSessionType()),
+    CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
+            new DummyCacheRefreshType()),
     UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
-    USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
-    CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
-    ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
-    UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy", new UmaDummyRptPolicyType()),
-    UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering", new UmaDummyClaimsGatheringType()),
-    CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering", new DummyConsentGatheringType()),
-    DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope", new DummyDynamicScopeType()),
+    USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration",
+            new DummyUserRegistrationType()),
+    CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
+            new DummyClientRegistrationType()),
+    ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator",
+            new DummyIdGeneratorType()),
+    UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy",
+            new UmaDummyRptPolicyType()),
+    UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering",
+            new UmaDummyClaimsGatheringType()),
+    CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
+            new DummyConsentGatheringType()),
+    DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",
+            new DummyDynamicScopeType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
     private String value;
@@ -61,13 +76,15 @@ public enum CustomScriptType implements LdapEnum {
     private BaseExternalType defaultImplementation;
 
     private static Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<String, CustomScriptType>();
+
     static {
         for (CustomScriptType enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
+    CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType,
+            Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
         this.displayName = displayName;
         this.value = value;
         this.customScriptType = customScriptType;

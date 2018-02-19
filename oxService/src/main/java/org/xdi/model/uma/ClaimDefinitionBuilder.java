@@ -1,15 +1,15 @@
 package org.xdi.model.uma;
 
-import org.apache.log4j.Logger;
-import org.xdi.util.Util;
-
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.xdi.util.Util;
 
 /**
  * @author yuriyz on 06/16/2017.
  */
-public class ClaimDefinitionBuilder {
+public final class ClaimDefinitionBuilder {
 
     private static final Logger LOG = Logger.getLogger(ClaimDefinitionBuilder.class);
 
@@ -17,13 +17,10 @@ public class ClaimDefinitionBuilder {
     }
 
     /**
-     * Parse json. Sample: [ {
-     * "issuer" : [ "https://example.com" ],
-     * "name" : "country",
-     * "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
-     * "claim_type" : "string",
-     * "friendly_name" : "country"
-     * } ]
+     * Parse json. Sample: [ { "issuer" : [ "https://example.com" ], "name" :
+     * "country", "claim_token_format" : [
+     * "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
+     * "claim_type" : "string", "friendly_name" : "country" } ]
      *
      * @param json
      * @return

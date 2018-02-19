@@ -24,20 +24,20 @@ public class WantSslRealm extends NullRealm {
         if (this.x509UsernameRetriever == null) {
             return new GenericPrincipal(null, null, null);
         }
-    
+
         String username = this.x509UsernameRetriever.getUsername(usercert);
-    
+
         Principal principal = new GenericPrincipal(username, null, null);
 
         return principal;
     }
 
     @Override
-    public Principal authenticate(X509Certificate certs[]) {
+    public Principal authenticate(X509Certificate[] certs) {
         if ((certs == null) || (certs.length == 0)) {
             return new GenericPrincipal(null, null, null);
         }
-    
+
         return super.authenticate(certs);
     }
 

@@ -6,9 +6,10 @@
 package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
@@ -42,7 +43,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param orgInum the orgInum to set
+     * @param orgInum
+     *            the orgInum to set
      */
     public void setOrgInum(String orgInum) {
         this.orgInum = orgInum;
@@ -56,7 +58,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param oxasimba the oxasimba to set
+     * @param oxasimba
+     *            the oxasimba to set
      */
     public void setOxasimba(String oxasimba) {
         this.oxasimba = oxasimba;
@@ -70,7 +73,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param idps the idps to set
+     * @param idps
+     *            the idps to set
      */
     public void setIdps(String idps) {
         this.idps = idps;
@@ -84,7 +88,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param selectors the selectors to set
+     * @param selectors
+     *            the selectors to set
      */
     public void setSelectors(String selectors) {
         this.selectors = selectors;
@@ -98,7 +103,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param requestors the requestors to set
+     * @param requestors
+     *            the requestors to set
      */
     public void setRequestors(String requestors) {
         this.requestors = requestors;
@@ -112,7 +118,8 @@ public class AsimbaConfiguration implements Serializable {
     }
 
     /**
-     * @param requestorpools the requestorpools to set
+     * @param requestorpools
+     *            the requestorpools to set
      */
     public void setRequestorpools(String requestorpools) {
         this.requestorpools = requestorpools;

@@ -1,10 +1,11 @@
 package org.xdi.model;
 
 import java.io.Serializable;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AttributeValidation implements Serializable{
+public class AttributeValidation implements Serializable {
 
     /**
      *
@@ -18,18 +19,23 @@ public class AttributeValidation implements Serializable{
     public String getRegexp() {
         return regexp;
     }
+
     public void setRegexp(String regexp) {
         this.regexp = regexp;
     }
+
     public Integer getMinLength() {
         return minLength;
     }
+
     public void setMinLength(Integer minLength) {
         this.minLength = minLength;
     }
+
     public Integer getMaxLength() {
         return maxLength;
     }
+
     public void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
     }

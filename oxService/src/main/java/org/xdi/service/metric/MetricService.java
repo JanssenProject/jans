@@ -57,7 +57,7 @@ public abstract class MetricService implements Serializable {
 
     private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 
-    private static final AtomicLong initialId = new AtomicLong(System.currentTimeMillis());
+    private static final AtomicLong INITIAL_ID = new AtomicLong(System.currentTimeMillis());
 
     private MetricRegistry metricRegistry;
 
@@ -213,22 +213,27 @@ public abstract class MetricService implements Serializable {
         return result;
     }
 
-    public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate, int sizeLimit, int chunkSize) {
+    public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
+            int sizeLimit, int chunkSize) {
         Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-        List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
+        List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
+                new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
 
         return metricEntries;
     }
 
-    public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType, String applianceInum, int sizeLimit, int chunkSize) {
+    public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType,
+            String applianceInum, int sizeLimit, int chunkSize) {
         String baseDn = buildDn(null, null, applicationType, applianceInum);
 
         Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
-        return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0, sizeLimit, chunkSize);
+        return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0,
+                sizeLimit, chunkSize);
     }
 
-    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int sizeLimit, int chunkSize) {
+    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum,
+            int sizeLimit, int chunkSize) {
         final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
         // Remove expired entries
         for (final String baseDnForPeriod : keepBaseDnForPeriod) {
@@ -258,7 +263,7 @@ public abstract class MetricService implements Serializable {
             public void performAction(List<SimpleBranch> objects) {
                 String baseDn = buildDn(null, null, applicationType, applianceInum);
                 Set<String> periodBranchesStrings = new HashSet<String>();
-                for (SimpleBranch periodBranch: objects) {
+                for (SimpleBranch periodBranch : objects) {
                     if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
                         periodBranchesStrings.add(periodBranch.getDn());
                     }
@@ -288,7 +293,7 @@ public abstract class MetricService implements Serializable {
 
         boolean stopCondition = cal.getTime().equals(endDate);
         cal.setTime(startDate);
-        while (true) {  // Add at least one month if the data exists
+        while (true) { // Add at least one month if the data exists
             int currentMonth = cal.get(Calendar.MONTH);
             Date currentStartDate = cal.getTime();
 
@@ -315,7 +320,7 @@ public abstract class MetricService implements Serializable {
     }
 
     public String getuUiqueIdentifier() {
-        return String.valueOf(initialId.incrementAndGet());
+        return String.valueOf(INITIAL_ID.incrementAndGet());
     }
 
     public Counter getCounter(MetricType metricType) {
@@ -345,7 +350,8 @@ public abstract class MetricService implements Serializable {
 
     /*
      * Should return similar to this pattern DN:
-     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,ou=organization_name,o=gluu
+     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=
+     * metric,ou=organization_name,o=gluu
      */
     public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String currentApplianceInum) {
         final StringBuilder dn = new StringBuilder();

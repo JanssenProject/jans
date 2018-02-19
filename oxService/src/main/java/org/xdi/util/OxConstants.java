@@ -10,15 +10,15 @@
  * @author Yuriy Movchan
  * @version 0.1, 10/14/2010
  */
-public  class OxConstants {
-	public static final String dn = "dn";
-	public static final String uid = "uid";
-	public static final String success = "success";
-	public static final String userPassword = "userPassword";
-	public static final String objectClass = "objectClass";
-	public static final String inum = "inum";
+public final class OxConstants {
 
-	public static final String INUM = "inum";
+    private OxConstants() {
+    }
+
+    public static final String UID = "uid";
+    public static final String OBJECT_CLASS = "objectClass";
+
+    public static final String INUM = "inum";
     public static final String INAME = "iname";
     public static final String DISPLAY_NAME = "displayName";
     public static final String DESCRIPTION = "description";
@@ -37,4 +37,5 @@ public  class OxConstants {
     public static final String CACHE_ACTIVE_ATTRIBUTE_NAME = "ActiveAttributeCache";
 
     public static final String SCRIPT_TYPE_INTERNAL_RESERVED_NAME = "simple_password_auth";
+
 }

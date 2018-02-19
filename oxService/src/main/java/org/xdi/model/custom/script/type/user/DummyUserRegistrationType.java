@@ -32,25 +32,22 @@ public class DummyUserRegistrationType implements UserRegistrationType {
     }
 
     @Override
-    public boolean initRegistration(Object user, Map<String, String[]> requestParameters,
-            Map<String, SimpleCustomProperty> configurationAttributes) {
+    public boolean initRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
     @Override
-    public boolean preRegistration(Object user, Map<String, String[]> requestParameters,
-            Map<String, SimpleCustomProperty> configurationAttributes) {
+    public boolean preRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
     @Override
-    public boolean postRegistration(Object user, Map<String, String[]> requestParameters,
-            Map<String, SimpleCustomProperty> configurationAttributes) {
+    public boolean postRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
     @Override
-    public boolean confirmRegistration(Object user,    Map<String, String[]> requestParameters,
+    public boolean confirmRegistration(Object user, Map<String, String[]> requestParameters,
             Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }

@@ -32,16 +32,16 @@ public abstract class AbstractCustomScriptService implements Serializable {
     private LdapEntryManager ldapEntryManager;
 
     public void add(CustomScript customScript) {
-       ldapEntryManager.persist(customScript);
+        ldapEntryManager.persist(customScript);
     }
 
     public void update(CustomScript customScript) {
-       ldapEntryManager.merge(customScript);
+        ldapEntryManager.merge(customScript);
     }
 
     public void remove(CustomScript customScript) {
         ldapEntryManager.remove(customScript);
-     }
+    }
 
     public CustomScript getCustomScriptByDn(String customScriptDn) {
         return ldapEntryManager.find(CustomScript.class, customScriptDn);
@@ -59,19 +59,19 @@ public abstract class AbstractCustomScriptService implements Serializable {
         return result;
     }
 
-    public List<CustomScript> findCustomScripts(List<CustomScriptType> customScriptTypes, String ... returnAttributes) {
+    public List<CustomScript> findCustomScripts(List<CustomScriptType> customScriptTypes, String... returnAttributes) {
         String baseDn = baseDn();
-    
+
         if ((customScriptTypes == null) || (customScriptTypes.size() == 0)) {
             return findAllCustomScripts(returnAttributes);
         }
-    
+
         List<Filter> customScriptTypeFilters = new ArrayList<Filter>();
         for (CustomScriptType customScriptType : customScriptTypes) {
             Filter customScriptTypeFilter = Filter.createEqualityFilter("oxScriptType", customScriptType.getValue());
             customScriptTypeFilters.add(customScriptTypeFilter);
         }
-            
+
         Filter filter = Filter.createORFilter(customScriptTypeFilters);
 
         List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);

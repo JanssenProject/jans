@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -29,7 +27,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @LdapEntry(sortBy = "level")
-@LdapObjectClass(values = {"top", "oxCustomScript"})
+@LdapObjectClass(values = { "top", "oxCustomScript" })
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
@@ -76,7 +74,8 @@ public class CustomScript extends BaseEntry {
     @Transient
     private boolean internal;
 
-    public CustomScript() {}
+    public CustomScript() {
+    }
 
     public CustomScript(String dn, String inum, String name) {
         super(dn);
@@ -157,7 +156,6 @@ public class CustomScript extends BaseEntry {
         this.moduleProperties = moduleProperties;
     }
 
-
     public List<SimpleExtendedCustomProperty> getConfigurationProperties() {
         return configurationProperties;
     }
@@ -216,8 +214,9 @@ public class CustomScript extends BaseEntry {
     }
 
     public void setLocationType(ScriptLocationType locationType) {
-        if(locationType != null)
+        if (locationType != null) {
             setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
+        }
     }
 
     public String getLocationPath() {
@@ -253,7 +252,7 @@ public class CustomScript extends BaseEntry {
 
     protected void setModuleProperty(String name, String value) {
         SimpleCustomProperty moduleProperty = getModuleProperty(name);
-    
+
         if (moduleProperty == null) {
             addModuleProperty(name, value);
         } else {

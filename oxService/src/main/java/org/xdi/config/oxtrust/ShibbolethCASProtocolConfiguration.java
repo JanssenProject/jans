@@ -6,8 +6,10 @@
 package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
@@ -43,7 +45,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param inum the inum to set
+     * @param inum
+     *            the inum to set
      */
     public void setInum(String inum) {
         this.inum = inum;
@@ -57,7 +60,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param enabled the enabled to set
+     * @param enabled
+     *            the enabled to set
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -71,7 +75,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param extended the extended to set
+     * @param extended
+     *            the extended to set
      */
     public void setExtended(boolean extended) {
         this.extended = extended;
@@ -85,7 +90,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param enableToProxyPatterns the enableToProxyPatterns to set
+     * @param enableToProxyPatterns
+     *            the enableToProxyPatterns to set
      */
     public void setEnableToProxyPatterns(boolean enableToProxyPatterns) {
         this.enableToProxyPatterns = enableToProxyPatterns;
@@ -99,7 +105,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param authorizedToProxyPattern the authorizedToProxyPattern to set
+     * @param authorizedToProxyPattern
+     *            the authorizedToProxyPattern to set
      */
     public void setAuthorizedToProxyPattern(String authorizedToProxyPattern) {
         this.authorizedToProxyPattern = authorizedToProxyPattern;
@@ -113,7 +120,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param unauthorizedToProxyPattern the unauthorizedToProxyPattern to set
+     * @param unauthorizedToProxyPattern
+     *            the unauthorizedToProxyPattern to set
      */
     public void setUnauthorizedToProxyPattern(String unauthorizedToProxyPattern) {
         this.unauthorizedToProxyPattern = unauthorizedToProxyPattern;
@@ -127,7 +135,8 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     }
 
     /**
-     * @param sessionStorageType the sessionStorageType to set
+     * @param sessionStorageType
+     *            the sessionStorageType to set
      */
     public void setSessionStorageType(String sessionStorageType) {
         this.sessionStorageType = sessionStorageType;

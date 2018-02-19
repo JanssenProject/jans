@@ -7,19 +7,19 @@ import java.io.File;
 /**
  * Created by eugeniuparvan on 5/1/17.
  */
-public class Utils {
+public final class Utils {
     private static final String SERVER_BASE_PATH = "server.base";
     private static final String CUSTOM_PAGES_PATH = "/custom/pages";
+
+    private Utils() { }
 
     public static boolean isCustomPagesDirExists() {
         String externalResourceBase = getCustomPagesPath();
         if (StringHelper.isNotEmpty(externalResourceBase)) {
             File folder = new File(externalResourceBase);
-            if (folder.exists() && folder.isDirectory()) {
-                return true;
-            } else {
-                return false;
-            }
+            boolean result = folder.exists() && folder.isDirectory();
+
+            return result;
         } else {
             return false;
         }

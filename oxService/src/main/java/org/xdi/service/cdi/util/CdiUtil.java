@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
  * @author Yuriy Movchan
  * @version 1.0, 05/05/2017
  */
-public class CdiUtil {
+public final class CdiUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(CdiUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CdiUtil.class);
 
     private CdiUtil() {
     }
@@ -38,56 +38,51 @@ public class CdiUtil {
 
         return existingInstance;
     }
-/*
-    @Deprecated
-    public static <T> T getContextualReference(BeanManager bm, Set<Bean<?>> beans, Class<?> type) {
-        if (beans == null || beans.size() == 0) {
-            return null;
-        }
 
-        // If we would resolve to multiple beans then BeanManager#resolve would throw an AmbiguousResolutionException
-        Bean<?> bean = bm.resolve(beans);
-        if (bean == null) {
-            return null;
-        } else {
-            CreationalContext<?> creationalContext = bm.createCreationalContext(bean);
-            return (T) bm.getReference(bean, type, creationalContext);
-        }
+    /*
+     * @Deprecated public static <T> T getContextualReference(BeanManager bm,
+     * Set<Bean<?>> beans, Class<?> type) { if (beans == null || beans.size() == 0)
+     * { return null; }
+     *
+     * // If we would resolve to multiple beans then BeanManager#resolve would throw
+     * an AmbiguousResolutionException Bean<?> bean = bm.resolve(beans); if (bean ==
+     * null) { return null; } else { CreationalContext<?> creationalContext =
+     * bm.createCreationalContext(bean); return (T) bm.getReference(bean, type,
+     * creationalContext); } }
+     */
+    public static <T> Instance<T> instance(Class<T> clazz) {
+        return CDI.current().select(clazz);
     }
-*/
-    public static <T> Instance<T> instance(Class<T> p_clazz) {
-        return CDI.current().select(p_clazz);
-    }    
 
-    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
-        return CDI.current().select(p_clazz, NamedLiteral.of(name));
-    }    
+    public static <T> Instance<T> instance(Class<T> clazz, String name) {
+        return CDI.current().select(clazz, NamedLiteral.of(name));
+    }
 
-    public static <T> T bean(Class<T> p_clazz) {
-        return instance(p_clazz).get();
-    }    
+    public static <T> T bean(Class<T> clazz) {
+        return instance(clazz).get();
+    }
 
-    public static <T> T bean(Class<T> p_clazz, String name) {
-        return instance(p_clazz, name).get();
-    }    
+    public static <T> T bean(Class<T> clazz, String name) {
+        return instance(clazz, name).get();
+    }
 
-    public static <T> void destroy(Class<T> p_clazz) {
-        Instance<T> instance = instance(p_clazz);
+    public static <T> void destroy(Class<T> clazz) {
+        Instance<T> instance = instance(clazz);
         if (instance.isResolvable()) {
             instance.destroy(instance.get());
         }
-    }    
+    }
 
-    public static <T> T destroy(Class<T> p_clazz, String name) {
-        Instance<T> instance = instance(p_clazz, name);
+    public static <T> T destroy(Class<T> clazz, String name) {
+        Instance<T> instance = instance(clazz, name);
         if (instance.isResolvable()) {
             T obj = instance.get();
             instance.destroy(obj);
-        
+
             return obj;
         }
 
         return null;
-    }    
+    }
 
 }

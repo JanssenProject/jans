@@ -26,9 +26,10 @@ import org.apache.tomcat.util.net.jsse.JSSESocketFactory;
  */
 public class WantCertJSSEImplementation extends JSSEImplementation {
 
-    private static final String DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION = "edu.internet2.middleware.security.tomcat7.DelegateToApplicationJSSEImplementation";
+    private static final String DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION =
+            "edu.internet2.middleware.security.tomcat7.DelegateToApplicationJSSEImplementation";
 
-    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
+    private static final org.apache.juli.logging.Log LOG = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
 
     private SSLImplementation delegateToApplicationJSSEImplementation = null;
 
@@ -36,8 +37,8 @@ public class WantCertJSSEImplementation extends JSSEImplementation {
         try {
             this.delegateToApplicationJSSEImplementation = getInstance(DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION);
         } catch (ClassNotFoundException ex) {
-            if (log.isErrorEnabled() || log.isDebugEnabled()) {
-                log.error("Failed to load " + DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION, ex);
+            if (LOG.isErrorEnabled() || LOG.isDebugEnabled()) {
+                LOG.error("Failed to load " + DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION, ex);
             }
         }
     }

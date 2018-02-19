@@ -210,7 +210,7 @@ public class XmlService implements Serializable {
         }
 
         fty.setNamespaceAware(true);
-        
+
         // Fix XXE vulnerability
         fty.setXIncludeAware(false);
         fty.setExpandEntityReferences(false);
@@ -227,7 +227,7 @@ public class XmlService implements Serializable {
 
         if (StringHelper.isEmpty(attributeName)) {
             String nodeValue = (String) formXPathExpression.evaluate(xmlDocument, XPathConstants.STRING);
-        
+
             return nodeValue;
         }
 

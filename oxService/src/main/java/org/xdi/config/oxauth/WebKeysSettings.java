@@ -7,9 +7,9 @@
 package org.xdi.config.oxauth;
 
 import java.util.Date;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.model.GluuImage;
 
 /**
  *
@@ -42,6 +42,14 @@ public class WebKeysSettings {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((serverIP == null) ? 0 : serverIP.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -60,6 +68,7 @@ public class WebKeysSettings {
         } else if (!serverIP.equals(other.serverIP)) {
             return false;
         }
+
         return true;
     }
 

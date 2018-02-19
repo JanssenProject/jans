@@ -17,7 +17,8 @@ public class AuthenticationCustomScript extends CustomScript {
 
     public static final String USAGE_TYPE_MODEL_PROPERTY = "usage_type";
 
-    public AuthenticationCustomScript() {}
+    public AuthenticationCustomScript() {
+    }
 
     public AuthenticationCustomScript(CustomScript customScript) {
         super(customScript);
