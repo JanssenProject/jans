@@ -36,7 +36,7 @@ public class SimpleUser implements Serializable {
     private String[] oxAuthPersistentJwt;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @LdapCustomObjectClass
     private String[] customObjectClasses;
