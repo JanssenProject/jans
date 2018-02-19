@@ -26,7 +26,8 @@ public class ContextProducer {
     @Inject
     private BeanManager beanManager;
 
-    @Produces @RequestScoped
+    @Produces
+    @RequestScoped
     public ExtendedELContext createELContext() {
         ConstantResolver constantResolver = new ConstantResolver();
 
@@ -54,8 +55,8 @@ public class ContextProducer {
         return resolver;
     }
 
-    private ExtendedELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper,
-            final VariableMapper variableMapper, final ConstantResolver constantResolver) {
+    private ExtendedELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper, final VariableMapper variableMapper,
+            final ConstantResolver constantResolver) {
         return new ExtendedELContext() {
             @Override
             public ELResolver getELResolver() {

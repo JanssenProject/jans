@@ -64,12 +64,7 @@ public class MemcachedConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "MemcachedConfiguration{" +
-                "servers='" + servers + '\'' +
-                ", maxOperationQueueLength=" + maxOperationQueueLength +
-                ", bufferSize=" + bufferSize +
-                ", defaultPutExpiration=" + defaultPutExpiration +
-                ", connectionFactoryType=" + connectionFactoryType +
-                '}';
+        return "MemcachedConfiguration{" + "servers='" + servers + '\'' + ", maxOperationQueueLength=" + maxOperationQueueLength + ", bufferSize="
+                + bufferSize + ", defaultPutExpiration=" + defaultPutExpiration + ", connectionFactoryType=" + connectionFactoryType + '}';
     }
 }

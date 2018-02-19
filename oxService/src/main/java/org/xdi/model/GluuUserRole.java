@@ -29,7 +29,7 @@ public enum GluuUserRole implements LdapEnum {
         }
     }
 
-    private GluuUserRole(String value) {
+    GluuUserRole(String value) {
         this.value = value;
     }
 

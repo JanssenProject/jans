@@ -9,8 +9,10 @@ public class TimerSchedule {
     private int interval;
 
     /**
-     * @param delay the delay before the first event occurs
-     * @param interval the period between the events
+     * @param delay
+     *            the delay before the first event occurs
+     * @param interval
+     *            the period between the events
      */
     public TimerSchedule(int delay, int interval) {
         this.delay = delay;

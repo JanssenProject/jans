@@ -15,12 +15,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-import org.xdi.model.DisplayNameEntry;
-import org.xdi.util.OxConstants;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.search.filter.Filter;
+import org.slf4j.Logger;
+import org.xdi.model.DisplayNameEntry;
+import org.xdi.util.OxConstants;
 
 /**
  * Provides operations with DisplayNameEntry
@@ -116,7 +116,7 @@ public class LookupService implements Serializable {
         }
 
         Collections.sort(inums);
-    
+
         return inums;
     }
 
@@ -128,7 +128,7 @@ public class LookupService implements Serializable {
             }
             compoundKey.append(inum);
         }
-    
+
         return compoundKey.toString();
     }
 

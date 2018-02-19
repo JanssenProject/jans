@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 @Named
 public class PageService {
 
-    private static final DateFormat currentDateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+    private static final DateFormat CURRENT_DATE_TIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
 
     public String getRootUrlByRequest(HttpServletRequest request) {
         String url = request.getRequestURL().toString();
@@ -25,7 +25,7 @@ public class PageService {
     }
 
     public String getCurrentDateTime() {
-        return currentDateTimeFormatter.format(new Date());
+        return CURRENT_DATE_TIME_FORMATTER.format(new Date());
     }
 
 }

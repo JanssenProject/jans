@@ -25,7 +25,7 @@ public class FacesResources {
         if (facesContext != null) {
             return facesContext.getExternalContext();
         }
-    
+
         return null;
     }
 
@@ -36,7 +36,7 @@ public class FacesResources {
         if (facesContext != null) {
             return facesContext.getApplication().getViewHandler();
         }
-    
+
         return null;
     }
 

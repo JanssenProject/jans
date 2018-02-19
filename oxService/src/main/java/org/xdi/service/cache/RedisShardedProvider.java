@@ -1,17 +1,18 @@
 package org.xdi.service.cache;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class RedisShardedProvider extends AbstractRedisProvider {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RedisShardedProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisShardedProvider.class);
 
     private ShardedJedisPool pool;
 
@@ -91,9 +92,7 @@ public class RedisShardedProvider extends AbstractRedisProvider {
     public void put(int expirationInSeconds, String key, Object object) {
         ShardedJedis jedis = pool.getResource();
         try {
-            String status = jedis.setex(key.getBytes(),
-                    expirationInSeconds,
-                    SerializationUtils.serialize((Serializable) object));
+            String status = jedis.setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
             LOG.trace("put - key: " + key + ", status: " + status);
         } finally {
             jedis.close();

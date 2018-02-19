@@ -43,7 +43,7 @@ public class ObjectSerializationService {
             fos = new FileOutputStream(file, append);
         } catch (FileNotFoundException ex) {
             log.error("Faield to serialize to file: '{}'. Error: ", path, ex);
-        
+
             return false;
         }
 
@@ -59,7 +59,7 @@ public class ObjectSerializationService {
 
             return false;
         }
-    
+
         return true;
     }
 
@@ -79,7 +79,7 @@ public class ObjectSerializationService {
             fis = new FileInputStream(file);
         } catch (FileNotFoundException ex) {
             log.error("Faield to deserialize from file: '{}'. Error: ", path, ex);
-        
+
             return null;
         }
 
@@ -92,10 +92,10 @@ public class ObjectSerializationService {
         } catch (IOException ex) {
             log.error("Faield to deserialize from file: '{}'. Error: ", path, ex);
             IOUtils.closeQuietly(bis);
-        
+
             return null;
         }
-    
+
         return obj;
     }
 

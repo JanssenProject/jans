@@ -5,9 +5,9 @@
  */
 package org.xdi.model.custom.script.type.scim;
 
-import org.xdi.model.SimpleCustomProperty;
-
 import java.util.Map;
+
+import org.xdi.model.SimpleCustomProperty;
 
 /**
  * @author Val Pecaoco

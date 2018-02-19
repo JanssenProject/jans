@@ -50,8 +50,8 @@ public class Identity implements Serializable {
     }
 
     /**
-     * Simple check that returns true if the user is logged in, without
-     * attempting to authenticate
+     * Simple check that returns true if the user is logged in, without attempting
+     * to authenticate
      *
      * @return true if the user is logged in
      */
@@ -61,9 +61,9 @@ public class Identity implements Serializable {
     }
 
     /**
-     * Will attempt to authenticate quietly if the user's credentials are set
-     * and they haven't authenticated already. A quiet authentication doesn't
-     * throw any exceptions if authentication fails.
+     * Will attempt to authenticate quietly if the user's credentials are set and
+     * they haven't authenticated already. A quiet authentication doesn't throw any
+     * exceptions if authentication fails.
      *
      * @return true if the user is logged in, false otherwise
      */
@@ -78,8 +78,7 @@ public class Identity implements Serializable {
     /**
      * Attempts to authenticate the user.
      *
-     * @return String returns "loggedIn" if user is authenticated, or null if
-     *         not.
+     * @return String returns "loggedIn" if user is authenticated, or null if not.
      */
     public String login() {
         try {
@@ -111,9 +110,9 @@ public class Identity implements Serializable {
     }
 
     /**
-     * Attempts a quiet login, suppressing any login exceptions and not creating
-     * any faces messages. This method is intended to be used primarily as an
-     * internal API call, however has been made public for convenience.
+     * Attempts a quiet login, suppressing any login exceptions and not creating any
+     * faces messages. This method is intended to be used primarily as an internal
+     * API call, however has been made public for convenience.
      */
     public void quietLogin() {
         try {

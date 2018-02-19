@@ -1,10 +1,10 @@
 package org.xdi.service.cache;
 
-import org.slf4j.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
 
 /**
  * @author yuriyz on 02/23/2017.
@@ -34,7 +34,8 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             RedisConfiguration redisConfiguration = cacheConfiguration.getRedisConfiguration();
             log.debug("Starting RedisProvider ... configuration:" + redisConfiguration);
 
-            defaultPutExpiration = redisConfiguration.getDefaultPutExpiration() > 0 ? redisConfiguration.getDefaultPutExpiration() : DEFAULT_PUT_EXPIRATION_IN_SECONDS;
+            defaultPutExpiration = redisConfiguration.getDefaultPutExpiration() > 0 ? redisConfiguration.getDefaultPutExpiration()
+                    : DEFAULT_PUT_EXPIRATION_IN_SECONDS;
 
             redisProvider = RedisProviderFactory.create(cacheConfiguration.getRedisConfiguration());
             redisProvider.create();
@@ -66,7 +67,8 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         return redisProvider.get(key);
     }
 
-    @Override // it is so weird but we use as workaround "region" field to pass "expiration" for put operation
+    @Override // it is so weird but we use as workaround "region" field to pass "expiration"
+              // for put operation
     public void put(String expirationInSeconds, String key, Object object) {
         redisProvider.put(putExpiration(expirationInSeconds), key, object);
     }

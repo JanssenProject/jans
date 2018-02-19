@@ -17,15 +17,18 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface UpdateUserType extends BaseExternalType {
 
-    public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
-    public boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
-    public boolean postAddUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean deleteUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
-    public boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    boolean postAddUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    boolean deleteUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

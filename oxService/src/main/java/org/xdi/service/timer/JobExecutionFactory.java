@@ -1,4 +1,4 @@
- package org.xdi.service.timer;
+package org.xdi.service.timer;
 
 import javax.inject.Inject;
 
@@ -16,8 +16,7 @@ public class JobExecutionFactory implements JobFactory {
     @Inject
     private JobExecutionDelegate jobExecutionDelegate;
 
-    public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler)
-            throws SchedulerException {
+    public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
         return jobExecutionDelegate;
     }
 

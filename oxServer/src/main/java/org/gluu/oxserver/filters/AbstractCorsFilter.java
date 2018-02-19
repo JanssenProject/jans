@@ -1,16 +1,34 @@
 package org.gluu.oxserver.filters;
 
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
 
 /**
  * CORS Filter to support both Tomcat and Jetty
@@ -24,8 +42,8 @@ public abstract class AbstractCorsFilter implements Filter {
     @Inject
     private Logger log;
 
-    private static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    private static final StringManager SM =
+            StringManager.getManager(Constants.PACKAGE);
 
     /**
      * A {@link Collection} of origins consisting of zero or more origins that
@@ -86,9 +104,9 @@ public abstract class AbstractCorsFilter implements Filter {
     public void doFilter(final ServletRequest servletRequest,
                          final ServletResponse servletResponse, final FilterChain filterChain)
             throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest) ||
-                !(servletResponse instanceof HttpServletResponse)) {
-            throw new ServletException(sm.getString("corsFilter.onlyHttp"));
+        if (!(servletRequest instanceof HttpServletRequest)
+                || !(servletResponse instanceof HttpServletResponse)) {
+            throw new ServletException(SM.getString("corsFilter.onlyHttp"));
         }
 
         // Safe to downcast at this point.
@@ -146,10 +164,10 @@ public abstract class AbstractCorsFilter implements Filter {
             throws IOException, ServletException {
 
         AbstractCorsFilter.CORSRequestType requestType = checkRequestType(request);
-        if (!(requestType == AbstractCorsFilter.CORSRequestType.SIMPLE ||
-                requestType == AbstractCorsFilter.CORSRequestType.ACTUAL)) {
+        if (!(requestType == AbstractCorsFilter.CORSRequestType.SIMPLE
+                || requestType == AbstractCorsFilter.CORSRequestType.ACTUAL)) {
             throw new IllegalArgumentException(
-                    sm.getString("corsFilter.wrongType2",
+                    SM.getString("corsFilter.wrongType2",
                             AbstractCorsFilter.CORSRequestType.SIMPLE,
                             AbstractCorsFilter.CORSRequestType.ACTUAL));
         }
@@ -229,7 +247,7 @@ public abstract class AbstractCorsFilter implements Filter {
         CORSRequestType requestType = checkRequestType(request);
         if (requestType != CORSRequestType.PRE_FLIGHT) {
             throw new IllegalArgumentException(
-                    sm.getString("corsFilter.wrongType1",
+                    SM.getString("corsFilter.wrongType1",
                             CORSRequestType.PRE_FLIGHT.name().toLowerCase()));
         }
 
@@ -245,8 +263,8 @@ public abstract class AbstractCorsFilter implements Filter {
         // Section 6.2.3
         String accessControlRequestMethod = request.getHeader(
                 AbstractCorsFilter.REQUEST_HEADER_ACCESS_CONTROL_REQUEST_METHOD);
-        if (accessControlRequestMethod == null ||
-                !HTTP_METHODS.contains(accessControlRequestMethod.trim())) {
+        if (accessControlRequestMethod == null
+                || !HTTP_METHODS.contains(accessControlRequestMethod.trim())) {
             handleInvalidCORS(request, response, filterChain);
             return;
         } else {
@@ -257,8 +275,8 @@ public abstract class AbstractCorsFilter implements Filter {
         String accessControlRequestHeadersHeader = request.getHeader(
                 AbstractCorsFilter.REQUEST_HEADER_ACCESS_CONTROL_REQUEST_HEADERS);
         List<String> accessControlRequestHeaders = new LinkedList<String>();
-        if (accessControlRequestHeadersHeader != null &&
-                !accessControlRequestHeadersHeader.trim().isEmpty()) {
+        if (accessControlRequestHeadersHeader != null
+                && !accessControlRequestHeadersHeader.trim().isEmpty()) {
             String[] headers = accessControlRequestHeadersHeader.trim().split(
                     ",");
             for (String header : headers) {
@@ -406,12 +424,12 @@ public abstract class AbstractCorsFilter implements Filter {
             final CORSRequestType corsRequestType) {
         if (request == null) {
             throw new IllegalArgumentException(
-                    sm.getString("corsFilter.nullRequest"));
+                    SM.getString("corsFilter.nullRequest"));
         }
 
         if (corsRequestType == null) {
             throw new IllegalArgumentException(
-                    sm.getString("corsFilter.nullRequestType"));
+                    SM.getString("corsFilter.nullRequestType"));
         }
 
         switch (corsRequestType) {
@@ -509,7 +527,7 @@ public abstract class AbstractCorsFilter implements Filter {
         CORSRequestType requestType = CORSRequestType.INVALID_CORS;
         if (request == null) {
             throw new IllegalArgumentException(
-                    sm.getString("corsFilter.nullRequest"));
+                    SM.getString("corsFilter.nullRequest"));
         }
         String originHeader = request.getHeader(REQUEST_HEADER_ORIGIN);
         // Section 6.1.1 and Section 6.2.1
@@ -525,11 +543,11 @@ public abstract class AbstractCorsFilter implements Filter {
                         String accessControlRequestMethodHeader =
                                 request.getHeader(
                                         REQUEST_HEADER_ACCESS_CONTROL_REQUEST_METHOD);
-                        if (accessControlRequestMethodHeader != null &&
-                                !accessControlRequestMethodHeader.isEmpty()) {
+                        if (accessControlRequestMethodHeader != null
+                                && !accessControlRequestMethodHeader.isEmpty()) {
                             requestType = CORSRequestType.PRE_FLIGHT;
-                        } else if (accessControlRequestMethodHeader != null &&
-                                accessControlRequestMethodHeader.isEmpty()) {
+                        } else if (accessControlRequestMethodHeader != null
+                                && accessControlRequestMethodHeader.isEmpty()) {
                             requestType = CORSRequestType.INVALID_CORS;
                         } else {
                             requestType = CORSRequestType.ACTUAL;
@@ -649,7 +667,7 @@ public abstract class AbstractCorsFilter implements Filter {
                 }
             } catch (NumberFormatException e) {
                 throw new ServletException(
-                        sm.getString("corsFilter.invalidPreflightMaxAge"), e);
+                        SM.getString("corsFilter.invalidPreflightMaxAge"), e);
             }
         }
 
@@ -887,7 +905,7 @@ public abstract class AbstractCorsFilter implements Filter {
      * Enumerates varies types of CORS requests. Also, provides utility methods
      * to determine the request type.
      */
-    protected static enum CORSRequestType {
+    protected enum CORSRequestType {
         /**
          * A simple HTTP request, i.e. it shouldn't be pre-flighted.
          */
@@ -996,8 +1014,8 @@ public abstract class AbstractCorsFilter implements Filter {
      * Access-Control-Request-Method, and Access-Control-Request-Headers.
      */
     public static final String DEFAULT_ALLOWED_HTTP_HEADERS =
-            "Origin,Accept,X-Requested-With,Content-Type," +
-                    "Access-Control-Request-Method,Access-Control-Request-Headers";
+            "Origin,Accept,X-Requested-With,Content-Type,"
+                    + "Access-Control-Request-Method,Access-Control-Request-Headers";
 
     /**
      * By default, none of the headers are exposed in response.
@@ -1054,7 +1072,7 @@ public abstract class AbstractCorsFilter implements Filter {
 
 }
 
-class StringManager {
+final class StringManager {
 
     private static int LOCALE_CACHE_SIZE = 10;
 
@@ -1174,7 +1192,7 @@ class StringManager {
     // STATIC SUPPORT METHODS
     // --------------------------------------------------------------
 
-    private static final Map<String, Map<Locale, StringManager>> managers =
+    private static final Map<String, Map<Locale, StringManager>> MANAGERS =
             new Hashtable<String, Map<Locale, StringManager>>();
 
     /**
@@ -1184,7 +1202,7 @@ class StringManager {
      *
      * @param packageName The package name
      */
-    public static final synchronized StringManager getManager(
+    public static synchronized StringManager getManager(
             String packageName) {
         return getManager(packageName, Locale.getDefault());
     }
@@ -1197,10 +1215,10 @@ class StringManager {
      * @param packageName The package name
      * @param locale      The Locale
      */
-    public static final synchronized StringManager getManager(
+    public static synchronized StringManager getManager(
             String packageName, Locale locale) {
 
-        Map<Locale, StringManager> map = managers.get(packageName);
+        Map<Locale, StringManager> map = MANAGERS.get(packageName);
         if (map == null) {
             /*
              * Don't want the HashMap to be expanded beyond LOCALE_CACHE_SIZE.
@@ -1222,7 +1240,7 @@ class StringManager {
                     return false;
                 }
             };
-            managers.put(packageName, map);
+            MANAGERS.put(packageName, map);
         }
 
         StringManager mgr = map.get(locale);
@@ -1256,7 +1274,9 @@ class StringManager {
 
 final class Constants {
 
-    public static final String Package = "org.apache.catalina.filters";
+    private Constants() { }
+
+    public static final String PACKAGE = "org.apache.catalina.filters";
 
     public static final String CSRF_NONCE_SESSION_ATTR_NAME =
             "org.apache.catalina.filters.CSRF_NONCE";

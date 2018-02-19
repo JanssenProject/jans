@@ -22,7 +22,7 @@ public final class CryptoConfigurationFile {
         this.cryptoConfiguration = cryptoConfiguration;
     }
 
-    public String getEncodeSalt(){
+    public String getEncodeSalt() {
         return cryptoConfiguration.getString("encodeSalt");
     }
 }

@@ -32,7 +32,7 @@ public class CacheService {
         if (cacheProvider == null) {
             return null;
         }
-    
+
         return cacheProvider.get(region, key);
     }
 
@@ -46,7 +46,7 @@ public class CacheService {
         if (cacheProvider == null) {
             return;
         }
-    
+
         cacheProvider.remove(region, key);
     }
 

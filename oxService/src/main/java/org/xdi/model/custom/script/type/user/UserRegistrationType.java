@@ -17,12 +17,13 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface UserRegistrationType extends BaseExternalType {
 
-    public boolean initRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean initRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean preRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean preRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean postRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    public boolean confirmRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean confirmRegistration(Object user, Map<String, String[]> requestParameters,
+            Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

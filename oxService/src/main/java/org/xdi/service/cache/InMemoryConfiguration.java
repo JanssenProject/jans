@@ -1,11 +1,10 @@
 package org.xdi.service.cache;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
-import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -28,8 +27,6 @@ public class InMemoryConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "InMemoryConfiguration{" +
-                "defaultPutExpiration=" + defaultPutExpiration +
-                '}';
+        return "InMemoryConfiguration{" + "defaultPutExpiration=" + defaultPutExpiration + '}';
     }
 }

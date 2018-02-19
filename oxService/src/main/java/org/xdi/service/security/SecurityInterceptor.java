@@ -37,7 +37,7 @@ public class SecurityInterceptor implements Serializable {
     public Object invoke(InvocationContext ctx) throws Exception {
         InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
 
-        // SecurityChecking  restrictions
+        // SecurityChecking restrictions
         Secure[] constraints = (is == null) ? new Secure[0] : is.value();
 
         // Getting the parameter values

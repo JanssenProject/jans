@@ -19,7 +19,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Dmitry Ognyannikov
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxShibbolethCASProtocolConfiguration"})
+@LdapObjectClass(values = { "top", "oxShibbolethCASProtocolConfiguration" })
 public class LdapShibbolethCASProtocolConfiguration extends Entry implements Serializable {
 
     private static final long serialVersionUID = -11887457695212971L;
@@ -34,16 +34,18 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     @LdapAttribute(name = "oxRevision")
     private long revision;
 
-    public LdapShibbolethCASProtocolConfiguration() {}
+    public LdapShibbolethCASProtocolConfiguration() {
+    }
 
     public String getInum() {
         return inum;
     }
 
     public void setInum(String inum) {
-        if (casProtocolConfiguration != null)
+        if (casProtocolConfiguration != null) {
             casProtocolConfiguration.setInum(inum);
-    
+        }
+
         this.inum = inum;
     }
 
@@ -55,7 +57,8 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     }
 
     /**
-     * @param casProtocolConfiguration the casProtocolConfiguration to set
+     * @param casProtocolConfiguration
+     *            the casProtocolConfiguration to set
      */
     public void setCasProtocolConfiguration(ShibbolethCASProtocolConfiguration casProtocolConfiguration) {
         this.casProtocolConfiguration = casProtocolConfiguration;
@@ -69,7 +72,8 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     }
 
     /**
-     * @param revision the revision to set
+     * @param revision
+     *            the revision to set
      */
     public void setRevision(long revision) {
         this.revision = revision;

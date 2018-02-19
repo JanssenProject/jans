@@ -48,41 +48,44 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     }
 
     /**
-     * The name of the auto-generated composite component attribute that holds a boolean indicating whether the the template
-     * contains an invalid input.
+     * The name of the auto-generated composite component attribute that holds a
+     * boolean indicating whether the the template contains an invalid input.
      */
     public String getInvalidAttributeName() {
         return "invalid";
     }
 
     /**
-     * The name of the auto-generated composite component attribute that holds a boolean indicating whether the template
-     * contains a required input.
+     * The name of the auto-generated composite component attribute that holds a
+     * boolean indicating whether the template contains a required input.
      */
     public String getRequiredAttributeName() {
         return "required";
     }
 
     /**
-     * The name of the composite component attribute that holds the string label for this set of inputs. If the label attribute
-     * is not provided, one will be generated from the id of the composite component or, if the id is defaulted, the name of the
-     * property bound to the first input.
+     * The name of the composite component attribute that holds the string label for
+     * this set of inputs. If the label attribute is not provided, one will be
+     * generated from the id of the composite component or, if the id is defaulted,
+     * the name of the property bound to the first input.
      */
     public String getLabelAttributeName() {
         return "label";
     }
 
     /**
-     * The name of the auto-generated composite component attribute that holds the elements in this input container. The
-     * elements include the label, a list of inputs and a cooresponding list of messages.
+     * The name of the auto-generated composite component attribute that holds the
+     * elements in this input container. The elements include the label, a list of
+     * inputs and a cooresponding list of messages.
      */
     public String getElementsAttributeName() {
         return "elements";
     }
 
     /**
-     * The name of the composite component attribute that holds a boolean indicating whether the component template should be
-     * enclosed in an HTML element, so that it be referenced from JavaScript.
+     * The name of the composite component attribute that holds a boolean indicating
+     * whether the component template should be enclosed in an HTML element, so that
+     * it be referenced from JavaScript.
      */
     public String getEncloseAttributeName() {
         return "enclose";
@@ -125,8 +128,9 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
         getAttributes().put(getRequiredAttributeName(), elements.hasRequiredInput());
 
         /*
-         * for some reason, Mojarra is not filling Attribute Map with "label" key if label attr has an EL value, so I added a
-         * labelHasEmptyValue to guarantee that there was no label setted.
+         * for some reason, Mojarra is not filling Attribute Map with "label" key if
+         * label attr has an EL value, so I added a labelHasEmptyValue to guarantee that
+         * there was no label setted.
          */
         if (getValueExpression(getLabelAttributeName()) == null
                 && (!getAttributes().containsKey(getLabelAttributeName()) || labelHasEmptyValue(elements))) {
@@ -160,8 +164,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
         if (style.length() > 0) {
             context.getResponseWriter().writeAttribute(HTML_STYLE_ATTR_NAME, style, HTML_STYLE_ATTR_NAME);
         }
-        String styleClass = (getAttributes().get("styleClass") != null ? getAttributes().get("styleClass").toString().trim()
-                : null);
+        String styleClass = (getAttributes().get("styleClass") != null ? getAttributes().get("styleClass").toString().trim() : null);
         if (styleClass.length() > 0) {
             context.getResponseWriter().writeAttribute(HTML_CLASS_ATTR_NAME, styleClass, HTML_CLASS_ATTR_NAME);
         }
@@ -182,17 +185,18 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     }
 
     /**
-     * Walk the component tree branch built by the composite component and locate the input container elements.
+     * Walk the component tree branch built by the composite component and locate
+     * the input container elements.
      *
      * @return a composite object of the input container elements
      */
-    protected InputContainerElements scan(final UIComponent component, InputContainerElements elements,
-                                          final FacesContext context) {
+    protected InputContainerElements scan(final UIComponent component, InputContainerElements elements, final FacesContext context) {
         if (elements == null) {
             elements = new InputContainerElements();
         }
 
-        // NOTE we need to walk the tree ignoring rendered attribute because it's condition
+        // NOTE we need to walk the tree ignoring rendered attribute because it's
+        // condition
         // could be based on what we discover
         if ((elements.getLabel() == null) && (component instanceof HtmlOutputLabel)) {
             elements.setLabel((HtmlOutputLabel) component);
@@ -250,7 +254,8 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     }
 
     /**
-     * Get the default Bean Validation Validator to read the contraints for a property.
+     * Get the default Bean Validation Validator to read the contraints for a
+     * property.
      */
     private Validator getDefaultValidator(final FacesContext context) throws FacesException {
         if (!beanValidationPresent) {
@@ -287,10 +292,11 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     }
 
     private boolean labelHasEmptyValue(InputContainerElements elements) {
-        if (elements.getLabel() == null || elements.getLabel().getValue() == null)
+        if (elements.getLabel() == null || elements.getLabel().getValue() == null) {
             return false;
-        return (elements.getLabel().getValue().toString().trim().equals(":") || elements.getLabel().getValue().toString()
-                .trim().equals(""));
+        }
+
+        return (elements.getLabel().getValue().toString().trim().equals(":") || elements.getLabel().getValue().toString().trim().equals(""));
     }
 
     public static class InputContainerElements {
@@ -317,9 +323,8 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
 
             if (!input.isValid()) {
                 validationError = true;
-            }
-            // optimization to avoid loop if already flagged
-            else if (!validationError) {
+            } else if (!validationError) {
+                // optimization to avoid loop if already flagged
                 Iterator<FacesMessage> it = context.getMessages(((UIComponent) input).getClientId(context));
                 while (it.hasNext()) {
                     if (it.next().getSeverity().compareTo(FacesMessage.SEVERITY_WARN) >= 0) {
@@ -343,7 +348,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
         }
 
         public boolean hasRequiredInput() {
-            //We have to scan these each time as the value could change in an AJAX request
+            // We have to scan these each time as the value could change in an AJAX request
             for (EditableValueHolder holder : inputs) {
                 if (holder.isRequired()) {
                     return true;

@@ -43,12 +43,12 @@ public class NetworkService implements Serializable {
             if (StringHelper.isEmpty(remoteIp)) {
                 remoteIp = request.getRemoteAddr();
             }
-        
+
             return remoteIp;
         } catch (Exception ex) {
             log.error("Failed to get remote IP", ex);
         }
-    
+
         return remoteIp;
     }
 

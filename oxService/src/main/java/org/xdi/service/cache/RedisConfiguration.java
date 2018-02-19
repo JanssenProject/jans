@@ -1,8 +1,8 @@
 package org.xdi.service.cache;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
 import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/23/2017.
@@ -44,10 +44,7 @@ public class RedisConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "RedisConfiguration{" +
-                "servers='" + servers + '\'' +
-                ", defaultPutExpiration=" + defaultPutExpiration +
-                ", redisProviderType=" + redisProviderType +
-                '}';
+        return "RedisConfiguration{" + "servers='" + servers + '\'' + ", defaultPutExpiration=" + defaultPutExpiration + ", redisProviderType="
+                + redisProviderType + '}';
     }
 }

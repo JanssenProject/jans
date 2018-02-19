@@ -61,17 +61,16 @@ public class SchemaService {
      * @param attributeTypes
      *            Attribute types
      */
-    public void addObjectClass(String objectClass, String attributeTypes, String schemaAddObjectClassWithoutAttributeTypesDefinition, String schemaAddObjectClassWithAttributeTypesDefinition) {
+    public void addObjectClass(String objectClass, String attributeTypes, String schemaAddObjectClassWithoutAttributeTypesDefinition,
+            String schemaAddObjectClassWithAttributeTypesDefinition) {
         SchemaEntry schemaEntry = new SchemaEntry();
         schemaEntry.setDn(getDnForSchema());
 
         String objectClassDefinition;
         if (StringHelper.isEmpty(attributeTypes)) {
-            objectClassDefinition = String.format(schemaAddObjectClassWithoutAttributeTypesDefinition,
-                    objectClass, objectClass);
+            objectClassDefinition = String.format(schemaAddObjectClassWithoutAttributeTypesDefinition, objectClass, objectClass);
         } else {
-            objectClassDefinition = String.format(schemaAddObjectClassWithAttributeTypesDefinition,
-                    objectClass, objectClass, attributeTypes);
+            objectClassDefinition = String.format(schemaAddObjectClassWithAttributeTypesDefinition, objectClass, objectClass, attributeTypes);
         }
         schemaEntry.addObjectClass(objectClassDefinition);
 
@@ -117,8 +116,8 @@ public class SchemaService {
 
         String objectClassDefinition = getObjectClassDefinition(schema, objectClass);
         if (objectClassDefinition == null) {
-            throw new InvalidSchemaUpdateException(String.format(
-                    "Can't add attributeType %s to objectClass %s because objectClass doesn't exist", attributeType, objectClass));
+            throw new InvalidSchemaUpdateException(
+                    String.format("Can't add attributeType %s to objectClass %s because objectClass doesn't exist", attributeType, objectClass));
         }
 
         String newObjectClassDefinition = null;
@@ -144,7 +143,7 @@ public class SchemaService {
         if (newObjectClassDefinition == null) {
             throw new InvalidSchemaUpdateException(String.format("Invalid objectClass definition format"));
         }
-    
+
         // Remove OC definition
         removeObjectClassWithDefinition(objectClassDefinition);
 
@@ -171,8 +170,8 @@ public class SchemaService {
 
         String objectClassDefinition = getObjectClassDefinition(schema, objectClass);
         if (objectClassDefinition == null) {
-            throw new InvalidSchemaUpdateException(String.format(
-                    "Can't add attributeType %s to objectClass %s because objectClass doesn't exist", attributeType, objectClass));
+            throw new InvalidSchemaUpdateException(
+                    String.format("Can't add attributeType %s to objectClass %s because objectClass doesn't exist", attributeType, objectClass));
         }
 
         String attributeTypePattern = "$ " + attributeType + " ";
@@ -191,7 +190,7 @@ public class SchemaService {
 
         String newObjectClassDefinition = objectClassDefinition.substring(0, index)
                 + objectClassDefinition.substring(index + attributeTypePattern.length());
-    
+
         // Remove OC definition
         removeObjectClassWithDefinition(objectClassDefinition);
 
@@ -455,7 +454,7 @@ public class SchemaService {
         if ((schemaEntry == null) || StringHelper.isEmpty(attributeType)) {
             return null;
         }
-    
+
         String lowerCaseAttributeType = StringHelper.toLowerCase(attributeType);
 
         Set<String> resultObjectClasses = new HashSet<String>();
@@ -463,7 +462,7 @@ public class SchemaService {
             ObjectClassDefinition definition;
             try {
                 definition = new ObjectClassDefinition(objectClassDefinition);
-            
+
                 Set<String> objectClassAttributeTypes = new HashSet<String>();
                 for (String name : definition.getOptionalAttributes()) {
                     objectClassAttributeTypes.add(StringHelper.toLowerCase(name));
@@ -471,7 +470,7 @@ public class SchemaService {
                 for (String name : definition.getRequiredAttributes()) {
                     objectClassAttributeTypes.add(StringHelper.toLowerCase(name));
                 }
-            
+
                 if (objectClassAttributeTypes.contains(lowerCaseAttributeType)) {
                     String objectClassType = definition.getNameOrOID();
                     resultObjectClasses.add(objectClassType);

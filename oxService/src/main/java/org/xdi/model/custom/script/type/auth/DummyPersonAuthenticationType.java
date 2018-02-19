@@ -6,11 +6,11 @@
 
 package org.xdi.model.custom.script.type.auth;
 
-import org.xdi.model.AuthenticationScriptUsageType;
-import org.xdi.model.SimpleCustomProperty;
-
 import java.util.List;
 import java.util.Map;
+
+import org.xdi.model.AuthenticationScriptUsageType;
+import org.xdi.model.SimpleCustomProperty;
 
 /**
  * Dummy implementation of interface PersonAuthenticationType
@@ -35,7 +35,8 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
     }
 
     @Override
-    public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
         return null;
     }
 

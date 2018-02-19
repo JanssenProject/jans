@@ -5,10 +5,10 @@
  */
 package org.xdi.model.custom.script.type.scim;
 
+import java.util.Map;
+
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.BaseExternalType;
-
-import java.util.Map;
 
 /**
  * @author Val Pecaoco

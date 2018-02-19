@@ -54,7 +54,7 @@ public class PythonService implements Serializable {
             try {
                 PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir), null);
                 this.pythonInterpreter = new PythonInterpreter();
-            
+
                 // Init output redirect for all new interpreters
                 this.pythonInterpreter.setOut(new OutputStreamWriter(new PythonLoggerOutputStream(log, false), "UTF-8"));
                 this.pythonInterpreter.setErr(new OutputStreamWriter(new PythonLoggerOutputStream(log, true), "UTF-8"));
@@ -104,7 +104,7 @@ public class PythonService implements Serializable {
         if (StringHelper.isNotEmpty(pythonHome)) {
             props.setProperty("python.home", pythonHome);
         }
-    
+
         // Register custom python modules
         if (StringHelper.isNotEmpty(pythonModulesDir)) {
             props.setProperty("python.path", pythonModulesDir);
@@ -123,7 +123,8 @@ public class PythonService implements Serializable {
         return StringHelper.isNotEmpty(pythonHomeProperty);
     }
 
-    public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
+    public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs)
+            throws PythonException {
         if (!interpereterReady || StringHelper.isEmpty(scriptName)) {
             return null;
         }
@@ -139,7 +140,8 @@ public class PythonService implements Serializable {
         return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
     }
 
-    public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
+    public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs)
+            throws PythonException {
         if (!interpereterReady || (scriptFile == null)) {
             return null;
         }
@@ -162,7 +164,6 @@ public class PythonService implements Serializable {
         if (scriptPythonTypeObject == null) {
             return null;
         }
-    
 
         PyObject scriptPythonTypeClass;
         try {
@@ -181,7 +182,7 @@ public class PythonService implements Serializable {
         return (T) scriptJavaClass;
     }
 
-    class PythonLoggerOutputStream extends OutputStream {
+    final class PythonLoggerOutputStream extends OutputStream {
 
         private boolean error;
         private Logger log;

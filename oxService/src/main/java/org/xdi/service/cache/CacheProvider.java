@@ -14,8 +14,8 @@ public abstract class CacheProvider<T> {
     public abstract T getDelegate();
 
     /**
-     * Fetches an object for the given key from the cache and returns it if
-     * found. Only the default cache region will be searched.
+     * Fetches an object for the given key from the cache and returns it if found.
+     * Only the default cache region will be searched.
      *
      * @param key
      *            - a key to identify the object.
@@ -26,8 +26,8 @@ public abstract class CacheProvider<T> {
     }
 
     /**
-     * Fetches an object for the given key from the cache and returns it if
-     * found. Only the default cache region will be searched.
+     * Fetches an object for the given key from the cache and returns it if found.
+     * Only the default cache region will be searched.
      *
      * @param key
      *            - a key to identify the object.
@@ -40,8 +40,8 @@ public abstract class CacheProvider<T> {
     }
 
     /**
-     * Fetches an object for the given key from the cache and returns it if
-     * found. Only the specified cache region will be searched.
+     * Fetches an object for the given key from the cache and returns it if found.
+     * Only the specified cache region will be searched.
      *
      * @param region
      *            - the name of a cache region
@@ -52,8 +52,8 @@ public abstract class CacheProvider<T> {
     public abstract Object get(String region, String key);
 
     /**
-     * Fetches an object for the given key from the cache and returns it if
-     * found. Only the specified cache region will be searched.
+     * Fetches an object for the given key from the cache and returns it if found.
+     * Only the specified cache region will be searched.
      *
      * @param region
      *            - the name of a cache region
@@ -82,8 +82,8 @@ public abstract class CacheProvider<T> {
     }
 
     /**
-     * Puts an object into the cache. The object is placed in the specified
-     * cache region under the given key.
+     * Puts an object into the cache. The object is placed in the specified cache
+     * region under the given key.
      *
      * @param region
      *            - the name of a cache region
@@ -110,8 +110,8 @@ public abstract class CacheProvider<T> {
     }
 
     /**
-     * Removes an object from the cache. The object is removed from the
-     * specified cache region under the given key.
+     * Removes an object from the cache. The object is removed from the specified
+     * cache region under the given key.
      *
      * @param region
      *            - the name of a cache region

@@ -30,27 +30,27 @@ public final class SchemaEntry extends Entry implements Serializable {
     @LdapAttribute
     private List<String> objectClasses = new ArrayList<String>();
 
-    public final List<String> getAttributeTypes() {
+    public List<String> getAttributeTypes() {
         return attributeTypes;
     }
 
-    public final void setAttributeTypes(List<String> attributeTypes) {
+    public void setAttributeTypes(List<String> attributeTypes) {
         this.attributeTypes = attributeTypes;
     }
 
-    public final void addAttributeType(String attributeType) {
+    public void addAttributeType(String attributeType) {
         this.attributeTypes.add(attributeType);
     }
 
-    public final List<String> getObjectClasses() {
+    public List<String> getObjectClasses() {
         return objectClasses;
     }
 
-    public final void setObjectClasses(List<String> objectClasses) {
+    public void setObjectClasses(List<String> objectClasses) {
         this.objectClasses = objectClasses;
     }
 
-    public final void addObjectClass(String objectClass) {
+    public void addObjectClass(String objectClass) {
         this.objectClasses.add(objectClass);
     }
 

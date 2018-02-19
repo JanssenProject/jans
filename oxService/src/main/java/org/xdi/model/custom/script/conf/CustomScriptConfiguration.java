@@ -20,8 +20,8 @@ public class CustomScriptConfiguration {
     private BaseExternalType externalType;
     private Map<String, SimpleCustomProperty> configurationAttributes;
 
-    public CustomScriptConfiguration(
-            CustomScript customScript, BaseExternalType externalType, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public CustomScriptConfiguration(CustomScript customScript, BaseExternalType externalType,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
         this.customScript = customScript;
         this.externalType = externalType;
         this.configurationAttributes = configurationAttributes;

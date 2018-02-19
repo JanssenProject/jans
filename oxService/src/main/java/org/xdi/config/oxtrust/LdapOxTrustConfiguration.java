@@ -18,7 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @version 0.9, 05/16/2013
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxTrustConfiguration"})
+@LdapObjectClass(values = { "top", "oxTrustConfiguration" })
 public class LdapOxTrustConfiguration extends Entry {
 
     private static final long serialVersionUID = -15289347651306279L;
@@ -37,9 +37,9 @@ public class LdapOxTrustConfiguration extends Entry {
     @LdapAttribute(name = "oxRevision")
     private long revision;
 
-    @LdapJsonObject //issue 102 - begin  : changed by shekhar
+    @LdapJsonObject // issue 102 - begin : changed by shekhar
     @LdapAttribute(name = "oxTrustConfImportPerson")
-    private ImportPersonConfig importPersonConfig; //issue 102 - end  : changed by shekhar
+    private ImportPersonConfig importPersonConfig; // issue 102 - end : changed by shekhar
 
     @LdapJsonObject
     @LdapAttribute(name = "oxTrustConfAttributeResolver")
@@ -72,15 +72,14 @@ public class LdapOxTrustConfiguration extends Entry {
         this.revision = revision;
     }
 
-    //issue 102 - begin  : changed by shekhar
+    // issue 102 - begin : changed by shekhar
     public ImportPersonConfig getImportPersonConfig() {
         return importPersonConfig;
     }
 
     public void setImportPersonConfig(ImportPersonConfig importPersonConfig) {
         this.importPersonConfig = importPersonConfig;
-    }//issue 102 - end  : changed by shekhar
-
+    } // issue 102 - end : changed by shekhar
 
     public AttributeResolverConfiguration getAttributeResolverConfig() {
         return attributeResolverConfig;
@@ -93,8 +92,8 @@ public class LdapOxTrustConfiguration extends Entry {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=").append(cacheRefresh)
-                .append(", revision=").append(revision).append("]");
+        builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=")
+                .append(cacheRefresh).append(", revision=").append(revision).append("]");
         return builder.toString();
     }
 

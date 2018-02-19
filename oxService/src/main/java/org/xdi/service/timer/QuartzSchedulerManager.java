@@ -8,12 +8,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.EverythingMatcher;
 import org.slf4j.Logger;
@@ -21,8 +23,6 @@ import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.JobShedule;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.init.Initializable;
-import org.quartz.JobBuilder;
-import org.quartz.TriggerBuilder;
 
 /**
  * @author Yuriy MovchanDate: 04/04/2017
@@ -78,20 +78,18 @@ public class QuartzSchedulerManager extends Initializable {
 
     public void schedule(@Observes TimerEvent timerEvent) {
         checkInitialized();
-    
+
         JobDataMap dataMap = new JobDataMap();
         dataMap.put(TimerJob.KEY_TIMER_EVENT, timerEvent);
 
         String uuid = UUID.randomUUID().toString();
 
-        JobDetail timerJob = JobBuilder.newJob(TimerJob.class)
-                .withIdentity(TimerJob.class.getSimpleName() + "_" + uuid, TimerJob.TIMER_JOB_GROUP)
+        JobDetail timerJob = JobBuilder.newJob(TimerJob.class).withIdentity(TimerJob.class.getSimpleName() + "_" + uuid, TimerJob.TIMER_JOB_GROUP)
                 .usingJobData(dataMap).build();
 
         TimerSchedule timerSchedule = timerEvent.getSchedule();
         Date triggerStartTime = new Date(System.currentTimeMillis() + timerSchedule.getDelay() * 1000L);
-        Trigger timerTrigger = TriggerBuilder.newTrigger().withIdentity(uuid, TimerJob.TIMER_JOB_GROUP)
-                .startAt(triggerStartTime)
+        Trigger timerTrigger = TriggerBuilder.newTrigger().withIdentity(uuid, TimerJob.TIMER_JOB_GROUP).startAt(triggerStartTime)
                 .withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(timerSchedule.getInterval())).build();
 
         try {
@@ -102,8 +100,9 @@ public class QuartzSchedulerManager extends Initializable {
     }
 
     public void start() {
-        if (!isInitialized())
+        if (!isInitialized()) {
             super.init();
+        }
 
         checkInitialized();
 
@@ -142,8 +141,9 @@ public class QuartzSchedulerManager extends Initializable {
 
     @PreDestroy
     public void destroy() {
-        if (!isInitialized())
+        if (!isInitialized()) {
             return;
+        }
 
         try {
             scheduler.shutdown();

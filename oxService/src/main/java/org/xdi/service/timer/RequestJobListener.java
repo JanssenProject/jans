@@ -23,8 +23,7 @@ public class RequestJobListener implements JobListener {
     @Inject
     private BoundRequestContext requestContext;
 
-    protected static final String REQUEST_DATA_STORE_KEY = RequestJobListener.class.getName()
-            + "_REQUEST_DATA_STORE_KEY";
+    protected static final String REQUEST_DATA_STORE_KEY = RequestJobListener.class.getName() + "_REQUEST_DATA_STORE_KEY";
 
     public String getName() {
         return getClass().getName();

@@ -29,7 +29,7 @@ public enum OxMultivalued implements LdapEnum {
         }
     }
 
-    private OxMultivalued(String value, String displayName) {
+    OxMultivalued(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

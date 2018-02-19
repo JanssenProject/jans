@@ -19,11 +19,11 @@ public class AsynchronousInterceptor implements Serializable {
 
     private static final long serialVersionUID = 4839412676894893540L;
 
-    private static final ThreadLocal<Boolean> asyncInvocation = new ThreadLocal<Boolean>();
+    private static final ThreadLocal<Boolean> ASYNC_INVOCATION = new ThreadLocal<Boolean>();
 
     @AroundInvoke
     public Object invoke(InvocationContext ctx) throws Exception {
-        if (Boolean.TRUE.equals(asyncInvocation.get())) {
+        if (Boolean.TRUE.equals(ASYNC_INVOCATION.get())) {
             return ctx.proceed();
         }
 
@@ -32,12 +32,12 @@ public class AsynchronousInterceptor implements Serializable {
             @Override
             public Object get() {
                 try {
-                    asyncInvocation.set(Boolean.TRUE);
+                    ASYNC_INVOCATION.set(Boolean.TRUE);
                     return localCtx.proceed();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 } finally {
-                    asyncInvocation.remove();
+                    ASYNC_INVOCATION.remove();
                 }
 
                 return null;

@@ -14,7 +14,7 @@ import javax.interceptor.InterceptorBinding;
  */
 @InterceptorBinding
 @Retention(RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Documented
 public @interface Asynchronous {
 }

@@ -57,11 +57,7 @@ public class CacheConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "CacheConfiguration{" +
-                "cacheProviderType=" + cacheProviderType +
-                ", memcachedConfiguration=" + memcachedConfiguration +
-                ", redisConfiguration=" + redisConfiguration +
-                ", inMemoryConfiguration=" + inMemoryConfiguration +
-                '}';
+        return "CacheConfiguration{" + "cacheProviderType=" + cacheProviderType + ", memcachedConfiguration=" + memcachedConfiguration
+                + ", redisConfiguration=" + redisConfiguration + ", inMemoryConfiguration=" + inMemoryConfiguration + '}';
     }
 }

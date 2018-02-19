@@ -48,22 +48,25 @@ public class WantSslAuthenticator extends SSLAuthenticator {
         }
 
         // Retrieve the certificate chain for this client
-        if (containerLog.isDebugEnabled())
-            containerLog.debug(" Looking up certificates");
+        if (containerLog.isDebugEnabled()) {
+            containerLog.debug("Looking up certificates");
+        }
 
-        X509Certificate certs[] = getRequestCertificates(request);
+        X509Certificate[] certs = getRequestCertificates(request);
 
         if ((certs == null) || (certs.length < 1)) {
-            if (containerLog.isDebugEnabled())
+            if (containerLog.isDebugEnabled()) {
                 containerLog.debug(" There is no user certificate");
+            }
         }
 
 
         // Authenticate the specified certificate chain
         Principal principal = context.getRealm().authenticate(certs);
         if (principal == null) {
-            if (containerLog.isDebugEnabled())
+            if (containerLog.isDebugEnabled()) {
                 containerLog.debug("  Realm.authenticate() returned false");
+            }
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                                sm.getString("authenticator.unauthorized"));
             return false;

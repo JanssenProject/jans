@@ -16,7 +16,7 @@ import javax.faces.el.CompositeComponentExpressionHolder;
 class ValueExpressionAnalyzer {
     private ValueExpression expression;
 
-    public ValueExpressionAnalyzer(ValueExpression expression) {
+    ValueExpressionAnalyzer(ValueExpression expression) {
         this.expression = expression;
     }
 
@@ -97,7 +97,7 @@ class ValueExpressionAnalyzer {
         private ELResolver delegate;
         private ValueReference valueReference;
 
-        public InterceptingResolver(ELResolver delegate) {
+        InterceptingResolver(ELResolver delegate) {
             this.delegate = delegate;
         }
 

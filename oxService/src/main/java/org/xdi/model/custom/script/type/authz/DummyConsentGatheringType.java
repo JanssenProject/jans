@@ -1,8 +1,8 @@
 package org.xdi.model.custom.script.type.authz;
 
-import org.xdi.model.SimpleCustomProperty;
-
 import java.util.Map;
+
+import org.xdi.model.SimpleCustomProperty;
 
 /**
  * Dummy implementation of interface AuthorizationType

@@ -4,16 +4,13 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.service;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -52,11 +49,13 @@ public class MailService {
         return sendMail(smtpConfiguration, null, null, to, null, subject, message, htmlMessage);
     }
 
-    public boolean sendMail(String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
+    public boolean sendMail(String from, String fromDisplayName, String to, String toDisplayName, String subject, String message,
+            String htmlMessage) {
         return sendMail(smtpConfiguration, from, fromDisplayName, to, null, subject, message, htmlMessage);
     }
 
-    public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
+    public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String fromDisplayName, String to, String toDisplayName,
+            String subject, String message, String htmlMessage) {
         if (mailSmtpConfiguration == null) {
             log.error("Failed to send message from '{}' to '{}' because the SMTP configuration isn't valid!", from, to);
             return false;

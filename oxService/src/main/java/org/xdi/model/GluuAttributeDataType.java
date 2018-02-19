@@ -19,12 +19,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum GluuAttributeDataType implements LdapEnum {
 
-    STRING("string", "Text"),
-    NUMERIC("numeric", "Numeric"),
-    BOOLEAN("boolean", "Boolean"),
-    PHOTO("photo", "Photo"),
-    CERTIFICATE("certificate", "Certificate"),
-    DATE("generalizedTime", "Date");
+    STRING("string", "Text"), NUMERIC("numeric", "Numeric"), BOOLEAN("boolean", "Boolean"), PHOTO("photo", "Photo"), CERTIFICATE("certificate",
+            "Certificate"), DATE("generalizedTime", "Date");
 
     private String value;
     private String displayName;
@@ -37,7 +33,7 @@ public enum GluuAttributeDataType implements LdapEnum {
         }
     }
 
-    private GluuAttributeDataType(String value, String displayName) {
+    GluuAttributeDataType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

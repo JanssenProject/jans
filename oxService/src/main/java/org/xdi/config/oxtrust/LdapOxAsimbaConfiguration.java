@@ -17,7 +17,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Dmitry Ognyannikov
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAsimbaConfiguration"})
+@LdapObjectClass(values = { "top", "oxAsimbaConfiguration" })
 public class LdapOxAsimbaConfiguration extends Entry {
 
     private static final long serialVersionUID = -12489397651302948L;
@@ -29,7 +29,8 @@ public class LdapOxAsimbaConfiguration extends Entry {
     @LdapAttribute(name = "oxRevision")
     private long revision;
 
-    public LdapOxAsimbaConfiguration() {}
+    public LdapOxAsimbaConfiguration() {
+    }
 
     /**
      * @return the applicationConfiguration
@@ -39,7 +40,8 @@ public class LdapOxAsimbaConfiguration extends Entry {
     }
 
     /**
-     * @param applicationConfiguration the applicationConfiguration to set
+     * @param applicationConfiguration
+     *            the applicationConfiguration to set
      */
     public void setApplicationConfiguration(AsimbaConfiguration applicationConfiguration) {
         this.applicationConfiguration = applicationConfiguration;
@@ -53,7 +55,8 @@ public class LdapOxAsimbaConfiguration extends Entry {
     }
 
     /**
-     * @param revision the revision to set
+     * @param revision
+     *            the revision to set
      */
     public void setRevision(long revision) {
         this.revision = revision;

@@ -53,8 +53,9 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                 addRulesForAllXHTML(documentBuilder, context.getRealPath(""), url.getPath(), builder);
             }
 
-            if (!Utils.isCustomPagesDirExists())
+            if (!Utils.isCustomPagesDirExists()) {
                 return builder;
+            }
             addRulesForAllXHTML(documentBuilder, Utils.getCustomPagesPath(), Utils.getCustomPagesPath(), builder);
         } catch (ParserConfigurationException ex) {
             FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't parse rewrite rules", ex);
@@ -66,7 +67,8 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
 
     private void addRulesForAllXHTML(DocumentBuilder documentBuilder, String contexPath, String path, ConfigurationBuilder builder) {
         Collection<File> xhtmlFiles = FileUtils.listFiles(new File(contexPath), new RegexFileFilter(".*\\.xhtml$"), DirectoryFileFilter.DIRECTORY);
-        Collection<File> navigationFiles = FileUtils.listFiles(new File(path), new RegexFileFilter(".*\\.navigation\\.xml"), DirectoryFileFilter.DIRECTORY);
+        Collection<File> navigationFiles = FileUtils.listFiles(new File(path), new RegexFileFilter(".*\\.navigation\\.xml"),
+                DirectoryFileFilter.DIRECTORY);
         Map<String, String> rewriteMap = getRewriteMap(documentBuilder, navigationFiles);
         for (File file : xhtmlFiles) {
             String xhtmlPath = file.getAbsolutePath();
@@ -109,8 +111,9 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
 
             try {
                 String value = getRewritePattern(documentBuilder.parse(file));
-                if(StringUtils.isNotEmpty(value))
+                if (StringUtils.isNotEmpty(value)) {
                     xhtmlNameToRewriteRule.put(navigationName.split("\\.")[0], value);
+                }
             } catch (Exception e) {
                 FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to retreive rewrite rules", e);
             }
@@ -120,10 +123,12 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
 
     private String getRewritePattern(Document document) {
         NodeList nodeList = document.getDocumentElement().getChildNodes();
-        if (nodeList == null)
+        if (nodeList == null) {
             return null;
+        }
         for (int i = 0; i < nodeList.getLength(); ++i) {
-            if (REWRITE.equals(nodeList.item(i).getNodeName()) && nodeList.item(i).getAttributes() != null && nodeList.item(i).getAttributes().getLength() > 0) {
+            if (REWRITE.equals(nodeList.item(i).getNodeName()) && nodeList.item(i).getAttributes() != null
+                    && nodeList.item(i).getAttributes().getLength() > 0) {
                 return nodeList.item(i).getAttributes().getNamedItem("pattern").getNodeValue();
             }
         }
