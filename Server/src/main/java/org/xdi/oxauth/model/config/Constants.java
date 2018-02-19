@@ -6,14 +6,12 @@
 
 package org.xdi.oxauth.model.config;
 
-import org.xdi.util.LDAPConstants;
-
 /**
  * Constants
  * 
  * @author Yuriy Movchan Date: 10.14.2010
  */
-public final class Constants extends LDAPConstants {
+public final class Constants {
 
 	public static final String RESULT_SUCCESS = "success";
 	public static final String RESULT_FAILURE = "failure";

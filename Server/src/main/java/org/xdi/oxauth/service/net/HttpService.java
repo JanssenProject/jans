@@ -20,7 +20,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
@@ -89,27 +88,6 @@ public class HttpService implements Serializable {
 	        return new DefaultHttpClient(ccm);
 	    } catch (Exception ex) {
 	    	log.error("Failed to create TrustAll https client", ex);
-	        return new DefaultHttpClient();
-	    }
-	}
-
-	@Deprecated
-	public HttpClient getHttpsClientDefaulTrustStore() {
-	    try {
-	        PlainSocketFactory psf = PlainSocketFactory.getSocketFactory();
-
-	        SSLContext ctx = SSLContext.getInstance("TLS");
-            SSLSocketFactory ssf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-	        SchemeRegistry registry = new SchemeRegistry();
-	        registry.register(new Scheme("http", 80, psf));
-	        registry.register(new Scheme("https", 443, ssf));
-
-	        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-
-	        return new DefaultHttpClient(ccm);
-	    } catch (Exception ex) {
-	    	log.error("Failed to create https client", ex);
 	        return new DefaultHttpClient();
 	    }
 	}
