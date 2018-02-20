@@ -8,15 +8,17 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
+CONF=/opt/oxd-https-extension/lib/oxd-https.yml
+OXD_HTTPS_EXTENSION_VERSION="3.1.2.Final"
 SERVICE_NAME=oxd-https-extension
 PID_PATH_NAME=/var/run/oxd-https-extension.pid
-LIB=/opt/oxd-https-extension/lib/oxd-https-extension-3.1.2.Final.jar
-CONF=/opt/oxd-https-extension/lib/oxd-https.yml
+LIB=/opt/oxd-https-extension/lib/oxd-https-extension-${OXD_HTTPS_EXTENSION_VERSION}.jar
+
 
 do_start () {
         if [ ! -f $PID_PATH_NAME ]; then
-        	echo "Starting $SERVICE_NAME ..."
-            	nohup java -jar $LIB server $CONF 2>>/dev/null>>/dev/null&
+                echo "Starting $SERVICE_NAME ..."
+                nohup java -jar $LIB server $CONF 2>>/dev/null>>/dev/null&
                 echo $! > $PID_PATH_NAME
         else
             echo "$SERVICE_NAME is already running ..."
@@ -38,27 +40,26 @@ do_stop () {
 
 case $1 in
     start)
-	do_start
+        do_start
     ;;
     stop)
-	do_stop
+        do_stop
     ;;
     restart)
-	do_stop
-	do_start
+        do_stop
+        do_start
     ;;
     status)
         if [ -f $PID_PATH_NAME ]; then
-            	echo "$SERVICE_NAME is running ...";
-        	PID_NUM=$(cat $PID_PATH_NAME)
-        	echo "PID: [$PID_NUM]"
+                echo "$SERVICE_NAME is running ...";
+                PID_NUM=$(cat $PID_PATH_NAME)
+                echo "PID: [$PID_NUM]"
         else
-           	echo "$SERVICE_NAME is not running ..."
+                echo "$SERVICE_NAME is not running ..."
         fi
     ;;
     *)
         echo "Usage: $0 {start|stop|status|restart}"
         RETVAL=2
     ;;
-esac 
-
+esac
