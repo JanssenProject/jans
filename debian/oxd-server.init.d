@@ -269,6 +269,11 @@ then
   JAVA=$(which java)
 fi
 
+if [ ! -f "$JAVA" ]
+then
+  JAVA=$(which java)
+fi
+
 if [ -z "$JAVA" ]
 then
   echo "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.5) in your PATH." >&2
