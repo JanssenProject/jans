@@ -10,7 +10,7 @@ import javax.inject.Named;
  * Key/value store to render manually messages and JSF pages
  *
  * @author Yuriy Movchan
- * @version 17/111/2017
+ * @version 17/11/2017
  */
 @Named("renderParams")
 @RequestScoped
