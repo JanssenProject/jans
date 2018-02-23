@@ -6,17 +6,18 @@
     <application>
         <locale-config>
             <default-locale>en</default-locale>
-            <supported-locale>en</supported-locale>
             <supported-locale>bg</supported-locale>
             <supported-locale>de</supported-locale>
+            <supported-locale>en</supported-locale>
             <supported-locale>es</supported-locale>
             <supported-locale>fr</supported-locale>
             <supported-locale>it</supported-locale>
+            <supported-locale>ru</supported-locale>
             <supported-locale>tr</supported-locale>
         </locale-config>
 
         <resource-bundle>
-            <base-name>messages</base-name>
+            <base-name>org.xdi.oxauth.i18n.CustomResourceBundle</base-name>
             <var>msgs</var>
         </resource-bundle>
     </application>
