@@ -7,6 +7,9 @@
     "trust_all_certs":true,
     "trust_store_path":"",
     "trust_store_password":"",
+    "crypt_provider_key_store_path":"",
+    "crypt_provider_key_store_password":"",
+    "crypt_provider_dn_name":"",
     "license_id":"",
     "public_key":"",
     "public_password":"",
@@ -20,6 +23,6 @@
     "migration_source_folder_path":"",
     "storage":"h2",
     "storage_configuration": {
-        "dbFileLocation":"/opt/oxd-server/bin/oxd_db"
+        "dbFileLocation":"/opt/oxd-server/data/oxd_db"
     }
 }

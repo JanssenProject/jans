@@ -26,6 +26,7 @@ import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Utils;
+import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
@@ -169,17 +170,25 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 redirectUris.add(params.getPostLogoutRedirectUri());
             }
         }
+        final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
+        if (autoRegister != null && autoRegister && !redirectUris.isEmpty()) {
+            String first = redirectUris.iterator().next();
+            if (first.contains(params.getOpHost())) {
+                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpHost(), params.getOpDiscoveryPath());
+                String autoRedirectUri = discovery.getClaimsInteractionEndpoint() + "?authentication=true";
+
+                LOG.trace("Register claims interaction endpoint as redirect_uri: " + autoRedirectUri);
+                redirectUris.add(autoRedirectUri);
+            } else {
+                LOG.trace("Skip auto registration of claims interaction endpoint as redirect_uri because OP host for different uri's is different which will not pass AS redirect_uri's validation (same host must be present).");
+            }
+        }
         params.setRedirectUris(Lists.newArrayList(redirectUris));
 
         // claims_redirect_uri
         Set<String> claimsRedirectUris = Sets.newHashSet();
         if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
             claimsRedirectUris.addAll(params.getClaimsRedirectUri());
-            final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
-            if (autoRegister != null && autoRegister) {
-                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpHost(), params.getOpDiscoveryPath());
-                claimsRedirectUris.add(discovery.getClaimsInteractionEndpoint() + "?authentication=true");
-            }
         }
         params.setClaimsRedirectUri(Lists.newArrayList(claimsRedirectUris));
 
@@ -341,6 +350,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
         rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
+        rp.setUmaProtectedResources(new ArrayList<UmaResource>());
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
             rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
@@ -357,6 +367,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
             rp.setClientId(params.getClientId());
             rp.setClientSecret(params.getClientSecret());
+            rp.setClientRegistrationAccessToken(params.getClientRegistrationAccessToken());
+            rp.setClientRegistrationClientUri(params.getClientRegistrationClientUri());
         }
 
         if (params.getContacts() != null && !params.getContacts().isEmpty()) {

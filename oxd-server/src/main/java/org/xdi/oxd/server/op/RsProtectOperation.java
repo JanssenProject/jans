@@ -3,6 +3,8 @@ package org.xdi.oxd.server.op;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
+import org.codehaus.jackson.JsonNode;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
@@ -20,6 +22,7 @@ import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +58,18 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         };
 
         ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
-        registrar.register(params.getResources());
+        try {
+            registrar.register(params.getResources());
+        } catch (ClientResponseFailure e) {
+            LOG.debug("Failed to register resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
+            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                registrar.register(params.getResources());
+            } else {
+                throw e;
+            }
+        }
 
         persist(registrar, site);
 
@@ -73,13 +87,27 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
             Set<String> scopes = Sets.newHashSet();
             Set<String> scopesForTicket = Sets.newHashSet();
+            Set<String> scopeExpressions = Sets.newHashSet();
+
+            RsResource rsResource = resourceMapCopy.get(entry.getKey());
+
             for (String httpMethod : entry.getKey().getHttpMethods()) {
-                scopes.addAll(resourceMapCopy.get(entry.getKey()).scopes(httpMethod));
-                scopesForTicket.addAll(resourceMapCopy.get(entry.getKey()).scopesForTicket(httpMethod));
+
+                List<String> rsScopes = rsResource.scopes(httpMethod);
+                if (rsScopes != null) {
+                    scopes.addAll(rsScopes);
+                }
+                scopesForTicket.addAll(rsResource.getScopesForTicket(httpMethod));
+
+                JsonNode scopeExpression = rsResource.getScopeExpression(httpMethod);
+                if (scopeExpression != null) {
+                    scopeExpressions.add(scopeExpression.toString());
+                }
             }
 
             resource.setScopes(Lists.newArrayList(scopes));
             resource.setTicketScopes(Lists.newArrayList(scopesForTicket));
+            resource.setScopeExpressions(Lists.newArrayList(scopeExpressions));
 
             site.getUmaProtectedResources().add(resource);
         }
@@ -90,6 +118,9 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     private void validate(RsProtectParams params) {
         if (params.getResources() == null || params.getResources().isEmpty()) {
             throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
+        }
+        if (!org.xdi.oxd.rs.protect.ResourceValidator.isHttpMethodUniqueInPath(params.getResources())) {
+            throw new ErrorResponseException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
         }
     }
 }

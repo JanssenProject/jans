@@ -35,6 +35,12 @@ public class Configuration {
     private String keyStorePath;
     @JsonProperty(value = "trust_store_password")
     private String keyStorePassword;
+    @JsonProperty(value = "crypt_provider_key_store_path")
+    private String cryptProviderKeyStorePath;
+    @JsonProperty(value = "crypt_provider_key_store_password")
+    private String cryptProviderKeyStorePassword;
+    @JsonProperty(value = "crypt_provider_dn_name")
+    private String cryptProviderDnName;
     @JsonProperty(value = "license_id")
     private String licenseId;
     @JsonProperty(value = "public_key")
@@ -61,6 +67,30 @@ public class Configuration {
     private String storage;
     @JsonProperty(value = "storage_configuration")
     private JsonNode storageConfiguration;
+
+    public String getCryptProviderKeyStorePath() {
+        return cryptProviderKeyStorePath;
+    }
+
+    public void setCryptProviderKeyStorePath(String cryptProviderKeyStorePath) {
+        this.cryptProviderKeyStorePath = cryptProviderKeyStorePath;
+    }
+
+    public String getCryptProviderKeyStorePassword() {
+        return cryptProviderKeyStorePassword;
+    }
+
+    public void setCryptProviderKeyStorePassword(String cryptProviderKeyStorePassword) {
+        this.cryptProviderKeyStorePassword = cryptProviderKeyStorePassword;
+    }
+
+    public String getCryptProviderDnName() {
+        return cryptProviderDnName;
+    }
+
+    public void setCryptProviderDnName(String cryptProviderDnName) {
+        this.cryptProviderDnName = cryptProviderDnName;
+    }
 
     public String getMigrationSourceFolderPath() {
         return migrationSourceFolderPath;
@@ -259,6 +289,9 @@ public class Configuration {
                 ", trustAllCerts=" + trustAllCerts +
                 ", keyStorePath='" + keyStorePath + '\'' +
                 ", keyStorePassword='" + keyStorePassword + '\'' +
+                ", cryptProviderKeyStorePath='" + cryptProviderKeyStorePath + '\'' +
+                ", cryptProviderKeyStorePassword='" + cryptProviderKeyStorePassword + '\'' +
+                ", cryptProviderDnName='" + cryptProviderDnName + '\'' +
                 ", licenseId='" + licenseId + '\'' +
                 ", publicKey='" + publicKey + '\'' +
                 ", publicPassword='" + publicPassword + '\'' +
@@ -271,7 +304,7 @@ public class Configuration {
                 ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
-                ", storageConfiguration='" + storageConfiguration + '\'' +
+                ", storageConfiguration=" + storageConfiguration +
                 '}';
     }
 }

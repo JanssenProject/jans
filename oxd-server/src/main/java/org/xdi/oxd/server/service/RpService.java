@@ -86,11 +86,19 @@ public class RpService {
             put(rp);
             persistenceService.create(rp);
         } else {
-            LOG.error("RP with already exists in database, oxd_id: " + rp.getOxdId());
+            LOG.error("RP already exists in database, oxd_id: " + rp.getOxdId());
         }
     }
 
     private Rp put(Rp rp) {
         return rpMap.put(rp.getOxdId(), rp);
+    }
+
+    public boolean remove(String oxdId) {
+        boolean ok = persistenceService.remove(oxdId);
+        if (ok) {
+            rpMap.remove(oxdId);
+        }
+        return ok;
     }
 }

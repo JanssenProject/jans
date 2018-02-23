@@ -60,4 +60,9 @@ public class PersistenceServiceImpl implements PersistenceService {
     public void destroy() {
         persistenceService.destroy();
     }
+
+    @Override
+    public boolean remove(String oxdId) {
+        return persistenceService.remove(oxdId);
+    }
 }

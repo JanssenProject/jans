@@ -23,6 +23,12 @@ public class GetClientTokenParams implements IParams {
     private String opDiscoveryPath;
     @JsonProperty(value = "scope")
     private List<String> scope;
+    @JsonProperty(value = "authentication_method")
+    private String authenticationMethod;
+    @JsonProperty(value = "algorithm")
+    private String algorithm;
+    @JsonProperty(value = "key_id")
+    private String keyId;
 
     public String getOpDiscoveryPath() {
         return opDiscoveryPath;
@@ -64,6 +70,30 @@ public class GetClientTokenParams implements IParams {
         this.scope = scope;
     }
 
+    public String getAuthenticationMethod() {
+        return authenticationMethod;
+    }
+
+    public void setAuthenticationMethod(String authenticationMethod) {
+        this.authenticationMethod = authenticationMethod;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
     @Override
     public String toString() {
         return "GetClientTokenParams{" +
@@ -71,6 +101,10 @@ public class GetClientTokenParams implements IParams {
                 ", clientSecret='" + clientSecret + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
+                ", scope=" + scope +
+                ", authenticationMethod='" + authenticationMethod + '\'' +
+                ", algorithm='" + algorithm + '\'' +
+                ", keyId='" + keyId + '\'' +
                 '}';
     }
 }

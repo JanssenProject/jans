@@ -73,7 +73,7 @@ public class LicenseFileUpdateService {
         return Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
     }
 
-    private void updateLicenseFromServer() {
+    public void updateLicenseFromServer() {
         try {
             final GenerateWS generateWS = LicenseClient.generateWs(LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
 
@@ -84,7 +84,7 @@ public class LicenseFileUpdateService {
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseFile.getLicenseFile();
                 if (file != null) {
-                    final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense(), macAddress).asJson();
+                    final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense(), macAddress, conf.getLicenseId()).asJson();
                     FileUtils.write(file, json);
 
                     retry.set(0);
