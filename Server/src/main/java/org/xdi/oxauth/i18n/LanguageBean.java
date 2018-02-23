@@ -6,46 +6,39 @@
 
 package org.xdi.oxauth.i18n;
 
-import org.apache.logging.log4j.util.Strings;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.SessionIdService;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import javax.enterprise.context.RequestScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.util.Strings;
+
 /**
  * @version August 9, 2017
  */
 @Named("language")
-@ApplicationScoped
+@RequestScoped
 public class LanguageBean implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    private static final String BASE_NAME = "messages";
+    private static final long serialVersionUID = -6723715664277907737L;
+
     private static final String COOKIE_NAME = "org.gluu.i18n.Locale";
     private static final int DEFAULT_MAX_AGE = 31536000; // 1 year in seconds
     private static final String COOKIE_PATH = "/";
-
-    @Inject
-    private SessionIdService sessionIdService;
-
-    @Inject
-    private AuthenticationService authenticationService;
 
     private String localeCode = Locale.ENGLISH.getLanguage();
 
     public String getLocaleCode() {
         String localeCode = getCookieValue();
-        if (localeCode != null) setLocaleCode(localeCode);
+        if (localeCode != null)
+            setLocaleCode(localeCode);
 
         return this.localeCode;
     }
@@ -58,15 +51,16 @@ public class LanguageBean implements Serializable {
                 this.localeCode = localeCode;
                 FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
                 setCookieValue(localeCode);
+                break;
             }
         }
     }
 
     public String getMessage(String key) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        ResourceBundle bundle = context.getApplication().getResourceBundle(context, "msgs");
         String result;
         try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME, new Locale(this.localeCode), loader);
             result = bundle.getString(key);
         } catch (MissingResourceException e) {
             result = "???" + key + "??? not found";
