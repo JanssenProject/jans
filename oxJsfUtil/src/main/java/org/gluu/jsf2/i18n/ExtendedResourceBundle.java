@@ -120,6 +120,10 @@ public class ExtendedResourceBundle extends ResourceBundle {
     }
 
     protected static void loadPropertiesFromFile(Properties properties, Path externalResource) {
+        if (externalResource == null) {
+            return;
+        }
+
         InputStreamReader input = null;
         try {
             File file = externalResource.toFile();
@@ -142,7 +146,6 @@ public class ExtendedResourceBundle extends ResourceBundle {
         public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
                 throws IllegalAccessException, InstantiationException, IOException {
             String resourceName = toResourceName(toBundleName(baseName, locale), "properties");
-            Path externalResource = EXTERNAL_PATH.resolve(resourceName);
             Properties properties = new Properties();
 
             InputStream input = null;
@@ -156,6 +159,10 @@ public class ExtendedResourceBundle extends ResourceBundle {
                 }
             }
 
+            Path externalResource = null;
+            if (EXTERNAL_PATH != null) {
+                externalResource = EXTERNAL_PATH.resolve(resourceName);
+            }
             loadPropertiesFromFile(properties, externalResource);
 
             return new ExtendedResourceBundle(externalResource, properties);
