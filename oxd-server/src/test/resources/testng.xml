@@ -15,6 +15,10 @@
     <parameter name="licenseServerEndpoint" value="https://${test.server.name}/license-server"/>
     <parameter name="rsProtect"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
+    <parameter name="rsProtectScopeExpression"
+               value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add','http://photoz.example.com/dev/actions/view']}},{'httpMethods':['PUT','POST'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add','http://photoz.example.com/dev/actions/view']},'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
+    <parameter name="rsProtectScopeExpressionSecond"
+               value="{'resources':[{'path':'/GetAll','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'ticketScopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}}]}]}"/>
 
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
@@ -27,6 +31,11 @@
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RegisterSiteTest"/>
+        </classes>
+    </test>
+    <test name="Remove site" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RemoveSiteTest"/>
         </classes>
     </test>
     <test name="Get authorization url" enabled="true">
@@ -91,6 +100,16 @@
             <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
     </test>
+    <test name="RP - Get Claims-Gathering Url" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
+    <test name="Introspect RPT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.IntrospectRptTest"/>
+        </classes>
+    </test>
 
     <!-- Custom -->
     <test name="Setup client" enabled="true">
@@ -101,6 +120,11 @@
     <test name="Get client token" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.GetClientTokenTest"/>
+        </classes>
+    </test>
+    <test name="Introspect access token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.IntrospectAccessTokenTest"/>
         </classes>
     </test>
 </suite>

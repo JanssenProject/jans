@@ -16,7 +16,8 @@ public enum CommandType {
     // Register
     SETUP_CLIENT("setup_client"),
     REGISTER_SITE("register_site"),
-    UPDATE_SITE("update_site_registration"),
+    UPDATE_SITE("update_site"),
+    REMOVE_SITE("remove_site"),
 
     // Connect (stateful)
     GET_AUTHORIZATION_URL("get_authorization_url"),
@@ -25,6 +26,7 @@ public enum CommandType {
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
     GET_ACCESS_TOKEN_BY_REFRESH_TOKEN("get_access_token_by_refresh_token"),
+    INTROSPECT_ACCESS_TOKEN("introspect_access_token"),
 
     VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
@@ -34,6 +36,7 @@ public enum CommandType {
     // UMA
     RS_PROTECT("uma_rs_protect"),
     RS_CHECK_ACCESS("uma_rs_check_access"),
+    INTROSPECT_RPT("introspect_rpt"),
     RP_GET_RPT("uma_rp_get_rpt"),
     RP_GET_CLAIMS_GATHERING_URL("uma_rp_get_claims_gathering_url"),
 

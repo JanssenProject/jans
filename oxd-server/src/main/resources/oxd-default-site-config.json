@@ -1,15 +1,11 @@
 {
     "op_host":"",
     "op_discovery_path":"",
-    "authorization_redirect_uri":"",
-    "post_logout_redirect_uri":"",
-    "redirect_uris":[""],
     "response_types":["code"],
     "grant_type":["authorization_code"],
     "acr_values":[""],
     "scope":["openid", "profile", "email"],
     "ui_locales":["en"],
     "claims_locales":["en"],
-    "client_jwks_uri":"",
     "contacts":[]
 }

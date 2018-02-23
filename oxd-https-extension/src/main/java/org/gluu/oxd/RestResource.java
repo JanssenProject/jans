@@ -51,19 +51,43 @@ public class RestResource {
     }
 
     @POST
+    @Path("/introspect-access-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String introspectAccessToken(String params) throws IOException {
+        return response(oxd.introspectAccessToken(read(params, IntrospectAccessTokenParams.class)));
+    }
+
+    @POST
+    @Path("/introspect-rpt")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String introspectRpt(String params) throws IOException {
+        return response(oxd.introspectRpt(read(params, IntrospectRptParams.class)));
+    }
+
+    @POST
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String registerSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(p_authorization)));
+    public String registerSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(authorization)));
     }
 
     @POST
     @Path("/update-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String updateSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(p_authorization)));
+    public String updateSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(authorization)));
+    }
+
+    @POST
+    @Path("/remove-site")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String removeSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.removeSite(read(params, RemoveSiteParams.class), validateAccessToken(authorization)));
     }
 
     @POST
@@ -159,8 +183,8 @@ public class RestResource {
             if (StringUtils.isNotBlank(accessToken)) {
                 return accessToken;
             }
-
         }
+        LOG.debug("No access token provided in Authorization header. Forbidden.");
         throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 

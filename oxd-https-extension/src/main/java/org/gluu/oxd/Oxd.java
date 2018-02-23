@@ -26,6 +26,9 @@ public class Oxd {
         try {
             client = newClient();
             return client.send(new Command(CommandType.SETUP_CLIENT).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -39,6 +42,9 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.REGISTER_SITE).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -51,6 +57,24 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.UPDATE_SITE).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    public CommandResponse removeSite(RemoveSiteParams params, String token) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            params.setProtectionAccessToken(token);
+
+            return client.send(new Command(CommandType.REMOVE_SITE).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -63,6 +87,9 @@ public class Oxd {
             params.setProtectionAccessToken(p_authorization);
 
             return client.send(new Command(CommandType.GET_AUTHORIZATION_URL).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -75,6 +102,9 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -88,6 +118,9 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.GET_USER_INFO).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -100,6 +133,9 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.GET_LOGOUT_URI).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -112,7 +148,7 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.RS_PROTECT).setParamsObject(params));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
@@ -127,7 +163,7 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.RS_CHECK_ACCESS).setParamsObject(params));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
@@ -142,7 +178,7 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.RP_GET_RPT).setParamsObject(params));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
@@ -157,7 +193,7 @@ public class Oxd {
             params.setProtectionAccessToken(accessToken);
 
             return client.send(new Command(CommandType.RP_GET_CLAIMS_GATHERING_URL).setParamsObject(params));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
@@ -170,7 +206,7 @@ public class Oxd {
         try {
             client = newClient();
             return client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(params));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
@@ -183,6 +219,35 @@ public class Oxd {
         try {
             client = newClient();
             return client.send(new Command(CommandType.GET_CLIENT_TOKEN).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    public CommandResponse introspectAccessToken(IntrospectAccessTokenParams params) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            return client.send(new Command(CommandType.INTROSPECT_ACCESS_TOKEN).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    public CommandResponse introspectRpt(IntrospectRptParams params) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            return client.send(new Command(CommandType.INTROSPECT_RPT).setParamsObject(params));
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
         } finally {
             CommandClient.closeQuietly(client);
         }

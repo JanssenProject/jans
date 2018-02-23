@@ -44,10 +44,6 @@ public class Utils {
         return "test".equals(APP_MODE);
     }
 
-    public static String getDiscoveryUrl(String p_amHost) {
-        return String.format("https://%s/.well-known/openid-configuration", p_amHost);
-    }
-
     public static String getUmaDiscoveryUrl(String p_amHost) {
         return String.format("https://%s/.well-known/uma2-configuration", p_amHost);
     }

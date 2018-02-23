@@ -24,14 +24,16 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -291,5 +293,20 @@ public class CoreUtils {
 
     public static String secureRandomString() {
         return new BigInteger(130, new SecureRandom()).toString(32);
+    }
+
+    public static Map<String, String> splitQuery(String url) throws UnsupportedEncodingException, MalformedURLException {
+        return splitQuery(new URL(url));
+    }
+
+    public static Map<String, String> splitQuery(URL url) throws UnsupportedEncodingException {
+        Map<String, String> queryPairs = new LinkedHashMap<>();
+        String query = url.getQuery();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+        }
+        return queryPairs;
     }
 }

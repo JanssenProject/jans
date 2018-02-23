@@ -2,10 +2,8 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
@@ -75,11 +73,18 @@ public class ValidationService {
      * Returns whether has valid token
      *
      * @param params params
-     * @return whether has valid token
+     * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
      */
     private boolean validate(HasProtectionAccessTokenParams params) {
         if (params instanceof SetupClientParams) {
             return false;
+        }
+        if (params instanceof UpdateSiteParams) {
+            final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+            final Rp rp = rpService.getRp(params.getOxdId());
+            if (rp.getSetupClient() != null && rp.getSetupClient()) {
+                return false; // skip validation if client is setup client (if we can setup client without protection access token then we allow also update it)
+            }
         }
 
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
@@ -108,6 +113,9 @@ public class ValidationService {
         final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
 
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
+        if (StringUtils.isBlank(introspectionResponse.getClientId())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
+        }
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
             return true;
@@ -128,12 +136,8 @@ public class ValidationService {
         }
         LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
 
-        final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
-        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();
-        final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
-        final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
-        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
-        final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+        final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
+        final IntrospectionResponse response = introspectionService.introspectToken(oxdId, accessToken);
 
         if (!response.isActive()) {
             LOG.debug("access_token is not active.");

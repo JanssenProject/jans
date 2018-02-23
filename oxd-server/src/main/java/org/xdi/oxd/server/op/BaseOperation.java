@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -14,6 +15,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Convertor;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.service.*;
@@ -71,6 +73,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(HttpService.class);
     }
 
+    public IntrospectionService getIntrospectionService() {
+        return getInstance(IntrospectionService.class);
+    }
+
     public PublicOpKeyService getKeyService() {
         return getInstance(PublicOpKeyService.class);
     }
@@ -101,6 +107,11 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
 
     public ConfigurationService getConfigurationService() {
         return getInstance(ConfigurationService.class);
+    }
+
+    public OxAuthCryptoProvider getCryptoProvider() throws Exception {
+        Configuration conf = getConfigurationService().get();
+        return new OxAuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
     }
 
     public Rp getRp() {

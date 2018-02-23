@@ -13,8 +13,8 @@ import java.io.Serializable;
 )
 public class H2Configuration implements Serializable {
 
-    public static final String DEFAULT_DB_FILE_LOCATION_LINUX = "/opt/oxd-server/bin/oxd_db";
-    public static final String DEFAULT_DB_FILE_LOCATION_WINDOWS = "C:\\opt\\oxd-server\\bin\\oxd_db";
+    public static final String DEFAULT_DB_FILE_LOCATION_LINUX = "/opt/oxd-server/data/oxd_db";
+    public static final String DEFAULT_DB_FILE_LOCATION_WINDOWS = "C:\\opt\\oxd-server\\data\\oxd_db";
 
     private String dbFileLocation = SystemUtils.IS_OS_LINUX ? DEFAULT_DB_FILE_LOCATION_LINUX : DEFAULT_DB_FILE_LOCATION_WINDOWS;
 
