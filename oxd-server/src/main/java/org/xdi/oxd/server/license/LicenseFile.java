@@ -5,6 +5,7 @@ package org.xdi.oxd.server.license;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -46,6 +47,8 @@ public class LicenseFile implements Serializable {
     private String encodedLicense;
     @JsonProperty(value = "mac_address")
     private String macAddress;
+    @JsonProperty(value = "license_id")
+    private String licenseId;
 
     @JsonIgnore
     private long lastModified;
@@ -53,9 +56,10 @@ public class LicenseFile implements Serializable {
     public LicenseFile() {
     }
 
-    public LicenseFile(String encodedLicense, String macAddress) {
+    public LicenseFile(String encodedLicense, String macAddress, String licenseId) {
         this.encodedLicense = encodedLicense;
         this.macAddress = macAddress;
+        this.licenseId = licenseId;
     }
 
     public String getEncodedLicense() {
@@ -80,6 +84,14 @@ public class LicenseFile implements Serializable {
 
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
+    }
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
     }
 
     private static LicenseFile create(InputStream p_stream) {
@@ -135,6 +147,23 @@ public class LicenseFile implements Serializable {
         LOG.debug("License file location: " + file.getAbsolutePath());
         return file;
     }
+
+    public static boolean deleteContent() {
+        try {
+            final File file = getLicenseFile();
+            if (file != null && file.exists()) {
+                FileUtils.write(file, "");
+                LOG.info("Dropped content of license file");
+                return true;
+            } else {
+                LOG.error("License file does not exist.");
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to remove content of license file.", e);
+        }
+        return false;
+    }
+
 
     public static boolean delete() throws IOException {
         return getLicenseFile().delete();

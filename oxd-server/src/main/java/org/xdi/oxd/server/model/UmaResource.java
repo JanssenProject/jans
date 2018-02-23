@@ -20,8 +20,21 @@ public class UmaResource {
     private List<String> httpMethods = Lists.newArrayList();
     @JsonProperty(value = "scopes")
     private List<String> scopes = Lists.newArrayList();
+    @JsonProperty(value = "scope_expressions")
+    private List<String> scopeExpressions = Lists.newArrayList();
     @JsonProperty(value = "ticketScopes")
     private List<String> ticketScopes = Lists.newArrayList();
+
+    public List<String> getScopeExpressions() {
+        if (scopeExpressions == null) {
+            scopeExpressions = Lists.newArrayList();
+        }
+        return scopeExpressions;
+    }
+
+    public void setScopeExpressions(List<String> scopeExpressions) {
+        this.scopeExpressions = scopeExpressions;
+    }
 
     public String getId() {
         return id;
@@ -80,6 +93,7 @@ public class UmaResource {
         sb.append(", path='").append(path).append('\'');
         sb.append(", httpMethods=").append(httpMethods);
         sb.append(", scopes=").append(scopes);
+        sb.append(", scopeExpressions=").append(scopeExpressions);
         sb.append(", ticketScopes=").append(ticketScopes);
         sb.append('}');
         return sb.toString();

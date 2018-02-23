@@ -118,7 +118,7 @@ public class ConfigurationService implements Provider<Configuration> {
 
     private void loadDefaultRp(String propertyName) {
         try {
-            String configurationFolder = StringUtils.substringBeforeLast(propertyName, File.separator);
+            String configurationFolder = new File(propertyName).getParent();
             File file = new File(configurationFolder + File.separator + DEFAULT_SITE_CONFIG_JSON);
             LOG.trace("Trying to read " + DEFAULT_SITE_CONFIG_JSON + ", path: " + file.getAbsolutePath());
             if (file.exists()) {

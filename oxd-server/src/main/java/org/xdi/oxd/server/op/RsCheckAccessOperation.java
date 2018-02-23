@@ -7,12 +7,11 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.specimpl.BuiltResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
+import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
+import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
@@ -70,36 +69,27 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         };
 
-        final UmaRptIntrospectionService introspectionService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
-
-        RptIntrospectionResponse status;
-        try {
-            status = introspectionService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
-        } catch (ClientResponseFailure e) {
-            int httpStatus = e.getResponse().getStatus();
-            if (httpStatus == 401 || httpStatus == 400 || httpStatus == 403) {
-                String freshPat = getUmaTokenService().obtainPat(params.getOxdId()).getToken();
-                status = introspectionService.requestRptStatus("Bearer " + freshPat, params.getRpt(), "");
-            } else {
-                throw e;
-            }
-        }
+        CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
-        final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
-            for (UmaPermission permission : status.getPermissions()) {
-                final List<String> requiredScopes = resource.getScopes();
+            for (CorrectUmaPermission permission : status.getPermissions()) {
+                List<String> requiredScopes = resource.getScopes();
+
+                if (requiredScopes.isEmpty()) {
+                    LOG.trace("Not scopes in resource:" + resource + ", oxdId: " + params.getOxdId());
+                    if (!resource.getScopeExpressions().isEmpty() && JsonLogicNodeParser.isNodeValid(resource.getScopeExpressions().get(0))) {
+                        requiredScopes = JsonLogicNodeParser.parseNode(resource.getScopeExpressions().get(0)).getData();
+                        LOG.trace("Set requiredScope from scope expression.");
+                    }
+                }
+
                 boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
 
                 LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
 
                 if (containsAny) {
-                    if (isGat) { // GAT
-                        LOG.debug("GAT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
-                        return okResponse(new RsCheckAccessResponse("granted"));
-                    }
                     if ((permission.getResourceId() != null && permission.getResourceId().equals(resource.getId()))) { // normal UMA
                         LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
                         return okResponse(new RsCheckAccessResponse("granted"));
@@ -114,7 +104,20 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         }
 
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
-        final BuiltResponse response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+        BuiltResponse response = null;
+        try {
+            LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
+            response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+        } catch (ClientResponseFailure e) {
+            LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
+            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+            } else {
+                throw e;
+            }
+        }
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
