@@ -16,9 +16,12 @@ public class Tester {
 
     public static void setSystemConfPath() {
         System.setProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME, getConfPath());
+        System.out.println(ConfigurationService.CONF_SYS_PROPERTY_NAME + " = " + System.getProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME));
     }
 
     public static String getConfPath() {
-        return Tester.class.getProtectionDomain().getCodeSource().getLocation().getPath() + File.separator + ConfigurationService.TEST_FILE_NAME;
+        String workingDir = System.getProperty("user.dir");
+        System.out.println("Working Directory = " + workingDir);
+        return workingDir + "/oxd-server/src/test/resources/" + File.separator + ConfigurationService.TEST_FILE_NAME;
     }
 }

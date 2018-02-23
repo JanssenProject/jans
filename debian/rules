@@ -29,11 +29,21 @@ override_dh_auto_install:
 		cp oxd-common/target/oxd-common.jar debian/oxd-server/opt/oxd-server/lib/
 #		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-https-extension/target/oxd-https-extension-3.2.0-SNAPSHOT.jar debian/oxd-server/opt/oxd-https-extension/lib/
+		cp oxd-https-extension/target/oxd-https-extension-3.1.2.Final.jar debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-https-extension/oxd-https.keystore debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-https-extension/oxd-https.yml debian/oxd-server/opt/oxd-https-extension/lib/
 #		cp lib/* debian/oxd-server/opt/oxd-server/lib/
+		cp bcprov-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
+		mkdir -p debian/oxd-server/var/log/
+		mkdir -p debian/oxd-server/etc/oxd/oxd-server/
+		mkdir -p debian/oxd-server/etc/default/
+		cp -a debian/oxd-server/opt/oxd-server/conf/* debian/oxd-server/etc/oxd/oxd-server/.
+		cp -a logs/oxd-server.log debian/oxd-server/var/log/
+		cp -a debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
+		rm -rf debian/oxd-server/opt/oxd-server/conf
 
 override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
+		#chmod 665 debian/oxd-server/var/log/oxd-server.log 
+		chmod 644 debian/oxd-server/etc/default/oxd-server

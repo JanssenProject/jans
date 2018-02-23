@@ -6,6 +6,9 @@ package org.xdi.oxd.common;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+
+import java.util.Arrays;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,7 +38,7 @@ public enum ErrorResponseCode {
     INVALID_ACCESS_TOKEN_BAD_HASH("invalid_access_token_bad_hash", "access_token is invalid. Hash of access_token does not match hash from id_token (at_hash)."),
     INVALID_AUTHORIZATION_CODE_BAD_HASH("invalid_authorization_code_bad_hash", "Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash)."),
     INVALID_REGISTRATION_CLIENT_URL("invalid_registration_client_url", "Registration client URL is invalid. Please check registration_client_url response parameter from IDP (http://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse)."),
-    INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site or setup_client command for site registration."),
+    INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. It does not exist or removed from the server. Please use register_site command to register a site."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),
@@ -44,10 +47,12 @@ public enum ErrorResponseCode {
     NO_SETUP_CLIENT_FOR_OXD_ID("no_setup_client_for_oxd_id", "There are no setup client for given oxd_id. Please obtain oxd_id via setup_client command in order to force protection_access_token validation."),
     BLANK_PROTECTION_ACCESS_TOKEN("blank_protection_access_token", "protection_access_token is blank. Command is protected by protection_access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     INVALID_PROTECTION_ACCESS_TOKEN("invalid_protection_access_token", "Invalid protection_access_token. Command is protected by protection_access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
+    NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE("invalid_introspection_response", "AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later)."),
     INACTIVE_PROTECTION_ACCESS_TOKEN("inactive_protection_access_token", "Inactive protection_access_token. Command is protected by protection_access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     INVALID_AUTHORIZATION_REDIRECT_URI("invalid_authorization_redirect_uri", "Invalid authorization_redirect_uri (empty or blank)."),
     INVALID_SCOPE("invalid_scope", "Invalid scope parameter (empty or blank)."),
     INVALID_ACR_VALUES("invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
+    INVALID_ALGORITHM("invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(SignatureAlgorithm.values())),
     NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
     NO_REGISTRATION_ENDPOINT("invalid_request", "OP does not support dynamic client registration. Please register client manually and provide client_id and client_secret to register_site command."),
     NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma2-configuration"),
@@ -58,9 +63,11 @@ public enum ErrorResponseCode {
     NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER("invalid_claims_redirect_uri_parameter", "claims_redirect_uri parameter is not specified or otherwise is not valid"),
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
     UMA_NEED_INFO("need_info", "The authorization server needs additional information in order to determine whether the client is authorized to have these permissions."),
+    UMA_HTTP_METHOD_NOT_UNIQUE("http_method_not_unique", "HTTP method defined in JSON must be unique within given PATH (but occurs more then one time)."),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
-    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT.");
+    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
+    FAILED_TO_REMOVE_SITE("remove_site_failed", "Failed to remove site."),;
 
     private final String code;
     private final String description;

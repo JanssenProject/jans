@@ -136,7 +136,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         if (StringUtils.isNotBlank(params.getAuthorizationRedirectUri())) {
             redirectUris.add(params.getAuthorizationRedirectUri());
             rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
+        } else if (StringUtils.isNotBlank(rp.getAuthorizationRedirectUri())) {
+            redirectUris.add(rp.getAuthorizationRedirectUri());
         }
+
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
             if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
