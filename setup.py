@@ -1205,6 +1205,7 @@ class Setup(object):
         if supportCustomizations:
             if not os.path.exists("%s/custom" % jettyServiceBase):
                 self.run([self.cmd_mkdir, '-p', "%s/custom" % jettyServiceBase])
+            self.run([self.cmd_mkdir, '-p', "%s/custom/i18n" % jettyServiceBase])
             self.run([self.cmd_mkdir, '-p', "%s/custom/pages" % jettyServiceBase])
             self.run([self.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
             self.run([self.cmd_mkdir, '-p', "%s/custom/libs" % jettyServiceBase])
