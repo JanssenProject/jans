@@ -138,34 +138,6 @@ ou: device
 
 ################################
 
-# oxProx Data - LEVEL 3
-dn: ou=oxProx,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: oxProx
-
-dn: ou=op,ou=oxProx,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: op
-
-dn: ou=script,ou=oxProx,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: script
-
-dn: ou=client,ou=oxProx,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: client
-
-dn: ou=token,ou=oxProx,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: token
-
-################################
-
 # U2F data - LEVEL 3
 # Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
 dn: ou=u2f,o=%(inumOrg)s,o=gluu
