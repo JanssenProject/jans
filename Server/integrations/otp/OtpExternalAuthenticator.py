@@ -495,9 +495,10 @@ class PersonAuthentication(PersonAuthenticationType):
         return hotp.value()
 
     def validateHotpKey(self, secretKey, movingFactor, totpKey):
+        lookAheadWindow = self.hotpConfiguration["lookAheadWindow"]
         digits = self.hotpConfiguration["digits"]
 
-        htopValidationResult = HOTPValidator.lookAheadWindow(1).validate(secretKey, movingFactor, digits, totpKey)
+        htopValidationResult = HOTPValidator.lookAheadWindow(lookAheadWindow).validate(secretKey, movingFactor, digits, totpKey)
         if htopValidationResult.isValid():
             return { "result": True, "movingFactor": htopValidationResult.getNewMovingFactor() }
 
