@@ -9,7 +9,7 @@ package org.xdi.oxauth.introspection.ws.rs;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -17,6 +17,8 @@ import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaScopeType;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -24,6 +26,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -48,13 +52,15 @@ public class IntrospectionWebService {
     private ErrorResponseFactory errorResponseFactory;
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+    @Inject
+    private ClientService clientService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiResponses(value = {
-    		@ApiResponse(code = 400, message = "invalid_request\n" +
+            @ApiResponse(code = 400, message = "invalid_request\n" +
                     "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
-    		@ApiResponse(code = 500, message = "Introspection Internal Server Failed.")
+            @ApiResponse(code = 500, message = "Introspection Internal Server Failed.")
     })
     public Response introspectGet(@HeaderParam("Authorization") String p_authorization,
                                   @QueryParam("token") String p_token,
@@ -67,8 +73,7 @@ public class IntrospectionWebService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response introspectPost(@HeaderParam("Authorization") String p_authorization,
                                    @FormParam("token") String p_token,
-                                   @FormParam("token_type_hint") String tokenTypeHint
-    ) {
+                                   @FormParam("token_type_hint") String tokenTypeHint) {
         return introspect(p_authorization, p_token, tokenTypeHint);
     }
 
@@ -76,7 +81,7 @@ public class IntrospectionWebService {
         try {
             log.trace("Introspect token, authorization: {}, token to introsppect: {}, tokenTypeHint:", p_authorization, p_token, tokenTypeHint);
             if (StringUtils.isNotBlank(p_authorization) && StringUtils.isNotBlank(p_token)) {
-                final AuthorizationGrant authorizationGrant = tokenService.getAuthorizationGrant(p_authorization);
+                final AuthorizationGrant authorizationGrant = getAuthorizationGrant(p_authorization, p_token);
                 if (authorizationGrant != null) {
                     final AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(tokenService.getTokenFromAuthorizationParameter(p_authorization));
                     boolean isPat = authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue()); // #432
@@ -122,6 +127,43 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+    }
+
+    private AuthorizationGrant getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
+        AuthorizationGrant grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Bearer ");
+        if (grant == null) {
+            grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Basic ");
+            if (grant != null) {
+                return grant;
+            }
+            if (StringUtils.startsWithIgnoreCase(authorization, "Basic ")) {
+
+                String encodedCredentials = authorization.substring("Basic ".length());
+
+                String token = new String(Base64.decodeBase64(encodedCredentials), Util.UTF8_STRING_ENCODING);
+
+                int delim = token.indexOf(":");
+
+                if (delim != -1) {
+                    String clientId = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
+                    String password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
+                    if (clientService.authenticate(clientId, password)) {
+                        final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
+                        if (grantOfIntrospectionToken != null) {
+                            if (!grantOfIntrospectionToken.getClientId().equals(clientId)) {
+                                log.trace("Failed to match grant object clientId and client id provided during authentication.");
+                                return null;
+                            }
+                            return authorizationGrantList.getAuthorizationGrantByAccessToken(encodedCredentials);
+                        }
+                    } else {
+                        log.trace("Failed to perform basic authentication for client: " + clientId);
+                    }
+
+                }
+            }
+        }
+        return null;
     }
 
     public static Integer dateToSeconds(Date date) {
