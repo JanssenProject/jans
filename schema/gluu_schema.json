@@ -2769,6 +2769,17 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "Attribute that contains first error which application get during it execution",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxScriptError"
+            ],
+            "oid": "oxAttribute:379",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "SMTP configuration",
             "equality": "caseIgnoreMatch",
             "names": [
