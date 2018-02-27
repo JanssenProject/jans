@@ -64,6 +64,7 @@ public enum ErrorResponseCode {
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
     UMA_NEED_INFO("need_info", "The authorization server needs additional information in order to determine whether the client is authorized to have these permissions."),
     UMA_HTTP_METHOD_NOT_UNIQUE("http_method_not_unique", "HTTP method defined in JSON must be unique within given PATH (but occurs more then one time)."),
+    UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION("invalid_scope_expressioin", "Scope expression is not valid. Please check documentation and make sure expression is valid JsonLogic expression."),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
     FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
