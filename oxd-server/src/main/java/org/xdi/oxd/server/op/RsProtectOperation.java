@@ -3,16 +3,19 @@ package org.xdi.oxd.server.op;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RsProtectResponse;
+import org.xdi.oxd.rs.protect.Condition;
 import org.xdi.oxd.rs.protect.RsResource;
 import org.xdi.oxd.rs.protect.resteasy.Key;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
@@ -121,6 +124,24 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         }
         if (!org.xdi.oxd.rs.protect.ResourceValidator.isHttpMethodUniqueInPath(params.getResources())) {
             throw new ErrorResponseException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
+        }
+        if (params.getResources() != null){
+            for (RsResource resource : params.getResources()) {
+                if (resource.getConditions() != null) {
+                    for (Condition condition : resource.getConditions()) {
+                        if (condition.getScopeExpression() != null) {
+                            String json = condition.getScopeExpression().toString();
+                            if (StringUtils.isNotBlank(json)) {
+                                boolean nodeValid = JsonLogicNodeParser.isNodeValid(json);
+                                LOG.trace("Scope expression validator - Valid: " + nodeValid + ", expression: " + json);
+                                if (!nodeValid) {
+                                    throw new ErrorResponseException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
