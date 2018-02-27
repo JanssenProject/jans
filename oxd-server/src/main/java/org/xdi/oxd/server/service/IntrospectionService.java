@@ -128,7 +128,7 @@ public class IntrospectionService {
                     for (UmaPermission badPermission : badResponse.getPermissions()) {
 
                         CorrectUmaPermission p = new CorrectUmaPermission();
-                        p.setExpiresAt(dateToSeconds(badPermission.getExpiresAt()));
+                        p.setExpiresAt(badPermission.getExpiresAt());
                         p.setResourceId(badPermission.getResourceId());
                         p.setScopes(badPermission.getScopes());
 
