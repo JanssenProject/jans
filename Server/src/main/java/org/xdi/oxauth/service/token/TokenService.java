@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.service.token;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.util.StringHelper;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Token specific service methods
@@ -40,6 +40,13 @@ public class TokenService {
         final String token = getTokenFromAuthorizationParameter(p_authorization);
         if (StringUtils.isNotBlank(token)) {
     	    return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
+        }
+        return null;
+    }
+
+    public AuthorizationGrant getAuthorizationGrantByPrefix(String authorization, String prefix) {
+        if (StringUtils.startsWithIgnoreCase(authorization, prefix)) {
+            return authorizationGrantList.getAuthorizationGrantByAccessToken(authorization.substring(prefix.length()));
         }
         return null;
     }
