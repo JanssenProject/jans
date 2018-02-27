@@ -71,7 +71,7 @@ public class ExtendedResourceBundle extends ResourceBundle {
     private ExtendedResourceBundle(Path externalResource, Properties properties) {
         this.externalResource = externalResource;
         this.properties = properties;
-        
+
         this.lastUpdate = new Date();
     }
 
@@ -80,7 +80,7 @@ public class ExtendedResourceBundle extends ResourceBundle {
         if (properties != null) {
             if ((EXTERNAL_PATH != null) && (WATCHER != null)) {
                 checkWatcher();
-                
+
                 updateLock.lock();
                 try {
                     if (WATCHER_LAST_UPDATE.after(this.lastUpdate)) {
@@ -114,7 +114,7 @@ public class ExtendedResourceBundle extends ResourceBundle {
 
         return parent.getKeys();
     }
-    
+
     public String getBaseName() {
         return BASE_NAME;
     }
