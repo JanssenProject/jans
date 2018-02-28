@@ -5,9 +5,9 @@
  */
 package org.xdi.model.custom.script.type.scim;
 
-import java.util.Map;
-
 import org.xdi.model.SimpleCustomProperty;
+
+import java.util.Map;
 
 /**
  * @author Val Pecaoco
@@ -35,7 +35,17 @@ public class DummyScimType implements ScimType {
     }
 
     @Override
+    public boolean postCreateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
     public boolean updateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
+    public boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
@@ -45,7 +55,17 @@ public class DummyScimType implements ScimType {
     }
 
     @Override
+    public boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
     public boolean createGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
+    public boolean postCreateGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
@@ -55,7 +75,18 @@ public class DummyScimType implements ScimType {
     }
 
     @Override
+    public boolean postUpdateGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
     public boolean deleteGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
+
+    @Override
+    public boolean postDeleteGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
 }
