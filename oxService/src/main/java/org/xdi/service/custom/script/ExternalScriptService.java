@@ -14,12 +14,10 @@ import java.util.Map;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
-import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.util.StringHelper;
 
