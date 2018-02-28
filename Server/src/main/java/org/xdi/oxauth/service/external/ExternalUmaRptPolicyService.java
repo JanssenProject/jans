@@ -98,6 +98,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 			return result;
 		} catch (Exception ex) {
 			log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
 			return false;
 		}
 	}
@@ -110,6 +111,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 			return result;
 		} catch (Exception ex) {
 			log.error("Failed to execute python 'getRequiredClaims' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
 			return new ArrayList<ClaimDefinition>();
 		}
 	}
@@ -122,6 +124,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 			return result;
 		} catch (Exception ex) {
 			log.error("Failed to execute python 'getClaimsGatheringScriptName' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
 			return "";
 		}
 	}
