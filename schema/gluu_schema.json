@@ -5243,7 +5243,8 @@
                 "oxConfigurationProperty",
                 "oxLevel",
                 "oxRevision",
-                "gluuStatus"
+                "gluuStatus",
+                "oxScriptError"
             ],
             "must": [
                 "objectclass"
