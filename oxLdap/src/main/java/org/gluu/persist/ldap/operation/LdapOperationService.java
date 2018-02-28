@@ -150,6 +150,6 @@ public interface LdapOperationService {
 
     String getCertificateAttributeName(String attributeName);
 
-    <T> void sortListByAttributes(List<T> searchResultEntries, boolean caseSensetive, String... sortByAttributes);
+    <T> List<T> sortListByAttributes(List<T> searchResultEntries, Class<T> cls, boolean caseSensitive, boolean ascending, String... sortByAttributes);
 
 }
