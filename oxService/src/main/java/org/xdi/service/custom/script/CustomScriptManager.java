@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ import org.xdi.model.SimpleExtendedCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
+import org.xdi.model.custom.script.model.ScriptError;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
 import org.xdi.service.cdi.async.Asynchronous;
@@ -248,20 +250,20 @@ public class CustomScriptManager implements Serializable {
                     }
                 }
 
-                // Create authenticator
+                // Load script
                 BaseExternalType newCustomScriptExternalType = createExternalType(loadedCustomScript, newConfigurationAttributes);
 
                 CustomScriptConfiguration newCustomScriptConfiguration = new CustomScriptConfiguration(loadedCustomScript,
                         newCustomScriptExternalType, newConfigurationAttributes);
 
-                // Store configuration and authenticator
+                // Store configuration and script
                 newCustomScriptConfigurations.put(newSupportedCustomScriptInum, newCustomScriptConfiguration);
 
                 modified = true;
             }
         }
 
-        // Remove old external authenticator configurations
+        // Remove old external scripts configurations
         for (Iterator<Entry<String, CustomScriptConfiguration>> it = newCustomScriptConfigurations.entrySet().iterator(); it.hasNext();) {
             Entry<String, CustomScriptConfiguration> externalAuthenticatorConfigurationEntry = it.next();
 
@@ -339,12 +341,16 @@ public class CustomScriptManager implements Serializable {
             externalType = createExternalTypeFromStringWithPythonException(customScript, configurationAttributes);
         } catch (PythonException ex) {
             log.error("Failed to prepare external type '{}'", ex, customScriptInum);
+            saveScriptError(customScript, ex);
             return null;
         }
 
         if (externalType == null) {
             log.debug("Using default external type class");
+            saveScriptError(customScript, new Exception("Using default external type class"));
             externalType = customScript.getScriptType().getDefaultImplementation();
+        } else {
+            clearScriptError(customScript);
         }
 
         return externalType;
@@ -397,9 +403,61 @@ public class CustomScriptManager implements Serializable {
             return externalType.destroy(configurationAttributes);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
         }
 
         return false;
+    }
+
+    public void saveScriptError(CustomScript customScript, Exception exception) {
+        try {
+            saveScriptErrorImpl(customScript, exception);
+        } catch (Exception ex) {
+            log.error("Failed to store script '{}' error", customScript.getInum(), ex);
+        }
+    }
+
+    protected void saveScriptErrorImpl(CustomScript customScript, Exception exception) {
+        // Load entry from DN
+        String customScriptDn = customScript.getDn();
+        Class<? extends CustomScript> scriptType = customScript.getScriptType().getCustomScriptModel();
+        CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(scriptType, customScriptDn);
+
+        // Check if there is error value already
+        ScriptError currError = loadedCustomScript.getScriptError();
+        if (currError != null) {
+            return;
+        }
+
+        // Save error into script entry
+        String error = ExceptionUtils.getStackTrace(exception);
+        loadedCustomScript.setScriptError(new ScriptError(new Date(), error));
+        customScriptService.update(loadedCustomScript);
+    }
+
+    public void clearScriptError(CustomScript customScript) {
+        try {
+            clearScriptErrorImpl(customScript);
+        } catch (Exception ex) {
+            log.error("Failed to clear script '{}' error", customScript.getInum(), ex);
+        }
+    }
+
+    protected void clearScriptErrorImpl(CustomScript customScript) {
+        // Load entry from DN
+        String customScriptDn = customScript.getDn();
+        Class<? extends CustomScript> scriptType = customScript.getScriptType().getCustomScriptModel();
+        CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(scriptType, customScriptDn);
+        
+        // Check if there is no error
+        ScriptError currError = loadedCustomScript.getScriptError();
+        if (currError == null) {
+            return;
+        }
+
+        // Save error into script entry
+        loadedCustomScript.setScriptError(null);
+        customScriptService.update(loadedCustomScript);
     }
 
     public CustomScriptConfiguration getCustomScriptConfigurationByInum(String inum) {
