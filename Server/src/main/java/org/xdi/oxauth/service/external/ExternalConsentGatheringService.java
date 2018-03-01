@@ -81,6 +81,7 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return false;
         }
     }
@@ -93,6 +94,7 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getNextStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return -1;
         }
     }
@@ -105,6 +107,7 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'prepareForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return false;
         }
     }
@@ -117,6 +120,7 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getStepsCount' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return -1;
         }
     }
@@ -129,6 +133,7 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getPageForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return "";
         }
     }
