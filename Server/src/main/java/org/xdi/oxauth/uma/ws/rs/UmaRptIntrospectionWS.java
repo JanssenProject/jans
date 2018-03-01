@@ -6,18 +6,21 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.ocpsoft.pretty.faces.util.StringUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.xdi.oxauth.introspection.ws.rs.IntrospectionWebService;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
@@ -44,18 +47,16 @@ public class UmaRptIntrospectionWS {
 
     @Inject
     private Logger log;
-
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
     @Inject
     private UmaRptService rptService;
-
     @Inject
     private UmaValidationService umaValidationService;
-
     @Inject
     private UmaScopeService umaScopeService;
+    @Inject
+    private UmaPctService pctService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -97,6 +98,23 @@ public class UmaRptIntrospectionWS {
             statusResponse.setClientId(rpt.getClientId());
             statusResponse.setAud(rpt.getClientId());
             statusResponse.setSub(rpt.getUserId());
+
+            final List<UmaPermission> rptPermissions = rptService.getRptPermissions(rpt);
+            if (!rptPermissions.isEmpty()) {
+                UmaPermission permission = rptPermissions.iterator().next();
+                String pctCode = permission.getAttributes().get(UmaPermission.PCT);
+                if (StringUtils.isNotBlank(pctCode)) {
+                    UmaPCT pct = pctService.getByCode(pctCode);
+                    if (pct != null) {
+                        statusResponse.setPctClaims(pct.getClaims().toMap());
+                    } else {
+                        log.error("Failed to find PCT with code: " + pctCode + " which is taken from permission object: " + permission.getDn());
+                    }
+                } else {
+                    log.trace("PCT code is blank for RPT: " + rpt.getCode());
+                }
+            }
+
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asJson(statusResponse);

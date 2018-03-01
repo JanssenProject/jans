@@ -115,7 +115,7 @@ public class UmaTokenService {
             }
 
             updatePermissionsWithClientRequestedScope(permissions, scopes);
-
+            addPctToPermissions(permissions, pct);
             rptService.addPermissionToRPT(rpt, permissions);
 
             UmaTokenResponse response = new UmaTokenResponse();
@@ -134,6 +134,13 @@ public class UmaTokenService {
 
         log.error("Failed to handle request to UMA Token Endpoint.");
         throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
+    }
+
+    private void addPctToPermissions(List<UmaPermission> permissions, UmaPCT pct) {
+        for (UmaPermission p : permissions) {
+            p.getAttributes().put(UmaPermission.PCT, pct.getCode());
+            permissionService.mergeSilently(p);
+        }
     }
 
     private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
