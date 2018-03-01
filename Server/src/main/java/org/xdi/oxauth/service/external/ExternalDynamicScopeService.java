@@ -47,6 +47,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 			return dynamicScopeType.update(dynamicScopeContext, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 		
 		return false;

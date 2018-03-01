@@ -44,6 +44,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 			return externalClientRegistrationType.updateClient(registerRequest, client, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 		
 		return false;
