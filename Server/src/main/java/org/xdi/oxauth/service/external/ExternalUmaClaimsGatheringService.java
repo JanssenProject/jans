@@ -106,6 +106,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'gather' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return false;
         }
     }
@@ -118,6 +119,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getNextStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return -1;
         }
     }
@@ -130,6 +132,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'prepareForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return false;
         }
     }
@@ -142,6 +145,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getStepsCount' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return -1;
         }
     }
@@ -154,6 +158,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getPageForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
             return "";
         }
     }

@@ -44,6 +44,7 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
             return applicationSessionType.endSession(httpRequest, sessionId, configurationAttributes);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
         }
 
         return false;
