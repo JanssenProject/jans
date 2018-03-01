@@ -6,8 +6,18 @@
 
 package org.xdi.oxauth.service.external;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -24,13 +34,8 @@ import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -127,6 +132,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return false;
@@ -140,6 +146,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return null;
@@ -153,6 +160,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getCountAuthenticationSteps(configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return -1;
@@ -166,6 +174,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.authenticate(configurationAttributes, requestParameters, step);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return false;
@@ -179,6 +188,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getNextStep(configurationAttributes, requestParameters, step);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return -1;
@@ -192,7 +202,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.logout(configurationAttributes, requestParameters);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
+
 		return false;
 	}
 
@@ -204,7 +216,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getLogoutExternalUrl(configurationAttributes, requestParameters);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
+
 		return null;
 	}
 
@@ -216,6 +230,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return false;
@@ -229,6 +244,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getExtraParametersForStep(configurationAttributes, step);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return null;
@@ -242,6 +258,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getPageForStep(configurationAttributes, step);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return null;
@@ -254,6 +271,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return externalAuthenticator.getApiVersion();
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return -1;

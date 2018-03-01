@@ -50,7 +50,7 @@ public class ApplicationService {
 		if (appId.startsWith("https://")) {
 			URI url = checkValidUrl(appId);
 			checkPathIsNotSlash(url);
-			checkNotIpAddress(url);
+//			checkNotIpAddress(url);
 		}
 	}
 
