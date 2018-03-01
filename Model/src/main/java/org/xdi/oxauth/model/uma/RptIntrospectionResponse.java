@@ -14,6 +14,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Token status response according to RPT introspection profile:
@@ -41,6 +42,7 @@ public class RptIntrospectionResponse {
     private String iss;
     private String jti;
     private List<UmaPermission> permissions;
+    private Map<String, List<String>> pctClaims;
 
     public RptIntrospectionResponse() {
     }
@@ -147,6 +149,16 @@ public class RptIntrospectionResponse {
 
     public void setPermissions(List<UmaPermission> p_permissions) {
         permissions = p_permissions;
+    }
+
+    @JsonProperty(value = "pct_claims")
+    @XmlElement(name = "pct_claims")
+    public Map<String, List<String>> getPctClaims() {
+        return pctClaims;
+    }
+
+    public void setPctClaims(Map<String, List<String>> pctClaims) {
+        this.pctClaims = pctClaims;
     }
 
     @Override
