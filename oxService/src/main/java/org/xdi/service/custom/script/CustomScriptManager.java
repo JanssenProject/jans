@@ -163,8 +163,7 @@ public class CustomScriptManager implements Serializable {
         private Map<String, CustomScriptConfiguration> customScriptConfigurations;
         private boolean modified;
 
-        ReloadResult(Map<String, CustomScriptConfiguration> customScriptConfigurations,
-                boolean modified) {
+        ReloadResult(Map<String, CustomScriptConfiguration> customScriptConfigurations, boolean modified) {
             this.customScriptConfigurations = customScriptConfigurations;
             this.modified = modified;
         }
@@ -316,8 +315,7 @@ public class CustomScriptManager implements Serializable {
 
     private Map<CustomScriptType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsByScriptType(
             Map<String, CustomScriptConfiguration> customScriptConfigurations) {
-        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType =
-                new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
+        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType = new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
 
         for (CustomScriptType customScriptType : this.supportedCustomScriptTypes) {
             List<CustomScriptConfiguration> customConfigurationsByScriptType = new ArrayList<CustomScriptConfiguration>();
