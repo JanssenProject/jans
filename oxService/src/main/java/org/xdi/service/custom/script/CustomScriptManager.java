@@ -341,13 +341,13 @@ public class CustomScriptManager implements Serializable {
             externalType = createExternalTypeFromStringWithPythonException(customScript, configurationAttributes);
         } catch (PythonException ex) {
             log.error("Failed to prepare external type '{}'", ex, customScriptInum);
-            saveScriptError(customScript, ex);
+            saveScriptError(customScript, ex, true);
             return null;
         }
 
         if (externalType == null) {
             log.debug("Using default external type class");
-            saveScriptError(customScript, new Exception("Using default external type class"));
+            saveScriptError(customScript, new Exception("Using default external type class"), true);
             externalType = customScript.getScriptType().getDefaultImplementation();
         } else {
             clearScriptError(customScript);
@@ -410,14 +410,18 @@ public class CustomScriptManager implements Serializable {
     }
 
     public void saveScriptError(CustomScript customScript, Exception exception) {
+        saveScriptError(customScript, exception, false);
+    }
+
+    public void saveScriptError(CustomScript customScript, Exception exception, boolean overwrite) {
         try {
-            saveScriptErrorImpl(customScript, exception);
+            saveScriptErrorImpl(customScript, exception, overwrite);
         } catch (Exception ex) {
             log.error("Failed to store script '{}' error", customScript.getInum(), ex);
         }
     }
 
-    protected void saveScriptErrorImpl(CustomScript customScript, Exception exception) {
+    protected void saveScriptErrorImpl(CustomScript customScript, Exception exception, boolean overwrite) {
         // Load entry from DN
         String customScriptDn = customScript.getDn();
         Class<? extends CustomScript> scriptType = customScript.getScriptType().getCustomScriptModel();
@@ -425,7 +429,7 @@ public class CustomScriptManager implements Serializable {
 
         // Check if there is error value already
         ScriptError currError = loadedCustomScript.getScriptError();
-        if (currError != null) {
+        if (!overwrite && (currError != null)) {
             return;
         }
 
