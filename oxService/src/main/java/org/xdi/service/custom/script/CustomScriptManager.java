@@ -452,7 +452,7 @@ public class CustomScriptManager implements Serializable {
         String customScriptDn = customScript.getDn();
         Class<? extends CustomScript> scriptType = customScript.getScriptType().getCustomScriptModel();
         CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(scriptType, customScriptDn);
-        
+
         // Check if there is no error
         ScriptError currError = loadedCustomScript.getScriptError();
         if (currError == null) {

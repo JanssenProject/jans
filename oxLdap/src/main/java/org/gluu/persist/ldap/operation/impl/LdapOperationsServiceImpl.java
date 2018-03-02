@@ -7,7 +7,15 @@
 package org.gluu.persist.ldap.operation.impl;
 
 import java.io.Serializable;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import org.apache.commons.lang.StringUtils;
@@ -74,24 +82,25 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     private LdapConnectionProvider connectionProvider;
     private LdapConnectionProvider bindConnectionProvider;
 
-    private static Map<String, Class<?>> attributeDataTypes=new HashMap<String, Class<?>>();
-    private static final Map<String, Class<?>> oidSyntaxClassMapping;
+    private static Map<String, Class<?>> ATTRIBUTE_DATA_TYPES = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> OID_SYNTAX_CLASS_MAPPING;
 
     static {
-        //Populates the mapping of syntaxes that will support comparison of attribute values. Only accounting for the most common and existing in Gluu Schema
-        oidSyntaxClassMapping=new HashMap<String, Class<?>>();
+        //Populates the mapping of syntaxes that will support comparison of attribute values.
+        //Only accounting for the most common and existing in Gluu Schema
+        OID_SYNTAX_CLASS_MAPPING = new HashMap<String, Class<?>>();
         //See RFC4517, section 3.3
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.7", Boolean.class);
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.11", String.class);   //Country String
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.15", String.class);   //Directory String
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.12", String.class);   //DN
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.22", String.class);   //Facsimile
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.24", Date.class);     //Generalized Time
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.26", String.class);   //IA5 String (used in email)
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.27", Integer.class);
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.36", String.class);   //Numeric string
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.41", String.class);   //Postal address
-        oidSyntaxClassMapping.put("1.3.6.1.4.1.1466.115.121.1.50", String.class);   //Telephone number
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.7", Boolean.class);
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.11", String.class);   //Country String
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.15", String.class);   //Directory String
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.12", String.class);   //DN
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.22", String.class);   //Facsimile
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.24", Date.class);     //Generalized Time
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.26", String.class);   //IA5 String (used in email)
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.27", Integer.class);
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.36", String.class);   //Numeric string
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.41", String.class);   //Postal address
+        OID_SYNTAX_CLASS_MAPPING.put("1.3.6.1.4.1.1466.115.121.1.50", String.class);   //Telephone number
     }
 
     @SuppressWarnings("unused")
@@ -886,7 +895,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public <T> List<T> sortListByAttributes(List<T> searchResultEntries, Class<T> cls, boolean caseSensitive, boolean ascending, String... sortByAttributes) {
+    public <T> List<T> sortListByAttributes(List<T> searchResultEntries, Class<T> cls, boolean caseSensitive,
+                                            boolean ascending, String... sortByAttributes) {
         // Check input parameters
         if (searchResultEntries == null) {
             throw new MappingException("Entries list to sort is null");
@@ -902,8 +912,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         //T array[]=(T[])searchResultEntries.toArray();
 
         //Converting the list to an array gets rid of unmodifiable list problem, see issue #68
-        T dummyArr[]=(T[]) java.lang.reflect.Array.newInstance(cls, 0);
-        T array[]=searchResultEntries.toArray(dummyArr);
+        T[] dummyArr = (T[]) java.lang.reflect.Array.newInstance(cls, 0);
+        T[] array = searchResultEntries.toArray(dummyArr);
         Arrays.sort(array, comparator);
         return Arrays.asList(array);
 
@@ -912,50 +922,51 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     private void populateAttributeDataTypesMapping(String schemaEntryDn) {
 
         try {
-            if (attributeDataTypes.size()==0){
+            if (ATTRIBUTE_DATA_TYPES.size() == 0) {
                 //schemaEntryDn="ou=schema";
                 SearchResultEntry entry = lookup(schemaEntryDn, "attributeTypes");
                 Attribute attrAttributeTypes = entry.getAttribute("attributeTypes");
 
-                Map<String, Pair<String, String>> tmpMap =new HashMap<String, Pair<String, String>>();
+                Map<String, Pair<String, String>> tmpMap = new HashMap<String, Pair<String, String>>();
 
-                for (String strAttributeType : attrAttributeTypes.getValues()){
-                    AttributeTypeDefinition attrTypeDef=new AttributeTypeDefinition(strAttributeType);
-                    String names[]=attrTypeDef.getNames();
+                for (String strAttributeType : attrAttributeTypes.getValues()) {
+                    AttributeTypeDefinition attrTypeDef = new AttributeTypeDefinition(strAttributeType);
+                    String[] names = attrTypeDef.getNames();
 
-                    if (names!=null){
-                        for (String name : names)
+                    if (names != null) {
+                        for (String name : names) {
                             tmpMap.put(name, new Pair<String, String>(attrTypeDef.getBaseSyntaxOID(), attrTypeDef.getSuperiorType()));
+                        }
                     }
                 }
 
                 //Fill missing values
                 for (String name : tmpMap.keySet()) {
-                    Pair<String, String> currPair=tmpMap.get(name);
-                    String sup=currPair.getSecond();
+                    Pair<String, String> currPair = tmpMap.get(name);
+                    String sup = currPair.getSecond();
 
-                    if (currPair.getFirst()==null && sup!=null) {     //No OID syntax?
+                    if (currPair.getFirst() == null && sup != null) {     //No OID syntax?
                         //Try to lookup superior type
                         Pair<String, String> pair = tmpMap.get(sup);
-                        if (pair != null)
+                        if (pair != null) {
                             currPair.setFirst(pair.getFirst());
+                        }
                     }
                 }
 
                 //Populate map of attribute names vs. Java classes
                 for (String name : tmpMap.keySet()) {
-                    String syntaxOID=tmpMap.get(name).getFirst();
+                    String syntaxOID = tmpMap.get(name).getFirst();
 
-                    if (syntaxOID!=null){
-                        Class<?> cls=oidSyntaxClassMapping.get(syntaxOID);
-                        if (cls!=null) {
-                            attributeDataTypes.put(name, cls);
+                    if (syntaxOID != null) {
+                        Class<?> cls = OID_SYNTAX_CLASS_MAPPING.get(syntaxOID);
+                        if (cls != null) {
+                            ATTRIBUTE_DATA_TYPES.put(name, cls);
                         }
                     }
                 }
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
 
@@ -972,23 +983,23 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         private SearchResultEntryComparator(String[] sortByAttributes, boolean caseSensitive, boolean ascending) {
             this.sortByAttributes = sortByAttributes;
             this.caseSensitive = caseSensitive;
-            this.ascending=ascending;
+            this.ascending = ascending;
         }
 
         public int compare(T entry1, T entry2) {
 
-            int result=0;
+            int result = 0;
 
-            if (entry1 == null){
-                if (entry2 == null)
-                    result=0;
-                else
-                    result=-1;
-            }
-            else{
-                if (entry2 == null)
-                    result=1;
-                else {
+            if (entry1 == null) {
+                if (entry2 == null) {
+                    result = 0;
+                } else {
+                    result = -1;
+                }
+            } else {
+                if (entry2 == null) {
+                    result = 1;
+                } else {
                     for (String currSortByAttribute : sortByAttributes) {
                         result = compare(entry1, entry2, currSortByAttribute);
                         if (result != 0) {
@@ -998,8 +1009,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                 }
             }
 
-            if (!ascending)
-                result*=-1;
+            if (!ascending) {
+                result *= -1;
+            }
 
             return result;
 
@@ -1008,52 +1020,55 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         //This comparison assumes a default sort order of "ascending"
         public int compare(T entry1, T entry2, String attributeName) {
 
-            int result=0;
-            try{
+            int result = 0;
+            try {
 
-                if (entry1 instanceof SearchResultEntry){
+                if (entry1 instanceof SearchResultEntry) {
 
-                    SearchResultEntry resultEntry1=(SearchResultEntry) entry1;
-                    SearchResultEntry resultEntry2=(SearchResultEntry) entry2;
+                    SearchResultEntry resultEntry1 = (SearchResultEntry) entry1;
+                    SearchResultEntry resultEntry2 = (SearchResultEntry) entry2;
 
                     //Obtain a string representation first and do nulls treatments
                     String value1 = resultEntry1.getAttributeValue(attributeName);
                     String value2 = resultEntry2.getAttributeValue(attributeName);
 
-                    if (value1 == null){
-                        if (value2 == null)
-                            result=0;
-                        else
-                            result=-1;
-                    }
-                    else {
-                        if (value2 == null)
-                            result=1;
-                        else {
-                            Class<?> cls=attributeDataTypes.get(attributeName);
+                    if (value1 == null) {
+                        if (value2 == null) {
+                            result = 0;
+                        } else {
+                            result = -1;
+                        }
+                    } else {
+                        if (value2 == null) {
+                            result = 1;
+                        } else {
+                            Class<?> cls = ATTRIBUTE_DATA_TYPES.get(attributeName);
 
-                            if (cls!=null){
-                                if (cls.equals(String.class)){
-                                    if (caseSensitive)
-                                        result=value1.compareTo(value2);
-                                    else
-                                        result=value1.toLowerCase().compareTo(value2.toLowerCase());
+                            if (cls != null) {
+                                if (cls.equals(String.class)) {
+                                    if (caseSensitive) {
+                                        result = value1.compareTo(value2);
+                                    } else {
+                                        result = value1.toLowerCase().compareTo(value2.toLowerCase());
+                                    }
+                                } else
+                                if (cls.equals(Integer.class)) {
+                                    result = resultEntry1.getAttributeValueAsInteger(attributeName)
+                                            .compareTo(resultEntry2.getAttributeValueAsInteger(attributeName));
+                                } else
+                                if (cls.equals(Boolean.class)) {
+                                    result = resultEntry1.getAttributeValueAsBoolean(attributeName)
+                                            .compareTo(resultEntry2.getAttributeValueAsBoolean(attributeName));
+                                } else
+                                if (cls.equals(Date.class)) {
+                                    result = resultEntry1.getAttributeValueAsDate(attributeName)
+                                            .compareTo(resultEntry2.getAttributeValueAsDate(attributeName));
                                 }
-                                else
-                                if (cls.equals(Integer.class))
-                                    result=resultEntry1.getAttributeValueAsInteger(attributeName).compareTo(resultEntry2.getAttributeValueAsInteger(attributeName));
-                                else
-                                if (cls.equals(Boolean.class))
-                                    result=resultEntry1.getAttributeValueAsBoolean(attributeName).compareTo(resultEntry2.getAttributeValueAsBoolean(attributeName));
-                                else
-                                if (cls.equals(Date.class))
-                                    result=resultEntry1.getAttributeValueAsDate(attributeName).compareTo(resultEntry2.getAttributeValueAsDate(attributeName));
                             }
                         }
                     }
                 }
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 LOG.error("Error occurred when comparing entries with SearchResultEntryComparator");
                 LOG.error(e.getMessage(), e);
             }
