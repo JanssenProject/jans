@@ -2780,7 +2780,7 @@ objectclass ( oxObjectClass:23 NAME 'oxUmaResource'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxScopeExpression $ description )
+	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxScopeExpression $ oxAuthCreation $ oxAuthExpiration $ description )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
