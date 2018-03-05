@@ -49,6 +49,7 @@ public class AppConfiguration implements Configuration {
     private Boolean umaRptAsJwt = false;
     private int umaRptLifetime;
     private int umaPctLifetime;
+    private int umaResourceLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaValidateClaimToken = false;
 
@@ -755,6 +756,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaRptLifetime(int umaRptLifetime) {
         this.umaRptLifetime = umaRptLifetime;
+    }
+
+    public int getUmaResourceLifetime() {
+        return umaResourceLifetime;
+    }
+
+    public void setUmaResourceLifetime(int umaResourceLifetime) {
+        this.umaResourceLifetime = umaResourceLifetime;
     }
 
     public int getUmaPctLifetime() {
