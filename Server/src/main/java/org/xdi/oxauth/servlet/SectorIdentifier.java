@@ -39,9 +39,9 @@ public class SectorIdentifier extends HttpServlet {
         PrintWriter out = httpResponse.getWriter();
         try {
             String urlPath = httpRequest.getPathInfo();
-            String inum = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
+            String oxId = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
 
-            org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierByInum(inum);
+            org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(oxId);
 
             JSONArray jsonArray = new JSONArray();
 
