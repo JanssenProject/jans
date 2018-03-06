@@ -8,6 +8,8 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService, AppInitializer
+from org.xdi.oxauth.service import MetricService
+from org.xdi.model.metric import MetricType
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.model.ldap import GluuLdapConfiguration
@@ -80,28 +82,36 @@ class PersonAuthentication(PersonAuthenticationType):
             identity = CdiUtil.bean(Identity)
             credentials = identity.getCredentials()
 
-            keyValue = credentials.getUsername()
-            userPassword = credentials.getPassword()
-
-            if (StringHelper.isNotEmptyString(keyValue) and StringHelper.isNotEmptyString(userPassword)):
-                for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
-                    ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
-                    ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
-                    loginAttributes = ldapExtendedEntryManager["loginAttributes"]
-                    localLoginAttributes = ldapExtendedEntryManager["localLoginAttributes"]
-
-                    print "Basic (multi auth conf). Authenticate for step 1. Using configuration: " + ldapConfiguration.getConfigId()
-
-                    idx = 0
-                    count = len(loginAttributes)
-                    while (idx < count):
-                        primaryKey = loginAttributes[idx]
-                        localPrimaryKey = localLoginAttributes[idx]
-
-                        loggedIn = authenticationService.authenticate(ldapConfiguration, ldapEntryManager, keyValue, userPassword, primaryKey, localPrimaryKey)
-                        if (loggedIn):
-                            return True
-                        idx += 1
+            metricService = CdiUtil.bean(MetricService)
+            timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time()
+            try:
+                keyValue = credentials.getUsername()
+                userPassword = credentials.getPassword()
+    
+                if (StringHelper.isNotEmptyString(keyValue) and StringHelper.isNotEmptyString(userPassword)):
+                    for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
+                        ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
+                        ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
+                        loginAttributes = ldapExtendedEntryManager["loginAttributes"]
+                        localLoginAttributes = ldapExtendedEntryManager["localLoginAttributes"]
+    
+                        print "Basic (multi auth conf). Authenticate for step 1. Using configuration: " + ldapConfiguration.getConfigId()
+    
+                        idx = 0
+                        count = len(loginAttributes)
+                        while (idx < count):
+                            primaryKey = loginAttributes[idx]
+                            localPrimaryKey = localLoginAttributes[idx]
+    
+                            loggedIn = authenticationService.authenticate(ldapConfiguration, ldapEntryManager, keyValue, userPassword, primaryKey, localPrimaryKey)
+                            if (loggedIn):
+                                metricService.incCounter(MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS)
+                                return True
+                            idx += 1
+            finally:
+                timerContext.stop()
+                
+            metricService.incCounter(MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES)
 
             return False
         else:
