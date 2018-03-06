@@ -12,14 +12,14 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Javier Rojas Blum
  * @version January 15, 2016
  */
-@LdapEntry(sortBy = {"inum"})
+@LdapEntry(sortBy = {"id"})
 @LdapObjectClass(values = {"top", "oxSectorIdentifier"})
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -2812480357430436514L;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
-    private String inum;
+    @LdapAttribute(name = "oxId", ignoreDuringUpdate = true)
+    private String id;
 
     @LdapAttribute(name = "oxAuthRedirectURI")
     private List<String> redirectUris;
@@ -28,11 +28,11 @@ public class SectorIdentifier extends BaseEntry implements Serializable {
     private List<String> clientIds;
 
     public String getInum() {
-        return inum;
+        return id;
     }
 
-    public void setInum(String inum) {
-        this.inum = inum;
+    public void setInum(String id) {
+        this.id = id;
     }
 
     public List<String> getRedirectUris() {
@@ -54,7 +54,7 @@ public class SectorIdentifier extends BaseEntry implements Serializable {
     @Override
     public String toString() {
         return String
-                .format("OxAuthSectorIdentifier [inum=%s, toString()=%s]",
-                        inum, super.toString());
+                .format("OxAuthSectorIdentifier [id=%s, toString()=%s]",
+                        id, super.toString());
     }
 }
