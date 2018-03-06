@@ -2913,7 +2913,7 @@ objectclass ( oxObjectClass:42 NAME 'oxSectorIdentifier'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( inum $ oxAuthRedirectURI $ oxAuthClientId )
+	MAY ( oxId $ oxAuthRedirectURI $ oxAuthClientId )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:43 NAME 'oxAsimbaConfiguration'
