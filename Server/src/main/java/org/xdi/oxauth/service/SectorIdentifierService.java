@@ -1,6 +1,5 @@
 package org.xdi.oxauth.service;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -14,7 +13,6 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version January 15, 2016
  */
-@Stateless
 @Named
 public class SectorIdentifierService {
 
@@ -28,17 +26,17 @@ public class SectorIdentifierService {
     private StaticConfiguration staticConfiguration;
 
     /**
-     * Get sector identifier by inum
+     * Get sector identifier by oxId
      *
-     * @param inum Sector identifier inum
+     * @param oxId Sector identifier oxId
      * @return Sector identifier
      */
-    public SectorIdentifier getSectorIdentifierByInum(String inum) {
+    public SectorIdentifier getSectorIdentifierById(String oxId) {
         SectorIdentifier result = null;
         try {
-            result = ldapEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(inum));
+            result = ldapEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(oxId));
         } catch (Exception e) {
-            log.error("Failed to find sector identifier by Inum " + inum, e);
+            log.error("Failed to find sector identifier by oxId " + oxId, e);
         }
         return result;
     }
@@ -46,16 +44,16 @@ public class SectorIdentifierService {
     /**
      * Build DN string for sector identifier
      *
-     * @param inum Sector Identifier Inum
-     * @return DN string for specified sector identifier or DN for sector identifiers branch if inum is null
+     * @param oxId Sector Identifier oxId
+     * @return DN string for specified sector identifier or DN for sector identifiers branch if oxId is null
      * @throws Exception
      */
-    public String getDnForSectorIdentifier(String inum) {
+    public String getDnForSectorIdentifier(String oxId) {
         String sectorIdentifierDn = staticConfiguration.getBaseDn().getSectorIdentifiers();
-        if (StringHelper.isEmpty(inum)) {
+        if (StringHelper.isEmpty(oxId)) {
             return sectorIdentifierDn;
         }
 
-        return String.format("inum=%s,%s", inum, sectorIdentifierDn);
+        return String.format("oxId=%s,%s", oxId, sectorIdentifierDn);
     }
 }
