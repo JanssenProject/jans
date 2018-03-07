@@ -12,7 +12,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
-import org.xdi.oxauth.introspection.ws.rs.IntrospectionWebService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -92,8 +91,8 @@ public class UmaRptIntrospectionWS {
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
             statusResponse.setActive(true);
-            statusResponse.setExpiresAt(IntrospectionWebService.dateToSeconds(rpt.getExpirationDate()));
-            statusResponse.setIssuedAt(IntrospectionWebService.dateToSeconds(rpt.getCreationDate()));
+            statusResponse.setExpiresAt(ServerUtil.dateToSeconds(rpt.getExpirationDate()));
+            statusResponse.setIssuedAt(ServerUtil.dateToSeconds(rpt.getCreationDate()));
             statusResponse.setPermissions(permissions);
             statusResponse.setClientId(rpt.getClientId());
             statusResponse.setAud(rpt.getClientId());
