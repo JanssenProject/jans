@@ -30,10 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The API available at the resource registration endpoint enables the resource server to put resources under
@@ -54,6 +51,8 @@ import java.util.UUID;
 public class UmaResourceRegistrationWS {
 
     private static final int NOT_ALLOWED_STATUS = 405;
+
+    public static final int DEFAULT_RESOURCE_LIFETIME = 2592000; // 1 month
 
     @Inject
     private Logger log;
@@ -167,6 +166,8 @@ public class UmaResourceRegistrationWS {
             response.setScopes(umaScopeService.getScopeIdsByDns(ldapResource.getScopes()));
             response.setScopeExpression(ldapResource.getScopeExpression());
             response.setType(ldapResource.getType());
+            response.setIat(ServerUtil.dateToSeconds(ldapResource.getCreationDate()));
+            response.setExp(ServerUtil.dateToSeconds(ldapResource.getExpirationDate()));
 
             final ResponseBuilder builder = Response.ok();
             builder.entity(ServerUtil.asJson(response)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
@@ -316,6 +317,7 @@ public class UmaResourceRegistrationWS {
         final String resourceDn = resourceService.getDnForResource(rsid);
         final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
 
+        final Calendar calendar = Calendar.getInstance();
         final org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = new org.xdi.oxauth.model.uma.persistence.UmaResource();
 
         ldapResource.setName(resource.getName());
@@ -329,10 +331,21 @@ public class UmaResourceRegistrationWS {
         ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
         ldapResource.setType(resource.getType());
+        ldapResource.setCreationDate(calendar.getTime());
+        ldapResource.setExpirationDate(getExpirationDate(calendar));
 
         resourceService.addResource(ldapResource);
 
         return resourceDn;
+    }
+
+    private Date getExpirationDate(Calendar creationCalender) {
+        int lifetime = appConfiguration.getUmaResourceLifetime();
+        if (lifetime <= 0) {
+            lifetime = DEFAULT_RESOURCE_LIFETIME;
+        }
+        creationCalender.add(Calendar.SECOND, lifetime);
+        return creationCalender.getTime();
     }
 
     private String updateResource(String rsid, UmaResource resource) throws IllegalAccessException, InvocationTargetException {
@@ -350,6 +363,9 @@ public class UmaResourceRegistrationWS {
         ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
+        if (resource.getExp() != null && resource.getExp() > 0) {
+            ldapResource.setExpirationDate(new Date(resource.getExp() * 1000));
+        }
 
         resourceService.updateResource(ldapResource);
 
