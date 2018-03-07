@@ -6,20 +6,6 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
@@ -36,11 +22,21 @@ import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -78,6 +74,9 @@ public class CleanerTimer {
 
     @Inject
     private UmaPermissionService umaPermissionService;
+
+    @Inject
+    private UmaResourceService umaResourceService;
 
     @Inject
     private SessionIdService sessionIdService;
@@ -130,6 +129,7 @@ public class CleanerTimer {
             this.umaRptService.cleanup(now);
             this.umaPermissionService.cleanup(now);
             this.umaPctService.cleanup(now);
+            this.umaResourceService.cleanup(now);
 
             processU2fRequests();
             processU2fDeviceRegistrations();

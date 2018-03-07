@@ -17,7 +17,6 @@ import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.introspection.ws.rs.IntrospectionWebService;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.uma.service.UmaScopeService;
@@ -34,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -163,7 +163,7 @@ public class ServerUtil {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
             result.setResourceId(permission.getResourceId());
             result.setScopes(umaScopeService.getScopeIdsByDns(permission.getScopeDns()));
-            result.setExpiresAt(IntrospectionWebService.dateToSeconds(permission.getExpirationDate()));
+            result.setExpiresAt(dateToSeconds(permission.getExpirationDate()));
             return result;
         }
         return null;
@@ -238,4 +238,7 @@ public class ServerUtil {
     	return parsedUrl1.getPath().endsWith(parsedUrl2.getPath());
     }
 
+    public static Integer dateToSeconds(Date date) {
+        return date != null ? (int) (date.getTime() / 1000) : null;
+    }
 }

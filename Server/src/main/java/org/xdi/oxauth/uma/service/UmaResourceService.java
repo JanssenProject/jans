@@ -6,27 +6,26 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
+import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import com.google.common.base.Preconditions;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Provides operations with resource set descriptions
@@ -78,6 +77,7 @@ public class UmaResourceService {
     public void validate(UmaResource resource) {
         Preconditions.checkArgument(StringUtils.isNotBlank(resource.getName()), "Name is required for resource.");
         Preconditions.checkArgument(((resource.getScopes() != null && !resource.getScopes().isEmpty()) || StringUtils.isNotBlank(resource.getScopeExpression())), "Scope must be specified for resource.");
+        Preconditions.checkState(!resource.isExpired(), "UMA Resource expired. It must not be expired.");
         prepareBranch();
     }
 
@@ -263,4 +263,22 @@ public class UmaResourceService {
         return true;
     }
 
+    public void cleanup(Date now) {
+        prepareBranch();
+
+        BatchOperation<UmaResource> batchService = new ProcessBatchOperation<UmaResource>() {
+            @Override
+            public void performAction(List<UmaResource> entries) {
+                for (UmaResource p : entries) {
+                    try {
+                        remove(p);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
+                }
+            }
+
+        };
+        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
+    }
 }

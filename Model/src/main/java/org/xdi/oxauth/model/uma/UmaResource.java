@@ -57,6 +57,32 @@ public class UmaResource {
                   , required = false)
     private String type;
 
+    @ApiModelProperty(value = "Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource was originally issued.", required = true)
+    private Integer iat;
+
+    @ApiModelProperty(value = " Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire. ", required = true)
+    private Integer exp;
+
+    @JsonProperty(value = "iat")
+    @XmlElement(name = "iat")
+    public Integer getIat() {
+        return iat;
+    }
+
+    public void setIat(Integer iat) {
+        this.iat = iat;
+    }
+
+    @JsonProperty(value = "exp")
+    @XmlElement(name = "exp")
+    public Integer getExp() {
+        return exp;
+    }
+
+    public void setExp(Integer exp) {
+        this.exp = exp;
+    }
+
     @JsonProperty(value = "description")
     @XmlElement(name = "description")
     public String getDescription() {
