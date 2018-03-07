@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,6 +64,12 @@ public class UmaResource {
 
     @LdapAttribute(name = "oxType")
     private String type;
+
+    @LdapAttribute(name = "oxAuthCreation")
+    private Date creationDate;
+
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
 
     public String getScopeExpression() {
         return scopeExpression;
@@ -167,4 +175,45 @@ public class UmaResource {
         this.creator = creator;
     }
 
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    @JsonIgnore
+    public boolean isExpired() {
+        return expirationDate != null && new Date().after(expirationDate);
+    }
+
+    @Override
+    public String toString() {
+        return "UmaResource{" +
+                "dn='" + dn + '\'' +
+                ", inum='" + inum + '\'' +
+                ", id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", iconUri='" + iconUri + '\'' +
+                ", scopes=" + scopes +
+                ", scopeExpression='" + scopeExpression + '\'' +
+                ", clients=" + clients +
+                ", resources=" + resources +
+                ", rev='" + rev + '\'' +
+                ", creator='" + creator + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", creationDate=" + creationDate +
+                ", expirationDate=" + expirationDate +
+                '}';
+    }
 }
