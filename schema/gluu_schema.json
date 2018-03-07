@@ -5360,7 +5360,7 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "inum",
+                "oxId",
                 "oxAuthRedirectURI",
                 "oxAuthClientId"
             ],
