@@ -59,7 +59,7 @@ public class UmaNeedsInfoService {
 
         UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
                 attributeService, resourceService, permissions, requestedScopes, claims, httpRequest,
-                sessionService, userService, client);
+                sessionService, userService, permissionService, client);
 
 
         for (UmaScopeDescription scope : requestedScopes.keySet()) {

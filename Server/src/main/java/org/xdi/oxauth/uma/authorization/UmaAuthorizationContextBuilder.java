@@ -8,6 +8,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaSessionService;
 
@@ -31,12 +32,13 @@ public class UmaAuthorizationContextBuilder {
     private final AppConfiguration configuration;
     private final UmaSessionService sessionService;
     private final UserService userService;
+    private final UmaPermissionService permissionService;
     private final Client client;
 
     public UmaAuthorizationContextBuilder(AppConfiguration configuration, AttributeService attributeService, UmaResourceService resourceService,
                                           List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes,
                                           Claims claims, HttpServletRequest httpRequest,
-                                          UmaSessionService sessionService, UserService userService, Client client) {
+                                          UmaSessionService sessionService, UserService userService, UmaPermissionService permissionService, Client client) {
         this.configuration = configuration;
         this.attributeService = attributeService;
         this.resourceService = resourceService;
@@ -47,12 +49,13 @@ public class UmaAuthorizationContextBuilder {
         this.httpRequest = httpRequest;
         this.sessionService = sessionService;
         this.userService = userService;
+        this.permissionService = permissionService;
     }
 
     public UmaAuthorizationContext build(CustomScriptConfiguration script) {
         return new UmaAuthorizationContext(configuration, attributeService, scopes, getResources(), claims,
                 script.getCustomScript().getDn(), httpRequest, script.getConfigurationAttributes(),
-                sessionService, userService, client);
+                sessionService, userService, permissionService, client);
     }
 
     public Set<String> getResourceIds() {

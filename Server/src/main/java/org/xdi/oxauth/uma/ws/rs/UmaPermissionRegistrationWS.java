@@ -33,7 +33,7 @@ import java.io.IOException;
  * The endpoint at which the host registers permissions that it anticipates a
  * requester will shortly be asking for from the AM. This AM's endpoint is part
  * of resource set registration API.
- * <p/>
+ * <p>
  * In response to receiving an access request accompanied by an RPT that is
  * invalid or has insufficient authorization data, the host SHOULD register a
  * permission with the AM that would be sufficient for the type of access
@@ -69,7 +69,7 @@ public class UmaPermissionRegistrationWS {
     private UmaValidationService umaValidationService;
 
     @Inject
-	private AppConfiguration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -85,7 +85,7 @@ public class UmaPermissionRegistrationWS {
     public Response registerPermission(@Context HttpServletRequest request,
                                        @HeaderParam("Authorization") String authorization,
                                        @ApiParam(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
-                                           String requestAsString) {
+                                       String requestAsString) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
@@ -96,8 +96,8 @@ public class UmaPermissionRegistrationWS {
             String ticket = permissionService.addPermission(permissionList, rptService.rptExpirationDate(), tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
-                            entity(new PermissionTicket(ticket)).
-                            build();
+                    entity(new PermissionTicket(ticket)).
+                    build();
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -111,6 +111,7 @@ public class UmaPermissionRegistrationWS {
 
     /**
      * UMA2 spec (edit 4) defined to possible requests, single permission or list of permission. So here we parse manually
+     *
      * @param requestAsString request as string
      * @return uma permission list
      */
