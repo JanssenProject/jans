@@ -162,7 +162,7 @@ public class IntrospectionWebService {
                 }
             }
         }
-        return null;
+        return grant;
     }
 
 }
