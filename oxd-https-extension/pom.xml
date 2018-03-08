@@ -272,6 +272,9 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}-jar-with-dependencies</finalName>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
