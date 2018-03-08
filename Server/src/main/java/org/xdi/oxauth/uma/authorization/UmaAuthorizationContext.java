@@ -6,24 +6,25 @@
 
 package org.xdi.oxauth.uma.authorization;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 import org.xdi.oxauth.uma.service.RedirectParameters;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaSessionService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,18 +45,20 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final AttributeService attributeService;
     private final UmaSessionService sessionService;
     private final UserService userService;
+    private final UmaPermissionService permissionService;
     private final Client client;
 
     public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
                                    Map<String, SimpleCustomProperty> configurationAttributes, UmaSessionService sessionService,
-                                   UserService userService, Client client) {
+                                   UserService userService, UmaPermissionService permissionService, Client client) {
     	super(httpRequest);
 
         this.configuration = configuration;
     	this.attributeService = attributeService;
         this.sessionService = sessionService;
         this.userService = userService;
+        this.permissionService = permissionService;
         this.client = client;
         this.scopes = new HashMap<UmaScopeDescription, Boolean>(scopes);
         this.resources = resources;
@@ -176,6 +179,16 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     public Client getClient() {
         return client;
     }
+
+    public List<UmaPermission> getPermissions() {
+        SessionId session = sessionService.getSession(httpRequest, httpResponse);
+        if (session == null) {
+            getLog().trace("No UMA session set.");
+            return Lists.newArrayList();
+        }
+        return permissionService.getPermissionsByTicket(sessionService.getTicket(session));
+    }
+
 
     //    public String getClientClaim(String p_claimName) {
 //        return getEntryAttributeValue(getGrant().getClientDn(), p_claimName);
