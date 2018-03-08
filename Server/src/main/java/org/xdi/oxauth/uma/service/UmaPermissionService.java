@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.BatchOperation;
@@ -29,6 +19,11 @@ import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Holds permission tokens and permissions
@@ -66,8 +61,12 @@ public class UmaPermissionService {
 
         List<UmaPermission> result = new ArrayList<UmaPermission>();
         for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
-            result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
-                    generateNewTicket(), configurationCode, expirationDate));
+            UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
+                    generateNewTicket(), configurationCode, expirationDate);
+            if (permission.getParams() != null && !permission.getParams().isEmpty()) {
+                p.getAttributes().putAll(permission.getParams());
+            }
+            result.add(p);
         }
 
         return result;

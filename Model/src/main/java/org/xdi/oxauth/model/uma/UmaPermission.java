@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * UMA Permission. Used for both:
@@ -42,6 +43,8 @@ public class UmaPermission implements Serializable {
             , required = true)
     private List<String> scopes;
     private Integer expiresAt;
+
+    private Map<String, String> params;
 
     public UmaPermission() {
     }
@@ -79,6 +82,16 @@ public class UmaPermission implements Serializable {
 
     public void setExpiresAt(Integer expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    @JsonProperty(value = "params")
+    @XmlElement(name = "params")
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
     }
 
     @Override
