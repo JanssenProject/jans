@@ -13,7 +13,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * @author shekhar laad
  * @date 12/10/2015
  */
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Vetoed
 public class ImportPersonConfig implements Configuration, Serializable {
