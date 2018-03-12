@@ -23,11 +23,40 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, configurationAttributes):
         print "CAS2. Initialization"
+        
+        self.cas_enable_server_validation = False
+        if (configurationAttributes.containsKey("cas_validation_uri") and
+            configurationAttributes.containsKey("cas_validation_pattern") and
+            configurationAttributes.containsKey("cas_validation_timeout")):
+
+            print "CAS2. Initialization. Configuring checker client"
+            self.cas_enable_server_validation = True
+
+            self.cas_validation_uri = configurationAttributes.get("cas_validation_uri").getValue2()
+            self.cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
+            cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
+    
+            httpService = CdiUtil.bean(HttpService)
+    
+            self.http_client = httpService.getHttpsClient()
+            self.http_client_params = self.http_client.getParams()
+            self.http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout)
+
+
+        self.cas_alt_auth_mode = None
+        if configurationAttributes.containsKey("cas_alt_auth_mode"):
+            self.cas_alt_auth_mode = configurationAttributes.get("cas_alt_auth_mode").getValue2()
+
         print "CAS2. Initialized successfully"
+
         return True   
 
     def destroy(self, configurationAttributes):
         print "CAS2. Destroy"
+        if self.cas_enable_server_validation:
+            print "CAS2. CDestory. Destorying checker client"
+            self.http_client = None
+            
         print "CAS2. Destroyed successfully"
         return True
 
@@ -35,33 +64,23 @@ class PersonAuthentication(PersonAuthenticationType):
         return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
-        print "CAS2. Rest API authenticate isValidAuthenticationMethod"
-
-        if (not (configurationAttributes.containsKey("cas_validation_uri") and
-            configurationAttributes.containsKey("cas_validation_pattern") and
-            configurationAttributes.containsKey("cas_validation_timeout"))):
+        if not self.cas_enable_server_validation:
             return True
 
-        cas_validation_uri = configurationAttributes.get("cas_validation_uri").getValue2()
-        cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
-        cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
+        print "CAS2. isValidAuthenticationMethod"
 
         httpService = CdiUtil.bean(HttpService)
 
-        http_client = httpService.getHttpsClient()
-        http_client_params = http_client.getParams()
-        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout)
-
         try:
-            http_service_response = httpService.executeGet(http_client, cas_validation_uri)
+            http_service_response = httpService.executeGet(self.http_client, self.cas_validation_uri)
             http_response = http_service_response.getHttpResponse()
         except:
-            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
+            print "CAS2. isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
             return False
 
         try:
-            if (http_response.getStatusLine().getStatusCode() != 200):
-                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response.getStatusLine().getStatusCode())
+            if http_response.getStatusLine().getStatusCode() != 200:
+                print "CAS2. isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response.getStatusLine().getStatusCode())
                 httpService.consume(http_response)
                 return False
     
@@ -71,15 +90,14 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             http_service_response.closeConnection()
 
-        if (validation_response_string == None or validation_response_string.find(cas_validation_pattern) == -1):
-            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
+        if validation_response_string == None or validation_response_string.find(self.cas_validation_pattern) == -1:
+            print "CAS2. isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
             return False
 
         return True
 
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
-        cas_alt_auth_mode = configurationAttributes.get("cas_alt_auth_mode").getValue2()
-        return cas_alt_auth_mode
+        return self.cas_alt_auth_mode
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
@@ -94,10 +112,10 @@ class PersonAuthentication(PersonAuthenticationType):
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
 
         cas_extra_opts = None
-        if (configurationAttributes.containsKey("cas_extra_opts")):
+        if configurationAttributes.containsKey("cas_extra_opts"):
             cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
 
-        if (step == 1):
+        if step == 1:
             print "CAS2. Authenticate for step 1"
             ticket_array = requestParameters.get("ticket")
             if ArrayHelper.isEmpty(ticket_array):
@@ -107,7 +125,7 @@ class PersonAuthentication(PersonAuthenticationType):
             ticket = ticket_array[0]
             print "CAS2. Authenticate for step 1. ticket: " + ticket
 
-            if (StringHelper.isEmptyString(ticket)):
+            if StringHelper.isEmptyString(ticket):
                 print "CAS2. Authenticate for step 1. ticket is invalid"
                 return False
 
@@ -117,19 +135,18 @@ class PersonAuthentication(PersonAuthenticationType):
 
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
-            if (cas_renew_opt):
+            if cas_renew_opt:
                 parametersMap.put("renew", "true")
             parametersMap.put("ticket", ticket)
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
             cas_service_request_uri = cas_host + "/serviceValidate?" + cas_service_request_uri
-            if (cas_extra_opts != None):
+            if cas_extra_opts != None:
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
             print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
             http_client = httpService.getHttpsClient()
             http_service_response = httpService.executeGet(http_client, cas_service_request_uri)
-            
             try:
                 validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_service_response.getHttpResponse()))
             finally:
@@ -146,17 +163,17 @@ class PersonAuthentication(PersonAuthenticationType):
             cas2_user_uid = self.parse_tag(validation_content, "cas:user")
             print "CAS2. Authenticate for step 1. cas2_user_uid: ", cas2_user_uid
             
-            if ((cas2_auth_failure != None) or (cas2_user_uid == None)):
+            if (cas2_auth_failure != None) or (cas2_user_uid == None):
                 print "CAS2. Authenticate for step 1. Ticket is invalid"
                 return False
 
-            if (cas_map_user):
+            if cas_map_user:
                 print "CAS2. Authenticate for step 1. Attempting to find user by oxExternalUid: cas2:" + cas2_user_uid
 
                 # Check if the is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
-                if (find_user_by_uid == None):
+                if find_user_by_uid == None:
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     print "CAS2. Authenticate for step 1. Setting count steps to 2"
                     identity.setWorkingParameter("cas2_count_login_steps", 2)
@@ -176,9 +193,9 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 print "CAS2. Authenticate for step 1. Attempting to find user by uid:" + cas2_user_uid
 
-                # Check if the is user with specified cas2_user_uid
+                # Check if there is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUser(cas2_user_uid)
-                if (find_user_by_uid == None):
+                if find_user_by_uid == None:
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     return False
 
@@ -192,37 +209,36 @@ class PersonAuthentication(PersonAuthenticationType):
                 identity.setWorkingParameter("cas2_count_login_steps", 1)
 
                 return True
-        elif (step == 2):
+        elif step == 2:
             print "CAS2. Authenticate for step 2"
 
-            sessionAttributes = identity.getSessionId().getSessionAttributes()
-            if (sessionAttributes == None) or not sessionAttributes.containsKey("cas2_user_uid"):
+            if identity.isSetWorkingParameter("cas2_user_uid"):
                 print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
                 return False
 
-            cas2_user_uid = sessionAttributes.get("cas2_user_uid")
+            cas2_user_uid = identity.getWorkingParameter("cas2_user_uid")
             passed_step1 = StringHelper.isNotEmptyString(cas2_user_uid)
-            if (not passed_step1):
+            if not passed_step1:
                 return False
 
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
-            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+            if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
-            if (not logged_in):
+            if not logged_in:
                 return False
 
             # Check if there is user which has cas2_user_uid
             # Avoid mapping CAS2 account to more than one IDP account
             find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
-            if (find_user_by_uid == None):
+            if find_user_by_uid == None:
                 # Add cas2_user_uid to user one id UIDs
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "cas2:" + cas2_user_uid)
-                if (find_user_by_uid == None):
+                if find_user_by_uid == None:
                     print "CAS2. Authenticate for step 2. Failed to update current user"
                     return False
 
@@ -246,10 +262,10 @@ class PersonAuthentication(PersonAuthenticationType):
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
 
         cas_extra_opts = None
-        if (configurationAttributes.containsKey("cas_extra_opts")):
+        if configurationAttributes.containsKey("cas_extra_opts"):
             cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
 
-        if (step == 1):
+        if step == 1:
             print "CAS2. Prepare for step 1"
 
             facesContext = CdiUtil.bean(FacesContext)
@@ -257,7 +273,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
-            if (cas_renew_opt):
+            if cas_renew_opt:
                 parametersMap.put("renew", "true")
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
             cas_service_request_uri = cas_host + "/login?" + cas_service_request_uri
@@ -269,7 +285,7 @@ class PersonAuthentication(PersonAuthenticationType):
             facesService.redirectToExternalURL(cas_service_request_uri)
 
             return True
-        elif (step == 2):
+        elif step == 2:
             print "CAS2. Prepare for step 2"
 
             return True
@@ -277,7 +293,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        if (step == 2):
+        if step == 2:
             return Arrays.asList("cas2_user_uid")
         
         return None
@@ -291,7 +307,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         identity = CdiUtil.bean(Identity)
-        if (step == 1):
+        if step == 1:
             return "/auth/cas2/cas2login.xhtml"
         return "/auth/cas2/cas2postlogin.xhtml"
 
