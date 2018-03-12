@@ -14,15 +14,15 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Saml NameId coxTrust configuration
- * 
+ *
  * @author Yuriy Movchan Date: 03/12/2018
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Vetoed
 public class NameIdConfig implements Configuration, Serializable {
-	
-	private static final long serialVersionUID = 2386538577505167695L;
+
+    private static final long serialVersionUID = 2386538577505167695L;
 
     private String name;
     private String sourceAttribute;

@@ -36,11 +36,11 @@ public class LdapOxTrustConfiguration extends Entry {
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxTrustConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;

@@ -14,7 +14,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Attribute resolver configurations
- * 
+ *
  * @author Yuriy Movchan Date: 09/04/2017
  */
 @Vetoed
