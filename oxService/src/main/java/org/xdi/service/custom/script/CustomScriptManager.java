@@ -315,7 +315,8 @@ public class CustomScriptManager implements Serializable {
 
     private Map<CustomScriptType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsByScriptType(
             Map<String, CustomScriptConfiguration> customScriptConfigurations) {
-        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType = new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
+        Map<CustomScriptType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByScriptType =
+                new HashMap<CustomScriptType, List<CustomScriptConfiguration>>();
 
         for (CustomScriptType customScriptType : this.supportedCustomScriptTypes) {
             List<CustomScriptConfiguration> customConfigurationsByScriptType = new ArrayList<CustomScriptConfiguration>();
