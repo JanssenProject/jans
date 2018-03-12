@@ -90,19 +90,23 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Duo. Authenticate for step 1"
 
-            credentials = identity.getCredentials()
-            user_name = credentials.getUsername()
-            user_password = credentials.getPassword()
-
-            logged_in = False
-            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
-                logged_in = authenticationService.authenticate(user_name, user_password)
-
-            if (not logged_in):
-                return False
-
+            # Check if user authenticated alreadyin another custom script
             user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                credentials = identity.getCredentials()
+                user_name = credentials.getUsername()
+                user_password = credentials.getPassword()
+    
+                logged_in = False
+                if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+                    userService = CdiUtil.bean(UserService)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
+    
+                if (not logged_in):
+                    return False
+    
+                user = authenticationService.getAuthenticatedUser()
+
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
                 is_member_duo_group = self.isUserMemberOfGroup(user, self.audit_attribute, self.duo_group)
