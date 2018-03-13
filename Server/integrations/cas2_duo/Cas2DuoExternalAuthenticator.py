@@ -27,29 +27,31 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "CAS2 + Duo. Initialization"
         
-        cas2_result = self.cas2ExternalAuthenticator.init(configurationAttributes)
-        duo_result = self.duoExternalAuthenticator.init(configurationAttributes)
+        result = self.cas2ExternalAuthenticator.init(configurationAttributes)
+        result = result and self.duoExternalAuthenticator.init(configurationAttributes)
 
         print "CAS2 + Duo. Initialized successfully"
-        return cas2_result and duo_result
+
+        return result
 
     def destroy(self, configurationAttributes):
         print "CAS2 + Duo. Destroy"
 
-        cas2_result = self.cas2ExternalAuthenticator.destroy(configurationAttributes)
-        duo_result = self.duoExternalAuthenticator.destroy(configurationAttributes)
+        result = self.cas2ExternalAuthenticator.destroy(configurationAttributes)
+        result = result and self.duoExternalAuthenticator.destroy(configurationAttributes)
 
         print "CAS2 + Duo. Destroyed successfully"
-        return cas2_result and duo_result
+
+        return result
 
     def getApiVersion(self):
         return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
-        cas2_result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
-        duo_result = self.duoExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
+        result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
+        result = result and self.duoExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
 
-        return cas2_result and duo_result
+        return result
 
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
         cas2_result = self.cas2ExternalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes)
@@ -63,31 +65,106 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        cas2_result = self.cas2ExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+        result = False
+
+        identity = CdiUtil.bean(Identity)
+
+        start_duo = False
+        if step == 1:
+            # Execute CAS2 for step #1
+            result = self.cas2ExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+
+            # Execute DUO prepareForStep and authenticate for step #1 if needed
+            cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if cas2_count_steps == 1:
+                result = result and self.duoExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step)
+                result = result and self.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+        elif step == 2:
+            # Execute CAS2 for step #2 if needed
+            cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if cas2_count_steps == 2:
+                result = self.cas2ExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+
+                # Execute DUO prepareForStep and authenticate for step #1
+                result = result and self.duoExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, 1)
+                result = result and self.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, 1)
+            else:
+                duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+                if duo_count_steps == 2:
+                    result = elf.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+        elif step == 3:
+            # Execute DUO for step #2 if needed
+            duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if duo_count_steps == 2:
+                result = self.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, 2)
 
         return cas2_result
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        cas2_result = self.cas2ExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step)
+        result = False
 
-        return cas2_result
+        identity = CdiUtil.bean(Identity)
+
+        # Execute CAS2 for step #1
+        if step == 1:
+            # Execute CAS2 for step #1
+            result = self.cas2ExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step)
+        elif step == 2:
+            # Execute CAS2 for step #2 if needed
+            cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if cas2_count_steps == 2:
+                result = self.cas2ExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step)
+            else:
+                # Execute DUO for step #2 if needed
+                duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+                if duo_count_steps == 2:
+                    result = self.duoExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step)
+        elif step == 3:
+            # Execute DUO for step #2 if needed
+            duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if duo_count_steps == 2:
+                result = self.duoExternalAuthenticator.prepareForStep(configurationAttributes, requestParameters, 2)
+
+        return result
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         cas2_result = self.cas2ExternalAuthenticator.getExtraParametersForStep(configurationAttributes, step)
+        duo_result = self.duoExternalAuthenticator.getExtraParametersForStep(configurationAttributes, step)
+        
+        if cas2_result == None:
+            return duo_result
 
-        return cas2_result
+        if duo_result == None:
+            return cas2_result
+
+        return ArrayHelper.arrayMerge(cas2_result, duo_result)
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        cas2_result = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+        default_count_steps = 2
+        cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+        duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+        if (cas2_count_steps == 2) and (duo_count_steps == 2):
+            default_count_steps = 3
 
-        return cas2_result
+        return max(default_count_steps, cas2_count_steps, duo_count_steps)
 
     def getPageForStep(self, configurationAttributes, step):
-        cas2_result = self.cas2ExternalAuthenticator.getPageForSteps(configurationAttributes, step)
+        result = ""
+        if step == 1:
+            result = self.cas2ExternalAuthenticator.getPageForStep(configurationAttributes, step)
+        elif step == 2:
+            cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+            if cas2_count_steps == 2:
+                result = self.cas2ExternalAuthenticator.getPageForStep(configurationAttributes, step)
+            else:
+                result = self.duoExternalAuthenticator.getPageForStep(configurationAttributes, step)
+        elif step == 3:
+            result = self.duoExternalAuthenticator.getPageForStep(configurationAttributes, step)
 
-        return cas2_result
+        return result
 
     def logout(self, configurationAttributes, requestParameters):
         cas2_result = self.cas2ExternalAuthenticator.logout(configurationAttributes, requestParameters)
+        duo_result = self.duoExternalAuthenticator.logout(configurationAttributes, requestParameters)
 
-        return cas2_result
+        return cas2_result and duo_result
