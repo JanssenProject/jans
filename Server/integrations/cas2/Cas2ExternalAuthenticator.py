@@ -42,7 +42,6 @@ class PersonAuthentication(PersonAuthenticationType):
             self.http_client_params = self.http_client.getParams()
             self.http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout)
 
-
         self.cas_alt_auth_mode = None
         if configurationAttributes.containsKey("cas_alt_auth_mode"):
             self.cas_alt_auth_mode = configurationAttributes.get("cas_alt_auth_mode").getValue2()
@@ -73,12 +72,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             http_service_response = httpService.executeGet(self.http_client, self.cas_validation_uri)
-            http_response = http_service_response.getHttpResponse()
         except:
             print "CAS2. isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
             return False
 
         try:
+            http_response = http_service_response.getHttpResponse()
             if http_response.getStatusLine().getStatusCode() != 200:
                 print "CAS2. isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response.getStatusLine().getStatusCode())
                 httpService.consume(http_response)
@@ -90,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             http_service_response.closeConnection()
 
-        if validation_response_string == None or validation_response_string.find(self.cas_validation_pattern) == -1:
+        if (validation_response_string == None) or (validation_response_string.find(self.cas_validation_pattern) == -1):
             print "CAS2. isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
             return False
 
