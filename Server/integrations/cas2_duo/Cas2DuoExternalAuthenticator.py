@@ -8,12 +8,8 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.service import MailService
-from org.xdi.util import ArrayHelper
-from org.xdi.util import StringHelper
+from org.xdi.util import ArrayHelper, StringHelper
 
-import duo_web
-import json
 from Cas2ExternalAuthenticator import PersonAuthentication as Cas2ExternalAuthenticator
 from DuoExternalAuthenticator import PersonAuthentication as DuoExternalAuthenticator
 
@@ -27,31 +23,31 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "CAS2 + Duo. Initialization"
         
-        result = self.cas2ExternalAuthenticator.init(configurationAttributes)
-        result = result and self.duoExternalAuthenticator.init(configurationAttributes)
+        cas2_result = self.cas2ExternalAuthenticator.init(configurationAttributes)
+        duo_result = self.duoExternalAuthenticator.init(configurationAttributes)
 
         print "CAS2 + Duo. Initialized successfully"
 
-        return result
+        return cas2_result and duo_result
 
     def destroy(self, configurationAttributes):
         print "CAS2 + Duo. Destroy"
 
-        result = self.cas2ExternalAuthenticator.destroy(configurationAttributes)
-        result = result and self.duoExternalAuthenticator.destroy(configurationAttributes)
+        cas2_result = self.cas2ExternalAuthenticator.destroy(configurationAttributes)
+        duo_result = self.duoExternalAuthenticator.destroy(configurationAttributes)
 
         print "CAS2 + Duo. Destroyed successfully"
 
-        return result
+        return cas2_result and duo_result
 
     def getApiVersion(self):
         return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
-        result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
-        result = result and self.duoExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
+        cas2_result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
+        duo_result = self.duoExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
 
-        return result
+        return cas2_result and duo_result
 
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
         cas2_result = self.cas2ExternalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes)
@@ -66,8 +62,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         result = False
-
-        identity = CdiUtil.bean(Identity)
 
         start_duo = False
         if step == 1:
@@ -91,19 +85,17 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
                 if duo_count_steps == 2:
-                    result = elf.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
+                    result = self.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, step)
         elif step == 3:
             # Execute DUO for step #2 if needed
             duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
             if duo_count_steps == 2:
                 result = self.duoExternalAuthenticator.authenticate(configurationAttributes, requestParameters, 2)
 
-        return cas2_result
+        return result
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         result = False
-
-        identity = CdiUtil.bean(Identity)
 
         # Execute CAS2 for step #1
         if step == 1:
@@ -140,16 +132,20 @@ class PersonAuthentication(PersonAuthenticationType):
         return ArrayHelper.arrayMerge(cas2_result, duo_result)
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        default_count_steps = 2
         cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
         duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
-        if (cas2_count_steps == 2) and (duo_count_steps == 2):
-            default_count_steps = 3
 
-        return max(default_count_steps, cas2_count_steps, duo_count_steps)
+        if (cas2_count_steps == 1) and (duo_count_steps == 1):
+            return 1
+
+        if (cas2_count_steps == 2) and (duo_count_steps == 2):
+            return 3
+
+        return max(cas2_count_steps, duo_count_steps)
 
     def getPageForStep(self, configurationAttributes, step):
         result = ""
+
         if step == 1:
             result = self.cas2ExternalAuthenticator.getPageForStep(configurationAttributes, step)
         elif step == 2:
