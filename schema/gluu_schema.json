@@ -4151,6 +4151,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxd Id",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxdId"
+            ],
+            "oid": "oxAttribute:383",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4732,6 +4743,7 @@
             "may": [
                 "associatedPerson",
                 "displayName",
+                "description",
                 "inum",
                 "oxAuthAppType",
                 "oxAuthClientIdIssuedAt",
@@ -4778,7 +4790,8 @@
                 "oxRefreshTokenLifetime",
                 "oxDisabled",
                 "oxAuthLogoutURI",
-                "oxAuthLogoutSessionRequired"
+                "oxAuthLogoutSessionRequired",
+                "oxdId"
             ],
             "must": [
                 "objectclass"
