@@ -59,6 +59,7 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
 
             SetupClientResponse response = new SetupClientResponse();
             response.setOxdId(registeredClient.getOxdId());
+            response.setClientIdOfOxdId(registered.getClientId());
             response.setOpHost(registeredClient.getOpHost());
 
             response.setSetupClientOxdId(setupClient.getOxdId());
