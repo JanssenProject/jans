@@ -1,3 +1,7 @@
+.project
+.settings/
+*.classpath
+
 .idea
 
 ### Java template
