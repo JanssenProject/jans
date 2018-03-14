@@ -11,6 +11,8 @@ public class SetupClientResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
+    @JsonProperty(value = "client_id_of_oxd_id")
+    private String clientIdOfOxdId;
     @JsonProperty(value = "op_host")
     private String opHost;
 
@@ -36,6 +38,14 @@ public class SetupClientResponse implements IOpResponse {
 
     public void setSetupClientOxdId(String setupClientOxdId) {
         this.setupClientOxdId = setupClientOxdId;
+    }
+
+    public String getClientIdOfOxdId() {
+        return clientIdOfOxdId;
+    }
+
+    public void setClientIdOfOxdId(String clientIdOfOxdId) {
+        this.clientIdOfOxdId = clientIdOfOxdId;
     }
 
     public String getOxdId() {
@@ -108,6 +118,7 @@ public class SetupClientResponse implements IOpResponse {
                 "oxdId='" + oxdId + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", setupClientOxdId='" + setupClientOxdId + '\'' +
+                ", clientIdOfOxdId='" + clientIdOfOxdId + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
