@@ -449,6 +449,12 @@ class Exporter(object):
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                           'cn=directory manager,o=gluu', '-j',
                           self.passwordFile]
+
+        self.ldapCredsSite = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
+                          'cn=directory manager,o=site', '-j',
+                          self.passwordFile]
+
+
         self.base_dns = ['ou=people',
                          'ou=groups',
                          'ou=attributes',
@@ -647,7 +653,7 @@ class Exporter(object):
         f.close()
 
         # Backup o=site
-        args = [self.ldapsearch] + self.ldapCreds + [
+        args = [self.ldapsearch] + self.ldapCredsSite + [
             '-b', 'o=site', '-s', 'one', 'objectclass=*']
         output = self.getOutput(args)
         f = open("%s/ldif/site.ldif" % self.backupDir, 'w')
