@@ -182,7 +182,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         if step == 2:
-            return Arrays.asList("duo_count_login_steps", "cas2_user_uid", "duo_host", "duo_sig_request")
+            return Arrays.asList("duo_count_login_steps", "cas2_user_uid")
 
         return None
 
