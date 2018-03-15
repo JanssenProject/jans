@@ -181,6 +181,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
+        if step == 2:
+            return Arrays.asList("duo_count_login_steps", "cas2_user_uid", "duo_host", "duo_sig_request")
+
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
