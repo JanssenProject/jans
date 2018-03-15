@@ -11,7 +11,7 @@ from javax.faces.context import FacesContext
 from org.apache.http.params import CoreConnectionPNames
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxauth.service import UserService, AuthenticationService, RequestParameterService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper, ArrayHelper
@@ -122,6 +122,7 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials = identity.getCredentials()
 
         userService = CdiUtil.bean(UserService)
+        requestParameterService = CdiUtil.bean(RequestParameterService)
         authenticationService = CdiUtil.bean(AuthenticationService)
         httpService = CdiUtil.bean(HttpService)
 
@@ -148,7 +149,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
             parametersMap.put("ticket", ticket)
-            cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
+            cas_service_request_uri = requestParameterService.parametersAsString(parametersMap)
             cas_service_request_uri = self.cas_host + "/serviceValidate?" + cas_service_request_uri
             if self.cas_extra_opts != None:
                 cas_service_request_uri = cas_service_request_uri + "&" + self.cas_extra_opts
@@ -268,7 +269,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "CAS2. Prepare for step 1"
 
-            authenticationService = CdiUtil.bean(AuthenticationService)
+            requestParameterService = CdiUtil.bean(RequestParameterService)
             httpService = CdiUtil.bean(HttpService)
 
             facesContext = CdiUtil.bean(FacesContext)
@@ -278,7 +279,7 @@ class PersonAuthentication(PersonAuthenticationType):
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
             if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
-            cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
+            cas_service_request_uri = requestParameterService.parametersAsString(parametersMap)
             cas_service_request_uri = self.cas_host + "/login?" + cas_service_request_uri
             if self.cas_extra_opts != None:
                 cas_service_request_uri = cas_service_request_uri + "&" + self.cas_extra_opts
