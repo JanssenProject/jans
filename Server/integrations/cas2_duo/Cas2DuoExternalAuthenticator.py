@@ -139,6 +139,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getCountAuthenticationSteps(self, configurationAttributes):
         cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
         duo_count_steps = self.duoExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
+        print "CAS2 + Duo. Get count authentication steps. cas2_count_steps = %s, duo_count_steps = %s" % (cas2_count_steps, duo_count_steps)
 
         if (cas2_count_steps == 1) and (duo_count_steps == 1):
             return 1
