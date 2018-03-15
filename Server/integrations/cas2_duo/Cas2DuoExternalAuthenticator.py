@@ -9,6 +9,7 @@ from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import ArrayHelper, StringHelper
+from java.util import ArrayList, Arrays
 
 from Cas2ExternalAuthenticator import PersonAuthentication as Cas2ExternalAuthenticator
 from DuoExternalAuthenticator import PersonAuthentication as DuoExternalAuthenticator
@@ -128,8 +129,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if duo_result == None:
             return cas2_result
+        
+        result_list = ArrayList()
+        result_list.addAll(cas2_result)
+        result_list.addAll(duo_result)
 
-        return ArrayHelper.arrayMerge(cas2_result, duo_result)
+        return result_list
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         cas2_count_steps = self.cas2ExternalAuthenticator.getCountAuthenticationSteps(configurationAttributes)
