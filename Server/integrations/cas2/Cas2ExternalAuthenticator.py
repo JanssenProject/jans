@@ -23,7 +23,26 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, configurationAttributes):
         print "CAS2. Initialization"
-        
+
+        if not configurationAttributes.containsKey("cas_host"):
+            print "CAS2. Initialization. Parameter 'cas_host' is missing"
+            return False
+
+        self.cas_host = configurationAttributes.get("cas_host").getValue2()
+
+        self.cas_extra_opts = None
+        if configurationAttributes.containsKey("cas_extra_opts"):
+            self.cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
+
+
+        self.cas_renew_opt = False
+        if configurationAttributes.containsKey("cas_renew_opt"):
+            self.cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
+
+        self.cas_map_user = False
+        if configurationAttributes.containsKey("cas_map_user"):
+            self.cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
+
         self.cas_enable_server_validation = False
         if (configurationAttributes.containsKey("cas_validation_uri") and
             configurationAttributes.containsKey("cas_validation_pattern") and
@@ -106,14 +125,6 @@ class PersonAuthentication(PersonAuthenticationType):
         authenticationService = CdiUtil.bean(AuthenticationService)
         httpService = CdiUtil.bean(HttpService)
 
-        cas_host = configurationAttributes.get("cas_host").getValue2()
-        cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
-        cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
-
-        cas_extra_opts = None
-        if configurationAttributes.containsKey("cas_extra_opts"):
-            cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
-
         if step == 1:
             print "CAS2. Authenticate for step 1"
             ticket_array = requestParameters.get("ticket")
@@ -134,13 +145,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
-            if cas_renew_opt:
+            if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
             parametersMap.put("ticket", ticket)
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
-            cas_service_request_uri = cas_host + "/serviceValidate?" + cas_service_request_uri
-            if cas_extra_opts != None:
-                cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
+            cas_service_request_uri = self.cas_host + "/serviceValidate?" + cas_service_request_uri
+            if self.cas_extra_opts != None:
+                cas_service_request_uri = cas_service_request_uri + "&" + self.cas_extra_opts
 
             print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
@@ -166,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "CAS2. Authenticate for step 1. Ticket is invalid"
                 return False
 
-            if cas_map_user:
+            if self.cas_map_user:
                 print "CAS2. Authenticate for step 1. Attempting to find user by oxExternalUid: cas2:" + cas2_user_uid
 
                 # Check if the is user with specified cas2_user_uid
@@ -254,30 +265,23 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
-        httpService = CdiUtil.bean(HttpService)
-
-        cas_host = configurationAttributes.get("cas_host").getValue2()
-        cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
-
-        cas_extra_opts = None
-        if configurationAttributes.containsKey("cas_extra_opts"):
-            cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
-
         if step == 1:
             print "CAS2. Prepare for step 1"
+
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            httpService = CdiUtil.bean(HttpService)
 
             facesContext = CdiUtil.bean(FacesContext)
             request = facesContext.getExternalContext().getRequest()
 
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
-            if cas_renew_opt:
+            if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
-            cas_service_request_uri = cas_host + "/login?" + cas_service_request_uri
-            if cas_extra_opts != None:
-                cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
+            cas_service_request_uri = self.cas_host + "/login?" + cas_service_request_uri
+            if self.cas_extra_opts != None:
+                cas_service_request_uri = cas_service_request_uri + "&" + self.cas_extra_opts
 
             print "CAS2. Prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
             facesService = CdiUtil.bean(FacesService)
