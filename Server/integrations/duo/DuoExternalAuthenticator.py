@@ -11,6 +11,7 @@ from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
 from org.xdi.util import ArrayHelper
 from org.xdi.util import StringHelper
+from java.util import Arrays
 
 import duo_web
 import json
