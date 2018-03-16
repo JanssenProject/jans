@@ -187,7 +187,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
-            sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
+            try {
+                sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
+            } catch (AcrChangedException e) { // Acr changed
+                //See https://github.com/GluuFederation/oxTrust/issues/797
+                if (e.isForceReAuthentication()) {
+                    if (!prompts.contains(Prompt.LOGIN)) {
+                        log.info("ACR is changed, adding prompt=login to prompts");
+                        prompts.add(Prompt.LOGIN);
+                        //Override prompt in session
+                        sessionUser.getSessionAttributes().put("prompt", org.xdi.oxauth.model.util.StringUtils.implode(prompts, " "));
+                    }
+                } else {
+                    throw e;
+                }
+            }
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
@@ -630,7 +644,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 //                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
 //            log.error(e.getMessage(), e);
         } catch (AcrChangedException e) { // Acr changed
-            log.error("ACR is changed, please use prompt=login in order to alter existing session.");
+            log.error("ACR is changed, please provide a supported and enabled acr value");
             log.error(e.getMessage(), e);
 
             RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
