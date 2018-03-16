@@ -147,7 +147,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (cas2_count_steps == 2) and (duo_count_steps == 2):
             return 3
 
-        return Math. max(cas2_count_steps, duo_count_steps)
+        return max(cas2_count_steps, duo_count_steps)
 
     def getPageForStep(self, configurationAttributes, step):
         result = ""
