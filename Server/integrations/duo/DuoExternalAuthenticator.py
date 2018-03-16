@@ -190,7 +190,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
         if (identity.isSetWorkingParameter("duo_count_login_steps")):
-            return identity.getWorkingParameter("duo_count_login_steps")
+            return int(identity.getWorkingParameter("duo_count_login_steps"))
 
         return 2
 
