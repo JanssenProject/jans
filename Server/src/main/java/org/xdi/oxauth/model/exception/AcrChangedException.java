@@ -7,7 +7,14 @@ package org.xdi.oxauth.model.exception;
 
 public class AcrChangedException extends Exception {
 
+    private boolean forceReAuthentication;
+
     public AcrChangedException() {
+        forceReAuthentication = true;
+    }
+
+    public AcrChangedException(boolean forceReAuthentication) {
+        this.forceReAuthentication = forceReAuthentication;
     }
 
     public AcrChangedException(Throwable cause) {
@@ -21,4 +28,13 @@ public class AcrChangedException extends Exception {
     public AcrChangedException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public boolean isForceReAuthentication() {
+        return forceReAuthentication;
+    }
+
+    public void setForceReAuthentication(boolean forceReAuthentication) {
+        this.forceReAuthentication = forceReAuthentication;
+    }
+
 }
