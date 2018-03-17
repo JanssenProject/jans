@@ -358,6 +358,7 @@ public class CustomScriptManager implements Serializable {
     public BaseExternalType createExternalTypeFromStringWithPythonException(CustomScript customScript,
             Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
         String script = customScript.getScript();
+        String scriptName = StringHelper.toLowerCase(customScript.getName()) + ".py";
         if (script == null) {
             return null;
         }
@@ -368,7 +369,7 @@ public class CustomScriptManager implements Serializable {
         InputStream bis = null;
         try {
             bis = new ByteArrayInputStream(script.getBytes("UTF-8"));
-            externalType = pythonService.loadPythonScript(bis, customScriptType.getPythonClass(), customScriptType.getCustomScriptType(),
+            externalType = pythonService.loadPythonScript(bis, scriptName, customScriptType.getPythonClass(), customScriptType.getCustomScriptType(),
                     new PyObject[] { new PyLong(System.currentTimeMillis()) });
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);

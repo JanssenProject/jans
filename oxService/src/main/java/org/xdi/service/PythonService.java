@@ -140,22 +140,21 @@ public class PythonService implements Serializable {
         return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
     }
 
-    public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs)
-            throws PythonException {
-        if (!interpereterReady || (scriptFile == null)) {
-            return null;
-        }
+	public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
+		if (!interpereterReady || StringHelper.isEmpty(scriptName)) {
+			return null;
+		}
 
-        PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
+    	PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
         try {
-            currentPythonInterpreter.execfile(scriptFile);
-        } catch (Exception ex) {
-            log.error("Failed to load python file", ex.getMessage(), ex);
-            throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
-        }
+        	currentPythonInterpreter.execfile(scriptName);
+		} catch (Exception ex) {
+			log.error("Failed to load python file", ex.getMessage());
+			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
+		}
 
         return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
-    }
+	}
 
     @SuppressWarnings("unchecked")
     private <T> T loadPythonScript(String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs, PythonInterpreter interpreter)
