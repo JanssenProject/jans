@@ -530,10 +530,15 @@ class Migration(object):
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
+                    if line.startswith('oxMemcachedConfiguration:'):
+                        print line
+                        line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
+
+
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -623,10 +628,12 @@ class Migration(object):
 
 
     def getLDAPServerTypeChoice(self):
-
+        choice = 0
+        
+        print self.setup_properties
         if os.path.isfile(self.setup_properties):
             data = ""
-            choice = 0
+            
             try:
                 with open(self.setup_properties) as f:
                     for line in f:
@@ -730,9 +737,12 @@ class Migration(object):
         if self.ldap_type == 'openldap':
             self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
             self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+        else:
+            self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
         self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+
 
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
