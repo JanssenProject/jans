@@ -29,7 +29,7 @@ Gluu provides the necessary [scripts](https://github.com/GluuFederation/communit
 
 ```
 
-Install the `python-pip` package using your package manager.
+Install the `python-pip` package:
 
 ```
 # curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
@@ -92,13 +92,13 @@ Install the `python-pip` package using your package manager.
 
 # python get-pip.py
 ```
-Install the python-ldap package:
-on Ubuntu:
+Install the `python-ldap` package:
+  * on Ubuntu:
 ```
 apt-get update
 apt-get install -y python-pip python-ldap
 ```
-on CentOS/RHEL:
+  * on CentOS/RHEL:
 
 ```
 # yum install epel-release
