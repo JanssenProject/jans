@@ -32,15 +32,6 @@ Gluu provides the necessary [scripts](https://github.com/GluuFederation/communit
 Install the `python-pip` package using your package manager.
 
 ```
-# apt-get update
-# apt-get install python-pip
-
-or
-
-# yum -y install python-pip
-
-or, for CentOS/RHEL 7x series
-
 # curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 # python get-pip.py
 ```
@@ -91,23 +82,28 @@ Navigate to where you have the `backup_2431` folder (if the above commands were 
 
 # wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/import2431.py
 
-# wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py
+# wget -c https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py
 ```
 
 Install the `python-pip` package using your package manager.
 
 ```
-# apt-get update
-# apt-get install python-pip
-
-or
-
-# yum -y install python-pip
-
-or, for CentOS/RHEL 7x series
-
 # curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+
 # python get-pip.py
+```
+Install the python-ldap package:
+on Ubuntu:
+```
+apt-get update
+apt-get install -y python-pip python-ldap
+```
+on CentOS/RHEL:
+
+```
+# yum install epel-release
+# yum clean all
+# yum install python-ldap
 ```
 
 Install the `json-merge` Python package and run the import script.
