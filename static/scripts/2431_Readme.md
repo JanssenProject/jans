@@ -123,6 +123,8 @@ Install the `json-merge` Python package and run the export script.
 ```
 # pip install jsonmerge
 
+# cd /root
+
 # chmod +x import2431.py
 
 # ./import2431.py backup_2431
