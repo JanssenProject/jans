@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # LSB Tags
 ### BEGIN INIT INFO
 # Provides:          oxd-https-extension
@@ -176,7 +175,7 @@ TMPDIR=${TMPDIR:-/tmp}
 # oxd-server's hallmark
 ##################################################
 # To be decided yet
-OXD_INSTALL_TRACE_FILE="oxd-https-extension-${OXD_HTTPS_EXTENSION_VERSION}.jar"
+OXD_INSTALL_TRACE_FILE="oxd-https-extension-jar-with-dependencies.jar"
 
 
 ##################################################
@@ -299,7 +298,8 @@ then
   CYGWIN*) OXD_LOGS="`cygpath -w $OXD_LOGS`";;
   esac
 
-  JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.logging.dir=$OXD_LOGS")
+  ### We will include once program starts taking args, we'll provide
+  ###JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.logging.dir=$OXD_LOGS")
 fi
 
 #####################################################
@@ -323,19 +323,21 @@ TMPDIR="`cygpath -w $TMPDIR`"
 ;;
 esac
 
-JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
+###  Leaving as such because we don't have other variables...
+#JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
 
 #####################################################
 # This is how the oxd server will be started
 #####################################################
 
-OXD_START="org.xdi.oxd.https.extension.ServerLauncher"
-
-case "`uname`" in
-CYGWIN*) OXD_START="`cygpath -w $OXD_START`";;
-esac
-
-RUN_ARGS=(${JAVA_OPTIONS[@]} "$OXD_START" ${OXD_ARGS[*]})
+#OXD_START="org.xdi.oxd.https.extension.ServerLauncher"
+#
+#case "`uname`" in
+#CYGWIN*) OXD_START="`cygpath -w $OXD_START`";;
+#esac
+#
+#RUN_ARGS=(${JAVA_OPTIONS[@]} "$OXD_START" ${OXD_ARGS[*]})
+RUN_ARGS=(${JAVA_OPTIONS[@]})
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 #####################################################
@@ -372,10 +374,12 @@ case "$ACTION" in
       unset CH_USER
       if [ -n "$OXD_USER" ]
       then
-        CH_USER="-c$OXD_USER"
+        CH_USER="-c $OXD_USER"
       fi
 
-      start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
+      touch "/var/log/oxd-https.log"
+      chown "$OXD_USER" "/var/log/oxd-https.log" 
+      start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" >> "$OXD_LOGS/oxd-https.log" 2>&1
 
     else
 
@@ -394,10 +398,10 @@ case "$ACTION" in
         fi
 
         touch "$OXD_PID"
-        chown "$OXD_USER" "$OXD_PID"
+        chown "$OXD_USER" "$OXD_PID" 
         # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         su - "$OXD_USER" $SU_SHELL -c "
-          exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
+          exec ${RUN_CMD[*]} >> "$OXD_LOGS/oxd-https.log" 2>&1 &
           disown \$!
           echo \$! > '$OXD_PID'"
       else
