@@ -108,7 +108,7 @@ Install the `python-ldap` package:
   * on Ubuntu:
 ```
 apt-get update
-apt-get install -y python-pip python-ldap
+apt-get install -y python-ldap
 ```
   * on CentOS/RHEL:
 
