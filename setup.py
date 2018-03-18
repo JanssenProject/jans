@@ -811,8 +811,9 @@ class Setup(object):
                 inFilePathLines = f.readlines()            
                 f.close()        
             except:            
-                self.logIt("Error reading %s" % inFilePathLines, True)            
+                self.logIt("Error reading %s" % inFilePathLines, True)
                 self.logIt(traceback.format_exc(), True)        
+
                 try:            
                     inFilePathLines.insert(index, text)            
                     f = open(inFilePath, "w")            
