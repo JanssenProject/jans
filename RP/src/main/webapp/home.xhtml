@@ -929,7 +929,7 @@
         hash = decodeURI(hash.replace(/\+/g, " "));
         params = hash.split("&");
     } else {
-        var query = self.document.location.split('?')[1];
+        var query = self.document.location.href.split('?')[1];
         params = query.split("&");
     }
 
