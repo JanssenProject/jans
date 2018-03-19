@@ -118,14 +118,14 @@ public class MailService {
 			msg.setSentDate(new Date());
 
 			if (StringHelper.isEmpty(htmlMessage)) {
-				msg.setText(message + "\n", "UTF-8", "text/plain");
+				msg.setText(message + "\n", "UTF-8", "plain");
 			} else {
 				// Unformatted text version
 				final MimeBodyPart textPart = new MimeBodyPart();
-				textPart.setText(message, "UTF-8", "text/plain");
+				textPart.setText(message, "UTF-8", "plain");
 				// HTML version
 				final MimeBodyPart htmlPart = new MimeBodyPart();
-				htmlPart.setText(htmlMessage, "UTF-8", "text/html");
+				htmlPart.setText(htmlMessage, "UTF-8", "html");
 
 				// Create the Multipart. Add BodyParts to it.
 				final Multipart mp = new MimeMultipart("alternative");
