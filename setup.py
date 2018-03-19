@@ -101,7 +101,7 @@ class Setup(object):
         self.cmd_keytool = '%s/bin/keytool' % self.jre_home
         self.cmd_jar = '%s/bin/jar' % self.jre_home
 
-        # Component versions
+        # Component ithversions
         self.jre_version = '112'
         self.jetty_version = '9.3.15.v20161220'
         self.jython_version = '2.7.0'
@@ -803,6 +803,27 @@ class Setup(object):
 
         return inFilePathText
 
+    def insertLinesInFile(self, inFilePath, index, text):        
+            inFilePathLines = None        
+            
+            try:            
+                f = open(inFilePath, "r")            
+                inFilePathLines = f.readlines()            
+                f.close()        
+            except:            
+                self.logIt("Error reading %s" % inFilePathLines, True)
+                self.logIt(traceback.format_exc(), True)        
+
+                try:            
+                    inFilePathLines.insert(index, text)            
+                    f = open(inFilePath, "w")            
+                    inFilePathLines = "".join(inFilePathLines)            
+                    f.write(inFilePathLines)            
+                    f.close()        
+                except:            
+                    self.logIt("Error writing %s" % inFilePathLines, True)            
+                    self.logIt(traceback.format_exc(), True)
+                    
     def commentOutText(self, text):
         textLines = text.split('\n')
 
@@ -2767,6 +2788,18 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         else:
             self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+            # Make the generated script LSB compliant            
+            lsb_str="""#### BEGIN INIT INFO
+# Provides:          opendj
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO"""            
+            
+            self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
         
         if self.os_type in ['centos', 'fedora', 'redhat']:
             self.run(["/sbin/chkconfig", 'opendj', "on"])
