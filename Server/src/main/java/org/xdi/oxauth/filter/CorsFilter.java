@@ -6,21 +6,31 @@
 
 package org.xdi.oxauth.filter;
 
+import org.apache.commons.codec.binary.Base64;
 import org.gluu.oxserver.filters.AbstractCorsFilter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.util.StringHelper;
 
 import javax.inject.Inject;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * CORS Filter to support both Tomcat and Jetty
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version June 27, 2017
+ * @version March 20, 2018
  */
 @WebFilter(
         filterName = "CorsFilter",
@@ -33,6 +43,9 @@ public class CorsFilter extends AbstractCorsFilter {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private ClientService clientService;
 
     public CorsFilter() {
         super();
@@ -72,5 +85,52 @@ public class CorsFilter extends AbstractCorsFilter {
                     configSupportsCredentials, configPreflightMaxAge,
                     configDecorateRequest);
         }
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        Collection<String> globalAllowedOrigins = getAllowedOrigins();
+
+        if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {
+            String clientId = servletRequest.getParameter("client_id");
+            Client client = clientService.getClient(clientId);
+            if (client != null) {
+                String[] authorizedOriginsArray = client.getAuthorizedOrigins();
+                if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
+                    List<String> clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
+                    setAllowedOrigins(clientAuthorizedOrigins);
+                }
+            }
+        } else {
+            final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+            String header = httpRequest.getHeader("Authorization");
+            if (httpRequest.getRequestURI().endsWith("/token")) {
+                if (header != null && header.startsWith("Basic ")) {
+                    String base64Token = header.substring(6);
+                    String token = new String(Base64.decodeBase64(base64Token), Util.UTF8_STRING_ENCODING);
+
+                    String username = "";
+                    int delim = token.indexOf(":");
+
+                    if (delim != -1) {
+                        username = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
+                    }
+
+                    Client client = clientService.getClient(username);
+
+                    if (client != null) {
+                        String[] authorizedOriginsArray = client.getAuthorizedOrigins();
+                        if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
+                            List<String> clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
+                            setAllowedOrigins(clientAuthorizedOrigins);
+                        }
+                    }
+                }
+            }
+        }
+
+        super.doFilter(servletRequest, servletResponse, filterChain);
+
+        setAllowedOrigins(globalAllowedOrigins);
     }
 }
