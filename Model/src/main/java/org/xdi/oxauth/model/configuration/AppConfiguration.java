@@ -52,6 +52,7 @@ public class AppConfiguration implements Configuration {
     private int umaResourceLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaValidateClaimToken = false;
+    private Boolean umaGrantAccessIfNoPolicies = false;
 
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -228,6 +229,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaValidateClaimToken(Boolean umaValidateClaimToken) {
         this.umaValidateClaimToken = umaValidateClaimToken;
+    }
+
+    public Boolean getUmaGrantAccessIfNoPolicies() {
+        return umaGrantAccessIfNoPolicies;
+    }
+
+    public void setUmaGrantAccessIfNoPolicies(Boolean umaGrantAccessIfNoPolicies) {
+        this.umaGrantAccessIfNoPolicies = umaGrantAccessIfNoPolicies;
     }
 
     /**
