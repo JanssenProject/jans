@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version November 29, 2017
+ * @version March 20, 2018
  */
 
 public enum RegisterRequestParam {
@@ -234,7 +234,12 @@ public enum RegisterRequestParam {
      */
     SCOPE("scope"),
 
-    CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at");
+    CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at"),
+
+    /**
+     * Authorized JavaScript origins.
+     */
+    AUTHORIZED_ORIGINS("authorized_origins");
 
     /**
      * Parameter name

@@ -29,7 +29,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 29, 2017
+ * @version March 20, 2018
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -204,6 +204,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
+                }
+                if (getRequest().getAuthorizedOrigins() != null && !getRequest().getAuthorizedOrigins().isEmpty()) {
+                    requestBody.put(AUTHORIZED_ORIGINS.toString(), new JSONArray(getRequest().getAuthorizedOrigins()));
                 }
 
                 if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {

@@ -8,9 +8,12 @@ import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
- * @version January 15, 2016
+ * @version March 20, 2018
  */
 @LdapEntry(sortBy = {"id"})
 @LdapObjectClass(values = {"top", "oxSectorIdentifier"})

@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version November 29, 2017
+ * @version March 20, 2018
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -71,6 +71,7 @@ public class RegisterRequest extends BaseRequest {
     private String initiateLoginUri;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
+    private List<String> authorizedOrigins;
 
     /**
      * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
@@ -104,6 +105,7 @@ public class RegisterRequest extends BaseRequest {
         this.defaultAcrValues = new ArrayList<String>();
         this.postLogoutRedirectUris = new ArrayList<String>();
         this.requestUris = new ArrayList<String>();
+        this.authorizedOrigins = new ArrayList<String>();
         this.scopes = new ArrayList<String>();
         this.customAttributes = new HashMap<String, String>();
     }
@@ -822,6 +824,24 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Returns authorized JavaScript origins.
+     *
+     * @return Authorized JavaScript origins.
+     */
+    public List<String> getAuthorizedOrigins() {
+        return authorizedOrigins;
+    }
+
+    /**
+     * Sets authorized JavaScript origins.
+     *
+     * @param authorizedOrigins Authorized JavaScript origins.
+     */
+    public void setAuthorizedOrigins(List<String> authorizedOrigins) {
+        this.authorizedOrigins = authorizedOrigins;
+    }
+
+    /**
      * @deprecated This function will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
      */
     public List<String> getScopes() {
@@ -979,6 +999,9 @@ public class RegisterRequest extends BaseRequest {
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
         }
+        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
+            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
+        }
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
         }
@@ -1080,6 +1103,14 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> authorizedOrigins = new ArrayList<String>();
+        if (requestObject.has(AUTHORIZED_ORIGINS.toString())) {
+            JSONArray authorizedOriginsJsonArray = requestObject.getJSONArray((AUTHORIZED_ORIGINS.toString()));
+            for (int i = 0; i < authorizedOriginsJsonArray.length(); i++) {
+                authorizedOrigins.add(authorizedOriginsJsonArray.getString(i));
+            }
+        }
+
         final List<String> scope = new ArrayList<String>();
         if (authorizationRequestCustomAllowedParameters && requestObject.has(SCOPES.toString())) {
             JSONArray scopesJsonArray = requestObject.getJSONArray(SCOPES.toString());
@@ -1119,6 +1150,7 @@ public class RegisterRequest extends BaseRequest {
         result.setJsonObject(requestObject);
         result.setClientSecretExpiresAt(clientSecretExpiresAt);
         result.setRequestUris(requestUris);
+        result.setAuthorizedOrigins(authorizedOrigins);
         result.setClaimsRedirectUris(claimRedirectUris);
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
@@ -1276,6 +1308,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
+        }
+        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
+            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
         }
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes));
