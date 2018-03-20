@@ -97,7 +97,7 @@
     "oxAuthClientPassword":"%(oxauthClient_encoded_pw)s",
     "oxAuthClientScope":"openid+profile+email+user_name",
 
-    "loginRedirectUrl":"https://%(hostname)s/identity/authentication/authcode",
+    "loginRedirectUrl":"https://%(hostname)s/identity/authentication/getauthcode",
     "logoutRedirectUrl":"https://%(hostname)s/identity/authentication/finishlogout",
 
     "umaIssuer":"https://%(hostname)s",
@@ -137,6 +137,6 @@
 
     "scimTestMode":false,
     "ScimProperties": {
-        "maxCount": 200
+        "maxCount": 1000
     }
 }
