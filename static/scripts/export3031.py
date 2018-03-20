@@ -349,7 +349,7 @@ def doClientsChangesForUMA2(self, clientPath):
 def doUmaResourcesChangesForUma2(self, UmaPath):
     scimClient = ''
     passportClient = ''
-    inumOrg = self.getOrgInum()
+    inumOrg = self.inumOrg
     with open('/install/community-edition-setup/setup.properties.last', 'r') as f:
         content = f.readlines()
         for line in content:
@@ -447,8 +447,14 @@ class Exporter(object):
         self.hostname = '/bin/hostname'
 
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                          'cn=directory manager,o=gluu', '-j',
+                          '"cn=directory manager,o=gluu"', '-j',
                           self.passwordFile]
+
+        self.ldapCredsSite = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
+                          '"cn=directory manager,o=site"', '-j',
+                          self.passwordFile]
+
+
         self.base_dns = ['ou=people',
                          'ou=groups',
                          'ou=attributes',
@@ -526,12 +532,6 @@ class Exporter(object):
                 logging.debug(traceback.format_exc())
                 sys.exit(1)
 
-    def getOrgInum(self):
-        args = [self.ldapsearch] + self.ldapCreds + ['-s', 'one', '-b',
-                                                     'o=gluu', 'o=*', 'dn']
-        output = self.getOutput(args)
-        return output.split(",")[0].split("o=")[-1]
-
     def prepareLdapPW(self):
         ldap_pass = None
         # read LDAP pass from setup.properties
@@ -544,7 +544,7 @@ class Exporter(object):
         with open(self.passwordFile, 'w') as pfile:
             pfile.write(ldap_pass)
         # perform sample search
-        sample = self.getOrgInum()
+        sample = self.inumOrg
         if not sample:
             # get the password from the user if it fails
             ldap_pass = getpass.getpass("Enter LDAP Passsword: ")
@@ -561,18 +561,34 @@ class Exporter(object):
                 logging.debug(traceback.format_exc())
         copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir + "/custom.schema")
 
+    def runAndLog(self, args):
+        try:
+            logging.debug("Running command : %s" % " ".join(args))
+            si,so,se = os.popen3(' '.join(args))
+            error = se.read()
+            if error:
+                logging.error(error)
+                logging.debug(traceback.format_exc())
+            return so.read()
+        except:
+            logging.error("Error running command : %s" % " ".join(args))
+            logging.error(traceback.format_exc())
+            sys.exit(1)
+
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
-        orgInum = self.getOrgInum()
+        orgInum = self.inumOrg
         # Backup the data
         for basedn in self.base_dns:
-            args = [self.ldapsearch] + self.ldapCreds + [
-                '-b', '%s,o=%s,o=gluu' % (basedn, orgInum), 'objectclass=*']
-            output = self.getOutput(args)
             ou = basedn.split("=")[-1]
-            f = open("%s/ldif/%s.ldif" % (self.backupDir, ou), 'w')
-            f.write(output)
-            f.close()
+            if ou =='people':
+                logging.info('Backing up o=%s, may take time' % ou)
+            
+            out_file = "%s/ldif/%s.ldif" % (self.backupDir, ou)
+            args = [self.ldapsearch] + self.ldapCreds + [
+                '-b', '"%s,o=%s,o=gluu"' % (basedn, orgInum), 'objectclass=*', '>', out_file]
+
+            self.runAndLog(args)
 
         removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
         doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
@@ -580,79 +596,70 @@ class Exporter(object):
         changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
 
         # Backup the appliance config
+        out_file = "%s/ldif/appliance.ldif" % self.backupDir
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
-                'ou=appliances,o=gluu',
+                '"ou=appliances,o=gluu"',
                 '-s',
                 'one',
-                'objectclass=*']
-        output = self.getOutput(args)
-        output = output.replace('IN_MEMORY', '"IN_MEMORY"')
-        output = output.replace('""IN_MEMORY""','"IN_MEMORY"')
-        output = output.replace('DEFAULT', '"DEFAULT"')
-        output = output.replace('""DEFAULT""','"DEFAULT"')
+                '"objectclass=*"', '>', out_file]
+        self.runAndLog(args)
 
-        f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+        output = open(out_file).read()
+
+        output = output.replace('IN_MEMORY', '"IN_MEMORY"')
+        output = output.replace('""IN_MEMORY""', "IN_MEMORY")
+        output = output.replace('DEFAULT', '"DEFAULT"')
+        output = output.replace('""DEFAULT""', "DEFAULT")
+
+        with open(out_file,'w') as f:
+            f.write(output)
+
 
         # Backup the oxidp config
 
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
-                'ou=appliances,o=gluu',
-                'objectclass=oxApplicationConfiguration']
-        output = self.getOutput(args)
-        f = open("%s/ldif/oxidp_config.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+                '"ou=appliances,o=gluu"',
+                'objectclass=oxApplicationConfiguration', '>', "%s/ldif/oxidp_config.ldif" % self.backupDir]
+        self.runAndLog(args)
+        
         # Backup the oxtrust config
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
-                'ou=appliances,o=gluu',
-                'objectclass=oxTrustConfiguration']
-        output = self.getOutput(args)
-        f = open("%s/ldif/oxtrust_config.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+                '"ou=appliances,o=gluu"',
+                '"objectclass=oxTrustConfiguration"', '>', "%s/ldif/oxtrust_config.ldif" % self.backupDir]
+        self.runAndLog(args)
+
+
         doOxTrustChanges(self, "%s/ldif/oxtrust_config.ldif" % self.backupDir)
         doApplinceChanges("%s/ldif/appliance.ldif" % self.backupDir)
+
         # Backup the oxauth config
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
-                'ou=appliances,o=gluu',
-                'objectclass=oxAuthConfiguration']
-        output = self.getOutput(args)
-        f = open("%s/ldif/oxauth_config.ldif" % self.backupDir, 'w')
-
-        f.write(output)
-        f.close()
+                '"ou=appliances,o=gluu"',
+                '"objectclass=oxAuthConfiguration"', '>', "%s/ldif/oxauth_config.ldif" % self.backupDir]
+        self.runAndLog(args)
 
         dooxAuthChangesFor31(self, "%s/ldif/oxauth_config.ldif" % self.backupDir)
 
         # Backup the trust relationships
         args = [self.ldapsearch] + self.ldapCreds + [
-            '-b', 'ou=appliances,o=gluu', 'objectclass=gluuSAMLconfig']
-        output = self.getOutput(args)
-        f = open("%s/ldif/trust_relationships.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+            '-b', '"ou=appliances,o=gluu"', '"objectclass=gluuSAMLconfig"', '>', "%s/ldif/trust_relationships.ldif" % self.backupDir]
+        self.runAndLog(args)
 
         # Backup the org
         args = [self.ldapsearch] + self.ldapCreds + [
-            '-s', 'base', '-b', 'o=%s,o=gluu' % orgInum, 'objectclass=*']
-        output = self.getOutput(args)
-        f = open("%s/ldif/organization.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+            '-s', 'base', '-b', 'o=%s,o=gluu' % orgInum, 'objectclass=*', '>', "%s/ldif/organization.ldif" % self.backupDir]
+        self.runAndLog(args)
+        logging.info('Backing up o=site, may take time')
+
 
         # Backup o=site
         args = [self.ldapsearch] + self.ldapCreds + [
-            '-b', 'o=site', '-s', 'one', 'objectclass=*']
-        output = self.getOutput(args)
-        f = open("%s/ldif/site.ldif" % self.backupDir, 'w')
-        f.write(output)
-        f.close()
+            '-b', '"o=site"', '-s', 'one', '"objectclass=*"','>', "%s/ldif/site.ldif" % self.backupDir]
+        self.runAndLog(args)
 
     def clean(self, s):
         return s.replace('@', '').replace('!', '').replace('.', '')
@@ -695,7 +702,7 @@ class Exporter(object):
             [self.grep, "^inum", "%s/ldif/appliance.ldif" % self.backupDir]
         ).split("\n")[0].split(":")[-1].strip()
         props['inumApplianceFN'] = self.clean(props['inumAppliance'])
-        props['inumOrg'] = self.getOrgInum()
+        props['inumOrg'] = self.inumOrg
         props['inumOrgFN'] = self.clean(props['inumOrg'])
         props['baseInum'] = props['inumOrg'][:21]
         props['encode_salt'] = self.getOutput(
@@ -797,6 +804,7 @@ class Exporter(object):
         # self.stopOpenDJ()
         # self.editLdapConfig()
         # self.startOpenDJ()
+        self.inumOrg = self.getProp('inumOrg')
         self.getLDAPServerTypeChoice()
         self.prepareLdapPW()
         self.makeFolders()

@@ -6,7 +6,6 @@
     "openIdClientPassword":"%(oxauthClient_encoded_pw)s",
     "openIdScopes":[
         "openid",
-        "profile",
         "email",
         "user_name"
     ],
