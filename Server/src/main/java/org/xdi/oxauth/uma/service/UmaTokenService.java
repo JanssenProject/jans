@@ -100,8 +100,14 @@ public class UmaTokenService {
             if (!scriptMap.isEmpty()) {
                 expressionService.evaluate(scriptMap, permissions);
             } else {
-                log.warn("There are no any policies that protects scopes. Scopes: " + UmaScopeService.asString(scopes.keySet()));
-                log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
+                log.warn("There are no any policies that protects scopes. Scopes: " + UmaScopeService.asString(scopes.keySet()) + ". Configuration property umaGrantAccessIfNoPolicies: " + appConfiguration.getUmaGrantAccessIfNoPolicies());
+
+                if (appConfiguration.getUmaGrantAccessIfNoPolicies() != null && appConfiguration.getUmaGrantAccessIfNoPolicies()) {
+                    log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
+                } else {
+                    log.warn("Access denied because there are no any protection. Make sure it is intentional behavior.");
+                    throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+                }
             }
 
             log.trace("Access granted.");
