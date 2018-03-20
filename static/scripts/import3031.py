@@ -20,6 +20,7 @@ import re
 import subprocess
 import time
 import datetime
+import shelve
 
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
@@ -36,6 +37,35 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
+
+
+def progress_bar(t, n, act='', finished=None):
+
+    if not t % 50:
+
+        if finished:
+            i = 40
+        else:
+            i = (t*1.0/(n)) /0.025    
+        ft = '#' * int(round(i))
+        ft = ft.ljust(40)
+        sys.stdout.write("\r[{0}] {1}".format(ft,act))
+        sys.stdout.flush()
+    if finished:
+        print
+
+class DBLDIF(LDIFParser):
+    def __init__(self, ldif_file):
+        LDIFParser.__init__(self, open(ldif_file,'rb'))
+        db_file =  os.path.basename(ldif_file)
+        sdb_file = os.path.join('/tmp', db_file+'.sdb')
+        if os.path.exists(sdb_file):
+            os.remove(sdb_file)
+        #logging.info("\nDumping %s to shelve database" % ldif_file)
+        self.sdb = shelve.open(sdb_file)
+
+    def handle(self, dn, entry):
+        self.sdb[dn] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -455,7 +485,9 @@ class Migration(object):
             ignoreList.remove('oxIDPAuthentication')
 
         # Rewriting all the new DNs in the new installation to ldif file
-        for dn in currentDNs:
+        nodn=len(currentDNs)
+        for cnt, dn in enumerate(currentDNs):
+            progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
@@ -489,15 +521,28 @@ class Migration(object):
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
             ldif_writer.unparse(dn, new_entry)
-
+        
+        progress_bar(0, 0, 'Rewriting DNs', True)
+        
         # Pick all the left out DNs from the old DN map and write them to the LDIF
-        for dn in sorted(old_dn_map, key=len):
+        nodn = len(old_dn_map)
+        
+        ldif_shelve_dict = {}
+        
+        for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
+            progress_bar(cnt, nodn, 'Perapring DNs for 3.1.2')
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
                 continue  # Already processed
 
-            entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+            cur_ldif_file = old_dn_map[dn]
+            if not cur_ldif_file in ldif_shelve_dict:
+                sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
+                sdb.parse()
+                ldif_shelve_dict[cur_ldif_file]=sdb.sdb
+
+            entry = ldif_shelve_dict[cur_ldif_file][dn]
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -520,20 +565,29 @@ class Migration(object):
         # Finally
         processed_fp.close()
 
+        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+
+        nodn = sum(1 for line in open(self.processTempFile))
+
         # Update the Schema change for lastModifiedTime
         with open(self.processTempFile, 'r') as infile:
             with open(self.o_gluu, 'w') as outfile:
-                for line in infile:
+                for cnt, line in enumerate(infile):
+                    progress_bar(cnt, nodn, 'converting Dns')
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
                     line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
+                    if line.startswith('oxMemcachedConfiguration:'):
+                        line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
+
+
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -545,6 +599,9 @@ class Migration(object):
                     #         f = open(self.o_gluu, "a")
                     #         f.write('\n')
                     #         f.write(out)
+        
+        progress_bar(0, 0, 'converting Dns', True)
+        
         data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
         open(os.path.join(self.backupDir, 'ldif','site.ldif'),"wb").write(data)
         filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','site.ldif')]
@@ -623,10 +680,12 @@ class Migration(object):
 
 
     def getLDAPServerTypeChoice(self):
-
+        choice = 0
+        
+        print self.setup_properties
         if os.path.isfile(self.setup_properties):
             data = ""
-            choice = 0
+            
             try:
                 with open(self.setup_properties) as f:
                     for line in f:
@@ -730,9 +789,12 @@ class Migration(object):
         if self.ldap_type == 'openldap':
             self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
             self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+        else:
+            self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
         self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+
 
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
