@@ -61,7 +61,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 7, 2017
+ * @version March 20, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -403,6 +403,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
+        List<String> authorizedOrigins = requestObject.getAuthorizedOrigins();
+        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
+            authorizedOrigins = new ArrayList<String>(new HashSet<String>(authorizedOrigins)); // Remove repeated elements
+            p_client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
+        }
+
         List<String> scopes = requestObject.getScope();
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
@@ -591,6 +597,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, INITIATE_LOGIN_URI.toString(), client.getInitiateLoginUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, POST_LOGOUT_REDIRECT_URIS.toString(), client.getPostLogoutRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_URIS.toString(), client.getRequestUris());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZED_ORIGINS.toString(), client.getAuthorizedOrigins());
         if (!Util.isNullOrEmpty(client.getJwks())) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), new JSONObject(client.getJwks()));
         }
