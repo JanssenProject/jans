@@ -7,11 +7,20 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OxdHttpsApplication extends Application<OxdHttpsConfiguration> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Oxd.class);
+
     public static void main(String[] args) throws Exception {
-        new OxdHttpsApplication().run(args);
+        try {
+            new OxdHttpsApplication().run(args);
+        } catch (Throwable e) {
+            LOG.error("Failed to start oxd-https-extension.", e);
+            System.exit(1);
+        }
     }
 
     @Override

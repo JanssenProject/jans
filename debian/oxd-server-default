@@ -1,6 +1,7 @@
 JAVA_HOME=/opt/jre
 JAVA=$JAVA_HOME/bin/java
 
+OXD_LOGS=/var/log/oxd-server
 OXD_HOME=/opt/oxd-server
 CONF=/etc/oxd/oxd-server
 LIB=$OXD_HOME/lib
