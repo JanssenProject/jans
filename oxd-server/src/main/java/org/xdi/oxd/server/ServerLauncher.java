@@ -48,7 +48,12 @@ public class ServerLauncher {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        start();
+        try {
+            start();
+        } catch (Throwable e) {
+            LOG.error("oxd-server start failed.", e);
+            System.exit(1);
+        }
     }
 
     public static void start() {
@@ -95,8 +100,10 @@ public class ServerLauncher {
             LOG.info("oxD Server started successfully.");
         } catch (ShutdownException e) {
             LOG.error("Shutdown oxd server.", e);
+            System.exit(1);
         } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);
+            System.exit(1);
         }
     }
 
