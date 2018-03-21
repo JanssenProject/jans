@@ -27,11 +27,11 @@ public class SectorIdentifier extends BaseEntry implements Serializable {
     @LdapAttribute(name = "oxAuthClientId")
     private List<String> clientIds;
 
-    public String getInum() {
+    public String getId() {
         return id;
     }
 
-    public void setInum(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
