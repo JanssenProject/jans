@@ -657,7 +657,7 @@ class Exporter(object):
 
 
         # Backup o=site
-        args = [self.ldapsearch] + self.ldapCreds + [
+        args = [self.ldapsearch] + self.ldapCredsSite + [
             '-b', '"o=site"', '-s', 'one', '"objectclass=*"','>', "%s/ldif/site.ldif" % self.backupDir]
         self.runAndLog(args)
 
