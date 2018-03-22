@@ -22,6 +22,7 @@ public class SetUpTest {
     @BeforeSuite
     public static void beforeSuite() {
         System.out.println("Running beforeSuite ...");
+        ServerLauncher.setSetUpSuite(true);
         CoreUtils.createExecutor().execute(new Runnable() {
             @Override
             public void run() {
