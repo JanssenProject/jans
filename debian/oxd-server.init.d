@@ -420,7 +420,7 @@ do_start () {
                                 	echo ""
                                 	echo "For details please check $OXD_INIT_LOG ."
                                 	echo "Exiting..."
-                                	exit 255
+                                	exit 1
                         	fi
 	
                 	fi
@@ -452,6 +452,7 @@ do_start () {
        	else
                	echo "$SERVICE_NAME is already running ..."
         	echo "PID: [$PID_NUM]"
+		exit 1
 	fi
 }
 
@@ -497,7 +498,8 @@ do_stop () {
     		rm -f "$OXD_STATE"
     		echo OK
 	else
-                echo "$SERVICE_NAME is not running ..."        
+                echo "$SERVICE_NAME is not running ..."     
+		exit 1
 	fi
 }
 ##################################################
