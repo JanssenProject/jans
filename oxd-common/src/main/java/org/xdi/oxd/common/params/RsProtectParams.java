@@ -20,6 +20,8 @@ public class RsProtectParams implements HasProtectionAccessTokenParams {
     private List<RsResource> resources;
     @JsonProperty(value = "protection_access_token")
     private String protectionAccessToken;
+    @JsonProperty(value = "overwrite")
+    private Boolean overwrite = false;
 
     public RsProtectParams() {
     }
@@ -48,6 +50,14 @@ public class RsProtectParams implements HasProtectionAccessTokenParams {
         this.resources = resources;
     }
 
+    public Boolean getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(Boolean overwrite) {
+        this.overwrite = overwrite;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -55,6 +65,7 @@ public class RsProtectParams implements HasProtectionAccessTokenParams {
         sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", resources=").append(resources);
         sb.append(", protectionAccessToken=").append(protectionAccessToken);
+        sb.append(", overwrite=").append(overwrite);
         sb.append('}');
         return sb.toString();
     }
