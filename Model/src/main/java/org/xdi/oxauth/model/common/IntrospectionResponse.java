@@ -133,7 +133,7 @@ public class IntrospectionResponse {
         return subject;
     }
 
-    public void setSubject(String subject) {
+    public void setSub(String subject) {
         this.subject = subject;
     }
 
