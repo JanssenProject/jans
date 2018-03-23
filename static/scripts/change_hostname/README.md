@@ -9,7 +9,7 @@ Requirements:
 - Python 2
 - Python-pip
 - ldap3
-- test.py
+- change_config.py
 - change_gluu_host.py
 
 Install python-pip and ldap3
@@ -19,7 +19,7 @@ apt install python-pip
 pip install ldap3
 ```
 
-Download [test.py](https://github.com/GluuFederation/cluster-mgr/blob/master/testing/test.py) and [change_gluu_host.py](https://github.com/GluuFederation/cluster-mgr/blob/master/testing/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
+Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/cluster-mgr/blob/master/testing/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
 
 Modify the entries inside of `test.py` using the following template:
 
@@ -43,7 +43,7 @@ name_changer = ChangeGluuHostname(
   
   Let's take the example of me using `dev.example.org` but my customer changed their domain requirements to `idp.customer.io`, the environment wouldn't fit the spec and I would have to rebuild. Fortunately with this script, a quick turnaround to another hostname, with new certificates to match that domain name, is one command-line away.
 
-  To achieve this with the previous example, I would modify the `test.py` file like so:
+  To achieve this with the previous example, I would modify the `change_config.py` file like so:
 
 ```
 name_changer = ChangeGluuHostname(
@@ -61,6 +61,6 @@ name_changer = ChangeGluuHostname(
     )
 ```
 
-  Now run `python test.py` outside of your Gluu chroot and once completed, restart your Gluu Server.
+  Now run `python change_config.py` outside of your Gluu chroot and once completed, restart your Gluu Server.
   
   All the endpoints inside LDAP, Apache2/HTTPD, `/etc/hosts` and all certificates have been successfully changed to the new hostname. 
