@@ -21,10 +21,15 @@ import subprocess
 import time
 import datetime
 import shelve
+import ldap
+import pyDes
+import base64
 
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
+
+ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
@@ -204,6 +209,37 @@ class Migration(object):
             logging.error("Backup doesn't contain directory for LDIF data."
                           " Nothing to migrate. Quitting.")
             sys.exit(1)
+
+    def unobscure(self,s=""):
+        engine = pyDes.triple_des(self.key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
+        cipher = pyDes.triple_des(self.key)
+        decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
+        return decrypted
+
+    def getLdapPassword(self):
+
+        try:
+            with open('/etc/gluu/conf/ox-ldap.properties') as f:
+                for line in f:
+                    if line.startswith("bindPassword:"):
+                        self.ldappassowrd = line.split(":")[1].split("\n")[0].strip()
+
+        except:
+            logging.error("ox-ldap.properties file not Found")
+
+
+        #get salt key
+        saltFn = "/etc/gluu/conf/salt"
+        try:
+            f = open(saltFn)
+            salt_property = f.read()
+            f.close()
+            self.key = salt_property.split("=")[1].strip()
+            self.ldappassowrd = self.unobscure(self.ldappassowrd)
+            #print self.ldappassowrd
+
+        except:
+            logging.error("Salt key Access Error")
 
     def setupWorkDirectory(self):
         if not os.path.exists(self.workingDir):
@@ -639,7 +675,7 @@ class Migration(object):
                    '-l', self.o_gluu, '-R', self.o_gluu + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
-        command = [self.ldif_import,'-b','o=gluu','-n', 'userRoot',
+        command = [self.ldif_import,'-b','o=site','-n', 'site',
                    '-l', self.o_site, '-R', self.o_site + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
@@ -796,11 +832,44 @@ class Migration(object):
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
 
-    def getProp(self, prop):
-        with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
+    def getProp(self, prop, prop_file=None):
+        if not prop_file:
+            prop_file = os.path.join(self.backupDir, 'setup.properties')
+
+        with open(prop_file, 'r') as f:
             for line in f:
-                if line.startswith(prop):
-                    return line.split('=')[-1].strip()
+                n = line.find('=')
+                if n > -1:
+                    if line[:n]==prop:
+                        tmp = line[n+1:].strip()
+                        return tmp.replace('\\=','=')
+
+    def idpResolved(self):
+
+        logging.info('Idp Configuration Setting...')
+        self.getLdapPassword()
+
+        if self.ldap_type == 'opendj':
+            bindDn = 'cn=directory manager'
+        else:
+            bindDn = 'cn=directory manager,o=gluu'
+
+        inumAppliance = self.getProp('inumAppliance', 
+                    '/install/community-edition-setup/setup.properties.last')
+
+        con = ldap.initialize('ldaps://localhost:1636')
+        con.simple_bind_s(bindDn, self.ldappassowrd)
+
+        dn = 'ou=oxtrust,ou=configuration,inum={},ou=appliances,o=gluu'.format(inumAppliance)
+        results = con.search_s(dn,  ldap.SCOPE_BASE, attrlist=['oxTrustConfCacheRefresh'])
+
+        if self.ldap_type == 'opendj':
+            jsons = results[0][1]['oxTrustConfCacheRefresh'][0]
+            jdata = json.loads(jsons)
+            jdata['inumConfig']['bindDN'] = 'cn=directory manager'
+            jsons = json.dumps(jdata)
+            con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
+
 
     def migrate(self):
         """Main function for the migration of backup data
@@ -825,6 +894,7 @@ class Migration(object):
         self.importProcessedData()
         self.fixPermissions()
         self.startLDAPServer()
+        self.idpResolved()
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
