@@ -616,8 +616,10 @@ class Migration(object):
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
-                    if line.startswith('oxMemcachedConfiguration:'):
+                    if line.startswith('oxMemcachedConfiguration:') or line.startswith('oxCacheConfiguration:'):
                         line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
+
+
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
