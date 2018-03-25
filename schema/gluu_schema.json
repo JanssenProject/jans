@@ -4162,6 +4162,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Authorized Origins",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAuthAuthorizedOrigins"
+            ],
+            "oid": "oxAttribute:384",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4791,7 +4802,8 @@
                 "oxDisabled",
                 "oxAuthLogoutURI",
                 "oxAuthLogoutSessionRequired",
-                "oxdId"
+                "oxdId",
+                "oxAuthAuthorizedOrigins"
             ],
             "must": [
                 "objectclass"
