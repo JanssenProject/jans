@@ -1181,6 +1181,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
         jettyRunFolder = '/var/run/jetty'
+        self.run([self.cmd_mkdir, '-p', self.jettyRunFolder])
         self.run([self.cmd_chmod, '-R', '775', jettyRunFolder])
         self.run([self.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
 
