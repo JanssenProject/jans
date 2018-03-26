@@ -102,10 +102,10 @@ class Setup(object):
         self.cmd_jar = '%s/bin/jar' % self.jre_home
 
         # Component ithversions
-        self.jre_version = '112'
-        self.jetty_version = '9.3.15.v20161220'
+        self.jre_version = '162'
+        self.jetty_version = '9.4.9.v20180320'
         self.jython_version = '2.7.0'
-        self.node_version = '6.9.1'
+        self.node_version = '8.10.0'
         self.apache_version = None
         self.opendj_version = None
 
@@ -172,27 +172,27 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded,websocket'},
+                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,servlets,ext,http-forwarded,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded,websocket'},
+                          'jetty' : {'modules' : 'deploy,http,console-capture,jsp,ext,http-forwarded,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
             'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
+                     'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
             'asimba' : {'name' : 'asimba',
-                        'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
+                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                         'installed' : False
                         },
             'oxauth-rp' : {'name' : 'oxauth-rp',
-                           'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
+                           'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
                            },
@@ -1179,6 +1179,10 @@ class Setup(object):
 
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
+
+        jettyRunFolder = '/var/run/jetty'
+        self.run([self.cmd_chmod, '-R', '775', jettyRunFolder])
+        self.run([self.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
 
     def installNode(self):
         self.logIt("Installing node %s..." % self.node_version)
