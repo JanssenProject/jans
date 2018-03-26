@@ -105,7 +105,7 @@ class Setup(object):
         self.jre_version = '162'
         self.jetty_version = '9.4.9.v20180320'
         self.jython_version = '2.7.0'
-        self.node_version = '8.10.0'
+        self.node_version = '9.9.0'
         self.apache_version = None
         self.opendj_version = None
 
