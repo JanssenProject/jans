@@ -149,6 +149,11 @@ class ChangeGluuHostname:
 
 
     def startup(self):
+        if local:
+            ldap_server = 'localhost'
+        else:
+            ldap_server = self.server
+        
         ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
         self.conn = Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
         r = self.conn.bind()
