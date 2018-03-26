@@ -165,7 +165,7 @@ class Setup(object):
         self.node_base = '%s/node' % self.gluuOptFolder
         self.node_user_home = '/home/node'
 
-        self.jetty_dist = '/opt/jetty-9.3'
+        self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '%s/jetty' % self.gluuOptFolder
         self.jetty_user_home = '/home/jetty'
