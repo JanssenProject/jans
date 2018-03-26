@@ -149,7 +149,7 @@ class ChangeGluuHostname:
 
 
     def startup(self):
-        if local:
+        if self.local:
             ldap_server = 'localhost'
         else:
             ldap_server = self.server
