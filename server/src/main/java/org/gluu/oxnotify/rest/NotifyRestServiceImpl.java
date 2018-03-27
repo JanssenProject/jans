@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
+import com.amazonaws.services.sns.model.EndpointDisabledException;
 import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
 import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
 import com.amazonaws.services.sns.model.InvalidParameterException;
@@ -194,6 +195,20 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return true;
 	}
 
+    private boolean enableEndpoint(AmazonSNS snsClient, String endpoint) throws IOException {
+        log.debug("Enabling endpoint '{}'", endpoint);
+
+        // Enable endpoint
+        SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
+                .withEndpointArn(endpoint).addAttributesEntry("Enabled ", "true");
+
+        snsClient.setEndpointAttributes(setEndpointAttributesRequest);
+
+        log.info("Enabled endpoint '{}'",  endpoint);
+        
+        return true;
+    }
+
 	@Override
 	public Response sendNotification(String authorization, String endpoint, String message, HttpServletRequest httpRequest) {
 		log.debug("Sending notification '{}' to endpoint '{}'", message, endpoint);
@@ -242,7 +257,14 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 			publishRequest.setTargetArn(endpoint);
 			publishRequest.setMessage(pushMessage);
 
-			PublishResult publishResult = snsClient.publish(publishRequest);
+			PublishResult publishResult;
+            try {
+                publishResult = snsClient.publish(publishRequest);
+            } catch (EndpointDisabledException ex) {
+                enableEndpoint(snsClient, endpoint);
+                log.warn("Resending message after re-enabling endpoint '{}'", endpoint);
+                publishResult = snsClient.publish(publishRequest);
+            }
 
 			NotificationResponse notificationResponse = new NotificationResponse(
 					publishResult.getSdkResponseMetadata().getRequestId(),
