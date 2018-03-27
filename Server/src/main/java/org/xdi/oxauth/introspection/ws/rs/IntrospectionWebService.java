@@ -135,6 +135,10 @@ public class IntrospectionWebService {
 
     private String getSub(AuthorizationGrant grant) {
         final User user = grant.getUser();
+        if (user == null) {
+            log.trace("User is null for grant " + grant.getGrantId());
+            return "";
+        }
         final String subjectType = grant.getClient().getSubjectType();
         if (SubjectType.PAIRWISE.equals(SubjectType.fromString(subjectType))) {
             String sectorIdentifierUri = null;
