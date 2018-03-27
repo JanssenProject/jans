@@ -201,7 +201,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 
         // Enable endpoint
         SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
-                .withEndpointArn(endpoint).addAttributesEntry("Enabled ", "true");
+                .withEndpointArn(endpoint).addAttributesEntry("Enabled", "true");
 
         snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 
