@@ -17,12 +17,12 @@
 
 		<weld.version>3.0.0.Final</weld.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
-		<jackson.version>2.8.10</jackson.version>
+		<jackson.version>2.8.11</jackson.version>
 
 		<log4j.version>2.8.2</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<aws.sns.version>1.11.184</aws.sns.version>
+		<aws.sns.version>1.11.300</aws.sns.version>
 	</properties>
 
 	<repositories>
