@@ -47,6 +47,7 @@ import com.amazonaws.services.sns.model.InvalidParameterException;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
+import com.amazonaws.services.sns.model.SetEndpointAttributesResult;
 
 /**
  * @author Yuriy Movchan
@@ -261,6 +262,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
             try {
                 publishResult = snsClient.publish(publishRequest);
             } catch (EndpointDisabledException ex) {
+                log.warn("Attempting to re-enable endpoint '{}'", endpoint);
                 enableEndpoint(snsClient, endpoint);
                 log.warn("Resending message after re-enabling endpoint '{}'", endpoint);
                 publishResult = snsClient.publish(publishRequest);
