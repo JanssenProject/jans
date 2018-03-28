@@ -8,11 +8,11 @@ package org.gluu.ldap.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Transient;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -127,7 +127,7 @@ public class SimpleSessionState implements Serializable {
 
     public Map<String, String> getSessionAttributes() {
         if (sessionAttributes == null) {
-            sessionAttributes = new HashedMap();
+            sessionAttributes = new HashMap<String, String>();
         }
         return sessionAttributes;
     }
