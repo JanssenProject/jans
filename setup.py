@@ -172,27 +172,27 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,servlets,ext,http-forwarded,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'deploy,http,console-capture,jsp,ext,http-forwarded,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
             'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
+                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp'},
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
             'asimba' : {'name' : 'asimba',
-                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
+                        'jetty' : {'modules' : 'server,deploy,http,resources,console-capture,jsp'},
                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                         'installed' : False
                         },
             'oxauth-rp' : {'name' : 'oxauth-rp',
-                           'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded,websocket'},
+                           'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
                            },
