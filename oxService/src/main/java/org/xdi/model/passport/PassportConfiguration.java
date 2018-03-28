@@ -1,24 +1,27 @@
+/*
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.model.passport;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.xdi.model.SimpleExtendedCustomProperty;
 
+import java.util.List;
+
 /**
  * @author Shekhar L.
  * @Date 07/17/2016
  */
-@JsonPropertyOrder({ "strategy", "fieldset" })
+@JsonPropertyOrder({"strategy", "fieldset"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PassportConfiguration {
     private String strategy;
-    private List <SimpleExtendedCustomProperty> fieldset;
-    
+    private List<SimpleExtendedCustomProperty> fieldset;
+
     public String getStrategy() {
         return strategy;
     }
@@ -27,11 +30,11 @@ public class PassportConfiguration {
         this.strategy = strategy;
     }
 
-    public List <SimpleExtendedCustomProperty> getFieldset() {
+    public List<SimpleExtendedCustomProperty> getFieldset() {
         return fieldset;
     }
 
-    public void setFieldset(List <SimpleExtendedCustomProperty> fieldset) {
+    public void setFieldset(List<SimpleExtendedCustomProperty> fieldset) {
         this.fieldset = fieldset;
     }
 
