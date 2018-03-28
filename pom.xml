@@ -245,7 +245,7 @@
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>mail</artifactId>
-				<version>1.6.1</version>
+				<version>1.4.7</version>
 			</dependency>
 
 			<!-- Cache -->
