@@ -80,7 +80,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public boolean destroy() {
-        boolean destroyResult = this.ldapOperationService.destroy();
+        boolean destroyResult = false;
+        if (this.ldapOperationService != null) {
+            destroyResult = this.ldapOperationService.destroy();
+        } else {
+            destroyResult = true;
+        }
 
         return destroyResult;
     }
