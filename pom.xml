@@ -170,6 +170,11 @@
 				<artifactId>commons-configuration</artifactId>
 				<version>1.10</version>
 			</dependency>
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>1.9.3</version>
+			</dependency>
 
 			<!-- Logging -->
 			<dependency>
@@ -240,7 +245,7 @@
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>mail</artifactId>
-				<version>1.6.1</version>
+				<version>1.4.7</version>
 			</dependency>
 
 			<!-- Cache -->
