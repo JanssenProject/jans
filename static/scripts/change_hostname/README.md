@@ -21,7 +21,7 @@ pip install ldap3
 
 Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/cluster-mgr/blob/master/testing/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
 
-Modify the entries inside of `test.py` using the following template:
+Modify the entries inside of `change_config.py` using the following template:
 
 `-os` below needs to be either "Ubuntu" or "CentOS"
 
@@ -33,7 +33,7 @@ name_changer = ChangeGluuHostname(
     cert_mail='<email>',
     cert_state='<state_or_region>',
     cert_country='<country>',
-    server='<actual_hostname_of_server>',
+    server='localhost',
     ip_address='<ip_address_of_server>',
     ldap_password="<ldap_password>",
     os_type='<linux_distro>',
@@ -53,8 +53,8 @@ name_changer = ChangeGluuHostname(
     cert_mail='admin@customer.io',
     cert_state='TX',
     cert_country='US',
-    server='dev.example.org', <------ Whatever the server resolves as. This is to connect to LDAP for modifications.
-    ip_address='10.36.101.25',
+    server='localhost', 
+    ip_address='10.36.101.25', <------ This is for modifying the /etc/hosts file inside the chroot to match the new server and hostname
     ldap_password="MyS3crE71D4pPas$",
     os_type='Ubuntu',
     local=True
