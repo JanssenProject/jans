@@ -23,7 +23,7 @@ import javax.enterprise.util.AnnotationLiteral;
  */
 public class SecurityExtension implements Extension {
 
-    private Map<Method, InterceptSecure> interceptSecureForMethods = new HashMap<Method, InterceptSecure>();;
+    private Map<Method, InterceptSecure> interceptSecureForMethods = new HashMap<Method, InterceptSecure>();
 
     public <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {
         // Wrap this to override the annotations of the class
