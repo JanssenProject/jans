@@ -1,15 +1,22 @@
 {
-  "status": "ok",
-  "data": {
-    "oxd_id": "bcad760f-91ba-46e1-a020-05e4281d91b6",
-    "client_id_of_oxd_id": "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.AAA4",
-    "op_host": "https://<op-hostname>",
-    "setup_client_oxd_id": "<setup client oxd_id>",
-    "client_id": "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387",
-    "client_secret": "f436b936-03fc-433f-9772-53c2bc9e1c74",
-    "client_registration_access_token": "d836df94-44b0-445a-848a-d43189839b17",
-    "client_registration_client_uri": "https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387",
-    "client_id_issued_at": 1501854943,
-    "client_secret_expires_at": 1501941343
-  }
+  "authorization_redirect_uri": "https://client.example.org/cb",
+  "op_host":"https://<ophostname>",
+  "post_logout_redirect_uri": "https://client.example.org/cb",
+  "application_type": "web",
+  "response_types": ["code"],
+  "grant_types": ["authorization_code", "client_credentials"],
+  "scope": ["openid"],
+  "acr_values": ["basic"],
+  "client_name": "",
+  "client_jwks_uri": "",
+  "client_token_endpoint_auth_method": "",
+  "client_request_uris": [],
+  "client_frontchannel_logout_uris": [],
+  "client_sector_identifier_uri": [],
+  "contacts": ["foo_bar@spam.org"],
+  "ui_locales": [],
+  "claims_locales": [],
+  "claims_redirect_uri": [],
+  "client_id": "<client id of existing client>",
+  "client_secret": "<client secret of existing client>"
 }
