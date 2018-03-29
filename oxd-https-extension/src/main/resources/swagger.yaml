@@ -1,0 +1,176 @@
+swagger: "2.0"
+info:
+  description: oxd-https-extension
+  version: "3.1.3"
+  title: oxd-https-extension
+  contact:
+    email: yuriyz@gluu.org
+
+  license:
+    name: License
+    url: https://github.com/GluuFederation/oxd/blob/master/LICENSE
+
+host: example.gluu.org
+schemes:
+ - https
+
+# tags are used for organizing operations
+tags:
+- name: developers
+  description: Operations available to regular developers
+
+paths:
+  /setup-client:
+    post:
+      tags:
+      - developers
+      summary: Setup Client
+      operationId: setup-client
+      description: Setups client for securing communication between oxd-https-extension and oxd-server
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: Parameters
+          schema:
+            type: object
+            required:
+              - authorization_redirect_uri
+            properties:
+              authorization_redirect_uri:
+                type: string
+                example: https://client.example.org/cb
+              op_host:
+                type: string
+                example: https://<ophostname>
+                description: If missing, must be present in defaults
+              post_logout_redirect_uri:
+                type: string
+                example: https://client.example.org/cb
+              application_type:
+                type: string
+                example: web
+              response_types:
+                type: array
+                items:
+                  type: string
+                example: ["code"]
+              grant_types:
+                type: array
+                items:
+                  type: string
+                example: ["authorization_code", "client_credentials"]
+              scope:
+                type: array
+                items:
+                  type: string
+                example:  ["openid"]
+              acr_values:
+                type: array
+                items:
+                  type: string
+                example: ["basic"]
+              client_name:
+                type: string
+                description: oxd will generate its own non-human readable name by defaultif client_name is not specified
+              client_jwks_uri:
+                type: string
+              client_token_endpoint_auth_method:
+                type: string
+              client_request_uris:
+                type: array
+                items:
+                  type: string
+              client_frontchannel_logout_uris:
+                type: array
+                items:
+                  type: string
+              client_sector_identifier_uri:
+                type: array
+                items:
+                  type: string
+              contacts:
+                type: array
+                items:
+                  type: string
+                example: ["foo_bar@spam.org"]
+              ui_locales:
+                type: array
+                items:
+                  type: string
+              claims_locales:
+                type: array
+                items:
+                  type: string
+              claims_redirect_uri:
+                type: array
+                items:
+                  type: string
+              client_id:
+                type: string
+                description: client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set)
+              client_secret:
+                type: string
+                description: client secret of existing client, must be used together with client_id
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            required:
+              - status
+              - data
+            properties:
+              status:
+                type: string
+                example: ok
+              data:
+                type: object
+                required:
+                  - oxd_id
+                  - client_id_of_oxd_id
+                  - op_host
+                  - setup_client_oxd_id
+                  - client_id
+                  - client_secret
+                  - client_registration_access_token
+                  - client_registration_client_uri
+                  - client_id_issued_at
+                  - client_secret_expires_at
+                properties:
+                  oxd_id:
+                    type: string
+                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
+                  client_id_of_oxd_id:
+                    type: string
+                    example: ccad760f-91ba-46e1-a020-05e4281d91b6
+                  op_host:
+                    type: string
+                    example: https://<op-hostname>
+                  setup_client_oxd_id:
+                    type: string
+                  client_id:
+                    type: string
+                    example: "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387"
+                  client_secret:
+                    type: string
+                    example: f436b936-03fc-433f-9772-53c2bc9e1c74
+                  client_registration_access_token:
+                    type: string
+                    example: d836df94-44b0-445a-848a-d43189839b17
+                  client_registration_client_uri:
+                    type: string
+                    example: https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387
+                  client_id_issued_at:
+                    type: integer
+                    example: 1501854943
+                  client_secret_expires_at:
+                    type: integer
+                    example: 1501941343
+        403:
+          description: invalid access token provided in Authorization header. Forbidden.
+        500:
+          description: internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
