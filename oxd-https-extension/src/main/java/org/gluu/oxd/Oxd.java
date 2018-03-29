@@ -20,7 +20,7 @@ public class Oxd {
         this.configuration = configuration;
     }
 
-    public CommandResponse setupClient(SetupClientParams params) throws IOException {
+    public CommandResponse setupClient(SetupClientParams params) {
         CommandClient client = null;
 
         try {
@@ -34,7 +34,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse registerSite(RegisterSiteParams params, String accessToken) throws IOException {
+    public CommandResponse registerSite(RegisterSiteParams params, String accessToken) {
         CommandClient client = null;
 
         try {
@@ -50,7 +50,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse updateSite(UpdateSiteParams params, String accessToken) throws IOException {
+    public CommandResponse updateSite(UpdateSiteParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -65,7 +65,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse removeSite(RemoveSiteParams params, String token) throws IOException {
+    public CommandResponse removeSite(RemoveSiteParams params, String token) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -80,7 +80,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) throws IOException {
+    public CommandResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -95,7 +95,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getTokenByCode(GetTokensByCodeParams params, String accessToken) throws IOException {
+    public CommandResponse getTokenByCode(GetTokensByCodeParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -110,7 +110,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getUserInfo(GetUserInfoParams params, String accessToken) throws IOException {
+    public CommandResponse getUserInfo(GetUserInfoParams params, String accessToken) {
         CommandClient client = null;
 
         try {
@@ -126,7 +126,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getLogoutUri(GetLogoutUrlParams params, String accessToken) throws IOException {
+    public CommandResponse getLogoutUri(GetLogoutUrlParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -141,7 +141,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse umaRsProtect(RsProtectParams params, String accessToken) throws IOException {
+    public CommandResponse umaRsProtect(RsProtectParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -156,7 +156,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse umaRsCheckAccess(RsCheckAccessParams params, String accessToken) throws IOException {
+    public CommandResponse umaRsCheckAccess(RsCheckAccessParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -171,7 +171,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse umaRpGetRpt(RpGetRptParams params, String accessToken) throws IOException {
+    public CommandResponse umaRpGetRpt(RpGetRptParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -186,7 +186,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params, String accessToken) throws IOException {
+    public CommandResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params, String accessToken) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -201,7 +201,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
+    public CommandResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -214,7 +214,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse getClientToken(GetClientTokenParams params) throws IOException {
+    public CommandResponse getClientToken(GetClientTokenParams params) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -227,7 +227,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse introspectAccessToken(IntrospectAccessTokenParams params) throws IOException {
+    public CommandResponse introspectAccessToken(IntrospectAccessTokenParams params) {
         CommandClient client = null;
         try {
             client = newClient();
@@ -240,7 +240,7 @@ public class Oxd {
         }
     }
 
-    public CommandResponse introspectRpt(IntrospectRptParams params) throws IOException {
+    public CommandResponse introspectRpt(IntrospectRptParams params) {
         CommandClient client = null;
         try {
             client = newClient();
