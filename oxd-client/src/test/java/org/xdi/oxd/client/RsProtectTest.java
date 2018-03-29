@@ -6,6 +6,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -16,6 +17,7 @@ import org.xdi.oxd.rs.protect.RsResource;
 import java.io.IOException;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 /**
@@ -36,6 +38,54 @@ public class RsProtectTest {
 
             protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
             RsCheckAccessTest.checkAccess(client, site);
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Test
+    public void overwriteFalse(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
+        CommandClient client = null;
+        try {
+            client = new CommandClient(host, port);
+
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+            List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
+            protectResources(client, site, resources);
+
+            final RsProtectParams commandParams = new RsProtectParams();
+            commandParams.setOxdId(site.getOxdId());
+            commandParams.setResources(resources);
+
+            ErrorResponse errorResponse = client.send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams)).dataAsResponse(ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(errorResponse.getError(), "uma_protection_exists");
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Test
+    public void overwriteTrue(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
+        CommandClient client = null;
+        try {
+            client = new CommandClient(host, port);
+
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+            List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
+            protectResources(client, site, resources);
+
+            final RsProtectParams commandParams = new RsProtectParams();
+            commandParams.setOxdId(site.getOxdId());
+            commandParams.setResources(resources);
+            commandParams.setOverwrite(true); // force overwrite
+
+            RsProtectResponse response = client.send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams)).dataAsResponse(RsProtectResponse.class);
+            assertNotNull(response);
         } finally {
             CommandClient.closeQuietly(client);
         }
