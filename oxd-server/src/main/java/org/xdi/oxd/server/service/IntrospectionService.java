@@ -66,7 +66,7 @@ public class IntrospectionService {
                 LOG.trace("Handled compatibility issue. Response: " + backResponse);
 
                 IntrospectionResponse response = new IntrospectionResponse();
-                response.setSubject(backResponse.getSubject());
+                response.setSub(backResponse.getSubject());
                 response.setAudience(backResponse.getAudience());
                 response.setTokenType(backResponse.getTokenType());
                 response.setActive(backResponse.isActive());
