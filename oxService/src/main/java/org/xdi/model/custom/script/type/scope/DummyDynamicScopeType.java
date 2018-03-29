@@ -4,6 +4,7 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.model.custom.script.type.scope;
 
+import java.util.List;
 import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
@@ -33,6 +34,11 @@ public class DummyDynamicScopeType implements DynamicScopeType {
     @Override
     public boolean update(Object dynamicScopeContext, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
+    }
+
+    @Override
+    public List<String> getSupportedClaims(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return null;
     }
 
 }
