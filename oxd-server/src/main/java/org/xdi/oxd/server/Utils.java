@@ -87,4 +87,8 @@ public class Utils {
         }
         return false;
     }
+
+    public static boolean isTrue(Boolean bool) {
+        return bool != null && bool;
+    }
 }
