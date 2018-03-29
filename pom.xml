@@ -21,7 +21,7 @@
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
-        <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
+        <oxlicense.version>3.1.3-SNAPSHOT</oxlicense.version>
     </properties>
 
     <prerequisites>
@@ -245,7 +245,7 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.2</version>
+                <version>2.6</version>
             </dependency>
             <dependency>
                 <groupId>commons-beanutils</groupId>
