@@ -1,6 +1,7 @@
 package org.gluu.oxd.resources.swagger;
 
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.InputStream;
@@ -56,6 +57,10 @@ public class ManualSwaggerGenerator {
                 append(result, indent, "  type: boolean\n");
             } else if (opt instanceof Float || opt instanceof Double) {
                 append(result, indent, "  type: number\n");
+            } else if (opt instanceof JSONArray) {
+                append(result, indent, "  type: array\n");
+                append(result, indent, "  items:\n");
+                append(result, indent, "    type: string\n");
             } else {
                 System.out.println(opt);
             }
@@ -94,8 +99,26 @@ public class ManualSwaggerGenerator {
                 case "scope":
                     append(result, indent, "  example: [\"openid\"]\n");
                     break;
+                case "authorization_redirect_uri":
+                case "post_logout_redirect_uri":
+                    append(result, indent, "  example: https://client.example.org/cb\n");
+                    break;
+                case "application_type":
+                    append(result, indent, "  example: web\n");
+                    break;
+                case "response_types":
+                    append(result, indent, "  example: [\"code\"]\n");
+                    break;
+                case "grant_types":
+                    append(result, indent, "  example: [\"authorization_code\", \"client_credentials\"]\n");
+                    break;
+                case "acr_values":
+                    append(result, indent, "  example: [\"basic\"]\n");
+                    break;
+                case "contacts":
+                    append(result, indent, "  example: [\"foo_bar@spam.org\"]\n");
+                    break;
             }
-
         }
     }
 
