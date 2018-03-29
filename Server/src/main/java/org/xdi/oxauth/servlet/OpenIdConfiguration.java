@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +64,9 @@ public class OpenIdConfiguration extends HttpServlet {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
+    
+    @Inject
+    private ExternalDynamicScopeService externalDynamicScopeService;
 
 
     /**
@@ -337,13 +342,22 @@ public class OpenIdConfiguration extends HttpServlet {
 
                 result.put(mapping);
 
-                final List<String> claimIdList = scope.getOxAuthClaims();
-                if (claimIdList != null && !claimIdList.isEmpty()) {
-                    for (String claimDn : claimIdList) {
-                        final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
-                        final String claimName = attribute.getOxAuthClaimName();
+                if (ScopeType.DYNAMIC.equals(scope.getScopeType())) {
+                    List<String> claimNames = externalDynamicScopeService.executeExternalGetSupportedClaimsMethods(Arrays.asList(scope));
+                    for (String claimName : claimNames) {
                         if (StringUtils.isNotBlank(claimName)) {
                             claimsList.put(claimName);
+                        }
+                    }
+                } else {
+                    final List<String> claimIdList = scope.getOxAuthClaims();
+                    if (claimIdList != null && !claimIdList.isEmpty()) {
+                        for (String claimDn : claimIdList) {
+                            final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                            final String claimName = attribute.getOxAuthClaimName();
+                            if (StringUtils.isNotBlank(claimName)) {
+                                claimsList.put(claimName);
+                            }
                         }
                     }
                 }
