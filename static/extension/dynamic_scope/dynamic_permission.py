@@ -46,8 +46,8 @@ class DynamicScope(DynamicScopeType):
 
         return True
 
-    def logout(self, configurationAttributes, requestParameters):
-        return True
+    def getSupportedClaims(self, configurationAttributes):
+        return Arrays.asList("role")
 
     def getApiVersion(self):
-        return 1
+        return 2
