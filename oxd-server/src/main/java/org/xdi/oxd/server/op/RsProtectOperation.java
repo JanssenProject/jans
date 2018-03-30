@@ -147,7 +147,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         }
 
-        List<UmaResource> existingUmaResources = getRp().getUmaProtectedResources();
+        Rp rp = getRp();
+        List<UmaResource> existingUmaResources = rp.getUmaProtectedResources();
         if (existingUmaResources != null && !existingUmaResources.isEmpty()) {
             if (params.getOverwrite() == null || !params.getOverwrite()) {
                 throw new ErrorResponseException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
@@ -162,6 +163,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                     resourceService.deleteResource("Bearer " + pat, resource.getId());
                     LOG.trace("Removed existing resource " + resource.getId() + ".");
                 }
+                rp.getUmaProtectedResources().clear();
+                getRpService().updateSilently(rp);
             }
         }
     }
