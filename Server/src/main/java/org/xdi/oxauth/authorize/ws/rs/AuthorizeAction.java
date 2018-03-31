@@ -19,10 +19,7 @@ import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -52,7 +49,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version January 30, 2018
+ * @version March 31, 2018
  */
 @RequestScoped
 @Named
@@ -289,11 +286,15 @@ public class AuthorizeAction {
         log.trace("checkPermissionGranted, user = " + user);
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
-            if (appConfiguration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
-                    permissionGranted(session);
-                    return;
-                }
+            if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+                // if trusted client = true, then skip authorization page and grant access directly
+                permissionGranted(session);
+                return;
+            } else if (appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId()
+                    && SubjectType.PAIRWISE.toString().equals(client.getSubjectType()) && hasOnlyOpenidScope()) {
+                // If a client has only openid scope and pairwise id, person should not have to authorize. oxAuth-743
+                permissionGranted(session);
+                return;
             }
 
             ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(
@@ -739,6 +740,10 @@ public class AuthorizeAction {
         } catch (UnsupportedEncodingException iee) {
             throw new RuntimeException(iee);
         }
+    }
+
+    private boolean hasOnlyOpenidScope() {
+        return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getDisplayName().equals("openid");
     }
 
 }
