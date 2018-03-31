@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Functional tests for Authorize Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 29, 2017
+ * @version March 31, 2018
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
@@ -2651,5 +2651,76 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             assertNotNull(authorizationResponse.getState(), "The state is null");
             assertNotNull(authorizationResponse.getScope(), "The scope is null");
         }
+    }
+
+    /**
+     * If a client has only openid scope and pairwise id, person should not have to authorize.
+     */
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationForOpenIdScopeAndPairwiseId(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationForOpenIdScopeAndPairwiseId");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+
+        // 3. Request authorization and receive the authorization code.
+        List<String> scopes = Arrays.asList("openid");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                authorizationEndpoint, authorizationRequest, userId, userSecret, false);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 }
