@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 29, 2017
+ * @version March 31, 2018
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -98,6 +98,7 @@ public class AppConfiguration implements Configuration {
     private int dynamicRegistrationExpirationTime;
     private Boolean dynamicRegistrationPersistClientAuthorizations;
     private Boolean trustedClientEnabled;
+    private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
@@ -869,6 +870,14 @@ public class AppConfiguration implements Configuration {
 
     public void setTrustedClientEnabled(Boolean trustedClientEnabled) {
         this.trustedClientEnabled = trustedClientEnabled;
+    }
+
+    public Boolean getSkipAuthorizationForOpenIdScopeAndPairwiseId() {
+        return skipAuthorizationForOpenIdScopeAndPairwiseId;
+    }
+
+    public void setSkipAuthorizationForOpenIdScopeAndPairwiseId(Boolean skipAuthorizationForOpenIdScopeAndPairwiseId) {
+        this.skipAuthorizationForOpenIdScopeAndPairwiseId = skipAuthorizationForOpenIdScopeAndPairwiseId;
     }
 
     public Boolean getDynamicRegistrationScopesParamEnabled() {
