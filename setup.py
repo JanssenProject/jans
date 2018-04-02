@@ -1281,6 +1281,15 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
 
+        tmpfiles_base = '/usr/lib/tmpfiles.d'
+        if self.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
+            self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
+            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % self.templateFolder
+            jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
+            self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
+            self.run([self.cmd_chown, 'root:root', jetty_tmpfiles_dst])
+            self.run([self.cmd_chmod, '644', jetty_tmpfiles_dst])
+
         serviceConfiguration['installed'] = True
 
     def installNodeService(self, serviceName):
