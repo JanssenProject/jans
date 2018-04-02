@@ -105,7 +105,7 @@ class Setup(object):
         self.jre_version = '162'
         self.jetty_version = '9.4.9.v20180320'
         self.jython_version = '2.7.0'
-        self.node_version = '8.10.0'
+        self.node_version = '9.9.0'
         self.apache_version = None
         self.opendj_version = None
 
@@ -172,27 +172,27 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,servlets,ext,http-forwarded,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'deploy,http,console-capture,jsp,ext,http-forwarded,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
             'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
+                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp'},
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
             'asimba' : {'name' : 'asimba',
-                        'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded'},
+                        'jetty' : {'modules' : 'server,deploy,http,resources,console-capture,jsp'},
                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                         'installed' : False
                         },
             'oxauth-rp' : {'name' : 'oxauth-rp',
-                           'jetty' : {'modules' : 'deploy,http,console-capture,jsp,http-forwarded,websocket'},
+                           'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
                            },
@@ -556,6 +556,8 @@ class Setup(object):
                            },
         }
 
+        self.install_time_ldap = None
+
     def __repr__(self):
         try:
             return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
@@ -582,6 +584,9 @@ class Setup(object):
                 val = self.__dict__[key]
                 s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
+
+    def initialize(self):
+        self.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
 
     def set_ownership(self):
         self.logIt("Changing ownership")
@@ -1181,6 +1186,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
         jettyRunFolder = '/var/run/jetty'
+        self.run([self.cmd_mkdir, '-p', jettyRunFolder])
         self.run([self.cmd_chmod, '-R', '775', jettyRunFolder])
         self.run([self.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
 
@@ -1274,6 +1280,15 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
+
+        tmpfiles_base = '/usr/lib/tmpfiles.d'
+        if self.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
+            self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
+            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % self.templateFolder
+            jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
+            self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
+            self.run([self.cmd_chown, 'root:root', jetty_tmpfiles_dst])
+            self.run([self.cmd_chmod, '644', jetty_tmpfiles_dst])
 
         serviceConfiguration['installed'] = True
 
@@ -3334,78 +3349,80 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            progress_bar(1, "Configuring system")
+            progress_bar(1, "Initializing")
+            installObject.initialize()
+            progress_bar(2, "Configuring system")
             installObject.configureSystem()
-            progress_bar(2, "Downloading War files")
+            progress_bar(3, "Downloading War files")
             installObject.downloadWarFiles()
-            progress_bar(3, "Calculating application memory")
+            progress_bar(4, "Calculating application memory")
             installObject.calculate_selected_aplications_memory()
-            progress_bar(4, "Downloading and installing JRE")
+            progress_bar(5, "Downloading and installing JRE")
             installObject.installJRE()
-            progress_bar(5, "Installing Jetty")
+            progress_bar(6, "Installing Jetty")
             installObject.installJetty()
-            progress_bar(6, "Installing Jython")
+            progress_bar(7, "Installing Jython")
             installObject.installJython()
-            progress_bar(7, "Installing Node")
+            progress_bar(8, "Installing Node")
             installObject.installNode()
-            progress_bar(8, "Making salt")
+            progress_bar(9, "Making salt")
             installObject.make_salt()
-            progress_bar(9, "Making oxauth salt")
+            progress_bar(10, "Making oxauth salt")
             installObject.make_oxauth_salt()
-            progress_bar(10, "Copying scripts")
+            progress_bar(11, "Copying scripts")
             installObject.copy_scripts()
-            progress_bar(11, "Encoding passwords")
+            progress_bar(12, "Encoding passwords")
             installObject.encode_passwords()
-            progress_bar(12, "Encoding test passwords")
+            progress_bar(13, "Encoding test passwords")
             installObject.encode_test_passwords()
-            progress_bar(13, "Installing Gluu base")
+            progress_bar(14, "Installing Gluu base")
             installObject.install_gluu_base()
-            progress_bar(14, "Preparing bas64 extention scripts")
+            progress_bar(15, "Preparing bas64 extention scripts")
             installObject.prepare_base64_extension_scripts()
-            progress_bar(15, "Rendering templates")
+            progress_bar(16, "Rendering templates")
             installObject.render_templates()
-            progress_bar(16, "Generating crypto")
+            progress_bar(17, "Generating crypto")
             installObject.generate_crypto()
-            progress_bar(17, "Generating oxauth openid keys")
+            progress_bar(18, "Generating oxauth openid keys")
             installObject.generate_oxauth_openid_keys()
-            progress_bar(18, "Generating base64 configuration")
+            progress_bar(19, "Generating base64 configuration")
             installObject.generate_base64_configuration()
-            progress_bar(19, "Rendering configuratipn template")
+            progress_bar(20, "Rendering configuratipn template")
             installObject.render_configuration_template()
-            progress_bar(20, "Updating hostname")
+            progress_bar(21, "Updating hostname")
             installObject.update_hostname()
-            progress_bar(21, "Setting ulimits")
+            progress_bar(22, "Setting ulimits")
             installObject.set_ulimits()
-            progress_bar(22, "Copying output")
+            progress_bar(23, "Copying output")
             installObject.copy_output()
-            progress_bar(23, "Setting up init scripts")
+            progress_bar(24, "Setting up init scripts")
             installObject.setup_init_scripts()
-            progress_bar(24, "Rendering node templates")
+            progress_bar(25, "Rendering node templates")
             installObject.render_node_templates()
-            progress_bar(25, "Installing Gluu components")
+            progress_bar(26, "Installing Gluu components")
             installObject.install_gluu_components()
-            progress_bar(26, "Rendering test templates")
+            progress_bar(27, "Rendering test templates")
             installObject.render_test_templates()
-            progress_bar(27, "Copying static")
+            progress_bar(28, "Copying static")
             installObject.copy_static()
-            progress_bar(28, "Setting ownerships")
+            progress_bar(29, "Setting ownerships")
             installObject.set_ownership()
-            progress_bar(29, "Setting permissions")
+            progress_bar(30, "Setting permissions")
             installObject.set_permissions()
-            progress_bar(30, "Starting services")
+            progress_bar(31, "Starting services")
             installObject.start_services()
-            progress_bar(31, "Changing rc links")
+            progress_bar(32, "Changing rc links")
             installObject.change_rc_links()
-            progress_bar(32, "Saving properties")
+            progress_bar(33, "Saving properties")
             installObject.save_properties()
             
             if 'importLDIFDir' in setupOptions.keys():
-                progress_bar(33, "Importing LDIF files")
+                progress_bar(34, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
-                progress_bar(33, "Completed")
+                progress_bar(34, "Completed")
             else:
-                progress_bar(33, "Completed")
+                progress_bar(34, "Completed")
             print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
