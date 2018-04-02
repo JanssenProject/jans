@@ -612,8 +612,12 @@ class Migration(object):
                     progress_bar(cnt, nodn, 'converting Dns')
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
                     line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
-                    if 'oxTrustAuthenticationMode' in line:
-                        line = line.replace('internal', 'auth_ldap_server')
+                    #if 'oxTrustAuthenticationMode' in line:
+                    #    line = line.replace('internal', 'auth_ldap_server')
+                    if line.startswith('oxAuthenticationMode'):
+                         line = 'oxAuthenticationMode: auth_ldap_server\n'
+                    elif line.startswith('oxTrustAuthenticationMode'):
+                         line = 'oxTrustAuthenticationMode: auth_ldap_server\n'
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
                     if line.startswith('oxMemcachedConfiguration:') or line.startswith('oxCacheConfiguration:'):
