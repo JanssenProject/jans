@@ -187,6 +187,7 @@
     "dynamicRegistrationExpirationTime":86400,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
+    "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList":[
