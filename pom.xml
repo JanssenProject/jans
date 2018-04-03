@@ -18,8 +18,8 @@
 		<oxeleven.version>3.2.0-SNAPSHOT</oxeleven.version>
 		<oxnotify.version>3.2.0-SNAPSHOT</oxnotify.version>
 
-		<jackson.version>2.8.10</jackson.version>
-		<jackson.databind.version>2.8.11.1</jackson.databind.version>
+		<jackson.version>2.9.5</jackson.version>
+		<jackson.databind.version>2.9.5</jackson.databind.version>
 		<jackson.prev.version>1.9.11</jackson.prev.version>
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
@@ -443,6 +443,11 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.fasterxml.jackson.core</groupId>
+			    <artifactId>jackson-annotations</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
