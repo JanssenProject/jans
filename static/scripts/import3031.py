@@ -834,7 +834,7 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
+        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
 

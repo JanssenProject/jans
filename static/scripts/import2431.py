@@ -970,6 +970,9 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
+        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
+        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+
     def getProp(self, prop, prop_file=None):
         if not prop_file:
             prop_file = os.path.join(self.backupDir, 'setup.properties')
