@@ -4,7 +4,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-import org.xdi.oxauth.model.uma.UmaPermission;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,7 +29,7 @@ public class BadRptIntrospectionResponse {
     private String aud;
     private String iss;
     private String jti;
-    private List<UmaPermission> permissions;
+    private List<BadUmaPermission> permissions;
 
     public BadRptIntrospectionResponse() {
     }
@@ -151,11 +150,11 @@ public class BadRptIntrospectionResponse {
     @XmlElement(
             name = "permissions"
     )
-    public List<UmaPermission> getPermissions() {
+    public List<BadUmaPermission> getPermissions() {
         return this.permissions;
     }
 
-    public void setPermissions(List<UmaPermission> p_permissions) {
+    public void setPermissions(List<BadUmaPermission> p_permissions) {
         this.permissions = p_permissions;
     }
 
