@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
+import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.util.StringHelper;
 
@@ -89,6 +90,19 @@ public class ExternalScriptService implements Serializable {
         }
 
         return defaultExternalCustomScript;
+    }
+
+    public int executeExternalGetApiVersion(CustomScriptConfiguration customScriptConfiguration) {
+        try {
+            log.debug("Executing python 'getApiVersion' authenticator method");
+            BaseExternalType externalAuthenticator = (BaseExternalType) customScriptConfiguration.getExternalType();
+            return externalAuthenticator.getApiVersion();
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+        }
+
+        return -1;
     }
 
     public void saveScriptError(CustomScript customScript, Exception exception) {
