@@ -131,7 +131,11 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticatedUserSessionAttribute(userName, authenticated);
+        String userId = userName;
+        if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
+            userId = identity.getUser().getUserId();
+        }
+        setAuthenticatedUserSessionAttribute(userId, authenticated);
 
         MetricType metricType;
         if (authenticated) {
