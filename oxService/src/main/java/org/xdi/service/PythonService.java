@@ -110,6 +110,9 @@ public class PythonService implements Serializable {
             props.setProperty("python.path", pythonModulesDir);
         }
 
+        props.put("python.console.encoding", "UTF-8");
+        props.put("python.import.site", "false");
+
         return props;
     }
 
