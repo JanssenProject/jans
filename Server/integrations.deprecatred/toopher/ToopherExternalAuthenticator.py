@@ -85,9 +85,9 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not logged_in):
                 return False
 
-            # Find user by uid
+            # Get user entry
             userService = CdiUtil.bean(UserService)
-            find_user_by_uid = userService.getUser(user_name)
+            find_user_by_uid = authenticationService.getAuthenticatedUser()
             if (find_user_by_uid == None):
                 print "Toopher. Authenticate for step 1. Failed to find user"
                 return False

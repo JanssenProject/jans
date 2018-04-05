@@ -53,7 +53,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if not logged_in:
                 return False
 
-            find_user_by_uid = userService.getUser(user_name)
+            find_user_by_uid = authenticationService.getAuthenticatedUser()
             user_expDate = find_user_by_uid.getAttribute("oxPasswordExpirationDate", False)
            
             if user_expDate == None:
@@ -76,7 +76,6 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif step == 2:
             print "Basic (with password update). Authenticate for step 2"
-
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
