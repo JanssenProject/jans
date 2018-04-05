@@ -71,7 +71,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not logged_in):
                 return False
             else:
-                find_user_by_uid = userService.getUser(user_name)
+                find_user_by_uid = authenticationService.getAuthenticatedUser()
                 status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "mail")
                 user_mail = status_attribute_value.getValue()
                 self.setRequestScopedParameters(identity)
@@ -102,8 +102,13 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "compromised_password (with password update). Authenticate for step 3. New password is empty"
                 return False
             new_password = new_password_array[0]
-            session_attributes = identity.getSessionId().getSessionAttributes()
-            user_name = session_attributes.get("user_name")
+
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "compromised_password (with password update). Authenticate for step 3. Failed to determine user name"
+                return False
+
+            user_name = user.getUserId()
             print "compromised_password (with password update). Authenticate for step 3. Attempting to set new user '" + user_name + "' password"
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
