@@ -104,7 +104,7 @@ class Setup(object):
         # Component ithversions
         self.jre_version = '162'
         self.jetty_version = '9.4.9.v20180320'
-        self.jython_version = '2.7.1a'
+        self.jython_version = '2.7.2a'
         self.node_version = '9.9.0'
         self.apache_version = None
         self.opendj_version = None
