@@ -104,7 +104,7 @@ class Setup(object):
         # Component ithversions
         self.jre_version = '162'
         self.jetty_version = '9.4.9.v20180320'
-        self.jython_version = '2.7.0'
+        self.jython_version = '2.7.1a'
         self.node_version = '9.9.0'
         self.apache_version = None
         self.opendj_version = None
@@ -1147,7 +1147,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
-        openDJArchive = 'opendj-server-3.0.0.zip'
+        openDJArchive = 'opendj-server-3.0.0.1.zip'
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
             self.run(['unzip', '-n', '-q', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
@@ -1315,7 +1315,7 @@ class Setup(object):
         jythonInstaller = 'jython-%s.jar' % self.jython_version
 
         try:
-            self.run(['rm', '-fr', '/opt*-%s' % self.jython_version])
+            self.run(['rm', '-rf', '/opt*-%s' % self.jython_version])
             self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
