@@ -52,5 +52,4 @@ oxAssociatedClient: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gl
 oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 oxId: 0f963ecc-93f0-49c1-beae-ad2006abbb99
 oxResource: https://%(hostname)s/identity/restv1/passport/config
-oxAuthExpiration: %(install_time_ldap)s
 oxRevision: 1
