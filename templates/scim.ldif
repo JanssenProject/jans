@@ -52,5 +52,4 @@ oxAssociatedClient: inum=%(scim_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06D,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 oxId: 0f13ae5a-135e-4b01-a290-7bbe62e7d40f
 oxResource: https://%(hostname)s/identity/restv1/scim/v2
-oxAuthExpiration: %(install_time_ldap)s
 oxRevision: 1
