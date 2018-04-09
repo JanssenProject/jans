@@ -93,7 +93,7 @@
 		<!-- Jython -->
 		<dependency>
 			<groupId>org.python</groupId>
-			<artifactId>jython</artifactId>
+			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
 		<!-- Cache -->
