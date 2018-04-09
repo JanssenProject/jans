@@ -328,7 +328,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if not logged_in:
             return None
 
-        find_user_by_uid = userService.getUser(user_name)
+        find_user_by_uid = authenticationService.getAuthenticatedUser()
         if find_user_by_uid == None:
             print "UAF. Process basic authentication. Failed to find user '%s'" % user_name
             return None
