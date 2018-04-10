@@ -191,7 +191,11 @@ public class LicenseService {
             request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage(), conf.getServerName()));
             LOG.trace("Updating statistic ... , request: " + request);
             Response response = LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
-            LOG.trace("Updated statistic. oxdId: " + oxdId + ", response: " + response);
+            if (response.getStatus() == 200) {
+                LOG.trace("Updated statistic. oxdId: " + oxdId + ", response: " + response);
+            } else {
+                throw new RuntimeException("Failed to update statistic, rp: " + rp);
+            }
         } catch (Exception e) {
             LOG.error("Failed to update statistic. Message: " + e.getMessage(), e);
         }
