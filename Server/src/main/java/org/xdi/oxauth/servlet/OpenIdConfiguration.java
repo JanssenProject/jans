@@ -306,8 +306,8 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, appConfiguration.getRequireRequestUriRegistration());
             jsonObj.put(OP_POLICY_URI, appConfiguration.getOpPolicyUri());
             jsonObj.put(OP_TOS_URI, appConfiguration.getOpTosUri());
-            jsonObj.put(FRONTCHANNEL_LOGOUT_SUPPORTED, "true");
-            jsonObj.put(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED, "true");
+            jsonObj.put(FRONTCHANNEL_LOGOUT_SUPPORTED, new Boolean(true));
+            jsonObj.put(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED, new Boolean(true));
             jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED, appConfiguration.getFrontChannelLogoutSessionSupported());
 
             out.println(jsonObj.toString(4).replace("\\/", "/"));
