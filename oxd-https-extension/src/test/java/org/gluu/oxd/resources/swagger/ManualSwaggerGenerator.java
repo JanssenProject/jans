@@ -61,6 +61,8 @@ public class ManualSwaggerGenerator {
                 append(result, indent, "  type: array\n");
                 append(result, indent, "  items:\n");
                 append(result, indent, "    type: string\n");
+            } else if (opt == null || opt == JSONObject.NULL) {
+                append(result, indent, "  type: string\n");
             } else {
                 System.out.println(opt);
             }
@@ -117,6 +119,46 @@ public class ManualSwaggerGenerator {
                     break;
                 case "contacts":
                     append(result, indent, "  example: [\"foo_bar@spam.org\"]\n");
+                    break;
+                case "access_token":
+                    append(result, indent, "  example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2\n");
+                    break;
+                case "expires_in":
+                case "exp":
+                    append(result, indent, "  example: 299\n");
+                    break;
+                case "iat":
+                    append(result, indent, "  example: 1419350238\n");
+                    break;
+                case "aud":
+                    append(result, indent, "  example: l238j323ds-23ij4\n");
+                    break;
+                case "active":
+                    append(result, indent, "  example: true\n");
+                    break;
+                case "username":
+                    append(result, indent, "  example: John Black\n");
+                    break;
+                case "token_type":
+                    append(result, indent, "  example: bearer\n");
+                    break;
+                case "sub":
+                    append(result, indent, "  example: jblack\n");
+                    break;
+                case "iss":
+                    append(result, indent, "  example: https://as.gluu.org/\n");
+                    break;
+                case "extension_field":
+                    append(result, indent, "  example: twenty-seven\n");
+                    break;
+                case "id_token":
+                    append(result, indent, "  example: eyJraWQiOiI5MTUyNTU1Ni04YmIwLTQ2MzYtYTFhYy05ZGVlNjlhMDBmYWUiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NlLWRldjMuZ2x1dS5vcmciLCJhdWQiOiJAITE3MzYuMTc5RS5BQTYwLjE2QjIhMDAwMSE4RjdDLkI5QUIhMDAwOCE5Njk5LkFFQzcuOTM3MS4yODA3IiwiZXhwIjoxNTAxODYwMzMwLCJpYXQiOjE1MDE4NTY3MzAsIm5vbmNlIjoiOGFkbzJyMGMzYzdyZG03OHU1OTUzbTc5MXAiLCJhdXRoX3RpbWUiOjE1MDE4NTY2NzIsImF0X2hhc2giOiItQ3gyZHo1V3Z3X2tCWEFjVHMzbUZBIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im\n");
+                    break;
+                case "refresh_token":
+                    append(result, indent, "  example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446\n");
+                    break;
+                case "at_hash":
+                    append(result, indent, "  example: -Cx2dz5Wvw_kBXAcTs3mFA\n");
                     break;
             }
         }
