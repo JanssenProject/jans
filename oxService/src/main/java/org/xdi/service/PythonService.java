@@ -12,8 +12,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -44,6 +46,18 @@ public class PythonService implements Serializable {
     private PythonInterpreter pythonInterpreter;
     private boolean interpereterReady;
 
+    private OutputStreamWriter logOut, logErr;
+
+    @PostConstruct
+    public void init() {
+        try {
+            this.logOut = new OutputStreamWriter(new PythonLoggerOutputStream(log, false), "UTF-8");
+            this.logErr = new OutputStreamWriter(new PythonLoggerOutputStream(log, true), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Failed to initialize Jython out/err loggers", ex);
+        }
+    }
+
     /*
      * Initialize singleton instance during startup
      */
@@ -55,9 +69,7 @@ public class PythonService implements Serializable {
                 PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir), null);
                 this.pythonInterpreter = new PythonInterpreter();
 
-                // Init output redirect for all new interpreters
-                this.pythonInterpreter.setOut(new OutputStreamWriter(new PythonLoggerOutputStream(log, false), "UTF-8"));
-                this.pythonInterpreter.setErr(new OutputStreamWriter(new PythonLoggerOutputStream(log, true), "UTF-8"));
+                initPythonInterpreter(this.pythonInterpreter);
 
                 result = true;
             } catch (PyException ex) {
@@ -70,6 +82,17 @@ public class PythonService implements Serializable {
         this.interpereterReady = result;
 
         return result;
+    }
+
+    private void initPythonInterpreter(PythonInterpreter interpreter) {
+        // Init output redirect interpreter
+        if (this.logOut != null) {
+            interpreter.setOut(this.logOut);
+        }
+
+        if (this.logErr != null) {
+            interpreter.setErr(this.logErr);
+        }
     }
 
     /**
@@ -133,6 +156,8 @@ public class PythonService implements Serializable {
         }
 
         PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
+        initPythonInterpreter(currentPythonInterpreter);
+
         try {
             currentPythonInterpreter.execfile(scriptName);
         } catch (Exception ex) {
@@ -150,6 +175,8 @@ public class PythonService implements Serializable {
         }
 
         PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
+        initPythonInterpreter(currentPythonInterpreter);
+
         try {
             currentPythonInterpreter.execfile(scriptFile, scriptName);
         } catch (Exception ex) {
