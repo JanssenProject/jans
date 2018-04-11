@@ -182,7 +182,7 @@ class Setup(object):
                           'installed' : False
                           },
             'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp'},
+                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp'},
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
