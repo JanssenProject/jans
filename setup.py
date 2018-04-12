@@ -40,6 +40,7 @@ import hashlib
 import re
 import glob
 import base64
+import platform
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -1063,26 +1064,12 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
 
     def detect_os_type(self):
-        
-        release_file = glob.glob("/etc/*-release")[0]
-
-        cout = open(release_file).read()
-
-        if 'Ubuntu' in cout and '14.' in cout:
-            return 'ubuntu', '14'
-        if 'Ubuntu' in cout and '16.' in cout:
-            return 'ubuntu', '16'
-        if 'CentOS' in cout and 'release 6.' in cout:
-            return 'centos' ,'6'
-        if 'CentOS' in cout and 'release 7.' in cout:
-            return 'centos', '7'
-        if 'Red Hat Enterprise Linux' in cout and '7.':
-            return 'redhat', '7'
-        if 'Debian' in cout and '(jessie)' in cout:
-            return 'debian', '8'
-        if 'Debian' in cout and '(stretch)' in cout:
-            return 'debian', '9'
-        else:
+        try:
+            p = platform.linux_distribution()
+            os_type = p[0].split()[0].lower()
+            os_version = p[1].split('.')[0]
+            return os_type, os_version
+        except:
             return self.choose_from_list(self.os_types, "Operating System")
 
     def detect_initd(self):
@@ -3192,7 +3179,7 @@ class Setup(object):
             query_command = 'dpkg -l {0}'
             check_text = 'no packages found matching'
 
-        elif self.os_type in ('centos', 'redhat'):
+        elif self.os_type in ('centos', 'redhat', 'fedora'):
             install_command = 'yum install -y {0}'
             update_command = 'yum install -y epel-release'
             query_command = 'rpm -q {0}'
@@ -3209,6 +3196,7 @@ class Setup(object):
                 'centos 6': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python-pip mod_ssl',
                 'centos 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
                 'redhat 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
+                'fedora 22': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python-pip mod_ssl',
                 }
 
 
@@ -3235,9 +3223,9 @@ class Setup(object):
                     sys.exit()
 
             if install:
-                progress_bar(1, "Installing packages")
                 self.logIt("Installing packages")
-                sout, serr = self.run_command(update_command)
+                if not self.os_type == 'fedora':
+                    sout, serr = self.run_command(update_command)
                 self.run_command(install_command.format(" ".join(install_list)))
 
 
@@ -3377,6 +3365,11 @@ if __name__ == '__main__':
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
     # Get the init type
     installObject.os_initdaemon = installObject.detect_initd()
+    
+    installObject.check_and_install_packages()
+    #it is time to import pyDes library
+    from pyDes import *
+    
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
 
@@ -3429,9 +3422,6 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            installObject.check_and_install_packages()
-            #it is time to import pyDes library
-            from pyDes import *
             progress_bar(2, "Initializing")
             installObject.initialize()
             progress_bar(3, "Configuring system")
