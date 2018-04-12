@@ -47,8 +47,6 @@ except:
     tty_rows = 60
     tty_columns = 120
 
-from pyDes import *
-
 def progress_bar(i, act=''):
     time.sleep(0.2)
     if setupOptions.get('verbose'):
@@ -1066,21 +1064,25 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
 
     def detect_os_type(self):
-        # TODO: Change this to support more distros. For example according to
-        # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.readFile('/etc/redhat-release', False)
-        if distro_info == None:
-            distro_info = self.readFile('/etc/os-release')
+        
+        release_file = glob.glob("/etc/*-release")[0]
 
-        if 'CentOS' in distro_info:
-            return self.os_types[0]
-        elif 'Red Hat' in distro_info:
-            return self.os_types[1]
-        elif 'Ubuntu' in distro_info:
-            return self.os_types[3]
-        elif 'Debian' in distro_info:
-            return self.os_types[4]
+        cout = open(release_file).read()
 
+        if 'Ubuntu' in cout and '14.' in cout:
+            return 'ubuntu', '14'
+        if 'Ubuntu' in cout and '16.' in cout:
+            return 'ubuntu', '16'
+        if 'CentOS' in cout and 'release 6.' in cout:
+            return 'centos' ,'6'
+        if 'CentOS' in cout and 'release 7.' in cout:
+            return 'centos', '7'
+        if 'Red Hat Enterprise Linux' in cout and '7.':
+            return 'redhat', '7'
+        if 'Debian' in cout and '(jessie)' in cout:
+            return 'debian', '8'
+        if 'Debian' in cout and '(stretch)' in cout:
+            return 'debian', '9'
         else:
             return self.choose_from_list(self.os_types, "Operating System")
 
@@ -3169,6 +3171,87 @@ class Setup(object):
     def change_rc_links(self):
         self.process_rc_links(self.init_fixes)
 
+
+    def run_command(self, cmd):
+        self.logIt("Running command: "+cmd)
+        sin, sout, serr = os.popen3(cmd)
+        o = sout.read().strip()
+        e = serr.read().strip()
+        self.logIt(o+'\n')
+        if e:
+            self.logIt(e+'\n', True)
+
+        return o, e
+
+
+
+    def check_and_install_packages(self):
+
+        if self.os_type in ('ubuntu', 'debian'):
+            install_command = 'DEBIAN_FRONTEND=noninteractive apt-get install -y {0}'
+            update_command = 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
+            query_command = 'dpkg -l {0}'
+            check_text = 'no packages found matching'
+
+        elif self.os_type in ('centos', 'redhat'):
+            install_command = 'yum install -y {0}'
+            update_command = 'yum install -y epel-release'
+            query_command = 'rpm -q {0}'
+            check_text = 'is not installed'
+
+
+        install_list = []
+
+        package_list = {
+                'debian 9': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'debian 8': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'ubuntu 14': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'ubuntu 16': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'centos 6': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python-pip mod_ssl',
+                'centos 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
+                'redhat 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
+                }
+
+
+        for package in package_list[self.os_type+' '+self.os_version].split():
+            sout, serr = self.run_command(query_command.format(package))
+            if check_text in sout+serr:
+                self.logIt('Package {0} was not installed'.format(package))
+                install_list.append(package)
+            else:
+                self.logIt('Package {0} was installed'.format(package))
+
+        if install_list:
+
+            install = True
+
+            if not setupOptions['noPrompt']:
+
+                print "The following packages are required for Gluu Server"
+                print "\n".join(install_list)
+                r = raw_input("Do you want to install these now? [Y/n] ")
+                if r.lower()=='n':
+                    install = False
+                    print("Can not proceed without installing required packages. Exiting ...")
+                    sys.exit()
+
+            if install:
+                progress_bar(1, "Installing packages")
+                self.logIt("Installing packages")
+                sout, serr = self.run_command(update_command)
+                self.run_command(install_command.format(" ".join(install_list)))
+
+
+
+        self.run_command('pip install pyDes')
+
+        if self.os_type in ('ubuntu', 'debian'):
+            self.run_command('a2enmod ssl headers proxy proxy_http proxy_ajp')
+            default_site = '/etc/apache2/sites-enabled/000-default.conf'
+            if os.path.exists(default_site):
+                os.remove(default_site)
+
+        
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -3295,11 +3378,12 @@ if __name__ == '__main__':
     installObject.installJce = setupOptions['installJce']
 
     # Get the OS type
-    installObject.os_type = installObject.detect_os_type()
+    installObject.os_type, installObject.os_version = installObject.detect_os_type()
     # Get the init type
     installObject.os_initdaemon = installObject.detect_initd()
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
+
 
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
@@ -3349,80 +3433,83 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            progress_bar(1, "Initializing")
+            installObject.check_and_install_packages()
+            #it is time to import pyDes library
+            from pyDes import *
+            progress_bar(2, "Initializing")
             installObject.initialize()
-            progress_bar(2, "Configuring system")
+            progress_bar(3, "Configuring system")
             installObject.configureSystem()
-            progress_bar(3, "Downloading War files")
+            progress_bar(4, "Downloading War files")
             installObject.downloadWarFiles()
-            progress_bar(4, "Calculating application memory")
+            progress_bar(5, "Calculating application memory")
             installObject.calculate_selected_aplications_memory()
-            progress_bar(5, "Downloading and installing JRE")
+            progress_bar(6, "Downloading and installing JRE")
             installObject.installJRE()
-            progress_bar(6, "Installing Jetty")
+            progress_bar(7, "Installing Jetty")
             installObject.installJetty()
-            progress_bar(7, "Installing Jython")
+            progress_bar(8, "Installing Jython")
             installObject.installJython()
-            progress_bar(8, "Installing Node")
+            progress_bar(9, "Installing Node")
             installObject.installNode()
-            progress_bar(9, "Making salt")
+            progress_bar(10, "Making salt")
             installObject.make_salt()
-            progress_bar(10, "Making oxauth salt")
+            progress_bar(11, "Making oxauth salt")
             installObject.make_oxauth_salt()
-            progress_bar(11, "Copying scripts")
+            progress_bar(12, "Copying scripts")
             installObject.copy_scripts()
-            progress_bar(12, "Encoding passwords")
+            progress_bar(13, "Encoding passwords")
             installObject.encode_passwords()
-            progress_bar(13, "Encoding test passwords")
+            progress_bar(14, "Encoding test passwords")
             installObject.encode_test_passwords()
-            progress_bar(14, "Installing Gluu base")
+            progress_bar(15, "Installing Gluu base")
             installObject.install_gluu_base()
-            progress_bar(15, "Preparing bas64 extention scripts")
+            progress_bar(16, "Preparing bas64 extention scripts")
             installObject.prepare_base64_extension_scripts()
-            progress_bar(16, "Rendering templates")
+            progress_bar(17, "Rendering templates")
             installObject.render_templates()
-            progress_bar(17, "Generating crypto")
+            progress_bar(18, "Generating crypto")
             installObject.generate_crypto()
-            progress_bar(18, "Generating oxauth openid keys")
+            progress_bar(19, "Generating oxauth openid keys")
             installObject.generate_oxauth_openid_keys()
-            progress_bar(19, "Generating base64 configuration")
+            progress_bar(20, "Generating base64 configuration")
             installObject.generate_base64_configuration()
-            progress_bar(20, "Rendering configuratipn template")
+            progress_bar(21, "Rendering configuratipn template")
             installObject.render_configuration_template()
-            progress_bar(21, "Updating hostname")
+            progress_bar(22, "Updating hostname")
             installObject.update_hostname()
-            progress_bar(22, "Setting ulimits")
+            progress_bar(23, "Setting ulimits")
             installObject.set_ulimits()
-            progress_bar(23, "Copying output")
+            progress_bar(24, "Copying output")
             installObject.copy_output()
-            progress_bar(24, "Setting up init scripts")
+            progress_bar(25, "Setting up init scripts")
             installObject.setup_init_scripts()
-            progress_bar(25, "Rendering node templates")
+            progress_bar(26, "Rendering node templates")
             installObject.render_node_templates()
-            progress_bar(26, "Installing Gluu components")
+            progress_bar(27, "Installing Gluu components")
             installObject.install_gluu_components()
-            progress_bar(27, "Rendering test templates")
+            progress_bar(28, "Rendering test templates")
             installObject.render_test_templates()
-            progress_bar(28, "Copying static")
+            progress_bar(29, "Copying static")
             installObject.copy_static()
-            progress_bar(29, "Setting ownerships")
+            progress_bar(30, "Setting ownerships")
             installObject.set_ownership()
-            progress_bar(30, "Setting permissions")
+            progress_bar(31, "Setting permissions")
             installObject.set_permissions()
-            progress_bar(31, "Starting services")
+            progress_bar(32, "Starting services")
             installObject.start_services()
-            progress_bar(32, "Changing rc links")
+            progress_bar(33, "Changing rc links")
             installObject.change_rc_links()
-            progress_bar(33, "Saving properties")
+            progress_bar(34, "Saving properties")
             installObject.save_properties()
             
             if 'importLDIFDir' in setupOptions.keys():
-                progress_bar(34, "Importing LDIF files")
+                progress_bar(35, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
-                progress_bar(34, "Completed")
+                progress_bar(35, "Completed")
             else:
-                progress_bar(34, "Completed")
+                progress_bar(35, "Completed")
             print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
