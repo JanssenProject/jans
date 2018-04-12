@@ -68,7 +68,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 except AuthenticationException:
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 
-            if (not logged_in):
+            if not logged_in:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
 

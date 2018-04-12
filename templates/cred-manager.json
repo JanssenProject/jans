@@ -12,5 +12,6 @@
     "salt" : "%(configFolder)s/salt",
     "ox-ldap_location" : "%(configFolder)s/ox-ldap.properties"
   },
-  "branding_path" : null
+  "branding_path" : null,
+  "log_level" : "INFO"
 }
