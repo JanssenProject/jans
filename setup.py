@@ -49,14 +49,13 @@ except:
 
 def progress_bar(i, act=''):
     time.sleep(0.2)
-    if setupOptions.get('verbose'):
-        ft = '#' * i
-        ft = ft.ljust(33)
-        act =act.ljust(40)
-        if int(tty_columns) < 88:
-            act = act[:int(tty_columns)-47]
-        sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
-        sys.stdout.flush()
+    ft = '#' * i
+    ft = ft.ljust(33)
+    act =act.ljust(40)
+    if int(tty_columns) < 88:
+        act = act[:int(tty_columns)-47]
+    sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
+    sys.stdout.flush()
 
 
 class Setup(object):
@@ -3272,7 +3271,6 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -e   Download JCE 1.8 and install it"
-    print "    -v   Be verbose and show progress bar"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
@@ -3303,9 +3301,7 @@ def getOpts(argv, setupOptions):
                     print "\nOoops... %s file not found for setup properties.\n" % arg
             except:
                 print "\nOoops... %s file not found\n" % arg
-        
-        elif opt == "-v":
-            setupOptions['verbose'] = True
+
         elif opt == "-n":
             setupOptions['noPrompt'] = True
         elif opt == "-N":
