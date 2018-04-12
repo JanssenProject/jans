@@ -98,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Get the Person's number and generate a code
             foundUser = None
             try:
-                foundUser = userService.getUserByAttribute("uid", user_name)
+                foundUser = authenticationService.getAuthenticatedUser()
             except:
                 print 'TwilioSMS, Error retrieving user %s from LDAP' % (user_name)
                 return False

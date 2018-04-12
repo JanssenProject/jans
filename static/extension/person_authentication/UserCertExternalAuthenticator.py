@@ -46,6 +46,10 @@ class PersonAuthentication(PersonAuthenticationType):
         chain_cert_file_path = configurationAttributes.get("chain_cert_file_path").getValue2()
 
         self.chain_certs = CertUtil.loadX509CertificateFromFile(chain_cert_file_path)
+        if self.chain_certs == None:
+            print "Cert. Initialization. Failed to load chain certificates from '%s'" % chain_cert_file_path
+            return False
+
         print "Cert. Initialization. Loaded '%d' chain certificates" % self.chain_certs.size()
         
         crl_max_response_size = 5 * 1024 * 1024  # 10Mb
@@ -296,7 +300,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (not logged_in):
             return None
 
-        find_user_by_uid = userService.getUser(user_name)
+        find_user_by_uid = authenticationService.getAuthenticatedUser()
         if (find_user_by_uid == None):
             print "Cert. Process basic authentication. Failed to find user '%s'" % user_name
             return None
