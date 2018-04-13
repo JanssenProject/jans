@@ -82,7 +82,7 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                     throw new InvalidJweException("The shared symmetric key is null");
                 }
                 if (sharedSymmetricKey.length != 16) { // 128 bit
-                    MessageDigest sha = MessageDigest.getInstance("SHA-2");
+                    MessageDigest sha = MessageDigest.getInstance("SHA-256");
                     sharedSymmetricKey = sha.digest(sharedSymmetricKey);
                     sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, 16);
                 }
