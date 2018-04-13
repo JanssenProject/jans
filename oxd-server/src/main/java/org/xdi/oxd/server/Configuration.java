@@ -67,6 +67,16 @@ public class Configuration {
     private String storage;
     @JsonProperty(value = "storage_configuration")
     private JsonNode storageConfiguration;
+    @JsonProperty(value = "remove_expired_clients")
+    private Boolean removeExpiredClients = false;
+
+    public Boolean getRemoveExpiredClients() {
+        return removeExpiredClients;
+    }
+
+    public void setRemoveExpiredClients(Boolean removeExpiredClients) {
+        this.removeExpiredClients = removeExpiredClients;
+    }
 
     public String getCryptProviderKeyStorePath() {
         return cryptProviderKeyStorePath;

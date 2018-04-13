@@ -7,14 +7,14 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.common.*;
 import org.xdi.oxd.common.params.IParams;
+import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
+import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.ValidationService;
+import org.xdi.util.Pair;
 
 import java.io.IOException;
 
@@ -71,10 +71,13 @@ public class Processor {
                 final IOperation<IParams> operation = (IOperation<IParams>) OperationFactory.create(command, ServerLauncher.getInjector());
                 if (operation != null) {
                     IParams iParams = Convertor.asParams(operation.getParameterClass(), command);
-                    validationService.validate(iParams);
+                    Pair<Rp, Boolean> rpWithIsClientLocalPair = validationService.validate(iParams);
 
                     CommandResponse operationResponse = operation.execute(iParams);
                     if (operationResponse != null) {
+                        if (operationResponse.getStatus() == ResponseStatus.OK) { // report usage only of operation is ok
+                            ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rpWithIsClientLocalPair.getFirst(), rpWithIsClientLocalPair.getSecond());
+                        }
                         return operationResponse;
                     } else {
                         LOG.error("No response from operation. Command: " + command);
