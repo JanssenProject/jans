@@ -7,6 +7,9 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.server.persistence.PersistenceService;
 
 import java.io.IOException;
@@ -30,10 +33,13 @@ public class RpService {
 
     private PersistenceService persistenceService;
 
+    private ConfigurationService configurationService;
+
     @Inject
-    public RpService(ValidationService validationService, PersistenceService persistenceService) {
+    public RpService(ValidationService validationService, PersistenceService persistenceService, ConfigurationService configurationService) {
         this.validationService = validationService;
         this.persistenceService = persistenceService;
+        this.configurationService = configurationService;
     }
 
     public void removeAllRps() {
@@ -57,7 +63,33 @@ public class RpService {
                 rpMap.put(oxdId, rp);
             }
         }
-        return validationService.validate(rp);
+        rp = validationService.validate(rp);
+        checkClientExpiredWithException(rp);
+        return rp;
+    }
+
+    private void checkClientExpiredWithException(Rp rp) {
+        if (checkClientExpired(rp)) {
+            throw new ErrorResponseException(ErrorResponseCode.EXPIRED_CLIENT);
+        }
+    }
+
+    private boolean checkClientExpired(Rp rp) {
+        if (CoreUtils.isExpired(rp.getClientSecretExpiresAt())) {
+            try {
+                Boolean removeExpiredClients = configurationService.get().getRemoveExpiredClients();
+                if (removeExpiredClients != null && removeExpiredClients) {
+                    LOG.debug("Removing client because it's expired ... rp: " + rp);
+                    rpMap.remove(rp.getOxdId());
+                    persistenceService.remove(rp.getOxdId());
+                    LOG.debug("Removed client because it's expired, rp: " + rp);
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to remove expired client, rp: " + rp, e);
+            }
+            return true;
+        }
+        return false;
     }
 
     public Map<String, Rp> getRps() {
