@@ -24,5 +24,6 @@
     "storage":"h2",
     "storage_configuration": {
         "dbFileLocation":"./oxd_db"
-    }
+    },
+    "remove_expired_clients":false
 }

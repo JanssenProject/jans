@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.service;
 
 import org.testng.annotations.Test;
+import org.xdi.oxd.common.CoreUtils;
 
 import java.util.Calendar;
 
@@ -22,7 +23,7 @@ public class UmaTokenServiceTest {
         Calendar past = Calendar.getInstance();
         past.add(Calendar.HOUR, -1);
 
-        assertFalse(UmaTokenService.isExpired(future.getTime()));
-        assertTrue(UmaTokenService.isExpired(past.getTime()));
+        assertFalse(CoreUtils.isExpired(future.getTime()));
+        assertTrue(CoreUtils.isExpired(past.getTime()));
     }
 }
