@@ -162,6 +162,7 @@ class Setup(object):
         self.node_initd_script = '%s/static/system/initd/node' % self.install_dir
         self.node_base = '%s/node' % self.gluuOptFolder
         self.node_user_home = '/home/node'
+        self.passport_initd_script = '%s/static/system/initd/passport' % self.install_dir
 
         self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
@@ -1198,6 +1199,7 @@ class Setup(object):
 
         # Copy init.d script
         self.copyFile(self.node_initd_script, self.gluuOptSystemFolder)
+        self.copyFile(self.passport_initd_script, self.gluuOptSystemFolder)
         self.run([self.cmd_chmod, '-R', "755", "%s/node" % self.gluuOptSystemFolder])
 
         self.run([self.cmd_chown, '-R', 'node:node', nodeDestinationPath])
@@ -1287,7 +1289,10 @@ class Setup(object):
         self.copyFile(nodeServiceConfiguration, '/etc/default')
         self.run([self.cmd_chown, 'root:root', '/etc/default/%s' % serviceName])
 
-        self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
+        if serviceName == 'passport':
+            self.copyFile('%s/%s' % (self.gluuOptSystemFolder, serviceName), '/etc/init.d/')
+        else:
+            self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'redhat']:
