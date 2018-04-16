@@ -4173,6 +4173,28 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "cred-manager - 2FA Enforcement Policy for User",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxStrongAuthPolicy"
+            ],
+            "oid": "oxAttribute:385",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "cred-manager - List of devices with which strong authentication may be skipped",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxTrustedDevicesInfo"
+            ],
+            "oid": "oxAttribute:386",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
