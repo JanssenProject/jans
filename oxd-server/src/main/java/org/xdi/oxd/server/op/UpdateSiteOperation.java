@@ -158,14 +158,18 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             request.setPostLogoutRedirectUris(Lists.newArrayList(params.getPostLogoutRedirectUri()));
         }
 
-        if (params.getContacts() != null && !params.getContacts().isEmpty()) {
+        if (params.getContacts() != null) {
             request.setContacts(params.getContacts());
             rp.setContacts(params.getContacts());
+        } else {
+            request.setContacts(rp.getContacts());
         }
 
-        if (params.getScope() != null && !params.getScope().isEmpty()) {
+        if (params.getScope() != null) {
             request.setScopes(params.getScope());
             rp.setScope(params.getScope());
+        } else {
+            request.setScopes(rp.getScope());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
