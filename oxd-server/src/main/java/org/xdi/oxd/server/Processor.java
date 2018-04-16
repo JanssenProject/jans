@@ -75,7 +75,7 @@ public class Processor {
 
                     CommandResponse operationResponse = operation.execute(iParams);
                     if (operationResponse != null) {
-                        if (operationResponse.getStatus() == ResponseStatus.OK) { // report usage only of operation is ok
+                        if (operationResponse.getStatus() == ResponseStatus.OK && rpWithIsClientLocalPair != null) { // report usage only of operation is ok
                             ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rpWithIsClientLocalPair.getFirst(), rpWithIsClientLocalPair.getSecond());
                         }
                         return operationResponse;
