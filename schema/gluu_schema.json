@@ -4294,7 +4294,9 @@
                 "userRandomKey",
                 "oxPreferredMethod",
                 "oxOTPDevices",
-                "oxMobileDevices"
+                "oxMobileDevices",
+                "oxStrongAuthPolicy",
+                "oxTrustedDevicesInfo"
             ],
             "must": [
                 "objectclass"
