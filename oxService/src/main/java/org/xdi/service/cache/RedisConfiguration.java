@@ -18,6 +18,8 @@ public class RedisConfiguration implements Serializable {
 
     private int defaultPutExpiration = 60; // in seconds
 
+    private String password;
+
     public String getServers() {
         return servers;
     }
@@ -40,6 +42,14 @@ public class RedisConfiguration implements Serializable {
 
     public void setRedisProviderType(RedisProviderType redisProviderType) {
         this.redisProviderType = redisProviderType;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
