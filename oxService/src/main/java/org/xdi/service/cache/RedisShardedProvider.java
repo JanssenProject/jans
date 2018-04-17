@@ -52,10 +52,15 @@ public class RedisShardedProvider extends AbstractRedisProvider {
 
         List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>();
         for (String serverWithPort : serverWithPorts) {
-            final String[] split = serverWithPort.trim().split(":");
-            String host = split[0];
-            int port = Integer.parseInt(split[1].trim());
-            shards.add(new JedisShardInfo(host, port));
+            serverWithPort = serverWithPort.trim();
+            if (serverWithPort.contains(":") && !serverWithPort.contains("@") && !servers.contains("//")) {
+                final String[] split = serverWithPort.trim().split(":");
+                String host = split[0];
+                int port = Integer.parseInt(split[1].trim());
+                shards.add(new JedisShardInfo(host, port));
+            } else {
+                shards.add(new JedisShardInfo(serverWithPort));
+            }
         }
         return shards;
     }
