@@ -3189,16 +3189,15 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
-                'debian 8': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
-                'ubuntu 14': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'debian 9': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip cron facter python python-pip rsyslog',
                 'ubuntu 16': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
-                'centos 6': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python-pip mod_ssl',
-                'centos 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
-                'redhat 7': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python2-pip mod_ssl',
-                'fedora 22': 'libsemanage tar xz unzip vim-enhanced httpd curl wget man-pages net-tools cronie git facter memcached python-pip mod_ssl',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python-pip rsyslog',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
+                'redhat 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
+                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python-pip rsyslog'
                 }
-
 
         for package in package_list[self.os_type+' '+self.os_version].split():
             sout, serr = self.run_command(query_command.format(package))
