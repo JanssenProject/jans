@@ -3197,7 +3197,7 @@ class Setup(object):
                 'debian 9': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
                 'debian 8': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
                 'ubuntu 14': 'apache2 curl wget xz-utils unzip cron facter python python-pip rsyslog',
-                'ubuntu 16': 'apt-utils vim apache2 curl wget man net-tools inetutils-ping unzip cron git facter memcached python python-pip rsyslog',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip cron facter python python-pip rsyslog',
                 'centos 6': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python-pip rsyslog',
                 'centos 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
                 'redhat 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
