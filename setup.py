@@ -3194,14 +3194,14 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip cron facter python python-pip rsyslog',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip cron facter python python-pip rsyslog',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip cron facter python python-pip rsyslog',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python-pip rsyslog',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
-                'redhat 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python2-pip rsyslog',
-                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip cronie facter python python-pip rsyslog'
+                'debian 9': 'apache2 curl wget tar xz-utils unzip cron facter python rsyslog',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip cron facter python rsyslog',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip cron facter python rsyslog',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip cron facter python rsyslog',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip cronie facter python rsyslog',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python rsyslog',
+                'redhat 7': 'httpd mod_ssl curl wget tar xz unzip cronie facter python rsyslog',
+                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip cronie facter python rsyslog'
                 }
 
         for package in package_list[self.os_type+' '+self.os_version].split():
