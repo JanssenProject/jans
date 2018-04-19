@@ -3340,6 +3340,37 @@ class Setup(object):
             self.logIt("Error importing custom ldif file %s" % ldif, True)
             self.logIt(traceback.format_exc(), True)
 
+    def import_custom_ldif_opendj(self, fullPath):
+        #opendj does not support imorting raw ldif files. ldif files
+        #will be copied directly to config/schema dir
+        
+        try:
+            for ldif in self.get_filepaths(fullPath):
+                c = 102
+                makenew = False
+                target_ldif = ldif
+                if '-' in target_ldif:
+                    la = target_ldif.split('-')
+                    if la[0].isdigit():
+                        if int(la[0]) < 102:
+                            target_ldif = target_ldif.replace(la[0], str(c))
+                            c +=1
+                    else:
+                        makenew = True
+                else:
+                    makenew = True
+                    
+                if makenew:
+                    target_ldif = str(c)+'-'+target_ldif
+                    c +=1
+        
+                custom_ldif = os.path.join(fullPath, ldif)
+                shutil.copy(custom_ldif, os.path.join(self.openDjSchemaFolder, target_ldif))
+                self.logIt("Custom schema file %s was copied as %s" % (ldif, target_ldif))
+        except:
+            self.logIt("Error importing custom ldif files")
+            self.logIt(traceback.format_exc(), True)
+
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
 
@@ -4162,7 +4193,6 @@ if __name__ == '__main__':
                 progress_bar(35, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-
                 progress_bar(35, "Completed")
             else:
                 progress_bar(35, "Completed")
