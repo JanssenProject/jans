@@ -3199,11 +3199,19 @@ class Setup(object):
 
 
     def run_command(self, cmd):
+        
         self.logIt("Running command: "+cmd)
-        sin, sout, serr = os.popen3(cmd)
+
+        p = subprocess.Popen(cmd, shell=True,
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, close_fds=True)
+
+        sin, sout, serr = (p.stdin, p.stdout, p.stderr)
         o = sout.read().strip()
         e = serr.read().strip()
+        
         self.logIt(o+'\n')
+        
         if e:
             self.logIt(e+'\n', True)
 
