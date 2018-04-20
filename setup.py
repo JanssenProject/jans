@@ -2217,15 +2217,31 @@ class Setup(object):
 
         promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
+            
+            open_ldap_esixst = False
+            
+            if self.os_type in ('ubuntu', 'debian'):
+                if glob.glob(self.distFolder+'/symas/symas-openldap*.deb'):
+                    open_ldap_esixst = True
+            elif self.os_type in ('centos', 'redhat', 'fedorat'):
+                    if glob.glob(self.distFolder+'/symas/symas-openldap*.rpm'):
+                        open_ldap_esixst = True
+
+            
             self.installLdap = True
             option = None
-            while (option != 1) and (option != 2):
-                try:
-                    option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
-                except ValueError:
-                    option = None
-                if (option != 1) and (option != 2):
-                    print "You did not enter the correct option. Enter either 1 or 2."
+            
+            if open_ldap_esixst:
+                while (option != 1) and (option != 2):
+                    try:
+                        option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
+                    except ValueError:
+                        option = None
+                    if (option != 1) and (option != 2):
+                        print "You did not enter the correct option. Enter either 1 or 2."
+            else:
+                option = 1
+
 
             if option == 1:
                 self.ldap_type = 'opendj'
