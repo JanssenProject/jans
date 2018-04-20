@@ -5,7 +5,7 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
-  
+
     <ui:define name="head">
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"></script>
 
@@ -42,6 +42,7 @@
         </style>
         <script type="text/javascript">
             jQuery(document).ready(function () {
+            if (document.getElementById('loginForm')) {
                 var user = window.location.href.split("=");
                 history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-post-login');
                 var userQueryString = decodeURIComponent(user[1]);
@@ -65,6 +66,7 @@
                     document.getElementById('loginForm')["loginForm:email"].value = userObj.email;
                     document.getElementById('loginForm')["loginForm:postForm"].click();
                 }
+                }
             });
         </script>
     </ui:define>
@@ -72,14 +74,14 @@
     <ui:define name="pageTitle">#{msgs['passport.pageTitle']}</ui:define>
 
     <ui:define name="body">
-        <h:form id="loginForm">
+        <h:form id="loginForm" rendered="#{authenticationService.authenticatedUser==null}">
 
-            <h:panelGroup rendered="#{not identity.loggedIn}">
+            <h:panelGroup>
                 <div class="login-panel">
                     <div class="login-panel-header">#{msgs['passport.loginSecondStep']}</div>
                     <div class="login-panel-body">
-			<ui:param name="client"
-				value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+                        <ui:param name="client"
+                                  value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
