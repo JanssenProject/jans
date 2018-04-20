@@ -104,10 +104,16 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             try:
-                mobile_number = foundUser.getAttribute("phoneNumberVerified")
-                if isinstance(mobile_number, JSONArray):
-                    mobile_number=mobile_number.get(0)
-                    print "TwilioSMS, Message will be sent to number ", mobile_number
+                isVerified = foundUser.getAttribute("phoneNumberVerified")
+                if isVerified:
+                    mobile_number = foundUser.getAttribute("employeeNumber")
+                if  mobile_number == None:
+                    mobile_number = foundUser.getAttribute("mobile")
+                if  mobile_number == None:
+                    mobile_number = foundUser.getAttribute("telephoneNumber")
+                if  mobile_number == None: 
+                    print "TwilioSMS, Error finding mobile number for' % (user_name)
+                    
             except:
                 print 'TwilioSMS, Error finding mobile number for' % (user_name)
                 return False
