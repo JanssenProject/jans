@@ -120,6 +120,8 @@ class Setup(object):
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
 
+        self.currentGluuVersion = '3.1.3'
+
         self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -796,7 +798,7 @@ class Setup(object):
 
     def writeFile(self, outFilePath, text):
         inFilePathText = None
-
+        self.backupFile(outFilePath)
         try:
             f = open(outFilePath, 'w')
             f.write(text)
@@ -818,7 +820,8 @@ class Setup(object):
                 self.logIt("Error reading %s" % inFilePathLines, True)
                 self.logIt(traceback.format_exc(), True)        
 
-                try:            
+                try:
+                    self.backupFile(inFilePath)
                     inFilePathLines.insert(index, text)            
                     f = open(inFilePath, "w")            
                     inFilePathLines = "".join(inFilePathLines)            
@@ -857,7 +860,30 @@ class Setup(object):
             self.writeFile(file, text)
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
+    def logOSChanges(self, text):
+        F=open("os-changes.log","a")
+        F.write(text+"\n")
+        F.close()
+
+    def backupFile(self, inFile, destFolder=None):
+
+        if destFolder:
+            if os.path.isfile(destFolder):
+                destFile = destFolder
+            else:
+                inFolder, inName = os.path.split(inFile)
+                destFile = os.path.join(destFolder, inName)
+        else:
+            destFile = inFile
+
+        if not destFile.startswith('/opt'):
+            backupFile = destFile+'.gluu-'+self.currentGluuVersion+'~'
+            if os.path.exists(destFile) and not os.path.exists(backupFile):
+                shutil.copy(destFile, backupFile)
+                self.logOSChanges("File %s was backed up as %s" % (destFile, backupFile))
+
     def copyFile(self, inFile, destFolder):
+        self.backupFile(inFile, destFolder)
         try:
             shutil.copy(inFile, destFolder)
             self.logIt("Copied %s to %s" % (inFile, destFolder))
@@ -881,6 +907,7 @@ class Setup(object):
 
                     if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                         shutil.copy2(s, d)
+                        self.backupFile(s, d)
 
             self.logIt("Copied tree %s to %s" % (src, dst))
         except:
@@ -926,6 +953,9 @@ class Setup(object):
         f.close()
 
     def appendLine(self, line, fileName=False):
+        
+        self.backupFile(fileName)
+        
         try:
             f = open(fileName, 'a')
             f.write('%s\n' % line)
@@ -1032,6 +1062,7 @@ class Setup(object):
                     if not os.path.exists(dest_dir):
                         self.logIt("Created destination folder %s" % dest_dir)
                         os.makedirs(dest_dir)
+                    self.backupFile(output_fn, dest_fn)
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
@@ -1649,6 +1680,8 @@ class Setup(object):
             self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
             return
 
+        self.backupFile(fn)
+
         try:
             jwks_text = '\n'.join(jwks)
             f = open(fn, 'w')
@@ -2035,6 +2068,7 @@ class Setup(object):
         try:
             useradd = '/usr/sbin/useradd'
             self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', homeDir, userName])
+            self.logOSChanges("User %s with homedir %s was created" % (userName, homeDir))
         except:
             self.logIt("Error adding user", True)
             self.logIt(traceback.format_exc(), True)
@@ -2043,6 +2077,7 @@ class Setup(object):
         try:
             groupadd = '/usr/sbin/groupadd'
             self.run([groupadd, groupName])
+            self.logOSChanges("Group %s was created" % (groupName))
         except:
             self.logIt("Error adding group", True)
             self.logIt(traceback.format_exc(), True)
@@ -2051,6 +2086,7 @@ class Setup(object):
         try:
             usermod = '/usr/sbin/usermod'
             self.run([usermod, '-a', '-G', groupName, userName])
+            self.logOSChanges("User %s was added to group %s" % (userName,groupName))
         except:
             self.logIt("Error adding group", True)
             self.logIt(traceback.format_exc(), True)
@@ -2133,6 +2169,7 @@ class Setup(object):
             currentSystemProfile = self.readFile(self.sysemProfile)
 
             # Write merged file
+            self.backupFile(self.sysemProfile)
             resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
             self.writeFile(self.sysemProfile, resultSystemProfile)
 
@@ -2218,20 +2255,20 @@ class Setup(object):
         promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             
-            open_ldap_esixst = False
+            open_ldap_exist = False
             
             if self.os_type in ('ubuntu', 'debian'):
                 if glob.glob(self.distFolder+'/symas/symas-openldap*.deb'):
-                    open_ldap_esixst = True
+                    open_ldap_exist = True
             elif self.os_type in ('centos', 'redhat', 'fedorat'):
                     if glob.glob(self.distFolder+'/symas/symas-openldap*.rpm'):
-                        open_ldap_esixst = True
+                        open_ldap_exist = True
 
             
             self.installLdap = True
             option = None
             
-            if open_ldap_esixst:
+            if open_ldap_exist:
                 while (option != 1) and (option != 2):
                     try:
                         option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
@@ -2321,7 +2358,7 @@ class Setup(object):
         # Create output folder if needed
         if not os.path.exists(outputFolder):
             os.makedirs(outputFolder)
-
+        self.backupFile(fn)
         newFn = open(os.path.join(outputFolder, fn), 'w+')
         newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
@@ -2387,6 +2424,7 @@ class Setup(object):
                     if not os.path.exists(fullOutputDir):
                         os.makedirs(fullOutputDir)
 
+                    self.backupFile(fullOutputFile)
                     newFn = open(fullOutputFile, 'w+')
                     newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
                     newFn.close()
