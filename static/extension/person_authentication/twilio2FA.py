@@ -111,8 +111,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     mobile_number = foundUser.getAttribute("mobile")
                 if  mobile_number == None:
                     mobile_number = foundUser.getAttribute("telephoneNumber")
-                if  mobile_number == None: 
-                    print "TwilioSMS, Error finding mobile number for' % (user_name)
+                if  mobile_number == None:
+                    print "TwilioSMS, Error finding mobile number for user '%'" % user_name
                     
             except:
                 print 'TwilioSMS, Error finding mobile number for' % (user_name)
