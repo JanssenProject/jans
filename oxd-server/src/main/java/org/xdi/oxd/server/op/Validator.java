@@ -17,6 +17,7 @@ import org.xdi.oxd.server.service.PublicOpKeyService;
 import org.xdi.oxd.server.service.StateService;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -100,6 +101,13 @@ public class Validator {
             }
 
             if (!clientId.equalsIgnoreCase(audienceFromToken)) {
+                List<String> audAsList = idToken.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
+                if (audAsList != null && audAsList.size() == 1) {
+                    if (!clientId.equalsIgnoreCase(audAsList.get(0))) {
+                        LOG.error("ID Token has invalid audience. Expected audience: " + clientId + ", audience from token is: " + audAsList);
+                        throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                    }
+                }
                 LOG.error("ID Token has invalid audience. Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
             }
