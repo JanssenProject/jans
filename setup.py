@@ -1232,6 +1232,7 @@ class Setup(object):
         self.copyFile(self.node_initd_script, self.gluuOptSystemFolder)
         self.copyFile(self.passport_initd_script, self.gluuOptSystemFolder)
         self.run([self.cmd_chmod, '-R', "755", "%s/node" % self.gluuOptSystemFolder])
+        self.run([self.cmd_chmod, '-R', "755", "%s/passport" % self.gluuOptSystemFolder])
 
         self.run([self.cmd_chown, '-R', 'node:node', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'node:node', self.node_home])
