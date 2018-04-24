@@ -446,12 +446,21 @@ class Exporter(object):
         self.grep = '/bin/grep'
         self.hostname = '/bin/hostname'
 
+
+        ldap_type = self.getProp('ldap_type')
+
+        if ldap_type == 'openldap':
+            bind_dn = '"cn=directory manager,o=gluu"'
+            bind_dn_site = '"cn=directory manager,o=site"'
+        elif ldap_type == 'opendj':
+            bind_dn = '"cn=directory manager"'
+            bind_dn_site = '"cn=directory manager"'
+            
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                          '"cn=directory manager,o=gluu"', '-j',
-                          self.passwordFile]
+                          bind_dn, '-j', self.passwordFile]
 
         self.ldapCredsSite = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                          '"cn=directory manager,o=site"', '-j',
+                          bind_dn_site, '-j',
                           self.passwordFile]
 
 
@@ -559,7 +568,17 @@ class Exporter(object):
             except:
                 logging.error("Failed to backup %s", folder)
                 logging.debug(traceback.format_exc())
-        copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir + "/custom.schema")
+
+        ldap_type = self.getProp('ldap_type')
+
+        if ldap_type == 'openldap':
+            copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir + "/custom.schema")
+        elif ldap_type == 'opendj':
+            if not os.path.exists(self.backupDir + '/opt/opendj/config/schema/'):
+                os.makedirs(self.backupDir + '/opt/opendj/config/schema/')
+            for sf in os.listdir('/opt/opendj/config/schema'):
+                if sf.split('-')[0] not in ['00','01','02','03','04','05','06','77','96','101']:
+                    copyfile(os.path.join('/opt/opendj/config/schema', sf), self.backupDir + '/opt/opendj/config/schema/'+sf)
 
     def runAndLog(self, args):
         try:
@@ -578,6 +597,7 @@ class Exporter(object):
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
         orgInum = self.inumOrg
+        oxVersion = self.getProp('oxVersion')[:5].strip()
         # Backup the data
         for basedn in self.base_dns:
             ou = basedn.split("=")[-1]
@@ -590,10 +610,11 @@ class Exporter(object):
 
             self.runAndLog(args)
 
-        removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
-        doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
-        doUmaResourcesChangesForUma2(self, "%s/ldif/uma.ldif" % self.backupDir)
-        changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
+        if oxVersion < '3.1.2':
+            removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
+            doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
+            doUmaResourcesChangesForUma2(self, "%s/ldif/uma.ldif" % self.backupDir)
+            changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
 
         # Backup the appliance config
         out_file = "%s/ldif/appliance.ldif" % self.backupDir
@@ -631,9 +652,9 @@ class Exporter(object):
                 '"objectclass=oxTrustConfiguration"', '>', "%s/ldif/oxtrust_config.ldif" % self.backupDir]
         self.runAndLog(args)
 
-
-        doOxTrustChanges(self, "%s/ldif/oxtrust_config.ldif" % self.backupDir)
-        doApplinceChanges("%s/ldif/appliance.ldif" % self.backupDir)
+        if oxVersion < '3.1.2':
+            doOxTrustChanges(self, "%s/ldif/oxtrust_config.ldif" % self.backupDir)
+            doApplinceChanges("%s/ldif/appliance.ldif" % self.backupDir)
 
         # Backup the oxauth config
         args = [self.ldapsearch] + self.ldapCreds + \
@@ -642,7 +663,8 @@ class Exporter(object):
                 '"objectclass=oxAuthConfiguration"', '>', "%s/ldif/oxauth_config.ldif" % self.backupDir]
         self.runAndLog(args)
 
-        dooxAuthChangesFor31(self, "%s/ldif/oxauth_config.ldif" % self.backupDir)
+        if oxVersion < '3.1.2':
+             dooxAuthChangesFor31(self, "%s/ldif/oxauth_config.ldif" % self.backupDir)
 
         # Backup the trust relationships
         args = [self.ldapsearch] + self.ldapCreds + [
