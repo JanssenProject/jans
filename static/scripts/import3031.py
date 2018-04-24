@@ -529,8 +529,6 @@ class Migration(object):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
 
-
-
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
@@ -566,13 +564,6 @@ class Migration(object):
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
                         
-            if '3.1.3' in self.oxVersion:
-                if dn == attrib_dn:
-                    if 'oxAuthClaimName' in new_entry and not 'member_off' in new_entry['oxAuthClaimName']:
-                        new_entry['oxAuthClaimName'].append('member_off')
-                    else:
-                        new_entry['oxAuthClaimName'] = ['member_off']
-
             
             ldif_writer.unparse(dn, new_entry)
         
@@ -582,6 +573,9 @@ class Migration(object):
         nodn = len(old_dn_map)
         
         ldif_shelve_dict = {}
+        
+        sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
+
         
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
@@ -598,6 +592,7 @@ class Migration(object):
 
             entry = ldif_shelve_dict[cur_ldif_file][dn]
 
+
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
                     continue  # skip conversion
@@ -613,13 +608,31 @@ class Migration(object):
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
                 entry[attr] = attr_values
+                
 
+
+            if '3.1.3' in self.oxVersion:
+
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
+                        entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        entry['oxAuthClaimName'] = ['member_off']
+
+                if sector_identifiers in dn:
+                    if dn.startswith('inum'):
+                        
+                        dn = dn.replace('inum=', 'oxId=')
+                        oxId = entry['inum'][:]
+                        entry['oxId'] = oxId
+                        del entry['inum']
+            
             ldif_writer.unparse(dn, entry)
 
         # Finally
         processed_fp.close()
 
-        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+        progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
 
         nodn = sum(1 for line in open(self.processTempFile))
 
