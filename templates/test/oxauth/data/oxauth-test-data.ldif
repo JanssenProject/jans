@@ -312,8 +312,8 @@ oxId: http://photoz.example.com/dev/scopes/all
 ######################################
 # Sector Identifier
 ######################################
-dn: inum=%(inumOrg)s!0012!D426.70FD,ou=sector_identifiers,o=%(inumOrg)s,o=gluu
-inum: %(inumOrg)s!0012!D426.70FD
+dn: oxId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=%(inumOrg)s,o=gluu
+oxId: a55ede29-8f5a-461d-b06e-76caee8d40b5
 objectClass: top
 objectClass: oxSectorIdentifier
 oxAuthRedirectURI: https://www.gluu.org
@@ -327,8 +327,8 @@ oxAuthRedirectURI: https://client.example.com/cb
 oxAuthRedirectURI: https://client.example.com/cb1
 oxAuthRedirectURI: https://client.example.com/cb2
 
-dn: inum=%(inumOrg)s!0012!D426.60FD,ou=sector_identifiers,o=%(inumOrg)s,o=gluu
-inum: %(inumOrg)s!0012!D426.60FD
+dn: oxId=840ef58d-a7d0-4986-af7b-71ed0089ce61,ou=sector_identifiers,o=%(inumOrg)s,o=gluu
+oxId: 840ef58d-a7d0-4986-af7b-71ed0089ce61
 objectClass: top
 objectClass: oxSectorIdentifier
 oxAuthRedirectURI: https://example.com/bad_sector_identifier

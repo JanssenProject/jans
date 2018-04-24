@@ -134,20 +134,24 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 if logged_in:
                     userService = CdiUtil.bean(UserService)
-                    foundUser = userService.getUserByAttribute("uid", user_name)
+                    foundUser = authenticationService.getAuthenticatedUser()
+                    if (foundUser == None):
+                        print "Cred-manager. authenticate for step 1. Cannot retrieve logged user"
+                        return False
+
                     acr=foundUser.getAttribute("oxPreferredMethod")
-                    
+
                     identity.setWorkingParameter("skip2FA", acr == None)
                     if acr == None:
                         return True
                     else:
                         identity.setWorkingParameter("ACR", acr)
-                        
+
                         if not (acr in self.ACRs):
                             print "%s not a valid cred-manager acr" % acr
 
                         return (acr in self.ACRs)
-            
+
                 return False
             else:
                 return False
@@ -155,74 +159,74 @@ class PersonAuthentication(PersonAuthenticationType):
             session_attributes=identity.getSessionId().getSessionAttributes()
             acr = session_attributes.get("ACR")
             alter = ServerUtil.getFirstValue(requestParameters, "alternativeMethod")
-            
+
             user = authenticationService.getAuthenticatedUser()
             if user == None:
-                print "Cred-manager. authenticate. Cannot retrieve logged user"
+                print "Cred-manager. authenticate for step 2. Cannot retrieve logged user"
                 return False
-            
+
             identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
-            
+
             #bypass authentication if an alternative method was provided. This step will be retried (see getNextStep)
             if alter!=None:
                 return True
-            
+
             elif acr==self.ACR_U2F:
                 token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
-                
+
                 if token_response == None:
                     print "Cred-manager. authenticate. tokenResponse is empty"
                     return False
-                
+
                 success=self.finishU2fAuthentication(user.getUserId(), token_response)
                 print "Cred-manager. authenticate. U2F finish authentication result was %s" % success
                 return success
-            
+
             elif acr==self.ACR_SMS:
                 code=session_attributes.get("randCode")
                 form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
-                
+
                 if form_passcode!=None and code==form_passcode:
                     print "Cred-manager. authenticate. 6-digit code matches with code sent via SMS"
                     return True
                 else:
                     facesMessages.add(FacesMessage.SEVERITY_ERROR, "Wrong code entered")
                     return False
-                
+
             elif acr==self.ACR_OTP:
                 otpCfg=self.scriptsConfig.get(self.ACR_OTP)
                 otpCode = ServerUtil.getFirstValue(requestParameters, "loginForm:otpCode")
                 success=False
-                
+
                 if otpCfg.get("otp_type") == "hotp":
                     success=self.processHotpAuthentication(user, otpCode)
                 elif otpCfg.get("otp_type") == "totp":
-                    success=self.processTotpAuthentication(user, otpCode)              
-                
+                    success=self.processTotpAuthentication(user, otpCode)
+
                 if not success:
                     facesMessages.add(FacesMessage.SEVERITY_ERROR, "Wrong code entered")
                 return success
-                
+
             elif acr==self.ACR_SG:
                 user_name=user.getUserId()
                 user_inum=user.getAttribute("inum")
-                
+
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
                     return False
-                    
+
                 u2f_device_id = session_device_status['device_id']
                 validation_result = self.validateSessionDeviceStatus(self.supergluu_app_id, session_device_status, user_inum)
-                
+
                 if validation_result:
                     super_gluu_request = json.loads(session_device_status['super_gluu_request'])
                     validation_result= super_gluu_request['method']=="authenticate"
-                    
+
                     if validation_result:
                         print "Cred-manager. authenticate. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
-                
+
                 return validation_result
-                    
+
         return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
@@ -232,34 +236,34 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step==2:
             identity=CdiUtil.bean(Identity)
             session_attributes = identity.getSessionId().getSessionAttributes()
-            
+
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            
+
             if user==None:
                 print "Cred-manager. prepareForStep. Cannot retrieve logged user"
                 return False
-                        
+
             acr=session_attributes.get("ACR")
             print "Cred-manager. prepareForStep. ACR=%s" % acr
             identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
-            
+
             if acr==self.ACR_U2F:
                 authnRequest=self.getU2fAuthnRequest(user.getUserId())
                 identity.setWorkingParameter("fido_u2f_authentication_request", authnRequest)
-                return True        
+                return True
 
             elif acr==self.ACR_SMS:
-                mobiles = user.getAttributeValues("mobile")                 
+                mobiles = user.getAttributeValues("mobile")
                 code = random.randint(100000, 999999)
                 identity.setWorkingParameter("randCode", code)
-                
+
                 twilioCfg=self.scriptsConfig.get(self.ACR_SMS)
                 for numb in mobiles:
-                    try:                        
+                    try:
                         Twilio.init(twilioCfg.get("twilio_sid"), twilioCfg.get("twilio_token"))
                         print "Cred-manager. prepareForStep. Sending SMS message (%s) to %s" % (code, numb)
-                        message = TwMessage.creator(PhoneNumber(numb), PhoneNumber(twilioCfg.get("from_number")), str(code)).create()
+                        message = TwMessage.creator(PhoneNumber(numb), PhoneNumber(twilioCfg.get("from_number")), "%s is your passcode to access your account" % code).create()
                         print "Cred-manager. prepareForStep. Message Sid: %s" % message.getSid()
                     except:
                         print "Cred-manager. prepareForStep. Error sending message", sys.exc_info()[1]

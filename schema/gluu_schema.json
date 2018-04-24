@@ -4151,6 +4151,50 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxd Id",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxdId"
+            ],
+            "oid": "oxAttribute:383",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Authorized Origins",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAuthAuthorizedOrigins"
+            ],
+            "oid": "oxAttribute:384",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "cred-manager - 2FA Enforcement Policy for User",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxStrongAuthPolicy"
+            ],
+            "oid": "oxAttribute:385",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "cred-manager - List of devices with which strong authentication may be skipped",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxTrustedDevicesInfo"
+            ],
+            "oid": "oxAttribute:386",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4249,8 +4293,11 @@
                 "oxGuid",
                 "userRandomKey",
                 "oxPreferredMethod",
+                "userCertificate",
                 "oxOTPDevices",
-                "oxMobileDevices"
+                "oxMobileDevices",
+                "oxStrongAuthPolicy",
+                "oxTrustedDevicesInfo"
             ],
             "must": [
                 "objectclass"
@@ -4732,6 +4779,7 @@
             "may": [
                 "associatedPerson",
                 "displayName",
+                "description",
                 "inum",
                 "oxAuthAppType",
                 "oxAuthClientIdIssuedAt",
@@ -4778,7 +4826,9 @@
                 "oxRefreshTokenLifetime",
                 "oxDisabled",
                 "oxAuthLogoutURI",
-                "oxAuthLogoutSessionRequired"
+                "oxAuthLogoutSessionRequired",
+                "oxdId",
+                "oxAuthAuthorizedOrigins"
             ],
             "must": [
                 "objectclass"
@@ -5360,7 +5410,7 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "inum",
+                "oxId",
                 "oxAuthRedirectURI",
                 "oxAuthClientId"
             ],

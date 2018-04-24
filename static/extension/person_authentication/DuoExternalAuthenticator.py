@@ -11,6 +11,7 @@ from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
 from org.xdi.util import ArrayHelper
 from org.xdi.util import StringHelper
+from java.util import Arrays
 
 import duo_web
 import json
@@ -90,19 +91,23 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Duo. Authenticate for step 1"
 
-            credentials = identity.getCredentials()
-            user_name = credentials.getUsername()
-            user_password = credentials.getPassword()
-
-            logged_in = False
-            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
-                logged_in = authenticationService.authenticate(user_name, user_password)
-
-            if (not logged_in):
-                return False
-
+            # Check if user authenticated alreadyin another custom script
             user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                credentials = identity.getCredentials()
+                user_name = credentials.getUsername()
+                user_password = credentials.getPassword()
+    
+                logged_in = False
+                if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+                    userService = CdiUtil.bean(UserService)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
+    
+                if (not logged_in):
+                    return False
+    
+                user = authenticationService.getAuthenticatedUser()
+
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
                 is_member_duo_group = self.isUserMemberOfGroup(user, self.audit_attribute, self.duo_group)
@@ -177,12 +182,15 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
+        if step == 2:
+            return Arrays.asList("duo_count_login_steps", "cas2_user_uid")
+
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
         if (identity.isSetWorkingParameter("duo_count_login_steps")):
-            return identity.getWorkingParameter("duo_count_login_steps")
+            return int(identity.getWorkingParameter("duo_count_login_steps"))
 
         return 2
 
