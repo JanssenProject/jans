@@ -5,12 +5,12 @@
 #
 
 # Requires the following custom properties and values:
-#   uaf_server_uri: https://ce-dev.gluu.org
+#   uaf_server_uri: <idp_hostname>
 #
 # These are non mandatory custom properties and values:
 #   uaf_policy_name: default
 #   send_push_notifaction: false
-#   registration_uri: https://ce-dev.gluu.org/identity/register
+#   registration_uri: https://<idp_hostname>/identity/register
 #   qr_options: { width: 400, height: 400 }
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -328,7 +328,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if not logged_in:
             return None
 
-        find_user_by_uid = userService.getUser(user_name)
+        find_user_by_uid = authenticationService.getAuthenticatedUser()
         if find_user_by_uid == None:
             print "UAF. Process basic authentication. Failed to find user '%s'" % user_name
             return None
