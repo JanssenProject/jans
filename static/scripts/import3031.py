@@ -20,10 +20,16 @@ import re
 import subprocess
 import time
 import datetime
+import shelve
+import ldap
+import pyDes
+import base64
 
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
+
+ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
@@ -36,6 +42,35 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
+
+
+def progress_bar(t, n, act='', finished=None):
+
+    if not t % 50:
+
+        if finished:
+            i = 40
+        else:
+            i = (t*1.0/(n)) /0.025    
+        ft = '#' * int(round(i))
+        ft = ft.ljust(40)
+        sys.stdout.write("\r[{0}] {1}".format(ft,act))
+        sys.stdout.flush()
+    if finished:
+        print
+
+class DBLDIF(LDIFParser):
+    def __init__(self, ldif_file):
+        LDIFParser.__init__(self, open(ldif_file,'rb'))
+        db_file =  os.path.basename(ldif_file)
+        sdb_file = os.path.join('/tmp', db_file+'.sdb')
+        if os.path.exists(sdb_file):
+            os.remove(sdb_file)
+        #logging.info("\nDumping %s to shelve database" % ldif_file)
+        self.sdb = shelve.open(sdb_file)
+
+    def handle(self, dn, entry):
+        self.sdb[dn] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -175,6 +210,37 @@ class Migration(object):
                           " Nothing to migrate. Quitting.")
             sys.exit(1)
 
+    def unobscure(self,s=""):
+        engine = pyDes.triple_des(self.key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
+        cipher = pyDes.triple_des(self.key)
+        decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
+        return decrypted
+
+    def getLdapPassword(self):
+
+        try:
+            with open('/etc/gluu/conf/ox-ldap.properties') as f:
+                for line in f:
+                    if line.startswith("bindPassword:"):
+                        self.ldappassowrd = line.split(":")[1].split("\n")[0].strip()
+
+        except:
+            logging.error("ox-ldap.properties file not Found")
+
+
+        #get salt key
+        saltFn = "/etc/gluu/conf/salt"
+        try:
+            f = open(saltFn)
+            salt_property = f.read()
+            f.close()
+            self.key = salt_property.split("=")[1].strip()
+            self.ldappassowrd = self.unobscure(self.ldappassowrd)
+            #print self.ldappassowrd
+
+        except:
+            logging.error("Salt key Access Error")
+
     def setupWorkDirectory(self):
         if not os.path.exists(self.workingDir):
             os.mkdir(self.workingDir)
@@ -262,10 +328,10 @@ class Migration(object):
         if self.version < 300:
             custom = '/var/gluu/webapps/'
             folder_map = [
-                (custom + 'oxauth/pages', self.jettyDir + 'oxauth/custom/pages'),
+                #(custom + 'oxauth/pages', self.jettyDir + 'oxauth/custom/pages'),
                 (custom + 'oxauth/resources', self.jettyDir + 'oxauth/custom/static'),
                 (custom + 'oxauth/libs', self.jettyDir + 'oxauth/lib/ext'),
-                (custom + 'oxtrust/pages', self.jettyDir + 'identity/custom/pages'),
+                #(custom + 'oxtrust/pages', self.jettyDir + 'identity/custom/pages'),
                 (custom + 'oxtrust/resources', self.jettyDir + 'identity/custom/static'),
                 (custom + 'oxtrust/libs', self.jettyDir + 'identity/lib/ext'),
             ]
@@ -438,7 +504,10 @@ class Migration(object):
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
+        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
+
         processed_fp = open(self.processTempFile, 'w')
+
         ldif_writer = LDIFWriter(processed_fp)
 
         currentDNs = self.getDns(self.currentData)
@@ -455,8 +524,13 @@ class Migration(object):
             ignoreList.remove('oxIDPAuthentication')
 
         # Rewriting all the new DNs in the new installation to ldif file
-        for dn in currentDNs:
+        nodn=len(currentDNs)
+        for cnt, dn in enumerate(currentDNs):
+            progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
+
+
+
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
@@ -465,6 +539,9 @@ class Migration(object):
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+
+
+
             for attr in old_entry.keys():
                 if attr in ignoreList:
                     continue
@@ -488,16 +565,38 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
-            ldif_writer.unparse(dn, new_entry)
+                        
+            if '3.1.3' in self.oxVersion:
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in new_entry and not 'member_off' in new_entry['oxAuthClaimName']:
+                        new_entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        new_entry['oxAuthClaimName'] = ['member_off']
 
+            
+            ldif_writer.unparse(dn, new_entry)
+        
+        progress_bar(0, 0, 'Rewriting DNs', True)
+        
         # Pick all the left out DNs from the old DN map and write them to the LDIF
-        for dn in sorted(old_dn_map, key=len):
+        nodn = len(old_dn_map)
+        
+        ldif_shelve_dict = {}
+        
+        for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
+            progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
                 continue  # Already processed
 
-            entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+            cur_ldif_file = old_dn_map[dn]
+            if not cur_ldif_file in ldif_shelve_dict:
+                sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
+                sdb.parse()
+                ldif_shelve_dict[cur_ldif_file]=sdb.sdb
+
+            entry = ldif_shelve_dict[cur_ldif_file][dn]
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -520,20 +619,35 @@ class Migration(object):
         # Finally
         processed_fp.close()
 
+        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+
+        nodn = sum(1 for line in open(self.processTempFile))
+
         # Update the Schema change for lastModifiedTime
         with open(self.processTempFile, 'r') as infile:
             with open(self.o_gluu, 'w') as outfile:
-                for line in infile:
+                for cnt, line in enumerate(infile):
+                    progress_bar(cnt, nodn, 'converting Dns')
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
                     line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
-                    if 'oxTrustAuthenticationMode' in line:
-                        line = line.replace('internal', 'auth_ldap_server')
+                    #if 'oxTrustAuthenticationMode' in line:
+                    #    line = line.replace('internal', 'auth_ldap_server')
+                    if line.startswith('oxAuthenticationMode'):
+                         line = 'oxAuthenticationMode: auth_ldap_server\n'
+                    elif line.startswith('oxTrustAuthenticationMode'):
+                         line = 'oxTrustAuthenticationMode: auth_ldap_server\n'
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
+                    if line.startswith('oxMemcachedConfiguration:') or line.startswith('oxCacheConfiguration:'):
+                        line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
+
+
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
+
+
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -545,6 +659,9 @@ class Migration(object):
                     #         f = open(self.o_gluu, "a")
                     #         f.write('\n')
                     #         f.write(out)
+        
+        progress_bar(0, 0, 'converting Dns', True)
+        
         data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
         open(os.path.join(self.backupDir, 'ldif','site.ldif'),"wb").write(data)
         filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','site.ldif')]
@@ -582,7 +699,7 @@ class Migration(object):
                    '-l', self.o_gluu, '-R', self.o_gluu + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
-        command = [self.ldif_import,'-b','o=gluu','-n', 'userRoot',
+        command = [self.ldif_import,'-b','o=site','-n', 'site',
                    '-l', self.o_site, '-R', self.o_site + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
@@ -623,10 +740,11 @@ class Migration(object):
 
 
     def getLDAPServerTypeChoice(self):
-
+        choice = 0
+        
         if os.path.isfile(self.setup_properties):
             data = ""
-            choice = 0
+            
             try:
                 with open(self.setup_properties) as f:
                     for line in f:
@@ -730,15 +848,51 @@ class Migration(object):
         if self.ldap_type == 'openldap':
             self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
             self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+        else:
+            self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
+        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
-    def getProp(self, prop):
-        with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
+
+    def getProp(self, prop, prop_file=None):
+        if not prop_file:
+            prop_file = os.path.join(self.backupDir, 'setup.properties')
+
+        with open(prop_file, 'r') as f:
             for line in f:
-                if line.startswith(prop):
-                    return line.split('=')[-1].strip()
+                n = line.find('=')
+                if n > -1:
+                    if line[:n]==prop:
+                        tmp = line[n+1:].strip()
+                        return tmp.replace('\\=','=')
+
+    def idpResolved(self):
+
+        logging.info('Idp Configuration Setting...')
+        self.getLdapPassword()
+
+        if self.ldap_type == 'opendj':
+            bindDn = 'cn=directory manager'
+        else:
+            bindDn = 'cn=directory manager,o=gluu'
+
+        inumAppliance = self.getProp('inumAppliance', 
+                    '/install/community-edition-setup/setup.properties.last')
+
+        con = ldap.initialize('ldaps://localhost:1636')
+        con.simple_bind_s(bindDn, self.ldappassowrd)
+
+        dn = 'ou=oxtrust,ou=configuration,inum={},ou=appliances,o=gluu'.format(inumAppliance)
+        results = con.search_s(dn,  ldap.SCOPE_BASE, attrlist=['oxTrustConfCacheRefresh'])
+
+        if self.ldap_type == 'opendj':
+            jsons = results[0][1]['oxTrustConfCacheRefresh'][0]
+            jdata = json.loads(jsons)
+            jdata['inumConfig']['bindDN'] = 'cn=directory manager'
+            jsons = json.dumps(jdata)
+            con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
+
 
     def migrate(self):
         """Main function for the migration of backup data
@@ -748,6 +902,11 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+        self.inumOrg = self.getProp('inumOrg', 
+                    '/install/community-edition-setup/setup.properties.last')
+        self.oxVersion = self.getProp('oxVersion', 
+                    '/install/community-edition-setup/setup.properties.last')
+        
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
         self.verifyBackupData()
@@ -763,6 +922,7 @@ class Migration(object):
         self.importProcessedData()
         self.fixPermissions()
         self.startLDAPServer()
+        self.idpResolved()
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
