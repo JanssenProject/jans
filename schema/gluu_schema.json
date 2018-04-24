@@ -4293,6 +4293,7 @@
                 "oxGuid",
                 "userRandomKey",
                 "oxPreferredMethod",
+                "userCertificate",
                 "oxOTPDevices",
                 "oxMobileDevices",
                 "oxStrongAuthPolicy",
