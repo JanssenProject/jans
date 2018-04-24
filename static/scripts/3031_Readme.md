@@ -45,6 +45,20 @@ or, for CentOS/RHEL 7x series
 # python get-pip.py
 ```
 
+Install the `python-ldap` package:
+  * on Ubuntu:
+```
+apt-get update
+apt-get install -y python-ldap
+```
+  * on CentOS/RHEL:
+
+```
+# yum install epel-release
+# yum clean all
+# yum install python-ldap
+```
+
 Install the `json-merge` Python package and run the import script.
 
 ```
