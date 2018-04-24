@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -37,6 +40,8 @@ public class CustomScript extends BaseEntry {
     private String inum;
 
     @LdapAttribute(name = "displayName")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Name should contain only letters, digits and underscores")
+    @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
     private String name;
 
     @LdapAttribute(name = "description")
