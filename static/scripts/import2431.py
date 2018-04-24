@@ -652,7 +652,7 @@ class Migration(object):
 
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
-
+        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp,  
                                     base64_attrs=['gluuProfileConfiguration'])
@@ -776,6 +776,14 @@ class Migration(object):
 
             if 'oxAuthClientCustomAttributes' in entry['objectClass']:
                 entry['objectClass'].remove('oxAuthClientCustomAttributes')
+
+            if '3.1.3' in self.oxVersion:
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
+                        entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        entry['oxAuthClaimName'] = ['member_off']
+
 
             ldif_writer.unparse(dn, entry)
 
@@ -1080,6 +1088,12 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+        self.inumOrg = self.getProp('inumOrg', 
+                    '/install/community-edition-setup/setup.properties.last')
+        self.oxVersion = self.getProp('oxVersion', 
+                    '/install/community-edition-setup/setup.properties.last')
+
+        
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
