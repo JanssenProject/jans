@@ -778,11 +778,20 @@ class Migration(object):
                 entry['objectClass'].remove('oxAuthClientCustomAttributes')
 
             if '3.1.3' in self.oxVersion:
+                sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
                 if dn == attrib_dn:
                     if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
                         entry['oxAuthClaimName'].append('member_off')
                     else:
                         entry['oxAuthClaimName'] = ['member_off']
+
+                if sector_identifiers in dn:
+                    if dn.startswith('inum'):
+                        
+                        dn = dn.replace('inum=', 'oxId=')
+                        oxId = entry['inum'][:]
+                        entry['oxId'] = oxId
+                        del entry['inum']
 
 
             ldif_writer.unparse(dn, entry)
