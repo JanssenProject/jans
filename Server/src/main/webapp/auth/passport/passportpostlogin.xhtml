@@ -43,7 +43,7 @@
         <script type="text/javascript">
             jQuery(document).ready(function () {
             if (document.getElementById('loginForm')) {
-                var userQueryString = "#{org.xdi.oxauth.model.util.Base64Util.base64urldecodeToString(request.getParameter('user'))}";
+                var userQueryString = "#{customScriptService.base64Decode(request.getParameter('user'))}";
                 history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-post-login');
                 
                 var userObj
