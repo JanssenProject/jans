@@ -79,14 +79,12 @@ class PersonAuthentication(PersonAuthenticationType):
 	if (StringHelper.isEmptyString(self.getUserValueFromAuth("email", requestParameters))):
 	    facesMessages = CdiUtil.bean(FacesMessages)
 	    facesMessages.setKeepMessages()
-	    facesMessages.clear()
 	    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide your email.")
             return False
 
 	if (StringHelper.isEmptyString(self.getUserValueFromAuth("pwd", requestParameters))):
 	    facesMessages = CdiUtil.bean(FacesMessages)
 	    facesMessages.setKeepMessages()
-	    facesMessages.clear()
 	    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide password.")
             return False
 
@@ -113,6 +111,12 @@ class PersonAuthentication(PersonAuthenticationType):
 		print("Registration: Error in adding user:" + str(err))
 		return False
 	    return userAuthenticated
+	else:
+	    facesMessages = CdiUtil.bean(FacesMessages)
+	    facesMessages.setKeepMessages()
+	    facesMessages.add(FacesMessage.SEVERITY_ERROR, "User with same email already exists!")
+	    return False
+
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
