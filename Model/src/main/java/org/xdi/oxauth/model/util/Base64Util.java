@@ -9,6 +9,7 @@ package org.xdi.oxauth.model.util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 /**
@@ -30,6 +31,11 @@ public class Base64Util {
     public static byte[] base64urldecode(String arg) throws IllegalArgumentException {
         String s = removePadding(arg);
         return Base64.decodeBase64(s); // Standard base64 decoder
+    }
+
+    public static String base64urldecodeToString(String arg) throws IllegalArgumentException, UnsupportedEncodingException {
+        byte[] decoded = base64urldecode(arg);
+        return new String(decoded, "UTF-8");
     }
 
     public static String removePadding(String base64UrlEncoded) {
