@@ -41,7 +41,6 @@ from org.gluu.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
 
 from com.google.android.gcm.server import Sender, Message
-from org.xdi.oxauth.service import EncryptionService
 from com.notnoop.apns import APNS
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService
 from org.gluu.oxnotify.client import NotifyClientFactory
@@ -1170,7 +1169,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             encService = CdiUtil.bean(EncryptionService)
-            #devicesInfo = encService.decrypt()
+            devicesInfo = encService.decrypt(devicesInfo)
             devicesInfo = json.loads(devicesInfo)
 
             partialMatch = False
@@ -1235,7 +1234,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 devicesInfo.append(obj)
 
             enc = json.dumps(devicesInfo, separators=(',',':'))
-            #enc = encService.encrypt(enc)
+            enc = encService.encrypt(enc)
             identity.setWorkingParameter("trustedDevicesInfo", enc)
         except:
             print "Cred-manager. process2FAPolicy. Error!", sys.exc_info()[1]
