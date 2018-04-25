@@ -57,6 +57,7 @@
                 }
                 document.getElementById('loginForm')["loginForm:userid"].value = userObj.id;
                 document.getElementById('loginForm')["loginForm:displayname"].value = userObj.name;
+                document.getElementById('loginForm')["loginForm:memberof"].value = JSON.stringify(userObj.memberOf);
                 document.getElementById('loginForm')["loginForm:username"].value = userObj.username;
                 document.getElementById('loginForm')["loginForm:token"].value = userObj.accessToken;
                 document.getElementById('loginForm')["loginForm:givenname"].value = userObj.givenName;
@@ -100,6 +101,7 @@
                                 <h:inputHidden id="provider"/>
                                 <h:inputHidden id="givenname"/>
                                 <h:inputHidden id="familyname"/>
+                                <h:inputHidden id="memberof"/>
                                 <h:inputHidden id="name"/>
                             </h:panelGrid>
                         </div>
