@@ -6,11 +6,14 @@
 
 package org.xdi.oxauth.service.custom;
 
+import java.io.UnsupportedEncodingException;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.service.custom.script.AbstractCustomScriptService;
 
 /**
@@ -29,6 +32,11 @@ public class CustomScriptService extends AbstractCustomScriptService {
 
     public String baseDn() {
         return staticConfiguration.getBaseDn().getScripts();
+    }
+
+    public String base64Decode(String encoded) throws IllegalArgumentException, UnsupportedEncodingException {
+        byte[] decoded = Base64Util.base64urldecode(encoded);
+        return new String(decoded, "UTF-8");
     }
 
 }
