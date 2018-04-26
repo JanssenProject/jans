@@ -246,7 +246,7 @@ class Migration(object):
 
     def copyCertificates(self):
         # remove opendj.crt
-        opendj_cert_file = os.path.join(self.backupDir, 'backup_2431/etc/certs/opendj.crt')
+        opendj_cert_file = os.path.join(self.backupDir, 'etc/certs/opendj.crt')
         if os.path.exists(opendj_cert_file):
             command = ['rm',opendj_cert_file]
             output = self.getOutput(command)
