@@ -492,7 +492,7 @@ do_start () {
         			chown "$NODE_USER" "$NODE_PID_FILE"
         			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         			su - "$NODE_USER" $SU_SHELL -c "
-          			exec ${RUN_CMD[*]} start-log-file="$NODE_LOGS/start.log" >> "$NODE_LOGS/start.log" 2>&1 &
+          			exec /usr/bin/env ${RUN_CMD[*]} start-log-file="$NODE_LOGS/start.log" >> "$NODE_LOGS/start.log" 2>&1 &
           			disown \$!
           			echo \$! > '$NODE_PID_FILE'"
       			else
