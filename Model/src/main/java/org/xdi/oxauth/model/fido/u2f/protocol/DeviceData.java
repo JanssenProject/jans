@@ -49,7 +49,7 @@ public class DeviceData implements Serializable {
 	public DeviceData(@JsonProperty(value = "uuid") String uuid, @JsonProperty(value = "token") String pushToken,
 			@JsonProperty(value = "type") String type, @JsonProperty(value = "platform") String platform,
 			@JsonProperty(value = "name") String name, @JsonProperty(value = "os_name") String osName,
-			@JsonProperty(value = "os_version") String osVersion, List<String> customData) {
+			@JsonProperty(value = "os_version") String osVersion, @JsonProperty(value = "custom_data") List<String> customData) {
 		this.uuid = uuid;
 		this.pushToken = pushToken;
 		this.type = type;
