@@ -1157,11 +1157,6 @@ class PersonAuthentication(PersonAuthenticationType):
         #Retrieve user's devices info
         devicesInfo = foundUser.getAttribute("oxTrustedDevicesInfo")
 
-        if devicesInfo == None:
-            print "Cred-manager. process2FAPolicy: There are no trusted devices for user yet"
-            #Simulate empty list
-            devicesInfo = "[]"
-
         #do geolocation
         geodata = self.getGeolocation(identity)
         if geodata == None:
@@ -1169,7 +1164,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             encService = CdiUtil.bean(EncryptionService)
-            devicesInfo = encService.decrypt(devicesInfo)
+
+            if devicesInfo == None:
+                print "Cred-manager. process2FAPolicy: There are no trusted devices for user yet"
+                #Simulate empty list
+                devicesInfo = "[]"
+            else:
+                devicesInfo = encService.decrypt(devicesInfo)
+
             devicesInfo = json.loads(devicesInfo)
 
             partialMatch = False
