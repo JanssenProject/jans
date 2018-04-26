@@ -1086,8 +1086,6 @@ class Migration(object):
         command = ['cp','/etc/certs/shibIDP.key','/etc/certs/idp-signing.key']
         output = self.getOutput(command)
 
-        command = ['service','idp','restart']
-        output = self.getOutput(command)
 
     def migrate(self):
         """Main function for the migration of backup data
