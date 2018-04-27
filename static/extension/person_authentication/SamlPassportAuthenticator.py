@@ -5,8 +5,9 @@
 #
 
 from org.xdi.service.cdi.util import CdiUtil
-from org.gluu.jsf2.message import FacesMessages
+from javax.faces.context import FacesContext
 from javax.faces.application import FacesMessage
+from org.gluu.jsf2.message import FacesMessages
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
@@ -22,7 +23,6 @@ from org.gluu.jsf2.service import FacesService
 from org.xdi.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
 from org.xdi.oxauth.service.net import HttpService
-from javax.faces.context import FacesContext
 
 import json
 import java
@@ -90,6 +90,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return ServerUtil.getFirstValue(requestParameters, toBeFeatched)
         except Exception, err:
             print("Passport-saml: Exception inside getUserValueFromAuth " + str(err))
+            return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         extensionResult = self.extensionAuthenticate(configurationAttributes, requestParameters, step)
@@ -101,13 +102,12 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             UserId = self.getUserValueFromAuth("userid", requestParameters)
         except Exception, err:
-            print("Passport-saml: Error: " + str(err))
-        useBasicAuth = False
-        if (StringHelper.isEmptyString(UserId)):
-            useBasicAuth = True
+            print "Passport-saml: Error: " + str(err)
+
+        useBasicAuth = StringHelper.isEmptyString(UserId)
 
         # Use basic method to log in
-        if (useBasicAuth):
+        if useBasicAuth:
             print "Passport-saml: Basic Authentication"
             identity = CdiUtil.bean(Identity)
             credentials = identity.getCredentials()
@@ -120,87 +120,102 @@ class PersonAuthentication(PersonAuthenticationType):
                 userService = CdiUtil.bean(UserService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
-            if (not logged_in):
-                return False
-            return True
-
+            print "Passport-saml: Basic Authentication returning %s" % logged_in
+            return logged_in
         else:
-            try:
-                userService = CdiUtil.bean(UserService)
-                authenticationService = CdiUtil.bean(AuthenticationService)
-                foundUser = userService.getUserByAttribute("mail", self.getUserValueFromAuth("email", requestParameters))
+            facesContext = CdiUtil.bean(FacesContext)
+            userService = CdiUtil.bean(UserService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
 
-                if (foundUser == None):
-                    newUser = User()
+            uidRemoteAttr = self.getUidRemoteAttr()
+            if uidRemoteAttr == None:
+                print "Cannot retrieve uid remote attribute"
+                return False
+            else:
+                uidRemoteAttrValue = self.getUserValueFromAuth(uidRemoteAttr, requestParameters)
+                externalUid = "passport-saml:%s" % uidRemoteAttrValue
 
-                    try:
-                        UserEmail = self.getUserValueFromAuth("email", requestParameters)
-                    except Exception, err:
-                        print("Passport-saml: Error in getting user email: " + str(err))
+                email = self.getUserValueFromAuth("email", requestParameters)
+                if StringHelper.isEmptyString(email):
+                    facesMessages = CdiUtil.bean(FacesMessages)
+                    facesMessages.setKeepMessages()
+                    self.clearFacesMessages(facesContext)
+                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide your email.")
 
-                    if (StringHelper.isEmptyString(UserEmail)):
-                        facesMessages = CdiUtil.bean(FacesMessages)
-                        facesMessages.setKeepMessages()
-                        facesMessages.clear()
-                        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide your email.")
-                        print "Passport-saml: Email was not received so sent error"
+                    print "Passport-saml: Email was not received"
+                    return False
 
-                        return False
+                userByMail = userService.getUserByAttribute("mail", email)
+                userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
 
-                    for attributesMappingEntry in self.attributesMapping.entrySet():
-                        remoteAttribute = attributesMappingEntry.getKey()
-                        localAttribute = attributesMappingEntry.getValue()
-                        localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
-                        if ((localAttribute != None) & (localAttributeValue != "undefined") & (
-                                    localAttribute != "provider")):
-                            newUser.setAttribute(localAttribute, localAttributeValue)
-
-                    newUser.setAttribute("oxExternalUid", "passport-saml" + ":" + self.getUserValueFromAuth(self.getUidRemoteAttr(), requestParameters))
-
-                    print ("Passport-saml: " + self.getUserValueFromAuth("provider",
-                                                     requestParameters) + ": Attempting to add user " + self.getUserValueFromAuth(
-                    self.getUidRemoteAttr(), requestParameters))
-
-                    try:
-                        foundUser = userService.addUser(newUser, True)
-                        foundUserName = foundUser.getUserId()
-                        print("Passport-saml: Found user name " + foundUserName)
-                        userAuthenticated = authenticationService.authenticate(foundUserName)
-                        print("Passport-saml: User added successfully and isUserAuthenticated = " + str(userAuthenticated))
-                    except Exception, err:
-                        print("Passport-saml: Error in adding user:" + str(err))
-                        return False
-                    return userAuthenticated
-
+                doUpdate = False
+                doAdd = False
+                if userByUid!=None:
+                    print "User with externalUid '%s' already exists" % externalUid
+                    if userByMail!=None:
+                        if userByMail.getUserId()==userByUid.getUserId():
+                            doUpdate = True
+                    else:
+                        doUpdate = True
                 else:
+                    if userByMail==None:
+                        doAdd = True
 
-                    foundUserName = foundUser.getUserId()
-                    print("Passport-saml: User Found " + str(foundUserName))
-                    userService = CdiUtil.bean(UserService)
-
+                if doUpdate:
+                    foundUser = userByUid
+                    #update user with remote attributes coming
                     for attributesMappingEntry in self.attributesMapping.entrySet():
                         remoteAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
                         localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
-                        if ((localAttribute != None) & (localAttributeValue != "undefined") & (
-                                    localAttribute != "provider")):
+
+                        if (localAttribute != None) and (localAttribute != "provider") and (localAttributeValue != "undefined"):
                             try:
                                 value = foundUser.getAttributeValues(str(localAttribute))[0]
-
                                 if value != localAttributeValue:
-                                    userService.setCustomAttribute(foundUser,localAttribute,localAttributeValue)
-                                    userService.updateUser(foundUser)
-
-
+                                    foundUser.setAttribute(localAttribute, localAttributeValue)
                             except Exception, err:
                                 print("Error in update Attribute " + str(err))
 
-                    userAuthenticated = authenticationService.authenticate(foundUserName)
-                    print("Passport-saml: Is user authenticated = " + str(userAuthenticated))
-                    return True
+                    try:
+                        foundUserName = foundUser.getUserId()
+                        print "Passport-saml: Updating user %s" % foundUserName
 
-            except Exception, err:
-                print ("Passport-saml: Error occurred during request parameter fetching " + str(err))
+                        userService.updateUser(foundUser)
+                        userAuthenticated = authenticationService.authenticate(foundUserName)
+                        print "Passport-saml: Is user authenticated = " + str(userAuthenticated)
+
+                        return userAuthenticated
+                    except Exception, err:
+                        return False
+
+                if doAdd:
+                    newUser = User()
+                    #Fill user attrs
+                    newUser.setAttribute("oxExternalUid", externalUid)
+
+                    for attributesMappingEntry in self.attributesMapping.entrySet():
+                        remoteAttribute = attributesMappingEntry.getKey()
+                        localAttribute = attributesMappingEntry.getValue()
+                        localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
+
+                        if (localAttribute != None) and (localAttribute != "provider") and (localAttributeValue != "undefined"):
+                            newUser.setAttribute(localAttribute, localAttributeValue)
+
+                    try:
+                        print "Passport-saml: Adding user %s" % externalUid
+                        foundUser = userService.addUser(newUser, True)
+                        foundUserName = foundUser.getUserId()
+
+                        userAuthenticated = authenticationService.authenticate(foundUserName)
+                        print "Passport-saml: User added successfully and isUserAuthenticated = " + str(userAuthenticated)
+
+                        return userAuthenticated
+                    except Exception, err:
+                        print "Passport-saml: Error in adding user:" + str(err)
+                        return False
+
+                return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         extensionResult = self.extensionPrepareForStep(configurationAttributes, requestParameters, step)
@@ -222,29 +237,29 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     stateBytes = Base64Util.base64urldecode(oldState)
                     state = StringUtil.fromBytes(stateBytes)
-		    stateObj = json.loads(state)    
-		    print stateObj["provider"]
-		    for y in stateObj:
-		        print (y,':',stateObj[y])
-		    httpService = CdiUtil.bean(HttpService)
-		    facesService = CdiUtil.bean(FacesService)
+                    stateObj = json.loads(state)
+                    print stateObj["provider"]
+                    for y in stateObj:
+                        print (y,':',stateObj[y])
+                    httpService = CdiUtil.bean(HttpService)
+                    facesService = CdiUtil.bean(FacesService)
                     facesContext = CdiUtil.bean(FacesContext)
-		    httpclient = httpService.getHttpsClient()
-		    headersMap = HashMap()
-		    headersMap.put("Accept", "text/json")
-		    host = facesContext.getExternalContext().getRequest().getServerName()
+                    httpclient = httpService.getHttpsClient()
+                    headersMap = HashMap()
+                    headersMap.put("Accept", "text/json")
+                    host = facesContext.getExternalContext().getRequest().getServerName()
                     url = "https://"+host+"/passport/token"
                     print "Passport-saml: url %s" %url
                     resultResponse = httpService.executeGet(httpclient, url , headersMap)
-		    http_response = resultResponse.getHttpResponse()
-		    response_bytes = httpService.getResponseContent(http_response)
-		    szResponse = httpService.convertEntityToString(response_bytes)
-		    print "Passport-saml: szResponse %s" % szResponse
-		    tokenObj = json.loads(szResponse)
-		    print "Passport-saml: /passport/auth/saml/"+stateObj["provider"]+"/"+tokenObj["token_"]
+                    http_response = resultResponse.getHttpResponse()
+                    response_bytes = httpService.getResponseContent(http_response)
+                    szResponse = httpService.convertEntityToString(response_bytes)
+                    print "Passport-saml: szResponse %s" % szResponse
+                    tokenObj = json.loads(szResponse)
+                    print "Passport-saml: /passport/auth/saml/"+stateObj["provider"]+"/"+tokenObj["token_"]
                     facesService.redirectToExternalURL("/passport/auth/saml/"+stateObj["provider"]+"/"+tokenObj["token_"])
 
-		except Exception, err:
+                except Exception, err:
                     print str(err)
                     return True
             return True
@@ -313,10 +328,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 localAttribute = attributesMappingEntry.getValue()
                 if localAttribute == "uid":
                     return remoteAttribute
-            else:
-                return "Not Get UID related remote attribute"
         except Exception, err:
             print("Passport-saml: Exception inside getUidRemoteAttr " + str(err))
+
+        return None
 
     def extensionAuthenticate(self, configurationAttributes, requestParameters, step):
         if (self.extensionModule == None):
@@ -332,8 +347,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport-saml: Extension. Authenticate. Unexpected error:", ex
         except java.lang.Throwable, ex:
             print "Passport-saml: Extension. Authenticate. Failed to execute postLogin method"
-            ex.printStackTrace() 
-                    
+            ex.printStackTrace()
+
         return True
 
     def extensionGetPageForStep(self, configurationAttributes, step):
@@ -350,8 +365,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport-saml: Extension. Get page for Step. Unexpected error:", ex
         except java.lang.Throwable, ex:
             print "Passport-saml: Extension. Get page for Step. Failed to execute postLogin method"
-            ex.printStackTrace() 
-                    
+            ex.printStackTrace()
+
         return None
 
     def extensionPrepareForStep(self, configurationAttributes, requestParameters, step):
@@ -372,3 +387,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return None
 
+    def clearFacesMessages(self, context):
+
+        if context!=None:
+            try:
+                iterator = context.getMessages()
+                while iterator.hasNext():
+                    iterator.next()
+                    iterator.remove()
+            except:
+                print "Error clearing faces messages"
