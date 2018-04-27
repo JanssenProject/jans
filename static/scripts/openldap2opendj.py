@@ -35,7 +35,7 @@ if not os.path.exists('opendj_schema'):
 
 for fn in file_list:
 
-    f = open(fn)
+    f = open(fn).readlines()
     entry_finished = True
     new_entry= []
     new_object = []
@@ -43,8 +43,8 @@ for fn in file_list:
     attributes = []
     objectclasses = []
 
-    for l in f:
-        if l.lower().startswith('attributetype') or l.lower().startswith('objectclass'):
+    for i,l in enumerate(f):
+        if l.lower().startswith('attributetype') or l.lower().startswith('objectclass') or (i==len(f)-1):
             entry_finished = False
             objs = ' '.join(new_entry)
             if objs.lower().startswith('attributetype'):
