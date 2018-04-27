@@ -28,6 +28,8 @@ import base64
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
+from ldifschema_utils import parse_open_ldap_schema
+from ldap.schema import AttributeType
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -42,6 +44,8 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
+
+
 
 
 def progress_bar(t, n, act='', finished=None):
@@ -303,12 +307,45 @@ class Migration(object):
         logging.info("Stopping OpenLDAP Server.")
         stop_msg = self.getOutput([self.service, 'solserver', 'stop'])
         output = self.getOutput([self.service, 'solserver', 'status'])
+        self.fix_openldap_ePSA()
         if "is not running" in output:
             return
         else:
             logging.error("Couldn't stop the OpenLDAP server.")
             logging.error(stop_msg)
             sys.exit(1)
+
+        
+
+    def fix_openldap_ePSA(self):
+        schema_file = '/opt/symas/etc/openldap/schema/eduperson.schema'
+        
+        schema = parse_open_ldap_schema(schema_file)
+
+        for a in schema['attributes']:
+            if 'eduPersonScopedAffiliation' in a.names:
+                break
+        else:
+            logging.info("Fixing eduperson.schema for eduPersonScopedAffiliation")
+            a_str = "( 1.3.6.1.4.1.5923.1.1.1.9 NAME 'eduPersonScopedAffiliation' DESC 'eduPerson per Internet2 and EDUCAUSE' EQUALITY caseIgnoreMatch SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' )"
+
+            ePSA_attr = AttributeType(a_str)
+
+            schema['attributes'].append(ePSA_attr)
+
+            for o in schema['objectclasses']:
+                if 'eduPerson' in o.names:
+                    may_list = list(o.may)
+                    may_list.append('eduPersonScopedAffiliation')
+                    o.may = tuple(may_list)
+
+
+            with open(schema_file, 'w') as outfile:
+                for atyp in schema['attributes']:
+                    outfile.write('attributetype {}\n'.format(atyp.__str__()))
+                for ocls in schema['objectclasses']:
+                    outfile.write('objectclass {}\n'.format(ocls.__str__()))
+
 
     def startSolserver(self):
         logging.info("Starting OpenLDAP Server.")
@@ -446,14 +483,15 @@ class Migration(object):
     def copyCustomSchema(self):
 
         if self.ldap_type == 'openldap':
+            if os.path.exists(self.backupDir + "/custom.schema"):
+                custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
+                outfile = open(custom_schema, 'w')
+            
+                output = self.readFile(self.backupDir + "/custom.schema")
 
-            custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-            outfile = open(custom_schema, 'w')
-            output = self.readFile(self.backupDir + "/custom.schema")
-
-            outfile.write("\n")
-            outfile.write(output)
-            outfile.close()
+                outfile.write("\n")
+                outfile.write(output)
+                outfile.close()
 
         else:
             return
