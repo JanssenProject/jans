@@ -2510,9 +2510,41 @@ class Setup(object):
         self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
         self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
+    def get_clean_args(self, args):
+        argsc = args[:]
+
+        for a in ('-R', '-h', '-p'):
+            if a in argsc:
+                argsc.remove(a)
+
+        if '-m' in argsc:
+            m = argsc.index('-m')
+            argsc.pop(m)
+            argsc.pop(m)
+            
+        return argsc
+
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None, useWait=False, shell=False):
         self.logIt('Running: %s' % ' '.join(args))
+        
+        if args[0] == self.cmd_chown:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Make of owner of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_chmod:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Set permission of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_chgrp:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Make group of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_mkdir:
+            argsc = self.get_clean_args(args)
+            if not (argsc[1].startswith('/opt') or argsc[1].startswith('.')):
+                self.logOSChanges('Creating directory %s' % (', '.join(argsc[1:])))
+
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env, shell=shell)
             if useWait:
