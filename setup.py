@@ -2531,15 +2531,15 @@ class Setup(object):
         if args[0] == self.cmd_chown:
             argsc = self.get_clean_args(args)
             if not argsc[2].startswith('/opt'):
-                self.logOSChanges('Make of owner of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+                self.logOSChanges('Making owner of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
         elif args[0] == self.cmd_chmod:
             argsc = self.get_clean_args(args)
             if not argsc[2].startswith('/opt'):
-                self.logOSChanges('Set permission of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+                self.logOSChanges('Setting permission of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
         elif args[0] == self.cmd_chgrp:
             argsc = self.get_clean_args(args)
             if not argsc[2].startswith('/opt'):
-                self.logOSChanges('Make group of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+                self.logOSChanges('Making group of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
         elif args[0] == self.cmd_mkdir:
             argsc = self.get_clean_args(args)
             if not (argsc[1].startswith('/opt') or argsc[1].startswith('.')):
