@@ -63,7 +63,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
         String uri = endSessionEndpoint +
                 "?id_token_hint=" + getIdToken(params, site);
-        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+        if (!Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
             uri += "&post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
         }
         if (!Strings.isNullOrEmpty(params.getState())) {
