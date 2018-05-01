@@ -124,7 +124,7 @@ class Setup(object):
 
         self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
-        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
 
@@ -965,7 +965,7 @@ class Setup(object):
 
     def set_ulimits(self):
         try:
-            if self.os_type in ['centos', 'redhat', 'fedora']:
+            if self.os_type in ['centos', 'red', 'fedora']:
                 apache_user = 'apache'
             else:
                 apache_user = 'www-data'
@@ -1031,7 +1031,7 @@ class Setup(object):
         self.run([service_path, apache_service_name, 'stop'])
 
         # CentOS 7.* + systemd + apache 2.4
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
@@ -1039,7 +1039,7 @@ class Setup(object):
         if self.os_type == 'centos' and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
+        if self.os_type in ['red', 'fedora'] and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
@@ -1118,7 +1118,7 @@ class Setup(object):
         return "2.2"
 
     def determineApacheVersionForOS(self):
-        if self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_type in ['centos', 'red', 'fedora']:
             # httpd -v
             # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
             # OR
@@ -1295,7 +1295,7 @@ class Setup(object):
         self.run(['sed', '-i', 's/^%s/%s/' % (source_string, target_string), '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
                 self.run(["/usr/bin/systemctl", 'enable', serviceName])
             else:
@@ -1327,7 +1327,7 @@ class Setup(object):
             self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
                 self.run(["/usr/bin/systemctl", 'enable', serviceName])
             else:
@@ -2261,7 +2261,7 @@ class Setup(object):
             if self.os_type in ('ubuntu', 'debian'):
                 if glob.glob(self.distFolder+'/symas/symas-openldap*.deb'):
                     open_ldap_exist = True
-            elif self.os_type in ('centos', 'redhat', 'fedorat'):
+            elif self.os_type in ('centos', 'red', 'fedorat'):
                     if glob.glob(self.distFolder+'/symas/symas-openldap*.rpm'):
                         open_ldap_exist = True
 
@@ -2878,7 +2878,7 @@ class Setup(object):
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
 
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -2904,7 +2904,7 @@ class Setup(object):
             
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
         
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             self.run(["/sbin/chkconfig", 'opendj', "on"])
             self.run([service_path, 'opendj', 'start'])
         elif self.os_type in ['ubuntu', 'debian']:
@@ -2926,7 +2926,7 @@ class Setup(object):
         if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        elif self.os_type in ['redhat']:
+        elif self.os_type in ['red']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
@@ -2936,7 +2936,7 @@ class Setup(object):
 
     def detect_service_path(self):
         service_path = '/sbin/service'
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             service_path = '/usr/bin/systemctl'
         elif self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
@@ -2947,7 +2947,7 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
@@ -2959,13 +2959,13 @@ class Setup(object):
         # Detect service path and apache service name
         service_path = self.detect_service_path()
         apache_service_name = 'httpd'
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
             apache_service_name = 'apache2'
 
         # Apache HTTPD
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             self.run([service_path, 'enable', apache_service_name])
             self.run([service_path, 'start', apache_service_name])
         else:
@@ -2974,7 +2974,7 @@ class Setup(object):
         # LDAP services
         if self.installLdap:
             if self.ldap_type == 'openldap':
-                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
                     self.run([service_path, 'restart', 'rsyslog.service'])
                     self.run([service_path, 'start', 'solserver.service'])
                 else:
@@ -2997,14 +2997,14 @@ class Setup(object):
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
 
-        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'red', 'fedora']:
             self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
         else:
             if self.os_type in ['debian', 'ubuntu']:
                 self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
                 self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
-            if self.os_type in ['centos', 'redhat', 'fedora']:
+            if self.os_type in ['centos', 'red', 'fedora']:
                 self.copyFile("%s/network" % self.outputFolder, self.network)
 
             self.run(['/bin/hostname', self.hostname])
@@ -3314,7 +3314,7 @@ class Setup(object):
             query_command = 'dpkg -l {0}'
             check_text = 'no packages found matching'
 
-        elif self.os_type in ('centos', 'redhat', 'fedora'):
+        elif self.os_type in ('centos', 'red', 'fedora'):
             install_command = 'yum install -y {0}'
             update_command = 'yum install -y epel-release'
             query_command = 'rpm -q {0}'
@@ -3330,10 +3330,10 @@ class Setup(object):
                 'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog',
                 'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
                 'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'redhat 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
+                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
+                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
                 'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog'
                 }
-
         for package in package_list[self.os_type+' '+self.os_version].split():
             sout, serr = self.run_command(query_command.format(package))
             if check_text in sout+serr:
