@@ -570,6 +570,11 @@ class Exporter(object):
                 logging.debug(traceback.format_exc())
 
         ldap_type = self.getProp('ldap_type')
+    
+        #if setup.properties.last does not contain ldap_type, make it openldap
+        if not ldap_type:
+             ldap_type = 'openldap'
+
 
         if ldap_type == 'openldap':
             copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir + "/custom.schema")
