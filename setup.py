@@ -2476,12 +2476,6 @@ class Setup(object):
                 self.installSaml = False
         
 
-        promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
-        if promptForAsimba == 'y':
-            self.installAsimba = True
-        else:
-            self.installAsimba = False
-
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
         if promptForOxAuthRP == 'y':
             self.installOxAuthRP = True
@@ -2494,8 +2488,13 @@ class Setup(object):
         else:
             self.installPassport = False
 
-            #if self.allowDeprecatedApplications:
-            # Empty deprecated option
+        if self.allowDeprecatedApplications:
+            promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
+            if promptForAsimba == 'y':
+                self.installAsimba = True
+            else:
+                self.installAsimba = False
+
 
         promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
         if promptForJCE == 'y':
