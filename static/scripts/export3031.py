@@ -448,7 +448,8 @@ class Exporter(object):
 
 
         ldap_type = self.getProp('ldap_type')
-
+        if not ldap_type:
+            ldap_type = 'openldap'
         if ldap_type == 'openldap':
             bind_dn = '"cn=directory manager,o=gluu"'
             bind_dn_site = '"cn=directory manager,o=site"'
