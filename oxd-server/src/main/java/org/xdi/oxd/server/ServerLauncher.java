@@ -41,6 +41,7 @@ public class ServerLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(ServerLauncher.class);
 
     private static final Injector INJECTOR = Guice.createInjector(new GuiceModule());
+    private static boolean setUpSuite = false;
 
     /**
      * Main method.
@@ -99,11 +100,12 @@ public class ServerLauncher {
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxD Server started successfully.");
         } catch (ShutdownException e) {
-            LOG.error("Shutdown oxd server.", e);
-            System.exit(1);
+            LOG.error("Shutted down oxd server.", e);
         } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);
-            System.exit(1);
+            if (!isSetUpSuite()) {
+                System.exit(1);
+            }
         }
     }
 
@@ -161,5 +163,13 @@ public class ServerLauncher {
 
     public static Injector getInjector() {
         return INJECTOR;
+    }
+
+    public static boolean isSetUpSuite() {
+        return setUpSuite;
+    }
+
+    public static void setSetUpSuite(boolean setUpSuite) {
+        ServerLauncher.setUpSuite = setUpSuite;
     }
 }

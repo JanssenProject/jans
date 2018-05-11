@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaMetadata;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.server.introspection.*;
@@ -66,7 +65,7 @@ public class IntrospectionService {
                 LOG.trace("Handled compatibility issue. Response: " + backResponse);
 
                 IntrospectionResponse response = new IntrospectionResponse();
-                response.setSubject(backResponse.getSubject());
+                response.setSub(backResponse.getSubject());
                 response.setAudience(backResponse.getAudience());
                 response.setTokenType(backResponse.getTokenType());
                 response.setActive(backResponse.isActive());
@@ -125,10 +124,9 @@ public class IntrospectionService {
                 response.setPermissions(permissions);
 
                 if (badResponse.getPermissions() != null) {
-                    for (UmaPermission badPermission : badResponse.getPermissions()) {
-
+                    for (BadUmaPermission badPermission : badResponse.getPermissions()) {
                         CorrectUmaPermission p = new CorrectUmaPermission();
-                        p.setExpiresAt(badPermission.getExpiresAt());
+                        p.setExpiresAt(dateToSeconds(badPermission.getExpiresAt()));
                         p.setResourceId(badPermission.getResourceId());
                         p.setScopes(badPermission.getScopes());
 
