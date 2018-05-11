@@ -8,7 +8,10 @@ import org.codehaus.jackson.JsonNode;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.client.uma.UmaResourceService;
 import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -141,6 +144,27 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                         }
                     }
                 }
+            }
+        }
+
+        Rp rp = getRp();
+        List<UmaResource> existingUmaResources = rp.getUmaProtectedResources();
+        if (existingUmaResources != null && !existingUmaResources.isEmpty()) {
+            if (params.getOverwrite() == null || !params.getOverwrite()) {
+                throw new ErrorResponseException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
+            } else {
+                // remove existing resources, overwrite=true
+                UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
+                UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientExecutor());
+                String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
+
+                for (UmaResource resource : existingUmaResources) {
+                    LOG.trace("Removing existing resource " + resource.getId() + " ...");
+                    resourceService.deleteResource("Bearer " + pat, resource.getId());
+                    LOG.trace("Removed existing resource " + resource.getId() + ".");
+                }
+                rp.getUmaProtectedResources().clear();
+                getRpService().updateSilently(rp);
             }
         }
     }

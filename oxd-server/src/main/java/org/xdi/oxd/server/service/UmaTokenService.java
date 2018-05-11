@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
@@ -70,7 +71,7 @@ public class UmaTokenService {
         UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(params.getOxdId());
 
         if (!Strings.isNullOrEmpty(rp.getRpt()) && rp.getRptExpiresAt() != null) {
-            if (!isExpired(rp.getRptExpiresAt())) {
+            if (!CoreUtils.isExpired(rp.getRptExpiresAt())) {
                 LOG.debug("RPT from rp, RPT: " + rp.getRpt() + ", rp: " + rp);
 
                 RpGetRptResponse result = new RpGetRptResponse();
@@ -123,10 +124,6 @@ public class UmaTokenService {
         throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
 
-    public static boolean isExpired(Date expiredAt) {
-        return expiredAt.before(new Date());
-    }
-
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
@@ -137,7 +134,7 @@ public class UmaTokenService {
             expiredAt.setTime(site.getPatCreatedAt());
             expiredAt.add(Calendar.SECOND, site.getPatExpiresIn());
 
-            if (!isExpired(expiredAt.getTime())) {
+            if (!CoreUtils.isExpired(expiredAt.getTime())) {
                 LOG.debug("PAT from site configuration, PAT: " + site.getPat());
                 return new Pat(site.getPat(), "", site.getPatExpiresIn());
             }
