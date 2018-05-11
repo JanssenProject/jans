@@ -17,6 +17,7 @@ import org.xdi.oxd.server.service.PublicOpKeyService;
 import org.xdi.oxd.server.service.StateService;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -100,8 +101,20 @@ public class Validator {
             }
 
             if (!clientId.equalsIgnoreCase(audienceFromToken)) {
-                LOG.error("ID Token has invalid audience. Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                List<String> audAsList = idToken.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
+                if (audAsList != null && audAsList.size() == 1) {
+                    if (!clientId.equalsIgnoreCase(audAsList.get(0))) {
+                        LOG.error("ID Token has invalid audience (string list). Expected audience: " + clientId + ", audience from token is: " + audAsList);
+                        throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                    }
+                }
+
+                // somehow fetching string list does not return actual list, so we do this ugly trick to compare single valued array, more details in #178
+                boolean equalsWithSingleValuedArray = ("[\"" + clientId + "\"]").equalsIgnoreCase(audienceFromToken);
+                if (!equalsWithSingleValuedArray) {
+                    LOG.error("ID Token has invalid audience (single valued array). Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                }
             }
 
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);

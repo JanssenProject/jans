@@ -32,6 +32,7 @@ import java.net.URLDecoder;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -45,6 +46,10 @@ import java.util.concurrent.ThreadFactory;
  * @version 0.9, 27/07/2013
  */
 public class CoreUtils {
+
+    public static boolean isExpired(Date expiredAt) {
+        return expiredAt.before(new Date());
+    }
 
     /**
      * Lazy initialization of jackson mapper via static holder
