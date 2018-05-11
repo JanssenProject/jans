@@ -27,6 +27,7 @@ import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.TimeService;
 
+import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -189,8 +190,12 @@ public class LicenseService {
                     licenseId, clientId, oxdId, clientName, macAddress, isClientLocal);
             request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage(), conf.getServerName()));
             LOG.trace("Updating statistic ... , request: " + request);
-            LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
-            LOG.trace("Updated statistic. oxdId: " + oxdId);
+            Response response = LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
+            if (response.getStatus() == 200) {
+                LOG.trace("Updated statistic. oxdId: " + oxdId + ", response: " + response);
+            } else {
+                throw new RuntimeException("Failed to update statistic, rp: " + rp);
+            }
         } catch (Exception e) {
             LOG.error("Failed to update statistic. Message: " + e.getMessage(), e);
         }
@@ -199,7 +204,7 @@ public class LicenseService {
     private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
         AppMetadata appMetadata = new AppMetadata();
         appMetadata.setAppName("oxd");
-        appMetadata.setAppVersion("3.1.1");
+        appMetadata.setAppVersion("3.1.3");
         appMetadata.setProgrammingLanguage(programmingLanguage);
 
         Properties buildProperties = ServerLauncher.buildProperties();

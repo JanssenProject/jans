@@ -10,7 +10,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ServerLauncher;
-import org.xdi.oxd.server.license.LicenseService;
+import org.xdi.util.Pair;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,7 +38,7 @@ public class ValidationService {
         }
     }
 
-    public void validate(IParams params) {
+    public Pair<Rp, Boolean> validate(IParams params) {
         Boolean isClientLocal = null;
         notNull(params);
         if (params instanceof HasOxdIdParams) {
@@ -58,15 +58,19 @@ public class ValidationService {
                     final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
                     final Rp rp = rpService.getRp(oxdId);
                     if (rp != null) {
-                        ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rp, isClientLocal);
+                        return new Pair<>(rp, isClientLocal);
                     }
                 }
             } catch (ErrorResponseException e) {
+                if (e.getErrorResponseCode() == ErrorResponseCode.EXPIRED_CLIENT) {
+                    throw e;
+                }
                 // ignore
             } catch (Exception e) {
                 LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);
             }
         }
+        return null;
     }
 
     /**

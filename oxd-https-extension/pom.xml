@@ -159,6 +159,16 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.json</include>
+                    <include>**/*.xml</include>
+                </includes>
+            </testResource>
+        </testResources>
         <pluginManagement>
             <plugins>
                 <plugin>
