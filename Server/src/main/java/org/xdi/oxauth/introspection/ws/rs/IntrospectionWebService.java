@@ -100,7 +100,7 @@ public class IntrospectionWebService {
                             response.setActive(tokenToIntrospect.isValid());
                             response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
                             response.setIssuedAt(ServerUtil.dateToSeconds(tokenToIntrospect.getCreationDate()));
-                            response.setAcrValues(tokenToIntrospect.getAuthMode());
+                            response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
                             response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
                             response.setSub(getSub(grantOfIntrospectionToken));
