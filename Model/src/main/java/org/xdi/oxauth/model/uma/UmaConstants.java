@@ -23,4 +23,7 @@ public class UmaConstants {
     public static final String JSON_MEDIA_TYPE = "application/json";
 
     public static final String GATHERING_ID = "gathering_id";
+
+    public static final String NO_SCRIPT = "no_script";
+
 }
