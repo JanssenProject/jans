@@ -2868,8 +2868,8 @@ class Setup(object):
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
-        if 'importLDIFDir' in setupOptions.keys():
-            self.import_custom_ldif_opendj(setupOptions['importLDIFDir'])
+        #if 'importLDIFDir' in setupOptions.keys():
+        #    self.import_custom_ldif_opendj(setupOptions['importLDIFDir'])
 
 
         self.run([self.cmd_chmod, '-R', 'a+rX', self.ldapBaseFolder])
@@ -3127,14 +3127,19 @@ class Setup(object):
     def import_custom_ldif_openldap(self, fullPath):
         output_dir = fullPath + '.output'
 
-        self.logIt("Importing Custom LDIF files into OpenLDAP")
+        self.logIt("Importing Custom LDIF files")
+        
+        
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
         try:
             for ldif in self.get_filepaths(fullPath):
                 custom_ldif = output_dir + '/' + ldif
-                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
+                if self.ldap_type == 'openldap':
+                    self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
+                else:
+                    self.import_ldif_template_opendj(custom_ldif)
         except:
             self.logIt("Error importing custom ldif file %s" % ldif, True)
             self.logIt(traceback.format_exc(), True)
@@ -3625,9 +3630,9 @@ if __name__ == '__main__':
             
             if 'importLDIFDir' in setupOptions.keys():
                 progress_bar(35, "Importing LDIF files")
-                if installObject.ldap_type == 'openldap':
-                    installObject.render_custom_templates(setupOptions['importLDIFDir'])
-                    installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+                #if installObject.ldap_type == 'openldap':
+                installObject.render_custom_templates(setupOptions['importLDIFDir'])
+                installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
 
                 progress_bar(35, "Completed")
             else:
