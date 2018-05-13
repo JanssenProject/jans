@@ -139,6 +139,10 @@
         {
             "attribute": "gluuStatus",
             "index": "eq"
+        },
+        {
+            "attribute": "oxTicket",
+            "index": "eq"
         }
     ]
 }
