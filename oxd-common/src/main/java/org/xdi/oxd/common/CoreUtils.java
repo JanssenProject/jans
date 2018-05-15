@@ -48,7 +48,7 @@ import java.util.concurrent.ThreadFactory;
 public class CoreUtils {
 
     public static boolean isExpired(Date expiredAt) {
-        return expiredAt.before(new Date());
+        return expiredAt != null && expiredAt.before(new Date());
     }
 
     /**
