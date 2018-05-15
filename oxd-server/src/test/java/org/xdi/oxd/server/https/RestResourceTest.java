@@ -2,14 +2,11 @@ package org.xdi.oxd.server.https;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
-import freemarker.template.utility.StringUtil;
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.xdi.oxd.server.https.OxdHttpsApplication;
-import org.xdi.oxd.server.https.OxdHttpsConfiguration;
-import org.xdi.oxd.server.https.RestResource;
+import org.eclipse.jetty.util.StringUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -22,6 +19,9 @@ import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.common.response.*;
 import org.xdi.oxd.rs.protect.Jackson;
 import org.xdi.oxd.rs.protect.RsResourceList;
+import org.xdi.oxd.server.OxdServerApplication;
+import org.xdi.oxd.server.OxdServerConfiguration;
+import org.xdi.oxd.server.RestResource;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -44,14 +44,14 @@ public class RestResourceTest {
     private static String oxdId = null;
 
     @ClassRule
-    public static final DropwizardAppRule<OxdHttpsConfiguration> RULE = new DropwizardAppRule<>(OxdHttpsApplication.class, CONFIG_PATH);
+    public static final DropwizardAppRule<OxdServerConfiguration> RULE = new DropwizardAppRule<>(OxdServerApplication.class, CONFIG_PATH);
     @ClassRule
     public static final ResourceTestRule RESOURCES = ResourceTestRule.builder().build();
 
     @BeforeClass
     public static void setUp() throws Exception {
         client = ClientBuilder.newClient();
-        OxdHttpsConfiguration configuration = new OxdHttpsConfiguration();
+        OxdServerConfiguration configuration = new OxdServerConfiguration();
 
         registerSiteParams = new RegisterSiteParams();
         registerSiteParams.setOpHost(configuration.getOpHost()); // your locally hosted gluu server can work

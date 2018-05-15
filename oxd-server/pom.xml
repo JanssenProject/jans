@@ -118,7 +118,7 @@
                                 implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.xdi.oxd.server.ServerLauncher</mainClass>
+                            <mainClass>org.xdi.oxd.server.OxdServerApplication</mainClass>
                         </transformer>
                         <transformer
                                 implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
