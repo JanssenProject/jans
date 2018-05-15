@@ -1,4 +1,4 @@
-package org.gluu.oxd.resources.swagger;
+package org.xdi.oxd.server.swagger;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jettison.json.JSONArray;

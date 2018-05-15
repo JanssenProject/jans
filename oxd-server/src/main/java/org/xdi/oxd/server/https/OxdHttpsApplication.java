@@ -1,4 +1,4 @@
-package org.gluu.oxd;
+package org.xdi.oxd.server.https;
 
 import com.codahale.metrics.health.HealthCheck;
 import io.dropwizard.Application;
