@@ -1,4 +1,4 @@
-package org.gluu.oxd;
+package org.xdi.oxd.server.https;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

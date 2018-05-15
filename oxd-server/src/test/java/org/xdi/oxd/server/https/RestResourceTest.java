@@ -1,4 +1,4 @@
-package org.gluu.oxd.resources;
+package org.xdi.oxd.server.https;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
@@ -7,9 +7,9 @@ import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.gluu.oxd.OxdHttpsApplication;
-import org.gluu.oxd.OxdHttpsConfiguration;
-import org.gluu.oxd.RestResource;
+import org.xdi.oxd.server.https.OxdHttpsApplication;
+import org.xdi.oxd.server.https.OxdHttpsConfiguration;
+import org.xdi.oxd.server.https.RestResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
