@@ -1,4 +1,4 @@
-package org.gluu.oxd;
+package org.xdi.oxd.server.https;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.node.POJONode;

@@ -1,4 +1,4 @@
-package org.gluu.oxd;
+package org.xdi.oxd.server.https;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
