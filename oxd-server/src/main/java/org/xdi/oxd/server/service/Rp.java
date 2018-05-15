@@ -44,6 +44,8 @@ public class Rp implements Serializable {
     private List<String> claimsRedirectUri;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
+    @JsonProperty(value = "front_channel_logout_uri")
+    private List<String> frontChannelLogoutUri;
 
     @JsonProperty(value = "client_id")
     private String clientId;
@@ -134,6 +136,7 @@ public class Rp implements Serializable {
         this.redirectUris = conf.redirectUris;
         this.claimsRedirectUri = conf.claimsRedirectUri;
         this.responseTypes = conf.responseTypes;
+        this.frontChannelLogoutUri = conf.frontChannelLogoutUri;
 
         this.clientId = conf.clientId;
         this.clientSecret = conf.clientSecret;
@@ -173,6 +176,14 @@ public class Rp implements Serializable {
 
         this.umaProtectedResources = conf.umaProtectedResources;
         this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
+    }
+
+    public List<String> getFrontChannelLogoutUri() {
+        return frontChannelLogoutUri;
+    }
+
+    public void setFrontChannelLogoutUri(List<String> frontChannelLogoutUri) {
+        this.frontChannelLogoutUri = frontChannelLogoutUri;
     }
 
     public String getClientJwksUri() {
@@ -557,6 +568,7 @@ public class Rp implements Serializable {
                 ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
                 ", applicationType='" + applicationType + '\'' +
                 ", redirectUris=" + redirectUris +
+                ", frontChannelLogoutUri=" + frontChannelLogoutUri +
                 ", claimsRedirectUri=" + claimsRedirectUri +
                 ", responseTypes=" + responseTypes +
                 ", clientId='" + clientId + '\'' +

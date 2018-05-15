@@ -312,7 +312,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setGrantTypes(grantTypes);
 
         if (params.getClientFrontchannelLogoutUri() != null) {
+            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUri()));
+        } else {
+            if (rp.getFrontChannelLogoutUri() != null) {
+                request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
+            }
         }
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
@@ -351,6 +356,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setApplicationType("web");
         rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
         rp.setUmaProtectedResources(new ArrayList<UmaResource>());
+        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
             rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
