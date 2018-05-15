@@ -1,4 +1,4 @@
-package org.xdi.oxd.server.https;
+package org.xdi.oxd.server;
 
 import com.codahale.metrics.health.HealthCheck;
 import io.dropwizard.Application;
@@ -10,27 +10,27 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OxdHttpsApplication extends Application<OxdHttpsConfiguration> {
+public class OxdServerApplication extends Application<OxdServerConfiguration> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Oxd.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OxdServerApplication.class);
 
     public static void main(String[] args) throws Exception {
         try {
-            new OxdHttpsApplication().run(args);
+            new OxdServerApplication().run(args);
         } catch (Throwable e) {
-            LOG.error("Failed to start oxd-https-extension.", e);
+            LOG.error("Failed to start oxd-server.", e);
             System.exit(1);
         }
     }
 
     @Override
-    public void initialize(Bootstrap<OxdHttpsConfiguration> bootstrap) {
+    public void initialize(Bootstrap<OxdServerConfiguration> bootstrap) {
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
                 bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
     }
 
     @Override
-    public void run(OxdHttpsConfiguration configuration, Environment environment) {
+    public void run(OxdServerConfiguration configuration, Environment environment) {
         environment.healthChecks().register("dummy", new HealthCheck() {
             @Override
             protected Result check() throws Exception {
