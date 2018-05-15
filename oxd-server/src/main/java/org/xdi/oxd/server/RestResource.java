@@ -1,4 +1,4 @@
-package org.xdi.oxd.server.https;
+package org.xdi.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.node.POJONode;
@@ -20,10 +20,8 @@ public class RestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 
-    private final Oxd oxd;
-
-    public RestResource(OxdHttpsConfiguration configuration) {
-        this.oxd = new Oxd(configuration);
+    public RestResource(OxdServerConfiguration configuration) {
+        ServerLauncher.start();
     }
 
     @GET
