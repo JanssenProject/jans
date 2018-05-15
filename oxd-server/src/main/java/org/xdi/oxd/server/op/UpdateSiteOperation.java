@@ -101,9 +101,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         request.setHttpMethod(HttpMethod.PUT); // force update
 
         Date clientSecretExpiresAt = params.getClientSecretExpiresAt();
-        if (clientSecretExpiresAt != null) {
+        if (clientSecretExpiresAt != null && clientSecretExpiresAt.getTime() != 0) {
             // translate it into milliseconds if someone sends it in seconds by miskate
-            if (clientSecretExpiresAt.getTime() != 0 && String.valueOf(clientSecretExpiresAt.getTime()).length() < 11) {
+            if (String.valueOf(clientSecretExpiresAt.getTime()).length() < 11) {
                 clientSecretExpiresAt = new Date(clientSecretExpiresAt.getTime() * 1000);
             }
             request.setClientSecretExpiresAt(clientSecretExpiresAt);
@@ -178,7 +178,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getClientLogoutUri() != null && !params.getClientLogoutUri().isEmpty()) {
+            rp.setFrontChannelLogoutUri(Lists.newArrayList(params.getClientLogoutUri()));
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
+        } else {
+            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
