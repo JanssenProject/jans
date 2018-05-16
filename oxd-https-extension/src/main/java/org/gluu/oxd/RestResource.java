@@ -4,9 +4,9 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.ErrorResponse;
+import org.xdi.oxd.client.CommandClient;
+import org.xdi.oxd.client.CommandClientPool;
+import org.xdi.oxd.common.*;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.rs.protect.Jackson;
 
@@ -20,10 +20,10 @@ public class RestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 
-    private final Oxd oxd;
+    private final CommandClientPool pool;
 
     public RestResource(OxdHttpsConfiguration configuration) {
-        this.oxd = new Oxd(configuration);
+        this.pool = new CommandClientPool(configuration.getOxdConnectionExpirationInSeconds(), configuration.getOxdHost(), Integer.parseInt(configuration.getOxdPort()));
     }
 
     @GET
@@ -38,7 +38,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String setupClient(String params) {
-        return response(oxd.setupClient(read(params, SetupClientParams.class)));
+        return response(send(CommandType.SETUP_CLIENT, read(params, SetupClientParams.class)));
     }
 
     @POST
@@ -46,7 +46,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getClientToken(String params) {
-        return response(oxd.getClientToken(read(params, GetClientTokenParams.class)));
+        return response(send(CommandType.GET_CLIENT_TOKEN, read(params, GetClientTokenParams.class)));
     }
 
     @POST
@@ -54,7 +54,8 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String introspectAccessToken(String params) {
-        return response(oxd.introspectAccessToken(read(params, IntrospectAccessTokenParams.class)));
+        IntrospectAccessTokenParams p = read(params, IntrospectAccessTokenParams.class);
+        return response(send(CommandType.INTROSPECT_ACCESS_TOKEN, p));
     }
 
     @POST
@@ -62,7 +63,8 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String introspectRpt(String params) {
-        return response(oxd.introspectRpt(read(params, IntrospectRptParams.class)));
+        IntrospectRptParams p = read(params, IntrospectRptParams.class);
+        return response(send(CommandType.INTROSPECT_RPT, p));
     }
 
     @POST
@@ -70,7 +72,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerSite(@HeaderParam("Authorization") String authorization, String params) {
-        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(authorization)));
+        RegisterSiteParams p = read(params, RegisterSiteParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
+        return response(send(CommandType.REGISTER_SITE, p));
     }
 
     @POST
@@ -78,7 +82,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String updateSite(@HeaderParam("Authorization") String authorization, String params) {
-        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(authorization)));
+        UpdateSiteParams p = read(params, UpdateSiteParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
+        return response(send(CommandType.UPDATE_SITE, p));
     }
 
     @POST
@@ -86,7 +92,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String removeSite(@HeaderParam("Authorization") String authorization, String params) {
-        return response(oxd.removeSite(read(params, RemoveSiteParams.class), validateAccessToken(authorization)));
+        RemoveSiteParams p = read(params, RemoveSiteParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
+        return response(send(CommandType.REMOVE_SITE, p));
     }
 
     @POST
@@ -94,7 +102,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAuthorizationUrl(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), validateAccessToken(p_authorization)));
+        GetAuthorizationUrlParams p = read(params, GetAuthorizationUrlParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_AUTHORIZATION_URL, p));
     }
 
     @POST
@@ -102,7 +112,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getTokenByCode(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), validateAccessToken(p_authorization)));
+        GetTokensByCodeParams p = read(params, GetTokensByCodeParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_TOKENS_BY_CODE, p));
     }
 
     @POST
@@ -110,7 +122,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getUserInfo(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.getUserInfo(read(params, GetUserInfoParams.class), validateAccessToken(p_authorization)));
+        GetUserInfoParams p = read(params, GetUserInfoParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_USER_INFO, p));
     }
 
     @POST
@@ -118,7 +132,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getLogoutUri(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), validateAccessToken(p_authorization)));
+        GetLogoutUrlParams p = read(params, GetLogoutUrlParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_LOGOUT_URI, p));
     }
 
     @POST
@@ -126,7 +142,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAccessTokenByRefreshToken(String params) {
-        return response(oxd.getAccessTokenByRefreshToken(read(params, GetAccessTokenByRefreshTokenParams.class)));
+        return response(send(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, read(params, GetAccessTokenByRefreshTokenParams.class)));
     }
 
     @POST
@@ -134,7 +150,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsProtect(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.umaRsProtect(read(params, RsProtectParams.class), validateAccessToken(p_authorization)));
+        RsProtectParams p = read(params, RsProtectParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.RS_PROTECT, p));
     }
 
     @POST
@@ -142,7 +160,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsCheckAccess(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), validateAccessToken(p_authorization)));
+        RsCheckAccessParams p = read(params, RsCheckAccessParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.RS_CHECK_ACCESS, p));
     }
 
     @POST
@@ -150,7 +170,9 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetRpt(@HeaderParam("Authorization") String p_authorization, String params) {
-        return response(oxd.umaRpGetRpt(read(params, RpGetRptParams.class), validateAccessToken(p_authorization)));
+        RpGetRptParams p = read(params, RpGetRptParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.RP_GET_RPT, p));
     }
 
     @POST
@@ -158,10 +180,12 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, String params) {
-        return response(oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), validateAccessToken(authorization)));
+        RpGetClaimsGatheringUrlParams p = read(params, RpGetClaimsGatheringUrlParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
+        return response(send(CommandType.RP_GET_CLAIMS_GATHERING_URL, p));
     }
 
-    public static <T> T read(String params, Class<T> clazz) {
+    public static <T extends IParams> T read(String params, Class<T> clazz) {
         try {
             return Jackson.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
@@ -198,5 +222,28 @@ public class RestResource {
 
         CommandResponse commandResponse = CommandResponse.error().setData(new POJONode(error));
         return CoreUtils.asJsonSilently(commandResponse);
+    }
+
+
+    public CommandResponse send(CommandType commandType, IParams params) {
+        CommandClient client = checkOut();
+        try {
+            LOG.trace("Command " + commandType + " executed by client: " + client.getNameForLogger());
+            return client.send(new Command(commandType).setParamsObject(params));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } finally {
+            pool.checkIn(client);
+        }
+    }
+
+    private CommandClient checkOut() {
+        CommandClient client = pool.checkOut();
+        if (client == null) {
+            LOG.error("Failed to initialize command client.");
+            throw new ServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command client is not able to connect to oxd-server.").build());
+        }
+        return client;
     }
 }
