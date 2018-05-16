@@ -98,7 +98,7 @@ public class AppConfiguration implements Configuration {
     private int dynamicRegistrationExpirationTime;
     private Boolean dynamicRegistrationPersistClientAuthorizations;
     private Boolean trustedClientEnabled;
-    private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId;
+    private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
