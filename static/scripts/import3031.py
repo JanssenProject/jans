@@ -664,6 +664,10 @@ class Migration(object):
                         oxId = entry['inum'][:]
                         entry['oxId'] = oxId
                         del entry['inum']
+                        
+                if 'ou=clients' in dn:
+                    if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
+                        entry['oxAuthGrantType'] = ['authorization_code']
             
             ldif_writer.unparse(dn, entry)
 
