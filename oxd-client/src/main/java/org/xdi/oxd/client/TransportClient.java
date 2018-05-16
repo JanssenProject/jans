@@ -101,4 +101,8 @@ public class TransportClient {
             p_client.close();
         }
     }
+
+    public boolean isValid() {
+        return m_socket.isConnected() && !m_socket.isClosed();
+    }
 }
