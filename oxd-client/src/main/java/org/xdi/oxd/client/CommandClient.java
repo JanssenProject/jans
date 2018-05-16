@@ -27,12 +27,15 @@ public class CommandClient {
     /**
      * Logger
      */
-    private static final Logger LOG = LoggerFactory.getLogger(CoreUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CommandClient.class);
 
     /**
      * Transport client
      */
     private TransportClient m_client;
+
+    private boolean inUse = false;
+    private int nameForLogger = -1;
 
     /**
      * Constructor.
@@ -55,6 +58,8 @@ public class CommandClient {
         if (p_command == null) {
             throw new IllegalArgumentException("Command is null");
         }
+
+        inUse = true;
         try {
             final String commandAsJson = CoreUtils.asJson(p_command);
             final String responseAsJson = m_client.sendCommand(commandAsJson);
@@ -65,8 +70,14 @@ public class CommandClient {
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            inUse = false;
         }
         return null;
+    }
+
+    public boolean isInUse() {
+        return inUse;
     }
 
     /**
@@ -96,4 +107,15 @@ public class CommandClient {
         return response.dataAsResponse(LicenseStatusOpResponse.class);
     }
 
+    public boolean isValid() {
+        return m_client.isValid();
+    }
+
+    public int getNameForLogger() {
+        return nameForLogger;
+    }
+
+    public void setNameForLogger(int nameForLogger) {
+        this.nameForLogger = nameForLogger;
+    }
 }

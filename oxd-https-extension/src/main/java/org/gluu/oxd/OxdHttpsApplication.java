@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class OxdHttpsApplication extends Application<OxdHttpsConfiguration> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Oxd.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OxdHttpsApplication.class);
 
     public static void main(String[] args) throws Exception {
         try {

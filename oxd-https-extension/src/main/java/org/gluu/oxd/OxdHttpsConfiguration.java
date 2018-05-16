@@ -15,6 +15,8 @@ public class OxdHttpsConfiguration extends Configuration {
     @NotEmpty
     private String oxdPort = "8099";
     @JsonProperty
+    private int oxdConnectionExpirationInSeconds = 60 * 60;
+    @JsonProperty
     @NotEmpty
     private String opHost = "https://ce-dev3.gluu.org";
     @JsonProperty
@@ -50,6 +52,14 @@ public class OxdHttpsConfiguration extends Configuration {
 
     public void setOxdPort(String oxdPort) {
         this.oxdPort = oxdPort;
+    }
+
+    public int getOxdConnectionExpirationInSeconds() {
+        return oxdConnectionExpirationInSeconds;
+    }
+
+    public void setOxdConnectionExpirationInSeconds(int oxdConnectionExpirationInSeconds) {
+        this.oxdConnectionExpirationInSeconds = oxdConnectionExpirationInSeconds;
     }
 
     public String getOpHost() {
