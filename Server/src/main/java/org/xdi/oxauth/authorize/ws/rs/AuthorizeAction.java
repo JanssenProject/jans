@@ -32,6 +32,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
@@ -290,7 +291,7 @@ public class AuthorizeAction {
                 // if trusted client = true, then skip authorization page and grant access directly
                 permissionGranted(session);
                 return;
-            } else if (appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId()
+            } else if (ServerUtil.isTrue(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId())
                     && SubjectType.PAIRWISE.toString().equals(client.getSubjectType()) && hasOnlyOpenidScope()) {
                 // If a client has only openid scope and pairwise id, person should not have to authorize. oxAuth-743
                 permissionGranted(session);
