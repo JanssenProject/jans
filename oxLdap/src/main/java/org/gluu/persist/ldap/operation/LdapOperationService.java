@@ -39,17 +39,6 @@ public interface LdapOperationService {
 
     void releaseConnection(LDAPConnection connection);
 
-    /**
-     *
-     * @param userName
-     * @param password
-     * @return
-     * @throws ConnectionException
-     * @throws ConnectionException
-     * @throws SearchException
-     * @throws LDAPException
-     */
-    boolean authenticate(String userName, String password, String baseDN) throws ConnectionException, SearchException;
 
     boolean authenticate(String bindDn, String password) throws ConnectionException;
 

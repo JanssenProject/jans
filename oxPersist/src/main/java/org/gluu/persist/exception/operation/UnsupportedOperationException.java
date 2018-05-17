@@ -9,7 +9,7 @@ package org.gluu.persist.exception.operation;
 import org.gluu.persist.exception.mapping.BaseMappingException;
 
 /**
- * An exception is a result if LDAP server doesn't support operation.
+ * An exception is a result if server doesn't support operation.
  *
  * @author Yuriy Movchan Date: 08.07.2012
  */

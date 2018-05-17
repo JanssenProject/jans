@@ -9,7 +9,7 @@ package org.gluu.persist.exception.operation;
 import org.gluu.persist.exception.mapping.BaseMappingException;
 
 /**
- * An exception is a result if user don't have required permissions.
+ * An exception is a result if user don't have required permissions or failed to authenticate him
  *
  * @author Yuriy Movchan Date: 10.26.2010
  */

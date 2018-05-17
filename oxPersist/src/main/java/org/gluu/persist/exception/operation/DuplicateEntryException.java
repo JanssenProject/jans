@@ -11,7 +11,7 @@ package org.gluu.persist.exception.operation;
  *
  * @author Pankaj
  */
-public class DuplicateEntryException extends PersistentException {
+public class DuplicateEntryException extends PersistenceException {
     /**
      * Serialization ID
      */

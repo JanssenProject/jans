@@ -11,7 +11,7 @@ package org.gluu.persist.exception.operation;
  *
  * @author Yuriy Movchan Date: 2017/12/29
  */
-public class SearchException extends PersistentException {
+public class SearchException extends PersistenceException {
 
     private static final long serialVersionUID = 5017957214447362606L;
 
@@ -25,6 +25,14 @@ public class SearchException extends PersistentException {
     public SearchException(String message, int resultCode) {
         super(message);
         this.resultCode = resultCode;
+    }
+
+    public SearchException(String message) {
+        super(message);
+    }
+
+    public SearchException(String message, Throwable ex) {
+        super(message, ex);
     }
 
     public SearchException(Throwable ex, int resultCode) {

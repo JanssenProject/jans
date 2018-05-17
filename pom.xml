@@ -70,6 +70,7 @@
 		<module>oxLdap</module>
 		<module>oxLdap-annotations</module>
 		<module>oxLdapSample</module>
+		<module>oxCouchbase</module>
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
@@ -205,6 +206,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>net.sf.ehcache</groupId>
 				<artifactId>ehcache-core</artifactId>
 				<version>2.6.11</version>
@@ -302,6 +309,13 @@
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
 				<version>4.0.5</version>
+			</dependency>
+
+			<!-- Couchbase -->
+			<dependency>
+				<groupId>com.couchbase.client</groupId>
+				<artifactId>java-client</artifactId>
+				<version>2.5.8</version>
 			</dependency>
 
 			<!-- Metrics -->
