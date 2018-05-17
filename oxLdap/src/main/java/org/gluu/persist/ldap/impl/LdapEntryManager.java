@@ -666,7 +666,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
                 return false;
             }
-            
+
             String bindDn = searchResult.getSearchEntries().get(0).getDN();
 
             return ldapOperationService.authenticate(bindDn, password);
