@@ -185,7 +185,7 @@ public class RestResource {
         return response(send(CommandType.RP_GET_CLAIMS_GATHERING_URL, p));
     }
 
-    public static <T extends IParams> T read(String params, Class<T> clazz) {
+    public static <T> T read(String params, Class<T> clazz) {
         try {
             return Jackson.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
