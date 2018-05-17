@@ -11,7 +11,7 @@ package org.gluu.persist.exception.operation;
  *
  * @author Yuriy Movchan Date: 29/01/2018
  */
-public class PersistentException extends Exception {
+public class PersistenceException extends Exception {
 
     /**
      * S Serialization ID
@@ -29,7 +29,7 @@ public class PersistentException extends Exception {
      * @param e
      *            Wrapped LDAP exception
      */
-    public PersistentException(final Throwable e) {
+    public PersistenceException(final Throwable e) {
         super(e);
     }
 
@@ -39,7 +39,7 @@ public class PersistentException extends Exception {
      * @param message
      *            Detailed message
      */
-    public PersistentException(final String message) {
+    public PersistenceException(final String message) {
         super(message);
     }
 
@@ -51,7 +51,7 @@ public class PersistentException extends Exception {
      * @param e
      *            Wrapped LDAP exception
      */
-    public PersistentException(final String message, final Throwable e) {
+    public PersistenceException(final String message, final Throwable e) {
         super(message, e);
     }
 

@@ -6,7 +6,7 @@
 
 package org.gluu.persist.ldap.exception;
 
-import org.gluu.persist.exception.operation.PersistentException;
+import org.gluu.persist.exception.operation.PersistenceException;
 
 import com.unboundid.ldap.sdk.ResultCode;
 
@@ -15,7 +15,7 @@ import com.unboundid.ldap.sdk.ResultCode;
  *
  * @author Yuriy Movchan Date: 12/30/2016
  */
-public class InvalidSimplePageControlException extends PersistentException {
+public class InvalidSimplePageControlException extends PersistenceException {
 
     private static final long serialVersionUID = 1756816743469359856L;
 

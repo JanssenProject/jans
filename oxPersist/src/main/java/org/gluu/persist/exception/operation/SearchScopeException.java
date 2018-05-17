@@ -11,7 +11,7 @@ package org.gluu.persist.exception.operation;
  *
  * @author Yuriy Movchan Date: 29/01/2018
  */
-public class SearchScopeException extends PersistentException {
+public class SearchScopeException extends PersistenceException {
 
     private static final long serialVersionUID = -4554637442590218891L;
 

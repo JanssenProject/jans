@@ -7,9 +7,8 @@
 package org.gluu.persist.ldap.operation.impl;
 
 import java.io.Serializable;
-
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.persist.exception.mapping.MappingException;
@@ -60,6 +58,7 @@ import com.unboundid.ldap.sdk.controls.SortKey;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
 import com.unboundid.ldap.sdk.controls.VirtualListViewResponseControl;
+import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import com.unboundid.ldif.LDIFChangeRecord;
 
 /**
@@ -199,22 +198,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      *
      * @see
      * org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
-    @Override
-    public boolean authenticate(final String userName, final String password, final String baseDN) throws ConnectionException, SearchException {
-        try {
-            return authenticateImpl(userName, password, baseDN);
-        } catch (LDAPException ex) {
-            throw new ConnectionException("Failed to authenticate user", ex);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.gluu.site.ldap.PlatformOperationFacade#authenticate(java.lang.String,
      * java.lang.String)
      */
     @Override
@@ -224,11 +207,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         } catch (LDAPException ex) {
             throw new ConnectionException("Failed to authenticate dn", ex);
         }
-    }
-
-    private boolean authenticateImpl(final String userName, final String password, final String baseDN)
-            throws SearchException, ConnectionException, LDAPException {
-        return authenticateImpl(lookupDnByUid(userName, baseDN), password);
     }
 
     private boolean authenticateImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
@@ -277,19 +255,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         } finally {
             bindConnectionProvider.releaseConnection(connection);
         }
-    }
-
-    /**
-     * Looks the uid in ldap and return the DN
-     */
-    protected String lookupDnByUid(String uid, String baseDN) throws SearchException {
-        Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, uid);
-        SearchResult searchResult = search(baseDN, filter, 1, 1);
-        if ((searchResult != null) && searchResult.getEntryCount() > 0) {
-            return searchResult.getSearchEntries().get(0).getDN();
-        }
-
-        return null;
     }
 
     /*
@@ -704,13 +669,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         List<Modification> mods = new ArrayList<Modification>();
 
         for (Attribute attribute : attrs) {
-            if (attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.OBJECT_CLASS)
-                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.DN)
-                    || attribute.getName().equalsIgnoreCase(LdapOperationsServiceImpl.USER_PASSWORD)) {
+            String attributeName = attribute.getName();
+            String attributeValue = attribute.getValue();
+            if (attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.OBJECT_CLASS)
+                    || attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.DN)
+                    || attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.USER_PASSWORD)) {
                 continue;
             } else {
-                if (attribute.getName() != null && attribute.getValue() != null) {
-                    mods.add(new Modification(ModificationType.REPLACE, attribute.getName(), attribute.getValue()));
+                if (attributeValue != null) {
+                    mods.add(new Modification(ModificationType.REPLACE, attributeName, attributeValue));
                 }
             }
         }

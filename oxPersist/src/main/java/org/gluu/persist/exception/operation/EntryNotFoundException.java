@@ -11,7 +11,7 @@ package org.gluu.persist.exception.operation;
  *
  * @author Pankaj
  */
-public class EntryNotFoundException extends PersistentException {
+public class EntryNotFoundException extends PersistenceException {
     /**
      * Serialization ID
      */

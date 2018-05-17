@@ -94,7 +94,7 @@ public class LdapConnectionProvider {
      * @throws EncryptionException
      * @throws EncryptionException
      */
-    public void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
+    protected void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
         String serverProp = props.getProperty("servers");
         this.servers = serverProp.split(",");
         this.addresses = new String[this.servers.length];

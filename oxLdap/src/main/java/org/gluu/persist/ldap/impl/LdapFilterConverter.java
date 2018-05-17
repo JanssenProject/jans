@@ -5,7 +5,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
 
 /**
- * Simple filter without dependency to specific persistence filter mechanism
+ * Filter to LDAP filter convert
  *
  * @author Yuriy Movchan Date: 12/15/2017
  */
