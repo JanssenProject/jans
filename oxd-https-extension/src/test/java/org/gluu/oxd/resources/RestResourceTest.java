@@ -74,7 +74,7 @@ public class RestResourceTest {
         clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
         clientTokenParams.setOpHost(configuration.getOpHost());
 
-        GetClientTokenResponse clientTokenResponse = getClientToken(clientTokenParams);
+        GetClientTokenResponse clientTokenResponse = httpClient("get-client-token", clientTokenParams, GetClientTokenResponse.class);
         accessToken = clientTokenResponse.getAccessToken();
 
         oxdId = setupClientResponse.getOxdId();
@@ -104,7 +104,7 @@ public class RestResourceTest {
         clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
         clientTokenParams.setOpHost(registerSiteParams.getOpHost());
 
-        GetClientTokenResponse clientTokenResponse = getClientToken(clientTokenParams);
+        GetClientTokenResponse clientTokenResponse = httpClient("get-client-token", clientTokenParams, GetClientTokenResponse.class);
         assertNotNull(clientTokenResponse);
         output("GET CLIENT TOKEN", clientTokenResponse);
     }
@@ -334,7 +334,7 @@ public class RestResourceTest {
         output("UMA RP GET CLAIMS GATHERING URL", rpGetClaimsGatheringUrlResponse);
     }
 
-    private String codeRequest(String oxdId, String state) {
+    public static String codeRequest(String oxdId, String state) {
         CommandClient client = null;
         try {
             String nonce = CoreUtils.secureRandomString();
@@ -349,7 +349,7 @@ public class RestResourceTest {
         return null;
     }
 
-    private static String getParameterJson(Object para) throws IOException {
+    public static String getParameterJson(Object para) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(para);
     }
@@ -359,12 +359,8 @@ public class RestResourceTest {
         return Jackson.createJsonMapper().readValue(rsProtect, RsResourceList.class);
     }
 
-    private static SetupClientResponse setupClient(RegisterSiteParams params) throws IOException {
+    public static SetupClientResponse setupClient(RegisterSiteParams params) throws IOException {
         return httpClient("setup-client", params, SetupClientResponse.class);
-    }
-
-    private static GetClientTokenResponse getClientToken(GetClientTokenParams params) throws IOException {
-        return httpClient("get-client-token", params, GetClientTokenResponse.class);
     }
 
     private RegisterSiteResponse registerSite(RegisterSiteParams params) throws IOException {
@@ -379,7 +375,7 @@ public class RestResourceTest {
         return httpClient("get-authorization-url", params, GetAuthorizationUrlResponse.class);
     }
 
-    private GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params) throws IOException {
+    public static GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params) throws IOException {
         return httpClient("get-tokens-by-code", params, GetTokensByCodeResponse.class);
     }
 
@@ -416,8 +412,12 @@ public class RestResourceTest {
         return RestResource.read(commandResponse.getData().toString(), responseClazz);
     }
 
-    private static CommandResponse httpClient(String endpoint, IParams params) throws IOException {
-        final String entity = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
+    public static CommandResponse httpClient(String endpoint, IParams params) throws IOException {
+        return httpClient(endpoint, params, RULE.getLocalPort());
+    }
+
+    public static CommandResponse httpClient(String endpoint, IParams params, int port) throws IOException {
+        final String entity = client.target("http://localhost:" + port + "/" + endpoint)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .post(Entity.json(getParameterJson(params)))
@@ -427,7 +427,7 @@ public class RestResourceTest {
         return RestResource.read(entity, CommandResponse.class);
     }
 
-    private static void output(String testCase, Object response) {
+    public static void output(String testCase, Object response) {
         System.out.println("[INFO] --------------------------------------------------------------------------------------------------------------------------------------------------");
         System.out.println("[INFO] TEST CASE : " + testCase);
         System.out.println("[INFO] ----------------------------------------------------------------------------------------------------------------------------------------------------");
