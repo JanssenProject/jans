@@ -24,7 +24,7 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 public class StressTest {
 
     @Parameters({"host", "port", "redirectUrl", "opHost"})
-    @Test(invocationCount = 10, threadPoolSize = 10, enabled = true)
+    @Test(invocationCount = 100, threadPoolSize = 100, enabled = true)
     public void test(String host, int port, String redirectUrl, String opHost) throws IOException {
         CommandClient client = null;
         try {
@@ -41,7 +41,7 @@ public class StressTest {
             final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
             assertNotNull(resp);
             notEmpty(resp.getAuthorizationUrl());
-            Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
+            Assert.assertTrue(resp.getAuthorizationUrl().contains("client_id"));
         } finally {
             CommandClient.closeQuietly(client);
         }
