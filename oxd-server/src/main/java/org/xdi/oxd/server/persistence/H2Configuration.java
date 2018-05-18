@@ -1,7 +1,7 @@
 package org.xdi.oxd.server.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.SystemUtils;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.io.Serializable;
 

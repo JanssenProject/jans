@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.license.LicenseFileUpdateService;
 
 import java.util.Date;
@@ -19,11 +19,11 @@ public class TimeService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TimeService.class);
 
-    private final Configuration conf;
+    private final OxdServerConfiguration conf;
     private final HttpService httpService;
 
     @Inject
-    public TimeService(Configuration conf, HttpService httpService) {
+    public TimeService(OxdServerConfiguration conf, HttpService httpService) {
         this.conf = conf;
         this.httpService = httpService;
     }

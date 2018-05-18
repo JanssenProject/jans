@@ -19,10 +19,10 @@ import org.xdi.oxd.license.client.js.Product;
 import org.xdi.oxd.license.client.js.StatisticUpdateRequest;
 import org.xdi.oxd.license.validator.LicenseContent;
 import org.xdi.oxd.license.validator.LicenseValidator;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
-import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.Utils;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.TimeService;
@@ -43,7 +43,7 @@ public class LicenseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseService.class);
 
-    private final Configuration conf;
+    private final OxdServerConfiguration conf;
     private final LicenseFileUpdateService updateService;
     private final TimeService timeService;
     private final HttpService httpService;
@@ -57,7 +57,7 @@ public class LicenseService {
             .build();
 
     @Inject
-    public LicenseService(Configuration conf, HttpService httpService, TimeService timeService) {
+    public LicenseService(OxdServerConfiguration conf, HttpService httpService, TimeService timeService) {
         this.conf = conf;
         this.timeService = timeService;
         this.updateService = new LicenseFileUpdateService(conf, httpService);
@@ -83,19 +83,22 @@ public class LicenseService {
         if (licenseValid) {
             schedulePeriodicValidation(1);
         } else {
-            throw new ShutdownException("Failed to validate license, shutdown server ... ");
+            ServerLauncher.shutdownDueToInvalidLicense();
         }
     }
 
     private void validateConfiguration() {
         if (Strings.isNullOrEmpty(conf.getLicenseId())) {
-            throw new ShutdownException("Unable to validate license. license_id is not set in oxd configuration.");
+            LOG.error("Unable to validate license. license_id is not set in oxd configuration.");
+            ServerLauncher.shutdown();
         }
         if (Strings.isNullOrEmpty(conf.getPublicKey())) {
-            throw new ShutdownException("Unable to validate license. public_key is not set in oxd configuration.");
+            LOG.error("Unable to validate license. public_key is not set in oxd configuration.");
+            ServerLauncher.shutdown();
         }
         if (Strings.isNullOrEmpty(conf.getPublicPassword())) {
-            throw new ShutdownException("Unable to validate license. public_password is not set in oxd configuration.");
+            LOG.error("Unable to validate license. public_password is not set in oxd configuration.");
+            ServerLauncher.shutdown();
         }
     }
 
@@ -204,7 +207,7 @@ public class LicenseService {
     private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
         AppMetadata appMetadata = new AppMetadata();
         appMetadata.setAppName("oxd");
-        appMetadata.setAppVersion("3.2.0");
+        appMetadata.setAppVersion(ConfigurationService.APP_VERSION);
         appMetadata.setProgrammingLanguage(programmingLanguage);
 
         Properties buildProperties = ServerLauncher.buildProperties();

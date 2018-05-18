@@ -13,8 +13,8 @@ import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
 import org.xdi.oxd.license.client.data.LicenseResponse;
-import org.xdi.oxd.server.Configuration;
-import org.xdi.oxd.server.ShutdownException;
+import org.xdi.oxd.server.OxdServerConfiguration;
+import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.oxd.server.service.HttpService;
 
 import java.io.File;
@@ -39,11 +39,11 @@ public class LicenseFileUpdateService {
     private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;
     public static final int RETRY_LIMIT = 3;
 
-    private final Configuration conf;
+    private final OxdServerConfiguration conf;
     private final HttpService httpService;
     private AtomicInteger retry = new AtomicInteger();
 
-    LicenseFileUpdateService(Configuration conf, HttpService httpService) {
+    LicenseFileUpdateService(OxdServerConfiguration conf, HttpService httpService) {
         this.conf = conf;
         this.httpService = httpService;
     }
@@ -107,7 +107,8 @@ public class LicenseFileUpdateService {
 
         if (isRetryLimitExceeded()) {
             LicenseFile.deleteSilently();
-            throw new ShutdownException("Shutdown server after trying to update license. Retry count: " + retry.get());
+            LOG.error("Shutdown server after trying to update license. Retry count: " + retry.get());
+            ServerLauncher.shutdownDueToInvalidLicense();
         }
 
         newExecutor().schedule(new Runnable() {

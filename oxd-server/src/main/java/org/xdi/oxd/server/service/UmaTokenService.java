@@ -22,7 +22,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RpGetRptResponse;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.Pat;
@@ -47,7 +47,7 @@ public class UmaTokenService {
     private final ValidationService validationService;
     private final DiscoveryService discoveryService;
     private final HttpService httpService;
-    private final Configuration configuration;
+    private final OxdServerConfiguration configuration;
     private final StateService stateService;
 
     @Inject
@@ -55,7 +55,7 @@ public class UmaTokenService {
                            ValidationService validationService,
                            DiscoveryService discoveryService,
                            HttpService httpService,
-                           Configuration configuration,
+                           OxdServerConfiguration configuration,
                            StateService stateService
     ) {
         this.rpService = rpService;
