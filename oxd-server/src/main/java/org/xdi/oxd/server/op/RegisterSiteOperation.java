@@ -24,10 +24,9 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.UmaResource;
-import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
 import java.io.IOException;
@@ -74,7 +73,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateAccessToken(String oxdId, RegisterSiteParams params) {
-        final Configuration conf = getConfigurationService().getConfiguration();
+        final OxdServerConfiguration conf = getConfigurationService().getConfiguration();
         if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
             if (StringUtils.isBlank(params.getProtectionAccessToken())) {
                 return; // skip validation since protectCommandsWithAccessToken=false
@@ -109,12 +108,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + ConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            LOG.warn("'op_host' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_host'");
             String fallbackOpHost = fallback.getOpHost();
             if (Strings.isNullOrEmpty(fallbackOpHost)) {
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
             }
-            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + ConfigurationService.DEFAULT_SITE_CONFIG_JSON);
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from configuration file.");
             params.setOpHost(fallbackOpHost);
         }
 
@@ -274,11 +273,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         } else {
             LOG.error("RegisterClient response is null.");
         }
-        if (!Strings.isNullOrEmpty(response.getErrorDescription())) {
+        if (response != null && !Strings.isNullOrEmpty(response.getErrorDescription())) {
             LOG.error(response.getErrorDescription());
         }
 
-        throw new RuntimeException("Failed to register client for site. Details:" + response.getEntity());
+        throw new RuntimeException("Failed to register client for site. Details: " + (response != null ? response.getEntity() : "response is null"));
     }
 
     private RegisterRequest createRegisterClientRequest(RegisterSiteParams params) {

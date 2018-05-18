@@ -6,7 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.rs.protect.Jackson;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.Jackson2;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.service.MigrationService;
 import org.xdi.oxd.server.service.Rp;
 import org.xdi.service.cache.AbstractRedisProvider;
@@ -23,10 +24,10 @@ public class RedisPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisPersistenceService.class);
 
-    private final Configuration configuration;
+    private final OxdServerConfiguration configuration;
     private AbstractRedisProvider redisProvider;
 
-    public RedisPersistenceService(Configuration configuration) {
+    public RedisPersistenceService(OxdServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -35,7 +36,7 @@ public class RedisPersistenceService implements PersistenceService {
         LOG.debug("Creating RedisPersistenceService ...");
 
         try {
-            RedisConfiguration redisConfiguration = asRedisConfiguration(configuration.getStorageConfiguration());
+            RedisConfiguration redisConfiguration = asRedisConfiguration(configuration);
 
             redisProvider = RedisProviderFactory.create(redisConfiguration);
             redisProvider.create();
@@ -112,8 +113,8 @@ public class RedisPersistenceService implements PersistenceService {
         return (String) redisProvider.get(key);
     }
 
-    public static RedisConfiguration asRedisConfiguration(Configuration configuration) throws Exception {
-        return asRedisConfiguration(configuration.getStorageConfiguration());
+    public static RedisConfiguration asRedisConfiguration(OxdServerConfiguration configuration) throws Exception {        ;
+        return asRedisConfiguration(Jackson2.asOldNode(configuration.getStorageConfiguration()));
     }
 
     public static RedisConfiguration asRedisConfiguration(JsonNode node) throws Exception {

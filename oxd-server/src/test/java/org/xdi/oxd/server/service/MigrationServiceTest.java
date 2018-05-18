@@ -5,7 +5,6 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
-import org.xdi.oxd.Tester;
 import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.PersistenceService;
 
@@ -28,7 +27,6 @@ public class MigrationServiceTest {
 
     @BeforeClass
     public void setUp() {
-        Tester.setSystemConfPath();
         persistenceService.create();
         service.removeAllRps();
         service.load();

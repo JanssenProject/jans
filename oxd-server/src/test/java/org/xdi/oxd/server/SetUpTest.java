@@ -7,7 +7,6 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.persistence.PersistenceService;
-import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.RpService;
 
 /**
@@ -28,7 +27,7 @@ public class SetUpTest {
             public void run() {
                 removeExistingRps();
 
-                ServerLauncher.start();
+                ServerLauncher.configureServices(null);
             }
         });
         // from one side we should give time to start server, from other we can't start in current
@@ -39,7 +38,6 @@ public class SetUpTest {
 
     private static void removeExistingRps() {
         try {
-            ServerLauncher.getInjector().getInstance(ConfigurationService.class).load();
             ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
             ServerLauncher.getInjector().getInstance(RpService.class).removeAllRps();
             ServerLauncher.getInjector().getInstance(RpService.class).load();
