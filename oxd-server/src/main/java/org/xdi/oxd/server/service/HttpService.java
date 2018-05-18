@@ -12,7 +12,7 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 
 import java.io.File;
 
@@ -24,10 +24,10 @@ public class HttpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 
-    private Configuration configuration;
+    private OxdServerConfiguration configuration;
 
     @Inject
-    public HttpService(Configuration configuration) {
+    public HttpService(OxdServerConfiguration configuration) {
         this.configuration = configuration;
     }
 

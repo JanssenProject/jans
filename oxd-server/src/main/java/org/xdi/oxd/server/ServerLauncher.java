@@ -13,11 +13,12 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
+import org.xdi.oxd.server.license.LicenseFileUpdateService;
+import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.MigrationService;
 import org.xdi.oxd.server.service.RpService;
-import org.xdi.oxd.server.service.SocketService;
 
 import java.io.InputStream;
 import java.security.Provider;
@@ -39,27 +40,25 @@ public class ServerLauncher {
     private static final Injector INJECTOR = Guice.createInjector(new GuiceModule());
     private static boolean setUpSuite = false;
 
-    /**
-     * Main method.
-     *
-     * @param args command-line arguments
-     */
-    public static void main(String[] args) {
-        try {
-            start();
-        } catch (Throwable e) {
-            LOG.error("oxd-server start failed.", e);
-            System.exit(1);
-        }
-    }
-
-    public static void start() {
-        LOG.info("Starting...");
+    public static void configureServices(OxdServerConfiguration configuration) {
+        LOG.info("Starting service configuration...");
         printBuildNumber();
         addSecurityProviders();
         registerResteasyProviders();
 
-        startOxd();
+        try {
+            INJECTOR.getInstance(ConfigurationService.class).setConfiguration(configuration);
+            INJECTOR.getInstance(LicenseService.class).start();
+            INJECTOR.getInstance(PersistenceService.class).create();
+            INJECTOR.getInstance(RpService.class).load();
+            INJECTOR.getInstance(MigrationService.class).migrate();
+            LOG.info("oxD Services are configured successfully.");
+        } catch (Throwable e) {
+            LOG.error("Failed to start oxd server.", e);
+            if (!isSetUpSuite()) {
+                System.exit(1);
+            }
+        }
     }
 
     public static Properties buildProperties() {
@@ -82,24 +81,6 @@ public class ServerLauncher {
         if (properties != null) {
             LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
                     ", build time:" + properties.getProperty("git.build.time"));
-        }
-    }
-
-    private static void startOxd() {
-        try {
-            INJECTOR.getInstance(ConfigurationService.class).load();
-            INJECTOR.getInstance(PersistenceService.class).create();
-            INJECTOR.getInstance(RpService.class).load();
-            INJECTOR.getInstance(MigrationService.class).migrate();
-            INJECTOR.getInstance(SocketService.class).listenSocket();
-            LOG.info("oxD Server started successfully.");
-        } catch (ShutdownException e) {
-            LOG.error("Shutted down oxd server.", e);
-        } catch (Throwable e) {
-            LOG.error("Failed to start oxd server.", e);
-            if (!isSetUpSuite()) {
-                System.exit(1);
-            }
         }
     }
 
@@ -129,8 +110,20 @@ public class ServerLauncher {
     }
 
     public static void shutdown() {
-        INJECTOR.getInstance(PersistenceService.class).destroy();
-        INJECTOR.getInstance(SocketService.class).shutdownNow();
+        LOG.info("Stopping the server...");
+        try {
+            INJECTOR.getInstance(PersistenceService.class).destroy();
+        } catch (Throwable e) {
+            // ignore, we may shut down server before it persistence service is initialize (e.g. due to invalid license)
+        }
+        LOG.info("Stopped the server successfully.");
+        System.exit(0);
+    }
+
+    public static void shutdownDueToInvalidLicense() {
+        LOG.error("License is invalid. Please check your license_id and make sure it is not expired.");
+        LOG.error("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT + " re-tries.");
+        shutdown();
     }
 
     public static Injector getInjector() {

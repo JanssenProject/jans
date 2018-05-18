@@ -41,7 +41,6 @@ public class MigrationService {
         }
 
         migrateChildren(migrationFolderFile);
-        migrateChildren(configurationService.getConfDirectoryFile());
     }
 
     public void migrateChildren(File parentFolder) {

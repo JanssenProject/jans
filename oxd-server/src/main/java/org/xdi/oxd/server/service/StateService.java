@@ -6,7 +6,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -28,7 +28,7 @@ public class StateService {
     @Inject
     public StateService(ConfigurationService configurationService) {
 
-        Configuration conf = configurationService.get();
+        OxdServerConfiguration conf = configurationService.get();
 
         states = CacheBuilder.newBuilder()
                 .expireAfterWrite(conf.getStateExpirationInMinutes(), TimeUnit.MINUTES)
