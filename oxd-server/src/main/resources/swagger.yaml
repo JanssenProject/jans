@@ -1,11 +1,11 @@
 # raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxd/version_3.1.3/oxd-https-extension/src/main/resources/swagger.yaml
-# http://petstore.swagger.io/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_3.1.3/oxd-https-extension/src/main/resources/swagger.yaml#/developers/setup-client
+# https://raw.githubusercontent.com/GluuFederation/oxd/version_3.2.0/oxd-server/src/main/resources/swagger.yaml
+# http://petstore.swagger.io/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_3.2.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
 swagger: "2.0"
 info:
-  description: oxd-https-extension
-  version: "3.1.3"
-  title: oxd-https-extension
+  description: oxd-server
+  version: "3.2.0"
+  title: oxd-server
   contact:
     email: yuriyz@gluu.org
 
@@ -30,7 +30,7 @@ paths:
       - developers
       summary: Health Check
       operationId: health-check
-      description: Health Check endpoint for quick check whether oxd-https-extension is alive.
+      description: Health Check endpoint for quick check whether oxd-server is alive.
       responses:
         200:
           description: OK
@@ -41,7 +41,7 @@ paths:
       - developers
       summary: Setup Client
       operationId: setup-client
-      description: Setups client for securing communication between oxd-https-extension and oxd-server
+      description: Setups client for securing communication to oxd-server
       consumes:
         - application/json
       produces:
