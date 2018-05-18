@@ -18,8 +18,8 @@ import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
-import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.model.UmaResource;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
-                    ". Please protect your resource first with uma_rs_protect command. Check details on " + Configuration.DOC_URL);
+                    ". Please protect your resource first with uma_rs_protect command. Check details on " + ConfigurationService.DOC_URL);
             LOG.error(error.getErrorDescription());
             return CommandResponse.error().setData(new POJONode(error));
         }

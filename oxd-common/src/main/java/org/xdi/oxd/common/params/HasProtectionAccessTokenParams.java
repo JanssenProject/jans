@@ -7,4 +7,6 @@ package org.xdi.oxd.common.params;
 
 public interface HasProtectionAccessTokenParams extends HasOxdIdParams {
     String getProtectionAccessToken();
+
+    void setProtectionAccessToken(String protectionAccessToken);
 }

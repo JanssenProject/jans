@@ -2,7 +2,6 @@ package org.xdi.oxd.server.service;
 
 import com.google.inject.Inject;
 import org.testng.annotations.*;
-import org.xdi.oxd.Tester;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.server.guice.GuiceModule;
@@ -34,8 +33,6 @@ public class RpServiceTest {
 
     @BeforeClass
     public void setUp() {
-        Tester.setSystemConfPath();
-        configurationService.load();
         persistenceService.create();
         service.removeAllRps();
         service.load();

@@ -1,12 +1,12 @@
 package org.xdi.oxd.server.persistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
-import org.codehaus.jackson.JsonNode;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.Jackson2;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.service.ConfigurationService;
 
 import java.sql.Connection;
@@ -46,11 +46,11 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
         return pool.getConnection();
     }
 
-    public static H2Configuration asH2Configuration(Configuration configuration) {
+    public static H2Configuration asH2Configuration(OxdServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
-                return CoreUtils.createJsonMapper().readValue(node, H2Configuration.class);
+                return Jackson2.createJsonMapper().treeToValue(node, H2Configuration.class);
             }
         } catch (Exception e) {
             LOG.error("Failed to parse H2Configuration.", e);

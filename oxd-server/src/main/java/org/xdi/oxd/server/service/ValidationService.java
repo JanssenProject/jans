@@ -8,7 +8,7 @@ import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.*;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.util.Pair;
 
@@ -91,7 +91,7 @@ public class ValidationService {
             }
         }
 
-        final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             if (StringUtils.isBlank(params.getProtectionAccessToken())) {
                 return false; // skip validation since protectCommandsWithAccessToken=false

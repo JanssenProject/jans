@@ -5,7 +5,7 @@ package org.xdi.oxd.server.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.persistence.H2PersistenceProvider;
 import org.xdi.oxd.server.persistence.SqlPersistenceProvider;
@@ -24,7 +24,6 @@ public class GuiceModule extends AbstractModule {
     protected void configure() {
         bind(LicenseService.class).in(Singleton.class);
         bind(ConfigurationService.class).in(Singleton.class);
-        bind(SocketService.class).in(Singleton.class);
         bind(PublicOpKeyService.class).in(Singleton.class);
         bind(RpService.class).in(Singleton.class);
         bind(HttpService.class).in(Singleton.class);
@@ -37,7 +36,7 @@ public class GuiceModule extends AbstractModule {
         bind(TimeService.class).in(Singleton.class);
         bind(StateService.class).in(Singleton.class);
 
-        bind(Configuration.class).toProvider(ConfigurationService.class);
+        bind(OxdServerConfiguration.class).toProvider(ConfigurationService.class);
     }
 
 }

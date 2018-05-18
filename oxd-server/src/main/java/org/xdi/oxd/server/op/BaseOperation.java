@@ -15,7 +15,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
-import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.Convertor;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.service.*;
@@ -110,7 +110,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public OxAuthCryptoProvider getCryptoProvider() throws Exception {
-        Configuration conf = getConfigurationService().get();
+        OxdServerConfiguration conf = getConfigurationService().get();
         return new OxAuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
     }
 
