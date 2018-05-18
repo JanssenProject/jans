@@ -7,9 +7,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
@@ -85,9 +82,9 @@ public class ServerLauncher {
     }
 
     private static void registerResteasyProviders() {
-        final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        instance.registerProvider(ResteasyJacksonProvider.class);
-        RegisterBuiltin.register(instance);
+//        final ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+//        instance.registerProvider(ResteasyJacksonProvider.class);
+//        RegisterBuiltin.register(instance);
     }
 
     private static void addSecurityProviders() {
