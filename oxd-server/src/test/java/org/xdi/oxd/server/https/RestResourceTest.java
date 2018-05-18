@@ -12,7 +12,7 @@ import javax.ws.rs.client.Client;
 
 public class RestResourceTest {
 
-    public static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("oxd-https-extension-ce-dev3.yml");
+    public static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("oxd-server-ce-dev3.yml");
 
     private static RegisterSiteParams registerSiteParams;
     private static String userId = null;
