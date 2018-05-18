@@ -8,9 +8,9 @@ import com.google.inject.Singleton;
 import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.persistence.H2PersistenceProvider;
-import org.xdi.oxd.server.persistence.SqlPersistenceProvider;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.persistence.PersistenceServiceImpl;
+import org.xdi.oxd.server.persistence.SqlPersistenceProvider;
 import org.xdi.oxd.server.service.*;
 
 /**
@@ -22,6 +22,8 @@ public class GuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(OxdServerConfiguration.class).toProvider(ConfigurationService.class);
+
         bind(LicenseService.class).in(Singleton.class);
         bind(ConfigurationService.class).in(Singleton.class);
         bind(PublicOpKeyService.class).in(Singleton.class);
@@ -35,8 +37,5 @@ public class GuiceModule extends AbstractModule {
         bind(ValidationService.class).in(Singleton.class);
         bind(TimeService.class).in(Singleton.class);
         bind(StateService.class).in(Singleton.class);
-
-        bind(OxdServerConfiguration.class).toProvider(ConfigurationService.class);
     }
-
 }
