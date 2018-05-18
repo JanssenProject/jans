@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.dropwizard.Configuration;
+import org.xdi.oxd.server.service.Rp;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OxdServerConfiguration extends Configuration {
@@ -56,6 +57,16 @@ public class OxdServerConfiguration extends Configuration {
     private JsonNode storageConfiguration;
     @JsonProperty(value = "remove_expired_clients")
     private Boolean removeExpiredClients = false;
+    @JsonProperty(value = "defaultSiteConfig")
+    private Rp defaultSiteConfig;
+
+    public Rp getDefaultSiteConfig() {
+        return defaultSiteConfig;
+    }
+
+    public void setDefaultSiteConfig(Rp defaultSiteConfig) {
+        this.defaultSiteConfig = defaultSiteConfig;
+    }
 
     public Boolean getRemoveExpiredClients() {
         return removeExpiredClients;
@@ -275,6 +286,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
                 ", storageConfiguration=" + storageConfiguration +
+                ", defaultSiteConfig=" + defaultSiteConfig +
                 '}';
     }
 }
