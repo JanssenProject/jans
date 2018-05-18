@@ -1,0 +1,78 @@
+
+# server configuration
+server_name: build_server
+use_client_authentication_for_pat: true
+trust_all_certs: true
+trust_store_path: ''
+trust_store_password: ''
+crypt_provider_key_store_path: ''
+crypt_provider_key_store_password: ''
+crypt_provider_dn_name: ''
+license_id: b9d9140e-0732-4a96-b4be-215597377a10
+public_key: 47SbaB5bmXBXpKWgtMGNot9CIN++xJITnqlOsCRsQA4swMFwPeSIBIyPqSPB0qBGBCvI9ER0FTYqH9z6XnRJ1txNdzc0voY/SDGw+OQe0emC3HgXax0+lR4JsYkuQ3C+cnfqyunHQgnwDVcx4fS0MvxWewu03q9ppc1UlImNe7nesm3tzP0dsvVkEMeAWyEbrsu58JzUmFDGDzl0sVKjtBs+czf1ETWd48q5a3IDq5DNSbT4E4Hr3dmLz72nEPBr9Bsoqik4wWiGl8YMa9w4BZiKZQjoIfvboxSwhJRy1kKCEzi/kJqLX6EZ/cCUw8fgn/Xu2Kaov8CI7dtOSi3DqKWQbcDdRpoZJTas+6uyux4tMzZPnblfYnlPaDJRBt9WOgL4SWBdoukw9/QXubXSEA==
+public_password: 3Rczv1eJ0sDnFOGLLEkX
+license_password: a7rkv7VCFOum40eFtfbL
+support-google-logout: true
+state_expiration_in_minutes: 5
+nonce_expiration_in_minutes: 5
+public_op_key_cache_expiration_in_minutes: 60
+protect_commands_with_access_token: false
+uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: true
+migration_source_folder_path: ''
+storage: h2
+storage_configuration:
+  dbFileLocation: "./oxd_db"
+remove_expired_clients: false
+
+# Connectors
+server:
+  applicationConnectors:
+    - type: https
+      port: 8443
+      keyStorePath: U:\own\project\git\oxd\master\oxd-server\src\main\resources\oxd-server.keystore
+      keyStorePassword: example
+      validateCerts: false
+  adminConnectors:
+    - type: https
+      port: 8444
+      keyStorePath: U:\own\project\git\oxd\master\oxd-server\src\main\resources\oxd-server.keystore
+      keyStorePassword: example
+      validateCerts: false
+
+# Logging settings.
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+  # Logger-specific levels.
+  loggers:
+    org.gluu: TRACE
+    org.xdi: TRACE
+
+# Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
+# Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
+# Logback's Fixed Window Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%i.log.gz
+
+  appenders:
+    - type: console
+    - type: file
+      threshold: INFO
+      logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
+      currentLogFilename: /var/log/oxd-server.log
+      archivedLogFilenamePattern: /var/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+      archivedFileCount: 7
+      timeZone: UTC
+      maxFileSize: 10MB
+
+defaultSiteConfig:
+  op_host: ''
+  op_discovery_path: ''
+  response_types: ['code']
+  grant_type: ['authorization_code']
+  acr_values: ['']
+  scope: ['openid', 'profile', 'email']
+  ui_locales: ['en']
+  claims_locales: ['en']
+  contacts: []
+

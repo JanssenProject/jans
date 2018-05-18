@@ -27,6 +27,11 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.json</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.yml</include>
+                </includes>
             </resource>
         </resources>
         <testResources>
@@ -36,6 +41,7 @@
                 <includes>
                     <include>**/*.json</include>
                     <include>**/*.xml</include>
+                    <include>**/*.yml</include>
                 </includes>
             </testResource>
         </testResources>
