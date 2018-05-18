@@ -1,8 +1,5 @@
 {
     "server_name":"build_server",
-    "port":8099,
-    "localhost_only":true,
-    "time_out_in_seconds":0,
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
