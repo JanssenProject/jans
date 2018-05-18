@@ -1,9 +1,9 @@
 package org.xdi.oxd.server.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
