@@ -64,3 +64,15 @@ logging:
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB
+
+defaultSiteConfig:
+  op_host: ''
+  op_discovery_path: ''
+  response_types: ['code']
+  grant_type: ['authorization_code']
+  acr_values: ['']
+  scope: ['openid', 'profile', 'email']
+  ui_locales: ['en']
+  claims_locales: ['en']
+  contacts: []
+
