@@ -186,7 +186,7 @@ public class RestResource {
             }
         }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
-        throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
+        throw new WebApplicationException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 
     public static String forbiddenErrorResponse() {

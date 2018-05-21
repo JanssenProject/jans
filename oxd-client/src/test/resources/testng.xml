@@ -34,7 +34,7 @@
     </test>
     <test name="Get authorization url" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.client.GetAuthorizationUrlTest"/>
+            <class name="org.xdi.oxd.server.GetAuthorizationUrlTest"/>
         </classes>
     </test>
     <test name="Get tokens by code" enabled="true">

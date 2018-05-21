@@ -1,9 +1,8 @@
-package org.xdi.oxd;
+package org.xdi.oxd.server;
 
 import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.testng.annotations.Test;
-import org.xdi.oxd.server.Utils;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
