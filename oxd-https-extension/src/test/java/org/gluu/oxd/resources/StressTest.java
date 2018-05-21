@@ -87,7 +87,7 @@ public class StressTest {
         client.close();
     }
 
-    @Test(invocationCount = 500, threadPoolSize = 500, enabled = true)
+    @Test(invocationCount = 5000, threadPoolSize = 100, enabled = true)
     public void testGetAuthorizationUrl() throws IOException {
         Assert.assertNotNull(accessToken);
         Assert.assertNotNull(oxdId);

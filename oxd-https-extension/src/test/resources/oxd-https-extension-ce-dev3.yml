@@ -32,7 +32,7 @@ server:
 logging:
 
   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
-  level: INFO
+  level: TRACE
 
   # Logger-specific levels.
   loggers:
