@@ -27,6 +27,8 @@ remove_expired_clients: false
 # Connectors
 server:
   applicationConnectors:
+    - type: http
+      port: 8084
     - type: https
       port: 8443
       keyStorePath: U:\own\project\git\oxd\master\oxd-server\src\main\resources\oxd-server.keystore

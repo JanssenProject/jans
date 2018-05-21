@@ -1,4 +1,4 @@
-package org.xdi.oxd;
+package org.xdi.oxd.server;
 
 /**
  * @author Yuriy Zabrovarnyy
