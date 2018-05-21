@@ -1,7 +1,7 @@
 /**
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
-package org.xdi.oxd.server;
+package org.xdi.oxd.server.manual;
 
 import junit.framework.Assert;
 import org.testng.annotations.Test;
