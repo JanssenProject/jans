@@ -15,7 +15,7 @@ public class OxdServerApplication extends Application<OxdServerConfiguration> {
 
     private static final Logger LOG = LoggerFactory.getLogger(OxdServerApplication.class);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             new OxdServerApplication().run(args);
         } catch (Throwable e) {
