@@ -46,6 +46,7 @@ public class Validator {
     public void validateAccessToken(String accessToken) {
         if (!Strings.isNullOrEmpty(accessToken)) {
             if (!rsaSigner.validateAccessToken(accessToken, idToken)) {
+                LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + idToken.getClaims().getClaimAsString("at_hash"));
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
             }
         }
