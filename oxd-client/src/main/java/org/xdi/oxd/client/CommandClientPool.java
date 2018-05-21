@@ -40,8 +40,13 @@ public class CommandClientPool extends ObjectPool<CommandClient> {
 
     @Override
     public void expire(CommandClient o) {
-        CommandClient.closeQuietly(o);
-        loggerNames.remove(o.getNameForLogger());
+        try {
+            loggerNames.remove(o.getNameForLogger());
+            locked.remove(o);
+            unlocked.remove(o);
+        } finally {
+            CommandClient.closeQuietly(o);
+        }
     }
 
     @Override

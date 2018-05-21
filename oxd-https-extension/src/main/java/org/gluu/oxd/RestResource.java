@@ -232,6 +232,7 @@ public class RestResource {
             return client.send(new Command(commandType).setParamsObject(params));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+            pool.expire(client);
             return null;
         } finally {
             pool.checkIn(client);
