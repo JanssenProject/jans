@@ -229,13 +229,17 @@ public class RestResource {
         CommandClient client = checkOut();
         try {
             LOG.trace("Command " + commandType + " executed by client: " + client.getNameForLogger());
-            return client.send(new Command(commandType).setParamsObject(params));
+            CommandResponse response = client.send(new Command(commandType).setParamsObject(params));
+            if (response != null) {
+                pool.checkIn(client);
+            } else {
+                pool.expire(client);
+            }
+            return response;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             pool.expire(client);
             return null;
-        } finally {
-            pool.checkIn(client);
         }
     }
 
