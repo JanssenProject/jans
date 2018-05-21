@@ -11,8 +11,8 @@ public abstract class ObjectPool<T> {
 
     private long expirationTime;
 
-    private final Map<T, Long> locked = new HashMap<T, Long>();
-    private final Map<T, Long> unlocked = new HashMap<T, Long>();
+    protected final Map<T, Long> locked = new HashMap<T, Long>();
+    protected final Map<T, Long> unlocked = new HashMap<T, Long>();
 
     public ObjectPool(int expirationInSeconds) {
         expirationTime = expirationInSeconds * 1000;
@@ -31,8 +31,6 @@ public abstract class ObjectPool<T> {
             for (T obj : unlocked.keySet()) {
                 t = obj;
                 if ((now - unlocked.get(t)) > expirationTime) {
-                    // object has expired
-                    unlocked.remove(t);
                     expire(t);
                     t = null;
                 } else {
@@ -41,8 +39,6 @@ public abstract class ObjectPool<T> {
                         locked.put(t, now);
                         return (t);
                     } else {
-                        // object failed validation
-                        unlocked.remove(t);
                         expire(t);
                         t = null;
                     }
