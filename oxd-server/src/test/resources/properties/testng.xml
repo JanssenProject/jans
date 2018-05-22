@@ -1,7 +1,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxD Suite" parallel="false">
+<suite name="oxD Suite" parallel="tests">
 
+    <parameter name="host" value="localhost"/>
+    <parameter name="port" value="8099"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
@@ -18,12 +20,6 @@
     <parameter name="rsProtectScopeExpressionSecond"
                value="{'resources':[{'path':'/GetAll','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'ticketScopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}}]}]}"/>
 
-    <!-- main class to set up and tear down suite -->
-    <test name="SetUp" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.server.SetUpTest"/>
-        </classes>
-    </test>
 
     <!-- Connect -->
     <test name="Register site" enabled="true">
@@ -66,18 +62,8 @@
             <class name="org.xdi.oxd.server.CheckAccessTokenTest"/>
         </classes>
     </test>
-    <test name="Authorization code flow prompt=none" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.server.AuthorizationCodeFlowTest"/>
-        </classes>
-    </test>
-    <test name="Migration Service Test" enabled="false">
-        <classes>
-            <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
-        </classes>
-    </test>
 
-    <!-- UMA Tests -->
+    <!-- UMA -->
     <test name="UMA - Full Flow Test" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.UmaFullTest"/>
@@ -93,6 +79,11 @@
             <class name="org.xdi.oxd.server.RsCheckAccessTest"/>
         </classes>
     </test>
+    <test name="Introspect RPT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.IntrospectRptTest"/>
+        </classes>
+    </test>
     <test name="RP - Get RPT" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.RpGetRptTest"/>
@@ -101,11 +92,6 @@
     <test name="RP - Get Claims-Gathering Url" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.UmaGetClaimsGatheringUrlTest"/>
-        </classes>
-    </test>
-    <test name="Introspect RPT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.server.IntrospectRptTest"/>
         </classes>
     </test>
 
