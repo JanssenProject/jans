@@ -27,23 +27,17 @@ remove_expired_clients: false
 # Connectors
 server:
   applicationConnectors:
-    - type: https
-      port: 8443
-      keyStorePath: oxd-server/src/main/resources/oxd-server.keystore
-      keyStorePassword: example
-      validateCerts: false
+    - type: http
+      port: 8084
   adminConnectors:
-    - type: https
-      port: 8444
-      keyStorePath: oxd-server/src/main/resources/oxd-server.keystore
-      keyStorePassword: example
-      validateCerts: false
+    - type: http
+      port: 8085
 
 # Logging settings.
 logging:
 
   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
-  level: INFO
+  level: TRACE
 
   # Logger-specific levels.
   loggers:
@@ -59,8 +53,8 @@ logging:
     - type: file
       threshold: INFO
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: /var/log/oxd-server.log
-      archivedLogFilenamePattern: /var/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: oxd-server.log
+      archivedLogFilenamePattern: oxd-server-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB
