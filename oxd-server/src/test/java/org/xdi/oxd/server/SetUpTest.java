@@ -1,6 +1,3 @@
-/**
- * All rights reserved -- Copyright 2015 Gluu Inc.
- */
 package org.xdi.oxd.server;
 
 import com.google.common.base.Preconditions;

@@ -3,8 +3,7 @@ package org.xdi.oxd.server;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.RpGetClaimsGatheringUrlParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -22,37 +21,30 @@ import static org.testng.Assert.assertTrue;
  */
 public class UmaGetClaimsGatheringUrlTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
     @Test
-    public void test(String host, int port, String opHost, String redirectUrl, String rsProtect) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void test(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
 
-            RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        ClientInterface client = Tester.newClient(host);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-            final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
 
-            final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
-            params.setOxdId(site.getOxdId());
-            params.setTicket(checkAccess.getTicket());
-            params.setClaimsRedirectUri(redirectUrl);
+        final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
+        params.setOxdId(site.getOxdId());
+        params.setTicket(checkAccess.getTicket());
+        params.setClaimsRedirectUri(redirectUrl);
 
-            final RpGetClaimsGatheringUrlResponse response = client
-                    .send(new Command(CommandType.RP_GET_CLAIMS_GATHERING_URL).setParamsObject(params))
-                    .dataAsResponse(RpGetClaimsGatheringUrlResponse.class);
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params).dataAsResponse(RpGetClaimsGatheringUrlResponse.class);
 
-            Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
+        Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
 
-            assertTrue(StringUtils.isNotBlank(parameters.get("client_id")));
-            assertTrue(StringUtils.isNotBlank(parameters.get("ticket")));
-            assertTrue(StringUtils.isNotBlank(parameters.get("state")));
-            assertTrue(StringUtils.isNotBlank(response.getState()));
-            assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        assertTrue(StringUtils.isNotBlank(parameters.get("client_id")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("ticket")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("state")));
+        assertTrue(StringUtils.isNotBlank(response.getState()));
+        assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
     }
 }
