@@ -123,7 +123,10 @@ public class ClientService {
 
         for (String clientId : clientIds) {
             try {
-                set.add(getClient(clientId));
+                Client client = getClient(clientId);
+                if (client != null) {
+                    set.add(client);
+                }
             } catch (RuntimeException e) {
                 if (!silent) {
                     throw e;
