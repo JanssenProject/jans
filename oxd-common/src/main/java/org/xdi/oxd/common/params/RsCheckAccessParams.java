@@ -12,33 +12,33 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "rpt")
     private String rpt;
     @JsonProperty(value = "path")
     private String path;
     @JsonProperty(value = "http_method")
-    private String httpMethod;
+    private String http_method;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public RsCheckAccessParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getRpt() {
@@ -58,22 +58,22 @@ public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
     }
 
     public String getHttpMethod() {
-        return httpMethod;
+        return http_method;
     }
 
     public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
+        this.http_method = httpMethod;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsCheckAccessParams");
-        sb.append("{oxdId='").append(oxdId).append('\'');
+        sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", path='").append(path).append('\'');
-        sb.append(", http_method='").append(httpMethod).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append(", http_method='").append(http_method).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

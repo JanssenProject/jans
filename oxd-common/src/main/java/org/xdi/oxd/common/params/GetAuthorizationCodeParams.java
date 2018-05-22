@@ -14,9 +14,9 @@ import java.util.List;
 public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "acr_values")
-    private List<String> acrValues;
+    private List<String> acr_values;
     @JsonProperty(value = "username")
     private String username;
     @JsonProperty(value = "password")
@@ -26,7 +26,7 @@ public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParam
     @JsonProperty(value = "nonce")
     private String nonce;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public GetAuthorizationCodeParams() {
     }
@@ -64,39 +64,39 @@ public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParam
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public List<String> getAcrValues() {
-        return acrValues;
+        return acr_values;
     }
 
     public void setAcrValues(List<String> acrValues) {
-        this.acrValues = acrValues;
+        this.acr_values = acrValues;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetAuthorizationCodeParams");
-        sb.append("{acrValues=").append(acrValues);
-        sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append("{acr_values=").append(acr_values);
+        sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", username='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", state='").append(state).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

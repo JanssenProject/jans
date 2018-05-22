@@ -15,13 +15,13 @@ import java.util.List;
 public class RpGetRptParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "ticket")
     private String ticket;
     @JsonProperty(value = "claim_token")
-    private String claimToken;
+    private String claim_token;
     @JsonProperty(value = "claim_token_format")
-    private String claimTokenFormat;
+    private String claim_token_format;
     @JsonProperty(value = "pct")
     private String pct;
     @JsonProperty(value = "rpt")
@@ -31,25 +31,25 @@ public class RpGetRptParams implements HasProtectionAccessTokenParams {
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public RpGetRptParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
 
@@ -62,19 +62,19 @@ public class RpGetRptParams implements HasProtectionAccessTokenParams {
     }
 
     public String getClaimToken() {
-        return claimToken;
+        return claim_token;
     }
 
     public void setClaimToken(String claimToken) {
-        this.claimToken = claimToken;
+        this.claim_token = claimToken;
     }
 
     public String getClaimTokenFormat() {
-        return claimTokenFormat;
+        return claim_token_format;
     }
 
     public void setClaimTokenFormat(String claimTokenFormat) {
-        this.claimTokenFormat = claimTokenFormat;
+        this.claim_token_format = claimTokenFormat;
     }
 
     public String getPct() {
@@ -112,15 +112,15 @@ public class RpGetRptParams implements HasProtectionAccessTokenParams {
     @Override
     public String toString() {
         return "RpGetRptParams{" +
-                "oxdId='" + oxdId + '\'' +
+                "oxd_id='" + oxd_id + '\'' +
                 ", ticket='" + ticket + '\'' +
-                ", claimToken='" + claimToken + '\'' +
-                ", claimTokenFormat='" + claimTokenFormat + '\'' +
+                ", claim_token='" + claim_token + '\'' +
+                ", claim_token_format='" + claim_token_format + '\'' +
                 ", pct='" + pct + '\'' +
                 ", rpt='" + rpt + '\'' +
                 ", scope=" + scope +
                 ", state='" + state + '\'' +
-                ", protectionAccessToken='" + protectionAccessToken + '\'' +
+                ", protection_access_token='" + protection_access_token + '\'' +
                 '}';
     }
 }

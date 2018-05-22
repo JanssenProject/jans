@@ -12,23 +12,23 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetTokensByCodeParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public GetTokensByCodeParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getCode() {
@@ -48,11 +48,11 @@ public class GetTokensByCodeParams implements HasProtectionAccessTokenParams {
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     @Override
@@ -62,12 +62,12 @@ public class GetTokensByCodeParams implements HasProtectionAccessTokenParams {
 
         GetTokensByCodeParams that = (GetTokensByCodeParams) o;
 
-        return !(code != null ? !code.equals(that.code) : that.code != null) && !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
+        return !(code != null ? !code.equals(that.code) : that.code != null) && !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
     }
 
     @Override
     public int hashCode() {
-        int result = oxdId != null ? oxdId.hashCode() : 0;
+        int result = oxd_id != null ? oxd_id.hashCode() : 0;
         result = 31 * result + (code != null ? code.hashCode() : 0);
         return result;
     }
@@ -77,9 +77,9 @@ public class GetTokensByCodeParams implements HasProtectionAccessTokenParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetTokensByCodeParams");
         sb.append("{code='").append(code).append('\'');
-        sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", state='").append(state).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

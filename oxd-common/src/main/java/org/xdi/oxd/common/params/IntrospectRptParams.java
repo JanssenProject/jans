@@ -10,17 +10,17 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class IntrospectRptParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "rpt")
     private String rpt;
 
     @Override
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getRpt() {
