@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.codehaus.jackson.node.POJONode;
 import org.jboss.resteasy.client.ClientResponseFailure;
-import org.jboss.resteasy.specimpl.BuiltResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
@@ -22,6 +21,7 @@ import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 
@@ -104,16 +104,16 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         }
 
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
-        BuiltResponse response = null;
+        Response response = null;
         try {
             LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
-            response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+            response = rptInterceptor.registerTicketResponse(scopes, resource.getId());
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
-                response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+                response = rptInterceptor.registerTicketResponse(scopes, resource.getId());
             } else {
                 throw e;
             }
