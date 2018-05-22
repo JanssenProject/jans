@@ -109,11 +109,11 @@ public class RsProtectTest {
     }
 
     public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
-        final RsProtectParams commandParams = new RsProtectParams();
-        commandParams.setOxdId(site.getOxdId());
-        commandParams.setResources(resources);
+        final RsProtectParams params = new RsProtectParams();
+        params.setOxdId(site.getOxdId());
+        params.setResources(resources);
 
-        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), commandParams).dataAsResponse(RsProtectResponse.class);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
         return resp;
     }
