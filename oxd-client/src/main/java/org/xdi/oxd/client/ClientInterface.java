@@ -98,7 +98,7 @@ public interface ClientInterface {
     @Path("/uma-rs-protect")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 umaRsProtect(@HeaderParam("Authorization") String authorization, RsProtectParams params);
+    CommandResponse2 umaRsProtect(@HeaderParam("Authorization") String authorization, RsProtectParams2 params);
 
     @POST
     @Path("/uma-rs-check-access")
