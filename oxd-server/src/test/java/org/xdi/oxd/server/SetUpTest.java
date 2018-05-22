@@ -3,12 +3,16 @@
  */
 package org.xdi.oxd.server;
 
+import com.google.common.base.Preconditions;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
-import org.xdi.oxd.common.CoreUtils;
+import org.testng.annotations.Parameters;
+import org.xdi.oxd.common.response.SetupClientResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.RpService;
 
@@ -21,6 +25,8 @@ import org.xdi.oxd.server.service.RpService;
 
 public class SetUpTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);
+
     public static final DropwizardTestSupport<OxdServerConfiguration> SUPPORT =
             new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
                     ResourceHelpers.resourceFilePath("oxd-server-jenkins.yaml"),
@@ -28,23 +34,29 @@ public class SetUpTest {
             );
 
 
+    @Parameters({"host", "opHost", "redirectUrl"})
     @BeforeSuite
-    public static void beforeSuite() {
-        System.out.println("Running beforeSuite ...");
-        ServerLauncher.setSetUpSuite(true);
-        SUPPORT.before();
+    public static void beforeSuite(String host, String opHost, String redirectUrl) {
+        try {
+            LOG.debug("Running beforeSuite ...");
+            ServerLauncher.setSetUpSuite(true);
+            SUPPORT.before();
+            LOG.debug("HTTP server started.");
 
-        CoreUtils.createExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                removeExistingRps();
-            }
-        });
+            removeExistingRps();
+            LOG.debug("Existing RPs are removed.");
 
-        // from one side we should give time to start server, from other we can't start in current
-        // thread because it will block suite thread, ugly but works...
-        CoreUtils.sleep(10);
-        System.out.println("Finished beforeSuite!");
+            SetupClientResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
+            Tester.setSetupClient(setupClient, host, opHost);
+            LOG.debug("SETUP_CLIENT is set in Tester.");
+
+            Preconditions.checkNotNull(Tester.getAuthorization());
+            LOG.debug("Tester's authorization is set.");
+
+            LOG.debug("Finished beforeSuite!");
+        } catch (Exception e) {
+            LOG.error("Failed to start suite.", e);
+        }
     }
 
     private static void removeExistingRps() {
@@ -52,17 +64,21 @@ public class SetUpTest {
             ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
             ServerLauncher.getInjector().getInstance(RpService.class).removeAllRps();
             ServerLauncher.getInjector().getInstance(RpService.class).load();
+            LOG.debug("Finished removeExistingRps successfullly.");
         } catch (Exception e) {
-            System.out.println("Failed to removed existing RPs.");
-            e.printStackTrace();
+            LOG.error("Failed to removed existing RPs.", e);
         }
-        System.out.println("Finished removeExistingRps.");
     }
 
     @AfterSuite
     public static void afterSuite() {
-        SUPPORT.after();
-        ServerLauncher.shutdown();
+        try {
+            SUPPORT.after();
+            ServerLauncher.shutdown();
+            LOG.debug("HTTP server is successfully stopped.");
+        } catch (Exception e) {
+            LOG.error("Failed to stop HTTP server.", e);
+        }
     }
 
 }
