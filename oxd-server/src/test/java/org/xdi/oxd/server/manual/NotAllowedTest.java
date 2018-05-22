@@ -3,10 +3,11 @@ package org.xdi.oxd.server.manual;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.xdi.oxd.client.ClientInterface;
+import org.xdi.oxd.client.RsProtectParams2;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.RegisterSiteParams;
-import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.server.Tester;
@@ -34,9 +35,9 @@ public class NotAllowedTest {
 
         RegisterSiteResponse site = registerSite(client);
 
-        final RsProtectParams params = new RsProtectParams();
+        final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(UmaFullTest.resourceList(rsProtect).getResources());
+        params.setResources(CoreUtils.asJsonSilently(UmaFullTest.resourceList(rsProtect).getResources()));
 
         final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
