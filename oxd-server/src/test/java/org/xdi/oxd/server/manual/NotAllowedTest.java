@@ -6,12 +6,11 @@ import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.client.RsProtectParams2;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
+import org.xdi.oxd.server.Jackson2;
 import org.xdi.oxd.server.Tester;
-import org.xdi.oxd.server.UmaFullTest;
 
 import java.io.IOException;
 
@@ -37,7 +36,7 @@ public class NotAllowedTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(CoreUtils.asJsonSilently(UmaFullTest.resourceList(rsProtect).getResources()));
+        params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
 
         final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);

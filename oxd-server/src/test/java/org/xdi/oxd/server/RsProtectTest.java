@@ -51,7 +51,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(CoreUtils.asJsonSilently(resources));
+        params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
 
         ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
         assertNotNull(errorResponse);
@@ -70,7 +70,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(CoreUtils.asJsonSilently(resources));
+        params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
         params.setOverwrite(true); // force overwrite
 
         RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
@@ -112,7 +112,11 @@ public class RsProtectTest {
     public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(CoreUtils.asJsonSilently(resources));
+        try {
+            params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
