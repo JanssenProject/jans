@@ -12,52 +12,52 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetLogoutUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
 
     @JsonProperty(value = "id_token_hint")
-    private String idTokenHint;
+    private String id_token_hint;
     @JsonProperty(value = "post_logout_redirect_uri")
-    private String postLogoutRedirectUri;
+    private String post_logout_redirect_uri;
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "session_state")
-    private String sessionState;
+    private String session_state;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public GetLogoutUrlParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getPostLogoutRedirectUri() {
-        return postLogoutRedirectUri;
+        return post_logout_redirect_uri;
     }
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
-        this.postLogoutRedirectUri = postLogoutRedirectUri;
+        this.post_logout_redirect_uri = postLogoutRedirectUri;
     }
 
     public String getIdTokenHint() {
-        return idTokenHint;
+        return id_token_hint;
     }
 
     public void setIdTokenHint(String idTokenHint) {
-        this.idTokenHint = idTokenHint;
+        this.id_token_hint = idTokenHint;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getState() {
@@ -69,23 +69,23 @@ public class GetLogoutUrlParams implements HasProtectionAccessTokenParams {
     }
 
     public String getSessionState() {
-        return sessionState;
+        return session_state;
     }
 
     public void setSessionState(String sessionState) {
-        this.sessionState = sessionState;
+        this.session_state = sessionState;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("LogoutParams");
-        sb.append("{oxdId=").append(oxdId);
-        sb.append(", idTokenHint=").append(idTokenHint);
-        sb.append(", postLogoutRedirectUri=").append(postLogoutRedirectUri);
+        sb.append("{oxd_id=").append(oxd_id);
+        sb.append(", id_token_hint=").append(id_token_hint);
+        sb.append(", post_logout_redirect_uri=").append(post_logout_redirect_uri);
         sb.append(", state=").append(state);
-        sb.append(", sessionState=").append(sessionState);
-        sb.append(", protectionAccessToken=").append(protectionAccessToken);
+        sb.append(", session_state=").append(session_state);
+        sb.append(", protection_access_token=").append(protection_access_token);
         sb.append('}');
         return sb.toString();
     }

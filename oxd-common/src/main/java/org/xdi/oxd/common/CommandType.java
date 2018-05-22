@@ -52,11 +52,13 @@ public enum CommandType {
     }
 
     @JsonValue
+    @com.fasterxml.jackson.annotation.JsonValue
     public String getValue() {
         return value;
     }
 
     @JsonCreator
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static CommandType fromValue(String v) {
         if (StringUtils.isNotBlank(v)) {
             for (CommandType t : values()) {

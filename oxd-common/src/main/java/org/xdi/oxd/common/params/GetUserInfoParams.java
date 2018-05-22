@@ -12,37 +12,37 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetUserInfoParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "access_token")
-    private String accessToken;
+    private String access_token;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public GetUserInfoParams() {
     }
 
     public String getAccessToken() {
-        return accessToken;
+        return access_token;
     }
 
     public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        this.access_token = accessToken;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     @Override
@@ -52,15 +52,15 @@ public class GetUserInfoParams implements HasProtectionAccessTokenParams {
 
         GetUserInfoParams that = (GetUserInfoParams) o;
 
-        if (accessToken != null ? !accessToken.equals(that.accessToken) : that.accessToken != null) return false;
-        return !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
+        if (access_token != null ? !access_token.equals(that.access_token) : that.access_token != null) return false;
+        return !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = oxdId != null ? oxdId.hashCode() : 0;
-        result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
+        int result = oxd_id != null ? oxd_id.hashCode() : 0;
+        result = 31 * result + (access_token != null ? access_token.hashCode() : 0);
         return result;
     }
 
@@ -68,9 +68,9 @@ public class GetUserInfoParams implements HasProtectionAccessTokenParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetUserInfoParams");
-        sb.append("{accessToken='").append(accessToken).append('\'');
-        sb.append(", oxdId='").append(oxdId).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append("{access_token='").append(access_token).append('\'');
+        sb.append(", oxd_id='").append(oxd_id).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

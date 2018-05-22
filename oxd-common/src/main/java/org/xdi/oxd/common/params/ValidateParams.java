@@ -12,28 +12,28 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class ValidateParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
 
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "id_token")
-    private String idToken;
+    private String id_token;
     @JsonProperty(value = "access_token")
-    private String accessToken;
+    private String access_token;
 
     @JsonProperty(value = "nonce")
     private String nonce;
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getCode() {
@@ -53,28 +53,28 @@ public class ValidateParams implements HasProtectionAccessTokenParams {
     }
 
     public String getIdToken() {
-        return idToken;
+        return id_token;
     }
 
     public void setIdToken(String idToken) {
-        this.idToken = idToken;
+        this.id_token = idToken;
     }
 
     public String getAccessToken() {
-        return accessToken;
+        return access_token;
     }
 
     public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        this.access_token = accessToken;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     @Override
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public String getNonce() {
@@ -88,13 +88,13 @@ public class ValidateParams implements HasProtectionAccessTokenParams {
     @Override
     public String toString() {
         return "ValidateParams{" +
-                "oxdId='" + oxdId + '\'' +
+                "oxd_id='" + oxd_id + '\'' +
                 ", code='" + code + '\'' +
-                ", idToken='" + idToken + '\'' +
-                ", accessToken='" + accessToken + '\'' +
+                ", id_token='" + id_token + '\'' +
+                ", access_token='" + access_token + '\'' +
                 ", nonce='" + nonce + '\'' +
                 ", state='" + state + '\'' +
-                ", protectionAccessToken='" + protectionAccessToken + '\'' +
+                ", protection_access_token='" + protection_access_token + '\'' +
                 '}';
     }
 }

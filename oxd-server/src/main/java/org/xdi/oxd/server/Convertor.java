@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.server;
 
+import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
@@ -35,6 +36,9 @@ public class Convertor {
      * @return parameter object based on string representation
      */
     public static <T extends IParams> T asParams(Class<T> clazz, Command command) {
+        if (command.getParams() instanceof POJONode) {
+            return (T) ((POJONode)command.getParams()).getPojo();
+        }
         final String paramsAsString = command.paramsAsString();
         try {
             T params = CoreUtils.createJsonMapper().readValue(paramsAsString, clazz);

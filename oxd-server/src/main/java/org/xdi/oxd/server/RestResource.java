@@ -32,8 +32,6 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String setupClient(String params) {
-        Command commmand = new Command(CommandType.SETUP_CLIENT, read(params, SetupClientParams.class));
-        ServerLauncher.getInjector().getInstance(Processor.class).process(commmand);
         return process(CommandType.SETUP_CLIENT, params, SetupClientParams.class, null);
     }
 
@@ -200,7 +198,8 @@ public class RestResource {
 
     public static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         T params = read(paramsAsString, paramsClass);
-        if (params instanceof HasProtectionAccessTokenParams) {
+        if (params instanceof HasProtectionAccessTokenParams &&
+                !(params instanceof SetupClientParams)) {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
         }
         Command command = new Command(commandType, params);
