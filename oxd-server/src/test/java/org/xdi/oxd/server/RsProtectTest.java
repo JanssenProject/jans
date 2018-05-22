@@ -5,9 +5,10 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
+import org.xdi.oxd.client.RsProtectParams2;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
-import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
@@ -48,9 +49,9 @@ public class RsProtectTest {
         List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
         protectResources(client, site, resources);
 
-        final RsProtectParams params = new RsProtectParams();
+        final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(resources);
+        params.setResources(CoreUtils.asJsonSilently(resources));
 
         ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
         assertNotNull(errorResponse);
@@ -67,9 +68,9 @@ public class RsProtectTest {
         List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
         protectResources(client, site, resources);
 
-        final RsProtectParams params = new RsProtectParams();
+        final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(resources);
+        params.setResources(CoreUtils.asJsonSilently(resources));
         params.setOverwrite(true); // force overwrite
 
         RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
@@ -109,9 +110,9 @@ public class RsProtectTest {
     }
 
     public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
-        final RsProtectParams params = new RsProtectParams();
+        final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(resources);
+        params.setResources(CoreUtils.asJsonSilently(resources));
 
         final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
