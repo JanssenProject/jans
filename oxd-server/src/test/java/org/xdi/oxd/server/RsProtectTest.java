@@ -39,7 +39,7 @@ public class RsProtectTest {
         RsCheckAccessTest.checkAccess(client, site);
     }
 
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
     @Test
     public void overwriteFalse(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
         ClientInterface client = Tester.newClient(host);
@@ -51,7 +51,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
+        params.setResources(Jackson2.createJsonMapper().readTree(StringUtils.replace(rsProtect, "'", "\"")));
 
         ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
         assertNotNull(errorResponse);
@@ -70,7 +70,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
+        params.setResources(Jackson2.createJsonMapper().readTree(StringUtils.replace(rsProtect, "'", "\"")));
         params.setOverwrite(true); // force overwrite
 
         RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
