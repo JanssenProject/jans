@@ -1,21 +1,20 @@
 package org.xdi.oxd.server.manual;
 
 import com.google.common.base.Strings;
-import org.xdi.oxd.client.CommandClient;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.server.Tester;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.xdi.oxd.client.TestUtils.notEmpty;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,8 +23,7 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class GoogleTest {
 
-    private static final String HOST = "localhost";
-    private static final int PORT = 8099;
+    private static final String HOST = "http://localhost:8084";
 
     private static final String OP_HOST = "https://accounts.google.com";
     private static final String REDIRECT_URI = "https://mytestproduct.com";
@@ -34,58 +32,45 @@ public class GoogleTest {
     private static final String CLIENT_SECRET = "vJVYPI4Ybwc9a2YOesq2bRCa";
 
     public static void main(String[] args) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(HOST, PORT);
+        ClientInterface client = Tester.newClient(HOST);
 
-            final RegisterSiteResponse site = registerSite(client);
-            final String authorizationUrl = getAuthorizationUrl(client, site.getOxdId());
+        final RegisterSiteResponse site = registerSite(client);
+        final String authorizationUrl = getAuthorizationUrl(client, site.getOxdId());
 
-            // after successful login get redirect with code
-            // https://mytestproduct.com/?state=af0ifjsldkj&code=4/2I5U130cxs7MObKVniVseBQkHQ0JQS0p5JfZm7NgZ-M&authuser=0&session_state=02bd0461002924877bee444d9dfd9f1279e44335..ae63&prompt=consent#
+        // after successful login get redirect with code
+        // https://mytestproduct.com/?state=af0ifjsldkj&code=4/2I5U130cxs7MObKVniVseBQkHQ0JQS0p5JfZm7NgZ-M&authuser=0&session_state=02bd0461002924877bee444d9dfd9f1279e44335..ae63&prompt=consent#
 //            String code = "4/2I5U130cxs7MObKVniVseBQkHQ0JQS0p5JfZm7NgZ-M";
 //            String code = "4/e8WrOQDMNRllHvMGAEKAovwWMnIy7k7oxRN4Xn9JPrg";
-            String code = "4/nWqDxBS-c7MDN_1Gq2WtW2L6B9KnA5rpOOYzGEdg7lM";
+        String code = "4/nWqDxBS-c7MDN_1Gq2WtW2L6B9KnA5rpOOYzGEdg7lM";
 
-            final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
-            commandParams.setOxdId(site.getOxdId());
-            commandParams.setCode(code);
+        final GetTokensByCodeParams params = new GetTokensByCodeParams();
+        params.setOxdId(site.getOxdId());
+        params.setCode(code);
 
-            final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
-
-            final GetTokensByCodeResponse resp = client.send(command).dataAsResponse(GetTokensByCodeResponse.class);
-            System.out.println(resp);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params).dataAsResponse(GetTokensByCodeResponse.class);
+        System.out.println(resp);
     }
 
-    private static String getAuthorizationUrl(CommandClient client, String oxdId) {
-        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(oxdId);
+    private static String getAuthorizationUrl(ClientInterface client, String oxdId) {
+        final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
+        params.setOxdId(oxdId);
 
-        final Command command = new Command(CommandType.GET_AUTHORIZATION_URL);
-        command.setParamsObject(commandParams);
-
-        final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationUrlResponse.class);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         System.out.println("Authorization url: " + resp.getAuthorizationUrl());
         return resp.getAuthorizationUrl();
     }
 
-    public static RegisterSiteResponse registerSite(CommandClient client) {
+    public static RegisterSiteResponse registerSite(ClientInterface client) {
 
-        final RegisterSiteParams commandParams = new RegisterSiteParams();
-        commandParams.setOpHost(OP_HOST);
-        commandParams.setAuthorizationRedirectUri(REDIRECT_URI);
-        commandParams.setClientId(CLIENT_ID);
-        commandParams.setClientSecret(CLIENT_SECRET);
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(OP_HOST);
+        params.setAuthorizationRedirectUri(REDIRECT_URI);
+        params.setClientId(CLIENT_ID);
+        params.setClientSecret(CLIENT_SECRET);
 
-        final Command command = new Command(CommandType.REGISTER_SITE);
-        command.setParamsObject(commandParams);
-
-        final RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
