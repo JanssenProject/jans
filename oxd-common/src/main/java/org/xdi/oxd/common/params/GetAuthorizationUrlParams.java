@@ -15,45 +15,45 @@ import java.util.Map;
 public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "acr_values")
-    private List<String> acrValues;
+    private List<String> acr_values;
     @JsonProperty(value = "prompt")
     private String prompt;
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "hd")
-    private String hostedDomain; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
+    private String hd; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
     @JsonProperty(value = "custom_parameters")
-    private Map<String, String> customParameters;
+    private Map<String, String> custom_parameters;
 
     public GetAuthorizationUrlParams() {
     }
 
     public Map<String, String> getCustomParameters() {
-        return customParameters;
+        return custom_parameters;
     }
 
     public void setCustomParameters(Map<String, String> customParameters) {
-        this.customParameters = customParameters;
+        this.custom_parameters = customParameters;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getHostedDomain() {
-        return hostedDomain;
+        return hd;
     }
 
     public void setHostedDomain(String hostedDomain) {
-        this.hostedDomain = hostedDomain;
+        this.hd = hostedDomain;
     }
 
     public List<String> getScope() {
@@ -73,19 +73,19 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public List<String> getAcrValues() {
-        return acrValues;
+        return acr_values;
     }
 
     public void setAcrValues(List<String> acrValues) {
-        this.acrValues = acrValues;
+        this.acr_values = acrValues;
     }
 
     @Override
@@ -95,27 +95,27 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
 
         GetAuthorizationUrlParams that = (GetAuthorizationUrlParams) o;
 
-        return !(acrValues != null ? !acrValues.equals(that.acrValues) : that.acrValues != null) && !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
+        return !(acr_values != null ? !acr_values.equals(that.acr_values) : that.acr_values != null) && !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = oxdId != null ? oxdId.hashCode() : 0;
-        result = 31 * result + (acrValues != null ? acrValues.hashCode() : 0);
+        int result = oxd_id != null ? oxd_id.hashCode() : 0;
+        result = 31 * result + (acr_values != null ? acr_values.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "GetAuthorizationUrlParams{" +
-                "oxdId='" + oxdId + '\'' +
-                ", acrValues=" + acrValues +
+                "oxd_id='" + oxd_id + '\'' +
+                ", acr_values=" + acr_values +
                 ", prompt='" + prompt + '\'' +
                 ", scope=" + scope +
-                ", hostedDomain='" + hostedDomain + '\'' +
-                ", protectionAccessToken='" + protectionAccessToken + '\'' +
-                ", customParameters=" + customParameters +
+                ", hd='" + hd + '\'' +
+                ", protection_access_token='" + protection_access_token + '\'' +
+                ", custom_parameters=" + custom_parameters +
                 '}';
     }
 }

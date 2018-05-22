@@ -20,10 +20,13 @@ public class ErrorResponse implements Serializable, IOpResponse {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorResponse.class);
 
     @JsonProperty(value = "error")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "error")
     private String error;
     @JsonProperty(value = "error_description")
-    private String errorDescription;
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "error_description")
+    private String error_description;
     @JsonProperty(value = "details")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "details")
     private JsonNode details;
 
     public ErrorResponse() {
@@ -35,12 +38,12 @@ public class ErrorResponse implements Serializable, IOpResponse {
 
     public ErrorResponse(ErrorResponseCode code) {
         this.error = code.getCode();
-        this.errorDescription = code.getDescription();
+        this.error_description = code.getDescription();
     }
 
     public ErrorResponse(String error, String errorDescription) {
         this.error = error;
-        this.errorDescription = errorDescription;
+        this.error_description = errorDescription;
     }
 
     public String getError() {
@@ -52,11 +55,11 @@ public class ErrorResponse implements Serializable, IOpResponse {
     }
 
     public String getErrorDescription() {
-        return errorDescription;
+        return error_description;
     }
 
     public void setErrorDescription(String errorDescription) {
-        this.errorDescription = errorDescription;
+        this.error_description = errorDescription;
     }
 
     public JsonNode getDetails() {
@@ -84,7 +87,7 @@ public class ErrorResponse implements Serializable, IOpResponse {
     public String toString() {
         return "ErrorResponse{" +
                 "error='" + error + '\'' +
-                ", errorDescription='" + errorDescription + '\'' +
+                ", error_description='" + error_description + '\'' +
                 ", details=" + details +
                 '}';
     }

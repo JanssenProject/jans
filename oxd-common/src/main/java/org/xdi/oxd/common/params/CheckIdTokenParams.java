@@ -15,23 +15,23 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class CheckIdTokenParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "id_token")
-    private String idToken;
+    private String id_token;
     @JsonProperty(value = "nonce")
     private String nonce;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public CheckIdTokenParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getNonce() {
@@ -43,19 +43,19 @@ public class CheckIdTokenParams implements HasProtectionAccessTokenParams {
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getIdToken() {
-        return idToken;
+        return id_token;
     }
 
     public void setIdToken(String p_idToken) {
-        idToken = p_idToken;
+        id_token = p_idToken;
     }
 
     /**
@@ -67,10 +67,10 @@ public class CheckIdTokenParams implements HasProtectionAccessTokenParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CheckIdTokenParams");
-        sb.append("{idToken='").append(idToken).append('\'');
-        sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append("{id_token='").append(id_token).append('\'');
+        sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

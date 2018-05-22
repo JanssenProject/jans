@@ -85,11 +85,13 @@ public enum ErrorResponseCode {
     }
 
     @JsonValue
+    @com.fasterxml.jackson.annotation.JsonValue
     public String getCode() {
         return code;
     }
 
     @JsonCreator
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static ErrorResponseCode fromValue(String v) {
         if (StringUtils.isNotBlank(v)) {
             for (ErrorResponseCode t : values()) {

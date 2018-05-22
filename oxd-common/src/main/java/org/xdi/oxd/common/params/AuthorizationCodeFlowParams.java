@@ -16,17 +16,17 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "redirect_url")
-    private String redirectUrl;
+    private String redirect_url;
     @JsonProperty(value = "client_id")
-    private String clientId;
+    private String client_id;
     @JsonProperty(value = "client_secret")
-    private String clientSecret;
+    private String client_secret;
     @JsonProperty(value = "user_id")
-    private String userId;
+    private String user_id;
     @JsonProperty(value = "user_secret")
-    private String userSecret;
+    private String user_secret;
     @JsonProperty(value = "scope")
     private String scope;
     @JsonProperty(value = "nonce")
@@ -34,25 +34,25 @@ public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenPara
     @JsonProperty(value = "acr")
     private String acr;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public AuthorizationCodeFlowParams() {
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getAcr() {
@@ -64,11 +64,11 @@ public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenPara
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return client_secret;
     }
 
     public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+        this.client_secret = clientSecret;
     }
 
     public String getNonce() {
@@ -88,35 +88,35 @@ public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenPara
     }
 
     public String getRedirectUrl() {
-        return redirectUrl;
+        return redirect_url;
     }
 
     public void setRedirectUrl(String p_redirectUrl) {
-        redirectUrl = p_redirectUrl;
+        redirect_url = p_redirectUrl;
     }
 
     public String getClientId() {
-        return clientId;
+        return client_id;
     }
 
     public void setClientId(String p_clientId) {
-        clientId = p_clientId;
+        client_id = p_clientId;
     }
 
     public String getUserId() {
-        return userId;
+        return user_id;
     }
 
     public void setUserId(String p_userId) {
-        userId = p_userId;
+        user_id = p_userId;
     }
 
     public String getUserSecret() {
-        return userSecret;
+        return user_secret;
     }
 
     public void setUserSecret(String p_userSecret) {
-        userSecret = p_userSecret;
+        user_secret = p_userSecret;
     }
 
     /**
@@ -128,15 +128,15 @@ public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenPara
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("AuthorizationCodeFlowParams");
-        sb.append("{oxd_id='").append(oxdId).append('\'');
-        sb.append(", redirectUrl='").append(redirectUrl).append('\'');
-        sb.append(", clientId='").append(clientId).append('\'');
-        sb.append(", userId='").append(userId).append('\'');
-        sb.append(", userSecret='").append(userSecret).append('\'');
+        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append(", redirect_url='").append(redirect_url).append('\'');
+        sb.append(", client_id='").append(client_id).append('\'');
+        sb.append(", user_id='").append(user_id).append('\'');
+        sb.append(", user_secret='").append(user_secret).append('\'');
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", acr='").append(acr).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

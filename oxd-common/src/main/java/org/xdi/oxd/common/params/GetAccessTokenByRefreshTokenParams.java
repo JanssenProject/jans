@@ -12,26 +12,26 @@ import java.util.List;
 public class GetAccessTokenByRefreshTokenParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "refresh_token")
-    private String refreshToken;
+    private String refresh_token;
     @JsonProperty(value = "scope")
     private List<String> scope;
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getRefreshToken() {
-        return refreshToken;
+        return refresh_token;
     }
 
     public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+        this.refresh_token = refreshToken;
     }
 
     public List<String> getScope() {
@@ -45,8 +45,8 @@ public class GetAccessTokenByRefreshTokenParams implements HasOxdIdParams {
     @Override
     public String toString() {
         return "GetAccessTokenByRefreshTokenParams{" +
-                "oxdId='" + oxdId + '\'' +
-                ", refreshToken='" + refreshToken + '\'' +
+                "oxd_id='" + oxd_id + '\'' +
+                ", refresh_token='" + refresh_token + '\'' +
                 ", scope=" + scope +
                 '}';
     }

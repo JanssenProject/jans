@@ -15,230 +15,230 @@ import java.util.List;
 public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "op_host")
-    private String opHost;
+    private String op_host;
     @JsonProperty(value = "op_discovery_path")
-    private String opDiscoveryPath;
+    private String op_discovery_path;
     @JsonProperty(value = "authorization_redirect_uri")
-    private String authorizationRedirectUri;
+    private String authorization_redirect_uri;
     @JsonProperty(value = "post_logout_redirect_uri")
-    private String postLogoutRedirectUri;
+    private String post_logout_redirect_uri;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     @JsonProperty(value = "redirect_uris")
-    private List<String> redirectUris;
+    private List<String> redirect_uris;
     @JsonProperty(value = "response_types")
-    private List<String> responseTypes;
+    private List<String> response_types;
     @JsonProperty(value = "claims_redirect_uri")
-    private List<String> claimsRedirectUri;
+    private List<String> claims_redirect_uri;
 
     @JsonProperty(value = "client_id")
-    private String clientId;
+    private String client_id;
     @JsonProperty(value = "client_secret")
-    private String clientSecret;
+    private String client_secret;
     @JsonProperty(value = "client_registration_access_token")
-    private String clientRegistrationAccessToken;
+    private String client_registration_access_token;
     @JsonProperty(value = "client_registration_client_uri")
-    private String clientRegistrationClientUri;
+    private String client_registration_client_uri;
     @JsonProperty(value = "client_name")
-    private String clientName;
+    private String client_name;
     @JsonProperty(value = "client_jwks_uri")
-    private String clientJwksUri;
+    private String client_jwks_uri;
     @JsonProperty(value = "client_token_endpoint_auth_method")
-    private String clientTokenEndpointAuthMethod;
+    private String client_token_endpoint_auth_method;
     @JsonProperty(value = "client_request_uris")
-    private List<String> clientRequestUris;
+    private List<String> client_request_uris;
     @JsonProperty(value = "client_frontchannel_logout_uris")
-    private List<String> clientFrontchannelLogoutUri;
+    private List<String> client_frontchannel_logout_uris;
     @JsonProperty(value = "client_sector_identifier_uri")
-    private String clientSectorIdentifierUri;
+    private String client_sector_identifier_uri;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
-    private List<String> uiLocales;
+    private List<String> ui_locales;
     @JsonProperty(value = "claims_locales")
-    private List<String> claimsLocales;
+    private List<String> claims_locales;
     @JsonProperty(value = "acr_values")
-    private List<String> acrValues;
+    private List<String> acr_values;
     @JsonProperty(value = "grant_types")
-    private List<String> grantType;
+    private List<String> grant_types;
     @JsonProperty(value = "contacts")
     private List<String> contacts;
     @JsonProperty(value = "trusted_client")
-    private Boolean trustedClient = false;
+    private Boolean trusted_client = false;
     @JsonProperty(value = "oxd_rp_programming_language")
-    private String oxdRpProgrammingLanguage;
+    private String oxd_rp_programming_language;
 
     public RegisterSiteParams() {
     }
 
     public String getClientRegistrationAccessToken() {
-        return clientRegistrationAccessToken;
+        return client_registration_access_token;
     }
 
     public void setClientRegistrationAccessToken(String clientRegistrationAccessToken) {
-        this.clientRegistrationAccessToken = clientRegistrationAccessToken;
+        this.client_registration_access_token = clientRegistrationAccessToken;
     }
 
     public String getClientRegistrationClientUri() {
-        return clientRegistrationClientUri;
+        return client_registration_client_uri;
     }
 
     public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
-        this.clientRegistrationClientUri = clientRegistrationClientUri;
+        this.client_registration_client_uri = clientRegistrationClientUri;
     }
 
     public String getOxdRpProgrammingLanguage() {
-        return oxdRpProgrammingLanguage;
+        return oxd_rp_programming_language;
     }
 
     public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
-        this.oxdRpProgrammingLanguage = oxdRpProgrammingLanguage;
+        this.oxd_rp_programming_language = oxdRpProgrammingLanguage;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public Boolean getTrustedClient() {
-        return trustedClient;
+        return trusted_client;
     }
 
     public void setTrustedClient(Boolean trustedClient) {
-        this.trustedClient = trustedClient;
+        this.trusted_client = trustedClient;
     }
 
     public String getClientName() {
-        return clientName;
+        return client_name;
     }
 
     public void setClientName(String clientName) {
-        this.clientName = clientName;
+        this.client_name = clientName;
     }
 
     public String getOpHost() {
-        return opHost;
+        return op_host;
     }
 
     public void setOpHost(String opHost) {
-        this.opHost = opHost;
+        this.op_host = opHost;
     }
 
     public String getOpDiscoveryPath() {
-        return opDiscoveryPath;
+        return op_discovery_path;
     }
 
     public void setOpDiscoveryPath(String opDiscoveryPath) {
-        this.opDiscoveryPath = opDiscoveryPath;
+        this.op_discovery_path = opDiscoveryPath;
     }
 
     public String getClientSectorIdentifierUri() {
-        return clientSectorIdentifierUri;
+        return client_sector_identifier_uri;
     }
 
     public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
-        this.clientSectorIdentifierUri = clientSectorIdentifierUri;
+        this.client_sector_identifier_uri = clientSectorIdentifierUri;
     }
 
     public List<String> getClientFrontchannelLogoutUri() {
-        return clientFrontchannelLogoutUri;
+        return client_frontchannel_logout_uris;
     }
 
     public void setClientFrontchannelLogoutUri(List<String> clientFrontchannelLogoutUri) {
-        this.clientFrontchannelLogoutUri = clientFrontchannelLogoutUri;
+        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUri;
     }
 
     public List<String> getClientRequestUris() {
-        return clientRequestUris;
+        return client_request_uris;
     }
 
     public void setClientRequestUris(List<String> clientRequestUris) {
-        this.clientRequestUris = clientRequestUris;
+        this.client_request_uris = clientRequestUris;
     }
 
     public String getClientTokenEndpointAuthMethod() {
-        return clientTokenEndpointAuthMethod;
+        return client_token_endpoint_auth_method;
     }
 
     public void setClientTokenEndpointAuthMethod(String clientTokenEndpointAuthMethod) {
-        this.clientTokenEndpointAuthMethod = clientTokenEndpointAuthMethod;
+        this.client_token_endpoint_auth_method = clientTokenEndpointAuthMethod;
     }
 
-    public String getPostLogoutRedirectUri() {
-        return postLogoutRedirectUri;
+    public String getPost_logout_redirect_uri() {
+        return post_logout_redirect_uri;
     }
 
-    public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
-        this.postLogoutRedirectUri = postLogoutRedirectUri;
+    public void setPost_logout_redirect_uri(String post_logout_redirect_uri) {
+        this.post_logout_redirect_uri = post_logout_redirect_uri;
     }
 
     public String getClientJwksUri() {
-        return clientJwksUri;
+        return client_jwks_uri;
     }
 
     public void setClientJwksUri(String clientJwksUri) {
-        this.clientJwksUri = clientJwksUri;
+        this.client_jwks_uri = clientJwksUri;
     }
 
     public String getAuthorizationRedirectUri() {
-        return authorizationRedirectUri;
+        return authorization_redirect_uri;
     }
 
     public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-        this.authorizationRedirectUri = authorizationRedirectUri;
+        this.authorization_redirect_uri = authorizationRedirectUri;
     }
 
     public List<String> getClaimsLocales() {
-        return claimsLocales;
+        return claims_locales;
     }
 
     public void setClaimsLocales(List<String> claimsLocales) {
-        this.claimsLocales = claimsLocales;
+        this.claims_locales = claimsLocales;
     }
 
     public String getClientId() {
-        return clientId;
+        return client_id;
     }
 
     public void setClientId(String clientId) {
-        this.clientId = clientId;
+        this.client_id = clientId;
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return client_secret;
     }
 
     public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+        this.client_secret = clientSecret;
     }
 
     public List<String> getGrantType() {
-        return grantType;
+        return grant_types;
     }
 
     public void setGrantType(List<String> grantType) {
-        this.grantType = grantType;
+        this.grant_types = grantType;
     }
 
     public List<String> getRedirectUris() {
-        return redirectUris;
+        return redirect_uris;
     }
 
     public void setRedirectUris(List<String> redirectUris) {
-        this.redirectUris = redirectUris;
+        this.redirect_uris = redirectUris;
     }
 
     public List<String> getResponseTypes() {
-        return responseTypes;
+        return response_types;
     }
 
     public void setResponseTypes(List<String> responseTypes) {
-        this.responseTypes = responseTypes;
+        this.response_types = responseTypes;
     }
 
     public List<String> getScope() {
@@ -250,19 +250,19 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     }
 
     public List<String> getUiLocales() {
-        return uiLocales;
+        return ui_locales;
     }
 
     public void setUiLocales(List<String> uiLocales) {
-        this.uiLocales = uiLocales;
+        this.ui_locales = uiLocales;
     }
 
     public List<String> getAcrValues() {
-        return acrValues;
+        return acr_values;
     }
 
     public void setAcrValues(List<String> acrValues) {
-        this.acrValues = acrValues;
+        this.acr_values = acrValues;
     }
 
     public List<String> getContacts() {
@@ -274,32 +274,32 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     }
 
     public List<String> getClaimsRedirectUri() {
-        return claimsRedirectUri;
+        return claims_redirect_uri;
     }
 
     public void setClaimsRedirectUri(List<String> claimsRedirectUri) {
-        this.claimsRedirectUri = claimsRedirectUri;
+        this.claims_redirect_uri = claimsRedirectUri;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RegisterSiteParams");
-        sb.append("{acrValues=").append(acrValues);
-        sb.append(", opHost='").append(opHost).append('\'');
-        sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
-        sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
-        sb.append(", redirectUris=").append(redirectUris);
-        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
-        sb.append(", responseTypes=").append(responseTypes);
-        sb.append(", clientId='").append(clientId).append('\'');
-        sb.append(", clientSecret='").append(clientSecret).append('\'');
-        sb.append(", clientName='").append(clientName).append('\'');
-        sb.append(", sectorIdentifierUri='").append(clientSectorIdentifierUri).append('\'');
+        sb.append("{acr_values=").append(acr_values);
+        sb.append(", op_host='").append(op_host).append('\'');
+        sb.append(", op_discovery_path='").append(op_discovery_path).append('\'');
+        sb.append(", authorization_redirect_uri='").append(authorization_redirect_uri).append('\'');
+        sb.append(", redirect_uris=").append(redirect_uris);
+        sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
+        sb.append(", response_types=").append(response_types);
+        sb.append(", client_id='").append(client_id).append('\'');
+        sb.append(", client_secret='").append(client_secret).append('\'');
+        sb.append(", client_name='").append(client_name).append('\'');
+        sb.append(", client_sector_identifier_uri='").append(client_sector_identifier_uri).append('\'');
         sb.append(", scope=").append(scope);
-        sb.append(", uiLocales=").append(uiLocales);
-        sb.append(", claimsLocales=").append(claimsLocales);
-        sb.append(", grantType=").append(grantType);
+        sb.append(", ui_locales=").append(ui_locales);
+        sb.append(", claims_locales=").append(claims_locales);
+        sb.append(", grant_types=").append(grant_types);
         sb.append(", contacts=").append(contacts);
         sb.append('}');
         return sb.toString();

@@ -12,31 +12,31 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "ticket")
     private String ticket;
     @JsonProperty(value = "claims_redirect_uri")
-    private String claimsRedirectUri;
+    private String claims_redirect_uri;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     public RpGetClaimsGatheringUrlParams() {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getTicket() {
@@ -48,21 +48,21 @@ public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenPa
     }
 
     public String getClaimsRedirectUri() {
-        return claimsRedirectUri;
+        return claims_redirect_uri;
     }
 
     public void setClaimsRedirectUri(String claimsRedirectUri) {
-        this.claimsRedirectUri = claimsRedirectUri;
+        this.claims_redirect_uri = claimsRedirectUri;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RpGetGetClaimsGatheringUrlParams");
-        sb.append("{oxdId='").append(oxdId).append('\'');
+        sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", ticket=").append(ticket);
-        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
-        sb.append(", protectionAccessToken=").append(protectionAccessToken);
+        sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
+        sb.append(", protection_access_token=").append(protection_access_token);
         sb.append('}');
         return sb.toString();
     }

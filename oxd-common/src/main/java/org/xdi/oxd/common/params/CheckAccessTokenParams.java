@@ -20,21 +20,21 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
      * oxd ID
      */
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
 
     /**
      * Id token
      */
     @JsonProperty(value = "id_token")
-    private String idToken;
+    private String id_token;
 
     /**
      * Access token
      */
     @JsonProperty(value = "access_token")
-    private String accessToken;
+    private String access_token;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
 
     /**
      * Constructor
@@ -43,11 +43,11 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     /**
@@ -56,7 +56,7 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
      * @return id token
      */
     public String getIdToken() {
-        return idToken;
+        return id_token;
     }
 
     /**
@@ -65,7 +65,7 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
      * @param p_idToken id token
      */
     public void setIdToken(String p_idToken) {
-        idToken = p_idToken;
+        id_token = p_idToken;
     }
 
     /**
@@ -74,7 +74,7 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
      * @return access token
      */
     public String getAccessToken() {
-        return accessToken;
+        return access_token;
     }
 
     /**
@@ -83,15 +83,15 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
      * @param p_accessToken access token
      */
     public void setAccessToken(String p_accessToken) {
-        accessToken = p_accessToken;
+        access_token = p_accessToken;
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     /**
@@ -103,10 +103,10 @@ public class CheckAccessTokenParams implements HasProtectionAccessTokenParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CheckAccessTokenParams");
-        sb.append("{oxd_id='").append(oxdId).append('\'');
-        sb.append(", idToken='").append(idToken).append('\'');
-        sb.append(", accessToken='").append(accessToken).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
+        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append(", id_token='").append(id_token).append('\'');
+        sb.append(", access_token='").append(access_token).append('\'');
+        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
         sb.append('}');
         return sb.toString();
     }

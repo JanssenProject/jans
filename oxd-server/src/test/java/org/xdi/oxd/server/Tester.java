@@ -3,6 +3,7 @@ package org.xdi.oxd.server;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.client.OxdClient;
 import org.xdi.oxd.common.params.GetClientTokenParams;
@@ -28,7 +29,7 @@ public class Tester {
     private static String OP_HOST;
 
     public static ClientInterface newClient(String targetHost) {
-        if ("http://localhost".equalsIgnoreCase(targetHost) || "http://127.0.0.1".equalsIgnoreCase(targetHost) ) {
+        if (StringUtils.countMatches(targetHost, ":") < 2 && "http://localhost".equalsIgnoreCase(targetHost) || "http://127.0.0.1".equalsIgnoreCase(targetHost) ) {
             targetHost = targetHost + ":" + SetUpTest.SUPPORT.getLocalPort();
         }
         return OxdClient.newClient(targetHost);

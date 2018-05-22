@@ -15,11 +15,11 @@ import java.util.List;
 public class RsProtectParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "resources")
     private List<RsResource> resources;
     @JsonProperty(value = "protection_access_token")
-    private String protectionAccessToken;
+    private String protection_access_token;
     @JsonProperty(value = "overwrite")
     private Boolean overwrite = false;
 
@@ -27,19 +27,19 @@ public class RsProtectParams implements HasProtectionAccessTokenParams {
     }
 
     public String getProtectionAccessToken() {
-        return protectionAccessToken;
+        return protection_access_token;
     }
 
     public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+        this.protection_access_token = protectionAccessToken;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public List<RsResource> getResources() {
@@ -62,9 +62,9 @@ public class RsProtectParams implements HasProtectionAccessTokenParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsProtectParams");
-        sb.append("{oxdId='").append(oxdId).append('\'');
+        sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", resources=").append(resources);
-        sb.append(", protectionAccessToken=").append(protectionAccessToken);
+        sb.append(", protection_access_token=").append(protection_access_token);
         sb.append(", overwrite=").append(overwrite);
         sb.append('}');
         return sb.toString();
