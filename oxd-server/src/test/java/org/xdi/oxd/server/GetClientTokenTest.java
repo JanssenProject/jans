@@ -6,8 +6,6 @@ import org.testng.annotations.Test;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
 
-import java.io.IOException;
-
 import static junit.framework.Assert.assertNotNull;
 import static org.xdi.oxd.server.TestUtils.notEmpty;
 
@@ -18,9 +16,9 @@ import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 public class GetClientTokenTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost"})
     @Test
-    public void getClientToken(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
+    public void getClientToken(String host, String opHost) {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
         params.setScope(Lists.newArrayList("openid"));

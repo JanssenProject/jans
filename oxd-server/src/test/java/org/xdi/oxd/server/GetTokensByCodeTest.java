@@ -1,12 +1,9 @@
 package org.xdi.oxd.server;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.ArrayUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
@@ -28,22 +25,16 @@ import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 public class GetTokensByCodeTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
-
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-            GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
-            refreshToken(tokensResponse, client, site.getOxdId());
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
+        refreshToken(tokensResponse, client, site.getOxdId());
     }
 
-    public GetClientTokenResponse refreshToken(GetTokensByCodeResponse resp, CommandClient client, String oxdId) {
+    public static GetClientTokenResponse refreshToken(GetTokensByCodeResponse resp, ClientInterface client, String oxdId) {
         notEmpty(resp.getRefreshToken());
 
         // refresh token
@@ -52,7 +43,7 @@ public class GetTokensByCodeTest {
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
-        GetClientTokenResponse refreshResponse = client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(refreshParams)).dataAsResponse(GetClientTokenResponse.class);
+        GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(refreshParams).dataAsResponse(GetClientTokenResponse.class);
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
@@ -60,7 +51,7 @@ public class GetTokensByCodeTest {
         return refreshResponse;
     }
 
-    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
+    public static GetTokensByCodeResponse tokenByCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
 
@@ -68,14 +59,12 @@ public class GetTokensByCodeTest {
 
         notEmpty(code);
 
-        final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
-        commandParams.setOxdId(site.getOxdId());
-        commandParams.setCode(code);
-        commandParams.setState(state);
+        final GetTokensByCodeParams params = new GetTokensByCodeParams();
+        params.setOxdId(site.getOxdId());
+        params.setCode(code);
+        params.setState(state);
 
-        final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
-
-        final GetTokensByCodeResponse resp = client.send(command).dataAsResponse(GetTokensByCodeResponse.class);
+        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params).dataAsResponse(GetTokensByCodeResponse.class);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -83,7 +72,7 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    public static String codeRequest(CommandClient client, String siteId, String userId, String userSecret, String state, String nonce) {
+    public static String codeRequest(ClientInterface client, String siteId, String userId, String userSecret, String state, String nonce) {
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(siteId);
         params.setUsername(userId);
@@ -91,15 +80,6 @@ public class GetTokensByCodeTest {
         params.setState(state);
         params.setNonce(nonce);
 
-        final Command command = new Command(CommandType.GET_AUTHORIZATION_CODE).setParamsObject(params);
-        return client.send(command).dataAsResponse(GetAuthorizationCodeResponse.class).getCode();
+        return client.getAuthorizationCode(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationCodeResponse.class).getCode();
     }
-
-    public static void main(String[] args) {
-        long[] ids = new long[] {123};
-
-        System.out.println(Joiner.on(",").join(ArrayUtils.toObject(ids)));
-    }
-
-
 }

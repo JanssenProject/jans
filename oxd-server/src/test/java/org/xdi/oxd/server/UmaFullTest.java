@@ -3,8 +3,7 @@ package org.xdi.oxd.server;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RpGetRptResponse;
@@ -24,38 +23,27 @@ import static org.testng.Assert.assertTrue;
 
 public class UmaFullTest {
 
-    private RegisterSiteResponse site;
-    private CommandClient client;
-
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
     @Test
-    public void test(String host, int port, String redirectUrl, String opHost, String rsProtect) throws Exception {
-        this.client = null;
-        try {
-            this.client = new CommandClient(host, port);
+    public void test(String host, String redirectUrl, String opHost, String rsProtect) throws Exception {
 
-            site = RegisterSiteTest.registerSite(this.client, opHost, redirectUrl);
+        ClientInterface client = Tester.newClient(host);
 
-            RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-            final RpGetRptParams params = new RpGetRptParams();
-            params.setOxdId(site.getOxdId());
-            params.setTicket(checkAccess.getTicket());
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
 
-            final RpGetRptResponse response = client
-                    .send(new Command(CommandType.RP_GET_RPT).setParamsObject(params))
-                    .dataAsResponse(RpGetRptResponse.class);
+        final RpGetRptParams params = new RpGetRptParams();
+        params.setOxdId(site.getOxdId());
+        params.setTicket(checkAccess.getTicket());
 
-            assertNotNull(response);
-            assertTrue(StringUtils.isNotBlank(response.getRpt()));
-            assertTrue(StringUtils.isNotBlank(response.getPct()));
+        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), params).dataAsResponse(RpGetRptResponse.class);
 
-
-        } finally {
-            CommandClient.closeQuietly(this.client);
-        }
+        assertNotNull(response);
+        assertTrue(StringUtils.isNotBlank(response.getRpt()));
+        assertTrue(StringUtils.isNotBlank(response.getPct()));
     }
 
     public static RsResourceList resourceList(String rsProtect) throws IOException {

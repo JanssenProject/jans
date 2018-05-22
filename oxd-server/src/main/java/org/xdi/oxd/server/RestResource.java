@@ -94,6 +94,14 @@ public class RestResource {
     }
 
     @POST
+    @Path("/get-authorization-code")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getAuthorizationCode(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.GET_AUTHORIZATION_CODE, params, GetAuthorizationCodeParams.class, authorization);
+    }
+
+    @POST
     @Path("/get-tokens-by-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -155,6 +163,30 @@ public class RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, String params) {
         return process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization);
+    }
+
+    @POST
+    @Path("/authorization-code-flow")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String authorizationCodeFlow(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.AUTHORIZATION_CODE_FLOW, params, AuthorizationCodeFlowParams.class, authorization);
+    }
+
+    @POST
+    @Path("/check-access-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String checkAccessToken(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.CHECK_ACCESS_TOKEN, params, CheckAccessTokenParams.class, authorization);
+    }
+
+    @POST
+    @Path("/check-id-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String checkIdToken(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.CHECK_ID_TOKEN, params, CheckIdTokenParams.class, authorization);
     }
 
     public static <T> T read(String params, Class<T> clazz) {

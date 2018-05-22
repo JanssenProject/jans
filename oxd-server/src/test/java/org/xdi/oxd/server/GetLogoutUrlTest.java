@@ -2,8 +2,7 @@ package org.xdi.oxd.server;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -24,29 +23,22 @@ import static junit.framework.Assert.assertTrue;
 
 public class GetLogoutUrlTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "userId", "userSecret", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrl", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, int port, String opHost, String redirectUrl, String userId, String userSecret, String postLogoutRedirectUrl) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void test(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
 
-            final GetLogoutUrlParams commandParams = new GetLogoutUrlParams();
-            commandParams.setOxdId(site.getOxdId());
-            commandParams.setIdTokenHint("dummy_token");
-            commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setState(UUID.randomUUID().toString());
-            commandParams.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
+        final GetLogoutUrlParams params = new GetLogoutUrlParams();
+        params.setOxdId(site.getOxdId());
+        params.setIdTokenHint("dummy_token");
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setState(UUID.randomUUID().toString());
+        params.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-            final Command command = new Command(CommandType.GET_LOGOUT_URI).setParamsObject(commandParams);
-
-            final LogoutResponse resp = client.send(command).dataAsResponse(LogoutResponse.class);
-            assertNotNull(resp);
-            assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        final LogoutResponse resp = client.getLogoutUri(Tester.getAuthorization(), params).dataAsResponse(LogoutResponse.class);
+        assertNotNull(resp);
+        assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
     }
 }
