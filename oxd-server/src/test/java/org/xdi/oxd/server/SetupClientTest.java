@@ -27,23 +27,23 @@ public class SetupClientTest {
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
     public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-            SetupClientResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
-            assertResponse(resp);
+        SetupClientResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        assertResponse(resp);
 
-            // more specific client setup
-            final SetupClientParams params = new SetupClientParams();
-            params.setOpHost(opHost);
-            params.setAuthorizationRedirectUri(redirectUrl);
-            params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
-            params.setRedirectUris(Arrays.asList(redirectUrl));
-            params.setAcrValues(new ArrayList<String>());
-            params.setScope(Lists.newArrayList("openid", "profile"));
-            params.setGrantType(Lists.newArrayList("authorization_code"));
-            params.setResponseTypes(Lists.newArrayList("code"));
+        // more specific client setup
+        final SetupClientParams params = new SetupClientParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+        params.setRedirectUris(Arrays.asList(redirectUrl));
+        params.setAcrValues(new ArrayList<String>());
+        params.setScope(Lists.newArrayList("openid", "profile"));
+        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setResponseTypes(Lists.newArrayList("code"));
 
-            resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
-            assertResponse(resp);
+        resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
+        assertResponse(resp);
     }
 
     public static void assertResponse(SetupClientResponse resp) {
