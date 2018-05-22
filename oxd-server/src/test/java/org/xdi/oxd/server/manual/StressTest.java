@@ -3,18 +3,17 @@ package org.xdi.oxd.server.manual;
 import junit.framework.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.client.CommandClient;
-import org.xdi.oxd.client.RegisterSiteTest;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.server.RegisterSiteTest;
+import org.xdi.oxd.server.Tester;
 
 import java.io.IOException;
 
 import static junit.framework.Assert.assertNotNull;
-import static org.xdi.oxd.client.TestUtils.notEmpty;
+import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,27 +22,19 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class StressTest {
 
-    @Parameters({"host", "port", "redirectUrl", "opHost"})
+    @Parameters({"host", "redirectUrl", "opHost"})
     @Test(invocationCount = 10, threadPoolSize = 10, enabled = true)
-    public void test(String host, int port, String redirectUrl, String opHost) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void test(String host, String redirectUrl, String opHost) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-            commandParams.setOxdId(site.getOxdId());
+        final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
+        params.setOxdId(site.getOxdId());
 
-            final Command command = new Command(CommandType.GET_AUTHORIZATION_URL);
-            command.setParamsObject(commandParams);
-
-            final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
-            assertNotNull(resp);
-            notEmpty(resp.getAuthorizationUrl());
-            Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationUrlResponse.class);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+        Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
     }
 }
