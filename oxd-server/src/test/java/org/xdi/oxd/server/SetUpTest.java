@@ -24,24 +24,25 @@ public class SetUpTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);
 
-    public static final DropwizardTestSupport<OxdServerConfiguration> SUPPORT =
-            new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
-                    ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yaml"),
-                    ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
-            );
+    public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
 
 
     @Parameters({"host", "opHost", "redirectUrl"})
     @BeforeSuite
     public static void beforeSuite(String host, String opHost, String redirectUrl) {
         try {
-            System.out.println("PATH>> " + ResourceHelpers.resourceFilePath("oxd-server-jenkins.yaml"));
-            System.out.println("PATH>> " + ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yaml"));
+            System.out.println("PATH>> " + ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml"));
+            System.out.println("PATH>> " + ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yml"));
             LOG.debug("PATH>> " + ResourceHelpers.resourceFilePath("oxd-server-jenkins.yaml"));
-            LOG.debug("PATH>> " + ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yaml"));
+            LOG.debug("PATH>> " + ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yml"));
 
             LOG.debug("Running beforeSuite ...");
             ServerLauncher.setSetUpSuite(true);
+
+            SUPPORT = new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
+                    ResourceHelpers.resourceFilePath("./oxd-server/src/test/resources/oxd-server-jenkins.yml"),
+                    ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
+            );
             SUPPORT.before();
             LOG.debug("HTTP server started.");
 
