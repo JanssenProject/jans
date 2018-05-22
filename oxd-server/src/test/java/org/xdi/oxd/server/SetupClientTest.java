@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.SetupClientParams;
@@ -23,36 +24,26 @@ import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 public class SetupClientTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void setupClient(String host, int port, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
-
-            SetupClientResponse resp = setupClient(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
+            SetupClientResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertResponse(resp);
 
             // more specific client setup
-            final SetupClientParams commandParams = new SetupClientParams();
-            commandParams.setOpHost(opHost);
-            commandParams.setAuthorizationRedirectUri(redirectUrl);
-            commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setRedirectUris(Arrays.asList(redirectUrl));
-            commandParams.setAcrValues(new ArrayList<String>());
-            commandParams.setScope(Lists.newArrayList("openid", "profile"));
-            commandParams.setGrantType(Lists.newArrayList("authorization_code"));
-            commandParams.setResponseTypes(Lists.newArrayList("code"));
+            final SetupClientParams params = new SetupClientParams();
+            params.setOpHost(opHost);
+            params.setAuthorizationRedirectUri(redirectUrl);
+            params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+            params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+            params.setRedirectUris(Arrays.asList(redirectUrl));
+            params.setAcrValues(new ArrayList<String>());
+            params.setScope(Lists.newArrayList("openid", "profile"));
+            params.setGrantType(Lists.newArrayList("authorization_code"));
+            params.setResponseTypes(Lists.newArrayList("code"));
 
-            final Command command = new Command(CommandType.SETUP_CLIENT);
-            command.setParamsObject(commandParams);
-
-            resp = client.send(command).dataAsResponse(SetupClientResponse.class);
+            resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
             assertResponse(resp);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
     }
 
     public static void assertResponse(SetupClientResponse resp) {
@@ -63,11 +54,11 @@ public class SetupClientTest {
         notEmpty(resp.getClientSecret());
     }
 
-    public static SetupClientResponse setupClient(CommandClient client, String opHost, String redirectUrl) {
+    public static SetupClientResponse setupClient(ClientInterface client, String opHost, String redirectUrl) {
         return setupClient(client, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static SetupClientResponse setupClient(CommandClient client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static SetupClientResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
         final SetupClientParams params = new SetupClientParams();
         params.setOpHost(opHost);
@@ -84,7 +75,7 @@ public class SetupClientTest {
         final Command command = new Command(CommandType.SETUP_CLIENT);
         command.setParamsObject(params);
 
-        final SetupClientResponse resp = client.send(command).dataAsResponse(SetupClientResponse.class);
+        final SetupClientResponse resp = client.setupClient(params).dataAsResponse(SetupClientResponse.class);
         assertResponse(resp);
         return resp;
     }
