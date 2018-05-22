@@ -48,7 +48,7 @@ public class Tester {
             assertNotNull(resp);
             assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 
-            AUTHORIZATION = resp.getAccessToken();
+            AUTHORIZATION = "Bearer " + resp.getAccessToken();
         }
         return AUTHORIZATION;
     }
