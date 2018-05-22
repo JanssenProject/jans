@@ -31,7 +31,6 @@ public class SetUpTest {
     @BeforeSuite
     public static void beforeSuite(String host, String opHost, String redirectUrl) {
         try {
-            LOG.debug("Full path of yml file: " + ResourceHelpers.resourceFilePath("oxd-server-jenkins.yaml"));
             LOG.debug("Running beforeSuite ...");
             ServerLauncher.setSetUpSuite(true);
 
