@@ -4,8 +4,7 @@ import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.params.RsProtectParams;
@@ -27,122 +26,94 @@ import static junit.framework.Assert.assertNotNull;
 
 public class RsProtectTest {
 
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
     @Test
-    public void protect(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void protect(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        ClientInterface client = Tester.newClient(host);
 
-            protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
-            RsCheckAccessTest.checkAccess(client, site);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+        protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+        RsCheckAccessTest.checkAccess(client, site);
     }
 
     @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
     @Test
-    public void overwriteFalse(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void overwriteFalse(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
-            protectResources(client, site, resources);
+        List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
+        protectResources(client, site, resources);
 
-            final RsProtectParams commandParams = new RsProtectParams();
-            commandParams.setOxdId(site.getOxdId());
-            commandParams.setResources(resources);
+        final RsProtectParams params = new RsProtectParams();
+        params.setOxdId(site.getOxdId());
+        params.setResources(resources);
 
-            ErrorResponse errorResponse = client.send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams)).dataAsResponse(ErrorResponse.class);
-            assertNotNull(errorResponse);
-            assertEquals(errorResponse.getError(), "uma_protection_exists");
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
+        assertNotNull(errorResponse);
+        assertEquals(errorResponse.getError(), "uma_protection_exists");
     }
 
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
     @Test
-    public void overwriteTrue(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void overwriteTrue(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
-            protectResources(client, site, resources);
+        List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
+        protectResources(client, site, resources);
 
-            final RsProtectParams commandParams = new RsProtectParams();
-            commandParams.setOxdId(site.getOxdId());
-            commandParams.setResources(resources);
-            commandParams.setOverwrite(true); // force overwrite
+        final RsProtectParams params = new RsProtectParams();
+        params.setOxdId(site.getOxdId());
+        params.setResources(resources);
+        params.setOverwrite(true); // force overwrite
 
-            RsProtectResponse response = client.send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams)).dataAsResponse(RsProtectResponse.class);
-            assertNotNull(response);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
+        assertNotNull(response);
     }
 
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtectScopeExpression"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtectScopeExpression"})
     @Test
-    public void protectWithScopeExpression(String host, int port, String redirectUrl, String opHost, String rsProtectScopeExpression) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void protectWithScopeExpression(String host, String redirectUrl, String opHost, String rsProtectScopeExpression) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
-            RsCheckAccessTest.checkAccess(client, site);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
+        RsCheckAccessTest.checkAccess(client, site);
     }
 
-    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtectScopeExpressionSecond"})
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtectScopeExpressionSecond"})
     @Test
-    public void protectWithScopeExpressionSeconds(String host, int port, String redirectUrl, String opHost, String rsProtectScopeExpressionSecond) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void protectWithScopeExpressionSeconds(String host, String redirectUrl, String opHost, String rsProtectScopeExpressionSecond) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond).getResources());
+        protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond).getResources());
 
-            final RsCheckAccessParams params = new RsCheckAccessParams();
-            params.setOxdId(site.getOxdId());
-            params.setHttpMethod("GET");
-            params.setPath("/GetAll");
-            params.setRpt("");
+        final RsCheckAccessParams params = new RsCheckAccessParams();
+        params.setOxdId(site.getOxdId());
+        params.setHttpMethod("GET");
+        params.setPath("/GetAll");
+        params.setRpt("");
 
-            final RsCheckAccessResponse response = client
-                    .send(new Command(CommandType.RS_CHECK_ACCESS).setParamsObject(params))
-                    .dataAsResponse(RsCheckAccessResponse.class);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params).dataAsResponse(RsCheckAccessResponse.class);
 
-            Assert.assertNotNull(response);
-            Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        Assert.assertNotNull(response);
+        Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
     }
 
-    public static RsProtectResponse protectResources(CommandClient client, RegisterSiteResponse site, List<RsResource> resources) {
+    public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
         final RsProtectParams commandParams = new RsProtectParams();
         commandParams.setOxdId(site.getOxdId());
         commandParams.setResources(resources);
 
-        final RsProtectResponse resp = client
-                .send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams))
-                .dataAsResponse(RsProtectResponse.class);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), commandParams).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
         return resp;
     }

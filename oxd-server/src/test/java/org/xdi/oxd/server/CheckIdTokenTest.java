@@ -2,9 +2,8 @@ package org.xdi.oxd.server;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.Command;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
@@ -25,41 +24,34 @@ import static junit.framework.Assert.assertTrue;
 
 public class CheckIdTokenTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
+        ClientInterface client = Tester.newClient(host);
 
-            RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            String nonce = CoreUtils.secureRandomString();
-            GetTokensByCodeResponse response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
+        String nonce = CoreUtils.secureRandomString();
+        GetTokensByCodeResponse response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
 
-            final CheckIdTokenParams params = new CheckIdTokenParams();
-            params.setOxdId(site.getOxdId());
-            params.setIdToken(response.getIdToken());
-            params.setNonce(nonce);
+        final CheckIdTokenParams params = new CheckIdTokenParams();
+        params.setOxdId(site.getOxdId());
+        params.setIdToken(response.getIdToken());
+        params.setNonce(nonce);
 
-            final Command checkIdTokenCommand = new Command(CommandType.CHECK_ID_TOKEN);
-            checkIdTokenCommand.setParamsObject(params);
-            final CommandResponse r = client.send(checkIdTokenCommand);
-            assertNotNull(r);
+        final CommandResponse r = client.checkIdToken(Tester.getAuthorization(), params);
+        assertNotNull(r);
 
-            final CheckIdTokenResponse checkR = r.dataAsResponse(CheckIdTokenResponse.class);
-            assertNotNull(checkR);
-            assertTrue(checkR.isActive());
-            assertNotNull(checkR.getExpiresAt());
-            assertNotNull(checkR.getIssuedAt());
-            assertNotNull(checkR.getClaims());
+        final CheckIdTokenResponse checkR = r.dataAsResponse(CheckIdTokenResponse.class);
+        assertNotNull(checkR);
+        assertTrue(checkR.isActive());
+        assertNotNull(checkR.getExpiresAt());
+        assertNotNull(checkR.getIssuedAt());
+        assertNotNull(checkR.getClaims());
 
-            final Map<String, List<String>> claims = checkR.getClaims();
-            assertClaim(claims, "aud");
-            assertClaim(claims, "iss");
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        final Map<String, List<String>> claims = checkR.getClaims();
+        assertClaim(claims, "aud");
+        assertClaim(claims, "iss");
     }
 
     public static void assertClaim(Map<String, List<String>> p_claims, String p_claimName) {

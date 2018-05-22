@@ -66,6 +66,12 @@ public interface ClientInterface {
     CommandResponse getAuthorizationUrl(@HeaderParam("Authorization") String authorization, GetAuthorizationUrlParams params);
 
     @POST
+    @Path("/get-authorization-code")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse getAuthorizationCode(@HeaderParam("Authorization") String authorization, GetAuthorizationCodeParams params);
+
+    @POST
     @Path("/get-tokens-by-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -113,4 +119,21 @@ public interface ClientInterface {
     @Consumes(MediaType.APPLICATION_JSON)
     CommandResponse umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, RpGetClaimsGatheringUrlParams params);
 
+    @POST
+    @Path("/authorization-code-flow")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse authorizationCodeFlow(@HeaderParam("Authorization") String authorization, AuthorizationCodeFlowParams params);
+
+    @POST
+    @Path("/check-access-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse checkAccessToken(@HeaderParam("Authorization") String authorization, CheckAccessTokenParams params);
+
+    @POST
+    @Path("/check-id-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse checkIdToken(@HeaderParam("Authorization") String authorization, CheckIdTokenParams params);
 }
