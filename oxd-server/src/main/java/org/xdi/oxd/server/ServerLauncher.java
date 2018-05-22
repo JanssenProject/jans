@@ -107,6 +107,10 @@ public class ServerLauncher {
     }
 
     public static void shutdown() {
+        shutdown(true);
+    }
+
+    public static void shutdown(boolean systemExit) {
         LOG.info("Stopping the server...");
         try {
             INJECTOR.getInstance(PersistenceService.class).destroy();
@@ -114,7 +118,9 @@ public class ServerLauncher {
             // ignore, we may shut down server before it persistence service is initialize (e.g. due to invalid license)
         }
         LOG.info("Stopped the server successfully.");
-        System.exit(0);
+        if (systemExit) {
+            System.exit(0);
+        }
     }
 
     public static void shutdownDueToInvalidLicense() {
