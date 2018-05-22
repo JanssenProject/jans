@@ -23,6 +23,9 @@ from org.gluu.jsf2.service import FacesService
 from org.xdi.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
 from org.xdi.oxauth.service.net import HttpService
+from org.xdi.oxauth.model.crypto import CryptoProviderFactory
+from org.xdi.oxauth.model.configuration import AppConfiguration
+from org.xdi.oxauth.model.common import WebKeyStorage
 
 import json
 import java
@@ -92,53 +95,92 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Passport-social: Exception inside getUserValueFromAuth " + str(err))
             return None
 
+    def getUserValueFromJwt(self, user_profile, remote_attr):
+        try:
+            return user_profile[remote_attr]
+        except Exception, err:
+            print("Passport-social: Exception inside getUserValueFromJwt " + str(err))
+            return None
+
     def authenticate(self, configurationAttributes, requestParameters, step):
         extensionResult = self.extensionAuthenticate(configurationAttributes, requestParameters, step)
         if extensionResult != None:
             return extensionResult
 
         authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
+        identity = CdiUtil.bean(Identity)
 
         try:
-            UserId = self.getUserValueFromAuth("userid", requestParameters)
+            UserId = self.getUserValueFromAuth("username", requestParameters)
         except Exception, err:
             print "Passport-social: Error: " + str(err)
 
-        useBasicAuth = StringHelper.isEmptyString(UserId)
-
         # Use basic method to log in
-        if useBasicAuth:
+        if StringHelper.isNotEmpty(UserId):
             print "Passport-social: Basic Authentication"
-            identity = CdiUtil.bean(Identity)
             credentials = identity.getCredentials()
-
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
             print "Passport-social: Basic Authentication returning %s" % logged_in
             return logged_in
         else:
             facesContext = CdiUtil.bean(FacesContext)
-            userService = CdiUtil.bean(UserService)
-            authenticationService = CdiUtil.bean(AuthenticationService)
+
+            # Get JWT token if it's post back call
+            jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+            if StringHelper.isEmpty(jwt_param):
+                print "Passport-social: Authenticate for step 1. JWT token is missing"
+                return False
+
+            # Parse JWT token
+            jwt = Jwt.parse(jwt_param)
+
+            # Validate signature
+            print "Passport-social: Authenticate for step 1. Checking JWT token signature: '%s'" % jwt
+            appConfiguration = AppConfiguration()
+            appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
+            appConfiguration.setKeyStoreFile("/etc/certs/passport-rp.jks")
+            appConfiguration.setKeyStoreSecret("secret")
+
+            cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
+            valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
+                                                        None, None, jwt.getHeader().getAlgorithm())
+            print "Passport-social: Authenticate for step 1. JWT signature validation result: '%s'" % validation
+            if not valid:
+                print "Passport-social: Authenticate for step 1. JWT signature validation failed"
+                return False
+
+            # Check if there is user profile
+            jwt_claims = jwt.getClaims()
+            user_profile_json = jwt_claims.getClaimAsString("data")
+            if StringHelper.isEmpty(user_profile_json):
+                print "Passport-social: Authenticate for step 1. User profile is missing in JWT token"
+                return False
+            
+            user_profile = json.loads(user_profile_json)
+                
+            # Store user profile in session
+            print "Passport-social: Authenticate for step 1. User profile: '%s'" % user_profile_json
+            identity.setWorkingParameter("passport_user_profile", user_profile_json)
 
             uidRemoteAttr = self.getUidRemoteAttr()
             if uidRemoteAttr == None:
                 print "Cannot retrieve uid remote attribute"
                 return False
             else:
-                uidRemoteAttrValue = self.getUserValueFromAuth(uidRemoteAttr, requestParameters)
-                if "shibboleth" in self.getUserValueFromAuth("provider", requestParameters):
+                uidRemoteAttrValue = self.getUserValueFromJwt(user_profile, uidRemoteAttr)
+                if "shibboleth" in self.getUserValueFromJwt(user_profile, "provider"):
                     externalUid = "passport-saml:%s" % uidRemoteAttrValue
                 else:
-                    externalUid = "passport-%s:%s" % (self.getUserValueFromAuth("provider", requestParameters), uidRemoteAttrValue)
+                    externalUid = "passport-%s:%s" % (self.getUserValueFromJwt(user_profile, "provider"), uidRemoteAttrValue)
 
-                email = self.getUserValueFromAuth("email", requestParameters)
+                email = self.getUserValueFromJwt(user_profile, "email")
                 if StringHelper.isEmptyString(email):
                     facesMessages = CdiUtil.bean(FacesMessages)
                     facesMessages.setKeepMessages()
@@ -170,7 +212,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     for attributesMappingEntry in self.attributesMapping.entrySet():
                         remoteAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
-                        localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
+                        localAttributeValue = self.getUserValueFromJwt(user_profile, remoteAttribute)
 
                         if (localAttribute != None) and (localAttribute != "provider") and (localAttributeValue != "undefined"):
                             try:
@@ -200,7 +242,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     for attributesMappingEntry in self.attributesMapping.entrySet():
                         remoteAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
-                        localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
+                        localAttributeValue = self.getUserValueFromJwt(user_profile, remoteAttribute)
 
                         if (localAttribute != None) and (localAttribute != "provider") and (localAttributeValue != "undefined"):
                             newUser.setAttribute(localAttribute, localAttributeValue)
@@ -225,8 +267,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        if (step == 1):
-            print "Passport-social: Prepare for Step 1 method call"
+        if step == 1:
+            print "Passport-social: Prepare for step 1"
             identity = CdiUtil.bean(Identity)
             sessionId =  identity.getSessionId()
             sessionAttribute = sessionId.getSessionAttributes()
@@ -270,6 +312,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
 
     def getExtraParametersForStep(self, configurationAttributes, step):
+        if step == 2:
+            return Arrays.asList("passport_user_profile")
+
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
