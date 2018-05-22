@@ -2,6 +2,7 @@
 # Copyright (c) 2016, Gluu
 #
 # Author: Arvind Tomar
+# Author: Yuriy Movchan
 #
 
 from org.xdi.service.cdi.util import CdiUtil
@@ -41,7 +42,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.extensionModule = None
         self.attributesMapping = None
         if (configurationAttributes.containsKey("generic_remote_attributes_list") and
-                configurationAttributes.containsKey("generic_local_attributes_list")):
+            configurationAttributes.containsKey("generic_local_attributes_list")):
 
             remoteAttributesList = configurationAttributes.get("generic_remote_attributes_list").getValue2()
             if (StringHelper.isEmpty(remoteAttributesList)):
@@ -57,6 +58,17 @@ class PersonAuthentication(PersonAuthenticationType):
             if (self.attributesMapping == None):
                 print "Passport-social: Initialization. The attributes mapping isn't valid"
                 return False
+
+        if not configurationAttributes.containsKey("key_store_file"):
+            print "Passport-social: Initialization. The property key_store_file is mandatory"
+            return False
+
+        if not configurationAttributes.containsKey("key_store_password"):
+            print "Passport-social: Initialization. The property key_store_password is mandatory"
+            return False
+
+        self.keyStoreFile = configurationAttributes.get("key_store_file").getValue2()
+        self.keyStorePassword = configurationAttributes.get("key_store_password").getValue2()
 
         if (configurationAttributes.containsKey("extension_module")):
             extensionModuleName = configurationAttributes.get("extension_module").getValue2()
@@ -145,13 +157,13 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport-social: Authenticate for step 1. Checking JWT token signature: '%s'" % jwt
             appConfiguration = AppConfiguration()
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
-            appConfiguration.setKeyStoreFile("/etc/certs/passport-rp.jks")
-            appConfiguration.setKeyStoreSecret("secret")
+            appConfiguration.setKeyStoreFile(self.keyStoreFile)
+            appConfiguration.setKeyStoreSecret(self.keyStorePassword)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                         None, None, jwt.getHeader().getAlgorithm())
-            print "Passport-social: Authenticate for step 1. JWT signature validation result: '%s'" % validation
+            print "Passport-social: Authenticate for step 1. JWT signature validation result: '%s'" % valid
             if not valid:
                 print "Passport-social: Authenticate for step 1. JWT signature validation failed"
                 return False
