@@ -5,8 +5,7 @@ import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -29,112 +28,56 @@ public class RegisterSiteTest {
 
     private String oxdId = null;
 
-    @Parameters({"host", "port", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void register(String host, int port, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+    public void register(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
+        RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        assertNotNull(resp);
 
-//            final SetupClientResponse setupClient = SetupClientTest.setupClient(client, opHost, redirectUrl);
+        notEmpty(resp.getOxdId());
 
-            RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
-            assertNotNull(resp);
+        // more specific site registration
+        final RegisterSiteParams params = new RegisterSiteParams();
+        //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrl));
+        params.setAcrValues(new ArrayList<String>());
+        params.setScope(Lists.newArrayList("openid", "profile"));
+        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setResponseTypes(Lists.newArrayList("code"));
 
-            notEmpty(resp.getOxdId());
-
-            // more specific site registration
-            final RegisterSiteParams commandParams = new RegisterSiteParams();
-            //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
-            commandParams.setOpHost(opHost);
-            commandParams.setAuthorizationRedirectUri(redirectUrl);
-            commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setRedirectUris(Lists.newArrayList(redirectUrl));
-            commandParams.setAcrValues(new ArrayList<String>());
-            commandParams.setScope(Lists.newArrayList("openid", "profile"));
-            commandParams.setGrantType(Lists.newArrayList("authorization_code"));
-            commandParams.setResponseTypes(Lists.newArrayList("code"));
-
-            final Command command = new Command(CommandType.REGISTER_SITE);
-            command.setParamsObject(commandParams);
-
-            resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
-            assertNotNull(resp);
-            assertNotNull(resp.getOxdId());
-            oxdId = resp.getOxdId();
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        resp = Tester.newClient(host).registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        assertNotNull(resp);
+        assertNotNull(resp.getOxdId());
+        oxdId = resp.getOxdId();
     }
 
     @Parameters({"host", "port"})
     @Test(dependsOnMethods = {"register"})
-    public void update(String host, int port) throws IOException {
+    public void update(String host) throws IOException {
         notEmpty(oxdId);
 
-        CommandClient client = null;
-        try {
-            client = new CommandClient(host, port);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        // more specific site registration
+        final UpdateSiteParams params = new UpdateSiteParams();
+        params.setOxdId(oxdId);
+        params.setClientSecretExpiresAt(calendar.getTime());
+        params.setScope(Lists.newArrayList("profile"));
 
-            // more specific site registration
-            final UpdateSiteParams commandParams = new UpdateSiteParams();
-            commandParams.setOxdId(oxdId);
-            commandParams.setClientSecretExpiresAt(calendar.getTime());
-            commandParams.setScope(Lists.newArrayList("profile"));
-
-            final Command command = new Command(CommandType.UPDATE_SITE);
-            command.setParamsObject(commandParams);
-
-            UpdateSiteResponse resp = client.send(command).dataAsResponse(UpdateSiteResponse.class);
-            assertNotNull(resp);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+        UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(), params).dataAsResponse(UpdateSiteResponse.class);
+        assertNotNull(resp);
     }
 
-    @Test(enabled = false)
-    public void manual() throws IOException {
-        CommandClient client = null;
-        try {
-            client = new CommandClient("localhost", 8099);
-
-            final RegisterSiteParams commandParams = new RegisterSiteParams();
-
-            commandParams.setAuthorizationRedirectUri("https://gluu.loc/wp-login.php?option=oxdOpenId");
-            commandParams.setPostLogoutRedirectUri("https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129");
-
-            commandParams.setRedirectUris(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
-            commandParams.setClaimsRedirectUri(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
-            commandParams.setAcrValues(new ArrayList<String>());
-            commandParams.setContacts(Lists.newArrayList("vlad.karapetyan.1988@gmail.com"));
-
-//            commandParams.setClientLogoutUri("https://mag.gluu/index.php/customer/account/logout/");
-            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
-            commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
-            commandParams.setGrantType(Lists.newArrayList("authorization_code"));
-            commandParams.setOxdRpProgrammingLanguage("java");
-
-            commandParams.setResponseTypes(Lists.newArrayList("code"));
-
-            final Command command = new Command(CommandType.REGISTER_SITE);
-            command.setParamsObject(commandParams);
-
-            RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
-            assertNotNull(resp);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
-    }
-
-    public static RegisterSiteResponse registerSite(CommandClient client, String opHost, String redirectUrl) {
+    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrl) {
         return registerSite(client, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static RegisterSiteResponse registerSite(CommandClient client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
@@ -149,10 +92,7 @@ public class RegisterSiteTest {
                 GrantType.CLIENT_CREDENTIALS.getValue()));
         params.setOxdRpProgrammingLanguage("java");
 
-        final Command command = new Command(CommandType.REGISTER_SITE);
-        command.setParamsObject(params);
-
-        final RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
