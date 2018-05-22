@@ -14,52 +14,52 @@ import java.util.List;
 public class GetClientTokenParams implements IParams {
 
     @JsonProperty(value = "client_id")
-    private String clientId;
+    private String client_id;
     @JsonProperty(value = "client_secret")
-    private String clientSecret;
+    private String client_secret;
     @JsonProperty(value = "op_host")
-    private String opHost;
+    private String op_host;
     @JsonProperty(value = "op_discovery_path")
-    private String opDiscoveryPath;
+    private String op_discovery_path;
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "authentication_method")
-    private String authenticationMethod;
+    private String authentication_method;
     @JsonProperty(value = "algorithm")
     private String algorithm;
     @JsonProperty(value = "key_id")
-    private String keyId;
+    private String key_id;
 
     public String getOpDiscoveryPath() {
-        return opDiscoveryPath;
+        return op_discovery_path;
     }
 
     public void setOpDiscoveryPath(String opDiscoveryPath) {
-        this.opDiscoveryPath = opDiscoveryPath;
+        this.op_discovery_path = opDiscoveryPath;
     }
 
     public String getClientId() {
-        return clientId;
+        return client_id;
     }
 
     public void setClientId(String clientId) {
-        this.clientId = clientId;
+        this.client_id = clientId;
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return client_secret;
     }
 
     public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+        this.client_secret = clientSecret;
     }
 
     public String getOpHost() {
-        return opHost;
+        return op_host;
     }
 
     public void setOpHost(String opHost) {
-        this.opHost = opHost;
+        this.op_host = opHost;
     }
 
     public List<String> getScope() {
@@ -71,11 +71,11 @@ public class GetClientTokenParams implements IParams {
     }
 
     public String getAuthenticationMethod() {
-        return authenticationMethod;
+        return authentication_method;
     }
 
     public void setAuthenticationMethod(String authenticationMethod) {
-        this.authenticationMethod = authenticationMethod;
+        this.authentication_method = authenticationMethod;
     }
 
     public String getAlgorithm() {
@@ -87,24 +87,24 @@ public class GetClientTokenParams implements IParams {
     }
 
     public String getKeyId() {
-        return keyId;
+        return key_id;
     }
 
     public void setKeyId(String keyId) {
-        this.keyId = keyId;
+        this.key_id = keyId;
     }
 
     @Override
     public String toString() {
         return "GetClientTokenParams{" +
-                "clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
-                ", opHost='" + opHost + '\'' +
-                ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
+                "client_id='" + client_id + '\'' +
+                ", client_secret='" + client_secret + '\'' +
+                ", op_host='" + op_host + '\'' +
+                ", op_discovery_path='" + op_discovery_path + '\'' +
                 ", scope=" + scope +
-                ", authenticationMethod='" + authenticationMethod + '\'' +
+                ", authentication_method='" + authentication_method + '\'' +
                 ", algorithm='" + algorithm + '\'' +
-                ", keyId='" + keyId + '\'' +
+                ", key_id='" + key_id + '\'' +
                 '}';
     }
 }

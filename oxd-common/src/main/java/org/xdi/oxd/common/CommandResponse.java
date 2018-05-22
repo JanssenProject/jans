@@ -18,6 +18,7 @@ import java.io.Serializable;
  * @version 0.9, 09/08/2013
  */
 @JsonPropertyOrder({"status", "data"})
+@com.fasterxml.jackson.annotation.JsonPropertyOrder({"status", "data"})
 public class CommandResponse implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandResponse.class);
@@ -29,8 +30,10 @@ public class CommandResponse implements Serializable {
     public static final CommandResponse OPERATION_IS_NOT_SUPPORTED = CommandResponse.createUnsupportedOperationError();
 
     @JsonProperty(value = "status")
+    @com.fasterxml.jackson.annotation.JsonProperty(value="status")
     private ResponseStatus status;
     @JsonProperty(value = "data")
+    @com.fasterxml.jackson.annotation.JsonProperty(value="data")
     private JsonNode data;
 
     public CommandResponse() {

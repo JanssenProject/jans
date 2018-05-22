@@ -38,6 +38,7 @@ public enum ResponseStatus {
      * @return string value of status
      */
     @JsonValue
+    @com.fasterxml.jackson.annotation.JsonValue
     public String getValue() {
         return value;
     }
@@ -49,6 +50,7 @@ public enum ResponseStatus {
      * @return response status object based on string value of status
      */
     @JsonCreator
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static ResponseStatus fromValue(String v) {
         if (StringUtils.isNotBlank(v)) {
             for (ResponseStatus t : values()) {
