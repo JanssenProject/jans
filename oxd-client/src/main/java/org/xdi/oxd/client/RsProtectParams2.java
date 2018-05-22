@@ -1,7 +1,8 @@
 package org.xdi.oxd.client;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
 
 /**
@@ -13,7 +14,7 @@ public class RsProtectParams2 implements HasProtectionAccessTokenParams {
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "resources")
-    private String resources;
+    private JsonNode resources;
     @JsonProperty(value = "protection_access_token")
     private String protection_access_token;
     @JsonProperty(value = "overwrite")
@@ -38,11 +39,11 @@ public class RsProtectParams2 implements HasProtectionAccessTokenParams {
         this.oxd_id = oxdId;
     }
 
-    public String getResources() {
+    public JsonNode getResources() {
         return resources;
     }
 
-    public void setResources(String resources) {
+    public void setResources(JsonNode resources) {
         this.resources = resources;
     }
 
