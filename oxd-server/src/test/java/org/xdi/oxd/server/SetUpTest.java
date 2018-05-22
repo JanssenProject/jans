@@ -73,7 +73,7 @@ public class SetUpTest {
     public static void afterSuite() {
         try {
             SUPPORT.after();
-            ServerLauncher.shutdown();
+            ServerLauncher.shutdown(false);
             LOG.debug("HTTP server is successfully stopped.");
         } catch (Exception e) {
             LOG.error("Failed to stop HTTP server.", e);
