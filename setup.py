@@ -3125,16 +3125,14 @@ class Setup(object):
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def import_custom_ldif_openldap(self, fullPath):
-        output_dir = fullPath + '.output'
-
+        output_dir = os.path.join(fullPath, '.output')
         self.logIt("Importing Custom LDIF files")
-        
-        
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
+
         try:
-            for ldif in self.get_filepaths(fullPath):
+            for ldif in self.get_filepaths(output_dir):
                 custom_ldif = output_dir + '/' + ldif
                 if self.ldap_type == 'openldap':
                     self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
