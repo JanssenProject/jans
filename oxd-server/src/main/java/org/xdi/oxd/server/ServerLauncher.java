@@ -100,7 +100,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxD Server started successfully.");
         } catch (ShutdownException e) {
-            LOG.error("Shutted down oxd server.", e);
+            LOG.error("Shut down oxd server.", e);
         } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);
             if (!isSetUpSuite()) {
