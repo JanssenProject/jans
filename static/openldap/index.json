@@ -143,6 +143,11 @@
         {
             "attribute": "oxTicket",
             "index": "eq"
+        }, 
+        {
+            "attribute": "oxAuthCreation",
+            "index": "eq"
         }
+        
     ]
 }
