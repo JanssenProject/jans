@@ -23,7 +23,7 @@ Download [change_config.py](https://github.com/GluuFederation/community-edition-
 
 Modify the entries inside of `change_config.py` using the following template:
 
-`-os` below needs to be either "Ubuntu" or "CentOS"
+`-os_type` below needs to be either "Ubuntu" or "CentOS"
 
 ```
 name_changer = ChangeGluuHostname(
