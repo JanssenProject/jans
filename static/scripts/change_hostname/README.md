@@ -37,7 +37,8 @@ name_changer = ChangeGluuHostname(
     ip_address='<ip_address_of_server>',
     ldap_password="<ldap_password>",
     os_type='<linux_distro>',
-    local=True
+    local=True,
+    gluu_version='3.1.3'
     )
 ```
   
