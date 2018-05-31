@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version March 20, 2018
+ * @version May 30, 2018
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -83,6 +83,11 @@ public class RegisterRequest extends BaseRequest {
      */
     private List<String> scope;
 
+    /**
+     * String containing a space-separated list of claims that can be requested individually.
+     */
+    private List<String> claims;
+
     private Date clientSecretExpiresAt;
     private Map<String, String> customAttributes;
 
@@ -107,6 +112,8 @@ public class RegisterRequest extends BaseRequest {
         this.requestUris = new ArrayList<String>();
         this.authorizedOrigins = new ArrayList<String>();
         this.scopes = new ArrayList<String>();
+        this.scope = new ArrayList<String>();
+        this.claims = new ArrayList<String>();
         this.customAttributes = new HashMap<String, String>();
     }
 
@@ -863,6 +870,14 @@ public class RegisterRequest extends BaseRequest {
         this.scope = scope;
     }
 
+    public List<String> getClaims() {
+        return claims;
+    }
+
+    public void setClaims(List<String> claims) {
+        this.claims = claims;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1008,6 +1023,9 @@ public class RegisterRequest extends BaseRequest {
         if (scope != null && !scope.isEmpty()) {
             parameters.put(SCOPE.toString(), implode(scope, " "));
         }
+        if (claims != null && !claims.isEmpty()) {
+            parameters.put(CLAIMS.toString(), implode(claims, " "));
+        }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
@@ -1127,6 +1145,17 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> claims = new ArrayList<String>();
+        if (requestObject.has(CLAIMS.toString())) {
+            String claimsString = requestObject.getString(CLAIMS.toString());
+            String[] claimsArray = claimsString.split(" ");
+            for (String c : claimsArray) {
+                if (StringUtils.isNotBlank(c)) {
+                    claims.add(c);
+                }
+            }
+        }
+
         final List<String> frontChannelLogoutUris = new ArrayList<String>();
         if (requestObject.has(FRONT_CHANNEL_LOGOUT_URI.toString())) {
             try {
@@ -1185,6 +1214,7 @@ public class RegisterRequest extends BaseRequest {
         result.setRedirectUris(redirectUris);
         result.setScopes(scope);
         result.setScope(scope);
+        result.setClaims(claims);
         result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
         result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
@@ -1317,6 +1347,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (scope != null && !scope.isEmpty()) {
             parameters.put(SCOPE.toString(), implode(scope, " "));
+        }
+        if (claims != null && !claims.isEmpty()) {
+            parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());

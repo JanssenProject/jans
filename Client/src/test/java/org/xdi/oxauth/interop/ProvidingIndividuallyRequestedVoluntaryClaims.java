@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing Individually Requested Voluntary Claims
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version May 30, 2018
  */
 public class ProvidingIndividuallyRequestedVoluntaryClaims extends BaseTest {
 
@@ -52,6 +52,9 @@ public class ProvidingIndividuallyRequestedVoluntaryClaims extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.EMAIL,
+                JwtClaimName.PICTURE));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

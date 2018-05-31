@@ -41,6 +41,7 @@
 
 	<ui:param name="_client" value="#{clientService.getClient(request.getParameter('client_id'))}" />
 	<ui:param name="_scopes" value="#{authorizeAction.scopes}" />
+	<ui:param name="_requestedClaims" value="#{authorizeAction.requestedClaims}" />
 
     <ui:define name="controlButttons">
 		<h:commandLink id="doNotAllowButton"  class="button button-default"

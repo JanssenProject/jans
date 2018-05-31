@@ -44,7 +44,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version May 30, 2018
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
@@ -388,6 +388,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

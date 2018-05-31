@@ -186,7 +186,7 @@
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
-    "skipAuthorizationForOpenIdScopeAndPairwiseId": true,
+    "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
     "personCustomObjectClassList":["gluuCustomPerson"],
