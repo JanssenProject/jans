@@ -6,34 +6,28 @@
 
 package org.xdi.oxauth.model.registration;
 
+import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.site.ldap.persistence.annotation.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-
 /**
  * @author Javier Rojas Blum
- * @version March 20, 2018
+ * @version May 30, 2018
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
 public class Client implements Serializable {
 
-	private static final long serialVersionUID = -6832496019942067969L;
+    private static final long serialVersionUID = -6832496019942067969L;
 
-	@LdapDN
+    @LdapDN
     private String dn;
 
     @LdapAttribute(name = "inum")
@@ -155,6 +149,9 @@ public class Client implements Serializable {
 
     @LdapAttribute(name = "oxAuthScope")
     private String[] scopes;
+
+    @LdapAttribute(name = "oxAuthClaim")
+    private String[] claims;
 
     @LdapAttribute(name = "oxAuthTrustedClient")
     private boolean trustedClient;
@@ -992,6 +989,14 @@ public class Client implements Serializable {
 
     public void setScopes(String[] scopes) {
         this.scopes = scopes;
+    }
+
+    public String[] getClaims() {
+        return claims;
+    }
+
+    public void setClaims(String[] claims) {
+        this.claims = claims;
     }
 
     public boolean getTrustedClient() {

@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  * If that user is logged in, the request succeeds, otherwise it fails.
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version May 30, 2018
  */
 public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
@@ -55,6 +55,9 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.GIVEN_NAME,
+                JwtClaimName.FAMILY_NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
