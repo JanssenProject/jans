@@ -4808,6 +4808,7 @@
                 "oxAuthRequireAuthTime",
                 "oxAuthResponseType",
                 "oxAuthScope",
+                "oxAuthClaim",
                 "oxAuthSectorIdentifierURI",
                 "oxAuthSignedResponseAlg",
                 "oxAuthSubjectType",
