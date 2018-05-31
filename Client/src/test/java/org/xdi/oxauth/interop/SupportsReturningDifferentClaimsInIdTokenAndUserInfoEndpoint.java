@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version May 30, 2018
  */
 public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extends BaseTest {
 
@@ -52,6 +52,11 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.NAME,
+                JwtClaimName.EMAIL,
+                JwtClaimName.GIVEN_NAME,
+                JwtClaimName.FAMILY_NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
