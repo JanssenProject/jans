@@ -29,7 +29,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 20, 2018
+ * @version May 30, 2018
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -214,6 +214,11 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 } else if (getRequest().getScope() != null && !getRequest().getScope().isEmpty()) {
                     String spaceSeparatedScope = implode(getRequest().getScope(), " ");
                     requestBody.put(SCOPE.toString(), spaceSeparatedScope);
+                }
+
+                if (getRequest().getClaims() != null && !getRequest().getClaims().isEmpty()) {
+                    String spaceSeparatedClaims = implode(getRequest().getClaims(), " ");
+                    requestBody.put(CLAIMS.toString(), spaceSeparatedClaims);
                 }
 
                 // Custom params
