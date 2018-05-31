@@ -111,6 +111,12 @@
         </classes>
     </test>
 
+    <test name="Individual Claims Requests test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.IndividualClaimsRequestsTest"/>
+        </classes>
+    </test>
+
     <!-- JWK test -->
     <test name="JWK test (HTTP)" enabled="true">
         <classes>

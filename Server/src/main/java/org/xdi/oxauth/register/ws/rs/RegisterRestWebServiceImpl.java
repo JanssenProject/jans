@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.slf4j.Logger;
+import org.xdi.model.GluuAttribute;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
@@ -28,10 +29,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.registration.RegisterParamsValidator;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.InumService;
-import org.xdi.oxauth.service.MetricService;
-import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -61,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 20, 2018
+ * @version May 30, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -72,8 +70,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private ApplicationAuditLogger applicationAuditLogger;
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private ScopeService scopeService;
+
+    @Inject
+    private AttributeService attributeService;
+
     @Inject
     private InumService inumService;
     @Inject
@@ -428,6 +431,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
         }
 
+        List<String> claims = requestObject.getClaims();
+        if (claims != null && !claims.isEmpty()) {
+            List<String> claimsDn = attributeService.getAttributesDn(claims);
+            p_client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
+        }
+
         Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
         if (clientSecretExpiresAt != null) {
             p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
@@ -622,6 +631,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } else {
             Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
         }
+
+        String[] claimNames = null;
+        String[] claimDns = client.getClaims();
+        if (claimDns != null) {
+            claimNames = new String[claimDns.length];
+            for (int i = 0; i < claimDns.length; i++) {
+                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDns[i]);
+                claimNames[i] = gluuAttribute.getOxAuthClaimName();
+            }
+        }
+
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS.toString(), implode(claimNames, " "));
 
         return responseJsonObject;
     }
