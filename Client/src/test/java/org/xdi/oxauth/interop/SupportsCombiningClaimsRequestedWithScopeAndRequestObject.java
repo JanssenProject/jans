@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object
  *
  * @author Javier Rojas Blum
- * @version January 11, 2017
+ * @version May 30, 2018
  */
 public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends BaseTest {
 
@@ -52,6 +52,9 @@ public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends B
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.GIVEN_NAME,
+                JwtClaimName.FAMILY_NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
