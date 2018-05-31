@@ -6,21 +6,21 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version May 30, 2018
  */
 @Stateless
 @Named
@@ -85,13 +85,25 @@ public class AttributeService extends org.xdi.service.AttributeService {
         return getAllAttributes(staticConfiguration.getBaseDn().getAttributes());
     }
 
-	public String getDnForAttribute(String inum) {
-		String attributesDn = staticConfiguration.getBaseDn().getAttributes();
-		if (StringHelper.isEmpty(inum)) {
-			return attributesDn;
-		}
+    public String getDnForAttribute(String inum) {
+        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
+        if (StringHelper.isEmpty(inum)) {
+            return attributesDn;
+        }
 
-		return String.format("inum=%s,%s", inum, attributesDn);
-	}
+        return String.format("inum=%s,%s", inum, attributesDn);
+    }
 
+    public List<String> getAttributesDn(List<String> claimNames) {
+        List<String> claims = new ArrayList<String>();
+
+        for (String claimName : claimNames) {
+            GluuAttribute gluuAttribute = getByClaimName(claimName);
+            if (gluuAttribute != null) {
+                claims.add(gluuAttribute.getDn());
+            }
+        }
+
+        return claims;
+    }
 }
