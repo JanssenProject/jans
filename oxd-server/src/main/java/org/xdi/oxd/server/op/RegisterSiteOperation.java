@@ -290,6 +290,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         String clientName = "oxD client for site: " + rp.getOxdId();
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
+            rp.setClientName(clientName);
         }
 
         final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, params.getRedirectUris());
