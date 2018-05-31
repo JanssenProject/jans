@@ -62,7 +62,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 5, 2017
+ * @version May 30, 2018
  */
 @Stateless
 @Named
@@ -221,22 +221,26 @@ public class IdTokenFactory {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getName();
-                    Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
-                    if (attribute != null) {
-                        if (attribute instanceof JSONArray) {
-                            JSONArray jsonArray = (JSONArray) attribute;
-                            List<String> values = new ArrayList<String>();
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String value = jsonArray.optString(i);
-                                if (value != null) {
-                                    values.add(value);
+                    Client client = authorizationGrant.getClient();
+
+                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
+                        String ldapClaimName = gluuAttribute.getName();
+                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
+                        if (attribute != null) {
+                            if (attribute instanceof JSONArray) {
+                                JSONArray jsonArray = (JSONArray) attribute;
+                                List<String> values = new ArrayList<String>();
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String value = jsonArray.optString(i);
+                                    if (value != null) {
+                                        values.add(value);
+                                    }
                                 }
+                                jwt.getClaims().setClaim(claim.getName(), values);
+                            } else {
+                                String value = (String) attribute;
+                                jwt.getClaims().setClaim(claim.getName(), value);
                             }
-                            jwt.getClaims().setClaim(claim.getName(), values);
-                        } else {
-                            String value = (String) attribute;
-                            jwt.getClaims().setClaim(claim.getName(), value);
                         }
                     }
                 }
@@ -405,22 +409,26 @@ public class IdTokenFactory {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getName();
-                    Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
-                    if (attribute != null) {
-                        if (attribute instanceof JSONArray) {
-                            JSONArray jsonArray = (JSONArray) attribute;
-                            List<String> values = new ArrayList<String>();
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String value = jsonArray.optString(i);
-                                if (value != null) {
-                                    values.add(value);
+                    Client client = authorizationGrant.getClient();
+
+                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
+                        String ldapClaimName = gluuAttribute.getName();
+                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
+                        if (attribute != null) {
+                            if (attribute instanceof JSONArray) {
+                                JSONArray jsonArray = (JSONArray) attribute;
+                                List<String> values = new ArrayList<String>();
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String value = jsonArray.optString(i);
+                                    if (value != null) {
+                                        values.add(value);
+                                    }
                                 }
+                                jwe.getClaims().setClaim(claim.getName(), values);
+                            } else {
+                                String value = attribute.toString();
+                                jwe.getClaims().setClaim(claim.getName(), value);
                             }
-                            jwe.getClaims().setClaim(claim.getName(), values);
-                        } else {
-                            String value = attribute.toString();
-                            jwe.getClaims().setClaim(claim.getName(), value);
                         }
                     }
                 }
@@ -511,6 +519,32 @@ public class IdTokenFactory {
             return generateSignedIdToken(
                     grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         }
+    }
+
+    public boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
+        if (gluuAttribute != null) {
+            if (clientAllowedClaims != null) {
+                for (int i = 0; i < clientAllowedClaims.length; i++) {
+                    if (gluuAttribute.getDn().equals(clientAllowedClaims[i])) {
+                        return true;
+                    }
+                }
+            }
+
+            for (String scopeName : scopes) {
+                org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+
+                if (scope != null && scope.getOxAuthClaims() != null) {
+                    for (String claimDn : scope.getOxAuthClaims()) {
+                        if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
 }

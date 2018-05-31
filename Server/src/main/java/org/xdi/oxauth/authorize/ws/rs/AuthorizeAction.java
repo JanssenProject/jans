@@ -10,23 +10,26 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.authorize.ScopeChecker;
+import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.AcrChangedException;
+import org.xdi.oxauth.model.exception.InvalidJweException;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
@@ -43,14 +46,19 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HttpMethod;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.*;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 31, 2018
+ * @version May 30, 2018
  */
 @RequestScoped
 @Named
@@ -360,6 +368,73 @@ public class AuthorizeAction {
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
         return authorizeService.getScopes(allowedScope);
+    }
+
+    public List<String> getRequestedClaims() {
+        Set<String> result = new HashSet<String>();
+        String requestJwt = request;
+
+        if (StringUtils.isBlank(requestJwt) && StringUtils.isNotBlank(requestUri)) {
+            try {
+                URI reqUri = new URI(requestUri);
+                String reqUriHash = reqUri.getFragment();
+                String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+                ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
+                clientRequest.setHttpMethod(HttpMethod.GET);
+
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                int status = clientResponse.getStatus();
+
+                if (status == 200) {
+                    String entity = clientResponse.getEntity(String.class);
+
+                    if (StringUtils.isBlank(reqUriHash)) {
+                        requestJwt = entity;
+                    } else {
+                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+                        if (StringUtils.equals(reqUriHash, hash)) {
+                            requestJwt = entity;
+                        }
+                    }
+                }
+            } catch (NoSuchAlgorithmException e) {
+                log.error(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                log.error(e.getMessage(), e);
+            } catch (UnsupportedEncodingException e) {
+                log.error(e.getMessage(), e);
+            } catch (NoSuchProviderException e) {
+                log.error(e.getMessage(), e);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+
+        if (StringUtils.isNotBlank(requestJwt)) {
+            try {
+                Client client = clientService.getClient(clientId);
+
+                if (client != null) {
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, request, client);
+
+                    for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
+                        result.add(claim.getName());
+                    }
+                    for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
+                        result.add(claim.getName());
+                    }
+                }
+            } catch (EntryPersistenceException e) {
+                log.error(e.getMessage(), e);
+            } catch (InvalidJwtException e) {
+                log.error(e.getMessage(), e);
+            } catch (InvalidJweException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+
+        return new ArrayList<String>(result);
     }
 
     /**

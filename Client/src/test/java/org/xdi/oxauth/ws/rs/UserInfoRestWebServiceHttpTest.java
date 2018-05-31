@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version December 5, 2017
+ * @version May 30, 2018
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -406,7 +406,29 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        // 1. Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setClaims(Arrays.asList(
+                "iname",
+                "o"));
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
