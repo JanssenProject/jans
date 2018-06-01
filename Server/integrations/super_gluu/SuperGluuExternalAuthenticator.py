@@ -109,6 +109,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
 
         self.valid_license = False
+        # Removing or altering this block validation is against the terms of the license. 
         if has_license_api and configurationAttributes.containsKey("license_file"):
             license_file = configurationAttributes.get("license_file").getValue2()
 
