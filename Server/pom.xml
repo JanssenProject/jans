@@ -302,6 +302,16 @@
 			<artifactId>oxnotify-client</artifactId>
 		</dependency>
 
+		<!-- oxLicense -->
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxlicense-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxlicense-validator</artifactId>
+		</dependency>
+
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
