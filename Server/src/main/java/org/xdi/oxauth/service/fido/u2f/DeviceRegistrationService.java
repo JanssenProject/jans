@@ -165,6 +165,16 @@ public class DeviceRegistrationService {
 		return deviceRegistrations;
 	}
 
+    public int getCountDeviceRegistrations(String appId) {
+        String baseDn = userService.getDnForUser(null);
+        
+        Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
+        Filter activeDeviceFilter = Filter.createEqualityFilter("oxStatus", DeviceRegistrationStatus.ACTIVE.getValue());
+        Filter resultFilter = Filter.createANDFilter(appIdFilter, activeDeviceFilter);
+        
+        return ldapEntryManager.countEntries(baseDn, DeviceRegistration.class, resultFilter);
+    }
+
 	/**
 	 * Build DN string for U2F user device
 	 */
