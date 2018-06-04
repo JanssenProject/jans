@@ -303,6 +303,7 @@
 		</dependency>
 
 		<!-- oxLicense -->
+<!--
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxlicense-client</artifactId>
@@ -311,6 +312,7 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxlicense-validator</artifactId>
 		</dependency>
+-->
 
 		<!-- Weld -->
 		<dependency>
