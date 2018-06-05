@@ -68,6 +68,28 @@ public class RpService {
         return rp;
     }
 
+    public Rp getFirstSetupClient() {
+        for (Rp rp : rpMap.values()) {
+            try {
+                if (rp.getSetupClient() != null && rp.getSetupClient()) {
+                    checkClientExpiredWithException(rp);
+                    return rp;
+                }
+            } catch (Throwable e) {// ignore
+            }
+        }
+        return null;
+    }
+
+    public Rp getRpByClientId(String clientId) {
+        for (Rp rp : rpMap.values()) {
+            if (StringUtils.isNotBlank(rp.getClientId()) && rp.getClientId().equalsIgnoreCase(clientId)) {
+                return rp;
+            }
+        }
+        return null;
+    }
+
     private void checkClientExpiredWithException(Rp rp) {
         if (checkClientExpired(rp)) {
             throw new ErrorResponseException(ErrorResponseCode.EXPIRED_CLIENT);
