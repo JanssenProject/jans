@@ -84,10 +84,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
-        LOG.trace("introspection: " + response + ", setupClientId: " + rp.getSetupClientId());
+
+        Rp setupRp = getRpService().getRpByClientId(response.getClientId());
+        LOG.trace("introspection: " + response + ", setupRp: " + rp);
 
         rp.setSetupClientId(response.getClientId());
-        rp.setSetupOxdId(oxdId);
+        rp.setSetupOxdId(setupRp != null ? setupRp.getOxdId() : oxdId);
         getRpService().updateSilently(rp);
     }
 
