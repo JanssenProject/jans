@@ -51,7 +51,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(StringUtils.replace(rsProtect, "'", "\"")));
+        params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
 
         ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
         assertNotNull(errorResponse);
@@ -70,7 +70,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(StringUtils.replace(rsProtect, "'", "\"")));
+        params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
         RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
