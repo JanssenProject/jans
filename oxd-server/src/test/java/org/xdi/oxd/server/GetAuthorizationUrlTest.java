@@ -3,7 +3,6 @@ package org.xdi.oxd.server;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
-import org.xdi.oxd.client.OxdClient;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -20,8 +19,8 @@ public class GetAuthorizationUrlTest {
     @Parameters({"host", "redirectUrl", "opHost"})
     @Test
     public void test(String host, String redirectUrl, String opHost) {
-
-        ClientInterface client = OxdClient.newClient(host);
+        SetUpTest.beforeSuite(host, opHost, redirectUrl);
+        ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
@@ -30,5 +29,6 @@ public class GetAuthorizationUrlTest {
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams).dataAsResponse(GetAuthorizationUrlResponse.class);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
+        SetUpTest.afterSuite();
     }
 }
