@@ -192,7 +192,7 @@ public class RestResource {
             return CoreUtils.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
             LOG.error("Invalid params: " + params, e);
-            throw new ServerErrorException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
         }
     }
 
