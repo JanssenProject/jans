@@ -137,6 +137,11 @@ public class ValidationService {
         final Rp rp = rpService.getRp(oxdId);
         if (StringUtils.isNotBlank(rp.getSetupOxdId())) {
             oxdId = rp.getSetupOxdId();
+        } else {
+            Rp firstSetupClient = rpService.getFirstSetupClient();
+            if (firstSetupClient != null) {
+                oxdId = firstSetupClient.getOxdId();
+            }
         }
         LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
 
