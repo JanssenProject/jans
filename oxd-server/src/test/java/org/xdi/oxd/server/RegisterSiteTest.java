@@ -55,7 +55,7 @@ public class RegisterSiteTest {
         oxdId = resp.getOxdId();
     }
 
-    @Parameters({"host", "port"})
+    @Parameters({"host"})
     @Test(dependsOnMethods = {"register"})
     public void update(String host) throws IOException {
         notEmpty(oxdId);
