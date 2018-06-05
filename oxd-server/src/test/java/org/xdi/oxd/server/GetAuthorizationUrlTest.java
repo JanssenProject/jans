@@ -19,7 +19,6 @@ public class GetAuthorizationUrlTest {
     @Parameters({"host", "redirectUrl", "opHost"})
     @Test
     public void test(String host, String redirectUrl, String opHost) {
-        SetUpTest.beforeSuite(host, opHost, redirectUrl);
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
@@ -29,6 +28,5 @@ public class GetAuthorizationUrlTest {
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams).dataAsResponse(GetAuthorizationUrlResponse.class);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
-        SetUpTest.afterSuite();
     }
 }
