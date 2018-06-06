@@ -238,10 +238,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 if (ldapSessionId != null) {
                     boolean result = sessionIdService.remove(ldapSessionId);
                     if (!result) {
-                        log.error("Failed to remove session_id '{}' from LDAP", id);
+                        log.error("Failed to remove session_id '{}'", id);
                     }
                 } else {
-                    log.error("Failed to load session from LDAP by session_id: '{}'", id);
+                    log.error("Failed to load session by session_id: '{}'", id);
                 }
             }
         } catch (Exception e) {
@@ -263,10 +263,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 if (ldapSessionId != null) {
                     boolean result = sessionIdService.remove(ldapSessionId);
                     if (!result) {
-                        log.error("Failed to remove session_id '{}' from LDAP", id);
+                        log.error("Failed to remove session_id '{}'", id);
                     }
                 } else {
-                    log.error("Failed to load session from LDAP by session_id: '{}'", id);
+                    log.error("Failed to load session by session_id: '{}'", id);
                 }
             }
         } catch (Exception e) {
