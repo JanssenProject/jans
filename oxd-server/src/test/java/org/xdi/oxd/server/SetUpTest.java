@@ -72,8 +72,6 @@ public class SetUpTest {
     @AfterSuite
     public static void afterSuite() {
         try {
-            LOG.debug("Starting afterSuite ...");
-            Thread.sleep(25 * 1000); // hack: need to investigate why after suite is called before actual suite is finished
             LOG.debug("Running afterSuite ...");
             SUPPORT.after();
             ServerLauncher.shutdown(false);
