@@ -10,7 +10,6 @@ package org.gluu.persist.couchbase.operation;
 import java.util.List;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
-import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.exception.operation.AuthenticationException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.PersistenceException;
@@ -26,9 +25,8 @@ import org.gluu.persist.model.SearchScope;
 public interface BaseOperationService<P, T, M, E, S> {
 
     P getConnectionProvider();
-    void setConnectionProvider(P connectionProvider);
 
-    boolean authenticate(String key, String password) throws SearchException, AuthenticationException ;
+    boolean authenticate(String key, String password) throws SearchException, AuthenticationException;
 
     boolean addEntry(String key, T atts) throws DuplicateEntryException, PersistenceException;
 
@@ -40,8 +38,9 @@ public interface BaseOperationService<P, T, M, E, S> {
 
     T lookup(String key, String... attributes) throws SearchException;
 
+    // Change ordder pageSize and count
     <O> ListViewResponse<T> search(String key, E expression, SearchScope scope,
-            int startIndex, int pageLimit, int count, S[] orderBy,
+            int startIndex, int pageSize, int count, S[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException;
 
     boolean isBinaryAttribute(String attribute);

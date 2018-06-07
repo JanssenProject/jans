@@ -31,7 +31,7 @@ public interface PersistenceEntryManager {
 
     <T> boolean contains(Class<T> entryClass, String primaryKey);
 
-    <T> boolean contains(String baseDN, Class<T> entryClass, Filter filter);
+    <T> boolean contains(String primaryKey, Class<T> entryClass, Filter filter);
 
     <T> List<T> findEntries(Object entry);
 
@@ -107,14 +107,5 @@ public interface PersistenceEntryManager {
     void addDeleteSubscriber(DeleteNotifier subscriber);
 
     void removeDeleteSubscriber(DeleteNotifier subscriber);
-
-    // TODO: 3.2.0: Change name
-    String[] getLDIF(String dn);
-
-    // TODO: 3.2.0: Change name
-    List<String[]> getLDIF(String dn, String[] attributes);
-
-    // TODO: 3.2.0: Change name
-    List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes);
 
 }

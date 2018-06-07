@@ -496,7 +496,9 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                         List<AttributeData> ldapAttributesList = getAttributesFromLdapAttributesList(entry, ldapAttribute, propertyName);
                         for (AttributeData attributeData : ldapAttributesList) {
                             String ldapAttributeName = attributeData.getName();
-                            attributes.add(ldapAttributeName);
+                            if (!attributes.contains(ldapAttributeName)) {
+                                attributes.add(ldapAttributeName);
+                            }
                         }
                     }
                 }
@@ -510,7 +512,9 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                     ldapAttributeName = propertyName;
                 }
 
-                attributes.add(ldapAttributeName);
+                if (!attributes.contains(ldapAttributeName)) {
+                    attributes.add(ldapAttributeName);
+                }
             }
         }
 
@@ -1581,7 +1585,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
         Filter[] objectClassFilter = new Filter[objectClasses.length];
         for (int i = 0; i < objectClasses.length; i++) {
-            objectClassFilter[i] = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[i]);
+            objectClassFilter[i] = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[i]).arrayType();
         }
         Filter searchFilter = Filter.createANDFilter(objectClassFilter);
         if (filter != null) {

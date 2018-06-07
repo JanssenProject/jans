@@ -16,9 +16,15 @@ public class ListViewResponse<T> implements Serializable {
 
     private static final long serialVersionUID = -4211997747213144092L;
 
-    private int totalResults;
-    private int itemsPerPage;
     private int startIndex;
+
+    // TODO: Rename to totalEntriesCount
+    private int totalResults;
+    
+    // TODO: Rename to entriesCount
+    private int itemsPerPage;
+
+    // TODO: Rename to entries
     private List<T> result;
 
     public int getTotalResults() {

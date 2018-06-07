@@ -1,18 +1,19 @@
 /*
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2018, Gluu
  */
 
 package org.gluu.persist.couchbase.operation.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
-import org.gluu.persist.couchbase.operation.BaseOperationService;
+import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.exception.operation.AuthenticationException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
@@ -23,6 +24,7 @@ import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
 import com.couchbase.client.core.CouchbaseException;
@@ -41,6 +43,7 @@ import com.couchbase.client.java.query.dsl.Sort;
 import com.couchbase.client.java.query.dsl.path.GroupByPath;
 import com.couchbase.client.java.query.dsl.path.LimitPath;
 import com.couchbase.client.java.query.dsl.path.MutateLimitPath;
+import com.couchbase.client.java.query.dsl.path.OffsetPath;
 import com.couchbase.client.java.subdoc.DocumentFragment;
 import com.couchbase.client.java.subdoc.MutateInBuilder;
 import com.couchbase.client.java.subdoc.MutationSpec;
@@ -50,15 +53,10 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
-public class CouchbaseOperationsServiceImpl implements BaseOperationService<CouchbaseConnectionProvider, JsonObject, MutationSpec, Expression, Sort> {
+// TODO: authenticateImpl
+public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService<CouchbaseConnectionProvider, JsonObject, MutationSpec, Expression, Sort> {
 
     private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
-
-    public static final String DN = "dn";
-    public static final String UID = "uid";
-    public static final String SUCCESS = "success";
-    public static final String USER_PASSWORD = "userPassword";
-    public static final String OBJECT_CLASS = "objectClass";
 
     private CouchbaseConnectionProvider connectionProvider;
 
@@ -76,16 +74,11 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
     }
 
     @Override
-    public void setConnectionProvider(CouchbaseConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
-
-    @Override
-    public boolean authenticate(final String key, final String password) throws SearchException, AuthenticationException {
+    public boolean authenticate(final String key, final String password) throws SearchException {
         return authenticateImpl(key, password);
     }
 
-    private boolean authenticateImpl(final String key, final String password) throws SearchException, AuthenticationException {
+    private boolean authenticateImpl(final String key, final String password) throws SearchException {
         // TODO: Implemenet
         return true;
     }
@@ -113,9 +106,9 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
         for (Entry<String, Object> attrEntry : attrs.toMap().entrySet()) {
             String attributeName = attrEntry.getKey();
             Object attributeValue = attrEntry.getValue();
-            if (attributeName.equalsIgnoreCase(CouchbaseOperationsServiceImpl.OBJECT_CLASS)
-                    || attributeName.equalsIgnoreCase(CouchbaseOperationsServiceImpl.DN)
-                    || attributeName.equalsIgnoreCase(CouchbaseOperationsServiceImpl.USER_PASSWORD)) {
+            if (attributeName.equalsIgnoreCase(CouchbaseOperationService.OBJECT_CLASS)
+                    || attributeName.equalsIgnoreCase(CouchbaseOperationService.DN)
+                    || attributeName.equalsIgnoreCase(CouchbaseOperationService.USER_PASSWORD)) {
                 continue;
             } else {
                 if (attributeValue != null) {
@@ -171,7 +164,7 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument result = bucketMapping.getBucket().remove(key);
 
-            return result != null;
+            return (result != null) && (result.id() != null);
         } catch (CouchbaseException ex) {
             throw new ConnectionException("Failed to delete entry", ex);
         }
@@ -181,11 +174,12 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
     public boolean deleteRecursively(String key) throws PersistenceException {
         try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-            MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName())).where(Expression.s("META().id").like("key" + "%"));
+            MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
+                    .where(Expression.path("META().id").like(Expression.s(key + "%")));
 
             N1qlQueryResult result = bucketMapping.getBucket().query(deleteQuery);
             if (!result.finalSuccess()) {
-                throw new SearchException("Failed to delete entries. Query: '" + bucketMapping.toString() + "'");
+                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()), result.info().errorCount());
             }
             
             return true;
@@ -198,20 +192,23 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
     public JsonObject lookup(String key, String... attributes) throws SearchException {
         try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-            if (attributes == null) {
+            if (ArrayHelper.isEmpty(attributes)) {
                 JsonDocument doc = bucketMapping.getBucket().get(key);
                 if (doc != null) {
                     return doc.content();
                 }
                 
             } else {
-                N1qlQuery query = N1qlQuery.simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).limit(1));
+                N1qlQuery query = N1qlQuery.simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName()))
+                        .useKeys(Expression.s(key)).limit(1));
                 N1qlQueryResult result = bucketMapping.getBucket().query(query);
-                if (!result.finalSuccess() || (result.allRows().size() == 0)) {
-                    throw new SearchException("Failed to lookup entry");
+                if (!result.finalSuccess()) {
+                    throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()) , result.info().errorCount());
                 }
-
-                return result.allRows().get(0).value();
+                
+                if (result.allRows().size() == 1) {
+                    return result.allRows().get(0).value();
+                }
             }
         } catch (CouchbaseException ex) {
             throw new SearchException("Failed to lookup entry", ex);
@@ -222,7 +219,7 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
 
     @Override
     public <O> ListViewResponse<JsonObject> search(String key, Expression expression, SearchScope scope,
-            int startIndex, int pageLimit, int count, Sort[] orderBy,
+            int startIndex, int pageSize, int count, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
@@ -243,52 +240,56 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
         if (scope == null) {
             scopeExpression = null;
         } else if (SearchScope.BASE == scope) {
-            scopeExpression = Expression.s("META().id").eq("key");
+            scopeExpression = Expression.path("META().id").eq(Expression.s(key));
         } else {
-            scopeExpression = Expression.s("META().id").like("key" + "%");
+            scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"));
         }
 
-        Expression finalExpression = scopeExpression.add(expression);
+        Expression finalExpression = scopeExpression;
+        if (expression != null) {
+            finalExpression = scopeExpression.and(expression);
+        }
 
         String[] select = attributes;
         if (select == null) {
-            select = new String[] { "*" };
+            select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN};
+        } else {
+            boolean hasDn = Arrays.asList(select).contains(CouchbaseOperationService.DN);
+            if (!hasDn) {
+                select = ArrayHelper.arrayMerge(select, new String[] { CouchbaseOperationService.DN });
+            }
         }
-        GroupByPath selectQuery = Select.select(select).from(Expression.i(bucketMapping.getBucketName())).where(finalExpression);
+        GroupByPath selectQuery = Select.select(select).from(Expression.i(bucketMapping.getBucketName())).as("gluu_doc").where(finalExpression);
         
         LimitPath baseQuery = selectQuery;
         if (orderBy != null) {
             baseQuery = selectQuery.orderBy(orderBy);
         }
 
-        boolean useCount = count > 0;
-
-        if (useCount) {
-            // Use paged result to limit search
-            pageLimit = count;
-        }
-
         List<N1qlQueryRow> searchResultList = new ArrayList<N1qlQueryRow>();
 
         N1qlQueryResult lastResult; 
-        if ((pageLimit > 0) || (startIndex > 0)) {
-            if (pageLimit == 0) {
-                // Default page size
-                pageLimit = 100;
-            }
-
+        if (pageSize > 0) {
             boolean collectSearchResult;
 
             Statement query = null;
+            int currentLimit;
             try {
                 List<N1qlQueryRow> lastSearchResultList;
+                int resultCount = 0; 
                 do {
                     collectSearchResult = true;
+                    
+                    currentLimit = pageSize;
+                    if (count > 0) {
+                        currentLimit = Math.min(pageSize, count - resultCount);
+                    }
 
-                    query = baseQuery.limit(pageLimit).offset(startIndex);
+                    query = baseQuery.limit(currentLimit).offset(startIndex + resultCount);
+                    System.out.println(query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
-                        throw new SearchException("Failed to search entries. Query: '" + query.toString() + "'");
+                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()), lastResult.info().errorCount());
                     }
                     
                     lastSearchResultList = lastResult.allRows();
@@ -304,22 +305,33 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
                         List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
                         ldapBatchOperation.performAction(entries);
                     }
+                    
+                    resultCount += lastSearchResultList.size();
 
-                    if (useCount) {
+                    if ((count > 0) && (resultCount >= count)) {
                         break;
                     }
-                } while (lastSearchResultList.size() > 0);
+                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() >= currentLimit));
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
             }
         } else {
             try {
-                lastResult = bucket.query(baseQuery);
+                Statement query = baseQuery;
+                if (count > 0) {
+                    query = ((LimitPath) query).limit(count);
+                }
+                if (startIndex > 0) {
+                    query = ((OffsetPath) query).offset(startIndex);
+                }
+
+                System.out.println(query);
+                lastResult = bucket.query(query);
                 if (!lastResult.finalSuccess()) {
-                    throw new SearchException("Failed to search entries. Query: '" + baseQuery.toString() + "'");
+                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()), lastResult.info().errorCount());
                 }
                 
-                searchResultList = lastResult.allRows();
+                searchResultList.addAll(lastResult.allRows());
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to search entries. Query: '" + baseQuery.toString() + "'", ex);
             }
@@ -331,18 +343,19 @@ public class CouchbaseOperationsServiceImpl implements BaseOperationService<Couc
         }
 
         ListViewResponse<JsonObject> result = new ListViewResponse<JsonObject>();
+        result.setResult(resultRows);
         result.setItemsPerPage(resultRows.size());
         result.setStartIndex(startIndex);
         
         if (returnCount) {
             log.debug("Calculating count.. Query: '" + baseQuery.toString() + "'");
-            GroupByPath selectCountQuery = Select.select("count(*)").from(Expression.i(bucketMapping.getBucketName())).where(finalExpression);
+            GroupByPath selectCountQuery = Select.select("COUNT(*) as TOTAL").from(Expression.i(bucketMapping.getBucketName())).where(finalExpression);
             try {
-                N1qlQueryResult countResult = bucket.query(baseQuery);
-                if (!lastResult.finalSuccess()) {
-                    throw new SearchException("Failed to calculate count entries. Query: '" + selectCountQuery.toString() + "'");
+                N1qlQueryResult countResult = bucket.query(selectCountQuery);
+                if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
+                    throw new SearchException(String.format("\"Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()), countResult.info().errorCount());
                 }
-                result.setTotalResults(countResult.info().resultCount());
+                result.setTotalResults(countResult.allRows().get(0).value().getInt("TOTAL"));
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to calculate count entries. Query: '" + selectCountQuery.toString() + "'", ex);
             }

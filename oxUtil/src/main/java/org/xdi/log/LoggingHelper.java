@@ -20,7 +20,7 @@ public final class LoggingHelper {
         appender.start();
         config.addAppender(appender);
         AppenderRef[] refs = new AppenderRef[] {AppenderRef.createAppenderRef(appender.getName(), null, null)};
-        LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.ALL, LogManager.ROOT_LOGGER_NAME, "true",
+        LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.DEBUG, LogManager.ROOT_LOGGER_NAME, "true",
                 refs, null, config, null);
         loggerConfig.addAppender(appender, null, null);
         config.addLogger(LogManager.ROOT_LOGGER_NAME, loggerConfig);

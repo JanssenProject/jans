@@ -8,29 +8,25 @@
 package org.gluu.persist.couchbase.impl;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
+import org.gluu.persist.couchbase.model.ParsedKey;
+import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.mapping.EntryPersistenceException;
 import org.gluu.persist.exception.mapping.MappingException;
 import org.gluu.persist.exception.operation.AuthenticationException;
-import org.gluu.persist.exception.operation.ConnectionException;
+import org.gluu.persist.exception.operation.KeyConversionException;
 import org.gluu.persist.exception.operation.SearchException;
-import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
@@ -47,169 +43,30 @@ import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.Sort;
+import com.couchbase.client.java.subdoc.MutationSpec;
 
 /**
  * Couchbase Entry Manager
  *
  * @author Yuriy Movchan Date: 05/14/2018
  */
+// TODO: Review meta_doc_id. We must have it in every JsonDocument
 public class CouchbaseEntryManager extends BaseEntryManager implements Serializable {
 
-    @Override
-    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize,
-            String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean authenticate(String bindDn, String password) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean authenticate(String userName, String password, String baseDN) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public boolean destroy() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void addDeleteSubscriber(DeleteNotifier subscriber) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeDeleteSubscriber(DeleteNotifier subscriber) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public String[] getLDIF(String dn) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<String[]> getLDIF(String dn, String[] attributes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected void persist(String dn, List<AttributeData> attributes) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public <T> T merge(T entry) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    protected <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
-            List<AttributeDataModification> attributeDataModifications) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void remove(Object entry) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected void remove(String dn) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeRecursively(String dn) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected boolean contains(String baseDN, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    protected List<AttributeData> find(String dn, String... attributes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String encodeGeneralizedTime(Date date) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Date decodeGeneralizedTime(String date) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            JsonObject ... searchResultEntries) {
-        return null;
-    }
-/*
-    private static final long serialVersionUID = -2554615610981223105L;
+    private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
     private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
-    private static final CouchbaseSearchScopeConverter SEARCH_SCOPE_CONVERTER = new CouchbaseSearchScopeConverter();
+    private static final CouchbaseKeyConverter KEY_CONVERTER = new CouchbaseKeyConverter();
 
-    private transient CouchbaseOperationsServiceImpl operationService;
-    private transient List<DeleteNotifier> subscribers;
-
-    public CouchbaseEntryManager() {
-    }
+    private CouchbaseOperationsServiceImpl operationService;
+    private List<DeleteNotifier> subscribers;
 
     protected CouchbaseEntryManager(CouchbaseOperationsServiceImpl operationService) {
         this.operationService = operationService;
@@ -218,14 +75,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public boolean destroy() {
-        boolean destroyResult = false;
-        if (this.operationService != null) {
-            destroyResult = this.operationService.destroy();
-        } else {
-            destroyResult = true;
+        if (this.operationService == null) {
+            return true;
         }
 
-        return destroyResult;
+        return this.operationService.destroy();
     }
 
     public CouchbaseOperationsServiceImpl getOperationService() {
@@ -247,29 +101,23 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
         if (isLdapSchemaEntry(entryClass)) {
-            if (getSupportedLDAPVersion() > 2) {
-                return merge(entry, true, AttributeModificationType.ADD);
-            } else {
-                throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
-            }
+            throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
         } else {
             return merge(entry, false, null);
         }
     }
 
     @Override
-    protected <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
+    protected <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
             List<AttributeDataModification> attributeDataModifications) {
         // Update object classes if entry contains custom object classes
-        if (getSupportedLDAPVersion() > 2) {
-            if (!isSchemaUpdate) {
-                String[] objectClasses = getObjectClasses(entry, entryClass);
-                String[] objectClassesFromLdap = attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getValues();
+        if (!isSchemaUpdate) {
+            String[] objectClasses = getObjectClasses(entry, entryClass);
+            String[] objectClassesFromDb = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase()).getValues();
 
-                if (!Arrays.equals(objectClassesFromLdap, objectClasses)) {
-                    attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                            new AttributeData(OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClassesFromLdap)));
-                }
+            if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
+                attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
+                        new AttributeData(OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClassesFromDb)));
             }
         }
     }
@@ -279,47 +127,34 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
         if (isLdapSchemaEntry(entryClass)) {
-            if (getSupportedLDAPVersion() > 2) {
-                merge(entry, true, AttributeModificationType.REMOVE);
-            } else {
-                throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
-            }
-            return;
+            throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
         }
 
         Object dnValue = getDNValue(entry, entryClass);
-
-        log.debug(String.format("LDAP entry to remove: %s", dnValue.toString()));
+        
+        log.debug("LDAP entry to remove: '{}'", dnValue.toString());
 
         remove(dnValue.toString());
     }
 
     @Override
     protected void persist(String dn, List<AttributeData> attributes) {
-        List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
+        JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
             String[] attributeValues = attribute.getValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
-                if (operationService.isCertificateAttribute(attributeName)) {
-                    byte[][] binaryValues = toBinaryValues(attributeValues);
-
-                    ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
-                } else {
-                    ldapAttributes.add(new Attribute(attributeName, attributeValues));
-                }
+                jsonObject.put(attributeName, attributeValues);
             }
         }
 
         // Persist entry
         try {
-            boolean result = this.operationService.addEntry(dn, ldapAttributes);
+            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
             }
-        } catch (ConnectionException ex) {
-            throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex.getCause());
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex);
         }
@@ -329,7 +164,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
         // Update entry
         try {
-            List<Modification> modifications = new ArrayList<Modification>(attributeDataModifications.size());
+            List<MutationSpec> modifications = new ArrayList<MutationSpec>(attributeDataModifications.size());
             for (AttributeDataModification attributeDataModification : attributeDataModifications) {
                 AttributeData attribute = attributeDataModification.getAttribute();
                 AttributeData oldAttribute = attributeDataModification.getOldAttribute();
@@ -348,15 +183,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
-                Modification modification = null;
+                MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(ModificationType.ADD, attributeName, attributeValues);
+                    modification = createModification(Mutation.DICT_ADD, attributeName, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
+                        modification = createModification(Mutation.DELETE, oldAttributeName, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
                         if (attributeValues.length == 1) {
-                            modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
+                            modification = createModification(Mutation.REPLACE, attributeName, attributeValues);
                         } else {
                             String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
                             String[] newValues = ArrayHelper.arrayClone(attributeValues);
@@ -396,13 +231,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                             }
 
                             if (removeValues.size() > 0) {
-                                Modification removeModification = createModification(ModificationType.DELETE, attributeName,
+                                MutationSpec removeModification = createModification(Mutation.DELETE, attributeName,
                                         removeValues.toArray(new String[removeValues.size()]));
                                 modifications.add(removeModification);
                             }
 
                             if (addValues.size() > 0) {
-                                Modification addModification = createModification(ModificationType.ADD, attributeName,
+                                MutationSpec addModification = createModification(Mutation.DICT_ADD, attributeName,
                                         addValues.toArray(new String[addValues.size()]));
                                 modifications.add(addModification);
                             }
@@ -416,13 +251,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
 
             if (modifications.size() > 0) {
-                boolean result = this.operationService.updateEntry(dn, modifications);
+                boolean result = operationService.updateEntry(toCouchbaseKey(dn).getKey(), modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
                 }
             }
-        } catch (ConnectionException ex) {
-            throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex.getCause());
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex);
         }
@@ -435,7 +268,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            this.operationService.delete(dn);
+            operationService.delete(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -447,51 +280,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public void removeRecursively(String dn) {
         try {
-            if (this.operationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
-                for (DeleteNotifier subscriber : subscribers) {
-                    subscriber.onBeforeRemove(dn);
-                }
-                this.operationService.deleteRecursively(dn);
-                for (DeleteNotifier subscriber : subscribers) {
-                    subscriber.onAfterRemove(dn);
-                }
-            } else {
-                removeSubtreeThroughIteration(dn);
+            for (DeleteNotifier subscriber : subscribers) {
+                subscriber.onBeforeRemove(dn);
+            }
+            operationService.deleteRecursively(toCouchbaseKey(dn).getKey());
+            for (DeleteNotifier subscriber : subscribers) {
+                subscriber.onAfterRemove(dn);
             }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
-    private void removeSubtreeThroughIteration(String dn) {
-        SearchResult searchResult = null;
-        try {
-            searchResult = this.operationService.search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), 0, 0, null, "dn");
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
-            }
-        } catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
-        }
-
-        List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntryCount());
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            removeEntriesDn.add(searchResultEntry.getDN());
-        }
-
-        Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
-
-        for (String removeEntryDn : removeEntriesDn) {
-            remove(removeEntryDn);
-        }
-    }
-
     @Override
     protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
-        // Load entry
-
         try {
-            SearchResultEntry entry = this.operationService.lookup(dn, ldapReturnAttributes);
+            // Load entry
+            ParsedKey keyWithInum = toCouchbaseKey(dn);
+            JsonObject entry = operationService.lookup(keyWithInum.getKey(), ldapReturnAttributes);
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -502,34 +308,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn));
     }
-*/
-/*
 
     @Override
-    public JsonObject lookup(String key) throws SearchException {
-        return lookup(key, (String[]) null);
-    }
-
-    @Override
-    public List<JsonObject> search(String key, Expression expression, int pageLimit, int count) throws SearchException {
-        return search(key, expression, pageLimit, count, (String[]) null);
-    }
-
-    @Override
-    public List<JsonObject> search(String key, Expression expression, int pageLimit, int count, String... attributes) throws SearchException {
-        return search(key, expression, SearchScope.SUB, pageLimit, count, attributes);
-    }
-
-    @Override
-    public List<JsonObject> search(String key, Expression expression, SearchScope scope, int pageLimit, int count,
-            String... attributes) throws SearchException {
-        return search(key, expression, scope, null, 0, pageLimit, count, attributes);
-    }
-*/
-/*
-    @Override
+    // TODO: Reuse findListViewResponse after changing method signature
     public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize) {
+            BatchOperation<T> batchOperation, int startIndex, int count, int pageLimit) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -550,35 +333,38 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         } else {
             searchFilter = filter;
         }
-        SearchResult searchResult = null;
-        try {
-            LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
-                    propertiesAnnotations);
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
-                    startIndex, chunkSize, sizeLimit, null, currentLdapReturnAttributes);
 
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+        // Prepare default sort
+        Sort[] defaultSort = getDefaultSort(entryClass);
+
+        ListViewResponse<JsonObject> searchResult = null;
+        ParsedKey keyWithInum = null;
+        try {
+            CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass,
+                    propertiesAnnotations);
+            keyWithInum = toCouchbaseKey(baseDN);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, startIndex, pageLimit, count,
+                    defaultSort, batchOperationWraper, false, currentLdapReturnAttributes);
+
+            if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        if (searchResult.getEntryCount() == 0) {
+        if (searchResult.getItemsPerPage() == 0) {
             return new ArrayList<T>(0);
         }
 
-        List<T> entries = createEntities(entryClass, propertiesAnnotations,
-                searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
-
-        // Default sort if needed
-        sortEntriesIfNeeded(entryClass, entries);
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
+                searchResult.getResult().toArray(new JsonObject[searchResult.getItemsPerPage()]));
 
         return entries;
     }
 
     @Override
-    public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize,
+    public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int pageLimit,
             String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
@@ -600,32 +386,49 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         } else {
             searchFilter = filter;
         }
+        
+        // Prepare default sort
+        Sort[] defaultSort = getDefaultSort(entryClass);
+        
+        if (StringHelper.isNotEmpty(sortBy)) {
+            Sort requestedSort = buildSort(sortBy, sortOrder);
+            
+            if (ArrayHelper.isEmpty(defaultSort)) {
+                defaultSort = new Sort[] { requestedSort };
+            } else {
+                defaultSort = ArrayHelper.arrayMerge(new Sort[] {requestedSort}, defaultSort);
+            }
+        }
 
-        SearchResult searchResult = null;
-        ListViewResponse<T> vlvResponse = new ListViewResponse<T>();
+        ListViewResponse<JsonObject> searchResult = null;
+        ParsedKey keyWithInum = null;
         try {
+            keyWithInum = toCouchbaseKey(baseDN);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB,
+                    startIndex, pageLimit, count, defaultSort, null, true, currentLdapReturnAttributes);
 
-            searchResult = this.operationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
-                    startIndex, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
-
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
-
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        if (searchResult.getEntryCount() == 0) {
-            vlvResponse.setResult(new ArrayList<T>(0));
-            return vlvResponse;
+        ListViewResponse<T> result = new ListViewResponse<T>();
+        result.setItemsPerPage(searchResult.getItemsPerPage());
+        result.setStartIndex(searchResult.getStartIndex());
+        result.setTotalResults(searchResult.getTotalResults());
+
+        if (searchResult.getItemsPerPage() == 0) {
+            result.setResult(new ArrayList<T>(0));
+            return result;
         }
+        
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
+                searchResult.getResult().toArray(new JsonObject[searchResult.getItemsPerPage()]));
+        result.setResult(entries);
 
-        List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations,
-                searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
-        vlvResponse.setResult(entries);
-
-        return vlvResponse;
+        return result;
     }
 
     @Override
@@ -642,31 +445,32 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             searchFilter = filter;
         }
 
-        SearchResult searchResult = null;
+        ListViewResponse<JsonObject> searchResult = null;
         try {
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), 1, 1, null, ldapReturnAttributes);
-            if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            ParsedKey keyWithInum = toCouchbaseKey(baseDN);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 1, 0, 1, null, null, false, ldapReturnAttributes);
+            if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
-        } catch (SearchException ex) {
-            if (!(ResultCode.NO_SUCH_OBJECT_INT_VALUE == ex.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-            }
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        return (searchResult != null) && (searchResult.getEntryCount() > 0);
+        return (searchResult != null) && (searchResult.getItemsPerPage() > 0);
     }
 
-    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
+    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, ParsedKey baseDn,
             JsonObject ... searchResultEntries) {
         List<T> result = new ArrayList<T>(searchResultEntries.length);
-        Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>(100);
+        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
 
         int count = 0;
         for (int i = 0; i < searchResultEntries.length; i++) {
             count++;
-            JsonDocument entry = searchResultEntries[i];
-            entriesAttributes.put(entry.getDN(), getAttributeDataList(entry));
+            JsonObject entry = searchResultEntries[i];
+//            String key = entry.getString(CouchbaseOperationService.META_DOC_ID);
+            String dn = entry.getString(CouchbaseOperationService.DN);
+            entriesAttributes.put(dn, getAttributeDataList(entry));
 
             // Remove reference to allow java clean up object
             searchResultEntries[i] = null;
@@ -676,7 +480,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 List<T> currentResult = createEntities(entryClass, propertiesAnnotations, entriesAttributes);
                 result.addAll(currentResult);
 
-                entriesAttributes = new HashMap<String, List<AttributeData>>(100);
+                entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
                 count = 0;
             }
         }
@@ -687,54 +491,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return result;
     }
 
-    @Deprecated
-    private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            JsonDocument ... searchResultEntries) {
-
-        List<T> result = new LinkedList<T>();
-        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
-
-        int count = 0;
-        for (int i = 0; i < searchResultEntries.length; i++) {
-
-            count++;
-
-            JsonDocument entry = searchResultEntries[i];
-
-            LinkedList<AttributeData> attributeDataLinkedList = new LinkedList<AttributeData>();
-            attributeDataLinkedList.addAll(getAttributeDataList(entry));
-            entriesAttributes.put(entry.getDN(), attributeDataLinkedList);
-
-            // Remove reference to allow java clean up object
-            searchResultEntries[i] = null;
-
-            // Allow java to clean up temporary objects
-            if (count >= 100) {
-
-                List<T> currentResult = new LinkedList<T>();
-                currentResult.addAll(createEntities(entryClass, propertiesAnnotations, entriesAttributes, false));
-                result.addAll(currentResult);
-
-                entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
-                count = 0;
-            }
-        }
-
-        List<T> currentResult = createEntities(entryClass, propertiesAnnotations, entriesAttributes, false);
-        result.addAll(currentResult);
-
-        return result;
-    }
-
-    private List<AttributeData> getAttributeDataList(JsonDocument entry) {
+    private List<AttributeData> getAttributeDataList(JsonObject entry) {
         if (entry == null) {
             return null;
         }
 
         List<AttributeData> result = new ArrayList<AttributeData>();
-        JsonObject content = entry.content();
-        for (String attributeName : content.getNames()) {
-            Object attributeObject = content.get(attributeName);
+        for (String attributeName : entry.getNames()) {
+            Object attributeObject = entry.get(attributeName);
 
             String[] attributeValueStrings;
             if (attributeObject == null) {
@@ -755,19 +519,27 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public boolean authenticate(String userName, String password, String baseDN) {
         try {
-            return operationService.authenticate(userName, password, baseDN);
-        } catch (ConnectionException ex) {
-            throw new AuthenticationException(String.format("Failed to authenticate user: %s", userName), ex);
+            Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
+            ListViewResponse<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter), SearchScope.SUB, 0, 0, 1, null, null, false);
+            if ((searchResult == null) || (searchResult.getItemsPerPage() != 1)) {
+                return false;
+            }
+
+            String bindDn = searchResult.getResult().get(0).getString(CouchbaseOperationService.DN);
+
+            return authenticate(bindDn, password);
         } catch (SearchException ex) {
             throw new AuthenticationException(String.format("Failed to find user DN: %s", userName), ex);
+        } catch (Exception ex) {
+            throw new AuthenticationException(String.format("Failed to authenticate user: %s", userName), ex);
         }
     }
 
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(bindDn, password);
-        } catch (ConnectionException ex) {
+            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), password);
+        } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
     }
@@ -794,8 +566,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         CountBatchOperation<T> batchOperation = new CountBatchOperation<T>();
 
         try {
-            LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
-            operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper, 0, 100, 0, null,
+            CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation);
+            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 0, 100, 0, null, batchOperationWraper, false,
                     ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -805,87 +577,45 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return batchOperation.getCountEntries();
     }
 
-    @Override
-    public String[] getLDIF(String dn) {
-        String[] ldif = null;
-        try {
-            ldif = this.operationService.lookup(dn).toLDIF();
-        } catch (ConnectionException e) {
-            log.error("Failed get ldif from " + dn, e);
-        }
-
-        return ldif;
-    }
-
-    @Override
-    public List<String[]> getLDIF(String dn, String[] attributes) {
-        SearchResult searchResult;
-        try {
-            searchResult = this.operationService.search(dn, toLdapFilter(Filter.create("objectclass=*")), toLdapSearchScope(SearchScope.BASE), -1,
-                    0, null, attributes);
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s", dn));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", dn, null), ex);
-        }
-
-        List<String[]> result = new ArrayList<String[]>();
-
-        if (searchResult.getEntryCount() == 0) {
-            return result;
-        }
-
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            result.add(searchResultEntry.toLDIF());
-        }
-
-        return result;
-    }
-
-    @Override
-    public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
-        SearchResult searchResult;
-        try {
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), -1, 0, null, attributes);
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-        }
-
-        List<String[]> result = new ArrayList<String[]>();
-
-        if (searchResult.getEntryCount() == 0) {
-            return result;
-        }
-
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            result.add(searchResultEntry.toLDIF());
-        }
-
-        return result;
-    }
-
-    private Modification createModification(final ModificationType modificationType, final String attributeName, final String... attributeValues) {
+    private MutationSpec createModification(final Mutation type, final String attributeName, final String... attributeValues) {
         String realAttributeName = attributeName;
-        if (operationService.isCertificateAttribute(realAttributeName)) {
-            realAttributeName += ";binary";
-            byte[][] binaryValues = toBinaryValues(attributeValues);
 
-            return new Modification(modificationType, realAttributeName, binaryValues);
-        }
-
-        return new Modification(modificationType, realAttributeName, attributeValues);
+        return new MutationSpec(type, realAttributeName, attributeValues);
     }
 
-    private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws SearchException {
+    protected Sort buildSort(String sortBy, SortOrder sortOrder) {
+        Sort requestedSort = null; 
+        if (SortOrder.DESCENDING == sortOrder) {
+            requestedSort = Sort.desc(Expression.path(sortBy));
+        } else if (SortOrder.ASCENDING == sortOrder) {
+            requestedSort = Sort.asc(Expression.path(sortBy));
+        } else {
+            requestedSort = Sort.def(Expression.path(sortBy));
+        }
+        return requestedSort;
+    }
+
+    protected <T> Sort[] getDefaultSort(Class<T> entryClass) {
+        String[] sortByProperties = getEntrySortBy(entryClass);
+
+        if (ArrayHelper.isEmpty(sortByProperties)) {
+            return null;
+        }
+        
+        Sort[] sort = new Sort[sortByProperties.length];
+        for (int i = 0; i < sortByProperties.length; i++) {
+            sort[i] = Sort.def(Expression.path(sortByProperties[i]));
+        }
+
+        return sort;
+    }
+
+    private Expression toCouchbaseFilter(Filter genericFilter) throws SearchException {
         return FILTER_CONVERTER.convertToLdapFilter(genericFilter);
     }
 
-    private com.unboundid.ldap.sdk.SearchScope toLdapSearchScope(SearchScope scope) throws SearchScopeException {
-        return SEARCH_SCOPE_CONVERTER.convertToLdapSearchScope(scope);
+    private ParsedKey toCouchbaseKey(String dn) throws KeyConversionException {
+        return KEY_CONVERTER.convertToKey(dn);
     }
 
     private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
@@ -906,5 +636,17 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             return countEntries;
         }
     }
-*/
+
+    @Override
+    public String encodeGeneralizedTime(Date date) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Date decodeGeneralizedTime(String date) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

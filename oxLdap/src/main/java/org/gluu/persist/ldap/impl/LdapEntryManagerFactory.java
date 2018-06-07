@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * LDAP Netry Manager Factory
+ * LDAP Entry Manager Factory
  *
  * @author Yuriy Movchan Date: 02/02/2018
  */
