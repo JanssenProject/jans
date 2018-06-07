@@ -767,4 +767,11 @@ public class SessionIdService {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
     }
+
+    public void refreshSessionId() {
+        SessionId sessionId = getSessionId();
+        if (sessionId != null) {
+            updateSessionId(sessionId, true);
+        }
+    }
 }
