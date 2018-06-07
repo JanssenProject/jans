@@ -21,6 +21,8 @@ public class Filter {
     private String[] subAny;
     private String subFinal;
 
+    private boolean arrayAttribute = false;
+
     public Filter(FilterType type) {
         this.type = type;
     }
@@ -165,6 +167,15 @@ public class Filter {
 
     public final void setSubFinal(String subFinal) {
         this.subFinal = subFinal;
+    }
+
+    public final boolean isArrayAttribute() {
+        return arrayAttribute;
+    }
+
+    public Filter arrayType() {
+        this.arrayAttribute = true;
+        return this;
     }
 
     @Override

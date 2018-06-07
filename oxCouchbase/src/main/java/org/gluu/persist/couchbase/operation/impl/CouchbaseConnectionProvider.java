@@ -9,7 +9,6 @@ package org.gluu.persist.couchbase.operation.impl;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,13 +36,12 @@ import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.SimpleN1qlQuery;
 import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.subdoc.DocumentFragment;
-import static com.couchbase.client.java.query.Select.select;
-import static com.couchbase.client.java.query.dsl.Expression.i;
 /**
  * Perform cluster initialization and open required buckets
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
+// TODO: getBucketMappingByKey
 public class CouchbaseConnectionProvider {
 
     private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
@@ -56,9 +54,8 @@ public class CouchbaseConnectionProvider {
     private String userName;
     private String userPassword;
 
-    private int creationResultCode;
-
     private CouchbaseCluster cluster;
+    private int creationResultCode;
     private HashMap<String, BucketMapping> bucketToBaseNameMapping;
     private HashMap<String, BucketMapping> baseNameToBucketMapping;
 
@@ -228,7 +225,7 @@ public class CouchbaseConnectionProvider {
 
     public BucketMapping getBucketMappingByKey(String key) {
         // TODO Auto-generated method stub
-        return null;
+        return baseNameToBucketMapping.values().iterator().next();
     }
 
     public int getCreationResultCode() {
@@ -241,14 +238,6 @@ public class CouchbaseConnectionProvider {
 
     public String[] getServers() {
         return servers;
-    }
-
-    public final String getUserName() {
-        return userName;
-    }
-
-    public final String getUserPassword() {
-        return userPassword;
     }
 
     public ArrayList<String> getBinaryAttributes() {
@@ -287,8 +276,9 @@ public class CouchbaseConnectionProvider {
         provider.create();
 
         System.err.println(provider.isConnected());
+        importSql(provider.getBucketMappingByKey("gluu").getBucket());
 
-        selectListByOC(provider);
+        //selectListByOC(provider);
 //        updatePerson2(provider, "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
 //        JsonDocument doc = getPerson(provider, "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
 //        byte[] data = new byte[200];
@@ -383,7 +373,7 @@ public class CouchbaseConnectionProvider {
 
     protected static void importSql(Bucket bucket) {
         try {
-            FileReader inFile = new FileReader("V:/gluu.sql");
+            FileReader inFile = new FileReader("V:/1.sql");
             BufferedReader inStream = new BufferedReader(inFile);
             String inString;
 
@@ -399,7 +389,12 @@ public class CouchbaseConnectionProvider {
                 // JsonObject.fromJson(doc_value)));
 
                 if (!result.finalSuccess()) {
-                    System.out.println(query);
+                    query = N1qlQuery.simple(inString.replaceAll("r's", "r\'s"));
+                    result = bucket.query(query);
+                    if (!result.finalSuccess()) {
+                        System.out.println(inString);
+                        System.out.println(result.errors());
+                    }
                 }
             }
             inStream.close();

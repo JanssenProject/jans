@@ -7,13 +7,19 @@
 
 package org.gluu.persist.couchbase.operation;
 
-import org.gluu.persist.couchbase.model.BucketMapping;
-
 /**
  * Couchbase operation service interface
  *
  * @author Yuriy Movchan Date: 05/14/2018
  */
 public interface CouchbaseOperationService<P, T, M, E, S> extends BaseOperationService<P, T, M, E, S> {
+
+    final String DN = "dn";
+    final String UID = "uid";
+    final String SUCCESS = "success";
+    final String USER_PASSWORD = "userPassword";
+    final String OBJECT_CLASS = "objectClass";
+
+    final String META_DOC_ID = "meta_doc_id";
 
 }

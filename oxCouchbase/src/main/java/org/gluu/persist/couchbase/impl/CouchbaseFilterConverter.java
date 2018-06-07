@@ -54,23 +54,27 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-            return Expression.path(Expression.s(genericFilter.getAttributeName())).eq(Expression.s(genericFilter.getAssertionValue()));
+            if (genericFilter.isArrayAttribute()) {
+                return Expression.path(Expression.s(genericFilter.getAssertionValue()).in(Expression.path(genericFilter.getAttributeName())));
+            } else {
+                return Expression.path(Expression.path(genericFilter.getAttributeName())).eq(Expression.s(genericFilter.getAssertionValue()));
+            }
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return Expression.path(Expression.s(genericFilter.getAttributeName())).lte(Expression.s(genericFilter.getAssertionValue()));
+            return Expression.path(Expression.path(genericFilter.getAttributeName())).lte(Expression.s(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return Expression.path(Expression.s(genericFilter.getAttributeName())).gte(Expression.s(genericFilter.getAssertionValue()));
+            return Expression.path(Expression.path(genericFilter.getAttributeName())).gte(Expression.s(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.PRESENCE == type) {
-            return Expression.path(Expression.s(genericFilter.getAttributeName())).exists();
+            return Expression.path(Expression.path(genericFilter.getAttributeName())).exists();
         }
 
         if (FilterType.APPROXIMATE_MATCH == type) {
-            throw new SearchException("Convertion from APPROXIMATE_MATCH Ldap filter to couchbasefilter is not implemented");
+            throw new SearchException("Convertion from APPROXIMATE_MATCH LDAP filter to Couchbase filter is not implemented");
         }
 
         if (FilterType.SUBSTRING == type) {
@@ -91,7 +95,7 @@ public class CouchbaseFilterConverter {
             if (genericFilter.getSubFinal() != null) {
                 like.append(genericFilter.getSubFinal());
             }
-            return Expression.path(Expression.s(genericFilter.getAttributeName())).like(Expression.s(like.toString()));
+            return Expression.path(Expression.path(genericFilter.getAttributeName()).like(Expression.s(like.toString())));
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));

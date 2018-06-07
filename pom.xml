@@ -71,6 +71,7 @@
 		<module>oxLdap-annotations</module>
 		<module>oxLdapSample</module>
 		<module>oxCouchbase</module>
+		<module>oxCouchbaseSample</module>
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
@@ -209,6 +210,11 @@
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-slf4j-impl</artifactId>
 				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<dependency>
