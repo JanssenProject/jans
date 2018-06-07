@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
-import org.gluu.persist.exception.operation.AuthenticationException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.PersistenceException;
@@ -54,9 +53,10 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  * @author Yuriy Movchan Date: 05/10/2018
  */
 // TODO: authenticateImpl
-public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService<CouchbaseConnectionProvider, JsonObject, MutationSpec, Expression, Sort> {
+public class CouchbaseOperationsServiceImpl
+        implements CouchbaseOperationService<CouchbaseConnectionProvider, JsonObject, MutationSpec, Expression, Sort> {
 
-    private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
     private CouchbaseConnectionProvider connectionProvider;
 
@@ -106,8 +106,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         for (Entry<String, Object> attrEntry : attrs.toMap().entrySet()) {
             String attributeName = attrEntry.getKey();
             Object attributeValue = attrEntry.getValue();
-            if (attributeName.equalsIgnoreCase(CouchbaseOperationService.OBJECT_CLASS)
-                    || attributeName.equalsIgnoreCase(CouchbaseOperationService.DN)
+            if (attributeName.equalsIgnoreCase(CouchbaseOperationService.OBJECT_CLASS) || attributeName.equalsIgnoreCase(CouchbaseOperationService.DN)
                     || attributeName.equalsIgnoreCase(CouchbaseOperationService.USER_PASSWORD)) {
                 continue;
             } else {
@@ -146,12 +145,12 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     throw new UnsupportedOperationException("Operation type '" + type + "' is not implemented");
                 }
             }
-            
+
             DocumentFragment<Mutation> result = builder.execute();
             if (result.size() > 0) {
                 return result.status(0).isSuccess();
             }
-            
+
             return false;
         } catch (final CouchbaseException ex) {
             throw new SearchException("Failed to update entry", ex);
@@ -179,9 +178,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
             N1qlQueryResult result = bucketMapping.getBucket().query(deleteQuery);
             if (!result.finalSuccess()) {
-                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()), result.info().errorCount());
+                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()),
+                        result.info().errorCount());
             }
-            
+
             return true;
         } catch (CouchbaseException ex) {
             throw new ConnectionException("Failed to delete entry", ex);
@@ -197,15 +197,15 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 if (doc != null) {
                     return doc.content();
                 }
-                
+
             } else {
-                N1qlQuery query = N1qlQuery.simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName()))
-                        .useKeys(Expression.s(key)).limit(1));
+                N1qlQuery query = N1qlQuery
+                        .simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1));
                 N1qlQueryResult result = bucketMapping.getBucket().query(query);
                 if (!result.finalSuccess()) {
-                    throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()) , result.info().errorCount());
+                    throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()), result.info().errorCount());
                 }
-                
+
                 if (result.allRows().size() == 1) {
                     return result.allRows().get(0).value();
                 }
@@ -218,9 +218,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     }
 
     @Override
-    public <O> ListViewResponse<JsonObject> search(String key, Expression expression, SearchScope scope,
-            int startIndex, int pageSize, int count, Sort[] orderBy,
-            CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException {
+    public <O> ListViewResponse<JsonObject> search(String key, Expression expression, SearchScope scope, int startIndex, int pageSize, int count,
+            Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
 
@@ -229,10 +228,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             ldapBatchOperation = (BatchOperation<O>) batchOperationWraper.getBatchOperation();
         }
 
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             // Find whole DB search
             if (StringHelper.equalsIgnoreCase(key, "_")) {
-                log.trace("Search in whole DB tree", new Exception());
+                LOG.trace("Search in whole DB tree", new Exception());
             }
         }
 
@@ -252,7 +251,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         String[] select = attributes;
         if (select == null) {
-            select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN};
+            select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN };
         } else {
             boolean hasDn = Arrays.asList(select).contains(CouchbaseOperationService.DN);
             if (!hasDn) {
@@ -260,7 +259,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             }
         }
         GroupByPath selectQuery = Select.select(select).from(Expression.i(bucketMapping.getBucketName())).as("gluu_doc").where(finalExpression);
-        
+
         LimitPath baseQuery = selectQuery;
         if (orderBy != null) {
             baseQuery = selectQuery.orderBy(orderBy);
@@ -268,7 +267,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         List<N1qlQueryRow> searchResultList = new ArrayList<N1qlQueryRow>();
 
-        N1qlQueryResult lastResult; 
+        N1qlQueryResult lastResult;
         if (pageSize > 0) {
             boolean collectSearchResult;
 
@@ -276,10 +275,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             int currentLimit;
             try {
                 List<N1qlQueryRow> lastSearchResultList;
-                int resultCount = 0; 
+                int resultCount = 0;
                 do {
                     collectSearchResult = true;
-                    
+
                     currentLimit = pageSize;
                     if (count > 0) {
                         currentLimit = Math.min(pageSize, count - resultCount);
@@ -289,9 +288,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     System.out.println(query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
-                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()), lastResult.info().errorCount());
+                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
+                                lastResult.info().errorCount());
                     }
-                    
+
                     lastSearchResultList = lastResult.allRows();
 
                     if (ldapBatchOperation != null) {
@@ -305,7 +305,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                         List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
                         ldapBatchOperation.performAction(entries);
                     }
-                    
+
                     resultCount += lastSearchResultList.size();
 
                     if ((count > 0) && (resultCount >= count)) {
@@ -328,9 +328,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 System.out.println(query);
                 lastResult = bucket.query(query);
                 if (!lastResult.finalSuccess()) {
-                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()), lastResult.info().errorCount());
+                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
+                            lastResult.info().errorCount());
                 }
-                
+
                 searchResultList.addAll(lastResult.allRows());
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to search entries. Query: '" + baseQuery.toString() + "'", ex);
@@ -346,14 +347,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         result.setResult(resultRows);
         result.setItemsPerPage(resultRows.size());
         result.setStartIndex(startIndex);
-        
+
         if (returnCount) {
-            log.debug("Calculating count.. Query: '" + baseQuery.toString() + "'");
-            GroupByPath selectCountQuery = Select.select("COUNT(*) as TOTAL").from(Expression.i(bucketMapping.getBucketName())).where(finalExpression);
+            LOG.debug("Calculating count.. Query: '" + baseQuery.toString() + "'");
+            GroupByPath selectCountQuery = Select.select("COUNT(*) as TOTAL").from(Expression.i(bucketMapping.getBucketName()))
+                    .where(finalExpression);
             try {
                 N1qlQueryResult countResult = bucket.query(selectCountQuery);
                 if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
-                    throw new SearchException(String.format("\"Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()), countResult.info().errorCount());
+                    throw new SearchException(
+                            String.format("\"Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
+                            countResult.info().errorCount());
                 }
                 result.setTotalResults(countResult.allRows().get(0).value().getInt("TOTAL"));
             } catch (CouchbaseException ex) {
@@ -382,13 +386,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             try {
                 connectionProvider.destory();
             } catch (Exception ex) {
-                log.error("Failed to destory provider correctly");
+                LOG.error("Failed to destory provider correctly");
                 result = false;
             }
         }
-        
+
         return result;
     }
 
-}
+    @Override
+    public void reserved() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
+}

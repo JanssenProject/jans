@@ -6,7 +6,7 @@
 package org.gluu.persist.couchbase.model;
 
 /**
- * Couchbase key with inum 
+ * Couchbase key with inum
  *
  * @author Yuriy Movchan Date: 05/31/2018
  */

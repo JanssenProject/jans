@@ -22,17 +22,17 @@ public class CouchbaseKeyConverter {
         if (StringHelper.isEmpty(dn)) {
             throw new KeyConversionException("Failed to convert empty DN to Key");
         }
-        
+
         StringBuilder result = new StringBuilder();
         String[] tokens = dn.split(",");
-        
+
         String orgInum = null;
-        for (String token: tokens) {
+        for (String token : tokens) {
             int pos = token.indexOf("=");
             if (pos == -1) {
                 throw new KeyConversionException("Failed to convert empty DN to Key");
             }
-            
+
             String name = token.substring(0, pos);
             String value = token.substring(pos + 1, token.length());
             if (StringHelper.equalsIgnoreCase(name, "o")) {
@@ -44,7 +44,7 @@ public class CouchbaseKeyConverter {
 
             result.insert(0, "_" + value);
         }
-        
+
         String key = result.toString();
         if (key.length() == 0) {
             key = "_";

@@ -36,6 +36,7 @@ import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.SimpleN1qlQuery;
 import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.subdoc.DocumentFragment;
+
 /**
  * Perform cluster initialization and open required buckets
  *
@@ -44,7 +45,7 @@ import com.couchbase.client.java.subdoc.DocumentFragment;
 // TODO: getBucketMappingByKey
 public class CouchbaseConnectionProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
     private Properties props;
 
@@ -79,7 +80,7 @@ public class CouchbaseConnectionProvider {
                 clonedProperties.setProperty("userPassword", "REDACTED");
             }
 
-            log.error("Failed to create connection with properties: '{}'", clonedProperties, ex);
+            LOG.error("Failed to create connection with properties: '{}'", clonedProperties, ex);
         }
     }
 
@@ -94,21 +95,21 @@ public class CouchbaseConnectionProvider {
         this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
 
         openWithWaitImpl();
-        log.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
+        LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
 
         this.binaryAttributes = new ArrayList<String>();
         if (props.containsKey("binaryAttributes")) {
             String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
             this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
         }
-        log.debug("Using next binary attributes: '{}'", binaryAttributes);
+        LOG.debug("Using next binary attributes: '{}'", binaryAttributes);
 
         this.certificateAttributes = new ArrayList<String>();
         if (props.containsKey("certificateAttributes")) {
             String[] binaryAttrs = StringHelper.split(props.get("certificateAttributes").toString().toLowerCase(), ",");
             this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
         }
-        log.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
+        LOG.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
 
         this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
     }
@@ -119,7 +120,7 @@ public class CouchbaseConnectionProvider {
         if (StringHelper.isNotEmpty(connectionMaxWaitTime)) {
             connectionMaxWaitTimeSeconds = Integer.parseInt(connectionMaxWaitTime);
         }
-        log.debug("Using Couchbase connection timeout: '{}'", connectionMaxWaitTimeSeconds);
+        LOG.debug("Using Couchbase connection timeout: '{}'", connectionMaxWaitTimeSeconds);
 
         CouchbaseException lastException = null;
 
@@ -129,7 +130,7 @@ public class CouchbaseConnectionProvider {
         do {
             attempt++;
             if (attempt > 0) {
-                log.info("Attempting to create connection: '{}'", attempt);
+                LOG.info("Attempting to create connection: '{}'", attempt);
             }
 
             try {
@@ -142,7 +143,7 @@ public class CouchbaseConnectionProvider {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException ex) {
-                log.error("Exception happened in sleep", ex);
+                LOG.error("Exception happened in sleep", ex);
                 return;
             }
             currentTime = System.currentTimeMillis();
@@ -182,7 +183,7 @@ public class CouchbaseConnectionProvider {
             try {
                 bucketMapping.getBucket().close();
             } catch (CouchbaseException ex) {
-                log.error("Failed to close bucket '{}'", bucketMapping.getBucketName(), ex);
+                LOG.error("Failed to close bucket '{}'", bucketMapping.getBucketName(), ex);
 
                 return false;
             }
@@ -202,12 +203,12 @@ public class CouchbaseConnectionProvider {
             try {
                 Bucket bucket = bucketMapping.getBucket();
                 if (bucket.isClosed() || !bucket.query(query).finalSuccess()) {
-                    log.error("Bucket '{}' is invalid", bucketMapping.getBucketName());
+                    LOG.error("Bucket '{}' is invalid", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
                 }
             } catch (CouchbaseException ex) {
-                log.error("Failed to check bucket", ex);
+                LOG.error("Failed to check bucket", ex);
             }
         }
 
@@ -278,17 +279,17 @@ public class CouchbaseConnectionProvider {
         System.err.println(provider.isConnected());
         importSql(provider.getBucketMappingByKey("gluu").getBucket());
 
-        //selectListByOC(provider);
-//        updatePerson2(provider, "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
-//        JsonDocument doc = getPerson(provider, "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
-//        byte[] data = new byte[200];
-//        data[0] = 1;
-//        data[199] = 1;
-//        doc.content().put("test", new BigInteger(data));
-//        System.out.println(doc);
-//        getAttributeDataList(doc);
-        
-
+        // selectListByOC(provider);
+        // updatePerson2(provider,
+        // "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
+        // JsonDocument doc = getPerson(provider,
+        // "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
+        // byte[] data = new byte[200];
+        // data[0] = 1;
+        // data[199] = 1;
+        // doc.content().put("test", new BigInteger(data));
+        // System.out.println(doc);
+        // getAttributeDataList(doc);
 
         provider.destory();
     }
@@ -304,29 +305,30 @@ public class CouchbaseConnectionProvider {
             System.err.println("Error! " + result.errors());
         }
     }
-/*
-    protected static void selectListByOCWithFilter(CouchbaseConnectionProvider provider) {
-        Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-        SimpleN1qlQuery query = N1qlQuery.simple(select("*").from(i("gluu")).where(expression) b WHERE META(b).id LIKE 'people_%' AND 'gluuPerson' IN objectClass");
-        N1qlQueryResult result = bucket.query(query);
-        if (result.finalSuccess()) {
-            System.out.println(result.allRows().get(0).value());
-            System.out.println(result.info().resultCount() + " :" + query);
-        } else {
-            System.err.println("Error! " + result.errors());
-        }
-    }
-*/
+
+    /*
+     * protected static void selectListByOCWithFilter(CouchbaseConnectionProvider
+     * provider) { Bucket bucket = provider.getBucketMapping("gluu").getBucket();
+     * SimpleN1qlQuery query =
+     * N1qlQuery.simple(select("*").from(i("gluu")).where(expression) b WHERE
+     * META(b).id LIKE 'people_%' AND 'gluuPerson' IN objectClass"); N1qlQueryResult
+     * result = bucket.query(query); if (result.finalSuccess()) {
+     * System.out.println(result.allRows().get(0).value());
+     * System.out.println(result.info().resultCount() + " :" + query); } else {
+     * System.err.println("Error! " + result.errors()); } }
+     */
     protected static void updatePerson(CouchbaseConnectionProvider provider, String docId) {
         try {
             Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-            DocumentFragment<Mutation> result = bucket.mutateIn(docId).remove("givenName").upsert("givenName", "bla-bla2").insert("aaa", "aaa").execute();
+            DocumentFragment<Mutation> result = bucket.mutateIn(docId).remove("givenName").upsert("givenName", "bla-bla2").insert("aaa", "aaa")
+                    .execute();
             System.out.println(result.size());
         } catch (SubDocumentException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
         }
     }
+
     protected static void addPerson(CouchbaseConnectionProvider provider, String docId, JsonObject content) {
         try {
             Bucket bucket = provider.getBucketMapping("gluu").getBucket();
@@ -346,8 +348,10 @@ public class CouchbaseConnectionProvider {
             data[199] = 1;
 
             Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-//            DocumentFragment<Mutation> result = bucket.mutateIn(docId).insert("a2", new Integer(12345)).execute();
-//            DocumentFragment<Mutation> result2 = bucket.mutateIn(docId).insert("a3", new BigInteger(data)).execute();
+            // DocumentFragment<Mutation> result = bucket.mutateIn(docId).insert("a2", new
+            // Integer(12345)).execute();
+            // DocumentFragment<Mutation> result2 = bucket.mutateIn(docId).insert("a3", new
+            // BigInteger(data)).execute();
             DocumentFragment<Mutation> result3 = bucket.mutateIn(docId).insert("a4", new Date()).execute();
             System.out.println(result3.size());
         } catch (SubDocumentException ex) {
@@ -361,13 +365,13 @@ public class CouchbaseConnectionProvider {
             Bucket bucket = provider.getBucketMapping("gluu").getBucket();
             JsonDocument result = bucket.get(docId);
             System.out.println(result);
-            
+
             return result;
         } catch (CouchbaseException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
         }
-        
+
         return null;
     }
 
@@ -403,7 +407,7 @@ public class CouchbaseConnectionProvider {
         }
     }
 
-    private static void  getAttributeDataList(JsonDocument entry) {
+    private static void getAttributeDataList(JsonDocument entry) {
         List<AttributeData> result = new ArrayList<AttributeData>();
         JsonObject content = entry.content();
         for (String attributeName : content.getNames()) {

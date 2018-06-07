@@ -17,6 +17,9 @@ public final class ResultCode implements Serializable {
 
     private static final long serialVersionUID = -9180126854928558942L;
 
+    private ResultCode() {
+    }
+
     /**
      * The integer value (0) for the "SUCCESS" result code.
      */
