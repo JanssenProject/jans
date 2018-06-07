@@ -35,9 +35,9 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
         }
         LOG.debug("Created connectionProvider '{}' with code '{}'", connectionProvider, connectionProvider.getCreationResultCode());
 
-        CouchbaseEntryManager CouchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationsServiceImpl(connectionProvider));
-        LOG.info("Created CouchbaseEntryManager: {}", CouchbaseEntryManager.getOperationService());
+        CouchbaseEntryManager couchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationsServiceImpl(connectionProvider));
+        LOG.info("Created CouchbaseEntryManager: {}", couchbaseEntryManager.getOperationService());
 
-        return CouchbaseEntryManager;
+        return couchbaseEntryManager;
     }
 }

@@ -20,7 +20,7 @@ public class ListViewResponse<T> implements Serializable {
 
     // TODO: Rename to totalEntriesCount
     private int totalResults;
-    
+
     // TODO: Rename to entriesCount
     private int itemsPerPage;
 

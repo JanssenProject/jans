@@ -8,7 +8,7 @@ package org.gluu.persist.couchbase.model;
 import com.couchbase.client.java.Bucket;
 
 /**
- * Holds bucket reference associated with it's string representation 
+ * Holds bucket reference associated with it's string representation
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */

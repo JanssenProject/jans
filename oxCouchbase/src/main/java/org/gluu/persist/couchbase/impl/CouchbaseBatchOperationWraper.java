@@ -23,7 +23,7 @@ import com.couchbase.client.java.query.N1qlQueryRow;
  */
 public class CouchbaseBatchOperationWraper<T> {
 
-    private CouchbaseEntryManager сouchbaseEntryManager;
+    private CouchbaseEntryManager couchbaseEntryManager;
     private Class<T> entryClass;
     private List<PropertyAnnotation> propertiesAnnotations;
 
@@ -33,10 +33,10 @@ public class CouchbaseBatchOperationWraper<T> {
         this.batchOperation = batchOperation;
     }
 
-    public CouchbaseBatchOperationWraper(BatchOperation<T> batchOperation, CouchbaseEntryManager сouchbaseEntryManager, Class<T> entryClass,
+    public CouchbaseBatchOperationWraper(BatchOperation<T> batchOperation, CouchbaseEntryManager couchbaseEntryManager, Class<T> entryClass,
             List<PropertyAnnotation> propertiesAnnotations) {
         this.batchOperation = batchOperation;
-        this.сouchbaseEntryManager = сouchbaseEntryManager;
+        this.couchbaseEntryManager = couchbaseEntryManager;
         this.entryClass = entryClass;
         this.propertiesAnnotations = propertiesAnnotations;
     }
@@ -46,7 +46,7 @@ public class CouchbaseBatchOperationWraper<T> {
     }
 
     public List<T> createEntities(List<N1qlQueryRow> searchResult) {
-        if (сouchbaseEntryManager == null) {
+        if (couchbaseEntryManager == null) {
             return new ArrayList<T>(0);
         }
 
@@ -57,7 +57,7 @@ public class CouchbaseBatchOperationWraper<T> {
             resultObjects[index++] = row.value();
         }
 
-        return сouchbaseEntryManager.createEntities(entryClass, propertiesAnnotations, null, resultObjects);
+        return couchbaseEntryManager.createEntities(entryClass, propertiesAnnotations, null, resultObjects);
     }
 
 }

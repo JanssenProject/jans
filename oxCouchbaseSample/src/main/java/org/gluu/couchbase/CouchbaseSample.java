@@ -3,8 +3,6 @@ package org.gluu.couchbase;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.couchbase.model.SimpleAttribute;
 import org.gluu.couchbase.model.SimpleGrant;
 import org.gluu.couchbase.model.SimpleSession;
@@ -18,22 +16,16 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.log.LoggingHelper;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016
  */
 public final class CouchbaseSample {
 
-    private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
-    static {
-//        StatusLogger.getLogger().setLevel(Level.DEBUG);
-//        LoggingHelper.configureConsoleAppender();
-//        log = Logger.getLogger(CouchbaseSample.class);
+    private CouchbaseSample() {
     }
-
-    private CouchbaseSample() { }
 
     public static void main(String[] args) {
         // Prepare sample connection details
@@ -45,7 +37,7 @@ public final class CouchbaseSample {
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = couchbaseEntryManager.findEntries("o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
-            log.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
+            LOG.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
         }
 
         if (users.size() > 0) {
@@ -59,41 +51,42 @@ public final class CouchbaseSample {
         }
 
         Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
-        List<SimpleAttribute> attributes = couchbaseEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0,
-                0);
+        List<SimpleAttribute> attributes = couchbaseEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10,
+                0, 0);
         for (SimpleAttribute attribute : attributes) {
-            log.info("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
+            LOG.info("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
-        List<SimpleSession> sessions = couchbaseEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
-        log.info("Found sessions: " + sessions.size());
+        List<SimpleSession> sessions = couchbaseEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0,
+                0);
+        LOG.info("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = couchbaseEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] {"oxAuthGrantId"},
-                null, 1, 0, 0);
-        log.info("Found grants: " + grants.size());
+        List<SimpleGrant> grants = couchbaseEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB,
+                new String[] { "oxAuthGrantId" }, null, 1, 0, 0);
+        LOG.info("Found grants: " + grants.size());
 
         try {
             ListViewResponse<SimpleUser> listViewResponse = couchbaseEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 0, 6, 4,
-                    "uid", SortOrder.ASCENDING, new String[] {"uid", "displayName", "gluuStatus"});
+                    "uid", SortOrder.ASCENDING, new String[] { "uid", "displayName", "gluuStatus" });
 
-            log.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
+            LOG.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
             for (SimpleUser user : listViewResponse.getResult()) {
                 System.out.println(user.getUserId());
             }
         } catch (Exception ex) {
-            log.info("Failed to search", ex);
+            LOG.info("Failed to search", ex);
         }
 
         try {
             ListViewResponse<SimpleUser> listViewResponse = couchbaseEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 0, 6, 4,
-                    "uid", SortOrder.DESCENDING, new String[] {"uid", "displayName", "gluuStatus"});
+                    "uid", SortOrder.DESCENDING, new String[] { "uid", "displayName", "gluuStatus" });
 
-            log.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
+            LOG.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
             for (SimpleUser user : listViewResponse.getResult()) {
                 System.out.println(user.getUserId());
             }
         } catch (Exception ex) {
-            log.info("Failed to search", ex);
+            LOG.info("Failed to search", ex);
         }
 
     }

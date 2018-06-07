@@ -60,7 +60,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private static final long serialVersionUID = 2127241817126412574L;
 
-    private static final Logger log = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
     private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
     private static final CouchbaseKeyConverter KEY_CONVERTER = new CouchbaseKeyConverter();
@@ -131,8 +131,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         Object dnValue = getDNValue(entry, entryClass);
-        
-        log.debug("LDAP entry to remove: '{}'", dnValue.toString());
+
+        LOG.debug("LDAP entry to remove: '{}'", dnValue.toString());
 
         remove(dnValue.toString());
     }
@@ -386,17 +386,17 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         } else {
             searchFilter = filter;
         }
-        
+
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
-        
+
         if (StringHelper.isNotEmpty(sortBy)) {
             Sort requestedSort = buildSort(sortBy, sortOrder);
-            
+
             if (ArrayHelper.isEmpty(defaultSort)) {
                 defaultSort = new Sort[] { requestedSort };
             } else {
-                defaultSort = ArrayHelper.arrayMerge(new Sort[] {requestedSort}, defaultSort);
+                defaultSort = ArrayHelper.arrayMerge(new Sort[] { requestedSort }, defaultSort);
             }
         }
 
@@ -404,8 +404,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         ParsedKey keyWithInum = null;
         try {
             keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB,
-                    startIndex, pageLimit, count, defaultSort, null, true, currentLdapReturnAttributes);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, startIndex, pageLimit,
+                    count, defaultSort, null, true, currentLdapReturnAttributes);
 
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -423,7 +423,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             result.setResult(new ArrayList<T>(0));
             return result;
         }
-        
+
         List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
                 searchResult.getResult().toArray(new JsonObject[searchResult.getItemsPerPage()]));
         result.setResult(entries);
@@ -448,7 +448,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         ListViewResponse<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 1, 0, 1, null, null, false, ldapReturnAttributes);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 1, 0, 1, null, null, false,
+                    ldapReturnAttributes);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
@@ -460,7 +461,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, ParsedKey baseDn,
-            JsonObject ... searchResultEntries) {
+            JsonObject... searchResultEntries) {
         List<T> result = new ArrayList<T>(searchResultEntries.length);
         Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
 
@@ -468,7 +469,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (int i = 0; i < searchResultEntries.length; i++) {
             count++;
             JsonObject entry = searchResultEntries[i];
-//            String key = entry.getString(CouchbaseOperationService.META_DOC_ID);
+            // String key = entry.getString(CouchbaseOperationService.META_DOC_ID);
             String dn = entry.getString(CouchbaseOperationService.DN);
             entriesAttributes.put(dn, getAttributeDataList(entry));
 
@@ -503,7 +504,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             String[] attributeValueStrings;
             if (attributeObject == null) {
                 attributeValueStrings = NO_STRINGS;
-            } if (attributeObject instanceof JsonArray) {
+            }
+            if (attributeObject instanceof JsonArray) {
                 attributeValueStrings = ((JsonArray) attributeObject).toList().toArray(NO_STRINGS);
             } else {
                 attributeValueStrings = new String[] { attributeObject.toString() };
@@ -520,7 +522,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public boolean authenticate(String userName, String password, String baseDN) {
         try {
             Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
-            ListViewResponse<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter), SearchScope.SUB, 0, 0, 1, null, null, false);
+            ListViewResponse<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
+                    SearchScope.SUB, 0, 0, 1, null, null, false);
             if ((searchResult == null) || (searchResult.getItemsPerPage() != 1)) {
                 return false;
             }
@@ -553,7 +556,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
-        String[] ldapReturnAttributes = new String[] {""}; // Don't load attributes
+        String[] ldapReturnAttributes = new String[] { "" }; // Don't load attributes
 
         // Find entries
         Filter searchFilter;
@@ -567,8 +570,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         try {
             CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation);
-            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 0, 100, 0, null, batchOperationWraper, false,
-                    ldapReturnAttributes);
+            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 0, 100, 0, null,
+                    batchOperationWraper, false, ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
                     String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -584,7 +587,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
-        Sort requestedSort = null; 
+        Sort requestedSort = null;
         if (SortOrder.DESCENDING == sortOrder) {
             requestedSort = Sort.desc(Expression.path(sortBy));
         } else if (SortOrder.ASCENDING == sortOrder) {
@@ -601,7 +604,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         if (ArrayHelper.isEmpty(sortByProperties)) {
             return null;
         }
-        
+
         Sort[] sort = new Sort[sortByProperties.length];
         for (int i = 0; i < sortByProperties.length; i++) {
             sort[i] = Sort.def(Expression.path(sortByProperties[i]));
