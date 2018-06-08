@@ -771,7 +771,7 @@ public class SessionIdService {
     public void refreshSessionId() {
         SessionId sessionId = getSessionId();
         if (sessionId != null) {
-            updateSessionId(sessionId, true);
+            updateSessionId(sessionId, true, true, true);
         }
     }
 }
