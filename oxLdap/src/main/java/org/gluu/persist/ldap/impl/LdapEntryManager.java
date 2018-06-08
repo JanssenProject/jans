@@ -28,7 +28,6 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
-import org.gluu.persist.ldap.LdapSupport;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
@@ -59,7 +58,7 @@ import com.unboundid.util.StaticUtils;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public class LdapEntryManager extends BaseEntryManager implements LdapSupport, Serializable {
+public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     private static final long serialVersionUID = -2544614410981223105L;
 
@@ -71,7 +70,7 @@ public class LdapEntryManager extends BaseEntryManager implements LdapSupport, S
     private LdapOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
 
-    protected LdapEntryManager(LdapOperationsServiceImpl operationService) {
+    public LdapEntryManager(LdapOperationsServiceImpl operationService) {
         this.operationService = operationService;
         subscribers = new LinkedList<DeleteNotifier>();
     }
@@ -721,7 +720,6 @@ public class LdapEntryManager extends BaseEntryManager implements LdapSupport, S
         return StaticUtils.encodeGeneralizedTime(date);
     }
 
-    @Override
     public Date decodeGeneralizedTime(String date) {
         if (date == null) {
             return null;
@@ -753,7 +751,7 @@ public class LdapEntryManager extends BaseEntryManager implements LdapSupport, S
     }
 
     @Override
-    public String[] getLDIF(String dn) {
+    public String[] exportEntry(String dn) {
         String[] ldif = null;
         try {
             ldif = this.operationService.lookup(dn).toLDIF();
@@ -762,57 +760,6 @@ public class LdapEntryManager extends BaseEntryManager implements LdapSupport, S
         }
 
         return ldif;
-    }
-
-    @Override
-    public List<String[]> getLDIF(String dn, String[] attributes) {
-        SearchResult searchResult;
-        try {
-            searchResult = this.operationService.search(dn, toLdapFilter(Filter.create("objectclass=*")), toLdapSearchScope(SearchScope.BASE), -1,
-                    0, null, attributes);
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s", dn));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", dn, null), ex);
-        }
-
-        List<String[]> result = new ArrayList<String[]>();
-
-        if (searchResult.getEntryCount() == 0) {
-            return result;
-        }
-
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            result.add(searchResultEntry.toLDIF());
-        }
-
-        return result;
-    }
-
-    @Override
-    public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
-        SearchResult searchResult;
-        try {
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), -1, 0, null, attributes);
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-        }
-
-        List<String[]> result = new ArrayList<String[]>();
-
-        if (searchResult.getEntryCount() == 0) {
-            return result;
-        }
-
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            result.add(searchResultEntry.toLDIF());
-        }
-
-        return result;
     }
 
     public int getSupportedLDAPVersion() {

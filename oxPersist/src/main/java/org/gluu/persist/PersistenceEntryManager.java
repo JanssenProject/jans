@@ -92,11 +92,12 @@ public interface PersistenceEntryManager {
 
     <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
 
+    String[] exportEntry(String dn);
+
     String encodeGeneralizedTime(Date date);
 
     Date decodeGeneralizedTime(String date);
 
-    // TODO: use close
     boolean destroy();
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
