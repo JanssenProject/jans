@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.model.ParsedKey;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
@@ -611,6 +612,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         return sort;
+    }
+
+    @Override
+    public String[] exportEntry(String dn) {
+        try {
+            // Load entry
+            ParsedKey keyWithInum = toCouchbaseKey(dn);
+            JsonObject entry = operationService.lookup(keyWithInum.getKey());
+            Map<String, Object> map = entry.toMap();
+            List<String> result = new ArrayList<String>(map.size());
+            for (Entry<String, Object> attr : map.entrySet()) {
+                result.add(attr.getKey() + ": " + attr.getValue());
+            }
+            
+            return result.toArray(new String[result.size()]);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
+        }
     }
 
     private Expression toCouchbaseFilter(Filter genericFilter) throws SearchException {
