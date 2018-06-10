@@ -23,22 +23,48 @@ Download [change_config.py](https://github.com/GluuFederation/community-edition-
 
 Modify the entries inside of `change_config.py` using the following template:
 
-`-os` below needs to be either "Ubuntu" or "CentOS"
+`-os_type` below needs to be either "Ubuntu" or "CentOS"
 
 ```
 name_changer = ChangeGluuHostname(
+    
+    # Change these parameters here. If there are '' marks, leave them only replacing <entry> with your information.
+    
+    # The hostname currently in Gluu Server's configuration
     old_host='<current_hostname>',
+    
+    # The hostname you would like your Gluu Server to have
     new_host='<new_hostname>',
+    
+    #### Certificate Creation #### 
     cert_city='<city>',
     cert_mail='<email>',
+    # State must be in 2 letter format i.e TX for Texas
     cert_state='<state_or_region>',
+    # Country also must be in 2 letter format i.e US for United States
     cert_country='<country>',
-    server='localhost',
+    ##############################
+    
+    # IP Address of the Gluu Server. Used to change the /etc/hosts file for Apache
     ip_address='<ip_address_of_server>',
+    
+    # The hostname or IP of the LDAP server to make changes to static hostname data. 
+    # The local parameter below, when True, disregards this variable to prevent accidentally connecting to a production instance.
+    server='<LDAP_server>',
+    
+    # The password to the the LDAP server
     ldap_password="<ldap_password>",
+    
+    # 'Ubuntu' or 'CentOS'
     os_type='<linux_distro>',
-    local=True
-    )
+    
+    # Do not change to False unless you want the script to access that LDAP server remotely. 
+    # Not recommended as the script should be run locally
+    local = True,
+    
+    # Version of Gluu Server you're trying to modify. For example: '3.1.3'
+    gluu_version='<gluu_server_version>'
+)
 ```
   
   Let's take the example of me using `dev.example.org` but my customer changed their domain requirements to `idp.customer.io`, the environment wouldn't fit the spec and I would have to rebuild. Fortunately with this script, a quick turnaround to another hostname, with new certificates to match that domain name, is one command-line away.
@@ -54,7 +80,7 @@ name_changer = ChangeGluuHostname(
     cert_state='TX',
     cert_country='US',
     server='localhost', 
-    ip_address='10.36.101.25', <------ This is for modifying the /etc/hosts file inside the chroot to match the new server and hostname
+    ip_address='10.36.101.25',
     ldap_password="MyS3crE71D4pPas$",
     os_type='Ubuntu',
     local=True
