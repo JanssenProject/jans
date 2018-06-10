@@ -173,7 +173,7 @@
     "umaRequesterPermissionTokenLifetime":3600,
     "umaAddScopesAutomatically":true,
     "umaValidateClaimToken":false,
-    "umaGrantAccessIfNoPolicies":true,
+    "umaGrantAccessIfNoPolicies":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
