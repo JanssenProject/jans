@@ -9,6 +9,7 @@
   "passportConfigAPI": "https://%(hostname)s/identity/restv1/passport/config",
   "applicationStartpoint": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
   "applicationEndpoint": "https://%(hostname)s/oxauth/postlogin",
+  "logLevel": "info",
   "activeMQConf": {
     "isEnabled": false,
     "host": "",
