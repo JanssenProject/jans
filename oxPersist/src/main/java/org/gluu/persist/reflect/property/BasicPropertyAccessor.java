@@ -10,9 +10,9 @@ import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.gluu.persist.exception.mapping.BaseMappingException;
-import org.gluu.persist.exception.mapping.PropertyAccessException;
-import org.gluu.persist.exception.mapping.PropertyNotFoundException;
+import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.persist.exception.PropertyAccessException;
+import org.gluu.persist.exception.PropertyNotFoundException;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class BasicPropertyAccessor implements PropertyAccessor {
             this.propertyName = propertyName;
         }
 
-        public void set(Object target, Object value) throws BaseMappingException {
+        public void set(Object target, Object value) throws BasePersistenceException {
             try {
                 method.invoke(target, new Object[] {value});
             } catch (NullPointerException npe) {
@@ -99,7 +99,7 @@ public class BasicPropertyAccessor implements PropertyAccessor {
             this.propertyName = propertyName;
         }
 
-        public Object get(Object target) throws BaseMappingException {
+        public Object get(Object target) throws BasePersistenceException {
             try {
                 return method.invoke(target, (Object[]) null);
             } catch (InvocationTargetException ite) {

@@ -7,30 +7,41 @@
 package org.gluu.persist.exception.operation;
 
 /**
- * LDAP entry not found exception
+ * Exception thrown when a there is no entry
  *
- * @author Pankaj
+ * @author Yuriy Movchan Date: 2017/12/29
  */
 public class EntryNotFoundException extends PersistenceException {
-    /**
-     * Serialization ID
-     */
-    private static final long serialVersionUID = -1429068470601742118L;
 
-    /**
-     * Default constructor
-     */
-    public EntryNotFoundException() {
-        super("Entry not found");
+    private static final long serialVersionUID = 5017957214447362606L;
+
+    private int resultCode;
+
+    public EntryNotFoundException(String message, Throwable ex, int resultCode) {
+        super(message, ex);
+        this.resultCode = resultCode;
     }
 
-    /**
-     * Constructor to return the offending DN
-     *
-     * @param dn
-     *            DN that was not found
-     */
-    public EntryNotFoundException(final String dn) {
-        super("Entry not found: " + dn);
+    public EntryNotFoundException(String message, int resultCode) {
+        super(message);
+        this.resultCode = resultCode;
     }
+
+    public EntryNotFoundException(String message) {
+        super(message);
+    }
+
+    public EntryNotFoundException(String message, Throwable ex) {
+        super(message, ex);
+    }
+
+    public EntryNotFoundException(Throwable ex, int resultCode) {
+        super(ex);
+        this.resultCode = resultCode;
+    }
+
+    public final int getResultCode() {
+        return resultCode;
+    }
+
 }

@@ -10,7 +10,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
-import org.gluu.persist.exception.mapping.PropertyNotFoundException;
+import org.gluu.persist.exception.PropertyNotFoundException;
 
 /**
  * Defines a strategy for accessing class and propery annotations.

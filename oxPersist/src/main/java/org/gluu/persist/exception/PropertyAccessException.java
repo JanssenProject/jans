@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 import org.xdi.util.StringHelper;
 
@@ -16,7 +16,7 @@ import org.xdi.util.StringHelper;
  * <li>an exception occurring inside the getter or setter method
  * </ul>
  */
-public class PropertyAccessException extends BaseMappingException {
+public class PropertyAccessException extends MappingException {
 
     private static final long serialVersionUID = 1076767768405558202L;
 

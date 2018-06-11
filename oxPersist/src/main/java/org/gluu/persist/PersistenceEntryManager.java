@@ -1,3 +1,9 @@
+/*
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2018, Gluu
+ */
+
 package org.gluu.persist;
 
 import java.util.Date;
@@ -7,7 +13,7 @@ import java.util.Map;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.search.filter.Filter;
@@ -40,43 +46,29 @@ public interface PersistenceEntryManager {
     /**
      * Search by sample
      *
-     * @param entry
-     *            Sample
-     * @param sizeLimit
-     *            Maximum result set size
+     * @param entry Sample
+     * @param count Maximum result set size
      * @return Result entries
      */
-    <T> List<T> findEntries(Object entry, int sizeLimit);
+    <T> List<T> findEntries(Object entry, int count);
 
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
 
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int count);
 
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
 
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit);
-
-    /**
-     * Search from baseDN
-     *
-     * @param baseDN
-     * @param entryClass
-     * @param filter
-     * @param scope
-     * @param ldapReturnAttributes
-     * @param sizeLimit
-     * @param chunkSize
-     *            Specify LDAP/DB pagination data set size
-     * @return Result entries
-     */
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit,
-            int chunkSize);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int count);
 
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize);
+            int start, int count, int chunkSize);
 
-    <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize,
-            String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
+            BatchOperation<T> batchOperation, int start, int count, int chunkSize);
+
+    // TODO: Combine sortBy and SortOrder into Sort
+    <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize);
 
     boolean authenticate(String bindDn, String password);
 
@@ -94,19 +86,19 @@ public interface PersistenceEntryManager {
 
     String[] exportEntry(String dn);
 
+    void addDeleteSubscriber(DeleteNotifier subscriber);
+
+    void removeDeleteSubscriber(DeleteNotifier subscriber);
+
+    boolean destroy();
+
     String encodeGeneralizedTime(Date date);
 
     Date decodeGeneralizedTime(String date);
-
-    boolean destroy();
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
     <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties,
             String sumByProperties);
-
-    void addDeleteSubscriber(DeleteNotifier subscriber);
-
-    void removeDeleteSubscriber(DeleteNotifier subscriber);
 
 }

@@ -4,16 +4,14 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.operation;
-
-import org.gluu.persist.exception.mapping.BaseMappingException;
+package org.gluu.persist.exception;
 
 /**
  * An exception is a result if server doesn't support operation.
  *
  * @author Yuriy Movchan Date: 08.07.2012
  */
-public class UnsupportedOperationException extends BaseMappingException {
+public class UnsupportedOperationException extends BasePersistenceException {
 
     private static final long serialVersionUID = 2321766232087075304L;
 

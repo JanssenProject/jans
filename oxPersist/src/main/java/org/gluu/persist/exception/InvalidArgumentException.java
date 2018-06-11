@@ -4,12 +4,12 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 /**
  * An exception is a result of something wrong in input parameters.
  */
-public class InvalidArgumentException extends BaseMappingException {
+public class InvalidArgumentException extends MappingException {
 
     private static final long serialVersionUID = -2223352885909511209L;
 

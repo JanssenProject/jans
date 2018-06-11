@@ -14,12 +14,12 @@ import java.util.Map.Entry;
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
-import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
+import org.gluu.persist.exception.operation.EntryNotFoundException;
 import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  */
 // TODO: authenticateImpl
 public class CouchbaseOperationsServiceImpl
-        implements CouchbaseOperationService<CouchbaseConnectionProvider, JsonObject, MutationSpec, Expression, Sort> {
+        implements CouchbaseOperationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
@@ -165,7 +165,7 @@ public class CouchbaseOperationsServiceImpl
 
             return (result != null) && (result.id() != null);
         } catch (CouchbaseException ex) {
-            throw new ConnectionException("Failed to delete entry", ex);
+            throw new EntryNotFoundException("Failed to delete entry", ex);
         }
     }
 
@@ -184,7 +184,7 @@ public class CouchbaseOperationsServiceImpl
 
             return true;
         } catch (CouchbaseException ex) {
-            throw new ConnectionException("Failed to delete entry", ex);
+            throw new EntryNotFoundException("Failed to delete entry", ex);
         }
     }
 
@@ -218,7 +218,7 @@ public class CouchbaseOperationsServiceImpl
     }
 
     @Override
-    public <O> ListViewResponse<JsonObject> search(String key, Expression expression, SearchScope scope, int startIndex, int pageSize, int count,
+    public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, int start, int pageSize, int count,
             Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
@@ -284,7 +284,7 @@ public class CouchbaseOperationsServiceImpl
                         currentLimit = Math.min(pageSize, count - resultCount);
                     }
 
-                    query = baseQuery.limit(currentLimit).offset(startIndex + resultCount);
+                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
                     System.out.println(query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
@@ -321,8 +321,8 @@ public class CouchbaseOperationsServiceImpl
                 if (count > 0) {
                     query = ((LimitPath) query).limit(count);
                 }
-                if (startIndex > 0) {
-                    query = ((OffsetPath) query).offset(startIndex);
+                if (start > 0) {
+                    query = ((OffsetPath) query).offset(start);
                 }
 
                 System.out.println(query);
@@ -343,10 +343,10 @@ public class CouchbaseOperationsServiceImpl
             resultRows.add(row.value());
         }
 
-        ListViewResponse<JsonObject> result = new ListViewResponse<JsonObject>();
-        result.setResult(resultRows);
-        result.setItemsPerPage(resultRows.size());
-        result.setStartIndex(startIndex);
+        PagedResult<JsonObject> result = new PagedResult<JsonObject>();
+        result.setEntries(resultRows);
+        result.setEntriesCount(resultRows.size());
+        result.setStart(start);
 
         if (returnCount) {
             LOG.debug("Calculating count.. Query: '" + baseQuery.toString() + "'");
@@ -359,7 +359,7 @@ public class CouchbaseOperationsServiceImpl
                             String.format("\"Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
                             countResult.info().errorCount());
                 }
-                result.setTotalResults(countResult.allRows().get(0).value().getInt("TOTAL"));
+                result.setTotalEntriesCount(countResult.allRows().get(0).value().getInt("TOTAL"));
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to calculate count entries. Query: '" + selectCountQuery.toString() + "'", ex);
             }
@@ -392,11 +392,6 @@ public class CouchbaseOperationsServiceImpl
         }
 
         return result;
-    }
-
-    @Override
-    public void reserved() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

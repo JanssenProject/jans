@@ -4,12 +4,12 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 /**
  * An exception is a result of something screwy in the O-R mappings.
  */
-public class MappingException extends BaseMappingException {
+public class MappingException extends BasePersistenceException {
 
     private static final long serialVersionUID = 1113352885909511209L;
 

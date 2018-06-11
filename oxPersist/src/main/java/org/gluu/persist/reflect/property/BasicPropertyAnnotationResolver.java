@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.gluu.persist.exception.mapping.PropertyNotFoundException;
+import org.gluu.persist.exception.PropertyNotFoundException;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.xdi.util.StringHelper;
 

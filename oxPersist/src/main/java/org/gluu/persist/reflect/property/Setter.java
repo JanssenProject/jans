@@ -9,7 +9,7 @@ package org.gluu.persist.reflect.property;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.gluu.persist.exception.mapping.BaseMappingException;
+import org.gluu.persist.exception.BasePersistenceException;
 
 /**
  * Sets values to a particular property.
@@ -22,9 +22,9 @@ public interface Setter extends Serializable {
      *            The instance upon which to set the given value.
      * @param value
      *            The value to be set on the target.
-     * @throws BaseMappingException
+     * @throws BasePersistenceException
      */
-    void set(Object target, Object value) throws BaseMappingException;
+    void set(Object target, Object value) throws BasePersistenceException;
 
     /**
      * Optional operation (return null)

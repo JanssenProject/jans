@@ -23,19 +23,19 @@ import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.event.DeleteNotifier;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
-import org.gluu.persist.exception.mapping.MappingException;
-import org.gluu.persist.exception.operation.AuthenticationException;
-import org.gluu.persist.exception.operation.KeyConversionException;
+import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.exception.KeyConversionException;
+import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
-import org.gluu.persist.model.ListViewResponse;
-import org.gluu.persist.model.PropertyAnnotation;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.search.filter.Filter;
@@ -56,7 +56,6 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  *
  * @author Yuriy Movchan Date: 05/14/2018
  */
-// TODO: Review meta_doc_id. We must have it in every JsonDocument
 public class CouchbaseEntryManager extends BaseEntryManager implements Serializable {
 
     private static final long serialVersionUID = 2127241817126412574L;
@@ -313,7 +312,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     // TODO: Reuse findListViewResponse after changing method signature
     public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int startIndex, int count, int pageLimit) {
+            BatchOperation<T> batchOperation, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -338,13 +337,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
-        ListViewResponse<JsonObject> searchResult = null;
+        PagedResult<JsonObject> searchResult = null;
         ParsedKey keyWithInum = null;
         try {
             CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
             keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, startIndex, pageLimit, count,
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, start, chunkSize, count,
                     defaultSort, batchOperationWraper, false, currentLdapReturnAttributes);
 
             if (searchResult == null) {
@@ -354,19 +353,19 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        if (searchResult.getItemsPerPage() == 0) {
+        if (searchResult.getEntriesCount() == 0) {
             return new ArrayList<T>(0);
         }
 
         List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
-                searchResult.getResult().toArray(new JsonObject[searchResult.getItemsPerPage()]));
+                searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
 
         return entries;
     }
 
     @Override
-    public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int pageLimit,
-            String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
+    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -401,11 +400,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
         }
 
-        ListViewResponse<JsonObject> searchResult = null;
+        PagedResult<JsonObject> searchResult = null;
         ParsedKey keyWithInum = null;
         try {
             keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, startIndex, pageLimit,
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, start, chunkSize,
                     count, defaultSort, null, true, currentLdapReturnAttributes);
 
             if (searchResult == null) {
@@ -415,19 +414,19 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        ListViewResponse<T> result = new ListViewResponse<T>();
-        result.setItemsPerPage(searchResult.getItemsPerPage());
-        result.setStartIndex(searchResult.getStartIndex());
-        result.setTotalResults(searchResult.getTotalResults());
+        PagedResult<T> result = new PagedResult<T>();
+        result.setEntriesCount(searchResult.getEntriesCount());
+        result.setStart(searchResult.getStart());
+        result.setTotalEntriesCount(searchResult.getTotalEntriesCount());
 
-        if (searchResult.getItemsPerPage() == 0) {
-            result.setResult(new ArrayList<T>(0));
+        if (searchResult.getEntriesCount() == 0) {
+            result.setEntries(new ArrayList<T>(0));
             return result;
         }
 
         List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
-                searchResult.getResult().toArray(new JsonObject[searchResult.getItemsPerPage()]));
-        result.setResult(entries);
+                searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
+        result.setEntries(entries);
 
         return result;
     }
@@ -446,7 +445,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             searchFilter = filter;
         }
 
-        ListViewResponse<JsonObject> searchResult = null;
+        PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
             searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 1, 0, 1, null, null, false,
@@ -458,7 +457,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        return (searchResult != null) && (searchResult.getItemsPerPage() > 0);
+        return (searchResult != null) && (searchResult.getEntriesCount() > 0);
     }
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, ParsedKey baseDn,
@@ -523,13 +522,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public boolean authenticate(String userName, String password, String baseDN) {
         try {
             Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
-            ListViewResponse<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
+            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
                     SearchScope.SUB, 0, 0, 1, null, null, false);
-            if ((searchResult == null) || (searchResult.getItemsPerPage() != 1)) {
+            if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
             }
 
-            String bindDn = searchResult.getResult().get(0).getString(CouchbaseOperationService.DN);
+            String bindDn = searchResult.getEntries().get(0).getString(CouchbaseOperationService.DN);
 
             return authenticate(bindDn, password);
         } catch (SearchException ex) {
@@ -625,7 +624,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             for (Entry<String, Object> attr : map.entrySet()) {
                 result.add(attr.getKey() + ": " + attr.getValue());
             }
-            
+
             return result.toArray(new String[result.size()]);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);

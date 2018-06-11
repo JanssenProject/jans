@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.gluu.persist.exception.mapping.MappingException;
-import org.gluu.persist.exception.mapping.PropertyNotFoundException;
+import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.exception.PropertyNotFoundException;
 import org.gluu.persist.reflect.property.BasicPropertyAccessor;
 import org.gluu.persist.reflect.property.BasicPropertyAnnotationResolver;
 import org.gluu.persist.reflect.property.DirectPropertyAccessor;

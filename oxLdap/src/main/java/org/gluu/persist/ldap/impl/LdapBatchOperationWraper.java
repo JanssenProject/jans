@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.PropertyAnnotation;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
 
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;

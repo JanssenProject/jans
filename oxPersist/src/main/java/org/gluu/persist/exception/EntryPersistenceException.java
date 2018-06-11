@@ -4,14 +4,14 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 /**
  * An exception is a result if LDAP entry defined incorrectly.
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public class EntryPersistenceException extends BaseMappingException {
+public class EntryPersistenceException extends BasePersistenceException {
 
     private static final long serialVersionUID = 1321766232087075304L;
 
