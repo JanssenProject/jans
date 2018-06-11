@@ -285,7 +285,7 @@ public class CouchbaseOperationsServiceImpl
                     }
 
                     query = baseQuery.limit(currentLimit).offset(start + resultCount);
-                    System.out.println(query);
+                    LOG.debug("Execution query:" + query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
                         throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
