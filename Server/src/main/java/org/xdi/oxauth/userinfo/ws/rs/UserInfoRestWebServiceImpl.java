@@ -9,7 +9,7 @@ package org.xdi.oxauth.userinfo.ws.rs;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.GluuAttributeDataType;
