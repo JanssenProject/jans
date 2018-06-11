@@ -461,14 +461,29 @@ class Migration(object):
                 'imapData': "( 1486583825530 NAME 'imapData' EQUALITY caseIgnoreMatch ORDERING caseIgnoreOrderingMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 USAGE userApplications X-SCHEMA-FILE '100-user.ldif' X-ORIGIN 'gluu' )",
                         }
             
+            schema_77_old = OpenDjSchema(os.path.join(self.backupDir, 'opt/opendj/config/schema/77-customAttributes.ldif'))
+            
             schema_77 = OpenDjSchema(os.path.join(self.open_dj_conf_dir,'77-customAttributes.ldif'))
             
             w = False
-            
+
             for a in att_dict:
                 if not a in attr_class['attributes']:
                     schema_77.add_attributes(att_dict[a])
                     w = True
+                    
+            for a in schema_77_old.attribute_names:
+                if not a in attr_class['attributes']:
+                    _attrib = schema_77_old.get_attribute_by_name(a)
+                    schema_77.schema['attributeTypes'].append(_attrib)
+                    w = True
+
+            for c in schema_77_old.class_names:
+                if not c in attr_class['objectclasses']:
+                    _class = schema_77_old.get_class_by_name(c)
+                    schema_77.schema['objectClasses'].append(_class)
+                    w = True
+
             if w:
                 schema_77.write()
             
@@ -505,7 +520,59 @@ class Migration(object):
                 schema_101.add_attribute_to_class('pairwiseIdentifier', 'oxSectorIdentifierURI')
                 schema_101.add_attribute_to_class('oxAuthUmaScopeDescription', 'oxUrl')
                 schema_101.write()
+
         
+            for custom_schema in ['100-user.ldif']:
+
+                schema_n_old_file = os.path.join(self.backupDir, 'opt/opendj/config/schema', custom_schema)
+                
+                if os.path.exists(schema_n_old_file):
+                    schema_n_file = os.path.join(self.open_dj_conf_dir, custom_schema)
+                    
+                    if not os.path.exists(schema_n_file):
+                        f = open(schema_n_file,'w')
+                        f.close()
+                
+                    schema_n = OpenDjSchema(schema_n_file)
+                    schema_n_old = OpenDjSchema(schema_n_old_file)
+                    w = False
+                    w77 = False
+                    gluuCustomPerson = schema_77.get_class_by_name('gluuCustomPerson')
+                    may_list = list(gluuCustomPerson.may)
+
+                    if not hasattr(schema_n, 'schema'):
+                        schema_n.schema={
+                                            'dn': 'cn=schema',
+                                            'objectClass': ['top', 'ldapSubentry', 'subschema'],
+                                            'objectClasses': [],
+                                            'attributeTypes': [],
+                                            'ldapSyntaxes': [],
+                                        }
+
+
+                    for a in schema_n_old.attribute_names:
+                        if not a in attr_class['attributes']:
+                            _attrib = schema_n_old.get_attribute_by_name(a)
+                            schema_n.schema['attributeTypes'].append(_attrib)
+                            w = True
+                            
+                        if not a in may_list:
+                            may_list.append(a)
+                            w77 = True
+                            
+                    if w77:
+                        gluuCustomPerson.may = tuple(may_list)
+                        schema_77.write()
+
+
+                    for c in schema_n_old.class_names:
+                        if not c in attr_class['objectclasses']:
+                            _class = schema_n_old.get_class_by_name(c)
+                            schema_n.schema['objectClasses'].append(_class)
+                            w = True
+
+                    if w:
+                        schema_n.write()
 
         #MB: I did not understand why we are doing followings
 
