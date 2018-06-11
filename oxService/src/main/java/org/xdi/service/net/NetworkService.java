@@ -7,6 +7,7 @@
 import java.io.Serializable;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,7 +21,7 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 04/28/2016
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class NetworkService implements Serializable {
 

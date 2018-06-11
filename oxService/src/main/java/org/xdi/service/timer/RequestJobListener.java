@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.jboss.weld.context.bound.BoundRequestContext;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 /**
  * @author Yuriy Movchan Date: 04/04/2017
  */
+@Dependent
 public class RequestJobListener implements JobListener {
 
     @Inject

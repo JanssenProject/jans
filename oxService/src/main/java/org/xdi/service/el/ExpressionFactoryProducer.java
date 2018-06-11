@@ -7,6 +7,7 @@ import javax.enterprise.inject.Produces;
 /**
  * @author Yuriy Movchan Date: 05/22/2017
  */
+@ApplicationScoped
 public class ExpressionFactoryProducer {
 
     @Produces

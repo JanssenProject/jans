@@ -2,6 +2,7 @@ package org.xdi.service.cache;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 /**
  * @author yuriyz on 02/23/2017.
  */
+@ApplicationScoped
 public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> {
 
     public static final int DEFAULT_PUT_EXPIRATION_IN_SECONDS = 60;

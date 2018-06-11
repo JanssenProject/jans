@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  *
  * @author Yuriy Movchan Date: 05/14/2013
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class JsonService implements Serializable {
 

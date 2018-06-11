@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import net.jodah.expiringmap.ExpiringMap;
  * @author yuriyz on 02/21/2017.
  */
 
+@ApplicationScoped
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryCacheProvider.class);

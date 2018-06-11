@@ -3,6 +3,7 @@ package org.xdi.service.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 14/03/2017
  */
+@ApplicationScoped
 public class Resources {
 
     private static Map<String, Logger> CACHE = new HashMap<String, Logger>();
