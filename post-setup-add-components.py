@@ -54,7 +54,7 @@ def installSaml():
 
     if os.path.exists(metadata_file):
         print "Shibboleth is already installed on this system"
-        return
+        sys.exit()
 
     print "Installing Shibboleth ..."
     setupObj.oxTrustConfigGeneration = "true"
@@ -94,6 +94,12 @@ def installSaml():
 
 
 def installPassport():
+    
+    if os.path.exists('/opt/gluu/node/passport'):
+        print "Passport is already installed on this system"
+        sys.exit()
+
+    
     print "Installing Passport ..."
     proc = subprocess.Popen('echo "" | /opt/jre/bin/keytool -list -v -keystore /etc/certs/passport-rp.jks', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     alias_l=''
