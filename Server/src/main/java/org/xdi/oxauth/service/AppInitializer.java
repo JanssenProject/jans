@@ -27,7 +27,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.gluu.persist.exception.mapping.BaseMappingException;
+import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
@@ -465,7 +465,7 @@ public class AppInitializer {
 		GluuAppliance appliance = null;
 		try {
 			appliance = localLdapEntryManager.find(GluuAppliance.class, applianceDn, ldapReturnAttributes);
-		} catch (BaseMappingException ex) {
+		} catch (BasePersistenceException ex) {
 			log.error("Failed to load appliance entry from Ldap", ex);
 			return null;
 		}

@@ -8,7 +8,7 @@ package org.xdi.oxauth.service;
 
 import com.google.common.collect.Sets;
 
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;

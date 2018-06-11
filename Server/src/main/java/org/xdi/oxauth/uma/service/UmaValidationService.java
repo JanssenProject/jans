@@ -9,7 +9,7 @@ package org.xdi.oxauth.uma.service;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
