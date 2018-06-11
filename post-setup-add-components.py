@@ -53,7 +53,7 @@ def installSaml():
     metadata_file = os.path.join(setupObj.idp3MetadataFolder, setupObj.idp3_metadata)
 
     if os.path.exists(metadata_file):
-        print "Shibboleth is allready installed on this system"
+        print "Shibboleth is already installed on this system"
         return
 
     print "Installing Shibboleth ..."
@@ -90,9 +90,11 @@ def installSaml():
         F.write(metadata)
     
     setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', setupObj.idp3Folder])
+    print "Shibboleth installation done"
 
 
 def installPassport():
+    print "Installing Passport ..."
     proc = subprocess.Popen('echo "" | /opt/jre/bin/keytool -list -v -keystore /etc/certs/passport-rp.jks', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     alias_l=''
 
@@ -109,6 +111,7 @@ def installPassport():
     setupObj.passport_rp_client_jwks = [json.dumps(jks)]
     
     setupObj.install_passport()
+    print "Passport installation done"
 
 
 if args.addshib:
