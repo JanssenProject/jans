@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.util.Map;
 
 import javax.el.ExpressionFactory;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017
  */
+@Dependent
 public class ExpressionEvaluator implements Serializable {
 
     private static final long serialVersionUID = -16629423172996440L;

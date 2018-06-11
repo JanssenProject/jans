@@ -2,6 +2,7 @@ package org.xdi.service.cache;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import net.spy.memcached.ops.OperationStatus;
 /**
  * @author yuriyz on 02/02/2017.
  */
+@ApplicationScoped
 public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
     @Inject

@@ -70,6 +70,9 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     private LdapOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
 
+    public LdapEntryManager() {
+    }
+
     public LdapEntryManager(LdapOperationsServiceImpl operationService) {
         this.operationService = operationService;
         subscribers = new LinkedList<DeleteNotifier>();

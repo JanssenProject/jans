@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBContext;
@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
  *
  * @author Yuriy Movchan Date: 01.11.2011
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class XmlService implements Serializable {
 

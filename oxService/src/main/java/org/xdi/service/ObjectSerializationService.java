@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  *
  * @author Yuriy Movchan Date: 01/27/2014
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class ObjectSerializationService {
 

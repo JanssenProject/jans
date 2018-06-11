@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.xdi.util.OxConstants;
  *
  * @author Yuriy Movchan Date: 08/11/2010
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class LookupService implements Serializable {
 
@@ -37,7 +37,7 @@ public class LookupService implements Serializable {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private CacheService cacheService;
@@ -53,7 +53,7 @@ public class LookupService implements Serializable {
         String key = dn;
         DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entry == null) {
-            entry = ldapEntryManager.find(DisplayNameEntry.class, key);
+            entry = ldapEntryManager.find(DisplayNameEntry.class, key, null);
 
             cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
         }

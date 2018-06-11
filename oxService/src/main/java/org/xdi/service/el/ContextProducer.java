@@ -9,6 +9,7 @@ import javax.el.ListELResolver;
 import javax.el.MapELResolver;
 import javax.el.ResourceBundleELResolver;
 import javax.el.VariableMapper;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
@@ -21,6 +22,7 @@ import com.sun.el.lang.VariableMapperImpl;
 /**
  * @author Yuriy Movchan Date: 05/22/2017
  */
+@Dependent
 public class ContextProducer {
 
     @Inject
