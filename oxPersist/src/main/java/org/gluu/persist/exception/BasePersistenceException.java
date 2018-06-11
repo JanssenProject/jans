@@ -4,24 +4,24 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 /**
  * The base {@link Throwable} type for LDAP Mapping.
  */
-public class BaseMappingException extends RuntimeException {
+public class BasePersistenceException extends RuntimeException {
 
     private static final long serialVersionUID = 1071769232087073304L;
 
-    public BaseMappingException(Throwable root) {
+    public BasePersistenceException(Throwable root) {
         super(root);
     }
 
-    public BaseMappingException(String string, Throwable root) {
+    public BasePersistenceException(String string, Throwable root) {
         super(string, root);
     }
 
-    public BaseMappingException(String s) {
+    public BasePersistenceException(String s) {
         super(s);
     }
 

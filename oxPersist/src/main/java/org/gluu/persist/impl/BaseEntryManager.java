@@ -31,15 +31,15 @@ import javax.persistence.Query;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
-import org.gluu.persist.exception.mapping.InvalidArgumentException;
-import org.gluu.persist.exception.mapping.MappingException;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.exception.InvalidArgumentException;
+import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
-import org.gluu.persist.model.PropertyAnnotation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.reflect.property.Getter;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.property.Setter;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
@@ -121,7 +121,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> List<T> findEntries(Object entry, int sizeLimit) {
+    public <T> List<T> findEntries(Object entry, int count) {
         if (entry == null) {
             throw new MappingException("Entry to find is null");
         }
@@ -136,7 +136,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
         Filter searchFilter = createFilterByEntry(entry, entryClass, attributes);
 
-        return findEntries(dnValue.toString(), entryClass, searchFilter, SearchScope.SUB, null, sizeLimit, DEFAULT_PAGINATION_SIZE);
+        return findEntries(dnValue.toString(), entryClass, searchFilter, SearchScope.SUB, null, 0, count, DEFAULT_PAGINATION_SIZE);
     }
 
     @Override
@@ -150,8 +150,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
     }
 
     @Override
-    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit) {
-        return findEntries(baseDN, entryClass, filter, SearchScope.SUB, null, null, 0, sizeLimit, 0);
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int count) {
+        return findEntries(baseDN, entryClass, filter, SearchScope.SUB, null, null, 0, count, 0);
     }
 
     @Override
@@ -160,14 +160,14 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
     }
 
     @Override
-    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit) {
-        return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, sizeLimit, 0);
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int count) {
+        return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, count, 0);
     }
 
     @Override
-    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit,
-            int chunkSize) {
-        return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, null, 0, sizeLimit, chunkSize);
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int start,
+            int count, int chunkSize) {
+        return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, null, start, count, chunkSize);
     }
 
     @SuppressWarnings("unchecked")

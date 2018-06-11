@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.gluu.persist.exception.operation.InvalidConfigurationException;
+import org.gluu.persist.exception.operation.ConfigurationException;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
@@ -103,7 +103,7 @@ public class LdapConnectionProvider {
             String str = this.servers[i];
             int idx = str.indexOf(":");
             if (idx == -1) {
-                throw new InvalidConfigurationException("Ldap server settings should be in format server:port");
+                throw new ConfigurationException("Ldap server settings should be in format server:port");
             }
             this.addresses[i] = str.substring(0, idx).trim();
             this.ports[i] = Integer.parseInt(str.substring(str.indexOf(":") + 1, str.length()));

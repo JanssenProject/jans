@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -214,26 +214,26 @@ public abstract class MetricService implements Serializable {
     }
 
     public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
-            int sizeLimit, int chunkSize) {
+            int count, int chunkSize) {
         Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
         List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
-                new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
+                new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);
 
         return metricEntries;
     }
 
     public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType,
-            String applianceInum, int sizeLimit, int chunkSize) {
+            String applianceInum, int count, int chunkSize) {
         String baseDn = buildDn(null, null, applicationType, applianceInum);
 
         Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
         return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0,
-                sizeLimit, chunkSize);
+                count, chunkSize);
     }
 
     public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum,
-            int sizeLimit, int chunkSize) {
+            int count, int chunkSize) {
         final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
         // Remove expired entries
         for (final String baseDnForPeriod : keepBaseDnForPeriod) {
@@ -250,7 +250,7 @@ public abstract class MetricService implements Serializable {
                     }
                 }
             };
-            getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, sizeLimit, chunkSize);
+            getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, count, chunkSize);
         }
 
         DefaultBatchOperation<SimpleBranch> batchOperation = new DefaultBatchOperation<SimpleBranch>() {
@@ -276,7 +276,7 @@ public abstract class MetricService implements Serializable {
                 }
             }
         };
-        findAllPeriodBranches(batchOperation, applicationType, applianceInum, sizeLimit, chunkSize);
+        findAllPeriodBranches(batchOperation, applicationType, applianceInum, count, chunkSize);
     }
 
     private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {

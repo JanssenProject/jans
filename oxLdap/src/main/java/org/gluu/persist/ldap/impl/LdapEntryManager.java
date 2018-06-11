@@ -21,9 +21,9 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.persist.event.DeleteNotifier;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
-import org.gluu.persist.exception.mapping.MappingException;
-import org.gluu.persist.exception.operation.AuthenticationException;
+import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
@@ -34,10 +34,10 @@ import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
-import org.gluu.persist.model.ListViewResponse;
-import org.gluu.persist.model.PropertyAnnotation;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -360,7 +360,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
-            BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize) {
+            BatchOperation<T> batchOperation, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -386,7 +386,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
             searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
-                    startIndex, chunkSize, sizeLimit, null, currentLdapReturnAttributes);
+                    start, chunkSize, count, null, currentLdapReturnAttributes);
 
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -409,8 +409,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize,
-            String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
+    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -433,10 +433,10 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
 
         SearchResult searchResult = null;
-        ListViewResponse<T> vlvResponse = new ListViewResponse<T>();
+        PagedResult<T> vlvResponse = new PagedResult<T>();
         try {
             searchResult = this.operationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
-                    startIndex, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+                    start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -447,20 +447,20 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
 
         if (searchResult.getEntryCount() == 0) {
-            vlvResponse.setResult(new ArrayList<T>(0));
+            vlvResponse.setEntries(new ArrayList<T>(0));
             return vlvResponse;
         }
 
         List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations,
                 searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
-        vlvResponse.setResult(entries);
+        vlvResponse.setEntries(entries);
 
         return vlvResponse;
     }
 
     @Deprecated
-    public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy,
-            SortOrder sortOrder, ListViewResponse vlvResponse, String[] ldapReturnAttributes) {
+    public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int start, int count, String sortBy,
+            SortOrder sortOrder, PagedResult vlvResponse, String[] ldapReturnAttributes) {
 
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
@@ -487,7 +487,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         try {
 
             searchResult = this.operationService.searchVirtualListView(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
-                    startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+                    start, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));

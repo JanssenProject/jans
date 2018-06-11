@@ -8,7 +8,7 @@
 package org.gluu.persist.couchbase.impl;
 
 import org.gluu.persist.couchbase.model.ParsedKey;
-import org.gluu.persist.exception.operation.KeyConversionException;
+import org.gluu.persist.exception.KeyConversionException;
 import org.xdi.util.StringHelper;
 
 /**

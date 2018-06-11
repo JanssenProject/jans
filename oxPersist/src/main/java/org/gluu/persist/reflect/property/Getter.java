@@ -9,7 +9,7 @@ package org.gluu.persist.reflect.property;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.gluu.persist.exception.mapping.BaseMappingException;
+import org.gluu.persist.exception.BasePersistenceException;
 
 /**
  * Gets values of a particular property
@@ -21,9 +21,9 @@ public interface Getter extends Serializable {
      * @param owner
      *            The instance containing the value to be retreived.
      * @return The extracted value.
-     * @throws BaseMappingException
+     * @throws BasePersistenceException
      */
-    Object get(Object owner) throws BaseMappingException;
+    Object get(Object owner) throws BasePersistenceException;
 
     /**
      * Get the declared Java type

@@ -7,7 +7,7 @@
 package org.gluu.persist.exception.operation;
 
 /**
- * Generic persistent layer exception
+ * Generic operation layer exception
  *
  * @author Yuriy Movchan Date: 29/01/2018
  */

@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2014, Gluu
  */
+
 package org.gluu.persist.model;
 
 import java.util.HashMap;

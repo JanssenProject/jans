@@ -10,7 +10,7 @@ import org.gluu.ldap.model.SimpleGrant;
 import org.gluu.ldap.model.SimpleSession;
 import org.gluu.ldap.model.SimpleUser;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomAttribute;
@@ -30,7 +30,8 @@ public final class LdapSample {
         LOG = Logger.getLogger(LdapSample.class);
     }
 
-    private LdapSample() { }
+    private LdapSample() {
+    }
 
     public static void main(String[] args) {
         // Prepare sample connection details
@@ -63,16 +64,16 @@ public final class LdapSample {
         List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
         LOG.debug("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] {"oxAuthGrantId"},
+        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" },
                 null, 10, 0, 0);
         LOG.debug("Found grants: " + grants.size());
 
         try {
-            ListViewResponse<SimpleUser> vlvResponse = ldapEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 10, 100000, 1000,
-                    "displayName", SortOrder.ASCENDING, new String[] {"uid", "displayName", "gluuStatus"});
+            PagedResult<SimpleUser> vlvResponse = ldapEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+                    new String[] { "uid", "displayName", "gluuStatus" }, "displayName", SortOrder.ASCENDING, 10, 100000, 1000);
 
-            LOG.debug("Found persons: " + vlvResponse.getTotalResults());
-            System.out.println(vlvResponse.getResult().size());
+            LOG.debug("Found persons: " + vlvResponse.getTotalEntriesCount());
+            System.out.println(vlvResponse.getEntries().size());
         } catch (Exception ex) {
             LOG.error("Failed to search", ex);
         }

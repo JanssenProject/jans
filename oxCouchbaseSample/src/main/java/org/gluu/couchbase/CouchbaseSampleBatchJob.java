@@ -12,7 +12,7 @@ import org.gluu.couchbase.model.SimpleClient;
 import org.gluu.couchbase.model.SimpleSession;
 import org.gluu.couchbase.model.SimpleTokenCouchbase;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;

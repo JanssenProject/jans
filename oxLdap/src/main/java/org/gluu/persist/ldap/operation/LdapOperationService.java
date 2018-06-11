@@ -8,7 +8,7 @@ import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
 
 import com.unboundid.ldap.sdk.Attribute;
@@ -42,23 +42,23 @@ public interface LdapOperationService {
 
     boolean authenticate(String bindDn, String password) throws ConnectionException;
 
-    SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws SearchException;
+    SearchResult search(String dn, Filter filter, int searchLimit, int count) throws SearchException;
 
-    SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit, Control[] controls,
+    SearchResult search(String dn, Filter filter, int searchLimit, int count, Control[] controls,
             String... attributes) throws SearchException;
 
-    SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls,
+    SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int count, Control[] controls,
             String... attributes) throws SearchException;
 
-    <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex,
-            int searchLimit, int sizeLimit, Control[] controls, String... attributes) throws SearchException;
+    <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException;
 
-    SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count,
-            int searchLimit, String sortBy, SortOrder sortOrder, ListViewResponse vlvResponse,
+    SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int start, int count,
+            int searchLimit, String sortBy, SortOrder sortOrder, PagedResult vlvResponse,
             String... attributes) throws Exception;
 
-    SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count,
-            String sortBy, SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes)
+    SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count,
+            String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes)
             throws Exception;
 
     /**

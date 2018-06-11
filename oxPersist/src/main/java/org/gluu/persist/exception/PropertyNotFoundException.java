@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.exception.mapping;
+package org.gluu.persist.exception;
 
 /**
  * Indicates that an expected getter or setter method could not be found on a

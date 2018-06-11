@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persist.model;
+package org.gluu.persist.reflect.property;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

@@ -6,7 +6,7 @@
 
 package org.gluu.persist.reflect.property;
 
-import org.gluu.persist.exception.mapping.PropertyNotFoundException;
+import org.gluu.persist.exception.PropertyNotFoundException;
 
 /**
  * Abstracts the notion of a "property". Defines a strategy for accessing the

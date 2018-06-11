@@ -9,7 +9,7 @@ import org.gluu.couchbase.model.SimpleSession;
 import org.gluu.couchbase.model.SimpleUser;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomAttribute;
@@ -66,11 +66,11 @@ public final class CouchbaseSample {
         LOG.info("Found grants: " + grants.size());
 
         try {
-            ListViewResponse<SimpleUser> listViewResponse = couchbaseEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 0, 6, 4,
-                    "uid", SortOrder.ASCENDING, new String[] { "uid", "displayName", "gluuStatus" });
+            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+                    new String[] { "uid", "displayName", "gluuStatus" }, "uid", SortOrder.ASCENDING, 0, 6, 4);
 
-            LOG.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
-            for (SimpleUser user : listViewResponse.getResult()) {
+            LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());
+            for (SimpleUser user : listViewResponse.getEntries()) {
                 System.out.println(user.getUserId());
             }
         } catch (Exception ex) {
@@ -78,11 +78,11 @@ public final class CouchbaseSample {
         }
 
         try {
-            ListViewResponse<SimpleUser> listViewResponse = couchbaseEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 0, 6, 4,
-                    "uid", SortOrder.DESCENDING, new String[] { "uid", "displayName", "gluuStatus" });
+            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+                    new String[] { "uid", "displayName", "gluuStatus" }, "uid", SortOrder.DESCENDING, 0, 6, 4);
 
-            LOG.info("Found persons: " + listViewResponse.getItemsPerPage() + ", total persons: " + listViewResponse.getTotalResults());
-            for (SimpleUser user : listViewResponse.getResult()) {
+            LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());
+            for (SimpleUser user : listViewResponse.getEntries()) {
                 System.out.println(user.getUserId());
             }
         } catch (Exception ex) {

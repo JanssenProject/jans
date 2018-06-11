@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.persist.exception.mapping.MappingException;
+import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
@@ -26,7 +26,7 @@ import org.gluu.persist.ldap.exception.InvalidSimplePageControlException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ListViewResponse;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Pair;
@@ -264,8 +264,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * com.unboundid.ldap.sdk.Filter, int, int)
      */
     @Override
-    public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws SearchException {
-        return search(dn, filter, searchLimit, sizeLimit, null, (String[]) null);
+    public SearchResult search(String dn, Filter filter, int searchLimit, int count) throws SearchException {
+        return search(dn, filter, searchLimit, count, null, (String[]) null);
     }
 
     /*
@@ -276,9 +276,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * java.lang.String)
      */
     @Override
-    public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+    public SearchResult search(String dn, Filter filter, int searchLimit, int count, Control[] controls, String... attributes)
             throws SearchException {
-        return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
+        return search(dn, filter, SearchScope.SUB, searchLimit, count, controls, attributes);
     }
 
     /*
@@ -289,9 +289,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
     @Override
-    public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+    public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int count, Control[] controls, String... attributes)
             throws SearchException {
-        return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
+        return search(dn, filter, scope, null, 0, searchLimit, count, controls, attributes);
     }
 
     /*
@@ -303,8 +303,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
     @Override
-    public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex,
-            int searchLimit, int sizeLimit, Control[] controls, String... attributes) throws SearchException {
+    public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
         SearchRequest searchRequest;
 
         BatchOperation<T> ldapBatchOperation = null;
@@ -325,11 +325,11 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             searchRequest = new SearchRequest(dn, scope, filter, attributes);
         }
 
-        boolean useSizeLimit = sizeLimit > 0;
+        boolean useSizeLimit = count > 0;
 
         if (useSizeLimit) {
             // Use paged result to limit search
-            searchLimit = sizeLimit;
+            searchLimit = count;
         }
 
         SearchResult searchResult = null;
@@ -337,7 +337,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
         List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
 
-        if ((searchLimit > 0) || (startIndex > 0)) {
+        if ((searchLimit > 0) || (start > 0)) {
             if (searchLimit == 0) {
                 // Default page size
                 searchLimit = 100;
@@ -349,13 +349,13 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             try {
                 ldapConnection = getConnectionPool().getConnection();
                 ASN1OctetString cookie = null;
-                if (startIndex > 0) {
+                if (start > 0) {
                     try {
-                        cookie = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, startIndex);
+                        cookie = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, start);
                     } catch (InvalidSimplePageControlException ex) {
-                        throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified startIndex", ex);
+                        throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified start", ex);
                     } catch (LDAPException ex) {
-                        throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified startIndex", ex);
+                        throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified start", ex);
                     }
                 }
 
@@ -393,7 +393,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                     }
                 } while ((cookie != null) && (cookie.getValueLength() > 0));
             } catch (LDAPException ex) {
-                throw new SearchException("Failed to scroll to specified startIndex", ex, ex.getResultCode().intValue());
+                throw new SearchException("Failed to scroll to specified start", ex, ex.getResultCode().intValue());
             } finally {
                 if (ldapConnection != null) {
                     getConnectionPool().releaseConnection(ldapConnection);
@@ -425,10 +425,10 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     private ASN1OctetString scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope,
-            Control[] controls, int startIndex) throws LDAPException, InvalidSimplePageControlException {
+            Control[] controls, int start) throws LDAPException, InvalidSimplePageControlException {
         SearchRequest searchRequest = new SearchRequest(dn, scope, filter, "dn");
 
-        int currentStartIndex = startIndex;
+        int currentStartIndex = start;
         ASN1OctetString cookie = null;
         do {
             int pageSize = Math.min(currentStartIndex, 100);
@@ -460,8 +460,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Override
-    public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count, int searchLimit, String sortBy,
-            SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
+    public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int start, int count, int searchLimit, String sortBy,
+            SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws Exception {
 
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
@@ -490,14 +490,14 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
         List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
 
-        if (startIndex <= totalResults) {
+        if (start <= totalResults) {
 
-            int diff = (totalResults - startIndex);
+            int diff = (totalResults - start);
             if (diff <= count) {
                 count = (diff + 1) >= count ? count : (diff + 1);
             }
 
-            int startZeroIndex = startIndex - 1;
+            int startZeroIndex = start - 1;
             searchResultEntryList = resultSearchResultEntries.subList(startZeroIndex, startZeroIndex + count);
         }
 
@@ -511,9 +511,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                 searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
 
         // Get results info
-        vlvResponse.setItemsPerPage(count);
-        vlvResponse.setTotalResults(totalResults);
-        vlvResponse.setStartIndex(startIndex);
+        vlvResponse.setEntriesCount(count);
+        vlvResponse.setTotalEntriesCount(totalResults);
+        vlvResponse.setStart(start);
 
         return searchResult;
     }
@@ -528,8 +528,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Deprecated
-    public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy,
-            SortOrder sortOrder, ListViewResponse vlvResponse, String... attributes) throws Exception {
+    public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
+            SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws Exception {
 
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
@@ -543,8 +543,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             searchRequest = new SearchRequest(dn, scope, filter, attributes);
         }
 
-        // startIndex and count should be "cleansed" before arriving here
-        int targetOffset = startIndex;
+        // start and count should be "cleansed" before arriving here
+        int targetOffset = start;
         int beforeCount = 0;
         int afterCount = (count > 0) ? (count - 1) : 0;
         int contentCount = 0;
@@ -571,9 +571,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
 
         // Get results info
-        vlvResponse.setItemsPerPage(searchResult.getEntryCount());
-        vlvResponse.setTotalResults(vlvResponseControl.getContentCount());
-        vlvResponse.setStartIndex(vlvResponseControl.getTargetPosition());
+        vlvResponse.setEntriesCount(searchResult.getEntryCount());
+        vlvResponse.setTotalEntriesCount(vlvResponseControl.getContentCount());
+        vlvResponse.setStart(vlvResponseControl.getTargetPosition());
 
         return searchResult;
     }
