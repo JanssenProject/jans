@@ -29,8 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
-import org.gluu.persist.exception.mapping.EmptyEntryPersistenceException;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -557,11 +556,7 @@ public class SessionIdService {
                 }
 
                 if (update) {
-                    try {
-                        mergeWithRetry(sessionId, 3);
-                    } catch (EmptyEntryPersistenceException ex) {
-                        log.warn("Failed to update session entry '{}': '{}'", sessionId.getId(), ex.getMessage());
-                    }
+                    mergeWithRetry(sessionId, 3);
                 }
             }
         } catch (Exception e) {

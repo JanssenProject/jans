@@ -16,7 +16,7 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
-import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.search.filter.Filter;
 

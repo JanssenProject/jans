@@ -9,6 +9,7 @@ package org.xdi.oxauth.service.custom;
 import java.io.UnsupportedEncodingException;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -23,6 +24,7 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
  */
 @Stateless
 @Named
+@ApplicationScoped
 public class CustomScriptService extends AbstractCustomScriptService {
 	
 	@Inject
