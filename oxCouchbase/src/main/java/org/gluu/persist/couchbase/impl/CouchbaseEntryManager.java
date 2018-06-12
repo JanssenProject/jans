@@ -310,66 +310,52 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    // TODO: Reuse findListViewResponse after changing method signature
     public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
             BatchOperation<T> batchOperation, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
 
-        // Check entry class
-        checkEntryClass(entryClass, false);
-        String[] objectClasses = getTypeObjectClasses(entryClass);
-        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        String[] currentLdapReturnAttributes = ldapReturnAttributes;
-        if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
-        }
-
-        // Find entries
-        Filter searchFilter;
-        if (objectClasses.length > 0) {
-            searchFilter = addObjectClassFilter(filter, objectClasses);
-        } else {
-            searchFilter = filter;
-        }
-
-        // Prepare default sort
-        Sort[] defaultSort = getDefaultSort(entryClass);
-
-        PagedResult<JsonObject> searchResult = null;
-        ParsedKey keyWithInum = null;
-        try {
-            CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass,
-                    propertiesAnnotations);
-            keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, start, chunkSize, count,
-                    defaultSort, batchOperationWraper, false, currentLdapReturnAttributes);
-
-            if (searchResult == null) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-        }
-
+        PagedResult<JsonObject> searchResult = findEntriesImpl(baseDN, entryClass, filter, scope, ldapReturnAttributes, null, null, batchOperation,
+                false, start, count, chunkSize);
         if (searchResult.getEntriesCount() == 0) {
             return new ArrayList<T>(0);
         }
 
-        List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
-                searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
+        List<T> entries = createEntities(baseDN, entryClass, searchResult);
 
         return entries;
     }
 
     @Override
-    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
-            SortOrder sortOrder, int start, int count, int chunkSize) {
+    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes,
+            String sortBy, SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
 
+        PagedResult<JsonObject> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder, null,
+                true, start, count, chunkSize);
+
+        PagedResult<T> result = new PagedResult<T>();
+        result.setEntriesCount(searchResult.getEntriesCount());
+        result.setStart(searchResult.getStart());
+        result.setTotalEntriesCount(searchResult.getTotalEntriesCount());
+
+        if (searchResult.getEntriesCount() == 0) {
+            result.setEntries(new ArrayList<T>(0));
+            return result;
+        }
+
+        List<T> entries = createEntities(baseDN, entryClass, searchResult);
+        result.setEntries(entries);
+
+        return result;
+    }
+
+    protected <T> PagedResult<JsonObject> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
+            String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, boolean returnCount, int start, int count,
+            int chunkSize) {
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
@@ -401,34 +387,23 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         PagedResult<JsonObject> searchResult = null;
-        ParsedKey keyWithInum = null;
         try {
-            keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, start, chunkSize,
-                    count, defaultSort, null, true, currentLdapReturnAttributes);
+            CouchbaseBatchOperationWraper<T> batchOperationWraper = null;
+            if (batchOperation != null) {
+                batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
+            }
+            ParsedKey keyWithInum = toCouchbaseKey(baseDN);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, currentLdapReturnAttributes,
+                    defaultSort, batchOperationWraper, returnCount, start, count, chunkSize);
 
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
+
+            return searchResult;
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
-
-        PagedResult<T> result = new PagedResult<T>();
-        result.setEntriesCount(searchResult.getEntriesCount());
-        result.setStart(searchResult.getStart());
-        result.setTotalEntriesCount(searchResult.getTotalEntriesCount());
-
-        if (searchResult.getEntriesCount() == 0) {
-            result.setEntries(new ArrayList<T>(0));
-            return result;
-        }
-
-        List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
-                searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
-        result.setEntries(entries);
-
-        return result;
     }
 
     @Override
@@ -448,8 +423,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 1, 0, 1, null, null, false,
-                    ldapReturnAttributes);
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, ldapReturnAttributes, null,
+                    null, false, 1, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
@@ -458,6 +433,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         return (searchResult != null) && (searchResult.getEntriesCount() > 0);
+    }
+
+    protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<JsonObject> searchResult) {
+        ParsedKey keyWithInum = toCouchbaseKey(baseDN);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
+                searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
+        
+        return entries;
     }
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, ParsedKey baseDn,
@@ -523,7 +507,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
             PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
-                    SearchScope.SUB, 0, 0, 1, null, null, false);
+                    SearchScope.SUB, null, null, null, false, 0, 0, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
             }
@@ -570,8 +554,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         try {
             CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation);
-            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, 0, 100, 0, null,
-                    batchOperationWraper, false, ldapReturnAttributes);
+            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, ldapReturnAttributes, null,
+                    batchOperationWraper, false, 0, 0, 100);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
                     String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -635,7 +619,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return FILTER_CONVERTER.convertToLdapFilter(genericFilter);
     }
 
-    private ParsedKey toCouchbaseKey(String dn) throws KeyConversionException {
+    private ParsedKey toCouchbaseKey(String dn) {
         return KEY_CONVERTER.convertToKey(dn);
     }
 

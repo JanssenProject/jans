@@ -6,36 +6,22 @@
 
 package org.gluu.persist.couchbase.operation.impl;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
 
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.ResultCode;
-import org.gluu.persist.model.AttributeData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.StringHelper;
 
 import com.couchbase.client.core.CouchbaseException;
-import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.error.subdoc.SubDocumentException;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.Select;
-import com.couchbase.client.java.query.SimpleN1qlQuery;
 import com.couchbase.client.java.query.Statement;
-import com.couchbase.client.java.subdoc.DocumentFragment;
 
 /**
  * Perform cluster initialization and open required buckets
@@ -263,157 +249,6 @@ public class CouchbaseConnectionProvider {
         }
 
         return certificateAttributes.contains(attributeName.toLowerCase());
-    }
-
-    public static void main(String[] args) {
-        Properties prop = new Properties();
-        prop.put("servers", "localhost");
-        prop.put("userName", "admin");
-        prop.put("userPassword", "secret");
-        prop.put("buckets", "gluu, travel-sample");
-        prop.put("bucket.gluu.mapping", "gluu");
-
-        CouchbaseConnectionProvider provider = new CouchbaseConnectionProvider(prop);
-        provider.create();
-
-        System.err.println(provider.isConnected());
-        importSql(provider.getBucketMappingByKey("gluu").getBucket());
-
-        // selectListByOC(provider);
-        // updatePerson2(provider,
-        // "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
-        // JsonDocument doc = getPerson(provider,
-        // "people_@!5304.5F36.0E64.E1AC!0001!179C.62D7!0000!1248.7F09.A58E.703D");
-        // byte[] data = new byte[200];
-        // data[0] = 1;
-        // data[199] = 1;
-        // doc.content().put("test", new BigInteger(data));
-        // System.out.println(doc);
-        // getAttributeDataList(doc);
-
-        provider.destory();
-    }
-
-    protected static void selectListByOC(CouchbaseConnectionProvider provider) {
-        Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-        SimpleN1qlQuery query = N1qlQuery.simple("SELECT * FROM `gluu` b WHERE META(b).id LIKE 'people_%' AND 'gluuPerson' IN objectClass");
-        N1qlQueryResult result = bucket.query(query);
-        if (result.finalSuccess()) {
-            System.out.println(result.allRows().get(0).value());
-            System.out.println(result.info().resultCount() + " :" + query);
-        } else {
-            System.err.println("Error! " + result.errors());
-        }
-    }
-
-    /*
-     * protected static void selectListByOCWithFilter(CouchbaseConnectionProvider
-     * provider) { Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-     * SimpleN1qlQuery query =
-     * N1qlQuery.simple(select("*").from(i("gluu")).where(expression) b WHERE
-     * META(b).id LIKE 'people_%' AND 'gluuPerson' IN objectClass"); N1qlQueryResult
-     * result = bucket.query(query); if (result.finalSuccess()) {
-     * System.out.println(result.allRows().get(0).value());
-     * System.out.println(result.info().resultCount() + " :" + query); } else {
-     * System.err.println("Error! " + result.errors()); } }
-     */
-    protected static void updatePerson(CouchbaseConnectionProvider provider, String docId) {
-        try {
-            Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-            DocumentFragment<Mutation> result = bucket.mutateIn(docId).remove("givenName").upsert("givenName", "bla-bla2").insert("aaa", "aaa")
-                    .execute();
-            System.out.println(result.size());
-        } catch (SubDocumentException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-        }
-    }
-
-    protected static void addPerson(CouchbaseConnectionProvider provider, String docId, JsonObject content) {
-        try {
-            Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-            JsonDocument doc = JsonDocument.create(docId, content);
-            JsonDocument result = bucket.upsert(doc);
-            System.out.println(result);
-        } catch (CouchbaseException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-        }
-    }
-
-    protected static void updatePerson2(CouchbaseConnectionProvider provider, String docId) {
-        try {
-            byte[] data = new byte[200];
-            data[0] = 1;
-            data[199] = 1;
-
-            Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-            // DocumentFragment<Mutation> result = bucket.mutateIn(docId).insert("a2", new
-            // Integer(12345)).execute();
-            // DocumentFragment<Mutation> result2 = bucket.mutateIn(docId).insert("a3", new
-            // BigInteger(data)).execute();
-            DocumentFragment<Mutation> result3 = bucket.mutateIn(docId).insert("a4", new Date()).execute();
-            System.out.println(result3.size());
-        } catch (SubDocumentException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-        }
-    }
-
-    protected static JsonDocument getPerson(CouchbaseConnectionProvider provider, String docId) {
-        try {
-            Bucket bucket = provider.getBucketMapping("gluu").getBucket();
-            JsonDocument result = bucket.get(docId);
-            System.out.println(result);
-
-            return result;
-        } catch (CouchbaseException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
-    protected static void importSql(Bucket bucket) {
-        try {
-            FileReader inFile = new FileReader("V:/1.sql");
-            BufferedReader inStream = new BufferedReader(inFile);
-            String inString;
-
-            while ((inString = inStream.readLine()) != null) {
-                SimpleN1qlQuery query = N1qlQuery.simple(inString);
-                N1qlQueryResult result = bucket.query(query);
-                // int idx = inString.indexOf("ENTRY:");
-                // String doc_key = inString.substring(5, idx - 1);
-                // String doc_value = inString.substring(idx + 7, inString.length());
-                // System.out.println(doc_value);
-                // doc_value = doc_value.replaceAll("\'", "");
-                // JsonDocument result = bucket.upsert(JsonDocument.create(doc_key,
-                // JsonObject.fromJson(doc_value)));
-
-                if (!result.finalSuccess()) {
-                    query = N1qlQuery.simple(inString.replaceAll("r's", "r\'s"));
-                    result = bucket.query(query);
-                    if (!result.finalSuccess()) {
-                        System.out.println(inString);
-                        System.out.println(result.errors());
-                    }
-                }
-            }
-            inStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void getAttributeDataList(JsonDocument entry) {
-        List<AttributeData> result = new ArrayList<AttributeData>();
-        JsonObject content = entry.content();
-        for (String attributeName : content.getNames()) {
-            Object attribute = content.get(attributeName);
-            System.out.println(attributeName + " : " + attribute + " : " + attribute.getClass().toGenericString());
-        }
     }
 
 }
