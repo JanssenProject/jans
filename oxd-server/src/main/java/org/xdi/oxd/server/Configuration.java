@@ -315,6 +315,7 @@ public class Configuration {
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
                 ", storageConfiguration=" + storageConfiguration +
+                ", removeExpiredClients=" + removeExpiredClients +
                 '}';
     }
 }
