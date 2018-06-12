@@ -13,6 +13,7 @@ import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
+import org.gluu.persist.exception.operation.EntryNotFoundException;
 import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.PagedResult;
@@ -32,7 +33,6 @@ public interface CouchbaseOperationService {
 
     String DN = "dn";
     String UID = "uid";
-    String SUCCESS = "success";
     String USER_PASSWORD = "userPassword";
     String OBJECT_CLASS = "objectClass";
 
@@ -47,15 +47,14 @@ public interface CouchbaseOperationService {
     boolean updateEntry(String key, JsonObject attrs) throws UnsupportedOperationException, PersistenceException;
     boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, PersistenceException;
 
-    boolean delete(String key) throws PersistenceException;
-    boolean deleteRecursively(String key) throws PersistenceException;
+    boolean delete(String key) throws EntryNotFoundException;
+    boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException;
 
     JsonObject lookup(String key, String... attributes) throws SearchException;
 
-    // Change ordder pageSize and count
     <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope,
-            int start, int pageSize, int count, Sort[] orderBy,
-            CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException;
+            String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount,
+            int start, int count, int pageSize) throws SearchException;
 
     boolean isBinaryAttribute(String attribute);
     boolean isCertificateAttribute(String attribute);

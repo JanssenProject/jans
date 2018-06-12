@@ -33,6 +33,9 @@ public final class CouchbaseSample {
 
         // Create Couchbase entry manager
         CouchbaseEntryManager couchbaseEntryManager = couchbaseSampleEntryManager.createCouchbaseEntryManager();
+        
+//        SimpleUser dummyUser = couchbaseEntryManager.find(SimpleUser.class, "inum=test,o=test,o=gluu");
+//        LOG.info("Dummy User '{}'", dummyUser);
 
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = couchbaseEntryManager.findEntries("o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", SimpleUser.class, null);
@@ -42,10 +45,13 @@ public final class CouchbaseSample {
 
         if (users.size() > 0) {
             // Add attribute "streetAddress" to first user
-            SimpleUser user = users.get(1);
+            SimpleUser user = users.get(3);
+            LOG.info("Updating: " + user.getUserId());
+
             String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
             user.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList(values)));
-            user.setUserId("check333");
+            user.getCustomAttributes().add(new CustomAttribute("test", "test_value"));
+            user.setUserId("user1");
 
             couchbaseEntryManager.merge(user);
         }

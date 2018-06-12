@@ -52,9 +52,7 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
-// TODO: authenticateImpl
-public class CouchbaseOperationsServiceImpl
-        implements CouchbaseOperationService {
+public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
@@ -158,7 +156,7 @@ public class CouchbaseOperationsServiceImpl
     }
 
     @Override
-    public boolean delete(String key) throws PersistenceException {
+    public boolean delete(String key) throws EntryNotFoundException {
         try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument result = bucketMapping.getBucket().remove(key);
@@ -170,7 +168,7 @@ public class CouchbaseOperationsServiceImpl
     }
 
     @Override
-    public boolean deleteRecursively(String key) throws PersistenceException {
+    public boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException {
         try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
@@ -218,8 +216,8 @@ public class CouchbaseOperationsServiceImpl
     }
 
     @Override
-    public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, int start, int pageSize, int count,
-            Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, String... attributes) throws SearchException {
+    public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+            CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, int start, int count, int pageSize) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
 
