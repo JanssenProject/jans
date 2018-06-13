@@ -285,6 +285,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
                 ", storageConfiguration=" + storageConfiguration +
+                ", removeExpiredClients=" + removeExpiredClients +
                 ", defaultSiteConfig=" + defaultSiteConfig +
                 '}';
     }
