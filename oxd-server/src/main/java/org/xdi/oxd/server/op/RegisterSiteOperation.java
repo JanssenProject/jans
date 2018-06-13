@@ -15,6 +15,7 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
@@ -302,6 +303,16 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setScopes(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
 
+        if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthSigningAlg())) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_ALGORITHM);
+            }
+            request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
+            rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());
+        }
+
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
         }
@@ -325,6 +336,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getClientTokenEndpointAuthMethod());
             if (authenticationMethod != null) {
                 request.setTokenEndpointAuthMethod(authenticationMethod);
+                rp.setTokenEndpointAuthMethod(params.getClientTokenEndpointAuthMethod());
             }
         }
 
