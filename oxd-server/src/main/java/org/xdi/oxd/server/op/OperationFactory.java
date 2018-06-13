@@ -70,6 +70,8 @@ public class OperationFactory {
                     return new IntrospectRptOperation(command, injector);
                 case REMOVE_SITE:
                     return new RemoveSiteOperation(command, injector);
+                case GET_RP:
+                    return new GetRpOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
