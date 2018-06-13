@@ -171,11 +171,11 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_token_endpoint_auth_method = clientTokenEndpointAuthMethod;
     }
 
-    public String getPost_logout_redirect_uri() {
+    public String getPostLogoutRedirectUri() {
         return post_logout_redirect_uri;
     }
 
-    public void setPost_logout_redirect_uri(String post_logout_redirect_uri) {
+    public void setPostLogoutRedirectUri(String post_logout_redirect_uri) {
         this.post_logout_redirect_uri = post_logout_redirect_uri;
     }
 
@@ -291,29 +291,37 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.claims_redirect_uri = claimsRedirectUri;
     }
 
-
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("RegisterSiteParams");
-        sb.append("{acr_values=").append(acr_values);
-        sb.append(", op_host='").append(op_host).append('\'');
-        sb.append(", op_discovery_path='").append(op_discovery_path).append('\'');
-        sb.append(", authorization_redirect_uri='").append(authorization_redirect_uri).append('\'');
-        sb.append(", redirect_uris=").append(redirect_uris);
-        sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
-        sb.append(", response_types=").append(response_types);
-        sb.append(", client_id='").append(client_id).append('\'');
-        sb.append(", client_secret='").append(client_secret).append('\'');
-        sb.append(", client_name='").append(client_name).append('\'');
-        sb.append(", client_sector_identifier_uri='").append(client_sector_identifier_uri).append('\'');
-        sb.append(", scope=").append(scope);
-        sb.append(", ui_locales=").append(ui_locales);
-        sb.append(", claims_locales=").append(claims_locales);
-        sb.append(", grant_types=").append(grant_types);
-        sb.append(", contacts=").append(contacts);
-        sb.append('}');
-        return sb.toString();
+        return "RegisterSiteParams{" +
+                "op_host='" + op_host + '\'' +
+                ", op_discovery_path='" + op_discovery_path + '\'' +
+                ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
+                ", post_logout_redirect_uri='" + post_logout_redirect_uri + '\'' +
+                ", protection_access_token='" + protection_access_token + '\'' +
+                ", redirect_uris=" + redirect_uris +
+                ", response_types=" + response_types +
+                ", claims_redirect_uri=" + claims_redirect_uri +
+                ", client_id='" + client_id + '\'' +
+                ", client_secret='" + client_secret + '\'' +
+                ", client_registration_access_token='" + client_registration_access_token + '\'' +
+                ", client_registration_client_uri='" + client_registration_client_uri + '\'' +
+                ", client_name='" + client_name + '\'' +
+                ", client_jwks_uri='" + client_jwks_uri + '\'' +
+                ", client_token_endpoint_auth_method='" + client_token_endpoint_auth_method + '\'' +
+                ", client_token_endpoint_auth_signing_alg='" + client_token_endpoint_auth_signing_alg + '\'' +
+                ", client_request_uris=" + client_request_uris +
+                ", client_frontchannel_logout_uris=" + client_frontchannel_logout_uris +
+                ", client_sector_identifier_uri='" + client_sector_identifier_uri + '\'' +
+                ", scope=" + scope +
+                ", ui_locales=" + ui_locales +
+                ", claims_locales=" + claims_locales +
+                ", acr_values=" + acr_values +
+                ", grant_types=" + grant_types +
+                ", contacts=" + contacts +
+                ", trusted_client=" + trusted_client +
+                ", oxd_rp_programming_language='" + oxd_rp_programming_language + '\'' +
+                '}';
     }
 
     @JsonIgnore
