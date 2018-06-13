@@ -45,7 +45,7 @@
             <directory>${project.basedir}/src/main/bin</directory>
             <outputDirectory>/bin</outputDirectory>
             <includes>
-                <include>oxd-start*</include>
+                <include>oxd*</include>
             </includes>
         </fileSet>
     </fileSets>
