@@ -486,11 +486,14 @@ class Migration(object):
 
             if w:
                 schema_77.write()
+                for a in att_dict:
+                    attr_class['attributes'][a]='77-customAttributes.ldif'
             
             if 'gluuCustomPerson' not in attr_class['objectclasses']:
                 schema_opendj = OpenDjSchema(os.path.join(self.open_dj_conf_dir,'100-user.ldif'))
                 schema_opendj.add_classs("( 1.3.6.1.4.1.48710.1.4.101 NAME 'gluuCustomPerson' SUP top AUXILIARY MAY ( telephoneNumber $ mobile $ carLicense $ facsimileTelephoneNumber $ departmentNumber $ employeeType $ cn $ st $ manager $ street $ postOfficeBox $ employeeNumber $ preferredDeliveryMethod $ roomNumber $ secretary $ homePostalAddress $ l $ postalCode $ description $ title $ gluuPermission $ imapHost $ imapPort $ imapUsername $ imapPassword ) )")
                 schema_opendj.write()
+                attr_class['objectclasses']['gluuCustomPerson'] = '100-user.ldif'
             else:
                 schema_opendj = OpenDjSchema(os.path.join(self.open_dj_conf_dir, attr_class['objectclasses']['gluuCustomPerson']))
                 w = False
@@ -551,11 +554,12 @@ class Migration(object):
 
 
                     for a in schema_n_old.attribute_names:
+                        
                         if not a in attr_class['attributes']:
                             _attrib = schema_n_old.get_attribute_by_name(a)
                             schema_n.schema['attributeTypes'].append(_attrib)
                             w = True
-                            
+                        
                         if not a in may_list:
                             may_list.append(a)
                             w77 = True
@@ -1192,7 +1196,7 @@ class Migration(object):
         self.oxVersion = self.getProp('oxVersion', 
                     '/install/community-edition-setup/setup.properties.last')
 
-        
+
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
@@ -1214,7 +1218,6 @@ class Migration(object):
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
         print("\n")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
