@@ -26,6 +26,7 @@ override_dh_auto_install:
 		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/bin/oxd-start.sh debian/oxd-server/opt/oxd-server/bin/
+		cp oxd-server/src/main/bin/oxd-show.sh debian/oxd-server/opt/oxd-server/bin/
 		cp oxd-common/target/oxd-common.jar debian/oxd-server/opt/oxd-server/lib/
 #		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
@@ -45,5 +46,6 @@ override_dh_auto_install:
 override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
-		#chmod 665 debian/oxd-server/var/log/oxd-server.log 
+		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-show.sh
+		#chmod 665 debian/oxd-server/var/log/oxd-server.log
 		chmod 644 debian/oxd-server/etc/default/oxd-server
