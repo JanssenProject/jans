@@ -19,7 +19,7 @@ apt install python-pip
 pip install ldap3
 ```
 
-Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/cluster-mgr/blob/master/testing/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
+Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
 
 Modify the entries inside of `change_config.py` using the following template:
 
