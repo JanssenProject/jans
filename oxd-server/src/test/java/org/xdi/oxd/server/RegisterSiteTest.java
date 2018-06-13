@@ -41,7 +41,7 @@ public class RegisterSiteTest {
         //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPost_logout_redirect_uri(postLogoutRedirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
@@ -82,7 +82,7 @@ public class RegisterSiteTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPost_logout_redirect_uri(postLogoutRedirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
