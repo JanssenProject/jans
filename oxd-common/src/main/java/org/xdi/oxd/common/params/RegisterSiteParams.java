@@ -46,6 +46,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String client_jwks_uri;
     @JsonProperty(value = "client_token_endpoint_auth_method")
     private String client_token_endpoint_auth_method;
+    @JsonProperty(value = "client_token_endpoint_auth_signing_alg")
+    private String client_token_endpoint_auth_signing_alg;
     @JsonProperty(value = "client_request_uris")
     private List<String> client_request_uris;
     @JsonProperty(value = "client_frontchannel_logout_uris")
@@ -177,6 +179,14 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.post_logout_redirect_uri = post_logout_redirect_uri;
     }
 
+    public String getClientTokenEndpointAuthSigningAlg() {
+        return client_token_endpoint_auth_signing_alg;
+    }
+
+    public void setClientTokenEndpointAuthSigningAlg(String clientTokenEndpointAuthSigningAlg) {
+        this.client_token_endpoint_auth_signing_alg = clientTokenEndpointAuthSigningAlg;
+    }
+
     public String getClientJwksUri() {
         return client_jwks_uri;
     }
@@ -280,6 +290,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     public void setClaimsRedirectUri(List<String> claimsRedirectUri) {
         this.claims_redirect_uri = claimsRedirectUri;
     }
+
 
     @Override
     public String toString() {
