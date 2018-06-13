@@ -65,6 +65,10 @@ public class Rp implements Serializable {
     private String sectorIdentifierUri;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
+    @JsonProperty(value = "token_endpoint_auth_signing_alg")
+    private String tokenEndpointAuthSigningAlg;
+    @JsonProperty(value = "token_endpoint_auth_method")
+    private String tokenEndpointAuthMethod;
 
     @JsonProperty(value = "is_setup_client")
     private Boolean setupClient;
@@ -148,6 +152,9 @@ public class Rp implements Serializable {
         this.sectorIdentifierUri = conf.sectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
 
+        this.tokenEndpointAuthSigningAlg = conf.tokenEndpointAuthSigningAlg;
+        this.tokenEndpointAuthMethod = conf.tokenEndpointAuthMethod;
+
         this.setupClient = conf.setupClient;
         this.setupOxdId = conf.setupOxdId;
         this.setupClientId = conf.setupClientId;
@@ -184,6 +191,22 @@ public class Rp implements Serializable {
 
     public void setFrontChannelLogoutUri(List<String> frontChannelLogoutUri) {
         this.frontChannelLogoutUri = frontChannelLogoutUri;
+    }
+
+    public String getTokenEndpointAuthSigningAlg() {
+        return tokenEndpointAuthSigningAlg;
+    }
+
+    public void setTokenEndpointAuthSigningAlg(String tokenEndpointAuthSigningAlg) {
+        this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
+    }
+
+    public String getTokenEndpointAuthMethod() {
+        return tokenEndpointAuthMethod;
+    }
+
+    public void setTokenEndpointAuthMethod(String tokenEndpointAuthMethod) {
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 
     public String getClientJwksUri() {
@@ -602,6 +625,8 @@ public class Rp implements Serializable {
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
                 ", rptUpgraded=" + rptUpgraded +
+                ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
+                ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
                 '}';
     }
