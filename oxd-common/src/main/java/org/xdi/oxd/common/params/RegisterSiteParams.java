@@ -46,6 +46,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String clientJwksUri;
     @JsonProperty(value = "client_token_endpoint_auth_method")
     private String clientTokenEndpointAuthMethod;
+    @JsonProperty(value = "client_token_endpoint_auth_signing_alg")
+    private String clientTokenEndpointAuthSigningAlg;
     @JsonProperty(value = "client_request_uris")
     private List<String> clientRequestUris;
     @JsonProperty(value = "client_frontchannel_logout_uris")
@@ -169,6 +171,14 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.clientTokenEndpointAuthMethod = clientTokenEndpointAuthMethod;
     }
 
+    public String getClientTokenEndpointAuthSigningAlg() {
+        return clientTokenEndpointAuthSigningAlg;
+    }
+
+    public void setClientTokenEndpointAuthSigningAlg(String clientTokenEndpointAuthSigningAlg) {
+        this.clientTokenEndpointAuthSigningAlg = clientTokenEndpointAuthSigningAlg;
+    }
+
     public String getPostLogoutRedirectUri() {
         return postLogoutRedirectUri;
     }
@@ -281,28 +291,38 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.claimsRedirectUri = claimsRedirectUri;
     }
 
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("RegisterSiteParams");
-        sb.append("{acrValues=").append(acrValues);
-        sb.append(", opHost='").append(opHost).append('\'');
-        sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
-        sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
-        sb.append(", redirectUris=").append(redirectUris);
-        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
-        sb.append(", responseTypes=").append(responseTypes);
-        sb.append(", clientId='").append(clientId).append('\'');
-        sb.append(", clientSecret='").append(clientSecret).append('\'');
-        sb.append(", clientName='").append(clientName).append('\'');
-        sb.append(", sectorIdentifierUri='").append(clientSectorIdentifierUri).append('\'');
-        sb.append(", scope=").append(scope);
-        sb.append(", uiLocales=").append(uiLocales);
-        sb.append(", claimsLocales=").append(claimsLocales);
-        sb.append(", grantType=").append(grantType);
-        sb.append(", contacts=").append(contacts);
-        sb.append('}');
-        return sb.toString();
+        return "RegisterSiteParams{" +
+                "opHost='" + opHost + '\'' +
+                ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
+                ", authorizationRedirectUri='" + authorizationRedirectUri + '\'' +
+                ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
+                ", protectionAccessToken='" + protectionAccessToken + '\'' +
+                ", redirectUris=" + redirectUris +
+                ", responseTypes=" + responseTypes +
+                ", claimsRedirectUri=" + claimsRedirectUri +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
+                ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
+                ", clientName='" + clientName + '\'' +
+                ", clientJwksUri='" + clientJwksUri + '\'' +
+                ", clientTokenEndpointAuthMethod='" + clientTokenEndpointAuthMethod + '\'' +
+                ", clientTokenEndpointAuthSigningAlg='" + clientTokenEndpointAuthSigningAlg + '\'' +
+                ", clientRequestUris=" + clientRequestUris +
+                ", clientFrontchannelLogoutUri=" + clientFrontchannelLogoutUri +
+                ", clientSectorIdentifierUri='" + clientSectorIdentifierUri + '\'' +
+                ", scope=" + scope +
+                ", uiLocales=" + uiLocales +
+                ", claimsLocales=" + claimsLocales +
+                ", acrValues=" + acrValues +
+                ", grantType=" + grantType +
+                ", contacts=" + contacts +
+                ", trustedClient=" + trustedClient +
+                ", oxdRpProgrammingLanguage='" + oxdRpProgrammingLanguage + '\'' +
+                '}';
     }
 
     @JsonIgnore
