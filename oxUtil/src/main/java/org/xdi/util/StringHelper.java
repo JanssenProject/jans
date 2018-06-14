@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ public final class StringHelper {
     private static final Pattern MULTI_SPACE_PATTERN = Pattern.compile("\\s+");
     private static final Pattern QUOTE_PATTERN = Pattern.compile("\\\"");
     private static final String CHARSET = "!0123456789abcdefghijklmnopqrstuvwxyz";
+    public static final byte[] EMPTY_BYTES = new byte[0];
     private static Random RAND;
 
     private StringHelper() {
@@ -501,6 +503,26 @@ public final class StringHelper {
         }
 
         return string.trim();
+    }
+
+    public static String utf8ToString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public static String utf8ToString(byte[] bytes, int start, int length) {
+        if (bytes == null) {
+            return "";
+        }
+
+        return new String(bytes, start, length, StandardCharsets.UTF_8);
+    }
+
+    public static byte[] getBytesUtf8(String string) {
+        if (string == null) {
+            return EMPTY_BYTES;
+        }
+
+        return string.getBytes(StandardCharsets.UTF_8);
     }
 
 }
