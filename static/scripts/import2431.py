@@ -724,6 +724,21 @@ class Migration(object):
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
         attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
+        
+        
+        # Determine current primary key
+        
+        appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
+        appliences.parse()
+        
+        for entry in appliences.entries:
+            if 'oxIDPAuthentication' in entry:
+                oxIDPAuthentication = json.loads(entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                primaryKey = idp_config['primaryKey']
+                localPrimaryKey = idp_config['localPrimaryKey']
+
+        
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp,  
                                     base64_attrs=['gluuProfileConfiguration'])
@@ -748,6 +763,19 @@ class Migration(object):
             
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
+
+
+            if 'ou=appliances' in dn:
+                if 'oxIDPAuthentication' in new_entry:
+                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                    idp_config = json.loads(oxIDPAuthentication['config'])
+                    idp_config['primaryKey'] = primaryKey
+                    idp_config['localPrimaryKey'] = localPrimaryKey
+                    oxIDPAuthentication['config'] = json.dumps(idp_config)
+                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
+
+
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
