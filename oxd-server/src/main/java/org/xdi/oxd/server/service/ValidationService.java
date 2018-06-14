@@ -70,6 +70,13 @@ public class ValidationService {
                 LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);
             }
         }
+        if (params instanceof GetClientTokenParams) {
+            GetClientTokenParams p = (GetClientTokenParams) params;
+            String clientId = p.getClientId();
+            final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+            Rp rp = rpService.getRpByClientId(clientId);
+            return new Pair<>(rp, false);
+        }
         return null;
     }
 
