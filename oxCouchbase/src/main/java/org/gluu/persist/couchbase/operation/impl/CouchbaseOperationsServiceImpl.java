@@ -22,7 +22,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
-import org.gluu.persist.operation.auth.PasswordEncryptionMethods;
+import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
@@ -392,7 +392,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         String results[] = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-            results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], PasswordEncryptionMethods.HASH_METHOD_SHA256);
+            results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
         }
 
         return results;

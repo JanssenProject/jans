@@ -10,14 +10,14 @@ package org.gluu.persist.operation.auth;
  * Store informations about an password
  */
 public class PasswordDetails {
-    private final PasswordEncryptionMethods algorithm;
+    private final PasswordEncryptionMethod algorithm;
     private final byte[] salt;
     private final byte[] password;
 
     /**
      * Creates a new PasswordDetails instance
      */
-    public PasswordDetails(PasswordEncryptionMethods algorithm, byte[] salt, byte[] password) {
+    public PasswordDetails(PasswordEncryptionMethod algorithm, byte[] salt, byte[] password) {
         this.algorithm = algorithm;
         this.salt = salt;
         this.password = password;
@@ -26,7 +26,7 @@ public class PasswordDetails {
     /**
      * The hash algorithm used to hash the password, null for plain text passwords
      */
-    public PasswordEncryptionMethods getAlgorithm() {
+    public PasswordEncryptionMethod getAlgorithm() {
         return algorithm;
     }
 
