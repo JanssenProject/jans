@@ -42,9 +42,14 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
 
             List<String> grantTypes = params.getGrantType();
             prepareSetupParams(params);
+
+            String clientName = params.getClientName();
+            params.setClientName(params.getSetupClientName());
+
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
 
             params.setGrantType(grantTypes);
+            params.setClientName(clientName);
             RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
 
             Rp setup = getRpService().getRp(setupClient.getOxdId());
