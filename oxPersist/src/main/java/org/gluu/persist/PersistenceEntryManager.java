@@ -72,7 +72,7 @@ public interface PersistenceEntryManager {
 
     boolean authenticate(String bindDn, String password);
 
-    boolean authenticate(String userName, String password, String baseDN);
+    boolean authenticate(String baseDN, String userName, String password);
 
     <T> int countEntries(Object entry);
 

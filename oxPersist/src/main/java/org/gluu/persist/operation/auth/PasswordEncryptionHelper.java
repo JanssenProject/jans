@@ -26,13 +26,13 @@ import org.xdi.util.security.BCrypt;
 /**
  * Perform authentication and password encryption
  */
-public class PasswordHelper {
+public class PasswordEncryptionHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PasswordHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PasswordEncryptionHelper.class);
 
     private static final byte[] CRYPT_SALT_CHARS = StringHelper.getBytesUtf8("./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
-    private PasswordHelper() {
+    private PasswordEncryptionHelper() {
     }
 
     /**

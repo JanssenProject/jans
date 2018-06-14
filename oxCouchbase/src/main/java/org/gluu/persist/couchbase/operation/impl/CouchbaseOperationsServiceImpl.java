@@ -21,6 +21,7 @@ import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
@@ -77,8 +78,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     }
 
     private boolean authenticateImpl(final String key, final String password) throws SearchException {
-        // TODO: Implemenet
-        return true;
+        if (password == null) {
+            return false;
+        }
+
+        JsonObject entry = lookup(key, USER_PASSWORD);
+        String userPassword = entry.getString(USER_PASSWORD);
+        if (userPassword == null) {
+            return false;
+        }
+        
+        return PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
     }
 
     @Override
@@ -212,7 +222,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             throw new SearchException("Failed to lookup entry", ex);
         }
 
-        return null;
+        throw new SearchException("Failed to lookup entry");
     }
 
     @Override
@@ -284,6 +294,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
                     query = baseQuery.limit(currentLimit).offset(start + resultCount);
                     LOG.debug("Execution query: '" + query + "'");
+                    System.out.println(query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
                         throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
@@ -309,7 +320,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     if ((count > 0) && (resultCount >= count)) {
                         break;
                     }
-                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() >= currentLimit));
+                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() > 0));
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
             }

@@ -55,6 +55,12 @@ public final class CouchbaseSample {
 
             couchbaseEntryManager.merge(user);
         }
+        
+        for (SimpleUser user : users) {
+            boolean result1 = couchbaseEntryManager.authenticate(user.getDn(), "secret");
+            boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", user.getUserId(), "secret");
+            System.out.println("authetication result: " + result1 + ", " + result2);
+        }
 
         Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
         List<SimpleAttribute> attributes = couchbaseEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10,
