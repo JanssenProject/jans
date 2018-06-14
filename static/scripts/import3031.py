@@ -74,7 +74,7 @@ class DBLDIF(LDIFParser):
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
-        self.sdb[dn] = entry
+        self.sdb[str(dn)] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -548,6 +548,19 @@ class Migration(object):
 
         ldif_writer = LDIFWriter(processed_fp)
 
+
+        # Determine current primary key
+        
+        appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
+        appliences.parse()
+        
+        for entry in appliences.entries:
+            if 'oxIDPAuthentication' in entry:
+                oxIDPAuthentication = json.loads(entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                primaryKey = idp_config['primaryKey']
+                localPrimaryKey = idp_config['localPrimaryKey']
+
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
@@ -567,6 +580,15 @@ class Migration(object):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
 
+            if 'ou=appliances' in dn:
+                if 'oxIDPAuthentication' in new_entry:
+                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                    idp_config = json.loads(oxIDPAuthentication['config'])
+                    idp_config['primaryKey'] = primaryKey
+                    idp_config['localPrimaryKey'] = localPrimaryKey
+                    oxIDPAuthentication['config'] = json.dumps(idp_config)
+                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
@@ -575,8 +597,6 @@ class Migration(object):
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
-
-
 
             for attr in old_entry.keys():
                 if attr in ignoreList:
@@ -614,7 +634,6 @@ class Migration(object):
         
         sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
 
-        
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
             if "o=site" in dn:
@@ -623,12 +642,13 @@ class Migration(object):
                 continue  # Already processed
 
             cur_ldif_file = old_dn_map[dn]
+
             if not cur_ldif_file in ldif_shelve_dict:
                 sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
                 sdb.parse()
                 ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
-            entry = ldif_shelve_dict[cur_ldif_file][dn]
+            entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
 
 
             for attr in entry.keys():
@@ -647,7 +667,6 @@ class Migration(object):
                         attr_values.append(val)
                 entry[attr] = attr_values
                 
-
 
             if '3.1.3' in self.oxVersion:
 
@@ -668,6 +687,7 @@ class Migration(object):
                 if 'ou=clients' in dn:
                     if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
+                
             
             ldif_writer.unparse(dn, entry)
 
@@ -703,6 +723,7 @@ class Migration(object):
                         outfile.write(line)
 
 
+
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -725,6 +746,7 @@ class Migration(object):
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
+
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
