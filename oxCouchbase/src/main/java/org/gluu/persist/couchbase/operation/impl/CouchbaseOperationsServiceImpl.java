@@ -283,7 +283,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     }
 
                     query = baseQuery.limit(currentLimit).offset(start + resultCount);
-                    LOG.debug("Execution query:" + query);
+                    LOG.debug("Execution query: '" + query + "'");
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
                         throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
@@ -323,7 +323,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     query = ((OffsetPath) query).offset(start);
                 }
 
-                System.out.println(query);
+                LOG.debug("Execution query: '" + query + "'");
                 lastResult = bucket.query(query);
                 if (!lastResult.finalSuccess()) {
                     throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
@@ -347,14 +347,14 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         result.setStart(start);
 
         if (returnCount) {
-            LOG.debug("Calculating count.. Query: '" + baseQuery.toString() + "'");
             GroupByPath selectCountQuery = Select.select("COUNT(*) as TOTAL").from(Expression.i(bucketMapping.getBucketName()))
                     .where(finalExpression);
             try {
+                LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
                 N1qlQueryResult countResult = bucket.query(selectCountQuery);
                 if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
                     throw new SearchException(
-                            String.format("\"Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
+                            String.format("Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
                             countResult.info().errorCount());
                 }
                 result.setTotalEntriesCount(countResult.allRows().get(0).value().getInt("TOTAL"));
