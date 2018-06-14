@@ -23,9 +23,8 @@ public class CouchbaseSampleEntryManager {
         connectionProperties.put("buckets", "gluu, travel-sample");
         connectionProperties.put("bucket.gluu.mapping", "gluu");
         connectionProperties.put("bucket.travel-sample.mapping", "travel-sample");
-
-        connectionProperties.put("key.inum.mapping", "attributes, clients, groups, people");
-        connectionProperties.put("key.inum.mapping", "attributes, clients, groups, people");
+        connectionProperties.put("encryption.method", "CRYPT-SHA-256");
+        
 
         return connectionProperties;
     }

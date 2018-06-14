@@ -38,7 +38,7 @@ public class PasswordEncryptionHelper {
     /**
      * Get the algorithm from the stored password
      */
-    public static PasswordEncryptionMethods findAlgorithm(byte[] credentials) {
+    public static PasswordEncryptionMethod findAlgorithm(byte[] credentials) {
         if ((credentials == null) || (credentials.length == 0)) {
             return null;
         }
@@ -73,7 +73,7 @@ public class PasswordEncryptionHelper {
                     }
                 }
 
-                return PasswordEncryptionMethods.getAlgorithm(algorithm);
+                return PasswordEncryptionMethod.getMethod(algorithm);
             } else {
                 // We don't have an algorithm
                 return null;
@@ -85,9 +85,9 @@ public class PasswordEncryptionHelper {
     }
 
     /**
-     * @see #createStoragePassword(byte[], PasswordEncryptionMethods)
+     * @see #createStoragePassword(byte[], PasswordEncryptionMethod)
      */
-    public static String createStoragePassword(String credentials, PasswordEncryptionMethods algorithm) {
+    public static String createStoragePassword(String credentials, PasswordEncryptionMethod algorithm) {
         byte[] resultBytes = createStoragePassword(StringHelper.getBytesUtf8(credentials), algorithm);
         
         return StringHelper.utf8ToString(resultBytes);
@@ -97,7 +97,7 @@ public class PasswordEncryptionHelper {
      * Create a hashed password in a format that can be stored in the server. If the
      * specified algorithm requires a salt then a random salt of 8 byte size is used
      */
-    public static byte[] createStoragePassword(byte[] credentials, PasswordEncryptionMethods algorithm) {
+    public static byte[] createStoragePassword(byte[] credentials, PasswordEncryptionMethod algorithm) {
         // Check plain text password
         if (algorithm == null) {
             return credentials;
@@ -145,11 +145,11 @@ public class PasswordEncryptionHelper {
 
         sb.append('{').append(StringHelper.toUpperCase(algorithm.getPrefix())).append('}');
 
-        if (algorithm == PasswordEncryptionMethods.HASH_METHOD_CRYPT || algorithm == PasswordEncryptionMethods.HASH_METHOD_CRYPT_BCRYPT) {
+        if (algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_BCRYPT) {
             sb.append(StringHelper.utf8ToString(salt));
             sb.append(StringHelper.utf8ToString(hashedPassword));
-        } else if (algorithm == PasswordEncryptionMethods.HASH_METHOD_CRYPT_MD5 || algorithm == PasswordEncryptionMethods.HASH_METHOD_CRYPT_SHA256
-                || algorithm == PasswordEncryptionMethods.HASH_METHOD_CRYPT_SHA512) {
+        } else if (algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_MD5 || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_SHA256
+                || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_SHA512) {
             sb.append(algorithm.getSubPrefix());
             sb.append(StringHelper.utf8ToString(salt));
             sb.append('$');
@@ -157,7 +157,7 @@ public class PasswordEncryptionHelper {
         } else if (salt != null) {
             byte[] hashedPasswordWithSaltBytes = new byte[hashedPassword.length + salt.length];
 
-            if (algorithm == PasswordEncryptionMethods.HASH_METHOD_PKCS5S2) {
+            if (algorithm == PasswordEncryptionMethod.HASH_METHOD_PKCS5S2) {
                 merge(hashedPasswordWithSaltBytes, salt, hashedPassword);
             } else {
                 merge(hashedPasswordWithSaltBytes, hashedPassword, salt);
@@ -175,7 +175,7 @@ public class PasswordEncryptionHelper {
      * Compare the credentials
      */
     public static boolean compareCredentials(byte[] receivedCredentials, byte[] storedCredentials) {
-        PasswordEncryptionMethods algorithm = findAlgorithm(storedCredentials);
+        PasswordEncryptionMethod algorithm = findAlgorithm(storedCredentials);
 
         if (algorithm != null) {
             // Get the encrypted part of the stored password
@@ -225,27 +225,27 @@ public class PasswordEncryptionHelper {
     /**
      * Encrypts the given credentials based on the algorithm name and optional salt
      */
-    private static byte[] encryptPassword(byte[] credentials, PasswordEncryptionMethods algorithm, byte[] salt) {
+    private static byte[] encryptPassword(byte[] credentials, PasswordEncryptionMethod algorithm, byte[] salt) {
         switch (algorithm) {
         case HASH_METHOD_SHA:
         case HASH_METHOD_SSHA:
-            return digest(PasswordEncryptionMethods.HASH_METHOD_SHA, credentials, salt);
+            return digest(PasswordEncryptionMethod.HASH_METHOD_SHA, credentials, salt);
 
         case HASH_METHOD_SHA256:
         case HASH_METHOD_SSHA256:
-            return digest(PasswordEncryptionMethods.HASH_METHOD_SHA256, credentials, salt);
+            return digest(PasswordEncryptionMethod.HASH_METHOD_SHA256, credentials, salt);
 
         case HASH_METHOD_SHA384:
         case HASH_METHOD_SSHA384:
-            return digest(PasswordEncryptionMethods.HASH_METHOD_SHA384, credentials, salt);
+            return digest(PasswordEncryptionMethod.HASH_METHOD_SHA384, credentials, salt);
 
         case HASH_METHOD_SHA512:
         case HASH_METHOD_SSHA512:
-            return digest(PasswordEncryptionMethods.HASH_METHOD_SHA512, credentials, salt);
+            return digest(PasswordEncryptionMethod.HASH_METHOD_SHA512, credentials, salt);
 
         case HASH_METHOD_MD5:
         case HASH_METHOD_SMD5:
-            return digest(PasswordEncryptionMethods.HASH_METHOD_MD5, credentials, salt);
+            return digest(PasswordEncryptionMethod.HASH_METHOD_MD5, credentials, salt);
 
         case HASH_METHOD_CRYPT:
             String saltWithCrypted = Crypt.crypt(StringHelper.utf8ToString(credentials), StringHelper.utf8ToString(salt));
@@ -274,7 +274,7 @@ public class PasswordEncryptionHelper {
     /**
      * Compute the hashed password given an algorithm, the credentials and an optional salt.
      */
-    private static byte[] digest(PasswordEncryptionMethods algorithm, byte[] password, byte[] salt) {
+    private static byte[] digest(PasswordEncryptionMethod algorithm, byte[] password, byte[] salt) {
         MessageDigest digest;
 
         try {
@@ -304,7 +304,7 @@ public class PasswordEncryptionHelper {
      * @return The password
      */
     public static PasswordDetails splitCredentials(byte[] credentials) {
-        PasswordEncryptionMethods algorithm = findAlgorithm(credentials);
+        PasswordEncryptionMethod algorithm = findAlgorithm(credentials);
 
         // check plain text password
         if (algorithm == null) {
@@ -370,7 +370,7 @@ public class PasswordEncryptionHelper {
     /**
      * Compute the credentials
      */
-    private static PasswordDetails getCredentials(byte[] credentials, int algoLength, int hashLen, PasswordEncryptionMethods algorithm) {
+    private static PasswordDetails getCredentials(byte[] credentials, int algoLength, int hashLen, PasswordEncryptionMethod algorithm) {
         // The password is associated with a salt. Decompose it in two parts, after having decoded the password.
         // The salt is at the end of the credentials.
         // The algorithm, salt, and password will be stored into the PasswordDetails structure
@@ -400,7 +400,7 @@ public class PasswordEncryptionHelper {
      * Generates a hash based on the
      * <a href="http://en.wikipedia.org/wiki/PBKDF2">PKCS5S2 spec</a>
      */
-    private static byte[] generatePbkdf2Hash(byte[] credentials, PasswordEncryptionMethods algorithm, byte[] salt) {
+    private static byte[] generatePbkdf2Hash(byte[] credentials, PasswordEncryptionMethod algorithm, byte[] salt) {
         try {
             SecretKeyFactory sk = SecretKeyFactory.getInstance(algorithm.getAlgorithm());
             char[] password = StringHelper.utf8ToString(credentials).toCharArray();
@@ -416,7 +416,7 @@ public class PasswordEncryptionHelper {
      * Gets the credentials from a PKCS5S2 hash. The salt for PKCS5S2 hash is
      * prepended to the password
      */
-    private static PasswordDetails getPbkdf2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethods algorithm) {
+    private static PasswordDetails getPbkdf2Credentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
         // The password is associated with a salt. Decompose it in two parts, after having decoded the password.
         // The salt is at the *beginning* of the credentials, and is 16 bytes long
         // The algorithm, salt, and password will be stored into the PasswordDetails structure
@@ -441,7 +441,7 @@ public class PasswordEncryptionHelper {
         return salt;
     }
 
-    private static PasswordDetails getCryptCredentials(byte[] credentials, int algoLength, PasswordEncryptionMethods algorithm) {
+    private static PasswordDetails getCryptCredentials(byte[] credentials, int algoLength, PasswordEncryptionMethod algorithm) {
         // The password is associated with a salt. Decompose it in two parts, no decoding required.
         // The salt length is dynamic, between the 2nd and 3rd '$'.
         // The algorithm, salt, and password will be stored into the PasswordDetails structure.

@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.ResultCode;
+import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.StringHelper;
@@ -47,6 +48,8 @@ public class CouchbaseConnectionProvider {
     private HashMap<String, BucketMapping> baseNameToBucketMapping;
 
     private ArrayList<String> binaryAttributes, certificateAttributes;
+    
+    private PasswordEncryptionMethod passwordEncryptionMethod;
 
     protected CouchbaseConnectionProvider() {
     }
@@ -82,6 +85,12 @@ public class CouchbaseConnectionProvider {
 
         openWithWaitImpl();
         LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
+        
+        if (props.containsKey("encryption.method")) {
+            this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("encryption.method"));
+        } else {
+            this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
+        }
 
         this.binaryAttributes = new ArrayList<String>();
         if (props.containsKey("binaryAttributes")) {
@@ -249,6 +258,10 @@ public class CouchbaseConnectionProvider {
         }
 
         return certificateAttributes.contains(attributeName.toLowerCase());
+    }
+
+    public PasswordEncryptionMethod getPasswordEncryptionMethod() {
+        return passwordEncryptionMethod;
     }
 
 }

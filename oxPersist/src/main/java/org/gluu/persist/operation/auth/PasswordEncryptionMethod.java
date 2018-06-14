@@ -8,7 +8,7 @@ package org.gluu.persist.operation.auth;
 /**
  * Password encryption methods
  */
-public enum PasswordEncryptionMethods {
+public enum PasswordEncryptionMethod {
     /** The SHA encryption method */
     HASH_METHOD_SHA("SHA", "SHA", "sha", 20),
 
@@ -72,11 +72,11 @@ public enum PasswordEncryptionMethods {
     /** Hash length */
     private final int hashLength;
 
-    PasswordEncryptionMethods(String name, String algorithm, String prefix, int hashLength) {
+    PasswordEncryptionMethod(String name, String algorithm, String prefix, int hashLength) {
         this(name, algorithm, prefix, "", hashLength);
     }
 
-    PasswordEncryptionMethods(String name, String algorithm, String prefix, String subPrefix, int hashLength) {
+    PasswordEncryptionMethod(String name, String algorithm, String prefix, String subPrefix, int hashLength) {
         this.name = name;
         this.algorithm = algorithm;
         this.prefix = prefix;
@@ -107,7 +107,7 @@ public enum PasswordEncryptionMethods {
     /**
      * Get the associated constant from a string
      */
-    public static PasswordEncryptionMethods getAlgorithm(String algorithm) {
+    public static PasswordEncryptionMethod getMethod(String algorithm) {
         if (matches(algorithm, HASH_METHOD_SHA)) {
             return HASH_METHOD_SHA;
         }
@@ -174,7 +174,7 @@ public enum PasswordEncryptionMethods {
         return null;
     }
 
-    private static boolean matches(String algorithm, PasswordEncryptionMethods constant) {
+    private static boolean matches(String algorithm, PasswordEncryptionMethod constant) {
         return constant.name.equalsIgnoreCase(algorithm) || (constant.prefix + constant.subPrefix).equalsIgnoreCase(algorithm);
     }
 
