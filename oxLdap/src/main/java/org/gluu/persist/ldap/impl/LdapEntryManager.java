@@ -654,7 +654,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public boolean authenticate(String userName, String password, String baseDN) {
+    public boolean authenticate(String baseDN, String userName, String password) {
         try {
             Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, userName);
             SearchResult searchResult = operationService.search(baseDN, toLdapFilter(filter), 1, 1);

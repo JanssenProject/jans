@@ -502,11 +502,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public boolean authenticate(String userName, String password, String baseDN) {
+    public boolean authenticate(String baseDN, String userName, String password) {
         try {
             Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
             PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
-                    SearchScope.SUB, null, null, null, false, 0, 0, 1);
+                    SearchScope.SUB, null, null, null, false, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
             }
