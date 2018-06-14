@@ -2019,35 +2019,35 @@ class Setup(object):
 
     def install_gluu_components(self):
         if self.installLdap:
-            progress_bar(25, "Installing Gluu components: LDAP")
+            progress_bar(27, "Installing Gluu components: LDAP")
             self.install_ldap_server()
 
         if self.installHttpd:
-            progress_bar(25, "Installing Gluu components: HTTPD")
+            progress_bar(27, "Installing Gluu components: HTTPD")
             self.configure_httpd()
 
         if self.installOxAuth:
-            progress_bar(25, "Installing Gluu components: OxAuth")
+            progress_bar(27, "Installing Gluu components: OxAuth")
             self.install_oxauth()
 
         if self.installOxTrust:
-            progress_bar(25, "Installing Gluu components: oxtruest")
+            progress_bar(27, "Installing Gluu components: oxtruest")
             self.install_oxtrust()
 
         if self.installSaml:
-            progress_bar(25, "Installing Gluu components: saml")
+            progress_bar(27, "Installing Gluu components: saml")
             self.install_saml()
 
         if self.installAsimba:
-            progress_bar(25, "Installing Gluu components: Asimba")
+            progress_bar(27, "Installing Gluu components: Asimba")
             self.install_asimba()
 
         if self.installOxAuthRP:
-            progress_bar(25, "Installing Gluu components: OxAuthRP")
+            progress_bar(27, "Installing Gluu components: OxAuthRP")
             self.install_oxauth_rp()
 
         if self.installPassport:
-            progress_bar(25, "Installing Gluu components: Passport")
+            progress_bar(27, "Installing Gluu components: Passport")
             self.install_passport()
 
     def isIP(self, address):
