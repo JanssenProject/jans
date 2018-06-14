@@ -133,4 +133,14 @@ public class RpService {
         }
         return ok;
     }
+
+    public Rp getRpByClientId(String clientId) {
+        for (Rp rp : rpMap.values()) {
+            if (rp.getClientId().equalsIgnoreCase(clientId)) {
+                LOG.trace("Found rp by client_id: " + clientId + ", rp: " + rp);
+                return rp;
+            }
+        }
+        return null;
+    }
 }

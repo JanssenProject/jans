@@ -7,12 +7,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IntrospectAccessTokenParams implements HasOxdIdParams {
+public class IntrospectAccessTokenParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
     @JsonProperty(value = "access_token")
     private String accessToken;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     @Override
     public String getOxdId() {
@@ -29,5 +31,14 @@ public class IntrospectAccessTokenParams implements HasOxdIdParams {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    @Override
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 }
