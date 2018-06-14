@@ -75,7 +75,9 @@ public class ValidationService {
             String clientId = p.getClientId();
             final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
             Rp rp = rpService.getRpByClientId(clientId);
-            return new Pair<>(rp, false);
+            if (rp != null) {
+                return new Pair<>(rp, false);
+            }
         }
         return null;
     }
