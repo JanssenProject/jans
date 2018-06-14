@@ -56,6 +56,8 @@ public interface CouchbaseOperationService {
             String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount,
             int start, int count, int pageSize) throws SearchException;
 
+    String[] createStoragePassword(String[] passwords);
+
     boolean isBinaryAttribute(String attribute);
     boolean isCertificateAttribute(String attribute);
 

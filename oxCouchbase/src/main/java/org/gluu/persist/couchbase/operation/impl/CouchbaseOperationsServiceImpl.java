@@ -22,6 +22,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
+import org.gluu.persist.operation.auth.PasswordEncryptionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
@@ -31,7 +32,9 @@ import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.document.json.JsonValue;
 import com.couchbase.client.java.query.Delete;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
@@ -83,11 +86,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         JsonObject entry = lookup(key, USER_PASSWORD);
-        String userPassword = entry.getString(USER_PASSWORD);
-        if (userPassword == null) {
+        Object userPasswordObj = entry.get(USER_PASSWORD);
+
+        String userPassword = null;
+        if (userPasswordObj instanceof JsonArray) {
+            userPassword = ((JsonArray) userPasswordObj).getString(0);
+        } else if (userPasswordObj instanceof String) {
+            userPassword = (String) userPasswordObj;
+        } else {
             return false;
         }
-        
+
         return PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
     }
 
@@ -294,7 +303,6 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
                     query = baseQuery.limit(currentLimit).offset(start + resultCount);
                     LOG.debug("Execution query: '" + query + "'");
-                    System.out.println(query);
                     lastResult = bucket.query(query);
                     if (!lastResult.finalSuccess()) {
                         throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
@@ -375,6 +383,19 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         return result;
+    }
+
+    public String[] createStoragePassword(String[] passwords) {
+        if (ArrayHelper.isEmpty(passwords)) {
+            return passwords;
+        }
+
+        String results[] = new String[passwords.length];
+        for (int i = 0; i < passwords.length; i++) {
+            results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], PasswordEncryptionMethods.HASH_METHOD_SHA256);
+        }
+
+        return results;
     }
 
     @Override

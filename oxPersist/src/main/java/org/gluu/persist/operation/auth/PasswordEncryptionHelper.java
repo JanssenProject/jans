@@ -87,8 +87,10 @@ public class PasswordEncryptionHelper {
     /**
      * @see #createStoragePassword(byte[], PasswordEncryptionMethods)
      */
-    public static byte[] createStoragePassword(String credentials, PasswordEncryptionMethods algorithm) {
-        return createStoragePassword(StringHelper.getBytesUtf8(credentials), algorithm);
+    public static String createStoragePassword(String credentials, PasswordEncryptionMethods algorithm) {
+        byte[] resultBytes = createStoragePassword(StringHelper.getBytesUtf8(credentials), algorithm);
+        
+        return StringHelper.utf8ToString(resultBytes);
     }
 
     /**

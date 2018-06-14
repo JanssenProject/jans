@@ -35,6 +35,9 @@ public class SimpleUser implements Serializable {
     @LdapAttribute(name = "uid")
     private String userId;
 
+    @LdapAttribute(name = "userPassword")
+    private String userPassword;
+
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -55,6 +58,14 @@ public class SimpleUser implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
