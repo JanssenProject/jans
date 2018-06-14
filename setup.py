@@ -58,6 +58,46 @@ def progress_bar(i, act=''):
     sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
     sys.stdout.flush()
 
+def get_key_from(dn, inum):
+    dns = dn.split(",")
+
+    if "o=gluu" in dns:
+        dns.remove("o=gluu")
+        
+    o_inumOrg = 'o='+inum
+
+    if o_inumOrg in dns:
+        dns.remove(o_inumOrg)
+
+    for i in range(len(dns)):
+        e = dns[i]
+        n = e.find('=')
+        e = e[n+1:]
+        dns[i] = e
+
+    dns.reverse()
+
+    key = '_'.join(dns)
+    
+    if not key:
+        key = '_'
+
+    return key
+
+
+def get_documents_from_ldif(ldif_file,  inumOrg):
+    entries = ldif.ParseLDIF(open(ldif_file))
+    documents = []
+
+    for dn, entry in entries:
+        if len(entry) > 2:
+            key = get_key_from(dn, inumOrg)
+            entry['dn'] = dn
+            documents.append((key, entry))
+
+    return documents
+
+
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -295,6 +335,7 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = None
+        self.install_couchbase = None
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
@@ -465,6 +506,18 @@ class Setup(object):
         self.passport_rp_client_cert_alias = None
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
+
+
+        #definitions for couchebase
+        self.couchebaseClusterAdmin = 'admin'
+        self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
+        self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
+        self.couchebaseBucketClusterPort = 8091
+        self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
+        self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
+        self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
+        self.couchebaseCbq = '/opt/couchbase/bin/cbq'
+
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
@@ -2017,10 +2070,27 @@ class Setup(object):
         # Install passport system service script
         self.installNodeService('passport')
 
+
+    def install_couchebase(self):
+        self.couchbaseInstall()
+        self.couchebaseCreateCluster()
+        
+        #execute this fonctions for 'site' when couchbase is backend
+        self.couchebaseCreateBucket('gluu')
+        self.couchebaseCreateIndexes('gluu')
+        
+        self.import_ldif_couchebase()
+        
+
+
     def install_gluu_components(self):
         if self.installLdap:
             progress_bar(27, "Installing Gluu components: LDAP")
             self.install_ldap_server()
+
+        if self.install_couchbase:
+            progress_bar(27, "Installing Gluu components: Couchebase")
+            self.install_couchebase()
 
         if self.installHttpd:
             progress_bar(27, "Installing Gluu components: HTTPD")
@@ -2270,13 +2340,33 @@ class Setup(object):
             option = None
             
             if open_ldap_exist:
-                while (option != 1) and (option != 2):
-                    try:
-                        option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
-                    except ValueError:
-                        option = None
-                    if (option != 1) and (option != 2):
-                        print "You did not enter the correct option. Enter either 1 or 2."
+                if self.allowPreReleasedApplications:
+
+                    while not option in ('1','2','3'):
+                        option = self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition (3) Couchbase [1|2|3]", "1")
+                        
+                        if not option in ('1','2','3'):
+                            print "You did not enter the correct option. Enter either 1, 2 or 3."
+                            
+                        if option == '3':
+                            #import ldif.LDIFParser here until python-ldap is a package of container 
+                            from ldif import LDIFParser
+                            
+                            #install opendj along with couchebase until couchebase is backend
+                            option = 1
+                            
+                            self.install_couchbase = True
+
+                else:
+
+                    while (option != 1) and (option != 2):
+                        try:
+                            option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
+                        except ValueError:
+                            option = None
+                        if (option != 1) and (option != 2):
+                            print "You did not enter the correct option. Enter either 1 or 2."
+
             else:
                 option = 1
 
@@ -3340,6 +3430,129 @@ class Setup(object):
             if os.path.exists(default_site):
                 os.remove(default_site)
 
+    
+    #Couchbase Functions
+
+    def installPackage(self, packageName):
+        if self.os_type in ['debian', 'ubuntu']:
+            self.run([self.cmd_dpkg, '--install', packageName])
+        else:
+            self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+
+    def couchbaseInstall(self):
+        coucbase_package = None
+        tmp = []
+
+        for f in os.listdir(self.couchbasePackageFolder):
+            if f.startswith('couchbase-server-enterprise'):
+                tmp.append(f)
+
+        if not tmp:
+            err_msg = "Couchbase package not found at %s. Exiting with error..." % (self.couchbasePackageFolder)
+            self.logIt(err_msg, True)
+            sys.exit(2)
+
+        packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
+        self.logIt("Found package '%s' for install" % packageName)
+        self.installPackage(packageName)
+
+    def couchebaseCreateCluster(self, clusterRamsize=4096, clusterName=None):
+        cmd_args = [
+                self.couchbaseCli, 'cluster-init',
+                '--cluster', self.couchebaseHost,
+                '--cluster-username', self.couchebaseClusterAdmin,
+                '--cluster-password', self.ldapPass,
+                '--services', 'data,index,query,fts',
+                '--cluster-ramsize', str(clusterRamsize),
+                ]
+
+        if clusterName:
+            cmd_args += ['--cluster-name', clusterName]
+
+        self.run(cmd_args)
+
+
+    def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
+        cmd_args = [
+                self.couchbaseCli, 'bucket-create',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--bucket', bucketName,
+                '--bucket-type', bucketType,
+                '--bucket-ramsize', str(bucketRamsize),
+                '--wait'
+            ]
+        
+        self.run(cmd_args)
+
+
+    def couchbaseImportJson(self, bucket, jsonFile, keyGen=None):
+        self.logIt("Importing Couchebase json file %s to bucket %s" % (jsonFile, bucket))
+        cmd_args = [
+                self.couchebaseCbImport, 'json',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--bucket', bucket,
+                '--dataset', jsonFile,
+                '--format', 'list',
+                '--threads', '4'
+            ]
+
+        if keyGen:
+            cmd_args += ['--generate-key', keyGen]
+    
+        self.run(cmd_args)
+
+    def couchbaseExecQuery(self, queryFile):
+        self.logIt("Running Couchbase query from file " + queryFile)
+        cmd_args = [
+                self.couchebaseCbq,
+                '--user', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--engine', self.couchebaseHost,
+                '--file', queryFile
+            ]
+
+        self.run(cmd_args)
+
+    def couchebaseCreateIndexes(self, bucket):
+        self.logIt("Running Couchbase index creation for " + bucket + " bucket")
+        file_content = open(self.couchebaseIndex).read()
+        file_content = file_content.replace('{#bucket#}', bucket)
+        
+        if not os.path.exists('/tmp/n1ql'):
+                os.mkdir('/tmp/n1ql')
+        
+        tmp_file = '/tmp/n1ql/index_%s.n1ql' % bucket
+        
+        with open(tmp_file, 'w') as w:
+            w.write(file_content)
+
+        self.couchbaseExecQuery(tmp_file)
+
+    def import_ldif_couchebase(self):
+        
+        for ldif in self.ldif_files:
+            documents = get_documents_from_ldif(open(os.path.join(self.outputFolder, ldif)),  self.inumOrg)
+            
+            ldif_base_name = os.path.basename(ldif)
+            name, ext = os.path.splitext(ldif_base_name)
+
+            if not os.path.exists('/tmp/n1ql'):
+                os.mkdir('/tmp/n1ql')
+
+            tmp_file = os.path.join('/tmp/n1ql', name+'.n1ql')
+            
+            with open(tmp_file, 'w') as o:
+                for e in documents:
+                    bucket = 'site' if 'site' in ldif else 'gluu'
+                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (bucket, e[0], json.dumps(e[1]))
+                    o.write(query)
+
+            self.couchbaseExecQuery(tmp_file)
+        
         
 ############################   Main Loop   #################################################
 
