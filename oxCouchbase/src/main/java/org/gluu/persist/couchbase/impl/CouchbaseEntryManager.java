@@ -144,9 +144,18 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             String[] attributeValues = attribute.getValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
-                jsonObject.put(attributeName, attributeValues);
+                String[] realValues = attributeValues;
+                if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
+                    realValues = operationService.createStoragePassword(attributeValues);
+                }
+                if (realValues.length > 0) {
+                    jsonObject.put(attributeName, JsonArray.from(realValues));
+                } else {
+                    jsonObject.put(attributeName, realValues[0]);
+                }
             }
         }
+        jsonObject.put(CouchbaseOperationService.DN, dn);
 
         // Persist entry
         try {
@@ -565,8 +574,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private MutationSpec createModification(final Mutation type, final String attributeName, final String... attributeValues) {
         String realAttributeName = attributeName;
+        
+        String[] realValues = attributeValues;
+        if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
+            realValues = operationService.createStoragePassword(attributeValues);
+        }
 
-        return new MutationSpec(type, realAttributeName, attributeValues);
+        return new MutationSpec(type, realAttributeName, realValues);
     }
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
