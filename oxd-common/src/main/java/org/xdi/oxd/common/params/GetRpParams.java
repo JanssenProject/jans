@@ -7,10 +7,12 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetRpParams implements HasOxdIdParams {
+public class GetRpParams implements IParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
+    @JsonProperty(value = "list")
+    private Boolean list;
 
     public GetRpParams() {
     }
@@ -25,6 +27,14 @@ public class GetRpParams implements HasOxdIdParams {
 
     public void setOxdId(String oxdId) {
         this.oxdId = oxdId;
+    }
+
+    public Boolean getList() {
+        return list;
+    }
+
+    public void setList(Boolean list) {
+        this.list = list;
     }
 
     @Override
