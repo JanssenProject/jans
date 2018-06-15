@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.response;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -7,28 +8,28 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class GetRpResponse implements IOpResponse {
 
-    @JsonProperty(value = "rp")
-    private String rp;
+    @JsonProperty(value = "node")
+    private JsonNode node;
 
     public GetRpResponse() {
     }
 
-    public GetRpResponse(String rp) {
-        this.rp = rp;
+    public GetRpResponse(JsonNode node) {
+        this.node = node;
     }
 
-    public String getRp() {
-        return rp;
+    public JsonNode getNode() {
+        return node;
     }
 
-    public void setRp(String rp) {
-        this.rp = rp;
+    public void setNode(JsonNode node) {
+        this.node = node;
     }
 
     @Override
     public String toString() {
         return "GetRpResponse{" +
-                "rp='" + rp + '\'' +
+                "node='" + node + '\'' +
                 '}';
     }
 }
