@@ -15,7 +15,6 @@ import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,37 +35,21 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
     }
 
     @Override
-    public CommandResponse execute(SetupClientParams params) throws Exception {
+    public CommandResponse execute(SetupClientParams params) {
         try {
             RegisterSiteOperation registerSiteOperation = new RegisterSiteOperation(getCommand(), getInjector());
 
-            List<String> grantTypes = params.getGrantType();
             prepareSetupParams(params);
-
-            String clientName = params.getClientName();
-            params.setClientName(params.getSetupClientName());
 
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
 
-            params.setGrantType(grantTypes);
-            params.setClientName(clientName);
-            RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
-
             Rp setup = getRpService().getRp(setupClient.getOxdId());
-            Rp registered = getRpService().getRp(registeredClient.getOxdId());
 
             setup.setSetupClient(true);
             getRpService().update(setup);
 
-            registered.setSetupOxdId(setup.getOxdId());
-            registered.setSetupClientId(setup.getClientId());
-            getRpService().update(registered);
-
             SetupClientResponse response = new SetupClientResponse();
-            response.setOxdId(registeredClient.getOxdId());
-            response.setClientIdOfOxdId(registered.getClientId());
-            response.setOpHost(registeredClient.getOpHost());
-
+            response.setOpHost(setupClient.getOpHost());
             response.setSetupClientOxdId(setupClient.getOxdId());
             response.setClientId(setup.getClientId());
             response.setClientSecret(setup.getClientSecret());
