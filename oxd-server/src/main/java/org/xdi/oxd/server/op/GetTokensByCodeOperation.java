@@ -92,7 +92,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             opResponse.setAccessToken(response.getAccessToken());
             opResponse.setIdToken(response.getIdToken());
             opResponse.setRefreshToken(response.getRefreshToken());
-            opResponse.setExpiresIn(response.getExpiresIn());
+            opResponse.setExpiresIn(response.getExpiresIn() != null ? response.getExpiresIn() : -1);
             opResponse.setIdTokenClaims(claims);
             return okResponse(opResponse);
         } else {
