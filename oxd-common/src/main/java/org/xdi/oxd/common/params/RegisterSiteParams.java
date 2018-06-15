@@ -291,6 +291,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.claims_redirect_uri = claimsRedirectUri;
     }
 
+
     @Override
     public String toString() {
         return "RegisterSiteParams{" +
