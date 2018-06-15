@@ -46,6 +46,7 @@
             <outputDirectory>/bin</outputDirectory>
             <includes>
                 <include>oxd*</include>
+                <include>ls*</include>
             </includes>
         </fileSet>
     </fileSets>

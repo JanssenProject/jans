@@ -8,8 +8,10 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetRpParams;
 import org.xdi.oxd.common.response.GetRpResponse;
 import org.xdi.oxd.rs.protect.Jackson;
+import org.xdi.oxd.server.service.Rp;
 
-import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author yuriyz
@@ -30,12 +32,17 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
 
     @Override
     public CommandResponse execute(GetRpParams params) {
-        String rp = null;
-        try {
-            rp = Jackson.asJson(getRpService().getRp(params.getOxdId()));
-        } catch (IOException e) {
-            LOG.error("Failed to fetch RP by oxd_id: " + params.getOxdId());
+        if (params.getList() != null && params.getList()) {
+            Set<String> oxdIds = getRpService().getRps().keySet();
+            return okResponse(new GetRpResponse(Jackson.createJsonMapper().valueToTree(new HashSet<>(oxdIds))));
         }
-        return okResponse(new GetRpResponse(rp));
+
+        Rp rp = getRpService().getRp(params.getOxdId());
+        if (rp != null) {
+            return okResponse(new GetRpResponse(Jackson.createJsonMapper().valueToTree(rp)));
+        } else {
+            LOG.trace("Failed to find RP by oxd_id: " + params.getOxdId());
+        }
+        return okResponse(new GetRpResponse());
     }
 }
