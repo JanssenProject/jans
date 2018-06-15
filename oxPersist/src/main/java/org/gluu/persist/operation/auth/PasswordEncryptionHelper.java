@@ -26,7 +26,7 @@ import org.xdi.util.security.BCrypt;
 /**
  * Perform authentication and password encryption
  */
-public class PasswordEncryptionHelper {
+public final class PasswordEncryptionHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(PasswordEncryptionHelper.class);
 
@@ -89,7 +89,7 @@ public class PasswordEncryptionHelper {
      */
     public static String createStoragePassword(String credentials, PasswordEncryptionMethod algorithm) {
         byte[] resultBytes = createStoragePassword(StringHelper.getBytesUtf8(credentials), algorithm);
-        
+
         return StringHelper.utf8ToString(resultBytes);
     }
 
@@ -133,7 +133,7 @@ public class PasswordEncryptionHelper {
             break;
 
         case HASH_METHOD_CRYPT_BCRYPT:
-            salt = StringHelper.getBytesUtf8(BCrypt.gensalt());
+            salt = StringHelper.getBytesUtf8(BCrypt.genSalt());
             break;
 
         default:
@@ -194,7 +194,7 @@ public class PasswordEncryptionHelper {
      * Compare two byte[] in a constant time. This is necessary because using an
      * Array.equals() is not Timing attack safe ([1], [2] and [3]), a breach that
      * can be exploited to break some hashes.
-     * 
+     *
      * [1] https://en.wikipedia.org/wiki/Timing_attack [2]
      * http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/ [3]
      * https://cryptocoding.net/index.php/Coding_rules
@@ -260,7 +260,7 @@ public class PasswordEncryptionHelper {
             return StringHelper.getBytesUtf8(crypted2);
 
         case HASH_METHOD_CRYPT_BCRYPT:
-            String crypted3 = BCrypt.hashpw(StringHelper.utf8ToString(credentials), StringHelper.utf8ToString(salt));
+            String crypted3 = BCrypt.hashPw(StringHelper.utf8ToString(credentials), StringHelper.utf8ToString(salt));
             return StringHelper.getBytesUtf8(crypted3.substring(crypted3.length() - 31));
 
         case HASH_METHOD_PKCS5S2:
