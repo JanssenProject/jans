@@ -79,6 +79,17 @@ public class ValidationService {
                 return new Pair<>(rp, false);
             }
         }
+        if (params instanceof GetRpParams) {
+            GetRpParams p = (GetRpParams) params;
+            String oxdId = p.getOxdId();
+            if (StringUtils.isNotBlank(oxdId) && (p.getList() == null || !p.getList())) {
+                final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+                Rp rp = rpService.getRp(oxdId);
+                if (rp != null) {
+                    return new Pair<>(rp, true);
+                }
+            }
+        }
         return null;
     }
 
