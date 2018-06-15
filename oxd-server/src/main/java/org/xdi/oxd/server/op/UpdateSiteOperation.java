@@ -121,14 +121,13 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
-        if (params.getGrantType() != null) {
-            for (String grantType : params.getGrantType()) {
-                GrantType t = GrantType.fromString(grantType);
-                if (t != null) {
-                    grantTypes.add(t);
-                }
+        for (String grantType : params.getGrantType() != null ? params.getGrantType() : rp.getGrantType()) {
+            GrantType t = GrantType.fromString(grantType);
+            if (t != null) {
+                grantTypes.add(t);
             }
         }
+
         request.setGrantTypes(grantTypes);
         rp.setGrantType(params.getGrantType());
 
