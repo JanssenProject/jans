@@ -9,14 +9,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class SetupClientResponse implements IOpResponse {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
-    @JsonProperty(value = "client_id_of_oxd_id")
-    private String clientIdOfOxdId;
     @JsonProperty(value = "op_host")
     private String opHost;
-
-
     @JsonProperty(value = "setup_client_oxd_id")
     private String setupClientOxdId;
     @JsonProperty(value = "client_id")
@@ -38,22 +32,6 @@ public class SetupClientResponse implements IOpResponse {
 
     public void setSetupClientOxdId(String setupClientOxdId) {
         this.setupClientOxdId = setupClientOxdId;
-    }
-
-    public String getClientIdOfOxdId() {
-        return clientIdOfOxdId;
-    }
-
-    public void setClientIdOfOxdId(String clientIdOfOxdId) {
-        this.clientIdOfOxdId = clientIdOfOxdId;
-    }
-
-    public String getOxdId() {
-        return oxdId;
-    }
-
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
     }
 
     public String getOpHost() {
@@ -115,10 +93,8 @@ public class SetupClientResponse implements IOpResponse {
     @Override
     public String toString() {
         return "SetupClientResponse{" +
-                "oxdId='" + oxdId + '\'' +
-                ", opHost='" + opHost + '\'' +
+                "opHost='" + opHost + '\'' +
                 ", setupClientOxdId='" + setupClientOxdId + '\'' +
-                ", clientIdOfOxdId='" + clientIdOfOxdId + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
