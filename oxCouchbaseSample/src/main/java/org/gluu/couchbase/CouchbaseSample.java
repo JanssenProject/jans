@@ -41,7 +41,7 @@ public final class CouchbaseSample {
         newUser.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList("London", "Texas", "Kiev")));
         newUser.getCustomAttributes().add(new CustomAttribute("test", "test_value"));
         couchbaseEntryManager.persist(newUser);
-        
+
 //        SimpleUser dummyUser = couchbaseEntryManager.find(SimpleUser.class, "inum=test,o=test,o=gluu");
 //        LOG.info("Dummy User '{}'", dummyUser);
 
@@ -64,7 +64,7 @@ public final class CouchbaseSample {
 
             couchbaseEntryManager.merge(user);
         }
-        
+
         for (SimpleUser user : users) {
             boolean result1 = couchbaseEntryManager.authenticate(user.getDn(), "test");
             boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", user.getUserId(), "test");

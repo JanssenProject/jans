@@ -57,8 +57,10 @@ public class CouchbaseFilterConverter {
             if (genericFilter.isArrayAttribute()) {
                 return Expression.path(Expression.s(genericFilter.getAssertionValue()).in(Expression.path(genericFilter.getAttributeName())));
             } else {
-                Expression exp1 = Expression.par(Expression.path(Expression.path(genericFilter.getAttributeName())).eq(Expression.s(genericFilter.getAssertionValue())));
-                Expression exp2 = Expression.par(Expression.path(Expression.s(genericFilter.getAssertionValue())).in(Expression.path(genericFilter.getAttributeName())));
+                Expression exp1 = Expression
+                        .par(Expression.path(Expression.path(genericFilter.getAttributeName())).eq(Expression.s(genericFilter.getAssertionValue())));
+                Expression exp2 = Expression
+                        .par(Expression.path(Expression.s(genericFilter.getAssertionValue())).in(Expression.path(genericFilter.getAttributeName())));
                 return Expression.par(exp1.or(exp2));
             }
         }

@@ -336,14 +336,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes,
-            String sortBy, SortOrder sortOrder, int start, int count, int chunkSize) {
+    public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
 
-        PagedResult<JsonObject> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder, null,
-                true, start, count, chunkSize);
+        PagedResult<JsonObject> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder,
+                null, true, start, count, chunkSize);
 
         PagedResult<T> result = new PagedResult<T>();
         result.setEntriesCount(searchResult.getEntriesCount());
@@ -362,8 +362,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     protected <T> PagedResult<JsonObject> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
-            String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, boolean returnCount, int start, int count,
-            int chunkSize) {
+            String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, boolean returnCount, int start,
+            int count, int chunkSize) {
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
@@ -448,7 +448,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         List<T> entries = createEntities(entryClass, propertiesAnnotations, keyWithInum,
                 searchResult.getEntries().toArray(new JsonObject[searchResult.getEntriesCount()]));
-        
+
         return entries;
     }
 
@@ -574,7 +574,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private MutationSpec createModification(final Mutation type, final String attributeName, final String... attributeValues) {
         String realAttributeName = attributeName;
-        
+
         String[] realValues = attributeValues;
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
             realValues = operationService.createStoragePassword(attributeValues);

@@ -48,7 +48,7 @@ public class CouchbaseConnectionProvider {
     private HashMap<String, BucketMapping> baseNameToBucketMapping;
 
     private ArrayList<String> binaryAttributes, certificateAttributes;
-    
+
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
     protected CouchbaseConnectionProvider() {
@@ -85,7 +85,7 @@ public class CouchbaseConnectionProvider {
 
         openWithWaitImpl();
         LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
-        
+
         if (props.containsKey("encryption.method")) {
             this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("encryption.method"));
         } else {

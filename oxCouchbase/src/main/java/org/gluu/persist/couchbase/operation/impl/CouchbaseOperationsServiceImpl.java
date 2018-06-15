@@ -22,7 +22,6 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
-import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
@@ -34,7 +33,6 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.document.json.JsonValue;
 import com.couchbase.client.java.query.Delete;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
@@ -390,7 +388,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             return passwords;
         }
 
-        String results[] = new String[passwords.length];
+        String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
             results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
         }

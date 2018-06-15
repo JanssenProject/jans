@@ -21,10 +21,12 @@ public class CouchbaseSampleEntryManager {
         connectionProperties.put("userName", "admin");
         connectionProperties.put("userPassword", "secret");
         connectionProperties.put("buckets", "gluu, travel-sample");
+        connectionProperties.put("bucket.default", "gluu");
+
         connectionProperties.put("bucket.gluu.mapping", "gluu");
         connectionProperties.put("bucket.travel-sample.mapping", "travel-sample");
+
         connectionProperties.put("encryption.method", "CRYPT-SHA-256");
-        
 
         return connectionProperties;
     }
