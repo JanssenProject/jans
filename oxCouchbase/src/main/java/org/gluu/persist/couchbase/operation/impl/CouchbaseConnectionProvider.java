@@ -86,8 +86,8 @@ public class CouchbaseConnectionProvider {
         openWithWaitImpl();
         LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
 
-        if (props.containsKey("encryption.method")) {
-            this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("encryption.method"));
+        if (props.containsKey("password.encryption.method")) {
+            this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("password.encryption.method"));
         } else {
             this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
         }

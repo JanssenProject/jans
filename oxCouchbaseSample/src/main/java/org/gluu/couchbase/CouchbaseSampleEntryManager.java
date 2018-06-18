@@ -20,13 +20,15 @@ public class CouchbaseSampleEntryManager {
         connectionProperties.put("servers", "localhost");
         connectionProperties.put("userName", "admin");
         connectionProperties.put("userPassword", "secret");
-        connectionProperties.put("buckets", "gluu, travel-sample");
+        connectionProperties.put("buckets", "gluu, gluu_site, gluu_user, gluu_session, gluu_statistic");
+
         connectionProperties.put("bucket.default", "gluu");
+        connectionProperties.put("bucket.gluu_user.mapping", "people, groups");
+        connectionProperties.put("bucket.gluu_session.mapping", "sessions");
+        connectionProperties.put("bucket.gluu_statistic.mapping", "statistic");
+        connectionProperties.put("bucket.gluu_site.mapping", "site");
 
-        connectionProperties.put("bucket.gluu.mapping", "gluu");
-        connectionProperties.put("bucket.travel-sample.mapping", "travel-sample");
-
-        connectionProperties.put("encryption.method", "CRYPT-SHA-256");
+        connectionProperties.put("password.encryption.method", "CRYPT-SHA-256");
 
         return connectionProperties;
     }
