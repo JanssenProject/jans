@@ -59,6 +59,8 @@ public final class CouchbaseSample {
             String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
             user.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList(values)));
             user.getCustomAttributes().add(new CustomAttribute("test", "test_value"));
+            user.getCustomAttributes().add(new CustomAttribute("test2", "test_value2"));
+            user.getCustomAttributes().add(new CustomAttribute("test3", "test_value3"));
             user.setUserId("user1");
             user.setUserPassword("test");
 

@@ -579,6 +579,10 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
             realValues = operationService.createStoragePassword(attributeValues);
         }
+        
+        if (realValues.length == 1) {
+            return new MutationSpec(type, realAttributeName, realValues[0]);
+        }
 
         return new MutationSpec(type, realAttributeName, realValues);
     }

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
@@ -28,6 +27,10 @@ import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
+import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
@@ -70,7 +73,7 @@ import com.unboundid.ldif.LDIFChangeRecord;
  */
 public class LdapOperationsServiceImpl implements LdapOperationService {
 
-    private static final Logger LOG = Logger.getLogger(LdapOperationsServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LdapOperationsServiceImpl.class);
 
     public static final String DN = "dn";
     public static final String UID = "uid";
@@ -210,6 +213,23 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     private boolean authenticateImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
+        // Try to authenticate if the password was encrypted with additional mechanism
+        List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
+        if (!additionalPasswordMethods.isEmpty()) {
+            
+            SearchResultEntry searchResult = lookup(bindDn, USER_PASSWORD);
+            if (searchResult == null) {
+                throw new ConnectionException("Failed to find use by dn");
+            }
+            
+            String storedUserPassword = searchResult.getAttribute(USER_PASSWORD).getValue();
+            PasswordEncryptionMethod storedPasswordMethod = PasswordEncryptionHelper.findAlgorithm(storedUserPassword);
+            if (additionalPasswordMethods.contains(storedPasswordMethod)) {
+                LOG.debug("Authenticating '{}' using internal authentication mechanism '{}'", bindDn, storedPasswordMethod);
+                return PasswordEncryptionHelper.compareCredentials(password, storedUserPassword);
+            }
+        }
+        
         if (this.bindConnectionProvider == null) {
             return authenticateConnectionPoolImpl(bindDn, password);
         } else {
