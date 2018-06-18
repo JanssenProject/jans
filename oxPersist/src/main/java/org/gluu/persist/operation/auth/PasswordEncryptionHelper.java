@@ -38,6 +38,13 @@ public final class PasswordEncryptionHelper {
     /**
      * Get the algorithm from the stored password
      */
+    public static PasswordEncryptionMethod findAlgorithm(String credentials) {
+        return findAlgorithm(StringHelper.getBytesUtf8(credentials));
+    }
+
+    /**
+     * Get the algorithm from the stored password
+     */
     public static PasswordEncryptionMethod findAlgorithm(byte[] credentials) {
         if ((credentials == null) || (credentials.length == 0)) {
             return null;
@@ -169,6 +176,13 @@ public final class PasswordEncryptionHelper {
         }
 
         return StringHelper.getBytesUtf8(sb.toString());
+    }
+
+    /**
+     * Compare the credentials
+     */
+    public static boolean compareCredentials(String receivedCredentials, String storedCredentials) {
+        return compareCredentials(StringHelper.getBytesUtf8(receivedCredentials), StringHelper.getBytesUtf8(storedCredentials));
     }
 
     /**

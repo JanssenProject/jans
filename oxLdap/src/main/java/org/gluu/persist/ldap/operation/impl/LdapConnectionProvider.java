@@ -13,6 +13,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
+import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
@@ -54,9 +56,11 @@ public class LdapConnectionProvider {
     private String bindPassword;
     private boolean useSSL;
 
+    private ArrayList<PasswordEncryptionMethod> additionalPasswordMethods;
     private ArrayList<String> binaryAttributes, certificateAttributes;
 
     private boolean supportsSubtreeDeleteRequestControl;
+
 
     protected LdapConnectionProvider() {
     }
@@ -155,6 +159,18 @@ public class LdapConnectionProvider {
                 this.connectionPool.setMaxWaitTimeMillis(Long.parseLong(connectionMaxWaitTime));
             }
         }
+
+        this.additionalPasswordMethods = new ArrayList<PasswordEncryptionMethod>();
+        if (props.containsKey("additionalPasswordMethods")) {
+            String[] additionalPasswordMethodsArray = StringHelper.split(props.get("additionalPasswordMethods").toString(), ",");
+            for (String additionalPasswordMethod : additionalPasswordMethodsArray) {
+                PasswordEncryptionMethod passwordEncryptionMethod =  PasswordEncryptionMethod.getMethod(additionalPasswordMethod);
+                if (passwordEncryptionMethod != null) {
+                    this.additionalPasswordMethods.add(passwordEncryptionMethod);
+                }
+            }
+        }
+        LOG.debug("Adding support for password methods: " + this.additionalPasswordMethods);
 
         this.binaryAttributes = new ArrayList<String>();
         if (props.containsKey("binaryAttributes")) {
@@ -471,6 +487,10 @@ public class LdapConnectionProvider {
 
     public boolean isUseSSL() {
         return useSSL;
+    }
+
+    public final ArrayList<PasswordEncryptionMethod> getAdditionalPasswordMethods() {
+        return additionalPasswordMethods;
     }
 
     public ArrayList<String> getBinaryAttributes() {
