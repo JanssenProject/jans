@@ -216,12 +216,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
         if (!additionalPasswordMethods.isEmpty()) {
-            
+
             SearchResultEntry searchResult = lookup(bindDn, USER_PASSWORD);
             if (searchResult == null) {
                 throw new ConnectionException("Failed to find use by dn");
             }
-            
+
             String storedUserPassword = searchResult.getAttribute(USER_PASSWORD).getValue();
             PasswordEncryptionMethod storedPasswordMethod = PasswordEncryptionHelper.findAlgorithm(storedUserPassword);
             if (additionalPasswordMethods.contains(storedPasswordMethod)) {
@@ -229,7 +229,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                 return PasswordEncryptionHelper.compareCredentials(password, storedUserPassword);
             }
         }
-        
+
         if (this.bindConnectionProvider == null) {
             return authenticateConnectionPoolImpl(bindDn, password);
         } else {

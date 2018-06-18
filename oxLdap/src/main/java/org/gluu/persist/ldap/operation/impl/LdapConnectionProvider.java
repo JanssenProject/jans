@@ -13,10 +13,10 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.gluu.persist.exception.operation.ConfigurationException;
-import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
+import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.FailoverServerSet;
