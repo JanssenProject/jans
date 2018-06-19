@@ -2,4 +2,4 @@
 set LIB=../lib
 set CONF=../conf/oxd-conf.json
 echo CONF=%CONF%
-java -Doxd.server.config=%CONF% -cp %LIB%/bcprov-jdk15on-1.54.jar;%LIB%/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher
+java -jar %LIB%/oxd-server.jar org.xdi.oxd.server.OxdServerApplication %CONF%

@@ -6,6 +6,6 @@ OXD_HOME=/opt/oxd-server
 CONF=/etc/oxd/oxd-server
 LIB=$OXD_HOME/lib
 
-JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/oxd-server-jar-with-dependencies.jar"
+JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -cp $LIB/oxd-server.jar"
 
 OXD_USER=jetty

@@ -6,28 +6,17 @@
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>/lib</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <includes>
-                <include>org.jboss.resteasy:resteasy-jaxrs</include>
-                <include>org.bouncycastle:bcprov-jdk15on</include>
-            </includes>
-            <scope>runtime</scope>
-        </dependencySet>
-    </dependencySets>
     <files>
         <file>
-            <source>${project.basedir}/src/main/resources/oxd-default-site-config.json</source>
+            <source>${project.basedir}/src/main/resources/oxd-server.yml</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/oxd-conf.json</source>
+            <source>${project.basedir}/src/main/resources/oxd-server.keystore</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.build.directory}/oxd-server-jar-with-dependencies.jar</source>
+            <source>${project.build.directory}/oxd-server.jar</source>
             <outputDirectory>/lib</outputDirectory>
         </file>
     </files>
