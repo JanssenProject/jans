@@ -1,5 +1,5 @@
 "cd /d %~dp0"
 set LIB=../lib
-set CONF=../conf/oxd-conf.json
+set CONF=../conf/oxd-server.yml
 echo CONF=%CONF%
-start /b javaw -Doxd.server.config=%CONF% -cp %LIB%/bcprov-jdk15on-1.54.jar;%LIB%/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher
+start /b javaw -jar %LIB%/oxd-server.jar org.xdi.oxd.server.OxdServerApplication %CONF%
