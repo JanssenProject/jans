@@ -135,4 +135,10 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     CommandResponse2 checkIdToken(@HeaderParam("Authorization") String authorization, CheckIdTokenParams params);
+
+    @POST
+    @Path("/get-rp")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse2 getRp(@HeaderParam("Authorization") String authorization, GetRpParams params);
 }

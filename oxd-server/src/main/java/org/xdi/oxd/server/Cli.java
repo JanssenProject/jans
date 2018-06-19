@@ -1,14 +1,22 @@
 package org.xdi.oxd.server;
 
 import com.google.inject.Injector;
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.jersey.validation.Validators;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.xdi.oxd.server.persistence.PersistenceService;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.RpService;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,7 +37,7 @@ public class Cli {
 
             Injector injector = ServerLauncher.getInjector();
 
-//TODO            injector.getInstance(ConfigurationService.class).load();
+            injector.getInstance(ConfigurationService.class).setConfiguration(parseConfiguration(cmd.getOptionValue("c")));
             injector.getInstance(PersistenceService.class).create();
 
             RpService rpService = injector.getInstance(RpService.class);
@@ -65,17 +73,30 @@ public class Cli {
             System.out.println(e.getMessage());
             printHelpAndExit();
         } catch (RuntimeException e) {
-            // oxd is running and keeps h2 database locked, so we connect to oxd-server and fetch RP via client connection
-            if (cmd != null) {
-                tryToConnectToRunningOxd(cmd);
-            } else {
-                printHelpAndExit();
-            }
+            System.out.println("Failed to open database file, make sure oxd-server is stopped. Otherwise it locks database and it is not possible to open it.");
+            e.printStackTrace();
+            printHelpAndExit();
         } catch (Throwable e) {
             System.out.println("Failed to run oxd CLI (make sure oxd-server was run at least one time and database file is created). Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private static OxdServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+        if (StringUtils.isBlank(pathToYaml)) {
+            System.out.println("Path to yml configuration file is not specified. Exit!");
+            System.exit(1);
+        }
+        File file = new File(pathToYaml);
+        if (!file.exists()) {
+            System.out.println("Failed to find yml configuration file. Please check " + pathToYaml);
+            System.exit(1);
+        }
+
+        DefaultConfigurationFactoryFactory<OxdServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
+        ConfigurationFactory<OxdServerConfiguration> configurationFactory = configurationFactoryFactory.create(OxdServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
+        return configurationFactory.build(file);
     }
 
     private static void printHelpAndExit() {
@@ -90,61 +111,6 @@ public class Cli {
         for (Logger logger : loggers) {
             logger.setLevel(Level.OFF);
         }
-    }
-
-    private static void tryToConnectToRunningOxd(CommandLine cmd) {
-//        CommandClient client = null;
-//        int port = 8099;
-//        try {
-//            port = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get().getPort();
-//            client = new CommandClient("localhost", port);
-//
-//            if (cmd.hasOption("l")) {
-//                final Command command = new Command(CommandType.GET_RP);
-//                GetRpParams params = new GetRpParams();
-//                params.setList(true);
-//                command.setParamsObject(params);
-//
-//                GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
-//                if (resp.getNode() instanceof ArrayNode) {
-//                    Iterator<JsonNode> elements = ((ArrayNode) resp.getNode()).getElements();
-//                    while (elements.hasNext()) {
-//                        System.out.println(sanitizeOutput(elements.next().toString()));
-//                    }
-//                } else {
-//                    System.out.println(resp.getNode());
-//                }
-//                return;
-//            }
-//
-//            if (cmd.hasOption("oxd_id")) {
-//                final String oxdId = cmd.getOptionValue("oxd_id");
-//                final Command command = new Command(CommandType.GET_RP);
-//                command.setParamsObject(new GetRpParams(oxdId));
-//
-//                GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
-//                print(oxdId, resp.getNode());
-//                return;
-//            }
-//
-//            if (cmd.hasOption("d")) {
-//                final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
-//                RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
-//                if (StringUtils.isNotBlank(resp.getOxdId())) {
-//                    System.out.println("Entry removed successfully.");
-//                } else {
-//                    System.out.println("Failed to remove entry from database, please check oxd-server.log file.");
-//                }
-//                return;
-//            }
-//
-//        } catch (IOException e) {
-//            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
-//            e.printStackTrace();
-//            System.exit(1);
-//        } finally {
-//            CommandClient.closeQuietly(client);
-//        }
     }
 
     private static String sanitizeOutput(String str) {
@@ -174,6 +140,10 @@ public class Cli {
         Option deleteOption = new Option("d", "delete", true, "deletes entry from database by oxd_id");
         deleteOption.setRequired(false);
         options.addOption(deleteOption);
+
+        Option configOption = new Option("c", "config", true, "path to yml configuration file");
+        configOption.setRequired(true);
+        options.addOption(configOption);
 
         return options;
     }
