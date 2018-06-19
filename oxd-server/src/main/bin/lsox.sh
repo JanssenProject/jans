@@ -8,4 +8,4 @@ echo CONF=$CONF
 
 LIB=$BASEDIR/../lib
 javaExe=java
-$javaExe -cp $LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.Cli -c $CONF "$@"
+$javaExe -cp $LIB/oxd-server.jar org.xdi.oxd.server.Cli -c $CONF "$@"
