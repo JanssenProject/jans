@@ -187,6 +187,14 @@ public class RestResource {
         return process(CommandType.CHECK_ID_TOKEN, params, CheckIdTokenParams.class, authorization);
     }
 
+    @POST
+    @Path("/get-rp")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getRp(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.GET_RP, params, GetRpParams.class, authorization);
+    }
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return CoreUtils.createJsonMapper().readValue(params, clazz);
