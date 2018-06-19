@@ -132,11 +132,20 @@ public class UmaGatherer {
         List<UmaPermission> permissions = context.getPermissions();
         String newTicket = umaPermissionService.changeTicket(permissions, permissions.get(0).getAttributes());
 
-        facesService.redirectToExternalURL(constructRedirectUri(session, context, newTicket));
+        String url = constructRedirectUri(session, context, newTicket);
+        if (StringUtils.isBlank(url)) {
+            facesService.redirectToExternalURL(url);
+        } else {
+            log.debug("Redirect to claims_redirect_uri is skipped because it was not provided during request.");
+        }
     }
 
     private String constructRedirectUri(SessionId session, UmaGatherContext context, String newTicket) {
         String claimsRedirectUri = umaSessionService.getClaimsRedirectUri(session);
+        if (StringUtils.isBlank(claimsRedirectUri)) {
+            log.debug("claims_redirect_uri is blank, session: " + session);
+            return "";
+        }
 
         claimsRedirectUri = addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
         claimsRedirectUri = addQueryParameter(claimsRedirectUri, "state", umaSessionService.getState(session));
@@ -156,6 +165,9 @@ public class UmaGatherer {
     }
 
     public static String addQueryParameter(String url, String paramName, String paramValue) {
+        if (StringUtils.isBlank(url)) {
+            return "";
+        }
         if (StringUtils.isNotBlank(paramValue)) {
             if (url.contains("?")) {
                 url += "&" + paramName + "=" + paramValue;
