@@ -303,16 +303,14 @@
 
         <script type="text/javascript">
 
-            function idp_redirect(provider) {
+            function idp_redirect(provider, isSaml) {
 
                 var APIURL = window.location.origin;
-                var url_idp = APIURL + "/passport/auth/saml/" + provider + "/";
-                var url_social = APIURL + "/passport/auth/" + provider + "/";
-                var send_url = url_idp;
-
-                if(provider.match("facebook") || provider.match("twitter") || provider.match("linkedin") || provider.match("google") || provider.match("tumblr") || provider.match("yahoo") || provider.match("github") || provider.match("dropbox")){
-                    send_url = url_social;
+                var send_url = APIURL + "/passport/auth/";
+                if (isSaml) {
+                	send_url += "saml/";
                 }
+                send_url += provider + "/";
 
                 jQuery.ajax({
                     url: APIURL + "/passport/token",
@@ -328,43 +326,37 @@
 
             }
 
-            function dynamic_social_link(social_name) {
-
-                var img = 'img/'+social_name+'.png';
-                var dy_social_link = '<div class="row"><div class="col-xs-3 col-sm-1 col-md-2"><a data-p="'+social_name+'" class="provider" href="javascript:void(0);"><img alt="'+social_name+'" onclick="idp_redirect(\'' + social_name + '\');"  src="'+img+'" class="img-responsive"></img></a></div><div class="col-xs-9 col-sm-11 col-md-10"><h4>'+social_name+'</h4></div><div class="clearfix"></div><hr/></div>'
-                $('#add_here').append(dy_social_link);
+            function dynamic_link(provider, logo_img, isSaml) {
+            	imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="' + provider + '" onclick="idp_redirect(\'' + provider + '\',' + isSaml + ')" src="' + logo_img + '"></img>';
+            	leftMarkup = '<div class="col-xs-3 col-sm-1 col-md-2">' + imgMarkup + '</div>';
+            	rightMarkup = '<div class="col-xs-9 col-sm-11 col-md-10"><h4>' + provider + '</h4></div>'
+            	$('#add_here').append('<div class="row">' + leftMarkup + rightMarkup + '<div class="clearfix"></div><hr /></div>');
             }
-
 
             jQuery(document).ready(function () {
 
                 var APIURL = window.location.origin;
 
-                //social_provider
+                //passport-based provider
                 $.get(APIURL + "/passport/passportstrategies", function (data) {
 
-                    var social_provider = JSON.parse(data);
-                    for (var social_name in social_provider) {
-                        dynamic_social_link(social_name);
+                    var providers = JSON.parse(data);
+                    for (var name in providers) {
+                        dynamic_link(name, providers[name].logo_img, false);
                     }
 
                 });
 
-                //idp_provider
+                //saml provider
                 $.get(APIURL + "/passport/saml_config", function (data) {
 
-                    var idp_provider = JSON.parse(data);
-                    for (var provider in idp_provider) {
-
-                        if(idp_provider[provider].enable == "true"){
-
-                            var logo_img = idp_provider[provider].logo_img;
-                            $("#provider_panel").css("visibility", "visible");
-                            var dydiv = '<div class="row"><div class="col-xs-3 col-sm-1 col-md-2"><img alt="'+provider+'" style="cursor: pointer" class="img-responsive" onclick="idp_redirect(\'' + provider + '\');"  src="' + logo_img + '"></img></div><div class="col-xs-9 col-sm-11 col-md-10"><h4>' + provider + '</h4></div><div class="clearfix"></div><hr/> </div>';
-                            $('#add_here').append(dydiv);
-
+                    var providers = JSON.parse(data);
+                    for (var name in providers) {
+                        if (providers[name].enable == "true") {
+                            dynamic_link(name, providers[name].logo_img, true);
                         }
                     }
+
                 });
 
                 //error message display
