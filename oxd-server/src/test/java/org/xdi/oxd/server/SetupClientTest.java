@@ -49,7 +49,6 @@ public class SetupClientTest {
     public static void assertResponse(SetupClientResponse resp) {
         assertNotNull(resp);
 
-        notEmpty(resp.getOxdId());
         notEmpty(resp.getClientId());
         notEmpty(resp.getClientSecret());
     }
