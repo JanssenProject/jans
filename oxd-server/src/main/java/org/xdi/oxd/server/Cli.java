@@ -6,22 +6,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.xdi.oxd.client.CommandClient;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.params.GetRpParams;
-import org.xdi.oxd.common.params.RemoveSiteParams;
-import org.xdi.oxd.common.response.GetRpResponse;
-import org.xdi.oxd.common.response.RemoveSiteResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
-import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.RpService;
 
-import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -41,7 +29,7 @@ public class Cli {
 
             Injector injector = ServerLauncher.getInjector();
 
-            injector.getInstance(ConfigurationService.class).load();
+//TODO            injector.getInstance(ConfigurationService.class).load();
             injector.getInstance(PersistenceService.class).create();
 
             RpService rpService = injector.getInstance(RpService.class);
@@ -105,58 +93,58 @@ public class Cli {
     }
 
     private static void tryToConnectToRunningOxd(CommandLine cmd) {
-        CommandClient client = null;
-        int port = 8099;
-        try {
-            port = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get().getPort();
-            client = new CommandClient("localhost", port);
-
-            if (cmd.hasOption("l")) {
-                final Command command = new Command(CommandType.GET_RP);
-                GetRpParams params = new GetRpParams();
-                params.setList(true);
-                command.setParamsObject(params);
-
-                GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
-                if (resp.getNode() instanceof ArrayNode) {
-                    Iterator<JsonNode> elements = ((ArrayNode) resp.getNode()).getElements();
-                    while (elements.hasNext()) {
-                        System.out.println(sanitizeOutput(elements.next().toString()));
-                    }
-                } else {
-                    System.out.println(resp.getNode());
-                }
-                return;
-            }
-
-            if (cmd.hasOption("oxd_id")) {
-                final String oxdId = cmd.getOptionValue("oxd_id");
-                final Command command = new Command(CommandType.GET_RP);
-                command.setParamsObject(new GetRpParams(oxdId));
-
-                GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
-                print(oxdId, resp.getNode());
-                return;
-            }
-
-            if (cmd.hasOption("d")) {
-                final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
-                RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
-                if (StringUtils.isNotBlank(resp.getOxdId())) {
-                    System.out.println("Entry removed successfully.");
-                } else {
-                    System.out.println("Failed to remove entry from database, please check oxd-server.log file.");
-                }
-                return;
-            }
-
-        } catch (IOException e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        } finally {
-            CommandClient.closeQuietly(client);
-        }
+//        CommandClient client = null;
+//        int port = 8099;
+//        try {
+//            port = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get().getPort();
+//            client = new CommandClient("localhost", port);
+//
+//            if (cmd.hasOption("l")) {
+//                final Command command = new Command(CommandType.GET_RP);
+//                GetRpParams params = new GetRpParams();
+//                params.setList(true);
+//                command.setParamsObject(params);
+//
+//                GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
+//                if (resp.getNode() instanceof ArrayNode) {
+//                    Iterator<JsonNode> elements = ((ArrayNode) resp.getNode()).getElements();
+//                    while (elements.hasNext()) {
+//                        System.out.println(sanitizeOutput(elements.next().toString()));
+//                    }
+//                } else {
+//                    System.out.println(resp.getNode());
+//                }
+//                return;
+//            }
+//
+//            if (cmd.hasOption("oxd_id")) {
+//                final String oxdId = cmd.getOptionValue("oxd_id");
+//                final Command command = new Command(CommandType.GET_RP);
+//                command.setParamsObject(new GetRpParams(oxdId));
+//
+//                GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
+//                print(oxdId, resp.getNode());
+//                return;
+//            }
+//
+//            if (cmd.hasOption("d")) {
+//                final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
+//                RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
+//                if (StringUtils.isNotBlank(resp.getOxdId())) {
+//                    System.out.println("Entry removed successfully.");
+//                } else {
+//                    System.out.println("Failed to remove entry from database, please check oxd-server.log file.");
+//                }
+//                return;
+//            }
+//
+//        } catch (IOException e) {
+//            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
+//            e.printStackTrace();
+//            System.exit(1);
+//        } finally {
+//            CommandClient.closeQuietly(client);
+//        }
     }
 
     private static String sanitizeOutput(String str) {
