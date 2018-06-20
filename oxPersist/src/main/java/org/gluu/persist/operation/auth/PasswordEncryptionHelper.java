@@ -140,6 +140,7 @@ public final class PasswordEncryptionHelper {
             break;
 
         case HASH_METHOD_CRYPT_BCRYPT:
+        case HASH_METHOD_CRYPT_BCRYPT_B:
             salt = StringHelper.getBytesUtf8(BCrypt.genSalt());
             break;
 
@@ -274,6 +275,7 @@ public final class PasswordEncryptionHelper {
             return StringHelper.getBytesUtf8(crypted2);
 
         case HASH_METHOD_CRYPT_BCRYPT:
+        case HASH_METHOD_CRYPT_BCRYPT_B:
             String crypted3 = BCrypt.hashPw(StringHelper.utf8ToString(credentials), StringHelper.utf8ToString(salt));
             return StringHelper.getBytesUtf8(crypted3.substring(crypted3.length() - 31));
 
@@ -364,6 +366,7 @@ public final class PasswordEncryptionHelper {
             return new PasswordDetails(algorithm, salt, password);
 
         case HASH_METHOD_CRYPT_BCRYPT:
+        case HASH_METHOD_CRYPT_BCRYPT_B:
             salt = Arrays.copyOfRange(credentials, algoLength, credentials.length - 31);
             password = Arrays.copyOfRange(credentials, credentials.length - 31, credentials.length);
 
