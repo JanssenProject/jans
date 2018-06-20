@@ -42,7 +42,7 @@ public class IntrospectAccessTokenTest {
         introspectParams.setOxdId(setupResponse.getSetupClientOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken(introspectParams).dataAsResponse(IntrospectionResponse.class);
+        IntrospectionResponse introspectionResponse = client.introspectAccessToken(Tester.getAuthorization(), introspectParams).dataAsResponse(IntrospectionResponse.class);
         assertNotNull(introspectionResponse);
         Assert.assertTrue(introspectionResponse.isActive());
     }
