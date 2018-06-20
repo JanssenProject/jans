@@ -22,28 +22,33 @@ public class IntrospectAccessTokenTest {
     @Parameters({"host", "opHost", "redirectUrl"})
     @Test
     public void introspectAccessToken(String host, String opHost, String redirectUrl) {
+        try {
+            SetUpTest.beforeSuite(host, opHost, redirectUrl);
 
-        ClientInterface client = Tester.newClient(host);
+            ClientInterface client = Tester.newClient(host);
 
-        SetupClientResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrl);
+            SetupClientResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrl);
 
-        final GetClientTokenParams params = new GetClientTokenParams();
-        params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid"));
-        params.setClientId(setupResponse.getClientId());
-        params.setClientSecret(setupResponse.getClientSecret());
+            final GetClientTokenParams params = new GetClientTokenParams();
+            params.setOpHost(opHost);
+            params.setScope(Lists.newArrayList("openid"));
+            params.setClientId(setupResponse.getClientId());
+            params.setClientSecret(setupResponse.getClientSecret());
 
-        GetClientTokenResponse tokenResponse = client.getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+            GetClientTokenResponse tokenResponse = client.getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
 
-        assertNotNull(tokenResponse);
-        notEmpty(tokenResponse.getAccessToken());
+            assertNotNull(tokenResponse);
+            notEmpty(tokenResponse.getAccessToken());
 
-        IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
-        introspectParams.setOxdId(setupResponse.getSetupClientOxdId());
-        introspectParams.setAccessToken(tokenResponse.getAccessToken());
+            IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
+            introspectParams.setOxdId(setupResponse.getSetupClientOxdId());
+            introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken(Tester.getAuthorization(), introspectParams).dataAsResponse(IntrospectionResponse.class);
-        assertNotNull(introspectionResponse);
-        Assert.assertTrue(introspectionResponse.isActive());
+            IntrospectionResponse introspectionResponse = client.introspectAccessToken(Tester.getAuthorization(), introspectParams).dataAsResponse(IntrospectionResponse.class);
+            assertNotNull(introspectionResponse);
+            Assert.assertTrue(introspectionResponse.isActive());
+        } finally {
+            SetUpTest.afterSuite();
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
+import org.xdi.oxd.server.Utils;
 import org.xdi.util.Pair;
 
 /**
@@ -130,7 +131,7 @@ public class ValidationService {
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
 
         final Rp rp = rpService.getRp(params.getOxdId());
-        if (StringUtils.isBlank(rp.getSetupClientId())) {
+        if (StringUtils.isBlank(rp.getSetupClientId()) && !Utils.isTrue(rp.getSetupClient())) {
             throw new ErrorResponseException(ErrorResponseCode.NO_SETUP_CLIENT_FOR_OXD_ID);
         }
 
@@ -142,6 +143,9 @@ public class ValidationService {
         }
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
+            return true;
+        }
+        if (Utils.isTrue(rp.getSetupClient()) && introspectionResponse.getClientId().equals(rp.getClientId())) {
             return true;
         }
 
