@@ -32,13 +32,13 @@ public interface ClientInterface {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 introspectAccessToken(IntrospectAccessTokenParams params);
+    CommandResponse2 introspectAccessToken(@HeaderParam("Authorization") String authorization, IntrospectAccessTokenParams params);
 
     @POST
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 introspectRpt(IntrospectRptParams params);
+    CommandResponse2 introspectRpt(@HeaderParam("Authorization") String authorization, IntrospectRptParams params);
 
     @POST
     @Path("/register-site")
