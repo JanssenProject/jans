@@ -41,6 +41,8 @@ import re
 import glob
 import base64
 import platform
+import ldif as ldap_ldif
+import copy
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -57,6 +59,8 @@ def progress_bar(i, act=''):
         act = act[:int(tty_columns)-47]
     sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
     sys.stdout.flush()
+
+listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
 
 def get_key_from(dn, inum):
     dns = dn.split(",")
@@ -86,13 +90,17 @@ def get_key_from(dn, inum):
 
 
 def get_documents_from_ldif(ldif_file,  inumOrg):
-    entries = ldif.ParseLDIF(open(ldif_file))
+    entries = ldap_ldif.ParseLDIF(open(ldif_file))
     documents = []
 
     for dn, entry in entries:
         if len(entry) > 2:
             key = get_key_from(dn, inumOrg)
             entry['dn'] = dn
+            for k in copy.deepcopy(entry):
+                if len(entry[k]) == 1:
+                    if not k in listAttrib:
+                        entry[k] = entry[k][0]
             documents.append((key, entry))
 
     return documents
@@ -509,14 +517,16 @@ class Setup(object):
 
 
         #definitions for couchebase
+        self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
         self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
-        self.couchebaseBucketClusterPort = 8091
+        self.couchebaseBucketClusterPort = 28091
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
         self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
         self.couchebaseCbq = '/opt/couchbase/bin/cbq'
+        self.couchebaseCert = '/etc/certs/couchbase.pem'
 
 
         self.ldif_files = [self.ldif_base,
@@ -2073,7 +2083,10 @@ class Setup(object):
 
     def install_couchebase(self):
         self.couchbaseInstall()
+        self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
+        self.restartCouchebase()
         self.couchebaseCreateCluster()
+        self.couchbaseSSL()
         
         #execute this fonctions for 'site' when couchbase is backend
         self.couchebaseCreateBucket('gluu')
@@ -2089,7 +2102,7 @@ class Setup(object):
             self.install_ldap_server()
 
         if self.install_couchbase:
-            progress_bar(27, "Installing Gluu components: Couchbase")
+            progress_bar(27, "Installing Gluu components: Couchebase")
             self.install_couchebase()
 
         if self.installHttpd:
@@ -2097,15 +2110,15 @@ class Setup(object):
             self.configure_httpd()
 
         if self.installOxAuth:
-            progress_bar(27, "Installing Gluu components: oxAuth")
+            progress_bar(27, "Installing Gluu components: OxAuth")
             self.install_oxauth()
 
         if self.installOxTrust:
-            progress_bar(27, "Installing Gluu components: oxTrust")
+            progress_bar(27, "Installing Gluu components: oxtruest")
             self.install_oxtrust()
 
         if self.installSaml:
-            progress_bar(27, "Installing Gluu components: SAML")
+            progress_bar(27, "Installing Gluu components: saml")
             self.install_saml()
 
         if self.installAsimba:
@@ -2113,7 +2126,7 @@ class Setup(object):
             self.install_asimba()
 
         if self.installOxAuthRP:
-            progress_bar(27, "Installing Gluu components: oxAuthRP")
+            progress_bar(27, "Installing Gluu components: OxAuthRP")
             self.install_oxauth_rp()
 
         if self.installPassport:
@@ -2344,18 +2357,15 @@ class Setup(object):
 
                     while not option in ('1','2','3'):
                         option = self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition (3) Couchbase [1|2|3]", "1")
-                        
                         if not option in ('1','2','3'):
                             print "You did not enter the correct option. Enter either 1, 2 or 3."
                             
                         if option == '3':
-                            #import ldif.LDIFParser here until python-ldap is a package of container 
-                            from ldif import LDIFParser
-                            
                             #install opendj along with couchebase until couchebase is backend
                             option = 1
                             
                             self.install_couchbase = True
+                            break
 
                 else:
 
@@ -3382,14 +3392,14 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
+                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
+                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
+                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
                 'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog'
                 }
         for package in package_list[self.os_type+' '+self.os_version].split():
@@ -3517,25 +3527,43 @@ class Setup(object):
 
         self.run(cmd_args)
 
+
     def couchebaseCreateIndexes(self, bucket):
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
-        file_content = open(self.couchebaseIndex).read()
-        file_content = file_content.replace('{#bucket#}', bucket)
-        
+
+        openldap_index = json.load(open(self.opendlapIndexDef))
+
         if not os.path.exists('/tmp/n1ql'):
                 os.mkdir('/tmp/n1ql')
         
         tmp_file = '/tmp/n1ql/index_%s.n1ql' % bucket
-        
-        with open(tmp_file, 'w') as w:
-            w.write(file_content)
+
+        W = open(tmp_file, 'w')
+
+        W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
+        index_list = [ ind['attribute'] for ind in openldap_index['indexes'] ]
+
+        if not 'dn' in index_list:
+            index_list.insert(0, 'dn')
+
+        index_names = []
+        for ind in index_list:
+            index_name = 'def_' + ind
+            W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
+            index_names.append(index_name)
+
+        W.write('BUILD INDEX ON `gluu` (%s) USING GSI;\n' % (','.join(index_names)))
+
+        W.close()
 
         self.couchbaseExecQuery(tmp_file)
+
 
     def import_ldif_couchebase(self):
         
         for ldif in self.ldif_files:
-            documents = get_documents_from_ldif(open(os.path.join(self.outputFolder, ldif)),  self.inumOrg)
+            self.logIt("Importing ldif file %s to Couchebase" % ldif)
+            documents = get_documents_from_ldif(ldif,  self.inumOrg)
             
             ldif_base_name = os.path.basename(ldif)
             name, ext = os.path.splitext(ldif_base_name)
@@ -3553,6 +3581,48 @@ class Setup(object):
 
             self.couchbaseExecQuery(tmp_file)
         
+    def changeCouchbasePort(self, service, port):
+        self.logIt("Changing Couchbase servive %s port to %s from file " % (service, str(port)))
+        couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
+        couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
+
+        if os.path.exists(couchebaseDatConfigFile):
+            os.remove(couchebaseDatConfigFile)
+
+        conf = open(couchebaseStaticConfigFile).readlines()
+
+        for i in range(len(conf)):
+
+            if service in conf[i]:
+                conf[i] = '{%s, %s}.\n' % (service, str(port))
+                break
+        else:
+            conf.append('{%s, %s}.\n' % (service, str(port)))
+
+        with open(couchebaseStaticConfigFile, 'w') as w:
+            w.write(''.join(conf))
+
+    def restartCouchebase(self):
+        self.logIt("Restarting Couchbase")
+        self.run(('systemctl', 'stop', 'couchbase-server'), useWait=True)
+        
+        self.run(('systemctl', 'start', 'couchbase-server'), useWait=True)
+
+        #wait a couple of seconds for couche start successfully
+        time.sleep(15)
+
+    def couchbaseSSL(self):
+        self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
+        cmd_args = [
+                self.couchbaseCli, 'ssl-manage',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--cluster-cert-info', '>', self.couchebaseCert
+            ]
+
+        self.logIt("Running command: " + ' '.join(cmd_args))
+        os.system(' '.join(cmd_args))
         
 ############################   Main Loop   #################################################
 
