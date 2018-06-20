@@ -1,6 +1,6 @@
 # raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxd/version_3.2.0/oxd-server/src/main/resources/swagger.yaml
-# http://petstore.swagger.io/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_3.2.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
+# https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.0/oxd-server/src/main/resources/swagger.yaml
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
 swagger: "2.0"
 info:
   description: oxd-server
@@ -13,7 +13,8 @@ info:
     name: License
     url: https://github.com/GluuFederation/oxd/blob/master/LICENSE
 
-host: example.gluu.org
+host: gluu.org
+basePath: /oxd/4.0.0
 schemes:
  - https
 
@@ -48,7 +49,7 @@ paths:
         - application/json
       parameters:
         - in: body
-          name: Parameters
+          name: SetupClientParams
           schema:
             type: object
             required:
@@ -134,6 +135,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: SetupClientResponse
             required:
               - status
               - data
@@ -184,14 +186,14 @@ paths:
                   client_secret_expires_at:
                     type: integer
                     example: 1501941343
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
-          
-          
+
+
   /get-client-token:
     post:
       tags:
@@ -205,8 +207,8 @@ paths:
         - application/json
       parameters:
         - in: body
-          name: Parameters
-          schema:        
+          name: GetClientTokenParams
+          schema:
             type: object
             required:
               - op_host
@@ -243,6 +245,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetClientTokenResponse
             required:
               - status
               - data
@@ -269,13 +272,13 @@ paths:
                     example: 299
                   refresh_token:
                     type: string
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).          
-        
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /introspect-access-token:
     post:
       tags:
@@ -292,8 +295,8 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
-          schema:        
+          name: IntrospectAccessTokenParams
+          schema:
             type: object
             required:
               - command
@@ -318,6 +321,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: IntrospectAccessTokenReponse
             required:
               - status
               - data
@@ -379,14 +383,14 @@ paths:
                     example: ["basic"]
                   extension_field:
                     type: string
-                    example: twenty-seven            
-        400:            
+                    example: twenty-seven
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).           
-                
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /register-site:
     post:
       tags:
@@ -403,7 +407,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: RegisterSiteParams
           schema:
             type: object
             required:
@@ -489,6 +493,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: RegisterSiteResponse
             required:
               - status
               - data
@@ -508,13 +513,13 @@ paths:
                   op_host:
                     type: string
                     example: https://<op-hostname>
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
-  
+
   /update-site:
     post:
       tags:
@@ -531,7 +536,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: UpdateSiteParams
           schema:
             type: object
             required:
@@ -600,6 +605,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: UpdateSiteResponse
             required:
               - status
               - data
@@ -615,12 +621,12 @@ paths:
                   oxd_id:
                     type: string
                     example: bcad760f-91ba-46e1-a020-05e4281d91b6
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).        
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
 
   /remove-site:
     post:
@@ -638,7 +644,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: RemoveSiteParams
           schema:
             type: object
             required:
@@ -652,6 +658,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: RemoveSiteResponse
             required:
               - status
               - data
@@ -667,13 +674,13 @@ paths:
                   oxd_id:
                     type: string
                     example: bcad760f-91ba-46e1-a020-05e4281d91b6
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).               
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /get-authorization-url:
     post:
       tags:
@@ -690,7 +697,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: GetAuthorizationUrlParams
           schema:
             type: object
             required:
@@ -726,6 +733,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetAuthorizationUrlResponse
             required:
               - status
               - data
@@ -741,13 +749,13 @@ paths:
                   authorization_url:
                     type: string
                     example: https://<op-hostname>/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).               
-               
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /get-tokens-by-code:
     post:
       tags:
@@ -764,7 +772,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: GetTokensByCodeParams
           schema:
             type: object
             required:
@@ -786,6 +794,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetTokensByCodeResponse
             required:
               - status
               - data
@@ -831,7 +840,7 @@ paths:
                         type: array
                         items:
                           type: string
-                        example: ["Cx2dz5Wvw_kBXAcTs3mFA"]  
+                        example: ["Cx2dz5Wvw_kBXAcTs3mFA"]
                       aud:
                         type: array
                         items:
@@ -867,13 +876,13 @@ paths:
                         type: array
                         items:
                           type: string
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).               
-               
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /get-user-info:
     post:
       tags:
@@ -890,13 +899,13 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: GetUserInfoParams
           schema:
             type: object
             required:
               - oxd_id
               - access_token
-            properties:  
+            properties:
               oxd_id:
                 type: string
                 example: bcad760f-91ba-46e1-a020-05e4281d91b6
@@ -908,6 +917,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetUserInfoResponse
             required:
               - claims
             properties:
@@ -991,13 +1001,13 @@ paths:
                     type: array
                     items:
                       type: string
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).               
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /get-logout-uri:
     post:
       tags:
@@ -1014,7 +1024,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: GetLogoutUriParams
           schema:
             type: object
             required:
@@ -1042,6 +1052,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetLogoutUriResponse
             required:
               - url
             properties:
@@ -1053,13 +1064,13 @@ paths:
                   url:
                     type: string
                     example: https://<op-hostname>/oxauth/seam/resource/restv1/oxauth/end_session?id_token_hint=eyJraWQiOiI1YmM2ZGM3MS0xYjA1LTQ5YzMtYWU3MC0zYTg4Y2ZiMjQwN2QiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NlLWRldi5nbHV1Lm9yZyIsImF1ZCI6IkAhNUE1OC5BRTBELkQzODMuMUU0NiEwMDAxIUUzOEIuN0RCRSEwMDA4IUE3MTkuOTU4QS41QjdGLkVBQkMiLCJleHAiOjE0OTAwMTk5MjEsImlhdCI6MTQ5MDAxNjMyMSwibm9uY2UiOiJkNGdsbmtndHAxYWlqZ3JnY3V2cGp1N2k3cCIsImF1dGhfdGltZSI6MTQ5MDAxNjI3MiwiYXRfaGFzaCI6Im1Xa2NXQzZ6NC1qN0ZNX0ctX0tYMWciLCJveFZhbGlkYXRpb25VUkkiOiJodHRwczovL2NlLWRldi5nbHV1Lm9yZy9veGF1dGgvb3BpZnJhbWUiLCJveE9wZW5JRENvbm5lY3RWZXJzaW9uIjoib3BlbmlkY29ubmVjdC0xLjAiLCJzdWIiOiJONHRLRncyLVpDWTVWN0FhQmdpMnNHRWdDR0t0Tlg2LS01M2FQbmZFYk5zIn0.PvCdzPnMwqPNUw1bzd8tvzpJqYu-P2iCTnELr85ZaJTG8_Fdj3EruLgUBa-emeum3j29cFgdjFPx6WplfCV1GnehOieXjDiAAE85fy-stxXwII3xrva5ZjG0FnTYnJLoRmy0BWMjFC2IdCoISJI9imcfvmQmlvNmU0EjLS02cJf3JAaqEaM-FJWdQv8end9-Sq2bcp6ME3voRjV30ps_7jcDdlM_hW3M_e3RdrXYCDifbl_1jaNip5tb6_bLpgTADDoLT3fTvACRN057e2GCkSYdxvVhIjfDsjnOhk5n3TDcWedriu99H8-sNXyI_aBr3HAXd37CsgmdfIJcgUNJJw
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).   
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /get-access-token-by-refresh-token:
     post:
       tags:
@@ -1076,7 +1087,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: GetAccessTokenByRefreshTokenParams
           schema:
             type: object
             required:
@@ -1100,6 +1111,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: GetAccessTokenByRefreshTokenResponse
             required:
               - status
               - data
@@ -1127,13 +1139,13 @@ paths:
                   refresh_token:
                     type: string
                     example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).   
-        
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /uma-rs-protect:
     post:
       tags:
@@ -1150,7 +1162,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: UmaRsProtectParams
           schema:
             type: object
             required:
@@ -1172,6 +1184,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: UmaRsProtectResponse
             required:
               - status
               - data
@@ -1187,13 +1200,13 @@ paths:
                   oxd_id:
                     type: string
                     example: "bcad760f-91ba-46e1-a020-05e4281d91b6"
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).   
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /uma-rs-check-access:
     post:
       tags:
@@ -1210,7 +1223,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: UmaRsCheckAccessParams
           schema:
             type: object
             required:
@@ -1233,6 +1246,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: UmaRsCheckAccessResponse
             required:
               - status
               - data
@@ -1247,15 +1261,15 @@ paths:
                 properties:
                   access:
                     type: string
-                    example: granted  
+                    example: granted
                     description: Possible values are granted, denied
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).                 
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /introspect-rpt:
     post:
       tags:
@@ -1272,7 +1286,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: IntrospectRptParams
           schema:
             type: object
             required:
@@ -1289,6 +1303,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: IntrospectRptResponse
             required:
               - status
               - data
@@ -1317,13 +1332,13 @@ paths:
                     type: array
                     items:
                       type: object
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).           
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /uma-rp-get-rpt:
     post:
       tags:
@@ -1340,7 +1355,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: UmaRpGetRptParams
           schema:
             type: object
             required:
@@ -1378,6 +1393,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: UmaRpGetRptResponse
             required:
               - status
               - data
@@ -1403,13 +1419,13 @@ paths:
                   token_type:
                     type: string
                     example: bearer
-        400:            
+        400:
           description: Invalid parameters are provided to endpoint.
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).  
-          
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
   /uma-rp-get-claims-gathering-url:
     post:
       tags:
@@ -1426,7 +1442,7 @@ paths:
           name: Authorization
           type: string
         - in: body
-          name: Parameters
+          name: UmaRpGetClaimsGatheringUrlParams
           schema:
             type: object
             required:
@@ -1448,6 +1464,7 @@ paths:
           description: OK
           schema:
             type: object
+            title: UmaRpGetClaimsGatheringUrlResponse
             required:
               - status
               - data
