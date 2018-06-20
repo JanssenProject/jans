@@ -47,16 +47,16 @@ public class RestResource {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectAccessToken(String params) {
-        return process(CommandType.INTROSPECT_ACCESS_TOKEN, params, IntrospectAccessTokenParams.class, null);
+    public String introspectAccessToken(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.INTROSPECT_ACCESS_TOKEN, params, IntrospectAccessTokenParams.class, authorization);
     }
 
     @POST
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectRpt(String params) {
-        return process(CommandType.INTROSPECT_RPT, params, IntrospectRptParams.class, null);
+    public String introspectRpt(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.INTROSPECT_RPT, params, IntrospectRptParams.class, authorization);
     }
 
     @POST
