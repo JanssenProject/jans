@@ -2102,7 +2102,7 @@ class Setup(object):
             self.install_ldap_server()
 
         if self.install_couchbase:
-            progress_bar(27, "Installing Gluu components: Couchebase")
+            progress_bar(27, "Installing Gluu components: Couchbase")
             self.install_couchebase()
 
         if self.installHttpd:
@@ -2110,7 +2110,7 @@ class Setup(object):
             self.configure_httpd()
 
         if self.installOxAuth:
-            progress_bar(27, "Installing Gluu components: OxAuth")
+            progress_bar(27, "Installing Gluu components: oxAuth")
             self.install_oxauth()
 
         if self.installOxTrust:
@@ -2118,7 +2118,7 @@ class Setup(object):
             self.install_oxtrust()
 
         if self.installSaml:
-            progress_bar(27, "Installing Gluu components: saml")
+            progress_bar(27, "Installing Gluu components: SAML")
             self.install_saml()
 
         if self.installAsimba:
@@ -2126,7 +2126,7 @@ class Setup(object):
             self.install_asimba()
 
         if self.installOxAuthRP:
-            progress_bar(27, "Installing Gluu components: OxAuthRP")
+            progress_bar(27, "Installing Gluu components: oxAuthRP")
             self.install_oxauth_rp()
 
         if self.installPassport:
