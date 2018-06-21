@@ -34,7 +34,7 @@
 		<log4j.version>2.8.2</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<weld.version>3.0.0.Final</weld.version>
+		<weld.version>3.0.1.Final</weld.version>
 		<richfaces.version>4.5.17.Final</richfaces.version>
 		<jsf.version>2.2.14</jsf.version>
 		<uel.version>2.2</uel.version>
