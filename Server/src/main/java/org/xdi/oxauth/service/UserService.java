@@ -225,7 +225,7 @@ public class UserService {
         if (user == null) {
         	return null;
         }
-        
+  
         boolean result = addUserAttribute(user, attributeName, attributeValue);
         if (!result) {
         	// We uses this result in Person Authentication Scripts
