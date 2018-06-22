@@ -5,6 +5,8 @@ import java.io.Serializable;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,11 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLParameters;
+import java.io.File;
+import java.io.Serializable;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -36,9 +43,18 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
             poolConfig.setMaxTotal(1000);
             poolConfig.setMinIdle(2);
 
-
             HostAndPort hostAndPort = RedisClusterProvider.hosts(redisConfiguration.getServers()).iterator().next();
-            pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
+
+            if (redisConfiguration.getUseSsl()) {
+                if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
+                            RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
+                } else {
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true);
+                }
+            } else {
+                pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
+            }
 
             testConnection();
             LOG.debug("RedisStandaloneProvider started.");
