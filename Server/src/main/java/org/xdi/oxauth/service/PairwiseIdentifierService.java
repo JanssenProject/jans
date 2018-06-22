@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 
@@ -29,7 +29,7 @@ public class PairwiseIdentifierService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private UserService userService;

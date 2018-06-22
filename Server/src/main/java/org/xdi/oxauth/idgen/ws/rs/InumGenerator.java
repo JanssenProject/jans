@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class InumGenerator implements IdGenerator {
     @Inject
     private Logger log;
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private StaticConfiguration staticConfiguration;

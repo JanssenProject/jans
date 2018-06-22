@@ -7,7 +7,7 @@
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -40,7 +40,7 @@ public class UmaPermissionService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private StaticConfiguration staticConfiguration;
