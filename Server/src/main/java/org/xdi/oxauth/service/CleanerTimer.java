@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class CleanerTimer {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;

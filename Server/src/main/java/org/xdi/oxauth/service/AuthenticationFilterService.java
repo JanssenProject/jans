@@ -16,7 +16,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.AuthenticationException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
@@ -31,7 +31,7 @@ import org.xdi.util.StringHelper;
 public class AuthenticationFilterService extends BaseAuthFilterService {
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private AppConfiguration appConfiguration;

@@ -13,7 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,8 +114,8 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    public static LdapEntryManager getLdapManager() {
-        return CdiUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+    public static PersistenceEntryManager getLdapManager() {
+        return CdiUtil.bean(PersistenceEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {

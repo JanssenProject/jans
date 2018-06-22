@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.model.ProgrammingLanguage;
@@ -42,7 +42,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 	private IdGenService idGenService;
 
 	@Inject
-	private LdapEntryManager ldapEntryManager;
+	private PersistenceEntryManager ldapEntryManager;
 
 	private static String idCustomScriptDn;
 

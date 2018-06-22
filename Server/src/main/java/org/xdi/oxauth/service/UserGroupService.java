@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 
 /**
@@ -35,7 +35,7 @@ public class UserGroupService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public UserGroup loadGroup(String p_groupDN) {
         try {
