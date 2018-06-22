@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -213,7 +213,7 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
+    public String loadEntryDN(PersistenceEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter = Filter.create(filter);

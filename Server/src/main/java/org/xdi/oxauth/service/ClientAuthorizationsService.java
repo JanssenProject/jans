@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import javax.ejb.Stateless;
@@ -40,7 +40,7 @@ public class ClientAuthorizationsService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private UserService userService;

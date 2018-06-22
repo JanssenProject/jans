@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
@@ -46,7 +46,7 @@ public class AuthenticationService extends RequestService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private ApplicationService applicationService;

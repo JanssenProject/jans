@@ -11,7 +11,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -68,7 +68,7 @@ public class ConfigurationFactory {
 	private Event<String> event;
 
 	@Inject @Named(AppInitializer.LDAP_ENTRY_MANAGER_NAME)
-	private Instance<LdapEntryManager> ldapEntryManagerInstance;
+	private Instance<PersistenceEntryManager> ldapEntryManagerInstance;
 	
 	@Inject
 	private Instance<Configuration> configurationInstance;
@@ -358,7 +358,7 @@ public class ConfigurationFactory {
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
-		final LdapEntryManager ldapManager = ldapEntryManagerInstance.get();
+		final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
 		final String dn = getLdapConfiguration().getString("oxauth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
@@ -403,7 +403,7 @@ public class ConfigurationFactory {
 				long nextRevision = conf.getRevision() + 1;
 				conf.setRevision(nextRevision);
 
-				final LdapEntryManager ldapManager = ldapEntryManagerInstance.get();
+				final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
 				ldapManager.merge(conf);
 
 				log.info("New JWKS generated successfully");

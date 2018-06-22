@@ -12,7 +12,7 @@ import javax.inject.Named;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.EncryptionService;
@@ -45,7 +45,7 @@ public class PushSnsService {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
 	public AmazonSNS createSnsClient(String accessKey, String secretKey, String region) {
 		String decryptedAccessKey = encryptionService.decrypt(accessKey, true);
