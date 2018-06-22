@@ -64,7 +64,9 @@ public class RedisShardedProvider extends AbstractRedisProvider {
                     final JedisShardInfo shardInfo;
                     if (configuration.getUseSsl()) {
                         if (StringUtils.isNotBlank(configuration.getSslTrustStoreFilePath())) {
-                            shardInfo = new JedisShardInfo(host, port, true, RedisProviderFactory.createTrustStoreSslSocketFactory(new File(configuration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
+                            shardInfo = new JedisShardInfo(host, port, true,
+                                    RedisProviderFactory.createTrustStoreSslSocketFactory(new File(configuration.getSslTrustStoreFilePath())),
+                                    new SSLParameters(), new DefaultHostnameVerifier());
                         } else {
                             shardInfo = new JedisShardInfo(host, port, true);
                         }

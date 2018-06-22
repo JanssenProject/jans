@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
@@ -67,7 +67,7 @@ public abstract class MetricService implements Serializable {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public void initTimer(int metricInterval) {
         this.metricRegistry = new MetricRegistry();
@@ -232,8 +232,8 @@ public abstract class MetricService implements Serializable {
                 count, chunkSize);
     }
 
-    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum,
-            int count, int chunkSize) {
+    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int count,
+            int chunkSize) {
         final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
         // Remove expired entries
         for (final String baseDnForPeriod : keepBaseDnForPeriod) {

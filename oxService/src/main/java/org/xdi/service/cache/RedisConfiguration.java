@@ -74,12 +74,7 @@ public class RedisConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "RedisConfiguration{" +
-                "servers='" + servers + '\'' +
-                ", defaultPutExpiration=" + defaultPutExpiration +
-                ", redisProviderType=" + redisProviderType +
-                ", useSsl=" + useSsl +
-                ", sslTrustStoreFilePath=" + sslTrustStoreFilePath +
-                '}';
+        return "RedisConfiguration{" + "servers='" + servers + '\'' + ", defaultPutExpiration=" + defaultPutExpiration + ", redisProviderType="
+                + redisProviderType + ", useSsl=" + useSsl + ", sslTrustStoreFilePath=" + sslTrustStoreFilePath + '}';
     }
 }

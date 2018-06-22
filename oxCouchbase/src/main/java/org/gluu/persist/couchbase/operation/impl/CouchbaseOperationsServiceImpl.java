@@ -422,4 +422,9 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return result;
     }
 
+    @Override
+    public boolean isConnected() {
+        return connectionProvider.isConnected();
+    }
+
 }

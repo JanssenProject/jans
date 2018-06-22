@@ -1,5 +1,6 @@
 package org.xdi.service.timer;
 
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import org.xdi.service.timer.event.TimerEvent;
 /**
  * @author Yuriy Movchan Date: 04/13/2017
  */
+@Dependent
 public class TimerJob implements Job {
 
     public static final String KEY_TIMER_EVENT = TimerEvent.class.getName();
@@ -31,7 +33,8 @@ public class TimerJob implements Job {
                 return;
             }
 
-            log.debug("Fire timer event [{}] with qualifiers {}", timerEvent.getTargetEvent().getClass().getName(), timerEvent.getQualifiers());
+            log.debug("Fire timer event [{}] with qualifiers {} from instance {}", timerEvent.getTargetEvent().getClass().getName(),
+                    timerEvent.getQualifiers(), System.identityHashCode(this));
 
             beanManager.fireEvent(timerEvent.getTargetEvent(), timerEvent.getQualifiers());
         } catch (Exception ex) {

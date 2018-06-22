@@ -243,16 +243,16 @@ public class CouchbaseConnectionProvider {
             return defaultBucketMapping;
         }
 
-        String baseNameParts[] = key.split("_");
+        String[] baseNameParts = key.split("_");
         if (ArrayHelper.isEmpty(baseNameParts)) {
             throw new KeyConversionException("Failed to determine base key part!");
         }
-        
+
         BucketMapping bucketMapping = baseNameToBucketMapping.get(baseNameParts[0]);
         if (bucketMapping == null) {
             return defaultBucketMapping;
         }
-        
+
         return bucketMapping;
     }
 

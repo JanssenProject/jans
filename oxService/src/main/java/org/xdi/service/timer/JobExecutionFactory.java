@@ -1,6 +1,6 @@
 package org.xdi.service.timer;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.quartz.Job;
@@ -12,7 +12,7 @@ import org.quartz.spi.TriggerFiredBundle;
 /**
  * @author Yuriy Movchan Date: 04/04/2017
  */
-@ApplicationScoped
+@Dependent
 public class JobExecutionFactory implements JobFactory {
 
     @Inject

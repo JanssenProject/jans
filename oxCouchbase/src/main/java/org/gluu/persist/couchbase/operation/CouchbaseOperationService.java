@@ -18,6 +18,7 @@ import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.operation.PersistenceOperationService;
 
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.dsl.Expression;
@@ -29,7 +30,7 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  *
  * @author Yuriy Movchan Date: 05/14/2018
  */
-public interface CouchbaseOperationService {
+public interface CouchbaseOperationService extends PersistenceOperationService {
 
     String DN = "dn";
     String UID = "uid";
