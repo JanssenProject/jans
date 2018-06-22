@@ -1,8 +1,8 @@
 package org.xdi.service.cache;
 
-import java.io.Serializable;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/23/2017.
