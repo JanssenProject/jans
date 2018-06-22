@@ -13,9 +13,12 @@ import java.util.Properties;
 
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.ResultCode;
+import org.gluu.persist.exception.KeyConversionException;
+import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
 import com.couchbase.client.core.CouchbaseException;
@@ -38,14 +41,17 @@ public class CouchbaseConnectionProvider {
 
     private String[] servers;
     private String[] buckets;
+    private String defaultBucket;
 
     private String userName;
     private String userPassword;
 
     private CouchbaseCluster cluster;
     private int creationResultCode;
+
     private HashMap<String, BucketMapping> bucketToBaseNameMapping;
     private HashMap<String, BucketMapping> baseNameToBucketMapping;
+    private BucketMapping defaultBucketMapping;
 
     private ArrayList<String> binaryAttributes, certificateAttributes;
 
@@ -79,7 +85,16 @@ public class CouchbaseConnectionProvider {
         this.userName = props.getProperty("userName");
         this.userPassword = props.getProperty("userPassword");
 
+        this.defaultBucket = props.getProperty("bucket.default");
+        if (StringHelper.isEmpty(defaultBucket)) {
+            throw new ConfigurationException("Default bucket is not defined!");
+        }
+
         this.buckets = StringHelper.split(props.getProperty("buckets"), ",");
+        if (!Arrays.asList(buckets).contains(defaultBucket)) {
+            this.buckets = ArrayHelper.addItemToStringArray(buckets, defaultBucket);
+        }
+
         this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
         this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
 
@@ -168,6 +183,10 @@ public class CouchbaseConnectionProvider {
                 baseNameToBucketMapping.put(baseName, bucketMapping);
             }
 
+            if (StringHelper.equalsIgnoreCase(bucketName, defaultBucket)) {
+                this.defaultBucketMapping = bucketMapping;
+            }
+
             // Create primary index if needed
             bucket.bucketManager().createN1qlPrimaryIndex(true, false);
         }
@@ -220,8 +239,21 @@ public class CouchbaseConnectionProvider {
     }
 
     public BucketMapping getBucketMappingByKey(String key) {
-        // TODO Auto-generated method stub
-        return baseNameToBucketMapping.values().iterator().next();
+        if ("_".equals(key)) {
+            return defaultBucketMapping;
+        }
+
+        String baseNameParts[] = key.split("_");
+        if (ArrayHelper.isEmpty(baseNameParts)) {
+            throw new KeyConversionException("Failed to determine base key part!");
+        }
+        
+        BucketMapping bucketMapping = baseNameToBucketMapping.get(baseNameParts[0]);
+        if (bucketMapping == null) {
+            return defaultBucketMapping;
+        }
+        
+        return bucketMapping;
     }
 
     public int getCreationResultCode() {
