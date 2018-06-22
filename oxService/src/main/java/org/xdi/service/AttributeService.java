@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
@@ -34,7 +34,7 @@ public abstract class AttributeService implements Serializable {
     protected Logger log;
 
     @Inject
-    protected LdapEntryManager ldapEntryManager;
+    protected PersistenceEntryManager ldapEntryManager;
 
     @Inject
     protected SchemaService schemaService;

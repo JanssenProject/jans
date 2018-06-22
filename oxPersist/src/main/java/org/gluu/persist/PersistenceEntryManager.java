@@ -16,6 +16,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.search.filter.Filter;
 
 /**
@@ -24,6 +25,8 @@ import org.gluu.search.filter.Filter;
  * @author Yuriy Movchan Date: 01/29/2018
  */
 public interface PersistenceEntryManager {
+
+    PersistenceOperationService getOperationService();
 
     void persist(Object entry);
 
@@ -40,6 +43,8 @@ public interface PersistenceEntryManager {
     <T> boolean contains(String primaryKey, Class<T> entryClass, Filter filter);
 
     <T> List<T> findEntries(Object entry);
+
+    <T> T find(Class<T> entryClass, Object primaryKey);
 
     <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
 

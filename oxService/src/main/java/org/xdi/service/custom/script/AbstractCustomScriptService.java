@@ -10,7 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -29,7 +29,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public void add(CustomScript customScript) {
         ldapEntryManager.persist(customScript);

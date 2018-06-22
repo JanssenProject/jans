@@ -1,6 +1,6 @@
 package org.xdi.service.timer;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
@@ -11,7 +11,7 @@ import org.quartz.JobExecutionException;
 /**
  * @author Yuriy Movchan Date: 04/04/2017
  */
-@RequestScoped
+@Dependent
 public class JobExecutionDelegate implements Job {
 
     @Inject

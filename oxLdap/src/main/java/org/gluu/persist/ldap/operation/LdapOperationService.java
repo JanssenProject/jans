@@ -10,6 +10,7 @@ import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.operation.PersistenceOperationService;
 
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Control;
@@ -23,7 +24,7 @@ import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldif.LDIFChangeRecord;
 
-public interface LdapOperationService {
+public interface LdapOperationService extends PersistenceOperationService {
 
     LdapConnectionProvider getConnectionProvider();
 

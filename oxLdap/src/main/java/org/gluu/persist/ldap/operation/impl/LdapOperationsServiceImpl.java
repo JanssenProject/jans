@@ -1065,5 +1065,10 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
     }
 
+    @Override
+    public boolean isConnected() {
+        return connectionProvider.isConnected();
+    }
+
 }
 
