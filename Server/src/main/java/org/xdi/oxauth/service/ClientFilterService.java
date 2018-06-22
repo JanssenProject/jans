@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
@@ -29,7 +29,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 public class ClientFilterService extends BaseAuthFilterService {
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private AppConfiguration appConfiguration;

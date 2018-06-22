@@ -6,8 +6,10 @@
 
 package org.xdi.oxauth.service.status.ldap;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
+import org.gluu.persist.operation.PersistenceOperationService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.service.cdi.event.LdapStatusEvent;
@@ -43,10 +45,10 @@ public class LdapStatusTimer {
 	private Event<TimerEvent> timerEvent;
 
 	@Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
-    private List<LdapEntryManager> ldapAuthEntryManagers;
+    private List<PersistenceEntryManager> ldapAuthEntryManagers;
 
     private AtomicBoolean isActive;
 
@@ -79,14 +81,19 @@ public class LdapStatusTimer {
     	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
 
     	for (int i = 0; i < ldapAuthEntryManagers.size(); i++) {
-			LdapEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
+			PersistenceEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
 			logConnectionProviderStatistic(ldapAuthEntryManager, "authConnectionProvider#" + i, "bindAuthConnectionProvider#" + i);
     	}
     }
 
-	public void logConnectionProviderStatistic(LdapEntryManager ldapEntryManager, String connectionProviderName, String bindConnectionProviderName) {
-		LdapConnectionProvider ldapConnectionProvider = ldapEntryManager.getOperationService().getConnectionProvider();
-        LdapConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getOperationService().getBindConnectionProvider();
+	public void logConnectionProviderStatistic(PersistenceEntryManager ldapEntryManager, String connectionProviderName, String bindConnectionProviderName) {
+	    PersistenceOperationService persistenceOperationService = ldapEntryManager.getOperationService();
+	    if (!(persistenceOperationService instanceof LdapOperationService)) {
+	        return;
+	    }
+
+	    LdapConnectionProvider ldapConnectionProvider = ((LdapOperationService) persistenceOperationService).getConnectionProvider();
+        LdapConnectionProvider bindLdapConnectionProvider = ((LdapOperationService) persistenceOperationService).getBindConnectionProvider();
         
         if (ldapConnectionProvider == null) {
         	log.error("{} is empty", connectionProviderName);
