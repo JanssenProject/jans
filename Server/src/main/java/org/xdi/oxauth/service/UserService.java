@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.GluuStatus;
 import org.gluu.search.filter.Filter;
@@ -45,7 +45,7 @@ public class UserService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private InumService inumService;

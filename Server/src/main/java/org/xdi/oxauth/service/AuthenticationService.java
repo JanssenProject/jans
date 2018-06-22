@@ -27,7 +27,7 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.persist.model.base.GluuStatus;
@@ -78,11 +78,11 @@ public class AuthenticationService {
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
-    private List<LdapEntryManager> ldapAuthEntryManagers;
+    private List<PersistenceEntryManager> ldapAuthEntryManagers;
 
     @Inject
     private UserService userService;
@@ -185,7 +185,7 @@ public class AuthenticationService {
     private boolean externalAuthenticate(String keyValue, String password) {
         for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
             GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
-            LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+            PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
 
             String primaryKey = "uid";
             if (StringHelper.isNotEmpty(ldapAuthConfig.getPrimaryKey())) {
@@ -217,7 +217,7 @@ public class AuthenticationService {
         try {
             for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
                 GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
-                LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+                PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
 
                 authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
                 if (authenticated) {
@@ -243,7 +243,7 @@ public class AuthenticationService {
     /*
      * Utility method which can be used in custom scripts
      */
-    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
+    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
         try {
@@ -332,7 +332,7 @@ public class AuthenticationService {
         return authenticated;
     }
 
-    private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
+    private User getUserByAttribute(PersistenceEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         if (StringHelper.isEmpty(attributeValue)) {

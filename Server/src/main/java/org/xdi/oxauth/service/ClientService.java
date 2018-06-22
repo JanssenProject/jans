@@ -9,7 +9,7 @@ package org.xdi.oxauth.service;
 import com.google.common.collect.Sets;
 
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -54,7 +54,7 @@ public class ClientService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private CacheService cacheService;

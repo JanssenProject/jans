@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class ExternalScriptContext {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
-    private final LdapEntryManager ldapEntryManager;
+    private final PersistenceEntryManager ldapEntryManager;
     protected HttpServletRequest httpRequest;
     protected final HttpServletResponse httpResponse;
 
@@ -58,7 +58,7 @@ public class ExternalScriptContext {
         return log;
     }
 
-    public LdapEntryManager getLdapEntryManager() {
+    public PersistenceEntryManager getPersistenceEntryManager() {
 		return ldapEntryManager;
 	}
 

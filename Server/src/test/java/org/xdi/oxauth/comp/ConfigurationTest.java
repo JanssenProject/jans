@@ -15,7 +15,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.ConfigurableTest;
@@ -35,7 +35,7 @@ public class ConfigurationTest extends ConfigurableTest {
 	private ConfigurationFactory configurationFactory;
 
 	@Inject
-	private LdapEntryManager ldapEntryManager;
+	private PersistenceEntryManager ldapEntryManager;
 
 	/*
 	 * Configuration must be present, otherwise server will not start

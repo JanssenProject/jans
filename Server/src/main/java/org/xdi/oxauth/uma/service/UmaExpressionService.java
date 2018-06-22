@@ -2,7 +2,7 @@ package org.xdi.oxauth.uma.service;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.JsonLogic;

@@ -3,7 +3,7 @@ package org.xdi.oxauth.service;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.ldap.SectorIdentifier;
@@ -20,7 +20,7 @@ public class SectorIdentifierService {
     private Logger log;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private StaticConfiguration staticConfiguration;

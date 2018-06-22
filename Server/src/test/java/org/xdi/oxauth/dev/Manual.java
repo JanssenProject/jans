@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
@@ -38,7 +38,7 @@ public class Manual {
 
 	private static final String LDAP_FILE_PATH = CONF_FOLDER + File.separator + LDAP_CONF_FILE_NAME;
 
-	public static LdapEntryManager MANAGER = null;
+	public static PersistenceEntryManager MANAGER = null;
 
 	@BeforeClass
 	public void init() {
@@ -51,7 +51,7 @@ public class Manual {
 
 	@AfterClass
 	public void destroy() {
-		MANAGER.getOperationService().getConnectionPool().close();
+		MANAGER.destroy();
 	}
 
 	@Test
