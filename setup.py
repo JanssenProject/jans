@@ -521,13 +521,17 @@ class Setup(object):
         self.couchebaseClusterAdmin = 'admin'
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
         self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
+        self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
+        self.couchbaseTrustStorePass = 'newsecret'
+        
         self.couchebaseBucketClusterPort = 28091
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
         self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
         self.couchebaseCbq = '/opt/couchbase/bin/cbq'
-        self.couchebaseCert = '/etc/certs/couchbase.pem'
-
+        self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
+        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchabse.properties')
+        self.couchbaseBuckets = []
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
@@ -1461,6 +1465,7 @@ class Setup(object):
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
+            self.encoded_couchbaseTrustStorePass = self.obscure(self.couchbaseTrustStorePass)
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
@@ -2079,21 +2084,6 @@ class Setup(object):
 
         # Install passport system service script
         self.installNodeService('passport')
-
-
-    def install_couchebase(self):
-        self.couchbaseInstall()
-        self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-        self.restartCouchebase()
-        self.couchebaseCreateCluster()
-        self.couchbaseSSL()
-        
-        #execute this fonctions for 'site' when couchbase is backend
-        self.couchebaseCreateBucket('gluu')
-        self.couchebaseCreateIndexes('gluu')
-        
-        self.import_ldif_couchebase()
-        
 
 
     def install_gluu_components(self):
@@ -3496,6 +3486,7 @@ class Setup(object):
         
         self.run(cmd_args)
 
+        self.couchbaseBuckets.append(bucketName)
 
     def couchbaseImportJson(self, bucket, jsonFile, keyGen=None):
         self.logIt("Importing Couchebase json file %s to bucket %s" % (jsonFile, bucket))
@@ -3623,6 +3614,55 @@ class Setup(object):
 
         self.logIt("Running command: " + ' '.join(cmd_args))
         os.system(' '.join(cmd_args))
+        
+        cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % self.hostname, \
+                  "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
+                  "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
+                
+        self.run(cmd_args)
+        
+        
+    def couchbaseProperties(self):
+        prop_file = os.path.basename(self.gluuCouchebaseProperties)
+        prop = open(os.path.join(self.templateFolder,prop_file)).read()
+    
+        
+        prop_dict = {
+                    'couchbase_servers': 'localhost',
+                    'couchbase_servers': 'localhost',
+                    'couchbase_buckets': ' '.join(self.couchbaseBuckets),
+                    'default_bucket': 'gluu',
+                    'user_mapping': 'people, groups',
+                    'session_mapping': 'sessions',
+                    'static_mapping': 'statistic',
+                    'site_mapping': 'site',
+                    'encryption_method': 'CRYPT-SHA-256',
+                    'ssl_enabled': 'true',
+                    'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
+                    'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
+                    }
+
+        prop = prop % prop_dict
+        
+        out_file = os.path.join(self.outputFolder, prop_file)
+        self.writeFile(out_file, prop)
+        self.writeFile(self.gluuCouchebaseProperties, prop)
+        
+        
+
+    def install_couchebase(self):
+        self.couchbaseInstall()
+        self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
+        self.restartCouchebase()
+        self.couchebaseCreateCluster()
+        self.couchbaseSSL()
+        
+        #execute this fonctions for 'site' when couchbase is backend
+        self.couchebaseCreateBucket('gluu')
+        self.couchebaseCreateIndexes('gluu')
+        
+        self.import_ldif_couchebase()
+        self.couchbaseProperties()
         
 ############################   Main Loop   #################################################
 
