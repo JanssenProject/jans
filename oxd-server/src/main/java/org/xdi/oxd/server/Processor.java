@@ -44,7 +44,7 @@ public class Processor {
      * @return response as string
      */
     public String process(String p_command) {
-        LOG.trace("Command: {}", p_command);
+        LOG.trace("Command: {}", StringUtils.remove(p_command, "client_secret"));
         try {
             if (StringUtils.isNotBlank(p_command)) {
                 final Command command = CoreUtils.createJsonMapper().readValue(p_command, Command.class);
