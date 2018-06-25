@@ -35,11 +35,11 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Arrays.asList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(Lists.newArrayList("openid", "profile"));
-        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
         resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
@@ -63,13 +63,12 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
-        params.setGrantType(Lists.newArrayList(
+        params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
-        params.setOxdRpProgrammingLanguage("java");
 
         final Command command = new Command(CommandType.SETUP_CLIENT);
         command.setParamsObject(params);

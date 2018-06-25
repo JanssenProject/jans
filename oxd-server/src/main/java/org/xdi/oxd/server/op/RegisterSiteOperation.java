@@ -123,8 +123,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         // grant_type
         List<String> grantTypes = Lists.newArrayList();
 
-        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
-            grantTypes.addAll(params.getGrantType());
+        if (params.getGrantTypes() != null && !params.getGrantTypes().isEmpty()) {
+            grantTypes.addAll(params.getGrantTypes());
         }
 
         if (grantTypes.isEmpty() && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
@@ -135,7 +135,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             grantTypes.add(GrantType.AUTHORIZATION_CODE.getValue());
         }
 
-        params.setGrantType(grantTypes);
+        params.setGrantTypes(grantTypes);
 
         // authorization_redirect_uri
         if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
@@ -319,14 +319,14 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
-        for (String grantType : params.getGrantType()) {
+        for (String grantType : params.getGrantTypes()) {
             grantTypes.add(GrantType.fromString(grantType));
         }
         request.setGrantTypes(grantTypes);
 
-        if (params.getClientFrontchannelLogoutUri() != null) {
-            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUri()));
+        if (params.getClientFrontchannelLogoutUris() != null) {
+            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
             if (rp.getFrontChannelLogoutUri() != null) {
                 request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
@@ -368,9 +368,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setRedirectUris(params.getRedirectUris());
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
-        rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
         rp.setUmaProtectedResources(new ArrayList<UmaResource>());
-        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
+        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
             rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
@@ -395,7 +394,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp.setContacts(params.getContacts());
         }
 
-        rp.setGrantType(params.getGrantType());
+        rp.setGrantType(params.getGrantTypes());
         rp.setResponseTypes(params.getResponseTypes());
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {

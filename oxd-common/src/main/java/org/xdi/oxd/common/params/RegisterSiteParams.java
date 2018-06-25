@@ -69,8 +69,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> contacts;
     @JsonProperty(value = "trusted_client")
     private Boolean trusted_client = false;
-    @JsonProperty(value = "oxd_rp_programming_language")
-    private String oxd_rp_programming_language;
 
     public RegisterSiteParams() {
     }
@@ -89,14 +87,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
         this.client_registration_client_uri = clientRegistrationClientUri;
-    }
-
-    public String getOxdRpProgrammingLanguage() {
-        return oxd_rp_programming_language;
-    }
-
-    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
-        this.oxd_rp_programming_language = oxdRpProgrammingLanguage;
     }
 
     public String getProtectionAccessToken() {
@@ -147,12 +137,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_sector_identifier_uri = clientSectorIdentifierUri;
     }
 
-    public List<String> getClientFrontchannelLogoutUri() {
+    public List<String> getClientFrontchannelLogoutUris() {
         return client_frontchannel_logout_uris;
     }
 
-    public void setClientFrontchannelLogoutUri(List<String> clientFrontchannelLogoutUri) {
-        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUri;
+    public void setClientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
+        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUris;
     }
 
     public List<String> getClientRequestUris() {
@@ -227,12 +217,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_secret = clientSecret;
     }
 
-    public List<String> getGrantType() {
+    public List<String> getGrantTypes() {
         return grant_types;
     }
 
-    public void setGrantType(List<String> grantType) {
-        this.grant_types = grantType;
+    public void setGrantTypes(List<String> grantTypes) {
+        this.grant_types = grantTypes;
     }
 
     public List<String> getRedirectUris() {
@@ -320,7 +310,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
                 ", grant_types=" + grant_types +
                 ", contacts=" + contacts +
                 ", trusted_client=" + trusted_client +
-                ", oxd_rp_programming_language='" + oxd_rp_programming_language + '\'' +
                 '}';
     }
 
