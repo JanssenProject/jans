@@ -1,22 +1,17 @@
 package io.swagger.client.model;
 
-import java.util.Objects;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * IntrospectAccessTokenReponseData
+ * IntrospectAccessTokenResponseData
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T15:27:32.160Z")
-public class IntrospectAccessTokenReponseData {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
+public class IntrospectAccessTokenResponseData {
   @SerializedName("active")
   private Boolean active = null;
 
@@ -53,7 +48,7 @@ public class IntrospectAccessTokenReponseData {
   @SerializedName("extension_field")
   private String extensionField = null;
 
-  public IntrospectAccessTokenReponseData active(Boolean active) {
+  public IntrospectAccessTokenResponseData active(Boolean active) {
     this.active = active;
     return this;
   }
@@ -71,7 +66,7 @@ public class IntrospectAccessTokenReponseData {
     this.active = active;
   }
 
-  public IntrospectAccessTokenReponseData clientId(String clientId) {
+  public IntrospectAccessTokenResponseData clientId(String clientId) {
     this.clientId = clientId;
     return this;
   }
@@ -89,7 +84,7 @@ public class IntrospectAccessTokenReponseData {
     this.clientId = clientId;
   }
 
-  public IntrospectAccessTokenReponseData username(String username) {
+  public IntrospectAccessTokenResponseData username(String username) {
     this.username = username;
     return this;
   }
@@ -107,12 +102,12 @@ public class IntrospectAccessTokenReponseData {
     this.username = username;
   }
 
-  public IntrospectAccessTokenReponseData scopes(List<String> scopes) {
+  public IntrospectAccessTokenResponseData scopes(List<String> scopes) {
     this.scopes = scopes;
     return this;
   }
 
-  public IntrospectAccessTokenReponseData addScopesItem(String scopesItem) {
+  public IntrospectAccessTokenResponseData addScopesItem(String scopesItem) {
     this.scopes.add(scopesItem);
     return this;
   }
@@ -130,7 +125,7 @@ public class IntrospectAccessTokenReponseData {
     this.scopes = scopes;
   }
 
-  public IntrospectAccessTokenReponseData tokenType(String tokenType) {
+  public IntrospectAccessTokenResponseData tokenType(String tokenType) {
     this.tokenType = tokenType;
     return this;
   }
@@ -148,7 +143,7 @@ public class IntrospectAccessTokenReponseData {
     this.tokenType = tokenType;
   }
 
-  public IntrospectAccessTokenReponseData sub(String sub) {
+  public IntrospectAccessTokenResponseData sub(String sub) {
     this.sub = sub;
     return this;
   }
@@ -166,7 +161,7 @@ public class IntrospectAccessTokenReponseData {
     this.sub = sub;
   }
 
-  public IntrospectAccessTokenReponseData aud(String aud) {
+  public IntrospectAccessTokenResponseData aud(String aud) {
     this.aud = aud;
     return this;
   }
@@ -184,7 +179,7 @@ public class IntrospectAccessTokenReponseData {
     this.aud = aud;
   }
 
-  public IntrospectAccessTokenReponseData iss(String iss) {
+  public IntrospectAccessTokenResponseData iss(String iss) {
     this.iss = iss;
     return this;
   }
@@ -202,7 +197,7 @@ public class IntrospectAccessTokenReponseData {
     this.iss = iss;
   }
 
-  public IntrospectAccessTokenReponseData exp(Integer exp) {
+  public IntrospectAccessTokenResponseData exp(Integer exp) {
     this.exp = exp;
     return this;
   }
@@ -220,7 +215,7 @@ public class IntrospectAccessTokenReponseData {
     this.exp = exp;
   }
 
-  public IntrospectAccessTokenReponseData iat(Integer iat) {
+  public IntrospectAccessTokenResponseData iat(Integer iat) {
     this.iat = iat;
     return this;
   }
@@ -238,12 +233,12 @@ public class IntrospectAccessTokenReponseData {
     this.iat = iat;
   }
 
-  public IntrospectAccessTokenReponseData acrValues(List<String> acrValues) {
+  public IntrospectAccessTokenResponseData acrValues(List<String> acrValues) {
     this.acrValues = acrValues;
     return this;
   }
 
-  public IntrospectAccessTokenReponseData addAcrValuesItem(String acrValuesItem) {
+  public IntrospectAccessTokenResponseData addAcrValuesItem(String acrValuesItem) {
     this.acrValues.add(acrValuesItem);
     return this;
   }
@@ -261,7 +256,7 @@ public class IntrospectAccessTokenReponseData {
     this.acrValues = acrValues;
   }
 
-  public IntrospectAccessTokenReponseData extensionField(String extensionField) {
+  public IntrospectAccessTokenResponseData extensionField(String extensionField) {
     this.extensionField = extensionField;
     return this;
   }
@@ -288,19 +283,19 @@ public class IntrospectAccessTokenReponseData {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IntrospectAccessTokenReponseData introspectAccessTokenReponseData = (IntrospectAccessTokenReponseData) o;
-    return Objects.equals(this.active, introspectAccessTokenReponseData.active) &&
-        Objects.equals(this.clientId, introspectAccessTokenReponseData.clientId) &&
-        Objects.equals(this.username, introspectAccessTokenReponseData.username) &&
-        Objects.equals(this.scopes, introspectAccessTokenReponseData.scopes) &&
-        Objects.equals(this.tokenType, introspectAccessTokenReponseData.tokenType) &&
-        Objects.equals(this.sub, introspectAccessTokenReponseData.sub) &&
-        Objects.equals(this.aud, introspectAccessTokenReponseData.aud) &&
-        Objects.equals(this.iss, introspectAccessTokenReponseData.iss) &&
-        Objects.equals(this.exp, introspectAccessTokenReponseData.exp) &&
-        Objects.equals(this.iat, introspectAccessTokenReponseData.iat) &&
-        Objects.equals(this.acrValues, introspectAccessTokenReponseData.acrValues) &&
-        Objects.equals(this.extensionField, introspectAccessTokenReponseData.extensionField);
+    IntrospectAccessTokenResponseData introspectAccessTokenResponseData = (IntrospectAccessTokenResponseData) o;
+    return Objects.equals(this.active, introspectAccessTokenResponseData.active) &&
+        Objects.equals(this.clientId, introspectAccessTokenResponseData.clientId) &&
+        Objects.equals(this.username, introspectAccessTokenResponseData.username) &&
+        Objects.equals(this.scopes, introspectAccessTokenResponseData.scopes) &&
+        Objects.equals(this.tokenType, introspectAccessTokenResponseData.tokenType) &&
+        Objects.equals(this.sub, introspectAccessTokenResponseData.sub) &&
+        Objects.equals(this.aud, introspectAccessTokenResponseData.aud) &&
+        Objects.equals(this.iss, introspectAccessTokenResponseData.iss) &&
+        Objects.equals(this.exp, introspectAccessTokenResponseData.exp) &&
+        Objects.equals(this.iat, introspectAccessTokenResponseData.iat) &&
+        Objects.equals(this.acrValues, introspectAccessTokenResponseData.acrValues) &&
+        Objects.equals(this.extensionField, introspectAccessTokenResponseData.extensionField);
   }
 
   @Override
@@ -312,7 +307,7 @@ public class IntrospectAccessTokenReponseData {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class IntrospectAccessTokenReponseData {\n");
+    sb.append("class IntrospectAccessTokenResponseData {\n");
     
     sb.append("    active: ").append(toIndentedString(active)).append("\n");
     sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
