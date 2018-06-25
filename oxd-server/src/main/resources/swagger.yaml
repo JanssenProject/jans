@@ -321,7 +321,7 @@ paths:
           description: OK
           schema:
             type: object
-            title: IntrospectAccessTokenReponse
+            title: IntrospectAccessTokenResponse
             required:
               - status
               - data
