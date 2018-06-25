@@ -1,11 +1,14 @@
 package io.swagger.client.api;
 
+import com.google.common.collect.Lists;
+import io.swagger.client.ApiException;
+import io.swagger.client.model.SetupClientParams;
 import io.swagger.client.model.SetupClientResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.model.common.GrantType;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -15,6 +18,8 @@ import static org.testng.Assert.assertTrue;
  * @author yuriyz
  */
 public class SetupClientTestGen {
+
+    private static final DevelopersApi api = new DevelopersApi();
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
@@ -41,42 +46,31 @@ public class SetupClientTestGen {
     public static void assertResponse(SetupClientResponse resp) {
         assertNotNull(resp);
 
-        notEmpty(resp.getData().getClientId());
-        notEmpty(resp.getData().getClientSecret());
+        Tester.notEmpty(resp.getData().getClientId());
+        Tester.notEmpty(resp.getData().getClientSecret());
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl) {
+    public static SetupClientResponse setupClient(String opHost, String redirectUrl) throws ApiException {
         return setupClient(opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static SetupClientResponse setupClient(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws ApiException {
 
-//        final SetupClientParams params = new SetupClientParams();
-//        params.setOpHost(opHost);
-//        params.setAuthorizationRedirectUri(redirectUrl);
-//        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-//        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
-//        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
-//        params.setTrustedClient(true);
-//        params.setGrantType(Lists.newArrayList(
-//                GrantType.AUTHORIZATION_CODE.getValue(),
-//                GrantType.CLIENT_CREDENTIALS.getValue()));
-//        params.setOxdRpProgrammingLanguage("java");
-//
-//        final Command command = new Command(CommandType.SETUP_CLIENT);
-//        command.setParamsObject(params);
-//
-//        final SetupClientResponse resp = client.setupClient(params).dataAsResponse(SetupClientResponse.class);
-//        assertResponse(resp);
-//        return resp;
-        return null;
+        final SetupClientParams params = new SetupClientParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setTrustedClient(true);
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+
+        SetupClientResponse resp = api.setupClient(params);
+
+        assertResponse(resp);
+        return resp;
     }
 
-    public static void notEmpty(String str) {
-        assertTrue(str != null && !str.isEmpty());
-    }
-
-    public static void notEmpty(List<String> str) {
-        assertTrue(str != null && !str.isEmpty() && str.get(0) != null && !str.get(0).isEmpty());
-    }
 }

@@ -42,11 +42,11 @@ public class RegisterSiteTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(Lists.newArrayList("openid", "profile"));
-        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
         resp = Tester.newClient(host).registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
@@ -83,14 +83,13 @@ public class RegisterSiteTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
-        params.setGrantType(Lists.newArrayList(
+        params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
-        params.setOxdRpProgrammingLanguage("java");
 
         final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
