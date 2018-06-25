@@ -1,21 +1,16 @@
 package io.swagger.client.model;
 
-import java.util.Objects;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * SetupClientParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T17:25:31.367Z")
 public class SetupClientParams {
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
@@ -62,8 +57,11 @@ public class SetupClientParams {
   @SerializedName("contacts")
   private List<String> contacts = null;
 
-  @SerializedName("ui_locales")
-  private List<String> uiLocales = null;
+    @SerializedName("redirect_uris")
+    private List<String> redirectUris = null;
+
+    @SerializedName("ui_locales")
+    private List<String> uiLocales = null;
 
   @SerializedName("claims_locales")
   private List<String> claimsLocales = null;
@@ -77,10 +75,13 @@ public class SetupClientParams {
   @SerializedName("client_secret")
   private String clientSecret = null;
 
-  public SetupClientParams authorizationRedirectUri(String authorizationRedirectUri) {
-    this.authorizationRedirectUri = authorizationRedirectUri;
-    return this;
-  }
+    @SerializedName("trusted_client")
+    private Boolean trustedClient = null;
+
+    public SetupClientParams authorizationRedirectUri(String authorizationRedirectUri) {
+        this.authorizationRedirectUri = authorizationRedirectUri;
+        return this;
+    }
 
    /**
    * Get authorizationRedirectUri
@@ -411,10 +412,36 @@ public class SetupClientParams {
     this.contacts = contacts;
   }
 
-  public SetupClientParams uiLocales(List<String> uiLocales) {
-    this.uiLocales = uiLocales;
-    return this;
-  }
+    public SetupClientParams redirectUris(List<String> redirectUris) {
+        this.redirectUris = redirectUris;
+        return this;
+    }
+
+    public SetupClientParams addRedirectUrisItem(String redirectUrisItem) {
+        if (this.redirectUris == null) {
+            this.redirectUris = new ArrayList<String>();
+        }
+        this.redirectUris.add(redirectUrisItem);
+        return this;
+    }
+
+    /**
+     * Get redirectUris
+     * @return redirectUris
+     **/
+    @ApiModelProperty(example = "[\"https://client.example.org/cb\"]", value = "")
+    public List<String> getRedirectUris() {
+        return redirectUris;
+    }
+
+    public void setRedirectUris(List<String> redirectUris) {
+        this.redirectUris = redirectUris;
+    }
+
+    public SetupClientParams uiLocales(List<String> uiLocales) {
+        this.uiLocales = uiLocales;
+        return this;
+    }
 
   public SetupClientParams addUiLocalesItem(String uiLocalesItem) {
     if (this.uiLocales == null) {
@@ -525,72 +552,94 @@ public class SetupClientParams {
     this.clientSecret = clientSecret;
   }
 
-
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
+    public SetupClientParams trustedClient(Boolean trustedClient) {
+        this.trustedClient = trustedClient;
+        return this;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    /**
+     * specified whether client is trusted. Default value is false.
+     * @return trustedClient
+     **/
+    @ApiModelProperty(value = "specified whether client is trusted. Default value is false.")
+    public Boolean isTrustedClient() {
+        return trustedClient;
     }
-    SetupClientParams setupClientParams = (SetupClientParams) o;
-    return Objects.equals(this.authorizationRedirectUri, setupClientParams.authorizationRedirectUri) &&
-        Objects.equals(this.opHost, setupClientParams.opHost) &&
-        Objects.equals(this.postLogoutRedirectUri, setupClientParams.postLogoutRedirectUri) &&
-        Objects.equals(this.applicationType, setupClientParams.applicationType) &&
-        Objects.equals(this.responseTypes, setupClientParams.responseTypes) &&
-        Objects.equals(this.grantTypes, setupClientParams.grantTypes) &&
-        Objects.equals(this.scope, setupClientParams.scope) &&
-        Objects.equals(this.acrValues, setupClientParams.acrValues) &&
-        Objects.equals(this.clientName, setupClientParams.clientName) &&
-        Objects.equals(this.clientJwksUri, setupClientParams.clientJwksUri) &&
-        Objects.equals(this.clientTokenEndpointAuthMethod, setupClientParams.clientTokenEndpointAuthMethod) &&
-        Objects.equals(this.clientRequestUris, setupClientParams.clientRequestUris) &&
-        Objects.equals(this.clientFrontchannelLogoutUris, setupClientParams.clientFrontchannelLogoutUris) &&
-        Objects.equals(this.clientSectorIdentifierUri, setupClientParams.clientSectorIdentifierUri) &&
-        Objects.equals(this.contacts, setupClientParams.contacts) &&
-        Objects.equals(this.uiLocales, setupClientParams.uiLocales) &&
-        Objects.equals(this.claimsLocales, setupClientParams.claimsLocales) &&
-        Objects.equals(this.claimsRedirectUri, setupClientParams.claimsRedirectUri) &&
-        Objects.equals(this.clientId, setupClientParams.clientId) &&
-        Objects.equals(this.clientSecret, setupClientParams.clientSecret);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret);
-  }
+    public void setTrustedClient(Boolean trustedClient) {
+        this.trustedClient = trustedClient;
+    }
 
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class SetupClientParams {\n");
-    
-    sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
-    sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
-    sb.append("    postLogoutRedirectUri: ").append(toIndentedString(postLogoutRedirectUri)).append("\n");
-    sb.append("    applicationType: ").append(toIndentedString(applicationType)).append("\n");
-    sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
-    sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
-    sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
-    sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
-    sb.append("    clientName: ").append(toIndentedString(clientName)).append("\n");
-    sb.append("    clientJwksUri: ").append(toIndentedString(clientJwksUri)).append("\n");
-    sb.append("    clientTokenEndpointAuthMethod: ").append(toIndentedString(clientTokenEndpointAuthMethod)).append("\n");
-    sb.append("    clientRequestUris: ").append(toIndentedString(clientRequestUris)).append("\n");
-    sb.append("    clientFrontchannelLogoutUris: ").append(toIndentedString(clientFrontchannelLogoutUris)).append("\n");
-    sb.append("    clientSectorIdentifierUri: ").append(toIndentedString(clientSectorIdentifierUri)).append("\n");
-    sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
-    sb.append("    uiLocales: ").append(toIndentedString(uiLocales)).append("\n");
-    sb.append("    claimsLocales: ").append(toIndentedString(claimsLocales)).append("\n");
-    sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");
-    sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
-    sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
+    @Override
+    public boolean equals(java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SetupClientParams setupClientParams = (SetupClientParams) o;
+        return Objects.equals(this.authorizationRedirectUri, setupClientParams.authorizationRedirectUri) &&
+                Objects.equals(this.opHost, setupClientParams.opHost) &&
+                Objects.equals(this.postLogoutRedirectUri, setupClientParams.postLogoutRedirectUri) &&
+                Objects.equals(this.applicationType, setupClientParams.applicationType) &&
+                Objects.equals(this.responseTypes, setupClientParams.responseTypes) &&
+                Objects.equals(this.grantTypes, setupClientParams.grantTypes) &&
+                Objects.equals(this.scope, setupClientParams.scope) &&
+                Objects.equals(this.acrValues, setupClientParams.acrValues) &&
+                Objects.equals(this.clientName, setupClientParams.clientName) &&
+                Objects.equals(this.clientJwksUri, setupClientParams.clientJwksUri) &&
+                Objects.equals(this.clientTokenEndpointAuthMethod, setupClientParams.clientTokenEndpointAuthMethod) &&
+                Objects.equals(this.clientRequestUris, setupClientParams.clientRequestUris) &&
+                Objects.equals(this.clientFrontchannelLogoutUris, setupClientParams.clientFrontchannelLogoutUris) &&
+                Objects.equals(this.clientSectorIdentifierUri, setupClientParams.clientSectorIdentifierUri) &&
+                Objects.equals(this.contacts, setupClientParams.contacts) &&
+                Objects.equals(this.redirectUris, setupClientParams.redirectUris) &&
+                Objects.equals(this.uiLocales, setupClientParams.uiLocales) &&
+                Objects.equals(this.claimsLocales, setupClientParams.claimsLocales) &&
+                Objects.equals(this.claimsRedirectUri, setupClientParams.claimsRedirectUri) &&
+                Objects.equals(this.clientId, setupClientParams.clientId) &&
+                Objects.equals(this.clientSecret, setupClientParams.clientSecret) &&
+                Objects.equals(this.trustedClient, setupClientParams.trustedClient);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient);
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class SetupClientParams {\n");
+
+        sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
+        sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
+        sb.append("    postLogoutRedirectUri: ").append(toIndentedString(postLogoutRedirectUri)).append("\n");
+        sb.append("    applicationType: ").append(toIndentedString(applicationType)).append("\n");
+        sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
+        sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
+        sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
+        sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
+        sb.append("    clientName: ").append(toIndentedString(clientName)).append("\n");
+        sb.append("    clientJwksUri: ").append(toIndentedString(clientJwksUri)).append("\n");
+        sb.append("    clientTokenEndpointAuthMethod: ").append(toIndentedString(clientTokenEndpointAuthMethod)).append("\n");
+        sb.append("    clientRequestUris: ").append(toIndentedString(clientRequestUris)).append("\n");
+        sb.append("    clientFrontchannelLogoutUris: ").append(toIndentedString(clientFrontchannelLogoutUris)).append("\n");
+        sb.append("    clientSectorIdentifierUri: ").append(toIndentedString(clientSectorIdentifierUri)).append("\n");
+        sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
+        sb.append("    redirectUris: ").append(toIndentedString(redirectUris)).append("\n");
+        sb.append("    uiLocales: ").append(toIndentedString(uiLocales)).append("\n");
+        sb.append("    claimsLocales: ").append(toIndentedString(claimsLocales)).append("\n");
+        sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");
+        sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
+        sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
+        sb.append("    trustedClient: ").append(toIndentedString(trustedClient)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
 
   /**
    * Convert the given object to string with each line indented by 4 spaces
