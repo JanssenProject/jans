@@ -304,7 +304,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
                 ", response_types=" + response_types +
                 ", claims_redirect_uri=" + claims_redirect_uri +
                 ", client_id='" + client_id + '\'' +
-                ", client_secret='" + client_secret + '\'' +
                 ", client_registration_access_token='" + client_registration_access_token + '\'' +
                 ", client_registration_client_uri='" + client_registration_client_uri + '\'' +
                 ", client_name='" + client_name + '\'' +
