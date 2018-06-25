@@ -1,21 +1,16 @@
 package io.swagger.client.model;
 
-import java.util.Objects;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * RegisterSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T17:25:31.367Z")
 public class RegisterSiteParams {
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
@@ -61,6 +56,9 @@ public class RegisterSiteParams {
 
   @SerializedName("contacts")
   private List<String> contacts = null;
+
+  @SerializedName("redirect_uris")
+  private List<String> redirectUris = null;
 
   @SerializedName("ui_locales")
   private List<String> uiLocales = null;
@@ -411,6 +409,32 @@ public class RegisterSiteParams {
     this.contacts = contacts;
   }
 
+  public RegisterSiteParams redirectUris(List<String> redirectUris) {
+    this.redirectUris = redirectUris;
+    return this;
+  }
+
+  public RegisterSiteParams addRedirectUrisItem(String redirectUrisItem) {
+    if (this.redirectUris == null) {
+      this.redirectUris = new ArrayList<String>();
+    }
+    this.redirectUris.add(redirectUrisItem);
+    return this;
+  }
+
+   /**
+   * Get redirectUris
+   * @return redirectUris
+  **/
+  @ApiModelProperty(example = "[\"https://client.example.org/cb\"]", value = "")
+  public List<String> getRedirectUris() {
+    return redirectUris;
+  }
+
+  public void setRedirectUris(List<String> redirectUris) {
+    this.redirectUris = redirectUris;
+  }
+
   public RegisterSiteParams uiLocales(List<String> uiLocales) {
     this.uiLocales = uiLocales;
     return this;
@@ -550,6 +574,7 @@ public class RegisterSiteParams {
         Objects.equals(this.clientFrontchannelLogoutUris, registerSiteParams.clientFrontchannelLogoutUris) &&
         Objects.equals(this.clientSectorIdentifierUri, registerSiteParams.clientSectorIdentifierUri) &&
         Objects.equals(this.contacts, registerSiteParams.contacts) &&
+        Objects.equals(this.redirectUris, registerSiteParams.redirectUris) &&
         Objects.equals(this.uiLocales, registerSiteParams.uiLocales) &&
         Objects.equals(this.claimsLocales, registerSiteParams.claimsLocales) &&
         Objects.equals(this.claimsRedirectUri, registerSiteParams.claimsRedirectUri) &&
@@ -559,7 +584,7 @@ public class RegisterSiteParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret);
+    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret);
   }
 
 
@@ -583,6 +608,7 @@ public class RegisterSiteParams {
     sb.append("    clientFrontchannelLogoutUris: ").append(toIndentedString(clientFrontchannelLogoutUris)).append("\n");
     sb.append("    clientSectorIdentifierUri: ").append(toIndentedString(clientSectorIdentifierUri)).append("\n");
     sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
+    sb.append("    redirectUris: ").append(toIndentedString(redirectUris)).append("\n");
     sb.append("    uiLocales: ").append(toIndentedString(uiLocales)).append("\n");
     sb.append("    claimsLocales: ").append(toIndentedString(claimsLocales)).append("\n");
     sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");

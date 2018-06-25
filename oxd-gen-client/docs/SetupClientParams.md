@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **clientFrontchannelLogoutUris** | **List&lt;String&gt;** |  |  [optional]
 **clientSectorIdentifierUri** | **List&lt;String&gt;** |  |  [optional]
 **contacts** | **List&lt;String&gt;** |  |  [optional]
+**redirectUris** | **List&lt;String&gt;** |  |  [optional]
 **uiLocales** | **List&lt;String&gt;** |  |  [optional]
 **claimsLocales** | **List&lt;String&gt;** |  |  [optional]
 **claimsRedirectUri** | **List&lt;String&gt;** |  |  [optional]
