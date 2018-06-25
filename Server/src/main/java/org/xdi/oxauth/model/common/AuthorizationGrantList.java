@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
+import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
@@ -129,9 +130,16 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-            return asGrant((TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(refreshTokenCode)));
+            return assertTokenType((TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(refreshTokenCode)), TokenType.REFRESH_TOKEN);
         }
-        return load(clientId, refreshTokenCode);
+        return assertTokenType(grantService.getGrantsByCodeAndClient(refreshTokenCode, clientId), TokenType.REFRESH_TOKEN);
+    }
+
+    public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType) {
+        if (tokenLdap != null && tokenLdap.getTokenTypeEnum() == tokenType) {
+            return asGrant(tokenLdap);
+        }
+        return null;
     }
 
     @Override
