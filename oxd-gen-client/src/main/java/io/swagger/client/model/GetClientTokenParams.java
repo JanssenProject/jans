@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * GetClientTokenParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T15:27:32.160Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
 public class GetClientTokenParams {
   @SerializedName("op_host")
   private String opHost = null;

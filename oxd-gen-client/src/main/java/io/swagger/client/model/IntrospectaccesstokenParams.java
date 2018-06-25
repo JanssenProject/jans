@@ -11,17 +11,17 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
 
 /**
- * IntrospectaccesstokenParams
+ * IntrospectAccessTokenParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T15:27:32.160Z")
-public class IntrospectaccesstokenParams {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
+public class IntrospectAccessTokenParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
 
   @SerializedName("access_token")
   private String accessToken = null;
 
-  public IntrospectaccesstokenParams oxdId(String oxdId) {
+  public IntrospectAccessTokenParams oxdId(String oxdId) {
     this.oxdId = oxdId;
     return this;
   }
@@ -39,7 +39,7 @@ public class IntrospectaccesstokenParams {
     this.oxdId = oxdId;
   }
 
-  public IntrospectaccesstokenParams accessToken(String accessToken) {
+  public IntrospectAccessTokenParams accessToken(String accessToken) {
     this.accessToken = accessToken;
     return this;
   }
@@ -66,9 +66,9 @@ public class IntrospectaccesstokenParams {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IntrospectaccesstokenParams introspectaccesstokenParams = (IntrospectaccesstokenParams) o;
-    return Objects.equals(this.oxdId, introspectaccesstokenParams.oxdId) &&
-        Objects.equals(this.accessToken, introspectaccesstokenParams.accessToken);
+    IntrospectAccessTokenParams introspectAccessTokenParams = (IntrospectAccessTokenParams) o;
+    return Objects.equals(this.oxdId, introspectAccessTokenParams.oxdId) &&
+        Objects.equals(this.accessToken, introspectAccessTokenParams.accessToken);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class IntrospectaccesstokenParams {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class IntrospectaccesstokenParams {\n");
+    sb.append("class IntrospectAccessTokenParams {\n");
     
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    accessToken: ").append(toIndentedString(accessToken)).append("\n");
