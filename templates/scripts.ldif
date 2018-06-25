@@ -147,7 +147,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample client authz UMA RPT Policy
-displayName: uma_client_authz_rpt_policy
+displayName: scim_access_policy
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F9A5
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
