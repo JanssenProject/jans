@@ -98,7 +98,6 @@ public class GetClientTokenParams implements IParams {
     public String toString() {
         return "GetClientTokenParams{" +
                 "client_id='" + client_id + '\'' +
-                ", client_secret='" + client_secret + '\'' +
                 ", op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
                 ", scope=" + scope +
