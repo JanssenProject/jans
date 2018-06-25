@@ -68,14 +68,14 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
     }
 
     private void prepareSetupParams(SetupClientParams params) {
-        if (params.getGrantType() == null) {
-            params.setGrantType(new ArrayList<String>());
+        if (params.getGrantTypes() == null) {
+            params.setGrantTypes(new ArrayList<String>());
         }
         if (params.getScope() == null) {
             params.setScope(new ArrayList<String>());
         }
-        if (!params.getGrantType().contains(GrantType.CLIENT_CREDENTIALS.getValue())) {
-            params.getGrantType().add(GrantType.CLIENT_CREDENTIALS.getValue());
+        if (!params.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS.getValue())) {
+            params.getGrantTypes().add(GrantType.CLIENT_CREDENTIALS.getValue());
         }
         if (!params.getScope().contains(UmaScopeType.PROTECTION.getValue())) {
             params.getScope().add(UmaScopeType.PROTECTION.getValue());
