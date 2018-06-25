@@ -309,7 +309,7 @@ No authorization required
 
 Health Check
 
-Health Check endpoint for quick check whether oxd-server is alive.
+Health Check endpoint is for quick check whether oxd-server is alive.
 
 ### Example
 ```java
@@ -345,7 +345,7 @@ No authorization required
 
 <a name="introspectAccessToken"></a>
 # **introspectAccessToken**
-> IntrospectAccessTokenReponse introspectAccessToken(authorization, introspectAccessTokenParams)
+> IntrospectAccessTokenResponse introspectAccessToken(authorization, introspectAccessTokenParams)
 
 Introspect Access Token
 
@@ -362,7 +362,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 IntrospectAccessTokenParams introspectAccessTokenParams = new IntrospectAccessTokenParams(); // IntrospectAccessTokenParams | 
 try {
-    IntrospectAccessTokenReponse result = apiInstance.introspectAccessToken(authorization, introspectAccessTokenParams);
+    IntrospectAccessTokenResponse result = apiInstance.introspectAccessToken(authorization, introspectAccessTokenParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#introspectAccessToken");
@@ -379,7 +379,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**IntrospectAccessTokenReponse**](IntrospectAccessTokenReponse.md)
+[**IntrospectAccessTokenResponse**](IntrospectAccessTokenResponse.md)
 
 ### Authorization
 
@@ -537,7 +537,7 @@ No authorization required
 
 Setup Client
 
-Setups client for securing communication to oxd-server
+Setups client is for securing communication to oxd-server
 
 ### Example
 ```java
