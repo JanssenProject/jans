@@ -1,28 +1,22 @@
 package io.swagger.client.model;
 
-import java.util.Objects;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.IntrospectAccessTokenReponseData;
-import java.io.IOException;
+
+import java.util.Objects;
 
 /**
- * IntrospectAccessTokenReponse
+ * IntrospectAccessTokenResponse
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T15:27:32.160Z")
-public class IntrospectAccessTokenReponse {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T16:29:00.516Z")
+public class IntrospectAccessTokenResponse {
   @SerializedName("status")
   private String status = null;
 
   @SerializedName("data")
-  private IntrospectAccessTokenReponseData data = null;
+  private IntrospectAccessTokenResponseData data = null;
 
-  public IntrospectAccessTokenReponse status(String status) {
+  public IntrospectAccessTokenResponse status(String status) {
     this.status = status;
     return this;
   }
@@ -40,7 +34,7 @@ public class IntrospectAccessTokenReponse {
     this.status = status;
   }
 
-  public IntrospectAccessTokenReponse data(IntrospectAccessTokenReponseData data) {
+  public IntrospectAccessTokenResponse data(IntrospectAccessTokenResponseData data) {
     this.data = data;
     return this;
   }
@@ -50,11 +44,11 @@ public class IntrospectAccessTokenReponse {
    * @return data
   **/
   @ApiModelProperty(required = true, value = "")
-  public IntrospectAccessTokenReponseData getData() {
+  public IntrospectAccessTokenResponseData getData() {
     return data;
   }
 
-  public void setData(IntrospectAccessTokenReponseData data) {
+  public void setData(IntrospectAccessTokenResponseData data) {
     this.data = data;
   }
 
@@ -67,9 +61,9 @@ public class IntrospectAccessTokenReponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IntrospectAccessTokenReponse introspectAccessTokenReponse = (IntrospectAccessTokenReponse) o;
-    return Objects.equals(this.status, introspectAccessTokenReponse.status) &&
-        Objects.equals(this.data, introspectAccessTokenReponse.data);
+    IntrospectAccessTokenResponse introspectAccessTokenResponse = (IntrospectAccessTokenResponse) o;
+    return Objects.equals(this.status, introspectAccessTokenResponse.status) &&
+        Objects.equals(this.data, introspectAccessTokenResponse.data);
   }
 
   @Override
@@ -81,7 +75,7 @@ public class IntrospectAccessTokenReponse {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class IntrospectAccessTokenReponse {\n");
+    sb.append("class IntrospectAccessTokenResponse {\n");
     
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    data: ").append(toIndentedString(data)).append("\n");
