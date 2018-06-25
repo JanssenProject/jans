@@ -11,7 +11,9 @@ import org.xdi.oxauth.model.common.GrantType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
+import static io.swagger.client.api.Tester.api;
 import static org.junit.Assert.assertNotNull;
 
 
@@ -19,8 +21,6 @@ import static org.junit.Assert.assertNotNull;
  * @author yuriyz
  */
 public class SetupClientTestGen {
-
-    private static final DevelopersApi api = new DevelopersApi();
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
@@ -33,14 +33,14 @@ public class SetupClientTestGen {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUris(new ArrayList<>(Arrays.asList(logoutUrl));
+        params.setClientFrontchannelLogoutUris(new ArrayList<>(Collections.singletonList(logoutUrl)));
         params.setRedirectUris(Arrays.asList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(new ArrayList<>(Arrays.asList("openid", "profile")));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
+        resp = api().setupClient(params);
         assertResponse(resp);
     }
 
@@ -68,7 +68,7 @@ public class SetupClientTestGen {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        SetupClientResponse resp = api.setupClient(params);
+        SetupClientResponse resp = api().setupClient(params);
 
         assertResponse(resp);
         return resp;
