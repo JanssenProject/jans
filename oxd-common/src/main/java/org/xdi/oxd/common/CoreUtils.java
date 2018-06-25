@@ -236,11 +236,8 @@ public class CoreUtils {
      */
     public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password) throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream instream = new FileInputStream(pathToKeyStore);
-        try {
+        try (FileInputStream instream = new FileInputStream(pathToKeyStore)) {
             keyStore.load(instream, password.toCharArray());
-        } finally {
-            instream.close();
         }
 
         HttpClient httpClient = new DefaultHttpClient();

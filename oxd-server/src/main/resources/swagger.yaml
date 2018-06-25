@@ -31,7 +31,7 @@ paths:
       - developers
       summary: Health Check
       operationId: health-check
-      description: Health Check endpoint for quick check whether oxd-server is alive.
+      description: Health Check endpoint is for quick check whether oxd-server is alive.
       responses:
         200:
           description: OK
@@ -42,7 +42,7 @@ paths:
       - developers
       summary: Setup Client
       operationId: setup-client
-      description: Setups client for securing communication to oxd-server
+      description: Setups client is for securing communication to oxd-server
       consumes:
         - application/json
       produces:

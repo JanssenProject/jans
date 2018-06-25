@@ -31,6 +31,7 @@
     <modules>
         <module>oxd-common</module>
         <module>oxd-client</module>
+        <module>oxd-gen-client</module>
         <module>oxd-server</module>
     </modules>
 
