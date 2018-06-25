@@ -299,23 +299,15 @@ paths:
           schema:
             type: object
             required:
-              - command
-              - params
+              - oxd_id
+              - access_token
             properties:
-              command:
+              oxd_id:
                 type: string
-              params:
-                type: object
-                required:
-                  - oxd_id
-                  - access_token
-                properties:
-                  oxd_id:
-                    type: string
-                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
-                  access_token:
-                    type: string
-                    example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
+                example: bcad760f-91ba-46e1-a020-05e4281d91b6
+              access_token:
+                type: string
+                example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
       responses:
         200:
           description: OK
