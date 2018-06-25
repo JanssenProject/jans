@@ -112,6 +112,11 @@ paths:
                 items:
                   type: string
                 example: ["foo_bar@spam.org"]
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/cb"]
               ui_locales:
                 type: array
                 items:
@@ -465,6 +470,11 @@ paths:
                 items:
                   type: string
                 example: ["foo_bar@spam.org"]
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/cb"]
               ui_locales:
                 type: array
                 items:
