@@ -595,7 +595,6 @@ public class Rp implements Serializable {
                 ", claimsRedirectUri=" + claimsRedirectUri +
                 ", responseTypes=" + responseTypes +
                 ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
                 ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
                 ", clientIdIssuedAt=" + clientIdIssuedAt +
