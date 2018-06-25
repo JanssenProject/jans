@@ -9,9 +9,10 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.GrantType;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -23,24 +24,24 @@ public class SetupClientTestGen {
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-//        SetupClientResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
-//        assertResponse(resp);
-//
-//        // more specific client setup
-//        final SetupClientParams params = new SetupClientParams();
-//        params.setOpHost(opHost);
-//        params.setAuthorizationRedirectUri(redirectUrl);
-//        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-//        params.setClientFrontchannelLogoutUri(new ArrayList<>(Arrays.asList(logoutUrl));
-//        params.setRedirectUris(Arrays.asList(redirectUrl));
-//        params.setAcrValues(new ArrayList<String>());
-//        params.setScope(new ArrayList<>(Arrays.asList("openid", "profile")));
-//        params.setGrantType(Lists.newArrayList("authorization_code"));
-//        params.setResponseTypes(Lists.newArrayList("code"));
-//
-//        resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
-//        assertResponse(resp);
+    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException, ApiException {
+        SetupClientResponse resp = setupClient(opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        assertResponse(resp);
+
+        // more specific client setup
+        final SetupClientParams params = new SetupClientParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(new ArrayList<>(Arrays.asList(logoutUrl));
+        params.setRedirectUris(Arrays.asList(redirectUrl));
+        params.setAcrValues(new ArrayList<String>());
+        params.setScope(new ArrayList<>(Arrays.asList("openid", "profile")));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
+        params.setResponseTypes(Lists.newArrayList("code"));
+
+        resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
+        assertResponse(resp);
     }
 
     public static void assertResponse(SetupClientResponse resp) {
