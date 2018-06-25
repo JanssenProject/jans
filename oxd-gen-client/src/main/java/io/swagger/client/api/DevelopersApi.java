@@ -29,7 +29,7 @@ import io.swagger.client.model.GetTokensByCodeResponse;
 import io.swagger.client.model.GetUserInfoParams;
 import io.swagger.client.model.GetUserInfoResponse;
 import io.swagger.client.model.IntrospectAccessTokenParams;
-import io.swagger.client.model.IntrospectAccessTokenReponse;
+import io.swagger.client.model.IntrospectAccessTokenResponse;
 import io.swagger.client.model.IntrospectRptParams;
 import io.swagger.client.model.IntrospectRptResponse;
 import io.swagger.client.model.RegisterSiteParams;
@@ -863,7 +863,7 @@ public class DevelopersApi {
 
     /**
      * Health Check
-     * Health Check endpoint for quick check whether oxd-server is alive.
+     * Health Check endpoint is for quick check whether oxd-server is alive.
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
     public void healthCheck() throws ApiException {
@@ -872,7 +872,7 @@ public class DevelopersApi {
 
     /**
      * Health Check
-     * Health Check endpoint for quick check whether oxd-server is alive.
+     * Health Check endpoint is for quick check whether oxd-server is alive.
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
@@ -883,7 +883,7 @@ public class DevelopersApi {
 
     /**
      * Health Check (asynchronously)
-     * Health Check endpoint for quick check whether oxd-server is alive.
+     * Health Check endpoint is for quick check whether oxd-server is alive.
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -979,11 +979,11 @@ public class DevelopersApi {
      * Introspect Access Token
      * @param authorization  (optional)
      * @param introspectAccessTokenParams  (optional)
-     * @return IntrospectAccessTokenReponse
+     * @return IntrospectAccessTokenResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public IntrospectAccessTokenReponse introspectAccessToken(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams) throws ApiException {
-        ApiResponse<IntrospectAccessTokenReponse> resp = introspectAccessTokenWithHttpInfo(authorization, introspectAccessTokenParams);
+    public IntrospectAccessTokenResponse introspectAccessToken(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams) throws ApiException {
+        ApiResponse<IntrospectAccessTokenResponse> resp = introspectAccessTokenWithHttpInfo(authorization, introspectAccessTokenParams);
         return resp.getData();
     }
 
@@ -992,12 +992,12 @@ public class DevelopersApi {
      * Introspect Access Token
      * @param authorization  (optional)
      * @param introspectAccessTokenParams  (optional)
-     * @return ApiResponse&lt;IntrospectAccessTokenReponse&gt;
+     * @return ApiResponse&lt;IntrospectAccessTokenResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<IntrospectAccessTokenReponse> introspectAccessTokenWithHttpInfo(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams) throws ApiException {
+    public ApiResponse<IntrospectAccessTokenResponse> introspectAccessTokenWithHttpInfo(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams) throws ApiException {
         com.squareup.okhttp.Call call = introspectAccessTokenValidateBeforeCall(authorization, introspectAccessTokenParams, null, null);
-        Type localVarReturnType = new TypeToken<IntrospectAccessTokenReponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<IntrospectAccessTokenResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
@@ -1010,7 +1010,7 @@ public class DevelopersApi {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call introspectAccessTokenAsync(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams, final ApiCallback<IntrospectAccessTokenReponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call introspectAccessTokenAsync(String authorization, IntrospectAccessTokenParams introspectAccessTokenParams, final ApiCallback<IntrospectAccessTokenResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1032,7 +1032,7 @@ public class DevelopersApi {
         }
 
         com.squareup.okhttp.Call call = introspectAccessTokenValidateBeforeCall(authorization, introspectAccessTokenParams, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<IntrospectAccessTokenReponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<IntrospectAccessTokenResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
@@ -1465,7 +1465,7 @@ public class DevelopersApi {
 
     /**
      * Setup Client
-     * Setups client for securing communication to oxd-server
+     * Setups client is for securing communication to oxd-server
      * @param setupClientParams  (optional)
      * @return SetupClientResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1477,7 +1477,7 @@ public class DevelopersApi {
 
     /**
      * Setup Client
-     * Setups client for securing communication to oxd-server
+     * Setups client is for securing communication to oxd-server
      * @param setupClientParams  (optional)
      * @return ApiResponse&lt;SetupClientResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1490,7 +1490,7 @@ public class DevelopersApi {
 
     /**
      * Setup Client (asynchronously)
-     * Setups client for securing communication to oxd-server
+     * Setups client is for securing communication to oxd-server
      * @param setupClientParams  (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call

@@ -14,7 +14,7 @@ import io.swagger.client.model.GetTokensByCodeResponse;
 import io.swagger.client.model.GetUserInfoParams;
 import io.swagger.client.model.GetUserInfoResponse;
 import io.swagger.client.model.IntrospectAccessTokenParams;
-import io.swagger.client.model.IntrospectAccessTokenReponse;
+import io.swagger.client.model.IntrospectAccessTokenResponse;
 import io.swagger.client.model.IntrospectRptParams;
 import io.swagger.client.model.IntrospectRptResponse;
 import io.swagger.client.model.RegisterSiteParams;
@@ -152,7 +152,7 @@ public class DevelopersApiTest {
     /**
      * Health Check
      *
-     * Health Check endpoint for quick check whether oxd-server is alive.
+     * Health Check endpoint is for quick check whether oxd-server is alive.
      *
      * @throws ApiException
      *          if the Api call fails
@@ -176,7 +176,7 @@ public class DevelopersApiTest {
     public void introspectAccessTokenTest() throws ApiException {
         String authorization = null;
         IntrospectAccessTokenParams introspectAccessTokenParams = null;
-        IntrospectAccessTokenReponse response = api.introspectAccessToken(authorization, introspectAccessTokenParams);
+        IntrospectAccessTokenResponse response = api.introspectAccessToken(authorization, introspectAccessTokenParams);
 
         // TODO: test validations
     }
@@ -235,7 +235,7 @@ public class DevelopersApiTest {
     /**
      * Setup Client
      *
-     * Setups client for securing communication to oxd-server
+     * Setups client is for securing communication to oxd-server
      *
      * @throws ApiException
      *          if the Api call fails

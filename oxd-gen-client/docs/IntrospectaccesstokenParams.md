@@ -1,5 +1,5 @@
 
-# IntrospectaccesstokenParams
+# IntrospectAccessTokenParams
 
 ## Properties
 Name | Type | Description | Notes
