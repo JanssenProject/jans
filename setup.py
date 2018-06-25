@@ -2255,6 +2255,11 @@ class Setup(object):
         self.createUsers()
         self.makeFolders()
 
+        if self.install_couchbase:
+            self.writePersistType('couchbase')
+        else:
+            self.writePersistType('ldap')
+
     def make_salt(self):
         try:
             f = open("%s/salt" % self.configFolder, 'w')
@@ -2269,6 +2274,16 @@ class Setup(object):
     def make_oxauth_salt(self):
         self.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
+
+
+    def writePersistType(self, ptype):
+        self.logIt("Writing persist type")
+        fname = os.path.join(self.configFolder, 'gluu.properties')
+        fcontent = 'persistence.type={}'.format(ptype)
+
+        print "writing", fname, fcontent
+
+        self.writeFile(fname, fcontent)
 
     def promptForProperties(self):
 
@@ -2369,7 +2384,6 @@ class Setup(object):
 
             else:
                 option = 1
-
 
             if option == 1:
                 self.ldap_type = 'opendj'
