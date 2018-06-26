@@ -970,6 +970,27 @@ class Migration(object):
             jsons = json.dumps(jdata)
             con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
 
+            prop_file = '/opt/shibboleth-idp/conf/ldap.properties'
+            if os.path.exists(prop_file):
+                f=open(prop_file).readlines()
+
+                for i in range(len(f)):
+                    l = f[i]
+                    ls = l.split('=')
+                    if ls and ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))\n'
+
+                    elif ls and ls[0].strip() == 'idp.authn.LDAP.trustCertificates':
+                        f[i] = 'idp.authn.LDAP.trustCertificates                = /etc/certs/opendj.crt\n'
+
+                    elif ls and ls[0].strip() == 'idp.authn.LDAP.bindDN':
+                        f[i] = 'idp.authn.LDAP.bindDN                           = cn=directory manager\n'
+
+                    with open(prop_file,'w') as w:
+                        w.write(''.join(f))
+
+                self.getOutput(['chown', 'jetty:jetty', prop_file])
+
 
     def migrate(self):
         """Main function for the migration of backup data
