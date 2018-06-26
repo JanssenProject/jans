@@ -152,6 +152,7 @@ class Setup(object):
         self.jetty_version = '9.4.9.v20180320'
         self.jython_version = '2.7.2a'
         self.node_version = '9.9.0'
+        self.opendj_version_number = '3.0.0.2'
         self.apache_version = None
         self.opendj_version = None
 
@@ -1234,7 +1235,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
-        openDJArchive = 'opendj-server-3.0.0.1.zip'
+        openDJArchive = 'opendj-server-%s.zip' % self.opendj_version_number
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
             self.run(['unzip', '-n', '-q', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
