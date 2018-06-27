@@ -58,10 +58,19 @@ def installSaml():
 
     print "Installing Shibboleth ..."
     setupObj.oxTrustConfigGeneration = "true"
+
+    if not setupObj.application_max_ram:
+        setupObj.application_max_ram = setupObj.getPrompt("Enter maximum RAM for applications in MB", '3072')
+
+    if not setupObj.shibJksPass:
+        setupObj.shibJksPass = setupObj.getPW()
+        setupObj.gen_cert('shibIDP', setupObj.shibJksPass, 'jetty')
+
     setupObj.calculate_selected_aplications_memory()
     realIdp3Folder = os.path.realpath(setupObj.idp3Folder)
     setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
     realIdp3BinFolder = "%s/bin" % realIdp3Folder
+
     if os.path.exists(realIdp3BinFolder):
         setupObj.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
     
@@ -82,8 +91,9 @@ def installSaml():
     setupObj.installSaml = True
     setupObj.install_saml()
     
-    
-    
+    setupObj.run([setupObj.cmd_chown, '-h', 'root:gluu', '/etc/certs/idp-signing.crt'])
+    setupObj.run([setupObj.cmd_chown, '-h', 'root:gluu', '/etc/certs/idp-signing.key'])
+
     metadata = open(metadata_file).read()
     metadata = metadata.replace('md:ArtifactResolutionService', 'ArtifactResolutionService')
     with open(metadata_file,'w') as F:
