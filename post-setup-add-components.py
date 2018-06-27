@@ -50,7 +50,11 @@ setupObj.ldapCertFn = setupObj.opendj_cert_fn
 
 def installSaml():
 
+    if setupObj.idp3_metadata[0] == '/':
+        setupObj.idp3_metadata = setupObj.idp3_metadata[1:]
+
     metadata_file = os.path.join(setupObj.idp3MetadataFolder, setupObj.idp3_metadata)
+
 
     if os.path.exists(metadata_file):
         print "Shibboleth is already installed on this system"
@@ -62,9 +66,16 @@ def installSaml():
     if not setupObj.application_max_ram:
         setupObj.application_max_ram = setupObj.getPrompt("Enter maximum RAM for applications in MB", '3072')
 
+    if not setupObj.hostname:
+        setupObj.hostname = setupObj.getPrompt("Hostname", '')
+
+    if not setupObj.orgName:
+        setupObj.orgName = setupObj.getPrompt("Organization Name", '')
+
     if not setupObj.shibJksPass:
         setupObj.shibJksPass = setupObj.getPW()
         setupObj.gen_cert('shibIDP', setupObj.shibJksPass, 'jetty')
+
 
     setupObj.calculate_selected_aplications_memory()
     realIdp3Folder = os.path.realpath(setupObj.idp3Folder)
@@ -103,6 +114,7 @@ def installSaml():
     print "Shibboleth installation done"
 
 
+    
 def installPassport():
     
     if os.path.exists('/opt/gluu/node/passport'):
