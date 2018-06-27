@@ -989,7 +989,7 @@ class Migration(object):
                         f[i] = 'idp.authn.LDAP.trustCertificates                = {0}\n'.format(lcert)
 
                     elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
-                        f[i] = 'idp.authn.LDAP.bindDN                           = {}\n'.format(bindDn)
+                        f[i] = 'idp.authn.LDAP.bindDN                           = {0}\n'.format(bindDn)
 
             with open(prop_file,'w') as w:
                 w.write(''.join(f))
