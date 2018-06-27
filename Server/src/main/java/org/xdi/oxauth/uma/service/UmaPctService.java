@@ -32,7 +32,7 @@ import org.xdi.util.INumGenerator;
 @Named
 public class UmaPctService {
 
-    public static final int DEFAULT_PCT_LIFETIME = 3600;
+    public static final int DEFAULT_PCT_LIFETIME = 2592000;
 
     @Inject
     private Logger log;
