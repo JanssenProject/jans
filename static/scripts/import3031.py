@@ -951,8 +951,12 @@ class Migration(object):
 
         if self.ldap_type == 'opendj':
             bindDn = 'cn=directory manager'
+            lfilter = '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))'
+            lcert = '/etc/certs/opendj.crt'
         else:
             bindDn = 'cn=directory manager,o=gluu'
+            lfilter = '(uid={user})'
+            lcert = '/etc/certs/openldap.crt'
 
         inumAppliance = self.getProp('inumAppliance', 
                     '/install/community-edition-setup/setup.properties.last')
@@ -970,26 +974,27 @@ class Migration(object):
             jsons = json.dumps(jdata)
             con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
 
-            prop_file = '/opt/shibboleth-idp/conf/ldap.properties'
-            if os.path.exists(prop_file):
-                f=open(prop_file).readlines()
+        prop_file = '/opt/shibboleth-idp/conf/ldap.properties'
+        if os.path.exists(prop_file):
+            f=open(prop_file).readlines()
 
-                for i in range(len(f)):
-                    l = f[i]
-                    ls = l.split('=')
-                    if ls and ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
-                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))\n'
+            for i in range(len(f)):
+                l = f[i]
+                ls = l.split('=')
+                if ls:
+                    if ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = {0}\n'.format(lfilter)
 
-                    elif ls and ls[0].strip() == 'idp.authn.LDAP.trustCertificates':
-                        f[i] = 'idp.authn.LDAP.trustCertificates                = /etc/certs/opendj.crt\n'
+                    elif ls[0].strip() == 'idp.authn.LDAP.trustCertificates':
+                        f[i] = 'idp.authn.LDAP.trustCertificates                = {0}\n'.format(lcert)
 
-                    elif ls and ls[0].strip() == 'idp.authn.LDAP.bindDN':
-                        f[i] = 'idp.authn.LDAP.bindDN                           = cn=directory manager\n'
+                    elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
+                        f[i] = 'idp.authn.LDAP.bindDN                           = {}\n'.format(bindDn)
 
-                    with open(prop_file,'w') as w:
-                        w.write(''.join(f))
+            with open(prop_file,'w') as w:
+                w.write(''.join(f))
 
-                self.getOutput(['chown', 'jetty:jetty', prop_file])
+            self.getOutput(['chown', 'jetty:jetty', prop_file])
 
 
     def migrate(self):
