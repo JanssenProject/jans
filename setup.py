@@ -3644,7 +3644,8 @@ class Setup(object):
         
         prop_dict = {
                     'couchbase_servers': 'localhost',
-                    'couchbase_servers': 'localhost',
+                    'couchbase_server_user': 'admin',
+                    'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ' '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'user_mapping': 'people, groups',
