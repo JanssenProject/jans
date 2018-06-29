@@ -24,6 +24,7 @@ import org.xdi.util.StringHelper;
 import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.Statement;
 
@@ -46,6 +47,7 @@ public class CouchbaseConnectionProvider {
     private String userName;
     private String userPassword;
 
+    private CouchbaseEnvironment couchbaseEnvironment;
     private CouchbaseCluster cluster;
     private int creationResultCode;
 
@@ -60,8 +62,9 @@ public class CouchbaseConnectionProvider {
     protected CouchbaseConnectionProvider() {
     }
 
-    public CouchbaseConnectionProvider(Properties props) {
+    public CouchbaseConnectionProvider(Properties props, CouchbaseEnvironment couchbaseEnvironment) {
         this.props = props;
+        this.couchbaseEnvironment = couchbaseEnvironment;
     }
 
     public void create() {
@@ -71,8 +74,8 @@ public class CouchbaseConnectionProvider {
             this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
             Properties clonedProperties = (Properties) props.clone();
-            if (clonedProperties.getProperty("userName") != null) {
-                clonedProperties.setProperty("userPassword", "REDACTED");
+            if (clonedProperties.getProperty("auth.userName") != null) {
+                clonedProperties.setProperty("auth.userPassword", "REDACTED");
             }
 
             LOG.error("Failed to create connection with properties: '{}'", clonedProperties, ex);
@@ -82,8 +85,8 @@ public class CouchbaseConnectionProvider {
     protected void init() {
         this.servers = StringHelper.split(props.getProperty("servers"), ",");
 
-        this.userName = props.getProperty("userName");
-        this.userPassword = props.getProperty("userPassword");
+        this.userName = props.getProperty("auth.userName");
+        this.userPassword = props.getProperty("auth.userPassword");
 
         this.defaultBucket = props.getProperty("bucket.default");
         if (StringHelper.isEmpty(defaultBucket)) {
@@ -165,7 +168,7 @@ public class CouchbaseConnectionProvider {
     }
 
     private void open() {
-        this.cluster = CouchbaseCluster.create(servers);
+        this.cluster = CouchbaseCluster.create(couchbaseEnvironment, servers);
         cluster.authenticate(userName, userPassword);
 
         // Open required buckets

@@ -18,8 +18,8 @@ public class CouchbaseSampleEntryManager {
         Properties connectionProperties = new Properties();
 
         connectionProperties.put("servers", "localhost");
-        connectionProperties.put("userName", "admin");
-        connectionProperties.put("userPassword", "test");
+        connectionProperties.put("auth.userName", "admin");
+        connectionProperties.put("auth.userPassword", "test");
 //        connectionProperties.put("buckets", "gluu");
         connectionProperties.put("buckets", "gluu, gluu_site, gluu_user, gluu_session, gluu_statistic");
 
