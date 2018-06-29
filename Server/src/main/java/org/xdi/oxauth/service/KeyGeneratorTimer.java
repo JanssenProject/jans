@@ -100,7 +100,7 @@ public class KeyGeneratorTimer {
 	}
 
 	public String updateKeys() throws JSONException, Exception {
-		String dn = configurationFactory.getLdapConfiguration().getString("configurationEntryDN");
+		String dn = configurationFactory.getPersistenceConfiguration().getConfiguration().getString("configurationEntryDN");
 		Conf conf = ldapEntryManager.find(Conf.class, dn);
 
 		JSONObject jwks = new JSONObject(conf.getWebKeys());
