@@ -77,4 +77,8 @@ public class EncryptionService {
 		return PropertiesDecrypter.decryptProperties(stringEncrypter, connectionProperties);
 	}
 
+    public Properties decryptAllProperties(Properties connectionProperties) {
+        return PropertiesDecrypter.decryptAllProperties(stringEncrypter, connectionProperties);
+    }
+
 }

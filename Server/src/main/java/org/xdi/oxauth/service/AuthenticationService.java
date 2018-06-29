@@ -74,14 +74,14 @@ public class AuthenticationService {
     private Credentials credentials;
 
     @Inject
-    @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Named(AppInitializer.PERSISTENCE_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Named(AppInitializer.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
     private List<PersistenceEntryManager> ldapAuthEntryManagers;
 
     @Inject
