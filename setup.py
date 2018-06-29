@@ -3610,9 +3610,11 @@ class Setup(object):
 
     def restartCouchebase(self):
         self.logIt("Restarting Couchbase")
-        self.run(('systemctl', 'stop', 'couchbase-server'), useWait=True)
+        service_path = self.detect_service_path()
+
+        self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
         
-        self.run(('systemctl', 'start', 'couchbase-server'), useWait=True)
+        self.run((service_path, 'start', 'couchbase-server'), useWait=True)
 
         #wait a couple of seconds for couche start successfully
         time.sleep(15)
