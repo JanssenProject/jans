@@ -48,14 +48,32 @@ public final class PropertiesDecrypter {
         }
 
         Properties clondedProperties = (Properties) properties.clone();
-        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.BIND_PASSWORD);
-        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.TRUST_STORE_PIN);
+        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.BIND_PASSWORD, true);
+        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.TRUST_STORE_PIN, true);
+
+        return clondedProperties;
+    }
+
+    public static Properties decryptAllProperties(StringEncrypter stringEncrypter, Properties properties) {
+        return decryptAllProperties(stringEncrypter, properties, null);
+    }
+
+    public static Properties decryptAllProperties(StringEncrypter stringEncrypter, Properties properties,
+            String encryptionKey) {
+        if (properties == null) {
+            return properties;
+        }
+
+        Properties clondedProperties = (Properties) properties.clone();
+        for (Object key : clondedProperties.keySet()) {
+            decriptProperty(stringEncrypter, clondedProperties, encryptionKey, (String) key, true);
+        }
 
         return clondedProperties;
     }
 
     private static void decriptProperty(StringEncrypter stringEncrypter, Properties properties, String encryptionKey,
-            String propertyName) {
+            String propertyName, boolean silent) {
         String encryptedPassword = properties.getProperty(propertyName);
         if (StringHelper.isEmpty(encryptedPassword)) {
             return;
@@ -64,9 +82,9 @@ public final class PropertiesDecrypter {
         try {
             String decryptedProperty;
             if (StringHelper.isEmpty(encryptionKey)) {
-                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName));
+                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), silent);
             } else {
-                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), encryptionKey);
+                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), encryptionKey, silent);
             }
 
             properties.put(propertyName, decryptedProperty);
