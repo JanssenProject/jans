@@ -115,7 +115,7 @@ public class ServerUtil {
     }
 
     public static PersistenceEntryManager getLdapManager() {
-        return CdiUtil.bean(PersistenceEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+        return CdiUtil.bean(PersistenceEntryManager.class, AppInitializer.PERSISTENCE_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
