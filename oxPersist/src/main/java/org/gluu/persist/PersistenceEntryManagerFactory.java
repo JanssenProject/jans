@@ -15,6 +15,10 @@ import java.util.Properties;
  */
 public interface PersistenceEntryManagerFactory {
 
+    String getPersistenceType();
+
+    String getDefaultConfigurationFileName();
+
     PersistenceEntryManager createEntryManager(Properties conf);
 
 }

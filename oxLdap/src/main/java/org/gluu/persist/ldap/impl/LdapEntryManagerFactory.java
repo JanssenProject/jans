@@ -2,6 +2,8 @@ package org.gluu.persist.ldap.impl;
 
 import java.util.Properties;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.ldap.operation.impl.LdapAuthConnectionProvider;
@@ -15,9 +17,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 02/02/2018
  */
+@ApplicationScoped
 public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManager.class);
+
+    @Override
+    public String getPersistenceType() {
+        return "ldap";
+    }
+
+    @Override
+    public String getDefaultConfigurationFileName() {
+        return "ox-ldap.properties";
+    }
 
     @Override
     public LdapEntryManager createEntryManager(Properties conf) {

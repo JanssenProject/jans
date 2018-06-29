@@ -9,6 +9,8 @@ package org.gluu.persist.couchbase.impl;
 
 import java.util.Properties;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
@@ -21,9 +23,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 05/31/2018
  */
+@ApplicationScoped
 public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
+
+    @Override
+    public String getPersistenceType() {
+        return "couchbase";
+    }
+
+    @Override
+    public String getDefaultConfigurationFileName() {
+        return "gluu-couchabse.properties";
+    }
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
@@ -40,4 +53,5 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
 
         return couchbaseEntryManager;
     }
+
 }

@@ -193,7 +193,7 @@ public class StringEncrypter {
         }
     }
 
-    private String decrypt(final String encryptedString, KeySpec keySpec) throws EncryptionException {
+    private String decrypt(final String encryptedString, KeySpec keySpec, boolean silent) throws EncryptionException {
         if (keySpec == null) {
             throw new IllegalArgumentException("keySpec was null or empty");
         }
@@ -211,6 +211,10 @@ public class StringEncrypter {
 
             return StringEncrypter.bytes2String(ciphertext);
         } catch (final Exception e) {
+            if (silent) {
+                return encryptedString;
+            }
+
             throw new EncryptionException(e);
         }
     }
@@ -224,9 +228,13 @@ public class StringEncrypter {
      * @throws EncryptionException
      */
     public String decrypt(final String encryptedString) throws EncryptionException {
+        return decrypt(encryptedString, false);
+    }
+
+    public String decrypt(final String encryptedString, boolean silent) throws EncryptionException {
         lock.lock();
         try {
-            return decrypt(encryptedString, keySpec);
+            return decrypt(encryptedString, keySpec, silent);
         } finally {
             lock.unlock();
         }
@@ -241,6 +249,10 @@ public class StringEncrypter {
      * @throws EncryptionException
      */
     public String decrypt(final String encryptedString, String encryptionKey) throws EncryptionException {
+        return decrypt(encryptedString, encryptionKey, false);
+    }
+
+    public String decrypt(final String encryptedString, String encryptionKey, boolean silent) throws EncryptionException {
         lock.lock();
         try {
             final byte[] keyAsBytes = encryptionKey.getBytes(StringEncrypter.UNICODE_FORMAT);
@@ -253,7 +265,7 @@ public class StringEncrypter {
             } else {
                 throw new IllegalArgumentException("Encryption scheme not supported: " + encryptionScheme);
             }
-            return decrypt(encryptedString, keySpec);
+            return decrypt(encryptedString, keySpec, silent);
         } catch (final Exception e) {
             throw new EncryptionException(e);
         } finally {

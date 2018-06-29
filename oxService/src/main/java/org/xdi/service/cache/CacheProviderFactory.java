@@ -22,7 +22,6 @@ public class CacheProviderFactory {
     private CacheConfiguration cacheConfiguration;
 
     @Inject
-    @ApplicationScoped
     private Instance<CacheProvider> instance;
 
     @Produces
