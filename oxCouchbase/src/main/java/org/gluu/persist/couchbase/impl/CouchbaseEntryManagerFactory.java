@@ -9,6 +9,7 @@ package org.gluu.persist.couchbase.impl;
 
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.gluu.persist.PersistenceEntryManagerFactory;
@@ -17,6 +18,9 @@ import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.couchbase.client.java.env.CouchbaseEnvironment;
+import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 
 /**
  * Couchbase Entry Manager Factory
@@ -27,6 +31,13 @@ import org.slf4j.LoggerFactory;
 public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
+    
+    private CouchbaseEnvironment couchbaseEnvironment;
+    
+    @PostConstruct
+    public void create() {
+        this.couchbaseEnvironment = DefaultCouchbaseEnvironment.create();
+    }
 
     @Override
     public String getPersistenceType() {
@@ -40,7 +51,7 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
-        CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(conf);
+        CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(conf, couchbaseEnvironment);
         connectionProvider.create();
         if (!connectionProvider.isCreated()) {
             throw new ConfigurationException(
