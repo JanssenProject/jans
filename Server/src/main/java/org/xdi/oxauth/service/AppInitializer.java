@@ -27,9 +27,9 @@ import javax.servlet.ServletContext;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
+import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.gluu.persist.exception.BasePersistenceException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
@@ -39,6 +39,7 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
@@ -77,10 +78,10 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
+    public static final String PERSISTENCE_AUTH_CONFIG_NAME = "persistenceAuthConfig";
 
-    public static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
-    public static final String LDAP_AUTH_ENTRY_MANAGER_NAME = "ldapAuthEntryManager";
+    public static final String PERSISTENCE_ENTRY_MANAGER_NAME = "persistenceEntryManager";
+    public static final String PERSISTENCE_AUTH_ENTRY_MANAGER_NAME = "persistenceAuthEntryManager";
 
     @Inject
     private Logger log;
@@ -94,14 +95,17 @@ public class AppInitializer {
 	@Inject
 	private Event<TimerEvent> timerEvent;
 
-	@Inject @Named(LDAP_ENTRY_MANAGER_NAME)
-	private Instance<PersistenceEntryManager> ldapEntryManagerInstance;
-	
-	@Inject @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
-	private Instance<List<PersistenceEntryManager>> ldapAuthEntryManagerInstance;
+	@Inject
+    private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
 
-	@Inject @Named(LDAP_AUTH_CONFIG_NAME)
-	private Instance<List<GluuLdapConfiguration>> ldapAuthConfigInstance;
+	@Inject @Named(PERSISTENCE_ENTRY_MANAGER_NAME)
+	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+	
+	@Inject @Named(PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+	private Instance<List<PersistenceEntryManager>> persistenceAuthEntryManagerInstance;
+
+	@Inject @Named(PERSISTENCE_AUTH_CONFIG_NAME)
+	private Instance<List<GluuLdapConfiguration>> persistenceAuthConfigInstance;
 
 	@Inject
 	private Instance<AuthenticationMode> authenticationModeInstance;
@@ -146,8 +150,7 @@ public class AppInitializer {
 	private long lastFinishedTime;
 	private AuthenticationMode authenticationMode;
 
-	private List<GluuLdapConfiguration> ldapAuthConfigs;
-	private LdapEntryManagerFactory entryManagerFactory;
+	private List<GluuLdapConfiguration> persistenceAuthConfigs;
 
 	@PostConstruct
     public void createApplicationComponents() {
@@ -158,18 +161,16 @@ public class AppInitializer {
         log.debug("Initializing application services");
     	customLibrariesLoader.init();
 
-        createEntryManagerFactory();
-
         configurationFactory.create();
         loggerService.configure();
 
-        PersistenceEntryManager localPersistenceEntryManager = ldapEntryManagerInstance.get();
-        this.ldapAuthConfigs = loadLdapAuthConfigs(localPersistenceEntryManager);
+        PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
+        this.persistenceAuthConfigs = loadPersistenceAuthConfigs(localPersistenceEntryManager);
 
         setDefaultAuthenticationMethod(localPersistenceEntryManager);
 
 		// Initialize python interpreter
-        pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
+        pythonService.initPythonInterpreter(configurationFactory.getPersistenceConfiguration().getConfiguration().getString("pythonModulesDir", null));
 
 		// Initialize script manager
         List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING,
@@ -235,14 +236,14 @@ public class AppInitializer {
 	}
 
 	private void reloadConfiguration() {
-        PersistenceEntryManager localPersistenceEntryManager = ldapEntryManagerInstance.get();
+        PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 
-        log.trace("Attempting to use {}: {}", LDAP_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
-		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs(localPersistenceEntryManager);
+        log.trace("Attempting to use {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
+		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(localPersistenceEntryManager);
 		
-		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
-			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
-			this.ldapAuthConfigs = newLdapAuthConfigs;
+		if (!this.persistenceAuthConfigs.equals(newPersistenceAuthConfigs)) {
+			recreatePersistenceAuthEntryManagers(newPersistenceAuthConfigs);
+			this.persistenceAuthConfigs = newPersistenceAuthConfigs;
 
 			event.select(ReloadAuthScript.Literal.INSTANCE).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 		}
@@ -253,119 +254,139 @@ public class AppInitializer {
 	/*
 	 * Utility method which can be used in custom scripts
 	 */
-	public PersistenceEntryManager createLdapAuthEntryManager(GluuLdapConfiguration ldapAuthConfig) {
-    	Properties ldapConnectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
+	public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
+    	Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig);
 
-    	PersistenceEntryManager ldapAuthEntryManager = this.entryManagerFactory.createEntryManager(ldapConnectionProperties);
-	    log.debug("Created custom authentication PersistenceEntryManager: {}", ldapAuthEntryManager);
-	        
-		return ldapAuthEntryManager;
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
+        try {
+        	PersistenceEntryManager persistenceAuthEntryManager = persistenceEntryManagerFactory.createEntryManager(persistenceConnectionProperties);
+    	    log.debug("Created custom authentication PersistenceEntryManager: {}", persistenceAuthEntryManager);
+
+    	    return persistenceAuthEntryManager;
+        } finally {
+    	    persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
+    	}
 	}
 
-    @Produces @ApplicationScoped @Named(LDAP_ENTRY_MANAGER_NAME)
+    @Produces @ApplicationScoped @Named(PERSISTENCE_ENTRY_MANAGER_NAME)
     public PersistenceEntryManager createPersistenceEntryManager() {
-    	FileConfiguration ldapConfig = configurationFactory.getLdapConfiguration();
-        Properties connectionProperties = (Properties) ldapConfig.getProperties();
+        PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
+    	FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
+        Properties connectionProperties = (Properties) persistenceConfig.getProperties();
 
         EncryptionService securityService = encryptionServiceInstance.get();
-        Properties decryptedConnectionProperties = securityService.decryptProperties(connectionProperties);
+        Properties decryptedConnectionProperties = securityService.decryptAllProperties(connectionProperties);
+        
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
+        try {
+            PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(decryptedConnectionProperties); 
+            log.info("Created {}: {}", new Object[] { PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager });
 
-        PersistenceEntryManager ldapEntryManager = this.entryManagerFactory.createEntryManager(decryptedConnectionProperties); 
-        log.info("Created {}: {}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
-
-        return ldapEntryManager;
+            return persistenceEntryManager;
+        } finally {
+            this.persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
+        }
     }
 
-    @Produces @ApplicationScoped @Named(LDAP_AUTH_CONFIG_NAME)
-    public List<GluuLdapConfiguration> createLdapAuthConfigs() {
-    	return ldapAuthConfigs;
+    @Produces @ApplicationScoped @Named(PERSISTENCE_AUTH_CONFIG_NAME)
+    public List<GluuLdapConfiguration> createPersistenceAuthConfigs() {
+    	return persistenceAuthConfigs;
     }
 
-    @Produces @ApplicationScoped @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
-	public List<PersistenceEntryManager> createLdapAuthEntryManager() {
-		List<PersistenceEntryManager> ldapAuthEntryManagers = new ArrayList<PersistenceEntryManager>();
-		if (this.ldapAuthConfigs.size() == 0) {
-			return ldapAuthEntryManagers;
+    @Produces @ApplicationScoped @Named(PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+	public List<PersistenceEntryManager> createPersistenceAuthEntryManager() {
+		List<PersistenceEntryManager> persistenceAuthEntryManagers = new ArrayList<PersistenceEntryManager>();
+		if (this.persistenceAuthConfigs.size() == 0) {
+			return persistenceAuthEntryManagers;
 		}
 
-		List<Properties> ldapAuthProperties = prepareAuthConnectionProperties(this.ldapAuthConfigs);
-		for (int i = 0; i < ldapAuthProperties.size(); i++) {
-			PersistenceEntryManager ldapAuthEntryManager = this.entryManagerFactory.createEntryManager(ldapAuthProperties.get(i));
-	        log.debug("Created {}#{}: {}", new Object[] { LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager });
-	        
-	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
-		}
+		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs);
 
-		return ldapAuthEntryManagers;
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
+        try {
+    		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
+    			PersistenceEntryManager persistenceAuthEntryManager = persistenceEntryManagerFactory.createEntryManager(persistenceAuthProperties.get(i));
+    	        log.debug("Created {}#{}: {}", new Object[] { PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i, persistenceAuthEntryManager });
+    	        
+    	        persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
+    		}
+        } finally {
+            persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
+        }
+
+		return persistenceAuthEntryManagers;
 	}
+
+    protected PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
+        PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryInstance.select(persistenceConfiguration.getEntryManagerFactoryType()).get();
+
+        return persistenceEntryManagerFactory;
+    }
 
     public void recreatePersistenceEntryManager(@Observes @LdapConfigurationReload String event) {
     	// Get existing application scoped instance
-    	PersistenceEntryManager oldPersistenceEntryManager = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
+    	PersistenceEntryManager oldPersistenceEntryManager = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, PERSISTENCE_ENTRY_MANAGER_NAME);
 
         // Close existing connections
     	closePersistenceEntryManager(oldPersistenceEntryManager);
 
         // Force to create new bean
-    	PersistenceEntryManager ldapEntryManager = ldapEntryManagerInstance.get();
-        ldapEntryManagerInstance.destroy(ldapEntryManager);
-        log.info("Recreated instance {}: {}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
+    	PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        persistenceEntryManagerInstance.destroy(persistenceEntryManager);
+        log.info("Recreated instance {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager);
     }
-
-    private void createEntryManagerFactory() {
-		this.entryManagerFactory = new LdapEntryManagerFactory();
-	}
 
 	private void closePersistenceEntryManager(PersistenceEntryManager oldPersistenceEntryManager) {
 		// Close existing connections
-    	log.debug("Attempting to destroy {}: {}", LDAP_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
     	oldPersistenceEntryManager.destroy();
-        log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+        log.debug("Destroyed {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 	}
 
 	private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
 		// Close existing connections
 		for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
-	    	log.debug("Attempting to destroy {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+	    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 			oldPersistenceEntryManager.destroy();
-	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+	        log.debug("Destroyed {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 		}
 	}
 
-    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
+    public void recreatePersistenceAuthEntryManagers(List<GluuLdapConfiguration> newPersistenceAuthConfigs) {
     	// Get existing application scoped instance
-		List<PersistenceEntryManager> oldLdapAuthEntryManagers = CdiUtil.getContextBean(beanManager,
-				new ParameterizedTypeImpl(List.class, PersistenceEntryManager.class), LDAP_AUTH_ENTRY_MANAGER_NAME);
+		List<PersistenceEntryManager> oldPersistenceAuthEntryManagers = CdiUtil.getContextBean(beanManager,
+				new ParameterizedTypeImpl(List.class, PersistenceEntryManager.class), PERSISTENCE_AUTH_ENTRY_MANAGER_NAME);
 
     	// Recreate components
-		this.ldapAuthConfigs = newLdapAuthConfigs;
+		this.persistenceAuthConfigs = newPersistenceAuthConfigs;
         
         // Close existing connections
-        closePersistenceEntryManagers(oldLdapAuthEntryManagers);
+        closePersistenceEntryManagers(oldPersistenceAuthEntryManagers);
 
 		// Destroy old Ldap auth entry managers
-		for (PersistenceEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
-	    	log.debug("Attempting to destroy {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
-			oldLdapAuthEntryManager.destroy();
-	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+		for (PersistenceEntryManager oldPersistenceAuthEntryManager : oldPersistenceAuthEntryManagers) {
+	    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
+			oldPersistenceAuthEntryManager.destroy();
+	        log.debug("Destroyed {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
 		}
 		
         // Force to create new Ldap auth entry managers bean
-    	List<PersistenceEntryManager> ldapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
-    	ldapAuthEntryManagerInstance.destroy(ldapAuthEntryManagers);
-        log.info("Recreated instance {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, ldapAuthEntryManagers);
+    	List<PersistenceEntryManager> persistenceAuthEntryManagers = persistenceAuthEntryManagerInstance.get();
+    	persistenceAuthEntryManagerInstance.destroy(persistenceAuthEntryManagers);
+        log.info("Recreated instance {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, persistenceAuthEntryManagers);
 
         // Force to create new auth configuration bean
-    	List<GluuLdapConfiguration> oldLdapAuthConfigs = ldapAuthConfigInstance.get();
-		ldapAuthConfigInstance.destroy(oldLdapAuthConfigs);
+    	List<GluuLdapConfiguration> oldPersistenceAuthConfigs = persistenceAuthConfigInstance.get();
+		persistenceAuthConfigInstance.destroy(oldPersistenceAuthConfigs);
     }
 
-    private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> ldapAuthConfigs) {
+    private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> persistenceAuthConfigs) {
     	List<Properties> result = new ArrayList<Properties>();
 
 		// Prepare connection providers per LDAP authentication configuration
-        for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
-            Properties decrypytedConnectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
+        for (GluuLdapConfiguration persistenceAuthConfig : persistenceAuthConfigs) {
+            Properties decrypytedConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig);
 
     		result.add(decrypytedConnectionProperties);
     	}
@@ -373,24 +394,24 @@ public class AppInitializer {
 		return result;
     }
 
-	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration ldapAuthConfig) {
-        FileConfiguration configuration = configurationFactory.getLdapConfiguration();
+	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration persistenceAuthConfig) {
+        FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
 		Properties properties = (Properties) configuration.getProperties().clone();
-		if (ldapAuthConfig != null) {
-		    properties.setProperty("servers", buildServersString(ldapAuthConfig.getServers()));
+		if (persistenceAuthConfig != null) {
+		    properties.setProperty("servers", buildServersString(persistenceAuthConfig.getServers()));
 		    
-		    String bindDn = ldapAuthConfig.getBindDN();
+		    String bindDn = persistenceAuthConfig.getBindDN();
 		    if (StringHelper.isNotEmpty(bindDn)) {
 		    	properties.setProperty("bindDN", bindDn);
-				properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
+				properties.setProperty("bindPassword", persistenceAuthConfig.getBindPassword());
 		    }
-			properties.setProperty("useSSL", Boolean.toString(ldapAuthConfig.isUseSSL()));
-			properties.setProperty("maxconnections", Integer.toString(ldapAuthConfig.getMaxConnections()));
+			properties.setProperty("useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
+			properties.setProperty("maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();
-		Properties decrypytedProperties = securityService.decryptProperties(properties);
+		Properties decrypytedProperties = securityService.decryptAllProperties(properties);
 
 		return decrypytedProperties;
 	}
@@ -453,7 +474,7 @@ public class AppInitializer {
 		return authenticationMode;
 	}
 
-	private GluuAppliance loadAppliance(PersistenceEntryManager localPersistenceEntryManager, String ... ldapReturnAttributes) {
+	private GluuAppliance loadAppliance(PersistenceEntryManager localPersistenceEntryManager, String ... persistenceReturnAttributes) {
 		String baseDn = configurationFactory.getBaseDn().getAppliance();
 		String applianceInum = configurationFactory.getAppConfiguration().getApplianceInum();
 		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
@@ -464,7 +485,7 @@ public class AppInitializer {
 
 		GluuAppliance appliance = null;
 		try {
-			appliance = localPersistenceEntryManager.find(GluuAppliance.class, applianceDn, ldapReturnAttributes);
+			appliance = localPersistenceEntryManager.find(GluuAppliance.class, applianceDn, persistenceReturnAttributes);
 		} catch (BasePersistenceException ex) {
 			log.error("Failed to load appliance entry from Ldap", ex);
 			return null;
@@ -473,22 +494,22 @@ public class AppInitializer {
 		return appliance;
 	}
 
-	private List<GluuLdapConfiguration> loadLdapAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
-		List<GluuLdapConfiguration> ldapAuthConfigs = new ArrayList<GluuLdapConfiguration>();
+	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
+		List<GluuLdapConfiguration> persistenceAuthConfigs = new ArrayList<GluuLdapConfiguration>();
 
-		List<oxIDPAuthConf> ldapIdpAuthConfigs = loadLdapIdpAuthConfigs(localPersistenceEntryManager);
-		if (ldapIdpAuthConfigs == null) {
-			return ldapAuthConfigs;
+		List<oxIDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(localPersistenceEntryManager);
+		if (persistenceIdpAuthConfigs == null) {
+			return persistenceAuthConfigs;
 		}
 
-		for (oxIDPAuthConf ldapIdpAuthConfig : ldapIdpAuthConfigs) {
-			GluuLdapConfiguration ldapAuthConfig = loadLdapAuthConfig(ldapIdpAuthConfig);
-			if ((ldapAuthConfig != null) && ldapAuthConfig.isEnabled()) {
-				ldapAuthConfigs.add(ldapAuthConfig);
+		for (oxIDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
+			GluuLdapConfiguration persistenceAuthConfig = loadPersistenceAuthConfig(persistenceIdpAuthConfig);
+			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
+				persistenceAuthConfigs.add(persistenceAuthConfig);
 			}
 		}
 		
-		return ldapAuthConfigs; 
+		return persistenceAuthConfigs; 
 	}
 
 	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
@@ -514,7 +535,7 @@ public class AppInitializer {
 		return configurations;
 	}
 
-	private GluuLdapConfiguration loadLdapAuthConfig(oxIDPAuthConf configuration) {
+	private GluuLdapConfiguration loadPersistenceAuthConfig(oxIDPAuthConf configuration) {
 		if (configuration == null) {
 			return null;
 		}
@@ -558,11 +579,11 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
     	log.info("Closing LDAP connection at server shutdown...");
-        PersistenceEntryManager ldapEntryManager = ldapEntryManagerInstance.get();
-        closePersistenceEntryManager(ldapEntryManager);
+        PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        closePersistenceEntryManager(persistenceEntryManager);
         
-    	List<PersistenceEntryManager> ldapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
-        closePersistenceEntryManagers(ldapAuthEntryManagers);
+    	List<PersistenceEntryManager> persistenceAuthEntryManagers = persistenceAuthEntryManagerInstance.get();
+        closePersistenceEntryManagers(persistenceAuthEntryManagers);
     }
 
 }

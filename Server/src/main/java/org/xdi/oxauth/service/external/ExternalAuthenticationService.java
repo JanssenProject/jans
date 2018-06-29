@@ -47,7 +47,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";
 
-    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject @Named(AppInitializer.PERSISTENCE_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
