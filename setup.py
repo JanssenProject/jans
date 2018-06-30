@@ -641,6 +641,7 @@ class Setup(object):
                    + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
                    + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
                    + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
+                   + 'Install Couchbase'.ljust(30) + repr(self.install_couchbase).rjust(35) + "\n" \
                    + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
                    + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
                    + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
@@ -2094,7 +2095,7 @@ class Setup(object):
 
         if self.install_couchbase:
             progress_bar(27, "Installing Gluu components: Couchbase")
-            self.install_couchebase()
+            self.install_couchbase_server()
 
         if self.installHttpd:
             progress_bar(27, "Installing Gluu components: HTTPD")
@@ -2281,9 +2282,6 @@ class Setup(object):
         self.logIt("Writing persist type")
         fname = os.path.join(self.configFolder, 'gluu.properties')
         fcontent = 'persistence.type={}'.format(ptype)
-
-        print "writing", fname, fcontent
-
         self.writeFile(fname, fcontent)
 
     def promptForProperties(self):
@@ -2367,6 +2365,7 @@ class Setup(object):
                             print "You did not enter the correct option. Enter either 1, 2 or 3."
                             
                         if option == '3':
+                            sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                             #install opendj along with couchebase until couchebase is backend
                             option = 1
                             
@@ -3608,6 +3607,21 @@ class Setup(object):
         with open(couchebaseStaticConfigFile, 'w') as w:
             w.write(''.join(conf))
 
+
+    def isCouchbaseStarted(self):
+        # check couchbase in every 5 secs for 12 times.
+        cmd = "netstat -lnp | grep 28091"
+        for i in range(12):
+            result = os.popen(cmd).read()
+            self.logIt("Checking if couchbase was started. Try {} ...".format(i+1))
+            if result.strip().endswith('beam.smp'):
+                return True
+            else:
+                self.logIt("Couchbase was not started. Will retry after 5 seconds.")
+                time.sleep(5)
+                
+        self.logIt("Couchbase was not started in a minute. Giving up.", True)
+
     def restartCouchebase(self):
         self.logIt("Restarting Couchbase")
         service_path = self.detect_service_path()
@@ -3616,8 +3630,12 @@ class Setup(object):
         
         self.run((service_path, 'start', 'couchbase-server'), useWait=True)
 
-        #wait a couple of seconds for couche start successfully
-        time.sleep(15)
+        #wait for couchbase start successfully
+        if not self.isCouchbaseStarted():
+            log_line = "Couchbase was not started in a minute. Terminating installation."
+            self.logIt(log_line, True)
+            print (log_line)
+            sys.exit(log_line)
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -3671,7 +3689,7 @@ class Setup(object):
         
         
 
-    def install_couchebase(self):
+    def install_couchbase_server(self):
         self.couchbaseInstall()
         self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
         self.restartCouchebase()
