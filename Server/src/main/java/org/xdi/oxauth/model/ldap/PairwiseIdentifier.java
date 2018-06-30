@@ -1,15 +1,15 @@
 package org.xdi.oxauth.model.ldap;
 
-import java.net.URI;
-
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.net.URI;
+
 /**
  * @author Javier Rojas Blum
- * @version July 22, 2016
+ * @version June 30, 2018
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "pairwiseIdentifier"})
@@ -21,11 +21,15 @@ public class PairwiseIdentifier extends BaseEntry {
     @LdapAttribute(name = "oxSectorIdentifier")
     private String sectorIdentifier;
 
+    @LdapAttribute(name = "oxAuthClientId")
+    private String clientId;
+
     public PairwiseIdentifier() {
     }
 
-    public PairwiseIdentifier(String sectorIdentifierUri) {
+    public PairwiseIdentifier(String sectorIdentifierUri, String clientId) {
         this.sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
+        this.clientId = clientId;
     }
 
     public String getId() {
@@ -44,12 +48,21 @@ public class PairwiseIdentifier extends BaseEntry {
         this.sectorIdentifier = sectorIdentifierUri;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("PairwiseIdentifier [id=")
                 .append(id)
                 .append(", sectorIdentifier=").append(sectorIdentifier)
+                .append(", clientId=").append(clientId)
                 .append("]");
         return builder.toString();
     }
