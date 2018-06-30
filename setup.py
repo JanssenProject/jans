@@ -531,7 +531,7 @@ class Setup(object):
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
         self.couchebaseCbq = '/opt/couchbase/bin/cbq'
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
-        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchabse.properties')
+        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
 
         self.ldif_files = [self.ldif_base,
