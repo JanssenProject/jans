@@ -3641,7 +3641,7 @@ class Setup(object):
         
     def couchbaseProperties(self):
         prop_file = os.path.basename(self.gluuCouchebaseProperties)
-        prop = open(os.path.join(self.templateFolder,prop_file)).read()
+        prop = open(os.path.join(self.templateFolder, prop_file)).read()
     
         
         prop_dict = {
