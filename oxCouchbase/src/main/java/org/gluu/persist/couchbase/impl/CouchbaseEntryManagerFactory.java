@@ -46,7 +46,7 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
 
     @Override
     public String getDefaultConfigurationFileName() {
-        return "gluu-couchabse.properties";
+        return "gluu-couchbase.properties";
     }
 
     @Override
