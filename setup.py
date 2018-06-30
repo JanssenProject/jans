@@ -3471,7 +3471,7 @@ class Setup(object):
         self.logIt("Found package '%s' for install" % packageName)
         self.installPackage(packageName)
 
-    def couchebaseCreateCluster(self, clusterRamsize=4096, clusterName=None):
+    def couchebaseCreateCluster(self, clusterRamsize=1024, clusterName=None):
         cmd_args = [
                 self.couchbaseCli, 'cluster-init',
                 '--cluster', self.couchebaseHost,
