@@ -3658,6 +3658,9 @@ class Setup(object):
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
                     'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
+                    'inumAppliance': self.inumAppliance,
+                    'certFolder': self.certFolder,
+                    'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
         prop = prop % prop_dict
