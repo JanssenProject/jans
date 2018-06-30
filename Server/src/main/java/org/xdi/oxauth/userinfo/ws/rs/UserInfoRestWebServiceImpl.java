@@ -68,7 +68,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version June 30, 2018
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -315,10 +315,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
+            String clientId = authorizationGrant.getClientId();
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri);
+                    userInum, sectorIdentifierUri, clientId);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -447,10 +448,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
+            String clientId = authorizationGrant.getClientId();
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri);
+                    userInum, sectorIdentifierUri, clientId);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -632,10 +634,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
+            String clientId = authorizationGrant.getClientId();
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri);
+                    userInum, sectorIdentifierUri, clientId);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),

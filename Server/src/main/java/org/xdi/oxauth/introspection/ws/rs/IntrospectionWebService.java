@@ -35,7 +35,7 @@ import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 17/09/2013
+ * @version June 30, 2018
  */
 @Path("/introspection")
 @Api(value = "/introspection", description = "The Introspection Endpoint is an OAuth 2 Endpoint that responds to " +
@@ -149,11 +149,12 @@ public class IntrospectionWebService {
             }
 
             String userInum = user.getAttribute("inum");
+            String clientId = grant.getClientId();
 
             try {
-                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum, sectorIdentifierUri);
+                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum, sectorIdentifierUri, clientId);
                 if (pairwiseIdentifier == null) {
-                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
+                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
                     pairwiseIdentifier.setId(UUID.randomUUID().toString());
                     pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
                     pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
