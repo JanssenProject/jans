@@ -677,13 +677,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         if (StringHelper.isEmpty(date)) {
             return null;
         }
-        
+
         Date decodedDate;
         try {
             decodedDate = jsonDateFormat.parse(date);
         } catch (ParseException ex) {
             LOG.error("Failed to decode generalized time '{}'", date, ex);
-            
+
             return null;
         }
 
