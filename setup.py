@@ -879,26 +879,26 @@ class Setup(object):
         return inFilePathText
 
     def insertLinesInFile(self, inFilePath, index, text):        
-            inFilePathLines = None        
-            
-            try:            
-                f = open(inFilePath, "r")            
-                inFilePathLines = f.readlines()            
-                f.close()        
-            except:            
-                self.logIt("Error reading %s" % inFilePathLines, True)
-                self.logIt(traceback.format_exc(), True)        
+        inFilePathLines = None
+        
+        try:
+            f = open(inFilePath, "r")
+            inFilePathLines = f.readlines()
+            f.close()
+        except:
+            self.logIt("Error reading %s" % inFilePathLines, True)
+            self.logIt(traceback.format_exc(), True)
 
-                try:
-                    self.backupFile(inFilePath)
-                    inFilePathLines.insert(index, text)            
-                    f = open(inFilePath, "w")            
-                    inFilePathLines = "".join(inFilePathLines)            
-                    f.write(inFilePathLines)            
-                    f.close()        
-                except:            
-                    self.logIt("Error writing %s" % inFilePathLines, True)            
-                    self.logIt(traceback.format_exc(), True)
+        try:
+            self.backupFile(inFilePath)
+            inFilePathLines.insert(index, text)
+            f = open(inFilePath, "w")
+            inFilePathLines = "".join(inFilePathLines)
+            f.write(inFilePathLines)
+            f.close()
+        except:            
+            self.logIt("Error writing %s" % inFilePathLines, True)            
+            self.logIt(traceback.format_exc(), True)
                     
     def commentOutText(self, text):
         textLines = text.split('\n')
