@@ -31,9 +31,9 @@ import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
-    
+
     private CouchbaseEnvironment couchbaseEnvironment;
-    
+
     @PostConstruct
     public void create() {
         this.couchbaseEnvironment = DefaultCouchbaseEnvironment.create();
