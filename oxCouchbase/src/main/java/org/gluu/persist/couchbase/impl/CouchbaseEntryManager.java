@@ -66,7 +66,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
     private static final CouchbaseKeyConverter KEY_CONVERTER = new CouchbaseKeyConverter();
 
-    private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private CouchbaseOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
