@@ -8,6 +8,8 @@
 package org.gluu.persist.couchbase.impl;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -63,6 +65,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
     private static final CouchbaseKeyConverter KEY_CONVERTER = new CouchbaseKeyConverter();
+
+    private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
     private CouchbaseOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
@@ -661,14 +665,29 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public String encodeGeneralizedTime(Date date) {
-        // TODO Auto-generated method stub
-        return null;
+        if (date == null) {
+            return null;
+        }
+
+        return jsonDateFormat.format(date);
     }
 
     @Override
     public Date decodeGeneralizedTime(String date) {
-        // TODO Auto-generated method stub
-        return null;
+        if (StringHelper.isEmpty(date)) {
+            return null;
+        }
+        
+        Date decodedDate;
+        try {
+            decodedDate = jsonDateFormat.parse(date);
+        } catch (ParseException ex) {
+            LOG.error("Failed to decode generalized time '{}'", date, ex);
+            
+            return null;
+        }
+
+        return decodedDate;
     }
 
 }
