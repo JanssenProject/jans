@@ -3000,7 +3000,9 @@ class Setup(object):
 # Default-Stop:      0 1 6
 # Short-Description: Start daemon at boot time
 # Description:       Enable service provided by daemon.
-### END INIT INFO"""            
+### END INIT INFO
+
+"""
             
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
         
