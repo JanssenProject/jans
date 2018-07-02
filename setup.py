@@ -629,25 +629,28 @@ class Setup(object):
 
     def __repr__(self):
         try:
-            return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
-                   + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
-                   + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
-                   + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
-                   + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
-                   + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
-                   + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
-                   + 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n" \
-                   + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-                   + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
-                   + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
-                   + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
-                   + 'Install Couchbase'.ljust(30) + repr(self.install_couchbase).rjust(35) + "\n" \
-                   + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
-                   + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
-                   + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
-                   + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
-                   + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
-                   + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            txt  = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
+            txt += 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n"
+            txt += 'os'.ljust(30) + self.os_type.rjust(35) + "\n"
+            txt += 'city'.ljust(30) + self.city.rjust(35) + "\n"
+            txt += 'state'.ljust(30) + self.state.rjust(35) + "\n"
+            txt += 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
+            txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
+            txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
+            txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
+            txt += 'Install Backend'.ljust(30) + repr(self.installLdap).rjust(35) + "\n"
+            
+            if self.installLdap:
+                txt += 'Backend Type'.ljust(30) + self.ldap_type.title().rjust(35) + "\n"
+            
+            txt += 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n"
+            txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
+            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
+            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
+            txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            
+            return txt
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -2090,8 +2093,9 @@ class Setup(object):
 
     def install_gluu_components(self):
         if self.installLdap:
-            progress_bar(27, "Installing Gluu components: LDAP")
-            self.install_ldap_server()
+            if self.ldap_type in ('openldap', 'opendj'):
+                progress_bar(27, "Installing Gluu components: LDAP")
+                self.install_ldap_server()
 
         if self.install_couchbase:
             progress_bar(27, "Installing Gluu components: Couchbase")
@@ -2340,7 +2344,7 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
+        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             
             open_ldap_exist = False
@@ -2357,38 +2361,24 @@ class Setup(object):
             option = None
             
             if open_ldap_exist:
-                if self.allowPreReleasedApplications:
+                while not option in ('1','2','3'):
+                    option = self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition (3) Couchbase [1|2|3]", "1")
+                    if not option in ('1','2','3'):
+                        print "You did not enter the correct option. Enter either 1, 2 or 3."
 
-                    while not option in ('1','2','3'):
-                        option = self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition (3) Couchbase [1|2|3]", "1")
-                        if not option in ('1','2','3'):
-                            print "You did not enter the correct option. Enter either 1, 2 or 3."
-                            
-                        if option == '3':
-                            sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                            #install opendj along with couchebase until couchebase is backend
-                            option = 1
-                            
-                            self.install_couchbase = True
-                            break
+                if option == '3':
+                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
+                    #install opendj along with couchebase until couchebase is backend
+                    self.ldap_type = 'couchbase'
+                    self.install_couchbase = True
 
-                else:
+                elif option == '2':
+                    self.ldap_type = 'openldap'
+                    
+                elif option == '1':
 
-                    while (option != 1) and (option != 2):
-                        try:
-                            option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
-                        except ValueError:
-                            option = None
-                        if (option != 1) and (option != 2):
-                            print "You did not enter the correct option. Enter either 1 or 2."
+                    self.ldap_type = 'opendj'
 
-            else:
-                option = 1
-
-            if option == 1:
-                self.ldap_type = 'opendj'
-            elif option == 2:
-                self.ldap_type = 'openldap'
         else:
             self.installLdap = False
 
