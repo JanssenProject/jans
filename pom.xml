@@ -6,7 +6,7 @@
 	<groupId>org.xdi</groupId>
 	<artifactId>oxauth</artifactId>
 	<packaging>pom</packaging>
-	<version>3.2.0-SNAPSHOT</version>
+	<version>4.0.0-SNAPSHOT</version>
 	<name>oxAuth</name>
 	<url>http://www.gluu.org</url>
 
@@ -14,10 +14,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<oxcore.version>3.2.0-SNAPSHOT</oxcore.version>
-		<oxeleven.version>3.2.0-SNAPSHOT</oxeleven.version>
-		<oxnotify.version>3.2.0-SNAPSHOT</oxnotify.version>
-		<oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
+		<oxcore.version>4.0.0-SNAPSHOT</oxcore.version>
+		<oxeleven.version>4.0.0-SNAPSHOT</oxeleven.version>
+		<oxnotify.version>4.0.0-SNAPSHOT</oxnotify.version>
+		<oxlicense.version>4.0.0-SNAPSHOT</oxlicense.version>
 
 		<jackson.version>2.9.5</jackson.version>
 		<jackson.databind.version>2.9.5</jackson.databind.version>
