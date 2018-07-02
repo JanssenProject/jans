@@ -3388,14 +3388,14 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
-                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
-                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2 python-ldap',
+                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2',
+                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2',
+                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog  python-httplib2',
                 'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog'
                 }
         for package in package_list[self.os_type+' '+self.os_version].split():
