@@ -152,7 +152,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(attributeValues);
                 }
-                if (realValues.length > 0) {
+                if (realValues.length > 1) {
                     jsonObject.put(attributeName, JsonArray.from(realValues));
                 } else {
                     jsonObject.put(attributeName, realValues[0]);
