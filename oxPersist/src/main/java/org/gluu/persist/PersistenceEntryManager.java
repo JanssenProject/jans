@@ -97,9 +97,9 @@ public interface PersistenceEntryManager {
 
     boolean destroy();
 
-    String encodeGeneralizedTime(Date date);
+    String encodeTime(Date date);
 
-    Date decodeGeneralizedTime(String date);
+    Date decodeTime(String date);
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 

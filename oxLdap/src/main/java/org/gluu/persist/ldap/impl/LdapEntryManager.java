@@ -715,7 +715,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public String encodeGeneralizedTime(Date date) {
+    public String encodeTime(Date date) {
         if (date == null) {
             return null;
         }
@@ -723,7 +723,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return StaticUtils.encodeGeneralizedTime(date);
     }
 
-    public Date decodeGeneralizedTime(String date) {
+    public Date decodeTime(String date) {
         if (date == null) {
             return null;
         }

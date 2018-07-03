@@ -1073,7 +1073,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         } else if (propertyValue instanceof Long) {
             attributeValues[0] = propertyValue.toString();
         } else if (propertyValue instanceof Date) {
-            attributeValues[0] = encodeGeneralizedTime((Date) propertyValue);
+            attributeValues[0] = encodeTime((Date) propertyValue);
         } else if (propertyValue instanceof String[]) {
             attributeValues = (String[]) propertyValue;
         } else if (propertyValue instanceof List<?>) {
@@ -1325,7 +1325,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         } else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
             propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf(attribute.getValue()));
         } else if (parameterType.equals(Date.class)) {
-            propertyValueSetter.set(entry, decodeGeneralizedTime(attribute.getValue()));
+            propertyValueSetter.set(entry, decodeTime(attribute.getValue()));
         } else if (parameterType.equals(String[].class)) {
             propertyValueSetter.set(entry, attribute.getValues());
         } else if (ReflectHelper.assignableFrom(parameterType, List.class)) {
@@ -1407,9 +1407,9 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         return result;
     }
 
-    public abstract String encodeGeneralizedTime(Date date);
+    public abstract String encodeTime(Date date);
 
-    public abstract Date decodeGeneralizedTime(String date);
+    public abstract Date decodeTime(String date);
 
     protected <T> Object getDNValue(Object entry, Class<T> entryClass) {
         // Check if entry has DN property
