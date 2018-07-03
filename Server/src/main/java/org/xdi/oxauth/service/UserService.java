@@ -424,11 +424,11 @@ public class UserService {
 	}
 
 	public String encodeGeneralizedTime(Date date) {
-		return ldapEntryManager.encodeGeneralizedTime(date);
+		return ldapEntryManager.encodeTime(date);
 	}
 
 	public Date decodeGeneralizedTime(String date) {
-		return ldapEntryManager.decodeGeneralizedTime(date);
+		return ldapEntryManager.decodeTime(date);
 	}
 
 }

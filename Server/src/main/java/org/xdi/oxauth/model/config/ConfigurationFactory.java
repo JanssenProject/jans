@@ -70,7 +70,7 @@ public class ConfigurationFactory {
 	private Event<String> event;
 
 	@Inject @Named(AppInitializer.PERSISTENCE_ENTRY_MANAGER_NAME)
-	private Instance<PersistenceEntryManager> ldapEntryManagerInstance;
+	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject
     private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
@@ -380,7 +380,7 @@ public class ConfigurationFactory {
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
-		final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
+		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.persistenceConfiguration.getConfiguration().getString("oxauth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
@@ -425,7 +425,7 @@ public class ConfigurationFactory {
 				long nextRevision = conf.getRevision() + 1;
 				conf.setRevision(nextRevision);
 
-				final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
+				final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 				ldapManager.merge(conf);
 
 				log.info("New JWKS generated successfully");

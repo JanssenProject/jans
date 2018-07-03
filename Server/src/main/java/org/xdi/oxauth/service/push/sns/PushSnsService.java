@@ -72,7 +72,7 @@ public class PushSnsService {
 
 	public String getCustomUserData(User user) {
 		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
-				ldapEntryManager.encodeGeneralizedTime(new Date()));
+				ldapEntryManager.encodeTime(new Date()));
 		return customUserData;
 	}
 
