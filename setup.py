@@ -3635,6 +3635,32 @@ class Setup(object):
                 
         self.logIt("Couchbase was not started in a minute. Giving up.", True)
 
+
+    def checkIfGluuBucketReady(self):
+        import urllib2
+        apiUrl = 'http://localhost:{0}/pools/default/buckets'.format(self.couchebaseBucketClusterPort)
+        for i in range(12):
+            self.logIt("Checking if gluu bucket is ready. Try %d ..." % (i+1))
+            try:
+                self.logIt("Connecting to %s" % apiUrl)
+                request = urllib2.Request(apiUrl) 
+                base64string = base64.encodestring('%s:%s' % (self.couchebaseClusterAdmin, self.ldapPass)).replace('\n', '')
+                request.add_header("Authorization", "Basic %s" % base64string) 
+                result = urllib2.urlopen(request)
+                response = result.read()
+
+                response_json = json.loads(response)
+
+                for bucket in response_json:
+                    if bucket['name'] == 'gluu':
+                        return True
+            except:
+                self.logIt("Connection to %s failed " % apiUrl)
+                time.sleep(5)
+
+        sys.exit("Couchbase server was not ready. Giving up")
+
+
     def restartCouchebase(self):
         self.logIt("Restarting Couchbase")
         service_path = self.detect_service_path()
@@ -3711,6 +3737,8 @@ class Setup(object):
         
         #execute this fonctions for 'site' when couchbase is backend
         self.couchebaseCreateBucket('gluu')
+        if not self.checkIfGluuBucketReady():
+            sys.exit("Couchbase was not ready")
         self.couchebaseCreateIndexes('gluu')
         
         self.import_ldif_couchebase()
