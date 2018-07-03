@@ -2347,37 +2347,47 @@ class Setup(object):
         promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             
-            open_ldap_exist = False
+            backend_types = []
+
+            if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
+                backend_types.append(('Gluu OpenDj','opendj'))
             
             if self.os_type in ('ubuntu', 'debian'):
-                if glob.glob(self.distFolder+'/symas/symas-openldap*.deb'):
-                    open_ldap_exist = True
-            elif self.os_type in ('centos', 'red', 'fedorat'):
-                    if glob.glob(self.distFolder+'/symas/symas-openldap*.rpm'):
-                        open_ldap_exist = True
+                suffix = 'deb'
 
-            
+            elif self.os_type in ('centos', 'red', 'fedora'):
+                suffix = 'rpm'
+
+            if glob.glob(self.distFolder+'/symas/symas-openldap*.'+suffix):
+                backend_types.append(('OpenLDAP Gluu Edition','openldap'))
+                
+            if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+                backend_types.append(('Couchbase','couchbase'))
+
+
             self.installLdap = True
             option = None
             
-            if open_ldap_exist:
-                while not option in ('1','2','3'):
-                    option = self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition (3) Couchbase [1|2|3]", "1")
-                    if not option in ('1','2','3'):
-                        print "You did not enter the correct option. Enter either 1, 2 or 3."
+            if backend_types:
+                prompt_text = 'Install '
+                options = []
+                for i, backend in enumerate(backend_types):
+                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
+                    options.append(str(i+1))
 
-                if option == '3':
+                prompt_text += '[{0}]'.format('|'.join(options))
+                option=None
+
+                while not option in options:
+                    option=self.getPrompt(prompt_text, options[0])
+                    if not option in options:
+                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
+
+                self.ldap_type = backend_types[int(option)-1][1]
+
+                if self.ldap_type == 'couchbase':
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                    #install opendj along with couchebase until couchebase is backend
-                    self.ldap_type = 'couchbase'
                     self.install_couchbase = True
-
-                elif option == '2':
-                    self.ldap_type = 'openldap'
-                    
-                elif option == '1':
-
-                    self.ldap_type = 'opendj'
 
         else:
             self.installLdap = False
