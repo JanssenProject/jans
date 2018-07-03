@@ -198,7 +198,7 @@ public class UmaPctService {
     }
 
     private Filter gethExpiredUmaPctFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(date));
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void merge(UmaPCT pct) {

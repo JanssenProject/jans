@@ -279,6 +279,6 @@ public class UmaResourceService {
             }
 
         };
-        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 }

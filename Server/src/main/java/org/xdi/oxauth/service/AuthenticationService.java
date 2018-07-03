@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.ejb.Stateless;
@@ -381,13 +383,18 @@ public class AuthenticationService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
         if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-        	customEntry.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+            // Combine object classes from LDAP and configuration in one list
+            Set<Object> customPersonCustomObjectClassList = new HashSet<Object>(personCustomObjectClassList);
+            customPersonCustomObjectClassList.add("gluuPerson");
+            customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
+
+            customEntry.setCustomObjectClasses(customPersonCustomObjectClassList.toArray(new String[customPersonCustomObjectClassList.size()]));
         } else {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
         }
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        String nowDateString = ldapEntryManager.encodeGeneralizedTime(now);
+        String nowDateString = ldapEntryManager.encodeTime(now);
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", nowDateString);
         customEntry.getCustomAttributes().add(customAttribute);
 

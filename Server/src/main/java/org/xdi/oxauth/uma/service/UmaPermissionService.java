@@ -172,7 +172,7 @@ public class UmaPermissionService {
     }
 
     private Filter getExpiredUmaPermissionFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(date));
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void addBranch(String clientDn) {
