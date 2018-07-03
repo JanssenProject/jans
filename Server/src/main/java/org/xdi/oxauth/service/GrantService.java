@@ -408,7 +408,7 @@ public class GrantService {
     }
 
     private Filter getExpiredTokenFilter() {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(new Date()));
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(new Date()));
     }
 
     private Filter getExpiredGrantFilter() {
@@ -417,7 +417,7 @@ public class GrantService {
 
         Filter hasSubordinates = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
     			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-    	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", ldapEntryManager.encodeGeneralizedTime(calendar.getTime()));
+    	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", ldapEntryManager.encodeTime(calendar.getTime()));
     	Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
     	
     	return filter;
