@@ -2285,7 +2285,7 @@ class Setup(object):
     def writePersistType(self, ptype):
         self.logIt("Writing persist type")
         fname = os.path.join(self.configFolder, 'gluu.properties')
-        fcontent = 'persistence.type={}'.format(ptype)
+        fcontent = 'persistence.type={0}'.format(ptype)
         self.writeFile(fname, fcontent)
 
     def promptForProperties(self):
@@ -3605,7 +3605,7 @@ class Setup(object):
         cmd = "netstat -lnp | grep 28091"
         for i in range(12):
             result = os.popen(cmd).read()
-            self.logIt("Checking if couchbase was started. Try {} ...".format(i+1))
+            self.logIt("Checking if couchbase was started. Try {0} ...".format(i+1))
             if result.strip().endswith('beam.smp'):
                 return True
             else:
