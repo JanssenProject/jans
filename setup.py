@@ -3664,7 +3664,7 @@ class Setup(object):
                     'session_mapping': 'sessions',
                     'static_mapping': 'statistic',
                     'site_mapping': 'site',
-                    'encryption_method': 'CRYPT-SHA-256',
+                    'encryption_method': 'SSHA-256',
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
                     'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
