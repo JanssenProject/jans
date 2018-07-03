@@ -41,7 +41,7 @@ import re
 import glob
 import base64
 import platform
-import ldif as ldap_ldif
+from ldif import LDIFParser
 import copy
 
 try:
@@ -88,12 +88,22 @@ def get_key_from(dn, inum):
 
     return key
 
+class myLdifParser(LDIFParser):
+    def __init__(self, ldif_file):
+        LDIFParser.__init__(self, open(ldif_file,'rb'))
+        self.entries = []
+    
+
+    def handle(self, dn, entry):
+        self.entries.append((dn, entry))
+
 
 def get_documents_from_ldif(ldif_file,  inumOrg):
-    entries = ldap_ldif.ParseLDIF(open(ldif_file))
+    parser = myLdifParser(ldif_file)
+    parser.parse()
     documents = []
 
-    for dn, entry in entries:
+    for dn, entry in parser.entries:
         if len(entry) > 2:
             key = get_key_from(dn, inumOrg)
             entry['dn'] = dn
