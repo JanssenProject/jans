@@ -534,6 +534,7 @@ class Setup(object):
         self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
+        self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         
         self.couchebaseBucketClusterPort = 28091
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
@@ -3550,10 +3551,10 @@ class Setup(object):
 
         openldap_index = json.load(open(self.opendlapIndexDef))
 
-        if not os.path.exists('/tmp/n1ql'):
-                os.mkdir('/tmp/n1ql')
+        if not os.path.exists(self.n1qlOutputFolder):
+                os.mkdir(self.n1qlOutputFolder)
         
-        tmp_file = '/tmp/n1ql/index_%s.n1ql' % bucket
+        tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
         W = open(tmp_file, 'w')
 
@@ -3585,10 +3586,10 @@ class Setup(object):
             ldif_base_name = os.path.basename(ldif)
             name, ext = os.path.splitext(ldif_base_name)
 
-            if not os.path.exists('/tmp/n1ql'):
-                os.mkdir('/tmp/n1ql')
+            if not os.path.exists(self.n1qlOutputFolder):
+                os.mkdir(self.n1qlOutputFolder)
 
-            tmp_file = os.path.join('/tmp/n1ql', name+'.n1ql')
+            tmp_file = os.path.join(self.n1qlOutputFolder, name+'.n1ql')
             
             with open(tmp_file, 'w') as o:
                 for e in documents:
