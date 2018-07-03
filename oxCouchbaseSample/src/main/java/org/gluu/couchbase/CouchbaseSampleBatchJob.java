@@ -140,7 +140,7 @@ public final class CouchbaseSampleBatchJob {
 
             CustomAttribute customAttribute = new CustomAttribute();
             customAttribute.setName(attributeName);
-            customAttribute.setValue(couchbaseEntryManager.encodeGeneralizedTime(calendar.getTime()));
+            customAttribute.setValue(couchbaseEntryManager.encodeTime(calendar.getTime()));
             return customAttribute;
         } catch (Exception ex) {
             LOG.error("Can't parse attribute", ex);

@@ -143,7 +143,7 @@ public final class LdapSampleBatchJob {
 
             CustomAttribute customAttribute = new CustomAttribute();
             customAttribute.setName(attributeName);
-            customAttribute.setValue(ldapEntryManager.encodeGeneralizedTime(calendar.getTime()));
+            customAttribute.setValue(ldapEntryManager.encodeTime(calendar.getTime()));
             return customAttribute;
         } catch (ParseException e) {
             LOG.error("Can't parse attribute", e);

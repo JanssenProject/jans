@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -202,58 +201,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
                         modification = createModification(Mutation.DELETE, oldAttributeName, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        if (attributeValues.length == 1) {
-                            modification = createModification(Mutation.REPLACE, attributeName, attributeValues);
-                        } else {
-                            String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
-                            String[] newValues = ArrayHelper.arrayClone(attributeValues);
-
-                            Arrays.sort(oldValues);
-                            Arrays.sort(newValues);
-
-                            boolean[] retainOldValues = new boolean[oldValues.length];
-                            Arrays.fill(retainOldValues, false);
-
-                            List<String> addValues = new ArrayList<String>();
-                            List<String> removeValues = new ArrayList<String>();
-
-                            // Add new values
-                            for (String value : newValues) {
-                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
-                                    @Override
-                                    public int compare(String o1, String o2) {
-                                        return o1.toLowerCase().compareTo(o2.toLowerCase());
-                                    }
-                                });
-                                if (idx >= 0) {
-                                    // Old values array contains new value. Retain
-                                    // old value
-                                    retainOldValues[idx] = true;
-                                } else {
-                                    // This is new value
-                                    addValues.add(value);
-                                }
-                            }
-
-                            // Remove values which we don't have in new values
-                            for (int i = 0; i < oldValues.length; i++) {
-                                if (!retainOldValues[i]) {
-                                    removeValues.add(oldValues[i]);
-                                }
-                            }
-
-                            if (removeValues.size() > 0) {
-                                MutationSpec removeModification = createModification(Mutation.DELETE, attributeName,
-                                        removeValues.toArray(new String[removeValues.size()]));
-                                modifications.add(removeModification);
-                            }
-
-                            if (addValues.size() > 0) {
-                                MutationSpec addModification = createModification(Mutation.DICT_ADD, attributeName,
-                                        addValues.toArray(new String[addValues.size()]));
-                                modifications.add(addModification);
-                            }
-                        }
+                        modification = createModification(Mutation.REPLACE, attributeName, attributeValues);
                     }
                 }
 
@@ -664,7 +612,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public String encodeGeneralizedTime(Date date) {
+    public String encodeTime(Date date) {
         if (date == null) {
             return null;
         }
@@ -673,7 +621,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public Date decodeGeneralizedTime(String date) {
+    public Date decodeTime(String date) {
         if (StringHelper.isEmpty(date)) {
             return null;
         }
