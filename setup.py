@@ -41,6 +41,8 @@ import re
 import glob
 import base64
 import platform
+from ldif import LDIFParser
+import copy
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -58,13 +60,69 @@ def progress_bar(i, act=''):
     sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
     sys.stdout.flush()
 
+listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
+
+def get_key_from(dn, inum):
+    dns = dn.split(",")
+
+    if "o=gluu" in dns:
+        dns.remove("o=gluu")
+        
+    o_inumOrg = 'o='+inum
+
+    if o_inumOrg in dns:
+        dns.remove(o_inumOrg)
+
+    for i in range(len(dns)):
+        e = dns[i]
+        n = e.find('=')
+        e = e[n+1:]
+        dns[i] = e
+
+    dns.reverse()
+
+    key = '_'.join(dns)
+    
+    if not key:
+        key = '_'
+
+    return key
+
+class myLdifParser(LDIFParser):
+    def __init__(self, ldif_file):
+        LDIFParser.__init__(self, open(ldif_file,'rb'))
+        self.entries = []
+    
+
+    def handle(self, dn, entry):
+        self.entries.append((dn, entry))
+
+
+def get_documents_from_ldif(ldif_file,  inumOrg):
+    parser = myLdifParser(ldif_file)
+    parser.parse()
+    documents = []
+
+    for dn, entry in parser.entries:
+        if len(entry) > 2:
+            key = get_key_from(dn, inumOrg)
+            entry['dn'] = dn
+            for k in copy.deepcopy(entry):
+                if len(entry[k]) == 1:
+                    if not k in listAttrib:
+                        entry[k] = entry[k][0]
+            documents.append((key, entry))
+
+    return documents
+
+
 
 class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '3.2.0-SNAPSHOT'
-        self.githubBranchName = 'version_3.2.0'
+        self.oxVersion = '4.0.0-SNAPSHOT'
+        self.githubBranchName = 'version_4.0.0'
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -104,6 +162,7 @@ class Setup(object):
         self.jetty_version = '9.4.9.v20180320'
         self.jython_version = '2.7.2a'
         self.node_version = '9.9.0'
+        self.opendj_version_number = '3.0.0.2'
         self.apache_version = None
         self.opendj_version = None
 
@@ -124,7 +183,7 @@ class Setup(object):
 
         self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
-        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
 
@@ -295,6 +354,7 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = None
+        self.install_couchbase = None
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
@@ -466,6 +526,25 @@ class Setup(object):
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
 
+
+        #definitions for couchebase
+        self.couchebaseInstallDir = '/opt/couchbase/'
+        self.couchebaseClusterAdmin = 'admin'
+        self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
+        self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
+        self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
+        self.couchbaseTrustStorePass = 'newsecret'
+        self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
+        
+        self.couchebaseBucketClusterPort = 28091
+        self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
+        self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
+        self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
+        self.couchebaseCbq = '/opt/couchbase/bin/cbq'
+        self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
+        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
+        self.couchbaseBuckets = []
+
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
                            self.ldif_attributes,
@@ -561,24 +640,28 @@ class Setup(object):
 
     def __repr__(self):
         try:
-            return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
-                   + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
-                   + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
-                   + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
-                   + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
-                   + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
-                   + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
-                   + 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n" \
-                   + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-                   + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
-                   + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
-                   + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
-                   + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
-                   + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
-                   + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
-                   + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
-                   + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
-                   + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            txt  = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
+            txt += 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n"
+            txt += 'os'.ljust(30) + self.os_type.rjust(35) + "\n"
+            txt += 'city'.ljust(30) + self.city.rjust(35) + "\n"
+            txt += 'state'.ljust(30) + self.state.rjust(35) + "\n"
+            txt += 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
+            txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
+            txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
+            txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
+            txt += 'Install Backend'.ljust(30) + repr(self.installLdap).rjust(35) + "\n"
+            
+            if self.installLdap:
+                txt += 'Backend Type'.ljust(30) + self.ldap_type.title().rjust(35) + "\n"
+            
+            txt += 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n"
+            txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
+            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
+            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
+            txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            
+            return txt
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -810,26 +893,26 @@ class Setup(object):
         return inFilePathText
 
     def insertLinesInFile(self, inFilePath, index, text):        
-            inFilePathLines = None        
-            
-            try:            
-                f = open(inFilePath, "r")            
-                inFilePathLines = f.readlines()            
-                f.close()        
-            except:            
-                self.logIt("Error reading %s" % inFilePathLines, True)
-                self.logIt(traceback.format_exc(), True)        
+        inFilePathLines = None
+        
+        try:
+            f = open(inFilePath, "r")
+            inFilePathLines = f.readlines()
+            f.close()
+        except:
+            self.logIt("Error reading %s" % inFilePathLines, True)
+            self.logIt(traceback.format_exc(), True)
 
-                try:
-                    self.backupFile(inFilePath)
-                    inFilePathLines.insert(index, text)            
-                    f = open(inFilePath, "w")            
-                    inFilePathLines = "".join(inFilePathLines)            
-                    f.write(inFilePathLines)            
-                    f.close()        
-                except:            
-                    self.logIt("Error writing %s" % inFilePathLines, True)            
-                    self.logIt(traceback.format_exc(), True)
+        try:
+            self.backupFile(inFilePath)
+            inFilePathLines.insert(index, text)
+            f = open(inFilePath, "w")
+            inFilePathLines = "".join(inFilePathLines)
+            f.write(inFilePathLines)
+            f.close()
+        except:            
+            self.logIt("Error writing %s" % inFilePathLines, True)            
+            self.logIt(traceback.format_exc(), True)
                     
     def commentOutText(self, text):
         textLines = text.split('\n')
@@ -965,7 +1048,7 @@ class Setup(object):
 
     def set_ulimits(self):
         try:
-            if self.os_type in ['centos', 'redhat', 'fedora']:
+            if self.os_type in ['centos', 'red', 'fedora']:
                 apache_user = 'apache'
             else:
                 apache_user = 'www-data'
@@ -1031,7 +1114,7 @@ class Setup(object):
         self.run([service_path, apache_service_name, 'stop'])
 
         # CentOS 7.* + systemd + apache 2.4
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
@@ -1039,7 +1122,7 @@ class Setup(object):
         if self.os_type == 'centos' and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
+        if self.os_type in ['red', 'fedora'] and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
@@ -1118,7 +1201,7 @@ class Setup(object):
         return "2.2"
 
     def determineApacheVersionForOS(self):
-        if self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_type in ['centos', 'red', 'fedora']:
             # httpd -v
             # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
             # OR
@@ -1167,7 +1250,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
-        openDJArchive = 'opendj-server-3.0.0.1.zip'
+        openDJArchive = 'opendj-server-%s.zip' % self.opendj_version_number
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
             self.run(['unzip', '-n', '-q', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
@@ -1295,7 +1378,7 @@ class Setup(object):
         self.run(['sed', '-i', 's/^%s/%s/' % (source_string, target_string), '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
                 self.run(["/usr/bin/systemctl", 'enable', serviceName])
             else:
@@ -1327,7 +1410,7 @@ class Setup(object):
             self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
                 self.run(["/usr/bin/systemctl", 'enable', serviceName])
             else:
@@ -1398,6 +1481,7 @@ class Setup(object):
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
+            self.encoded_couchbaseTrustStorePass = self.obscure(self.couchbaseTrustStorePass)
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
@@ -2017,37 +2101,43 @@ class Setup(object):
         # Install passport system service script
         self.installNodeService('passport')
 
+
     def install_gluu_components(self):
         if self.installLdap:
-            progress_bar(25, "Installing Gluu components: LDAP")
-            self.install_ldap_server()
+            if self.ldap_type in ('openldap', 'opendj'):
+                progress_bar(27, "Installing Gluu components: LDAP")
+                self.install_ldap_server()
+
+        if self.install_couchbase:
+            progress_bar(27, "Installing Gluu components: Couchbase")
+            self.install_couchbase_server()
 
         if self.installHttpd:
-            progress_bar(25, "Installing Gluu components: HTTPD")
+            progress_bar(27, "Installing Gluu components: HTTPD")
             self.configure_httpd()
 
         if self.installOxAuth:
-            progress_bar(25, "Installing Gluu components: OxAuth")
+            progress_bar(27, "Installing Gluu components: oxAuth")
             self.install_oxauth()
 
         if self.installOxTrust:
-            progress_bar(25, "Installing Gluu components: oxtruest")
+            progress_bar(27, "Installing Gluu components: oxtruest")
             self.install_oxtrust()
 
         if self.installSaml:
-            progress_bar(25, "Installing Gluu components: saml")
+            progress_bar(27, "Installing Gluu components: SAML")
             self.install_saml()
 
         if self.installAsimba:
-            progress_bar(25, "Installing Gluu components: Asimba")
+            progress_bar(27, "Installing Gluu components: Asimba")
             self.install_asimba()
 
         if self.installOxAuthRP:
-            progress_bar(25, "Installing Gluu components: OxAuthRP")
+            progress_bar(27, "Installing Gluu components: oxAuthRP")
             self.install_oxauth_rp()
 
         if self.installPassport:
-            progress_bar(25, "Installing Gluu components: Passport")
+            progress_bar(27, "Installing Gluu components: Passport")
             self.install_passport()
 
     def isIP(self, address):
@@ -2182,6 +2272,11 @@ class Setup(object):
         self.createUsers()
         self.makeFolders()
 
+        if self.install_couchbase:
+            self.writePersistType('couchbase')
+        else:
+            self.writePersistType('ldap')
+
     def make_salt(self):
         try:
             f = open("%s/salt" % self.configFolder, 'w')
@@ -2196,6 +2291,13 @@ class Setup(object):
     def make_oxauth_salt(self):
         self.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
+
+
+    def writePersistType(self, ptype):
+        self.logIt("Writing persist type")
+        fname = os.path.join(self.configFolder, 'gluu.properties')
+        fcontent = 'persistence.type={0}'.format(ptype)
+        self.writeFile(fname, fcontent)
 
     def promptForProperties(self):
 
@@ -2253,38 +2355,51 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
+        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             
-            open_ldap_exist = False
+            backend_types = []
+
+            if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
+                backend_types.append(('Gluu OpenDj','opendj'))
             
             if self.os_type in ('ubuntu', 'debian'):
-                if glob.glob(self.distFolder+'/symas/symas-openldap*.deb'):
-                    open_ldap_exist = True
-            elif self.os_type in ('centos', 'redhat', 'fedorat'):
-                    if glob.glob(self.distFolder+'/symas/symas-openldap*.rpm'):
-                        open_ldap_exist = True
+                suffix = 'deb'
 
-            
+            elif self.os_type in ('centos', 'red', 'fedora'):
+                suffix = 'rpm'
+
+            if glob.glob(self.distFolder+'/symas/symas-openldap*.'+suffix):
+                backend_types.append(('OpenLDAP Gluu Edition','openldap'))
+                
+            if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+                backend_types.append(('Couchbase','couchbase'))
+
+
             self.installLdap = True
             option = None
             
-            if open_ldap_exist:
-                while (option != 1) and (option != 2):
-                    try:
-                        option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
-                    except ValueError:
-                        option = None
-                    if (option != 1) and (option != 2):
-                        print "You did not enter the correct option. Enter either 1 or 2."
-            else:
-                option = 1
+            if backend_types:
+                prompt_text = 'Install '
+                options = []
+                for i, backend in enumerate(backend_types):
+                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
+                    options.append(str(i+1))
 
+                prompt_text += '[{0}]'.format('|'.join(options))
+                option=None
 
-            if option == 1:
-                self.ldap_type = 'opendj'
-            elif option == 2:
-                self.ldap_type = 'openldap'
+                while not option in options:
+                    option=self.getPrompt(prompt_text, options[0])
+                    if not option in options:
+                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
+
+                self.ldap_type = backend_types[int(option)-1][1]
+
+                if self.ldap_type == 'couchbase':
+                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
+                    self.install_couchbase = True
+
         else:
             self.installLdap = False
 
@@ -2510,9 +2625,41 @@ class Setup(object):
         self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
         self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
+    def get_clean_args(self, args):
+        argsc = args[:]
+
+        for a in ('-R', '-h', '-p'):
+            if a in argsc:
+                argsc.remove(a)
+
+        if '-m' in argsc:
+            m = argsc.index('-m')
+            argsc.pop(m)
+            argsc.pop(m)
+            
+        return argsc
+
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None, useWait=False, shell=False):
         self.logIt('Running: %s' % ' '.join(args))
+        
+        if args[0] == self.cmd_chown:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Making owner of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_chmod:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Setting permission of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_chgrp:
+            argsc = self.get_clean_args(args)
+            if not argsc[2].startswith('/opt'):
+                self.logOSChanges('Making group of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
+        elif args[0] == self.cmd_mkdir:
+            argsc = self.get_clean_args(args)
+            if not (argsc[1].startswith('/opt') or argsc[1].startswith('.')):
+                self.logOSChanges('Creating directory %s' % (', '.join(argsc[1:])))
+
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env, shell=shell)
             if useWait:
@@ -2836,17 +2983,13 @@ class Setup(object):
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
-        if 'importLDIFDir' in setupOptions.keys():
-            self.import_custom_ldif_opendj(setupOptions['importLDIFDir'])
-
-
         self.run([self.cmd_chmod, '-R', 'a+rX', self.ldapBaseFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
 
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
 
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -2868,11 +3011,13 @@ class Setup(object):
 # Default-Stop:      0 1 6
 # Short-Description: Start daemon at boot time
 # Description:       Enable service provided by daemon.
-### END INIT INFO"""            
+### END INIT INFO
+
+"""
             
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
         
-        if self.os_type in ['centos', 'fedora', 'redhat']:
+        if self.os_type in ['centos', 'fedora', 'red']:
             self.run(["/sbin/chkconfig", 'opendj', "on"])
             self.run([service_path, 'opendj', 'start'])
         elif self.os_type in ['ubuntu', 'debian']:
@@ -2894,7 +3039,7 @@ class Setup(object):
         if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        elif self.os_type in ['redhat']:
+        elif self.os_type in ['red']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
@@ -2904,7 +3049,7 @@ class Setup(object):
 
     def detect_service_path(self):
         service_path = '/sbin/service'
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             service_path = '/usr/bin/systemctl'
         elif self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
@@ -2915,7 +3060,7 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
@@ -2927,13 +3072,13 @@ class Setup(object):
         # Detect service path and apache service name
         service_path = self.detect_service_path()
         apache_service_name = 'httpd'
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
             apache_service_name = 'apache2'
 
         # Apache HTTPD
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
             self.run([service_path, 'enable', apache_service_name])
             self.run([service_path, 'start', apache_service_name])
         else:
@@ -2942,7 +3087,7 @@ class Setup(object):
         # LDAP services
         if self.installLdap:
             if self.ldap_type == 'openldap':
-                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
                     self.run([service_path, 'restart', 'rsyslog.service'])
                     self.run([service_path, 'start', 'solserver.service'])
                 else:
@@ -2965,14 +3110,14 @@ class Setup(object):
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
 
-        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'red', 'fedora']:
             self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
         else:
             if self.os_type in ['debian', 'ubuntu']:
                 self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
                 self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
-            if self.os_type in ['centos', 'redhat', 'fedora']:
+            if self.os_type in ['centos', 'red', 'fedora']:
                 self.copyFile("%s/network" % self.outputFolder, self.network)
 
             self.run(['/bin/hostname', self.hostname])
@@ -3092,50 +3237,22 @@ class Setup(object):
             else:
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
-    def import_custom_ldif_openldap(self, fullPath):
-        output_dir = fullPath + '.output'
-
-        self.logIt("Importing Custom LDIF files into OpenLDAP")
+    def import_custom_ldif(self, fullPath):
+        output_dir = os.path.join(fullPath, '.output')
+        self.logIt("Importing Custom LDIF files")
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
+
         try:
-            for ldif in self.get_filepaths(fullPath):
+            for ldif in self.get_filepaths(output_dir):
                 custom_ldif = output_dir + '/' + ldif
-                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
+                if self.ldap_type == 'openldap':
+                    self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
+                else:
+                    self.import_ldif_template_opendj(custom_ldif)
         except:
             self.logIt("Error importing custom ldif file %s" % ldif, True)
-            self.logIt(traceback.format_exc(), True)
-
-    def import_custom_ldif_opendj(self, fullPath):
-        #opendj does not support imorting raw ldif files. ldif files
-        #will be copied directly to config/schema dir
-        
-        try:
-            for ldif in self.get_filepaths(fullPath):
-                c = 102
-                makenew = False
-                target_ldif = ldif
-                if '-' in target_ldif:
-                    la = target_ldif.split('-')
-                    if la[0].isdigit():
-                        if int(la[0]) < 102:
-                            target_ldif = target_ldif.replace(la[0], str(c))
-                            c +=1
-                    else:
-                        makenew = True
-                else:
-                    makenew = True
-                    
-                if makenew:
-                    target_ldif = str(c)+'-'+target_ldif
-                    c +=1
-        
-                custom_ldif = os.path.join(fullPath, ldif)
-                shutil.copy(custom_ldif, os.path.join(self.openDjSchemaFolder, target_ldif))
-                self.logIt("Custom schema file %s was copied as %s" % (ldif, target_ldif))
-        except:
-            self.logIt("Error importing custom ldif files")
             self.logIt(traceback.format_exc(), True)
 
     def install_ldap_server(self):
@@ -3282,7 +3399,7 @@ class Setup(object):
             query_command = 'dpkg -l {0}'
             check_text = 'no packages found matching'
 
-        elif self.os_type in ('centos', 'redhat', 'fedora'):
+        elif self.os_type in ('centos', 'red', 'fedora'):
             install_command = 'yum install -y {0}'
             update_command = 'yum install -y epel-release'
             query_command = 'rpm -q {0}'
@@ -3292,16 +3409,16 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
-                'redhat 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog',
+                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap',
+                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap',
+                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap',
                 'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog'
                 }
-
         for package in package_list[self.os_type+' '+self.os_version].split():
             sout, serr = self.run_command(query_command.format(package))
             if check_text in sout+serr:
@@ -3340,6 +3457,293 @@ class Setup(object):
             if os.path.exists(default_site):
                 os.remove(default_site)
 
+    
+    #Couchbase Functions
+
+    def installPackage(self, packageName):
+        if self.os_type in ['debian', 'ubuntu']:
+            self.run([self.cmd_dpkg, '--install', packageName])
+        else:
+            self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+
+    def couchbaseInstall(self):
+        coucbase_package = None
+        tmp = []
+
+        for f in os.listdir(self.couchbasePackageFolder):
+            if f.startswith('couchbase-server-enterprise'):
+                tmp.append(f)
+
+        if not tmp:
+            err_msg = "Couchbase package not found at %s. Exiting with error..." % (self.couchbasePackageFolder)
+            self.logIt(err_msg, True)
+            sys.exit(2)
+
+        packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
+        self.logIt("Found package '%s' for install" % packageName)
+        self.installPackage(packageName)
+
+    def couchebaseCreateCluster(self, clusterRamsize=1024, clusterName=None):
+        cmd_args = [
+                self.couchbaseCli, 'cluster-init',
+                '--cluster', self.couchebaseHost,
+                '--cluster-username', self.couchebaseClusterAdmin,
+                '--cluster-password', self.ldapPass,
+                '--services', 'data,index,query,fts',
+                '--cluster-ramsize', str(clusterRamsize),
+                ]
+
+        if clusterName:
+            cmd_args += ['--cluster-name', clusterName]
+
+        self.run(cmd_args)
+
+
+    def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
+        cmd_args = [
+                self.couchbaseCli, 'bucket-create',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--bucket', bucketName,
+                '--bucket-type', bucketType,
+                '--bucket-ramsize', str(bucketRamsize),
+                '--wait'
+            ]
+        
+        self.run(cmd_args)
+
+        self.couchbaseBuckets.append(bucketName)
+
+    def couchbaseImportJson(self, bucket, jsonFile, keyGen=None):
+        self.logIt("Importing Couchebase json file %s to bucket %s" % (jsonFile, bucket))
+        cmd_args = [
+                self.couchebaseCbImport, 'json',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--bucket', bucket,
+                '--dataset', jsonFile,
+                '--format', 'list',
+                '--threads', '4'
+            ]
+
+        if keyGen:
+            cmd_args += ['--generate-key', keyGen]
+    
+        self.run(cmd_args)
+
+    def couchbaseExecQuery(self, queryFile):
+        self.logIt("Running Couchbase query from file " + queryFile)
+        cmd_args = [
+                self.couchebaseCbq,
+                '--user', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--engine', self.couchebaseHost,
+                '--file', queryFile
+            ]
+
+        self.run(cmd_args)
+
+
+    def couchebaseCreateIndexes(self, bucket):
+        self.logIt("Running Couchbase index creation for " + bucket + " bucket")
+
+        openldap_index = json.load(open(self.opendlapIndexDef))
+
+        if not os.path.exists(self.n1qlOutputFolder):
+                os.mkdir(self.n1qlOutputFolder)
+        
+        tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
+
+        W = open(tmp_file, 'w')
+
+        W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
+        index_list = [ ind['attribute'] for ind in openldap_index['indexes'] ]
+
+        if not 'dn' in index_list:
+            index_list.insert(0, 'dn')
+
+        index_names = []
+        for ind in index_list:
+            index_name = 'def_' + ind
+            W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
+            index_names.append(index_name)
+
+        W.write('BUILD INDEX ON `gluu` (%s) USING GSI;\n' % (','.join(index_names)))
+
+        W.close()
+
+        self.couchbaseExecQuery(tmp_file)
+
+
+    def import_ldif_couchebase(self):
+        
+        for ldif in self.ldif_files:
+            self.logIt("Importing ldif file %s to Couchebase" % ldif)
+            documents = get_documents_from_ldif(ldif,  self.inumOrg)
+            
+            ldif_base_name = os.path.basename(ldif)
+            name, ext = os.path.splitext(ldif_base_name)
+
+            if not os.path.exists(self.n1qlOutputFolder):
+                os.mkdir(self.n1qlOutputFolder)
+
+            tmp_file = os.path.join(self.n1qlOutputFolder, name+'.n1ql')
+            
+            with open(tmp_file, 'w') as o:
+                for e in documents:
+                    bucket = 'site' if 'site' in ldif else 'gluu'
+                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (bucket, e[0], json.dumps(e[1]))
+                    o.write(query)
+
+            self.couchbaseExecQuery(tmp_file)
+        
+    def changeCouchbasePort(self, service, port):
+        self.logIt("Changing Couchbase servive %s port to %s from file " % (service, str(port)))
+        couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
+        couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
+
+        if os.path.exists(couchebaseDatConfigFile):
+            os.remove(couchebaseDatConfigFile)
+
+        conf = open(couchebaseStaticConfigFile).readlines()
+
+        for i in range(len(conf)):
+
+            if service in conf[i]:
+                conf[i] = '{%s, %s}.\n' % (service, str(port))
+                break
+        else:
+            conf.append('{%s, %s}.\n' % (service, str(port)))
+
+        with open(couchebaseStaticConfigFile, 'w') as w:
+            w.write(''.join(conf))
+
+
+    def isCouchbaseStarted(self):
+        # check couchbase in every 5 secs for 12 times.
+        cmd = "netstat -lnp | grep 28091"
+        for i in range(12):
+            result = os.popen(cmd).read()
+            self.logIt("Checking if couchbase was started. Try {0} ...".format(i+1))
+            if result.strip().endswith('beam.smp'):
+                return True
+            else:
+                self.logIt("Couchbase was not started. Will retry after 5 seconds.")
+                time.sleep(5)
+                
+        self.logIt("Couchbase was not started in a minute. Giving up.", True)
+
+
+    def checkIfGluuBucketReady(self):
+        import urllib2
+        apiUrl = 'http://localhost:{0}/pools/default/buckets'.format(self.couchebaseBucketClusterPort)
+        for i in range(12):
+            self.logIt("Checking if gluu bucket is ready. Try %d ..." % (i+1))
+            try:
+                self.logIt("Connecting to %s" % apiUrl)
+                request = urllib2.Request(apiUrl) 
+                base64string = base64.encodestring('%s:%s' % (self.couchebaseClusterAdmin, self.ldapPass)).replace('\n', '')
+                request.add_header("Authorization", "Basic %s" % base64string) 
+                result = urllib2.urlopen(request)
+                response = result.read()
+
+                response_json = json.loads(response)
+
+                for bucket in response_json:
+                    if bucket['name'] == 'gluu':
+                        time.sleep(10)
+                        return True
+            except:
+                self.logIt("Connection to %s failed " % apiUrl)
+                time.sleep(5)
+
+        sys.exit("Couchbase server was not ready. Giving up")
+
+
+    def restartCouchebase(self):
+        self.logIt("Restarting Couchbase")
+        service_path = self.detect_service_path()
+
+        self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
+        
+        self.run((service_path, 'start', 'couchbase-server'), useWait=True)
+
+        #wait for couchbase start successfully
+        if not self.isCouchbaseStarted():
+            log_line = "Couchbase was not started in a minute. Terminating installation."
+            self.logIt(log_line, True)
+            print (log_line)
+            sys.exit(log_line)
+
+    def couchbaseSSL(self):
+        self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
+        cmd_args = [
+                self.couchbaseCli, 'ssl-manage',
+                '--cluster', self.couchebaseHost,
+                '--username', self.couchebaseClusterAdmin,
+                '--password', self.ldapPass,
+                '--cluster-cert-info', '>', self.couchebaseCert
+            ]
+
+        self.logIt("Running command: " + ' '.join(cmd_args))
+        os.system(' '.join(cmd_args))
+        
+        cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % self.hostname, \
+                  "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
+                  "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
+                
+        self.run(cmd_args)
+        
+        
+    def couchbaseProperties(self):
+        prop_file = os.path.basename(self.gluuCouchebaseProperties)
+        prop = open(os.path.join(self.templateFolder, prop_file)).read()
+    
+        
+        prop_dict = {
+                    'couchbase_servers': 'localhost',
+                    'couchbase_server_user': 'admin',
+                    'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
+                    'couchbase_buckets': ' '.join(self.couchbaseBuckets),
+                    'default_bucket': 'gluu',
+                    'user_mapping': 'people, groups',
+                    'session_mapping': 'sessions',
+                    'static_mapping': 'statistic',
+                    'site_mapping': 'site',
+                    'encryption_method': 'SSHA-256',
+                    'ssl_enabled': 'true',
+                    'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
+                    'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
+                    'inumAppliance': self.inumAppliance,
+                    'certFolder': self.certFolder,
+                    'gluuOptPythonFolder': self.gluuOptPythonFolder
+                    }
+
+        prop = prop % prop_dict
+        
+        out_file = os.path.join(self.outputFolder, prop_file)
+        self.writeFile(out_file, prop)
+        self.writeFile(self.gluuCouchebaseProperties, prop)
+        
+        
+
+    def install_couchbase_server(self):
+        self.couchbaseInstall()
+        self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
+        self.restartCouchebase()
+        self.couchebaseCreateCluster()
+        self.couchbaseSSL()
+        
+        #execute this fonctions for 'site' when couchbase is backend
+        self.couchebaseCreateBucket('gluu')
+        if not self.checkIfGluuBucketReady():
+            sys.exit("Couchbase was not ready")
+        self.couchebaseCreateIndexes('gluu')
+        
+        self.import_ldif_couchebase()
+        self.couchbaseProperties()
         
 ############################   Main Loop   #################################################
 
@@ -3513,7 +3917,7 @@ if __name__ == '__main__':
         if os.path.isdir(installObject.openldapBaseFolder):
             installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
             installObject.render_custom_templates(setupOptions['importLDIFDir'])
-            installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+            installObject.import_custom_ldif(setupOptions['importLDIFDir'])
             installObject.logIt("Setup is exiting now after import of ldifs generated.", True)
             sys.exit(2)
 
@@ -3593,9 +3997,8 @@ if __name__ == '__main__':
             
             if 'importLDIFDir' in setupOptions.keys():
                 progress_bar(35, "Importing LDIF files")
-                if installObject.ldap_type == 'openldap':
-                    installObject.render_custom_templates(setupOptions['importLDIFDir'])
-                    installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+                installObject.render_custom_templates(setupOptions['importLDIFDir'])
+                installObject.import_custom_ldif(setupOptions['importLDIFDir'])
 
                 progress_bar(35, "Completed")
             else:
