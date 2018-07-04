@@ -535,6 +535,7 @@ class Setup(object):
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
+        self.couchebaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
         
         self.couchebaseBucketClusterPort = 28091
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
@@ -3483,6 +3484,15 @@ class Setup(object):
         self.logIt("Found package '%s' for install" % packageName)
         self.installPackage(packageName)
 
+        if self.os_type == 'ubuntu' and self.os_version == '16':
+            script_name = os.path.basename(self.couchebaseInitScript)
+            target_file = os.path.join('/etc/init.d', script_name)
+            self.copyFile(self.couchebaseInitScript, target_file)
+            self.run([self.cmd_chmod, '+x', target_file])
+            self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
+            self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
+            
+
     def couchebaseCreateCluster(self, clusterRamsize=1024, clusterName=None):
         cmd_args = [
                 self.couchbaseCli, 'cluster-init',
@@ -3603,7 +3613,7 @@ class Setup(object):
             self.couchbaseExecQuery(tmp_file)
 
     def changeCouchbasePort(self, service, port):
-        self.logIt("Changing Couchbase servive %s port to %s from file " % (service, str(port)))
+        self.logIt("Changing Couchbase service %s port to %s from file " % (service, str(port)))
         couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
         couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
 
@@ -3671,9 +3681,12 @@ class Setup(object):
         self.logIt("Restarting Couchbase")
         service_path = self.detect_service_path()
 
-        self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
-        
-        self.run((service_path, 'start', 'couchbase-server'), useWait=True)
+        if self.os_type == 'ubuntu' and self.os_version == '16':
+            self.run((service_path, 'couchbase-server', 'stop'), useWait=True)
+            self.run((service_path, 'couchbase-server', 'start'), useWait=True)
+        else:
+            self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
+            self.run((service_path, 'start', 'couchbase-server'), useWait=True)
 
         #wait for couchbase start successfully
         if not self.isCouchbaseStarted():
