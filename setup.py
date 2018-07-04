@@ -3577,9 +3577,12 @@ class Setup(object):
         self.couchbaseExecQuery(tmp_file)
 
 
-    def import_ldif_couchebase(self):
+    def import_ldif_couchebase(self, ldif_file_list=[]):
         
-        for ldif in self.ldif_files:
+        if not ldif_file_list:
+            ldif_file_list = self.ldif_files[:]
+        
+        for ldif in ldif_file_list:
             self.logIt("Importing ldif file %s to Couchebase" % ldif)
             documents = get_documents_from_ldif(ldif,  self.inumOrg)
             
@@ -3598,7 +3601,7 @@ class Setup(object):
                     o.write(query)
 
             self.couchbaseExecQuery(tmp_file)
-        
+
     def changeCouchbasePort(self, service, port):
         self.logIt("Changing Couchbase servive %s port to %s from file " % (service, str(port)))
         couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
@@ -3747,6 +3750,17 @@ class Setup(object):
         self.import_ldif_couchebase()
         self.couchbaseProperties()
         
+    def loadTestData(self):
+        
+        self.logIt("Loading test ldif files")
+        ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
+        scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
+        ldif_files = [ox_auth_test_ldif, scim_test_ldif]
+        
+        self.import_ldif_couchebase(ldif_files)
+        
+        
+        
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -3767,13 +3781,14 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -e   Download JCE 1.8 and install it"
+    print "    -t   Load test data"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrev", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -3814,6 +3829,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == "-e":
             setupOptions['installJce'] = True
+        elif opt == "-t":
+            setupOptions['loadTestData'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
@@ -3842,6 +3859,7 @@ if __name__ == '__main__':
         'installAsimba': False,
         'installOxAuthRP': False,
         'installPassport': False,
+        'loadTestData': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
         'installJce': False
@@ -3996,7 +4014,12 @@ if __name__ == '__main__':
             installObject.change_rc_links()
             progress_bar(34, "Saving properties")
             installObject.save_properties()
-            
+
+            if setupOptions['loadTestData']:
+                progress_bar(34, "Loading test data")
+                installObject.loadTestData()
+
+
             if 'importLDIFDir' in setupOptions.keys():
                 progress_bar(35, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
