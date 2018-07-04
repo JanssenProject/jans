@@ -3637,26 +3637,28 @@ class Setup(object):
 
 
     def checkIfGluuBucketReady(self):
-        import urllib2
-        apiUrl = 'http://localhost:{0}/pools/default/buckets'.format(self.couchebaseBucketClusterPort)
+            
+        args = [
+                self.couchebaseCbq, 
+                '-q', '-s', 'select 1', 
+                '-e', 'http://{0}'.format(self.couchebaseHost), 
+                '-u', self.couchebaseClusterAdmin, 
+                '-p', self.ldapPass
+                ]
+
         for i in range(12):
-            self.logIt("Checking if gluu bucket is ready. Try %d ..." % (i+1))
+            self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
             try:
-                self.logIt("Connecting to %s" % apiUrl)
-                request = urllib2.Request(apiUrl) 
-                base64string = base64.encodestring('%s:%s' % (self.couchebaseClusterAdmin, self.ldapPass)).replace('\n', '')
-                request.add_header("Authorization", "Basic %s" % base64string) 
-                result = urllib2.urlopen(request)
-                response = result.read()
-
-                response_json = json.loads(response)
-
-                for bucket in response_json:
-                    if bucket['name'] == 'gluu':
-                        time.sleep(10)
-                        return True
+                self.logIt("Running command: " + ' '.join(args))
+                child = subprocess.Popen(args,  stdout=subprocess.PIPE)
+                result = child.communicate()[0]
+                rs_js = json.loads(result)
+                
+                if rs_js['status']=='success':
+                    self.logIt("Bucket is ready for N1QL queries")
+                    return True
             except:
-                self.logIt("Connection to %s failed " % apiUrl)
+                self.logIt("Connection to N1QL service failed. Rerty im 5 seconds ...")
                 time.sleep(5)
 
         sys.exit("Couchbase server was not ready. Giving up")
