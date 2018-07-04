@@ -228,15 +228,6 @@
 			-->
 
 			<requestors signing="FALSE">
-				<requestor id="http://sptest2.gluu.org/secure" 
-						signing="FALSE">
-					<metadata>
-						<file>${webapp.root}/WEB-INF/sample-data/sptest2.xml</file>
-						<!-- when metadata is sourced from a URL instead, the configuration could look like this:
-						<http timeout="10000" url="http://my.serviceprovider.com/sp/metadata" />
-						 -->
-					</metadata>
-				</requestor>
 			</requestors>
 			
 			<!-- 

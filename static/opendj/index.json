@@ -193,6 +193,20 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxTicket",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	}, 
+		
+	{
+		"attribute": "oxAuthCreation",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	}
 
 ]
