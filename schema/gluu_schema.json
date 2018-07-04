@@ -4202,7 +4202,8 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxId",
-                "oxSectorIdentifier"
+                "oxSectorIdentifier",
+                "oxAuthClientId"
             ],
             "must": [
                 "objectclass"
@@ -4808,6 +4809,7 @@
                 "oxAuthRequireAuthTime",
                 "oxAuthResponseType",
                 "oxAuthScope",
+                "oxAuthClaim",
                 "oxAuthSectorIdentifierURI",
                 "oxAuthSignedResponseAlg",
                 "oxAuthSubjectType",

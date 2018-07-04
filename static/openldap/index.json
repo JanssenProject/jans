@@ -139,6 +139,15 @@
         {
             "attribute": "gluuStatus",
             "index": "eq"
+        },
+        {
+            "attribute": "oxTicket",
+            "index": "eq"
+        }, 
+        {
+            "attribute": "oxAuthCreation",
+            "index": "eq"
         }
+        
     ]
 }
