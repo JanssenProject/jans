@@ -3653,6 +3653,7 @@ class Setup(object):
 
                 for bucket in response_json:
                     if bucket['name'] == 'gluu':
+                        time.sleep(10)
                         return True
             except:
                 self.logIt("Connection to %s failed " % apiUrl)
