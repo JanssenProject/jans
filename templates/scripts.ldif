@@ -28,6 +28,8 @@ description: Passport authentication module
 displayName: passport_social
 gluuStatus: false
 inum: %(inumOrg)s!2FDB.CF02
+oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
+oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
 oxConfigurationProperty: {"value1":"generic_local_attributes_list","value2":"uid, mail, cn, displayName, givenName, sn, provider","description":""}
 oxLevel: 60
@@ -145,7 +147,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample client authz UMA RPT Policy
-displayName: uma_client_authz_rpt_policy
+displayName: scim_access_policy
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F9A5
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
