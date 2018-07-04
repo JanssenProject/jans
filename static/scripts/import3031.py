@@ -28,6 +28,8 @@ import base64
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
+from ldifschema_utils import parse_open_ldap_schema
+from ldap.schema import AttributeType
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -42,6 +44,8 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
+
+
 
 
 def progress_bar(t, n, act='', finished=None):
@@ -70,7 +74,7 @@ class DBLDIF(LDIFParser):
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
-        self.sdb[dn] = entry
+        self.sdb[str(dn)] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -303,12 +307,45 @@ class Migration(object):
         logging.info("Stopping OpenLDAP Server.")
         stop_msg = self.getOutput([self.service, 'solserver', 'stop'])
         output = self.getOutput([self.service, 'solserver', 'status'])
+        self.fix_openldap_ePSA()
         if "is not running" in output:
             return
         else:
             logging.error("Couldn't stop the OpenLDAP server.")
             logging.error(stop_msg)
             sys.exit(1)
+
+        
+
+    def fix_openldap_ePSA(self):
+        schema_file = '/opt/symas/etc/openldap/schema/eduperson.schema'
+        
+        schema = parse_open_ldap_schema(schema_file)
+
+        for a in schema['attributes']:
+            if 'eduPersonScopedAffiliation' in a.names:
+                break
+        else:
+            logging.info("Fixing eduperson.schema for eduPersonScopedAffiliation")
+            a_str = "( 1.3.6.1.4.1.5923.1.1.1.9 NAME 'eduPersonScopedAffiliation' DESC 'eduPerson per Internet2 and EDUCAUSE' EQUALITY caseIgnoreMatch SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' )"
+
+            ePSA_attr = AttributeType(a_str)
+
+            schema['attributes'].append(ePSA_attr)
+
+            for o in schema['objectclasses']:
+                if 'eduPerson' in o.names:
+                    may_list = list(o.may)
+                    may_list.append('eduPersonScopedAffiliation')
+                    o.may = tuple(may_list)
+
+
+            with open(schema_file, 'w') as outfile:
+                for atyp in schema['attributes']:
+                    outfile.write('attributetype {}\n'.format(atyp.__str__()))
+                for ocls in schema['objectclasses']:
+                    outfile.write('objectclass {}\n'.format(ocls.__str__()))
+
 
     def startSolserver(self):
         logging.info("Starting OpenLDAP Server.")
@@ -446,14 +483,15 @@ class Migration(object):
     def copyCustomSchema(self):
 
         if self.ldap_type == 'openldap':
+            if os.path.exists(self.backupDir + "/custom.schema"):
+                custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
+                outfile = open(custom_schema, 'w')
+            
+                output = self.readFile(self.backupDir + "/custom.schema")
 
-            custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-            outfile = open(custom_schema, 'w')
-            output = self.readFile(self.backupDir + "/custom.schema")
-
-            outfile.write("\n")
-            outfile.write(output)
-            outfile.close()
+                outfile.write("\n")
+                outfile.write(output)
+                outfile.close()
 
         else:
             return
@@ -510,6 +548,19 @@ class Migration(object):
 
         ldif_writer = LDIFWriter(processed_fp)
 
+
+        # Determine current primary key
+        
+        appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
+        appliences.parse()
+        
+        for entry in appliences.entries:
+            if 'oxIDPAuthentication' in entry:
+                oxIDPAuthentication = json.loads(entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                primaryKey = idp_config['primaryKey']
+                localPrimaryKey = idp_config['localPrimaryKey']
+
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
@@ -529,7 +580,14 @@ class Migration(object):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
 
-
+            if 'ou=appliances' in dn:
+                if 'oxIDPAuthentication' in new_entry:
+                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                    idp_config = json.loads(oxIDPAuthentication['config'])
+                    idp_config['primaryKey'] = primaryKey
+                    idp_config['localPrimaryKey'] = localPrimaryKey
+                    oxIDPAuthentication['config'] = json.dumps(idp_config)
+                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
 
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
@@ -539,8 +597,6 @@ class Migration(object):
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
-
-
 
             for attr in old_entry.keys():
                 if attr in ignoreList:
@@ -566,13 +622,6 @@ class Migration(object):
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
                         
-            if '3.1.3' in self.oxVersion:
-                if dn == attrib_dn:
-                    if 'oxAuthClaimName' in new_entry and not 'member_off' in new_entry['oxAuthClaimName']:
-                        new_entry['oxAuthClaimName'].append('member_off')
-                    else:
-                        new_entry['oxAuthClaimName'] = ['member_off']
-
             
             ldif_writer.unparse(dn, new_entry)
         
@@ -583,6 +632,8 @@ class Migration(object):
         
         ldif_shelve_dict = {}
         
+        sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
+
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
             if "o=site" in dn:
@@ -591,12 +642,14 @@ class Migration(object):
                 continue  # Already processed
 
             cur_ldif_file = old_dn_map[dn]
+
             if not cur_ldif_file in ldif_shelve_dict:
                 sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
                 sdb.parse()
                 ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
-            entry = ldif_shelve_dict[cur_ldif_file][dn]
+            entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
+
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -613,13 +666,35 @@ class Migration(object):
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
                 entry[attr] = attr_values
+                
 
+            if '3.1.3' in self.oxVersion:
+
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
+                        entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        entry['oxAuthClaimName'] = ['member_off']
+
+                if sector_identifiers in dn:
+                    if dn.startswith('inum'):
+                        
+                        dn = dn.replace('inum=', 'oxId=')
+                        oxId = entry['inum'][:]
+                        entry['oxId'] = oxId
+                        del entry['inum']
+                        
+                if 'ou=clients' in dn:
+                    if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
+                        entry['oxAuthGrantType'] = ['authorization_code']
+                
+            
             ldif_writer.unparse(dn, entry)
 
         # Finally
         processed_fp.close()
 
-        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+        progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
 
         nodn = sum(1 for line in open(self.processTempFile))
 
@@ -648,6 +723,7 @@ class Migration(object):
                         outfile.write(line)
 
 
+
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -670,6 +746,7 @@ class Migration(object):
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
+
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
@@ -874,8 +951,12 @@ class Migration(object):
 
         if self.ldap_type == 'opendj':
             bindDn = 'cn=directory manager'
+            lfilter = '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))'
+            lcert = '/etc/certs/opendj.crt'
         else:
             bindDn = 'cn=directory manager,o=gluu'
+            lfilter = '(uid={user})'
+            lcert = '/etc/certs/openldap.crt'
 
         inumAppliance = self.getProp('inumAppliance', 
                     '/install/community-edition-setup/setup.properties.last')
@@ -892,6 +973,28 @@ class Migration(object):
             jdata['inumConfig']['bindDN'] = 'cn=directory manager'
             jsons = json.dumps(jdata)
             con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
+
+        prop_file = '/opt/shibboleth-idp/conf/ldap.properties'
+        if os.path.exists(prop_file):
+            f=open(prop_file).readlines()
+
+            for i in range(len(f)):
+                l = f[i]
+                ls = l.split('=')
+                if ls:
+                    if ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = {0}\n'.format(lfilter)
+
+                    elif ls[0].strip() == 'idp.authn.LDAP.trustCertificates':
+                        f[i] = 'idp.authn.LDAP.trustCertificates                = {0}\n'.format(lcert)
+
+                    elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
+                        f[i] = 'idp.authn.LDAP.bindDN                           = {0}\n'.format(bindDn)
+
+            with open(prop_file,'w') as w:
+                w.write(''.join(f))
+
+            self.getOutput(['chown', 'jetty:jetty', prop_file])
 
 
     def migrate(self):
