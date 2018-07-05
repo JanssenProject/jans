@@ -289,7 +289,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             responseTypes.add(ResponseType.fromString(type));
         }
 
-        String clientName = "oxD client for site: " + rp.getOxdId();
+        String clientName = "oxd client for rp: " + rp.getOxdId();
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
             rp.setClientName(clientName);
