@@ -133,7 +133,7 @@ public class UmaGatherer {
         String newTicket = umaPermissionService.changeTicket(permissions, permissions.get(0).getAttributes());
 
         String url = constructRedirectUri(session, context, newTicket);
-        if (StringUtils.isBlank(url)) {
+        if (StringUtils.isNotBlank(url)) {
             facesService.redirectToExternalURL(url);
         } else {
             log.debug("Redirect to claims_redirect_uri is skipped because it was not provided during request.");
