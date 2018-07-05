@@ -5,6 +5,7 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/login-template.xhtml">
+
     <f:metadata>
         <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
     </f:metadata>
@@ -172,6 +173,9 @@
 
         <div class="container">
             <div id="content" class="sign-in-page">
+                <noscript>
+                    <b>#{msgs['passport.javascriptRequired']}</b>
+                </noscript>
                 <div class="row">
                     <div class="col-xs-12 col-md-6">
                         <div class="panel panel-default panel-order">
@@ -180,6 +184,7 @@
                                 <h:form id="loginForm">
                                     <h:panelGroup rendered="#{not identity.loggedIn}">
                                         <p class="text-danger errormsg" style="display:none"></p>
+                                        <h:inputHidden id="provider"/>
                                         <div class="row form-group">
                                             <h:messages class="text-danger"/>
                                             <span class="input-name col-md-3">
@@ -209,15 +214,6 @@
                                                                  action="#{authenticator.authenticate}"
                                                                  class="btn btn-login"/>
                                             </div>
-                                            <h:panelGroup
-                                                    id="registerId" style="display:none" class="col-md-3">
-                                                <div id="submit_block" class="login_input">
-                                                    <h:commandButton id="registerButton"
-                                                                     value="#{msgs['login.register']}"
-                                                                     action="#{authenticator.authenticate}"
-                                                                     class="btn btn-login"/>
-                                                </div>
-                                            </h:panelGroup>
                                         </div>
 
                                         <div class="row">
@@ -302,32 +298,16 @@
         </div>
 
         <script type="text/javascript">
+		var behaviour = "${identity.getWorkingParameter('behaviour')}";
 
-            function idp_redirect(provider, isSaml) {
-
-                var APIURL = window.location.origin;
-                var send_url = APIURL + "/passport/auth/";
-                if (isSaml) {
-                	send_url += "saml/";
-                }
-                send_url += provider + "/";
-
-                jQuery.ajax({
-                    url: APIURL + "/passport/token",
-                    success: function (result) {
-                        token = result.token_;
-                        window.location.href = send_url + token;
-                    },
-                    error: function (error) {
-                        jQuery('.errormsg').html("An unknown error occurred");
-                        jQuery('.errormsg').prop('style', 'display:block');
-                    }
-                });
-
+            function idp_redirect(provider) {
+                var form = document.forms.loginForm;
+                form["loginForm:provider"].value = provider;
+                form["loginForm:loginButton"].click();
             }
 
-            function dynamic_link(provider, logo_img, isSaml) {
-            	imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="' + provider + '" onclick="idp_redirect(\'' + provider + '\',' + isSaml + ')" src="' + logo_img + '"></img>';
+            function dynamic_link(provider, logo_img) {
+            	imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="' + provider + '" onclick="idp_redirect(\'' + provider + '\')" src="' + logo_img + '"></img>';
             	leftMarkup = '<div class="col-xs-3 col-sm-1 col-md-2">' + imgMarkup + '</div>';
             	rightMarkup = '<div class="col-xs-9 col-sm-11 col-md-10"><h4>' + provider + '</h4></div>'
             	$('#add_here').append('<div class="row">' + leftMarkup + rightMarkup + '<div class="clearfix"></div><hr /></div>');
@@ -337,27 +317,30 @@
 
                 var APIURL = window.location.origin;
 
-                //passport-based provider
-                $.get(APIURL + "/passport/passportstrategies", function (data) {
+		if (behaviour == "" || behaviour == "social") {
+			//passport-based provider
+			$.get(APIURL + "/passport/passportstrategies", function (data) {
 
-                    var providers = JSON.parse(data);
-                    for (var name in providers) {
-                        dynamic_link(name, providers[name].logo_img, false);
-                    }
+			    var providers = JSON.parse(data);
+			    for (var name in providers) {
+				dynamic_link(name, providers[name].logo_img);
+			    }
 
-                });
+			});
+                }
+		if (behaviour == "" || behaviour == "saml") {
+			//saml provider
+			$.get(APIURL + "/passport/saml_config", function (data) {
 
-                //saml provider
-                $.get(APIURL + "/passport/saml_config", function (data) {
+			    var providers = JSON.parse(data);
+			    for (var name in providers) {
+				if (providers[name].enable == "true") {
+				    dynamic_link(name, providers[name].logo_img);
+				}
+			    }
 
-                    var providers = JSON.parse(data);
-                    for (var name in providers) {
-                        if (providers[name].enable == "true") {
-                            dynamic_link(name, providers[name].logo_img, true);
-                        }
-                    }
-
-                });
+			});
+		}
 
                 //error message display
                 var errormsg = window.location.href.split("=");
