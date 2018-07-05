@@ -3640,6 +3640,18 @@ class Setup(object):
             w.write(''.join(conf))
 
 
+        capi_conf = os.path.join(self.couchebaseInstallDir, 'etc/couchdb/default.d/capi.ini')
+
+        f = open(capi_conf).readlines()
+
+        for i in range(len(f)):
+            if f[i].startswith('bind_address'):
+                f[i] = 'bind_address = 127.0.0.1\n'
+
+        with open(capi_conf, 'w') as w:
+            w.write(''.join(f))
+
+
     def isCouchbaseStarted(self):
         # check couchbase in every 5 secs for 12 times.
         cmd = "netstat -lnp | grep 28091"
