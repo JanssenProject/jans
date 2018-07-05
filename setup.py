@@ -536,8 +536,10 @@ class Setup(object):
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchebaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
+        self.couchbaseClusterRamsize = 1024 #in MB
         
         self.couchebaseBucketClusterPort = 28091
+
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
         self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
@@ -1439,39 +1441,39 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            progress_bar(2, "Downloading oxAuth war file")
+            progress_bar(4, "Downloading oxAuth war file")
             
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            progress_bar(2, "Downloading oxTrust war file")
+            progress_bar(4, "Downloading oxTrust war file")
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
             distAsimbaPath = '%s/%s' % (self.distGluuFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
-                progress_bar(2, "Downloading Asimba war file")
+                progress_bar(4, "Downloading Asimba war file")
                 self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                progress_bar(2, "Downloading oxAuth RP war file")
+                progress_bar(4, "Downloading oxAuth RP war file")
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
             
-            progress_bar(2, "Downloading Shibboleth IDP v3 war file")
+            progress_bar(4, "Downloading Shibboleth IDP v3 war file")
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            progress_bar(2, "Downloading Shibboleth IDP v3 keygenerator")
+            progress_bar(4, "Downloading Shibboleth IDP v3 keygenerator")
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            progress_bar(2, "Downloading Shibboleth IDP v3 binary distributive file")
+            progress_bar(4, "Downloading Shibboleth IDP v3 binary distributive file")
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
         jceArchive = 'jce_policy-8.zip'
         jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
         if self.installJce and not os.path.exists(jceArchivePath):
-            progress_bar(2, "Downloading JCE 1.8 zip file")
+            progress_bar(4, "Downloading JCE 1.8 zip file")
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
 
 
@@ -2401,6 +2403,11 @@ class Setup(object):
                 self.ldap_type = backend_types[int(option)-1][1]
 
                 if self.ldap_type == 'couchbase':
+                    print ('  Please note that you have to update your firewall configuration to\n'
+                            '  allow connections to the following ports:\n'
+                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                     self.install_couchbase = True
 
@@ -3580,7 +3587,7 @@ class Setup(object):
         if not 'dn' in index_list:
             index_list.insert(0, 'dn')
 
-        index_names = []
+        index_names = ['def_primary']
         for ind in index_list:
             index_name = 'def_' + ind
             W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
@@ -3593,7 +3600,7 @@ class Setup(object):
         self.couchbaseExecQuery(tmp_file)
 
 
-    def import_ldif_couchebase(self, ldif_file_list=[]):
+    def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
         
         if not ldif_file_list:
             ldif_file_list = self.ldif_files[:]
@@ -3612,8 +3619,21 @@ class Setup(object):
             
             with open(tmp_file, 'w') as o:
                 for e in documents:
-                    bucket = 'site' if 'site' in ldif else 'gluu'
-                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (bucket, e[0], json.dumps(e[1]))
+
+                    if bucket:
+                        cur_bucket = bucket
+                    elif e[0].startswith('site_@'):
+                        cur_bucket = 'gluu_site'
+                    #elif e[0].startswith('group_@') or e[0].startswith('people_@'):
+                    #    cur_bucket = 'gluu_user'
+                    elif e[0].startswith('metric_@'):
+                        cur_bucket = 'gluu_statistic'
+                    elif e[0].startswith('sessions_@'):
+                        cur_bucket = 'gluu_session'
+                    else:
+                        cur_bucket = 'gluu'
+                    
+                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
                     o.write(query)
 
             self.couchbaseExecQuery(tmp_file)
@@ -3654,11 +3674,13 @@ class Setup(object):
 
     def isCouchbaseStarted(self):
         # check couchbase in every 5 secs for 12 times.
-        cmd = "netstat -lnp | grep 28091"
+        cmd = "netstat -lnp | grep {0}".format(self.couchebaseBucketClusterPort)
         for i in range(12):
+            self.logIt("Checking if couchbase was started. Try {0} with command {1}".format(i+1, cmd))
             result = os.popen(cmd).read()
-            self.logIt("Checking if couchbase was started. Try {0} ...".format(i+1))
             if result.strip().endswith('beam.smp'):
+                #still need to wait couple of seconds
+                time.sleep(5)
                 return True
             else:
                 self.logIt("Couchbase was not started. Will retry after 5 seconds.")
@@ -3706,12 +3728,7 @@ class Setup(object):
             self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
             self.run((service_path, 'start', 'couchbase-server'), useWait=True)
 
-        #wait for couchbase start successfully
-        if not self.isCouchbaseStarted():
-            log_line = "Couchbase was not started in a minute. Terminating installation."
-            self.logIt(log_line, True)
-            print (log_line)
-            sys.exit(log_line)
+
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -3762,21 +3779,39 @@ class Setup(object):
         out_file = os.path.join(self.outputFolder, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
-        
-        
+
 
     def install_couchbase_server(self):
         self.couchbaseInstall()
         self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
         self.restartCouchebase()
-        self.couchebaseCreateCluster()
-        self.couchbaseSSL()
         
-        #execute this fonctions for 'site' when couchbase is backend
-        self.couchebaseCreateBucket('gluu')
+        #wait for couchbase start successfully
+        if not self.isCouchbaseStarted():
+            log_line = "Couchbase was not started in a minute. Terminating installation."
+            self.logIt(log_line, True)
+            print (log_line)
+            sys.exit(log_line)
+        
+        self.couchebaseCreateCluster(clusterRamsize=self.couchbaseClusterRamsize)
+        self.couchbaseSSL()
+
+        #TO DO: calculations of bucketRamsize is neaded
+        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize)
+        #self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_session', bucketType='memcached', bucketRamsize=self.couchbaseClusterRamsize/5)
+
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
+            
+        #TO DO: what indexes should be created in each bucket?
         self.couchebaseCreateIndexes('gluu')
+        #self.couchebaseCreateIndexes('gluu_user')
+        #self.couchebaseCreateIndexes('gluu_statistic')
+        #self.couchebaseCreateIndexes('gluu_site')
+        
         
         self.import_ldif_couchebase()
         self.couchbaseProperties()
