@@ -657,7 +657,10 @@ class Setup(object):
             
             txt += 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n"
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
-            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            
+            if self.ldap_type != 'couchbase':
+                txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            
             txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
             txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
@@ -2410,12 +2413,15 @@ class Setup(object):
         else:
             self.installHttpd = False
 
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
-        if promptForShibIDP == 'y':
-            self.shibboleth_version = 'v3'
-            self.installSaml = True
-        else:
-            self.installSaml = False
+        
+        if self.ldap_type != 'couchbase':
+            promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+            if promptForShibIDP == 'y':
+                self.shibboleth_version = 'v3'
+                self.installSaml = True
+            else:
+                self.installSaml = False
+        
 
         promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
         if promptForAsimba == 'y':
