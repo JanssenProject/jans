@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Supports Returning Claims in ID Token
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version July 4, 2018
  */
 public class SupportsReturningClaimsInIdToken extends BaseTest {
 
@@ -53,6 +53,9 @@ public class SupportsReturningClaimsInIdToken extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setClaims(Arrays.asList(
+                JwtClaimName.NAME,
+                JwtClaimName.EMAIL));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
