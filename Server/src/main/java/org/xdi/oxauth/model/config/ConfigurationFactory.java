@@ -490,7 +490,7 @@ public class ConfigurationFactory {
                 ldapFileLastModifiedTime = ldapFile.lastModified();
             }
 
-            PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration(ldapFileName, ldapConfiguration, org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory.class, ldapFileLastModifiedTime);
+            PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration(ldapFileName, ldapConfiguration, org.gluu.persist.ldap.impl.LdapEntryManagerFactory.class, ldapFileLastModifiedTime);
 
             return persistenceConfiguration;
         } catch (Exception e) {
