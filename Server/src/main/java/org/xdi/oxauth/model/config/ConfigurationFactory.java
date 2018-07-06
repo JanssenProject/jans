@@ -35,7 +35,7 @@ import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.ConfigurationEvent;
@@ -69,7 +69,7 @@ public class ConfigurationFactory {
 	@Inject
 	private Event<String> event;
 
-	@Inject @Named(AppInitializer.PERSISTENCE_ENTRY_MANAGER_NAME)
+	@Inject @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject

@@ -6,6 +6,18 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.GluuStatus;
@@ -18,17 +30,6 @@ import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
-
-import javax.annotation.Nullable;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Provides operations with users.

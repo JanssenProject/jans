@@ -6,16 +6,17 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.service.ScopeService;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.HashSet;
-import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.ScopeService;
 
 /**
  * Validates the scopes received for the authorize web service.

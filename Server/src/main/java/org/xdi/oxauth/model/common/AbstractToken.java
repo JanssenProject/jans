@@ -6,18 +6,18 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
-
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Calendar;
 import java.util.Date;
+
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.token.HandleTokenFactory;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.util.JwtUtil;
 
 /**
  * <p>

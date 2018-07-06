@@ -1,18 +1,19 @@
 package org.xdi.oxauth.service.logger;
 
+import java.io.File;
+import java.util.logging.LogManager;
+
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
-
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.File;
-import java.util.logging.LogManager;
 
 /**
  * Created by eugeniuparvan on 8/3/17.

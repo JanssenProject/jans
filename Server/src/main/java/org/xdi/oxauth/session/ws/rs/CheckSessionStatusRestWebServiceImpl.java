@@ -6,17 +6,8 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.slf4j.Logger;
-import org.xdi.model.security.Identity;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
+import java.io.IOException;
+import java.util.Date;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -28,8 +19,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.io.IOException;
-import java.util.Date;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * @author Yuriy Movchan

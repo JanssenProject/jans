@@ -6,14 +6,29 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.*;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.U2fConstants;
+import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
@@ -29,10 +44,7 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import java.util.List;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint allows to start and finish U2F registration process

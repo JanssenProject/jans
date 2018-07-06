@@ -6,7 +6,9 @@
 
 package org.xdi.oxauth.model.token;
 
-import com.google.common.base.Strings;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -26,8 +28,7 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 
-import java.util.Date;
-import java.util.List;
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

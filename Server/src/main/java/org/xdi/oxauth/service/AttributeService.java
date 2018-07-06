@@ -6,17 +6,18 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum

@@ -28,8 +28,8 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.persist.model.base.GluuStatus;
@@ -76,14 +76,14 @@ public class AuthenticationService {
     private Credentials credentials;
 
     @Inject
-    @Named(AppInitializer.PERSISTENCE_AUTH_CONFIG_NAME)
+    @Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    @Named(AppInitializer.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+    @Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
     private List<PersistenceEntryManager> ldapAuthEntryManagers;
 
     @Inject
