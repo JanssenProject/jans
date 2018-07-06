@@ -6,7 +6,18 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
@@ -33,16 +44,7 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum

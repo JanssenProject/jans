@@ -1,7 +1,6 @@
 package org.xdi.oxauth.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Iterator;
 
 import javax.faces.FacesException;
 import javax.faces.application.ConfigurableNavigationHandler;
@@ -11,7 +10,9 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.event.ExceptionQueuedEventContext;
-import java.util.Iterator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by eugeniuparvan on 8/29/17.

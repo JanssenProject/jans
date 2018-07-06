@@ -36,7 +36,6 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 

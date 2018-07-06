@@ -27,7 +27,7 @@ import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
-import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
 import org.xdi.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 import org.xdi.service.custom.script.ExternalScriptService;
@@ -47,7 +47,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";
 
-    @Inject @Named(AppInitializer.PERSISTENCE_AUTH_CONFIG_NAME)
+    @Inject @Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
