@@ -13,12 +13,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

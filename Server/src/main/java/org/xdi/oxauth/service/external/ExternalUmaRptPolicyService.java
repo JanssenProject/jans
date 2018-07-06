@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.service.external;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -17,16 +28,6 @@ import org.xdi.service.LookupService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides factory methods needed to create external UMA authorization policies extension

@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.fido.u2f;
 
+import java.util.Date;
+
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-
-import java.util.Date;
 
 /**
  * U2F base request

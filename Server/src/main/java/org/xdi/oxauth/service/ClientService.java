@@ -6,17 +6,25 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 
-import org.gluu.persist.exception.EntryPersistenceException;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.codehaus.jettison.json.JSONArray;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.search.filter.Filter;
-import org.codehaus.jettison.json.JSONArray;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.Scope;
@@ -29,10 +37,7 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
+import com.google.common.collect.Sets;
 
 /**
  * Provides operations with clients.

@@ -6,6 +6,20 @@
 
 package org.xdi.oxauth.service;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -17,21 +31,10 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.service.cdi.event.KeyGenerationEvent;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
-
-import org.xdi.service.cdi.async.Asynchronous;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum

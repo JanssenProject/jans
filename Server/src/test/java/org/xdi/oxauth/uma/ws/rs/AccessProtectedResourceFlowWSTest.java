@@ -6,16 +6,22 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.net.URI;
+import java.util.Arrays;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.*;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.TUma;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.UmaResourceResponse;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import java.net.URI;
-import java.util.Arrays;
 
 /**
  * @author Yuriy Zabrovarnyy

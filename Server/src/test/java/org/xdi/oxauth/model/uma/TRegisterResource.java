@@ -6,19 +6,22 @@
 
 package org.xdi.oxauth.model.uma;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.util.ServerUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

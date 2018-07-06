@@ -6,16 +6,21 @@
 
 package org.xdi.oxauth.model.registration;
 
-import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.*;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
+import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 
 /**
  * @author Javier Rojas Blum

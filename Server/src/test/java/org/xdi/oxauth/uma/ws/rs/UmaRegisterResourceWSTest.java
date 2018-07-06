@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertTrue;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -15,12 +21,6 @@ import org.xdi.oxauth.model.uma.UmaResource;
 import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

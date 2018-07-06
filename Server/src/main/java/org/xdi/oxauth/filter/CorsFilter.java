@@ -6,6 +6,21 @@
 
 package org.xdi.oxauth.filter;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.oxserver.filters.AbstractCorsFilter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -14,16 +29,6 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.StringHelper;
-
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * CORS Filter to support both Tomcat and Jetty
