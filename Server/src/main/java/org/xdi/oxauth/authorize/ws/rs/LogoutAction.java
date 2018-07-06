@@ -6,6 +6,15 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import java.io.IOException;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -24,14 +33,6 @@ import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.JsonService;
 import org.xdi.util.StringHelper;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Javier Rojas Blum

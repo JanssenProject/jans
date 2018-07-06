@@ -8,14 +8,18 @@ package org.xdi.oxauth.service;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.InMemoryConfiguration;
 
@@ -30,9 +34,21 @@ public class ApplicationFactory {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private ConfigurationFactory configurationFactory;
     
     @Inject
     private ApplianceService applianceService;
+
+    @Inject
+    private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
+
+    public static final String PERSISTENCE_AUTH_CONFIG_NAME = "persistenceAuthConfig";
+
+    public static final String PERSISTENCE_ENTRY_MANAGER_NAME = "persistenceEntryManager";
+
+    public static final String PERSISTENCE_AUTH_ENTRY_MANAGER_NAME = "persistenceAuthEntryManager";
 
     @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
@@ -69,5 +85,13 @@ public class ApplicationFactory {
 
     return smtpConfiguration;
 	}
+
+    public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
+        PersistenceConfiguration persistenceConfiguration = configurationFactory.getPersistenceConfiguration();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
+                .select(persistenceConfiguration.getEntryManagerFactoryType()).get();
+
+        return persistenceEntryManagerFactory;
+    }
 
 }
