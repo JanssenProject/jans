@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.net.URI;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-
-import java.net.URI;
 
 /**
  * @author Yuriy Zabrovarnyy

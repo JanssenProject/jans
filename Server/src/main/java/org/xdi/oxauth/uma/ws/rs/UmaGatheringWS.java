@@ -6,6 +6,30 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.FOUND;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -19,23 +43,10 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
-import org.xdi.oxauth.uma.service.*;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.FOUND;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
+import org.xdi.oxauth.uma.service.UmaPctService;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaSessionService;
+import org.xdi.oxauth.uma.service.UmaValidationService;
 
 /**
  * Claims-Gathering Endpoint.

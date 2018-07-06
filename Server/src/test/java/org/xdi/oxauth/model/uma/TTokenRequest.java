@@ -6,6 +6,26 @@
 
 package org.xdi.oxauth.model.uma;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -15,21 +35,13 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.Holder;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URI;
-import java.util.*;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

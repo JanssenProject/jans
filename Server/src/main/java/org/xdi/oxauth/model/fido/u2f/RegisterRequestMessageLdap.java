@@ -5,12 +5,12 @@
  */
 package org.xdi.oxauth.model.fido.u2f;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * U2F registration requests

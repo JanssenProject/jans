@@ -6,25 +6,41 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.fido.u2f.*;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.*;
+import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
+import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * Provides operations with U2F registration requests

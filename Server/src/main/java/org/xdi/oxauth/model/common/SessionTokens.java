@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.common;
 
-import com.google.common.base.Preconditions;
-import com.ocpsoft.pretty.faces.util.StringUtils;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.google.common.base.Preconditions;
+import com.ocpsoft.pretty.faces.util.StringUtils;
 
 /**
  * @author yuriyz

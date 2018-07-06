@@ -6,6 +6,19 @@
 
 package org.xdi.oxauth.model.registration;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
@@ -19,18 +32,6 @@ import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.util.URLPatternList;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Validates the parameters received for the register web service.

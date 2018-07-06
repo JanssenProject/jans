@@ -9,9 +9,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;

@@ -6,15 +6,21 @@
 
 package org.xdi.oxauth.model.common;
 
-import com.google.common.collect.Maps;
-import org.gluu.site.ldap.persistence.annotation.*;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.persistence.Transient;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author Yuriy Zabrovarnyy

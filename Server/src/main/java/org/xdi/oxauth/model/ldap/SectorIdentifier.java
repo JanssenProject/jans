@@ -8,9 +8,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
-import java.io.Serializable;
-import java.util.List;
-
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2018

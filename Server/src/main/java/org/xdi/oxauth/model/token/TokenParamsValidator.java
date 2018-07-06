@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.token;
 
-import org.xdi.oxauth.model.common.GrantType;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import org.xdi.oxauth.model.common.GrantType;
 
 /**
  * Validates the parameters received for the token web service.
