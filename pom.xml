@@ -726,6 +726,8 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.19.1</version>
 					<configuration>
+						<argLine>-Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC</argLine>
+
 						<!-- Needed as we have both junit and testng -->
 						<failIfNoTests>false</failIfNoTests>
 						<trimStackTrace>false</trimStackTrace>
