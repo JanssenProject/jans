@@ -72,6 +72,10 @@
             "attribute": "oxAuthClientId",
             "index": "eq"
         },
+	{
+            "attribute": "oxAuthClientSecretExpiresAt",
+            "index": "eq"
+	},
         {
             "attribute": "oxAuthGrantId",
             "index": "eq"
