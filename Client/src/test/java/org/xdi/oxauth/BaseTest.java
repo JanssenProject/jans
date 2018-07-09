@@ -40,6 +40,8 @@ import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
 
+import com.gargoylesoftware.htmlunit.ScriptException;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
@@ -563,7 +565,15 @@ public abstract class BaseTest {
             System.out.println("authenticateResourceOwner: Cleaning cookies");
             deleteAllCookies();
         }
-        driver.navigate().to(authorizationRequestUrl);
+        try {
+            driver.navigate().to(authorizationRequestUrl);
+        } catch (WebDriverException ex) {
+            if (ex.getCause() instanceof ScriptException) {
+                System.out.println("authenticateResourceOwner: Script error: " + ex.getMessage());
+            } else {
+                throw ex;
+            }
+        }
 
         if (userSecret != null) {
             if (userId != null) {
