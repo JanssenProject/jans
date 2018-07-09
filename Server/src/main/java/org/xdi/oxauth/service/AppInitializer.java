@@ -171,7 +171,7 @@ public class AppInitializer {
 				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
 
         // Start timer
-        quartzSchedulerManager.start();
+        initSchedulerService();
 
         // Schedule timer tasks
         metricService.initTimer();
@@ -184,6 +184,17 @@ public class AppInitializer {
 
         loggerService.configure();
 	}
+
+    protected void initSchedulerService() {
+        quartzSchedulerManager.start();
+
+        String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
+        if ((disableScheduler != null) && Boolean.valueOf(disableScheduler)) {
+            this.log.warn("Suspending Quartz Scheduler Service...");
+            quartzSchedulerManager.standby();
+            return;
+        }
+    }
 
     @Produces @ApplicationScoped
 	public StringEncrypter getStringEncrypter() {
