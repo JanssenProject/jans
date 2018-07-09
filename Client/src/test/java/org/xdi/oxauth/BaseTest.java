@@ -565,15 +565,15 @@ public abstract class BaseTest {
             System.out.println("authenticateResourceOwner: Cleaning cookies");
             deleteAllCookies();
         }
-        try {
+//        try {
             driver.navigate().to(authorizationRequestUrl);
-        } catch (WebDriverException ex) {
-            if (ex.getCause() instanceof ScriptException) {
-                System.out.println("authenticateResourceOwner: Script error: " + ex.getMessage());
-            } else {
-                throw ex;
-            }
-        }
+//        } catch (WebDriverException ex) {
+//            if (ex.getCause() instanceof ScriptException) {
+//                System.out.println("authenticateResourceOwner: Script error: " + ex.getMessage());
+//            } else {
+//                throw ex;
+//            }
+//        }
 
         if (userSecret != null) {
             if (userId != null) {
