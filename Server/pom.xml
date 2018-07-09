@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxauth</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.1.4-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -267,14 +267,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxcore-couchbase</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.xdi</groupId>
-			<artifactId>oxcore-filter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
@@ -317,7 +309,6 @@
 			<artifactId>oxlicense-validator</artifactId>
 		</dependency>
 -->
-
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
@@ -343,6 +334,12 @@
 		<dependency>
 			<groupId>org.ocpsoft.rewrite</groupId>
 			<artifactId>rewrite-config-prettyfaces</artifactId>
+		</dependency>
+
+			<!-- OmniFaces -->
+		<dependency>
+			<groupId>org.omnifaces</groupId>
+			<artifactId>omnifaces</artifactId>
 		</dependency>
 
 		<!-- Commons libs -->
@@ -411,6 +408,12 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
+		</dependency>
+
+		<!-- LDAP -->
+		<dependency>
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
 		</dependency>
 
 		<!-- Metrics -->
@@ -548,6 +551,11 @@
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 
