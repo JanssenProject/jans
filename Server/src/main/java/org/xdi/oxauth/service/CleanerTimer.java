@@ -113,12 +113,6 @@ public class CleanerTimer {
             interval = DEFAULT_INTERVAL;
         }
 
-        String disableCleanUp = System.getProperties().getProperty("oxauth.disable.cleanup");
-        if ((disableCleanUp != null) && Boolean.valueOf(disableCleanUp)) {
-            log.warn("System Clean Up service is not enabled!");
-            return;
-        }
-
         cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
