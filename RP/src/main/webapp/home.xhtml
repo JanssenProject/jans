@@ -947,15 +947,18 @@
                 document.getElementById("mainForm:scope").value = param[1];
             } else if (param[0] == "session_state") {
                 var rp = document.getElementById("rp");
-                var clientId = document.getElementById("mainForm:authorizationClientId").value;
-                var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin").value;
-
-                var rpIFrame = "./rpiframe.htm?session_state=" + param[1]
-                        + "&client_id=" + clientId + "&op_origin=" + opOrigin;
-
-                document.getElementById("mainForm:rpIFrame").value = rpIFrame;
-
-                rp.src = rpIFrame;
+                var clientIdValue = document.getElementById("mainForm:authorizationClientId").value;
+                var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin");
+                if (opOrigin != null) {
+	                var opOriginValue = opOrigin.value;
+	
+	                var rpIFrame = "./rpiframe.htm?session_state=" + param[1]
+	                        + "&client_id=" + clientIdValue + "&op_origin=" + opOriginValue;
+	
+	                document.getElementById("mainForm:rpIFrame").value = rpIFrame;
+	
+	                rp.src = rpIFrame;
+            	}
             }
         }
     }
