@@ -65,7 +65,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 	@Parameters({ "registerPath", "redirectUris", "clientJwksUri" })
 	@Test
 	public void requestParameterMethodES256Step1(final String registerPath, final String redirectUris,
-			final String jwksUri) throws Exception {
+	        final String jwksUri) throws Exception {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
 		String registerRequestContent = null;
