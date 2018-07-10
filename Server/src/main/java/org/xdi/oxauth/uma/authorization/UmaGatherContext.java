@@ -6,6 +6,13 @@
 
 package org.xdi.oxauth.uma.authorization;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.gluu.jsf2.service.FacesService;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.oxauth.model.common.SessionId;
@@ -22,12 +29,6 @@ import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaSessionService;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author yuriyz

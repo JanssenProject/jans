@@ -6,7 +6,16 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.google.common.base.Preconditions;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
@@ -22,10 +31,7 @@ import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
+import com.google.common.base.Preconditions;
 
 /**
  * Provides operations with resource set descriptions
@@ -279,6 +285,6 @@ public class UmaResourceService {
             }
 
         };
-        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 }

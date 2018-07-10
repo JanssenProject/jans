@@ -1,14 +1,15 @@
 package org.xdi.oxauth.service.external.internal;
 
-import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
-import org.xdi.model.security.Credentials;
-import org.xdi.oxauth.service.AuthenticationService;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Map;
+
+import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
+import org.xdi.model.security.Credentials;
+import org.xdi.oxauth.service.AuthenticationService;
 
 /**
  * Wrapper to call internal authentication method

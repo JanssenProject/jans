@@ -9,9 +9,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -72,7 +69,7 @@ public class PushSnsService {
 
 	public String getCustomUserData(User user) {
 		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
-				ldapEntryManager.encodeGeneralizedTime(new Date()));
+				ldapEntryManager.encodeTime(new Date()));
 		return customUserData;
 	}
 

@@ -6,6 +6,19 @@
 
 package org.xdi.oxauth.uma.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -20,16 +33,13 @@ import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.uma.authorization.*;
+import org.xdi.oxauth.uma.authorization.Claims;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.authorization.UmaScriptByScope;
+import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.*;
 
 /**
  * UMA Token Service

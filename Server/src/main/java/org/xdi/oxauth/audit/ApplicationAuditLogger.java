@@ -8,7 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.xdi.service.cdi.async.Asynchronous;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -29,6 +28,7 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 
 import com.google.common.base.Objects;
