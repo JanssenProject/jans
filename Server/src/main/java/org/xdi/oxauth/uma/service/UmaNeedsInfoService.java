@@ -1,5 +1,20 @@
 package org.xdi.oxauth.uma.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -13,16 +28,12 @@ import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
-import org.xdi.oxauth.uma.authorization.*;
+import org.xdi.oxauth.uma.authorization.Claims;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.oxauth.uma.authorization.UmaScriptByScope;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.*;
 
 /**
  * @author yuriyz on 06/16/2017.

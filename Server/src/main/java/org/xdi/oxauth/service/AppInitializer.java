@@ -28,7 +28,6 @@ import javax.servlet.ServletContext;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
@@ -78,11 +77,6 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public static final String PERSISTENCE_AUTH_CONFIG_NAME = "persistenceAuthConfig";
-
-    public static final String PERSISTENCE_ENTRY_MANAGER_NAME = "persistenceEntryManager";
-    public static final String PERSISTENCE_AUTH_ENTRY_MANAGER_NAME = "persistenceAuthEntryManager";
-
     @Inject
     private Logger log;
 
@@ -95,17 +89,17 @@ public class AppInitializer {
 	@Inject
 	private Event<TimerEvent> timerEvent;
 
-	@Inject
-    private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
-
-	@Inject @Named(PERSISTENCE_ENTRY_MANAGER_NAME)
+	@Inject @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 	
-	@Inject @Named(PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+	@Inject @Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
 	private Instance<List<PersistenceEntryManager>> persistenceAuthEntryManagerInstance;
 
-	@Inject @Named(PERSISTENCE_AUTH_CONFIG_NAME)
+	@Inject @Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
 	private Instance<List<GluuLdapConfiguration>> persistenceAuthConfigInstance;
+
+    @Inject
+    private ApplicationFactory applicationFactory;
 
 	@Inject
 	private Instance<AuthenticationMode> authenticationModeInstance;
@@ -162,7 +156,6 @@ public class AppInitializer {
     	customLibrariesLoader.init();
 
         configurationFactory.create();
-        loggerService.configure();
 
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
         this.persistenceAuthConfigs = loadPersistenceAuthConfigs(localPersistenceEntryManager);
@@ -188,6 +181,8 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
+
+        loggerService.configure();
 	}
 
     @Produces @ApplicationScoped
@@ -238,7 +233,7 @@ public class AppInitializer {
 	private void reloadConfiguration() {
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 
-        log.trace("Attempting to use {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
+        log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(localPersistenceEntryManager);
 		
 		if (!this.persistenceAuthConfigs.equals(newPersistenceAuthConfigs)) {
@@ -257,18 +252,13 @@ public class AppInitializer {
 	public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
     	Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig);
 
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
-        try {
-        	PersistenceEntryManager persistenceAuthEntryManager = persistenceEntryManagerFactory.createEntryManager(persistenceConnectionProperties);
-    	    log.debug("Created custom authentication PersistenceEntryManager: {}", persistenceAuthEntryManager);
+    	PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(persistenceConnectionProperties);
+	    log.debug("Created custom authentication PersistenceEntryManager: {}", persistenceAuthEntryManager);
 
-    	    return persistenceAuthEntryManager;
-        } finally {
-    	    persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
-    	}
+	    return persistenceAuthEntryManager;
 	}
 
-    @Produces @ApplicationScoped @Named(PERSISTENCE_ENTRY_MANAGER_NAME)
+    @Produces @ApplicationScoped @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     public PersistenceEntryManager createPersistenceEntryManager() {
         PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
     	FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
@@ -277,23 +267,18 @@ public class AppInitializer {
         EncryptionService securityService = encryptionServiceInstance.get();
         Properties decryptedConnectionProperties = securityService.decryptAllProperties(connectionProperties);
         
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
-        try {
-            PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(decryptedConnectionProperties); 
-            log.info("Created {}: {}", new Object[] { PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager });
+        PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(decryptedConnectionProperties); 
+        log.info("Created {}: {}", new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager });
 
-            return persistenceEntryManager;
-        } finally {
-            this.persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
-        }
+        return persistenceEntryManager;
     }
 
-    @Produces @ApplicationScoped @Named(PERSISTENCE_AUTH_CONFIG_NAME)
+    @Produces @ApplicationScoped @Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
     public List<GluuLdapConfiguration> createPersistenceAuthConfigs() {
     	return persistenceAuthConfigs;
     }
 
-    @Produces @ApplicationScoped @Named(PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+    @Produces @ApplicationScoped @Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
 	public List<PersistenceEntryManager> createPersistenceAuthEntryManager() {
 		List<PersistenceEntryManager> persistenceAuthEntryManagers = new ArrayList<PersistenceEntryManager>();
 		if (this.persistenceAuthConfigs.size() == 0) {
@@ -302,31 +287,19 @@ public class AppInitializer {
 
 		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs);
 
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory();
-        try {
-    		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
-    			PersistenceEntryManager persistenceAuthEntryManager = persistenceEntryManagerFactory.createEntryManager(persistenceAuthProperties.get(i));
-    	        log.debug("Created {}#{}: {}", new Object[] { PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i, persistenceAuthEntryManager });
-    	        
-    	        persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
-    		}
-        } finally {
-            persistenceEntryManagerFactoryInstance.destroy(persistenceEntryManagerFactory);
-        }
+		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
+			PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(persistenceAuthProperties.get(i));
+	        log.debug("Created {}#{}: {}", new Object[] { ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i, persistenceAuthEntryManager });
+	        
+	        persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
+		}
 
 		return persistenceAuthEntryManagers;
 	}
 
-    protected PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
-        PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryInstance.select(persistenceConfiguration.getEntryManagerFactoryType()).get();
-
-        return persistenceEntryManagerFactory;
-    }
-
     public void recreatePersistenceEntryManager(@Observes @LdapConfigurationReload String event) {
     	// Get existing application scoped instance
-    	PersistenceEntryManager oldPersistenceEntryManager = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, PERSISTENCE_ENTRY_MANAGER_NAME);
+    	PersistenceEntryManager oldPersistenceEntryManager = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
 
         // Close existing connections
     	closePersistenceEntryManager(oldPersistenceEntryManager);
@@ -334,29 +307,29 @@ public class AppInitializer {
         // Force to create new bean
     	PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(persistenceEntryManager);
-        log.info("Recreated instance {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager);
+        log.info("Recreated instance {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager);
     }
 
 	private void closePersistenceEntryManager(PersistenceEntryManager oldPersistenceEntryManager) {
 		// Close existing connections
-    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+    	log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
     	oldPersistenceEntryManager.destroy();
-        log.debug("Destroyed {}: {}", PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+        log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 	}
 
 	private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
 		// Close existing connections
 		for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
-	    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+	    	log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 			oldPersistenceEntryManager.destroy();
-	        log.debug("Destroyed {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
+	        log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceEntryManager);
 		}
 	}
 
     public void recreatePersistenceAuthEntryManagers(List<GluuLdapConfiguration> newPersistenceAuthConfigs) {
     	// Get existing application scoped instance
 		List<PersistenceEntryManager> oldPersistenceAuthEntryManagers = CdiUtil.getContextBean(beanManager,
-				new ParameterizedTypeImpl(List.class, PersistenceEntryManager.class), PERSISTENCE_AUTH_ENTRY_MANAGER_NAME);
+				new ParameterizedTypeImpl(List.class, PersistenceEntryManager.class), ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME);
 
     	// Recreate components
 		this.persistenceAuthConfigs = newPersistenceAuthConfigs;
@@ -366,15 +339,15 @@ public class AppInitializer {
 
 		// Destroy old Ldap auth entry managers
 		for (PersistenceEntryManager oldPersistenceAuthEntryManager : oldPersistenceAuthEntryManagers) {
-	    	log.debug("Attempting to destroy {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
+	    	log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
 			oldPersistenceAuthEntryManager.destroy();
-	        log.debug("Destroyed {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
+	        log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, oldPersistenceAuthEntryManager);
 		}
 		
         // Force to create new Ldap auth entry managers bean
     	List<PersistenceEntryManager> persistenceAuthEntryManagers = persistenceAuthEntryManagerInstance.get();
     	persistenceAuthEntryManagerInstance.destroy(persistenceAuthEntryManagers);
-        log.info("Recreated instance {}: {}", PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, persistenceAuthEntryManagers);
+        log.info("Recreated instance {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, persistenceAuthEntryManagers);
 
         // Force to create new auth configuration bean
     	List<GluuLdapConfiguration> oldPersistenceAuthConfigs = persistenceAuthConfigInstance.get();

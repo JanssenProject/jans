@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.ejb.Stateless;
@@ -26,8 +28,8 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.persist.model.base.GluuStatus;
@@ -74,14 +76,14 @@ public class AuthenticationService {
     private Credentials credentials;
 
     @Inject
-    @Named(AppInitializer.PERSISTENCE_AUTH_CONFIG_NAME)
+    @Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    @Named(AppInitializer.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+    @Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
     private List<PersistenceEntryManager> ldapAuthEntryManagers;
 
     @Inject
@@ -381,13 +383,18 @@ public class AuthenticationService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
         if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-        	customEntry.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+            // Combine object classes from LDAP and configuration in one list
+            Set<Object> customPersonCustomObjectClassList = new HashSet<Object>(personCustomObjectClassList);
+            customPersonCustomObjectClassList.add("gluuPerson");
+            customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
+
+            customEntry.setCustomObjectClasses(customPersonCustomObjectClassList.toArray(new String[customPersonCustomObjectClassList.size()]));
         } else {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
         }
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        String nowDateString = ldapEntryManager.encodeGeneralizedTime(now);
+        String nowDateString = ldapEntryManager.encodeTime(now);
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", nowDateString);
         customEntry.getCustomAttributes().add(customAttribute);
 

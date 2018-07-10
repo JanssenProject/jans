@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.ldap;
 
+import java.net.URI;
+
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-
-import java.net.URI;
 
 /**
  * @author Javier Rojas Blum

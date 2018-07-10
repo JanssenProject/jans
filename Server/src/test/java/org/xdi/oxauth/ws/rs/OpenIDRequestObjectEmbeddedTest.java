@@ -6,6 +6,32 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -14,7 +40,12 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.QueryStringDecoder;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.ResponseAsserter;
+import org.xdi.oxauth.client.UserInfoRequest;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -31,24 +62,6 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.util.StringHelper;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Functional tests for OpenID Request Object (embedded)

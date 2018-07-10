@@ -6,7 +6,16 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
@@ -30,9 +39,7 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint allows to start and finish U2F authentication process

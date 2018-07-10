@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.uma;
 
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.util.ServerUtil;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+
+import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
