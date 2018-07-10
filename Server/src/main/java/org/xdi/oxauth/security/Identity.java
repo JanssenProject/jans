@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.security;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.session.SessionClient;
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
 
 /**
  * @version August 9, 2017

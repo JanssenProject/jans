@@ -8,7 +8,6 @@ package org.xdi.oxauth.service;
 
 import java.util.Properties;
 
-import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;

@@ -1,8 +1,15 @@
 package org.xdi.oxauth.uma.service;
 
-import com.ocpsoft.pretty.faces.util.StringUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.gluu.persist.PersistenceEntryManager;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.JsonLogic;
@@ -17,14 +24,7 @@ import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaScriptByScope;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.ocpsoft.pretty.faces.util.StringUtils;
 
 /**
  * @author yuriyz

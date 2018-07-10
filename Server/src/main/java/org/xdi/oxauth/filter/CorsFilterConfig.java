@@ -6,12 +6,17 @@
 
 package org.xdi.oxauth.filter;
 
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.configuration.CorsConfigurationFilter;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import java.util.*;
+
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.CorsConfigurationFilter;
 
 /**
  * @author Javier Rojas Blum

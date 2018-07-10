@@ -14,11 +14,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
-import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
 
 /**
  * It's utility service which applications uses in custom authentication scripts 

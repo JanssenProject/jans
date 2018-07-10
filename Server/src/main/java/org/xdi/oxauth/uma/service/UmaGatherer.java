@@ -6,6 +6,19 @@
 
 package org.xdi.oxauth.uma.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
@@ -18,18 +31,6 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz
@@ -133,7 +134,7 @@ public class UmaGatherer {
         String newTicket = umaPermissionService.changeTicket(permissions, permissions.get(0).getAttributes());
 
         String url = constructRedirectUri(session, context, newTicket);
-        if (StringUtils.isBlank(url)) {
+        if (StringUtils.isNotBlank(url)) {
             facesService.redirectToExternalURL(url);
         } else {
             log.debug("Redirect to claims_redirect_uri is skipped because it was not provided during request.");

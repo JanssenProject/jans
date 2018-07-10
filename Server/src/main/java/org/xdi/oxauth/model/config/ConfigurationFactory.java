@@ -35,7 +35,7 @@ import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.ConfigurationEvent;
@@ -69,8 +69,8 @@ public class ConfigurationFactory {
 	@Inject
 	private Event<String> event;
 
-	@Inject @Named(AppInitializer.PERSISTENCE_ENTRY_MANAGER_NAME)
-	private Instance<PersistenceEntryManager> ldapEntryManagerInstance;
+	@Inject @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject
     private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
@@ -380,7 +380,7 @@ public class ConfigurationFactory {
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
-		final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
+		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.persistenceConfiguration.getConfiguration().getString("oxauth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
@@ -425,7 +425,7 @@ public class ConfigurationFactory {
 				long nextRevision = conf.getRevision() + 1;
 				conf.setRevision(nextRevision);
 
-				final PersistenceEntryManager ldapManager = ldapEntryManagerInstance.get();
+				final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 				ldapManager.merge(conf);
 
 				log.info("New JWKS generated successfully");
@@ -490,7 +490,7 @@ public class ConfigurationFactory {
                 ldapFileLastModifiedTime = ldapFile.lastModified();
             }
 
-            PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration(ldapFileName, ldapConfiguration, org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory.class, ldapFileLastModifiedTime);
+            PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration(ldapFileName, ldapConfiguration, org.gluu.persist.ldap.impl.LdapEntryManagerFactory.class, ldapFileLastModifiedTime);
 
             return persistenceConfiguration;
         } catch (Exception e) {
