@@ -6,15 +6,15 @@
 
 package org.xdi.oxauth.model.ldap;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.common.GrantType;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy

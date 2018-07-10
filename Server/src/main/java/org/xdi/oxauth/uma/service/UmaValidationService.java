@@ -6,7 +6,35 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.google.common.base.Joiner;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_PCT;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_SCOPE;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RPT;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TICKET;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.EntryPersistenceException;
@@ -43,15 +71,7 @@ import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.*;
-
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
+import com.google.common.base.Joiner;
 
 /**
  * @author Yuriy Zabrovarnyy

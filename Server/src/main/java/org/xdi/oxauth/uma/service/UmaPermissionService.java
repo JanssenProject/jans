@@ -6,6 +6,16 @@
 
 package org.xdi.oxauth.uma.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
@@ -19,11 +29,6 @@ import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * Holds permission tokens and permissions
@@ -172,7 +177,7 @@ public class UmaPermissionService {
     }
 
     private Filter getExpiredUmaPermissionFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(date));
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void addBranch(String clientDn) {

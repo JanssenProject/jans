@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.comp;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -14,13 +25,6 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
-
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

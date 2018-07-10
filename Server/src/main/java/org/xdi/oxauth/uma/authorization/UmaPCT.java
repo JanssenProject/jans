@@ -1,5 +1,7 @@
 package org.xdi.oxauth.uma.authorization;
 
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -12,8 +14,6 @@ import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.uma.service.UmaPctService;
-
-import java.util.Date;
 
 /**
  * @author yuriyz on 05/30/2017.

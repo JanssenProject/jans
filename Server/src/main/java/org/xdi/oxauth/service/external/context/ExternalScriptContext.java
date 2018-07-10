@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.net.util.SubnetUtils;
-import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
