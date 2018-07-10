@@ -584,6 +584,28 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- We have to explicitly specify version because arquillian-suite-extension  depends on 1.1.11-->
+		<dependency>
+			<groupId>org.jboss.arquillian.container</groupId>
+			<artifactId>arquillian-container-test-impl-base</artifactId>
+			<version>1.4.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.container</groupId>
+			<artifactId>arquillian-container-spi</artifactId>
+			<version>1.4.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.container</groupId>
+			<artifactId>arquillian-container-test-spi</artifactId>
+			<version>1.4.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.testenricher</groupId>
+			<artifactId>arquillian-testenricher-cdi</artifactId>
+			<version>1.4.0.Final</version>
+		</dependency>
+
 		<!-- Test: Shrinkwrap -->
 		<dependency>
 			<groupId>org.jboss.shrinkwrap.resolver</groupId>
