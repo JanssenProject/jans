@@ -146,6 +146,7 @@
 									rendered="#{sessionIdService.notSessionIdAuthenticated}">
 									
 						<h:messages style="color:red;" />
+                            <h:inputHidden id="platform"/>
 						
 						  <div class="form-group">
 							<h:outputLabel styleClass="col-sm-4 control-label"	for="username" value="#{msgs['login.username']}" />
@@ -274,6 +275,7 @@
                 $('#rememberme').click(function() {
                     checkRemembeMe();
                 });
+
                 fillPlatformField();
     		});
 
@@ -300,9 +302,9 @@
                         //There was a match against the regexp
                         platform.version=result[1];
                     }
+    			    document.getElementById("loginForm:platform").value = JSON.stringify(platform);
                 } catch (e) {
                 }
-    			document.getElementById("loginForm:platform").value = JSON.stringify(platform);
             }
         </script>
 	</ui:define>
