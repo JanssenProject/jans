@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.uma.authorization;
 
+import java.util.Date;
+import java.util.List;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.common.AbstractToken;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * Requesting Party Token.

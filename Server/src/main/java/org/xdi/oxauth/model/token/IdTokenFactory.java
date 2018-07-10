@@ -6,7 +6,21 @@
 
 package org.xdi.oxauth.model.token;
 
-import com.google.common.collect.Lists;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -14,7 +28,11 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCode;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
+import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -45,12 +63,7 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.util.*;
+import com.google.common.collect.Lists;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained

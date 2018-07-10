@@ -6,8 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
@@ -20,13 +27,8 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum

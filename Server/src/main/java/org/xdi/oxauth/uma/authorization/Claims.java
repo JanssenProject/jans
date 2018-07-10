@@ -1,11 +1,11 @@
 package org.xdi.oxauth.uma.authorization;
 
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.jwt.Jwt;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.jwt.Jwt;
 
 /**
  * @author yuriyz on 06/02/2017.

@@ -19,7 +19,6 @@ import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuit
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
-import org.junit.BeforeClass;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxauth.util.Deployments;

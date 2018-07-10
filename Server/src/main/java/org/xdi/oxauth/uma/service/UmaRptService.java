@@ -143,7 +143,7 @@ public class UmaRptService {
     }
 
     private Filter getExpiredUmaRptFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(date));
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {

@@ -6,6 +6,23 @@
 
 package org.xdi.oxauth.util;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -18,27 +35,11 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -115,7 +116,7 @@ public class ServerUtil {
     }
 
     public static PersistenceEntryManager getLdapManager() {
-        return CdiUtil.bean(PersistenceEntryManager.class, AppInitializer.PERSISTENCE_ENTRY_MANAGER_NAME);
+        return CdiUtil.bean(PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
