@@ -144,7 +144,7 @@
 						-Dgluu.base=${project.build.directory}
 						-Dserver.base=${project.build.directory}
 						-Dlog.base=${project.build.directory}
-<						-Dgluu.disable.scheduler=true
+						-Dgluu.disable.scheduler=true
  
 					</argLine>
 				</configuration>
