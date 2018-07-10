@@ -21,3 +21,5 @@
 8. Enable few Person auth scripts
 
 9. Fix sector identifier numbers to conform tests
+
+10. Enable clien and person authentication filters
