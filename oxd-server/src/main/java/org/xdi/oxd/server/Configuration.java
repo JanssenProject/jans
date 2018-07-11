@@ -13,8 +13,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class Configuration {
 
-    public static final String DOC_URL = "https://www.gluu.org/docs-oxd/";
-
     @JsonProperty(value = "port")
     private int port;
     @JsonProperty(value = "time_out_in_seconds")
