@@ -66,7 +66,8 @@ public final class PropertiesDecrypter {
 
         Properties clondedProperties = (Properties) properties.clone();
         for (Object key : clondedProperties.keySet()) {
-            decriptProperty(stringEncrypter, clondedProperties, encryptionKey, (String) key, true);
+            String propertyName = (String) key;
+            decriptProperty(stringEncrypter, clondedProperties, encryptionKey, propertyName, true);
         }
 
         return clondedProperties;
@@ -74,17 +75,21 @@ public final class PropertiesDecrypter {
 
     private static void decriptProperty(StringEncrypter stringEncrypter, Properties properties, String encryptionKey,
             String propertyName, boolean silent) {
-        String encryptedPassword = properties.getProperty(propertyName);
-        if (StringHelper.isEmpty(encryptedPassword)) {
+        String propertyValue = properties.getProperty(propertyName);
+        if (StringHelper.isEmpty(propertyValue)) {
             return;
         }
 
         try {
             String decryptedProperty;
             if (StringHelper.isEmpty(encryptionKey)) {
-                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), silent);
+                decryptedProperty = stringEncrypter.decrypt(propertyValue, silent);
             } else {
-                decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), encryptionKey, silent);
+                decryptedProperty = stringEncrypter.decrypt(propertyValue, encryptionKey, silent);
+            }
+            
+            if (StringHelper.isEmpty(decryptedProperty)) {
+                decryptedProperty = propertyValue;
             }
 
             properties.put(propertyName, decryptedProperty);
