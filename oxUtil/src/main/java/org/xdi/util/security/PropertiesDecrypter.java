@@ -87,7 +87,7 @@ public final class PropertiesDecrypter {
             } else {
                 decryptedProperty = stringEncrypter.decrypt(propertyValue, encryptionKey, silent);
             }
-            
+
             if (StringHelper.isEmpty(decryptedProperty)) {
                 decryptedProperty = propertyValue;
             }
