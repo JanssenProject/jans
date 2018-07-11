@@ -140,7 +140,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
             driver.findElement(By.id("loginForm:city")).sendKeys("NY");
             driver.findElement(By.id("loginForm:gather")).click();
-
+            Thread.sleep(1200);
             // Finally after claims-redirect flow user gets redirect with new ticket
             // Sample: https://client.example.com/cb?ticket=e8e7bc0b-75de-4939-a9b1-2425dab3d5ec
             System.out.println(driver.getCurrentUrl());
