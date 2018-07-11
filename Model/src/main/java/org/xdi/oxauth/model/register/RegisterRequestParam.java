@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version June 20, 2018
  */
 
 public enum RegisterRequestParam {
@@ -230,14 +230,14 @@ public enum RegisterRequestParam {
     SCOPES("scopes"),
 
     /**
-     * String containing a space-separated list of scope values.
-     */
-    SCOPE("scope"),
-
-    /**
      * String containing a space-separated list of claims that can be requested individually.
      */
     CLAIMS("claims"),
+
+    /**
+     * String containing a space-separated list of scope values.
+     */
+    SCOPE("scope"),
 
     CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at"),
 
