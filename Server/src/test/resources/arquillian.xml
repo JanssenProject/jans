@@ -8,6 +8,9 @@
 
 	<container qualifier="jetty" default="true">
 		<configuration>
+            <property name="bindHttpPort">9080</property>
+            <property name="javaVmArguments">-Xms256m -Xmx512m -XX:MaxPermSize=256m</property>
+
 			<!-- property name="javaVmArguments">${additionalJvmArgs}</property -->
 			<!-- <property name="javaVmArguments">-Xdebug -Xrunjdwp:transport=dt_socket,address=8585,server=y,suspend=y</property> -->
 		</configuration>
