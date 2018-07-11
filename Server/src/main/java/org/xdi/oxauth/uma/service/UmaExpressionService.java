@@ -23,8 +23,7 @@ import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaScriptByScope;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
-
-import com.ocpsoft.pretty.faces.util.StringUtils;
+import org.xdi.util.StringHelper;
 
 /**
  * @author yuriyz
@@ -52,7 +51,7 @@ public class UmaExpressionService {
     public void evaluate(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<UmaPermission> permissions) {
         for (UmaPermission permission : permissions) {
             UmaResource resource = resourceService.getResourceById(permission.getResourceId());
-            if (StringUtils.isNotBlank(resource.getScopeExpression())) {
+            if (StringHelper.isNotEmpty(resource.getScopeExpression())) {
                 evaluateScopeExpression(scriptMap, permission, resource);
             } else {
                 if (!evaluateByScopes(filterByScopeDns(scriptMap, permission.getScopeDns()))) {
