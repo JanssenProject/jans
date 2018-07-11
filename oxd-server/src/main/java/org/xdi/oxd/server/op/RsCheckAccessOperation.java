@@ -52,7 +52,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
-                    ". Please protect your resource first with uma_rs_protect command. Check details on " + ConfigurationService.DOC_URL);
+                    ". Please protect your resource first with uma_rs_protect command. Check details on " + CoreUtils.DOC_URL);
             LOG.error(error.getErrorDescription());
             return CommandResponse.error().setData(new POJONode(error));
         }
