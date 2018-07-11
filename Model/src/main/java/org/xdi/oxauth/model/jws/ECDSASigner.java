@@ -13,6 +13,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.custom.sec.SecP256R1FieldElement;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
@@ -125,8 +126,8 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);
             BigInteger q = ((ECCurve.AbstractFp) ecSpec.getCurve()).getField().getCharacteristic();
-            ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
-            ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
+            ECFieldElement xFieldElement = new SecP256R1FieldElement.Fp(q, ecdsaPublicKey.getX());
+            ECFieldElement yFieldElement = new SecP256R1FieldElement.Fp(q, ecdsaPublicKey.getY());
             ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
             ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
 
