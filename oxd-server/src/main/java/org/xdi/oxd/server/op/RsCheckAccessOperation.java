@@ -18,7 +18,6 @@ import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
 import org.xdi.oxd.server.model.UmaResource;
-import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
 import javax.ws.rs.core.Response;
