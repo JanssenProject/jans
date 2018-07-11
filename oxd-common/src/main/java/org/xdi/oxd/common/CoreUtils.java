@@ -47,6 +47,8 @@ import java.util.concurrent.ThreadFactory;
  */
 public class CoreUtils {
 
+    public static final String DOC_URL = "https://gluu.org/docs/oxd";
+
     public static boolean isExpired(Date expiredAt) {
         return expiredAt != null && expiredAt.before(new Date());
     }
