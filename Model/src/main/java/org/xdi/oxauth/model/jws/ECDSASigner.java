@@ -6,6 +6,18 @@
 
 package org.xdi.oxauth.model.jws;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -13,18 +25,12 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.math.ec.custom.sec.SecP256R1FieldElement;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
@@ -126,8 +132,8 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);
             BigInteger q = ((ECCurve.AbstractFp) ecSpec.getCurve()).getField().getCharacteristic();
-            ECFieldElement xFieldElement = new SecP256R1FieldElement.Fp(q, ecdsaPublicKey.getX());
-            ECFieldElement yFieldElement = new SecP256R1FieldElement.Fp(q, ecdsaPublicKey.getY());
+            ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
+            ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
             ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
             ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
 
