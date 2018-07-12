@@ -585,7 +585,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- We have to explicitly specify version because arquillian-suite-extension  depends on 1.1.11-->
+		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11-->
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-impl-base</artifactId>
