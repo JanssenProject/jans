@@ -356,24 +356,22 @@ class ChangeGluuHostname:
 
         self.installer.run('chown jetty:jetty /etc/certs/oxauth-keys.*')
 
-    def modify_saml_idp(self):
-        fn = '/opt/gluu-server-{0}/opt/shibboleth-idp/conf/idp.properties'.format(self.gluu_version)
-        if os.path.isfile(fn):
-            print "Modifying Shibboleth idp.properties"
-            f = open(fn).readlines()
-            wf = False
-            for i in range(len(f)):
-                if f[i].startswith('idp.entityID'):
-                    f[i] = 'idp.entityID = {0}'.format(self.new_host) + '\n'
-                    break
-            for i in range(len(f)):
-                if f[i].startswith('idp.scope'):
-                    f[i] = 'idp.scope = {0}'.format(self.new_host) + '\n'
-                    wf = True
-                    break      
-            if wf:
-                with open(fn,'w') as w:
-                    w.write(''.join(f))
+    def modify_saml_passport(self):
+        print "Modifying SAML & Passport if installed"
+        
+        files = [
+            '/opt/gluu-server-{0}/opt/shibboleth-idp/conf/idp.properties'.format(self.gluu_version),
+            '/opt/gluu-server-{0}/etc/gluu/conf/passport-config.json'.format(self.gluu_version),
+            ]
+
+        for fn in files:
+            if self.c.exists(fn):
+                print "Modifying Shibboleth {0}".format(fn)
+                r = self.c.get_file(fn)
+                if r[0]:
+                    f = r[1].read()
+                    f = f.replace(self.old_host, self.new_host)
+                    print self.c.put_file(fn, f)
 
     def change_host_name(self):
         print "Changing hostname"
@@ -422,4 +420,4 @@ if __name__ == "__main__":
     name_changer.change_httpd_conf()
     name_changer.create_new_certs()
     name_changer.change_host_name()
-    name_changer.modify_saml_idp()
+    name_changer.modify_saml_passport()
