@@ -20,6 +20,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.testng.ITestContext;
+import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxauth.util.Deployments;
 import org.xdi.util.StringHelper;
@@ -42,6 +43,7 @@ public abstract class ConfigurableTest extends Arquillian {
 
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+        Reporter.log("Invoked init test suite method", true);
 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {
 			propertiesFile = "target/test-classes/testng.properties";
