@@ -535,8 +535,11 @@ class Setup(object):
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
+        self.couchebaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
+        self.couchbaseClusterRamsize = 1024 #in MB
         
         self.couchebaseBucketClusterPort = 28091
+
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
         self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
@@ -656,7 +659,10 @@ class Setup(object):
             
             txt += 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n"
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
-            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            
+            if self.ldap_type != 'couchbase':
+                txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
+            
             txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
             txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
@@ -1435,39 +1441,39 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            progress_bar(2, "Downloading oxAuth war file")
+            progress_bar(4, "Downloading oxAuth war file")
             
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            progress_bar(2, "Downloading oxTrust war file")
+            progress_bar(4, "Downloading oxTrust war file")
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
             distAsimbaPath = '%s/%s' % (self.distGluuFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
-                progress_bar(2, "Downloading Asimba war file")
+                progress_bar(4, "Downloading Asimba war file")
                 self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                progress_bar(2, "Downloading oxAuth RP war file")
+                progress_bar(4, "Downloading oxAuth RP war file")
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
             
-            progress_bar(2, "Downloading Shibboleth IDP v3 war file")
+            progress_bar(4, "Downloading Shibboleth IDP v3 war file")
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            progress_bar(2, "Downloading Shibboleth IDP v3 keygenerator")
+            progress_bar(4, "Downloading Shibboleth IDP v3 keygenerator")
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            progress_bar(2, "Downloading Shibboleth IDP v3 binary distributive file")
+            progress_bar(4, "Downloading Shibboleth IDP v3 binary distributive file")
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
         jceArchive = 'jce_policy-8.zip'
         jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
         if self.installJce and not os.path.exists(jceArchivePath):
-            progress_bar(2, "Downloading JCE 1.8 zip file")
+            progress_bar(4, "Downloading JCE 1.8 zip file")
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
 
 
@@ -2397,6 +2403,11 @@ class Setup(object):
                 self.ldap_type = backend_types[int(option)-1][1]
 
                 if self.ldap_type == 'couchbase':
+                    print ('  Please note that you have to update your firewall configuration to\n'
+                            '  allow connections to the following ports:\n'
+                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                     self.install_couchbase = True
 
@@ -2409,12 +2420,15 @@ class Setup(object):
         else:
             self.installHttpd = False
 
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
-        if promptForShibIDP == 'y':
-            self.shibboleth_version = 'v3'
-            self.installSaml = True
-        else:
-            self.installSaml = False
+        
+        if self.ldap_type != 'couchbase':
+            promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+            if promptForShibIDP == 'y':
+                self.shibboleth_version = 'v3'
+                self.installSaml = True
+            else:
+                self.installSaml = False
+        
 
         promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
         if promptForAsimba == 'y':
@@ -3483,6 +3497,15 @@ class Setup(object):
         self.logIt("Found package '%s' for install" % packageName)
         self.installPackage(packageName)
 
+        if self.os_type == 'ubuntu' and self.os_version == '16':
+            script_name = os.path.basename(self.couchebaseInitScript)
+            target_file = os.path.join('/etc/init.d', script_name)
+            self.copyFile(self.couchebaseInitScript, target_file)
+            self.run([self.cmd_chmod, '+x', target_file])
+            self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
+            self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
+            
+
     def couchebaseCreateCluster(self, clusterRamsize=1024, clusterName=None):
         cmd_args = [
                 self.couchbaseCli, 'cluster-init',
@@ -3564,7 +3587,7 @@ class Setup(object):
         if not 'dn' in index_list:
             index_list.insert(0, 'dn')
 
-        index_names = []
+        index_names = ['def_primary']
         for ind in index_list:
             index_name = 'def_' + ind
             W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
@@ -3577,9 +3600,12 @@ class Setup(object):
         self.couchbaseExecQuery(tmp_file)
 
 
-    def import_ldif_couchebase(self):
+    def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
         
-        for ldif in self.ldif_files:
+        if not ldif_file_list:
+            ldif_file_list = self.ldif_files[:]
+        
+        for ldif in ldif_file_list:
             self.logIt("Importing ldif file %s to Couchebase" % ldif)
             documents = get_documents_from_ldif(ldif,  self.inumOrg)
             
@@ -3593,14 +3619,27 @@ class Setup(object):
             
             with open(tmp_file, 'w') as o:
                 for e in documents:
-                    bucket = 'site' if 'site' in ldif else 'gluu'
-                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (bucket, e[0], json.dumps(e[1]))
+
+                    if bucket:
+                        cur_bucket = bucket
+                    elif e[0].startswith('site_@'):
+                        cur_bucket = 'gluu_site'
+                    #elif e[0].startswith('group_@') or e[0].startswith('people_@'):
+                    #    cur_bucket = 'gluu_user'
+                    elif e[0].startswith('metric_@'):
+                        cur_bucket = 'gluu_statistic'
+                    elif e[0].startswith('sessions_@'):
+                        cur_bucket = 'gluu_session'
+                    else:
+                        cur_bucket = 'gluu'
+                    
+                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
                     o.write(query)
 
             self.couchbaseExecQuery(tmp_file)
-        
+
     def changeCouchbasePort(self, service, port):
-        self.logIt("Changing Couchbase servive %s port to %s from file " % (service, str(port)))
+        self.logIt("Changing Couchbase service %s port to %s from file " % (service, str(port)))
         couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
         couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
 
@@ -3621,13 +3660,27 @@ class Setup(object):
             w.write(''.join(conf))
 
 
+        capi_conf = os.path.join(self.couchebaseInstallDir, 'etc/couchdb/default.d/capi.ini')
+
+        f = open(capi_conf).readlines()
+
+        for i in range(len(f)):
+            if f[i].startswith('bind_address'):
+                f[i] = 'bind_address = 127.0.0.1\n'
+
+        with open(capi_conf, 'w') as w:
+            w.write(''.join(f))
+
+
     def isCouchbaseStarted(self):
         # check couchbase in every 5 secs for 12 times.
-        cmd = "netstat -lnp | grep 28091"
+        cmd = "netstat -lnp | grep {0}".format(self.couchebaseBucketClusterPort)
         for i in range(12):
+            self.logIt("Checking if couchbase was started. Try {0} with command {1}".format(i+1, cmd))
             result = os.popen(cmd).read()
-            self.logIt("Checking if couchbase was started. Try {0} ...".format(i+1))
             if result.strip().endswith('beam.smp'):
+                #still need to wait couple of seconds
+                time.sleep(5)
                 return True
             else:
                 self.logIt("Couchbase was not started. Will retry after 5 seconds.")
@@ -3637,26 +3690,28 @@ class Setup(object):
 
 
     def checkIfGluuBucketReady(self):
-        import urllib2
-        apiUrl = 'http://localhost:{0}/pools/default/buckets'.format(self.couchebaseBucketClusterPort)
+            
+        args = [
+                self.couchebaseCbq, 
+                '-q', '-s', 'select 1', 
+                '-e', 'http://{0}'.format(self.couchebaseHost), 
+                '-u', self.couchebaseClusterAdmin, 
+                '-p', self.ldapPass
+                ]
+
         for i in range(12):
-            self.logIt("Checking if gluu bucket is ready. Try %d ..." % (i+1))
+            self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
             try:
-                self.logIt("Connecting to %s" % apiUrl)
-                request = urllib2.Request(apiUrl) 
-                base64string = base64.encodestring('%s:%s' % (self.couchebaseClusterAdmin, self.ldapPass)).replace('\n', '')
-                request.add_header("Authorization", "Basic %s" % base64string) 
-                result = urllib2.urlopen(request)
-                response = result.read()
-
-                response_json = json.loads(response)
-
-                for bucket in response_json:
-                    if bucket['name'] == 'gluu':
-                        time.sleep(10)
-                        return True
+                self.logIt("Running command: " + ' '.join(args))
+                child = subprocess.Popen(args,  stdout=subprocess.PIPE)
+                result = child.communicate()[0]
+                rs_js = json.loads(result)
+                
+                if rs_js['status']=='success':
+                    self.logIt("Bucket is ready for N1QL queries")
+                    return True
             except:
-                self.logIt("Connection to %s failed " % apiUrl)
+                self.logIt("Connection to N1QL service failed. Rerty im 5 seconds ...")
                 time.sleep(5)
 
         sys.exit("Couchbase server was not ready. Giving up")
@@ -3666,16 +3721,14 @@ class Setup(object):
         self.logIt("Restarting Couchbase")
         service_path = self.detect_service_path()
 
-        self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
-        
-        self.run((service_path, 'start', 'couchbase-server'), useWait=True)
+        if self.os_type == 'ubuntu' and self.os_version == '16':
+            self.run((service_path, 'couchbase-server', 'stop'), useWait=True)
+            self.run((service_path, 'couchbase-server', 'start'), useWait=True)
+        else:
+            self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
+            self.run((service_path, 'start', 'couchbase-server'), useWait=True)
 
-        #wait for couchbase start successfully
-        if not self.isCouchbaseStarted():
-            log_line = "Couchbase was not started in a minute. Terminating installation."
-            self.logIt(log_line, True)
-            print (log_line)
-            sys.exit(log_line)
+
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -3726,24 +3779,53 @@ class Setup(object):
         out_file = os.path.join(self.outputFolder, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
-        
-        
+
 
     def install_couchbase_server(self):
         self.couchbaseInstall()
         self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
         self.restartCouchebase()
-        self.couchebaseCreateCluster()
-        self.couchbaseSSL()
         
-        #execute this fonctions for 'site' when couchbase is backend
-        self.couchebaseCreateBucket('gluu')
+        #wait for couchbase start successfully
+        if not self.isCouchbaseStarted():
+            log_line = "Couchbase was not started in a minute. Terminating installation."
+            self.logIt(log_line, True)
+            print (log_line)
+            sys.exit(log_line)
+        
+        self.couchebaseCreateCluster(clusterRamsize=self.couchbaseClusterRamsize)
+        self.couchbaseSSL()
+
+        #TO DO: calculations of bucketRamsize is neaded
+        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize)
+        #self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_session', bucketType='memcached', bucketRamsize=self.couchbaseClusterRamsize/5)
+
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
+            
+        #TO DO: what indexes should be created in each bucket?
         self.couchebaseCreateIndexes('gluu')
+        #self.couchebaseCreateIndexes('gluu_user')
+        #self.couchebaseCreateIndexes('gluu_statistic')
+        #self.couchebaseCreateIndexes('gluu_site')
+        
         
         self.import_ldif_couchebase()
         self.couchbaseProperties()
+        
+    def loadTestData(self):
+        
+        self.logIt("Loading test ldif files")
+        ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
+        scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
+        ldif_files = [ox_auth_test_ldif, scim_test_ldif]
+        
+        self.import_ldif_couchebase(ldif_files)
+        
+        
         
 ############################   Main Loop   #################################################
 
@@ -3765,13 +3847,14 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -e   Download JCE 1.8 and install it"
+    print "    -t   Load test data"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrev", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -3812,6 +3895,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == "-e":
             setupOptions['installJce'] = True
+        elif opt == "-t":
+            setupOptions['loadTestData'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
@@ -3840,6 +3925,7 @@ if __name__ == '__main__':
         'installAsimba': False,
         'installOxAuthRP': False,
         'installPassport': False,
+        'loadTestData': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
         'installJce': False
@@ -3994,7 +4080,12 @@ if __name__ == '__main__':
             installObject.change_rc_links()
             progress_bar(34, "Saving properties")
             installObject.save_properties()
-            
+
+            if setupOptions['loadTestData']:
+                progress_bar(34, "Loading test data")
+                installObject.loadTestData()
+
+
             if 'importLDIFDir' in setupOptions.keys():
                 progress_bar(35, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])

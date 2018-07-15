@@ -56,6 +56,13 @@
 	},
 
 	{
+		"attribute": "oxAuthClientSecretExpiresAt",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxAuthGrantId",
 		"type": "string",
 		"index": ["equality"],
