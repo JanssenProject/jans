@@ -19,11 +19,14 @@ apt install python-pip
 pip install ldap3
 ```
 
-Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of.
+Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of, outside the chroot.
 
-Modify the entries inside of `change_config.py` using the following template:
+```
+wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/change_hostname/change_config.py
+wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/change_hostname/change_gluu_host.py
+```
 
-`-os_type` below needs to be either "Ubuntu" or "CentOS"
+We only need to modify the entries inside of `change_config.py` using the following template:
 
 ```
 name_changer = ChangeGluuHostname(
@@ -89,4 +92,4 @@ name_changer = ChangeGluuHostname(
 
   Now run `python change_config.py` outside of your Gluu chroot and once completed, restart your Gluu Server.
   
-  All the endpoints inside LDAP, Apache2/HTTPD, `/etc/hosts` and all certificates have been successfully changed to the new hostname. 
+  All the endpoints inside LDAP, Apache2/HTTPD, `/etc/hosts`, `/opt/shibboleth-idp/conf/idp.properties` and all certificates have been successfully changed to the new hostname. 
