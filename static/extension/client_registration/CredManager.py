@@ -54,16 +54,16 @@ class ClientRegistration(ClientRegistrationType):
         
         scopeService = CdiUtil.bean(ScopeService)
 
-        profileScope = scopeService.getScopeByDisplayName("profile")
-        clientinfoScope = scopeService.getScopeByDisplayName("clientinfo")
-        usernameScope = scopeService.getScopeByDisplayName("user_name")
-
-        newScopes = ArrayHelper.addItemToStringArray(newScopes, profileScope.getDn())
-        newScopes = ArrayHelper.addItemToStringArray(newScopes, clientinfoScope.getDn())
-        newScopes = ArrayHelper.addItemToStringArray(newScopes, usernameScope.getDn()) 
+        requiredScopes = ["openid", "profile", "user_name", "clientinfo", "uma_protection"]
+        for scopeName in requiredScopes:
+            scope = scopeService.getScopeByDisplayName(scopeName)
+            if not scope.getIsDefault():
+                print "Cred-manager client registration. Adding scope '%s'" % scopeName
+                newScopes = ArrayHelper.addItemToStringArray(newScopes, scope.getDn())
 
         print "Cred-manager client registration. Result scopes: %s" % newScopes
         client.setScopes(newScopes)
+
         #Extend client lifetime for one year
         cal=GregorianCalendar()
         cal.add(1,1)
