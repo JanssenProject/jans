@@ -1079,7 +1079,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodAlgNoneStep1", response, entity);
 
-		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response.getStatus(), entity);
 		responseAsserter.assertRegisterResponse();
 		clientId3 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
