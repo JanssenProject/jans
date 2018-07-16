@@ -106,6 +106,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setSubjectType(SubjectType.PAIRWISE);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
