@@ -116,7 +116,8 @@ public class IntrospectionWebService {
                             response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
                             response.setIssuedAt(ServerUtil.dateToSeconds(tokenToIntrospect.getCreationDate()));
                             response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
-                            response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
+                            response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // remove in 4.0.0, we don't need it anymore
+                            response.setScope(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
                             response.setSub(getSub(grantOfIntrospectionToken));
                             response.setUsername(user != null ? user.getAttribute("displayName") : null);
