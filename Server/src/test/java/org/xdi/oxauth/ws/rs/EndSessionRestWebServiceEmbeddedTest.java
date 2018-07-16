@@ -235,8 +235,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
     @Parameters({"endSessionPath", "postLogoutRedirectUri"})
     @Test
-    public void requestEndSessionFail2(final String endSessionPath, final String postLogoutRedirectUri)
-            throws Exception {
+    public void requestEndSessionFail2(final String endSessionPath, final String postLogoutRedirectUri) {
         String endSessionId = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest = new EndSessionRequest("INVALID_ACCESS_TOKEN", postLogoutRedirectUri,
                 endSessionId);
@@ -250,7 +249,8 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestEndSessionFail2", response, entity);
 
-        assertEquals(response.getStatus(), 401, "Unexpected response code.");
+        // we can get bad request or redirect to RP according to https://github.com/GluuFederation/oxAuth/issues/575
+        assertTrue(response.getStatus() == 400 || response.getStatus() == 307, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
