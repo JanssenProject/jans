@@ -119,6 +119,9 @@ class FakeRemote:
     def put_file(self, filename, filecontent):
         with open(filename, 'w') as f:
             f.write(filecontent)
+            
+    def exists(self, path):
+        return os.path.exists(path)
 
     def rename(self, oldname, newname):
         os.rename(oldname, newname)
