@@ -102,7 +102,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 			BaseTest.showResponse("UMA : RegisterPermissionWSTest.testRegisterPermissionWithInvalidResource() : ",
 					response, entity);
 
-			assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
+			assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
 					"Unexpected response code.");
 			try {
 				final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
