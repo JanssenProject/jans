@@ -27,10 +27,15 @@ public class IntrospectionResponse {
 
     @JsonProperty(value = "active")
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
-    
+
+    @Deprecated // remove in 4.0.0, we left it just for compatiblity in 3.x.x versions
     @JsonProperty(value = "scopes")
     @ApiModelProperty(value = " An array referencing zero or more strings representing scopes to which access was granted for this resource. Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.", required = true) 
     private List<String> scopes;
+
+    @JsonProperty(value = "scope")
+    @ApiModelProperty(value = " An array referencing zero or more strings representing scopes to which access was granted for this resource. Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.", required = true)
+    private List<String> scope;
     
     @JsonProperty(value = "client_id")
     private String clientId;
@@ -81,12 +86,22 @@ public class IntrospectionResponse {
         active = p_active;
     }
 
+    @Deprecated // remove in 4.0.0, we left it just for compatiblity in 3.x.x versions
     public List<String> getScopes() {
         return scopes;
     }
 
+    @Deprecated // remove in 4.0.0, we left it just for compatiblity in 3.x.x versions
     public void setScopes(Collection<String> scopes) {
         this.scopes = scopes != null ? new ArrayList<String>(scopes) : new ArrayList<String>();
+    }
+
+    public List<String> getScope() {
+        return scope;
+    }
+
+    public void setScope(Collection<String> scope) {
+        this.scope = scope != null ? new ArrayList<String>(scope) : new ArrayList<String>();;
     }
 
     public Integer getExpiresAt() {
@@ -166,6 +181,7 @@ public class IntrospectionResponse {
         return "IntrospectionResponse{" +
                 "active=" + active +
                 ", scopes=" + scopes +
+                ", scope=" + scope +
                 ", clientId='" + clientId + '\'' +
                 ", username='" + username + '\'' +
                 ", tokenType='" + tokenType + '\'' +
