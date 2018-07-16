@@ -66,6 +66,11 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+            registerRequest.setGrantTypes(grantTypes);
+
             registerRequestContent = registerRequest.getJSONParameters().toString(4);
         } catch (JSONException e) {
             e.printStackTrace();
