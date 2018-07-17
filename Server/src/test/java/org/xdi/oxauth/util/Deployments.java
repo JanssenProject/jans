@@ -1,5 +1,7 @@
 package org.xdi.oxauth.util;
 
+import java.io.File;
+
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -21,9 +23,22 @@ public class Deployments {
 				// .addClass(ResteasyInitializer.class)
 				// .addPackage(GluuConfigurationWS.class.getPackage())
 				// Servlets
-				.addAsWebInfResource("jetty-env.xml").addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+		        .addAsWebInfResource("jetty-env.xml").addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
 				.setWebXML("web.xml");
-		return war;
+	    File dir = new File("src/main/webapp");
+	    addFiles(war, dir);
+
+	    return war;
 	}
+
+    private static void addFiles(WebArchive war, File dir) {
+        for (File f : dir.listFiles()) {
+            if (f.isFile()) {
+                war.addAsWebResource(f, f.getPath().replace("\\", "/").substring("src/main/webapp/".length()));
+            } else {
+                addFiles(war, f);
+            }
+        }
+    }
 
 }
