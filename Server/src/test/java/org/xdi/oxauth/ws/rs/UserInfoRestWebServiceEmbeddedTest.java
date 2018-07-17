@@ -434,7 +434,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
 		List<ResponseType> responseTypes = new ArrayList<ResponseType>();
 		responseTypes.add(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("picture");
+		List<String> scopes = Arrays.asList("profile");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
