@@ -438,8 +438,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<SearchResultEntry> searchResultEntries;
         PagedResult<T> vlvResponse = new PagedResult<T>();
         try {
-            searchResultEntries = this.operationService.searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
-                    start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+            searchResultEntries = this.operationService.searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
+                    toLdapSearchScope(SearchScope.SUB), start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
