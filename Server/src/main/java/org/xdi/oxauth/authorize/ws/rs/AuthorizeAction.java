@@ -443,11 +443,16 @@ public class AuthorizeAction {
                 if (client != null) {
                     JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, request, client);
 
-                    for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
-                        result.add(claim.getName());
+                    if (jwtAuthorizationRequest.getUserInfoMember() != null) {
+                        for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
+                            result.add(claim.getName());
+                        }
                     }
-                    for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
-                        result.add(claim.getName());
+
+                    if (jwtAuthorizationRequest.getIdTokenMember() != null) {
+                        for (Claim claim : jwtAuthorizationRequest.getIdTokenMember().getClaims()) {
+                            result.add(claim.getName());
+                        }
                     }
                 }
             } catch (EntryPersistenceException e) {
