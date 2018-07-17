@@ -19,7 +19,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
  */
-@JsonPropertyOrder({"active", "scopes", "client_id", "username", "token_type", "exp", "iat", "sub", "aud", "iss", "jti", "acr_values"})
+@JsonPropertyOrder({"active", "scope", "client_id", "username", "token_type", "exp", "iat", "sub", "aud", "iss", "jti", "acr_values"})
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 @ApiModel(value = "RPT introspection endpoint")
