@@ -76,7 +76,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
 
             JwtClaims claims = new JwtClaims();
             claims.setClaim("test_claim", jobj);
-            assertEquals(jobj, claims.toJsonObject().toString());
+            assertEquals(jobj, claims.toJsonObject().get("test_claim"));
         } catch (Exception ex) {
             fail(ex.getMessage());
         }
