@@ -336,7 +336,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		Builder request = null;
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-			List<String> scopes = Arrays.asList("openid");
+			List<String> scopes = Arrays.asList("openid", "profile");
 			String nonce = UUID.randomUUID().toString();
 
 			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
