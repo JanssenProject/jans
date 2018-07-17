@@ -676,7 +676,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
@@ -821,7 +821,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
@@ -966,7 +966,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
