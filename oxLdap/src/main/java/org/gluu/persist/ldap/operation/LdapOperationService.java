@@ -40,7 +40,6 @@ public interface LdapOperationService extends PersistenceOperationService {
 
     void releaseConnection(LDAPConnection connection);
 
-
     boolean authenticate(String bindDn, String password) throws ConnectionException;
 
     SearchResult search(String dn, Filter filter, int searchLimit, int count) throws SearchException;
@@ -54,9 +53,9 @@ public interface LdapOperationService extends PersistenceOperationService {
     <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
             int searchLimit, int count, Control[] controls, String... attributes) throws SearchException;
 
-    SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int start, int count,
-            int searchLimit, String sortBy, SortOrder sortOrder, PagedResult vlvResponse,
-            String... attributes) throws Exception;
+    List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+                                                        int count, int pageSize, String sortBy, SortOrder sortOrder,
+                                                        PagedResult vlvResponse, String... attributes) throws Exception;
 
     SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count,
             String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes)
