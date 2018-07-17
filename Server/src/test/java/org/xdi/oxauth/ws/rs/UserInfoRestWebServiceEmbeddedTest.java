@@ -106,6 +106,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setSubjectType(SubjectType.PAIRWISE);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -429,7 +434,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
 		List<ResponseType> responseTypes = new ArrayList<ResponseType>();
 		responseTypes.add(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("picture");
+		List<String> scopes = Arrays.asList("profile");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
@@ -633,6 +638,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -666,7 +676,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
@@ -771,6 +781,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
@@ -806,7 +821,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
@@ -913,6 +928,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -946,7 +966,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		final String state = UUID.randomUUID().toString();
 
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-		List<String> scopes = Arrays.asList("openid");
+		List<String> scopes = Arrays.asList("openid", "profile", "email");
 		String nonce = UUID.randomUUID().toString();
 
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
