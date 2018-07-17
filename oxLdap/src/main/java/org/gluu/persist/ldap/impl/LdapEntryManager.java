@@ -435,30 +435,23 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             searchFilter = filter;
         }
 
-        SearchResult searchResult = null;
+        List<SearchResultEntry> searchResultEntries;
         PagedResult<T> vlvResponse = new PagedResult<T>();
         try {
-            searchResult = this.operationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
+            searchResultEntries = this.operationService.searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
                     start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
-
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
-
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        if (searchResult.getEntryCount() == 0) {
-            vlvResponse.setEntries(new ArrayList<T>(0));
-            return vlvResponse;
+        List<T> entries = new ArrayList<T>(0);
+        if (searchResultEntries.size() > 0) {
+            entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResultEntries.toArray(new SearchResultEntry[]{}));
         }
-
-        List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations,
-                searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
         vlvResponse.setEntries(entries);
 
         return vlvResponse;
+
     }
 
     @Deprecated
