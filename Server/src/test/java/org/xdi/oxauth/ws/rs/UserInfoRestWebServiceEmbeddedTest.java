@@ -638,6 +638,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -775,6 +780,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setResponseTypes(responseTypes);
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
@@ -917,6 +927,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 		registerRequest.setResponseTypes(responseTypes);
 		registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
