@@ -92,6 +92,11 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
         String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
         Response response = request.post(Entity.json(registerRequestContent));
@@ -124,6 +129,11 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
         String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
@@ -207,6 +217,11 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
         String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
         Response response = request.post(Entity.json(registerRequestContent));
@@ -288,6 +303,11 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
         String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
         Response response = request.post(Entity.json(registerRequestContent));
@@ -368,6 +388,11 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
         String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
