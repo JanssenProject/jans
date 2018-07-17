@@ -17,6 +17,8 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_A
 import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -81,6 +83,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setJwksUri(jwksUri);
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -168,6 +175,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setJwksUri(jwksUri);
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
@@ -258,6 +270,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -346,6 +363,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setJwksUri(jwksUri);
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
@@ -436,6 +458,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
+
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
 		Response response = request.post(Entity.json(registerRequestContent));
@@ -522,6 +549,11 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 		registerRequest.setJwksUri(jwksUri);
 		registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
 		registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+        registerRequest.setGrantTypes(grantTypes);
 
 		String registerRequestContent = registerRequest.getJSONParameters().toString(4);
 
