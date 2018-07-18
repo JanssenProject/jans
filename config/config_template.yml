@@ -1,0 +1,72 @@
+
+# server configuration
+server_name: $SERVER_NAME
+use_client_authentication_for_pat: $USE_CLIENT_AUTHENTICATION_FOR_PAT
+trust_all_certs: $TRUST_ALL_CERTS
+trust_store_path: ''
+trust_store_password: ''
+crypt_provider_key_store_path: ''
+crypt_provider_key_store_password: ''
+crypt_provider_dn_name: ''
+license_id: $LICENSE_ID
+public_key: $PUBLIC_KEY
+public_password: $PUBLIC_PASSWORD
+license_password: $LICENSE_PASSWORD
+support-google-logout: $SUPPORT_GOOGLE_LOGOUT
+state_expiration_in_minutes: 5
+nonce_expiration_in_minutes: 5
+public_op_key_cache_expiration_in_minutes: 60
+protect_commands_with_access_token: false
+uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: true
+migration_source_folder_path: ''
+storage: h2
+storage_configuration:
+  dbFileLocation: "./oxd_db"
+remove_expired_clients: false
+
+# Connectors
+server:
+  applicationConnectors:
+    - type: http
+      port: 8084
+    - type: https
+      port: 8443
+      keyStorePath: $KEYSTORE_PATH
+      keyStorePassword: $KEYSTORE_PASSWORD
+      validateCerts: $KEYSTORE_VALIDATE_CERTS
+  adminConnectors:
+    - type: https
+      port: 8444
+      keyStorePath: $KEYSTORE_PATH
+      keyStorePassword: $KEYSTORE_PASSWORD
+      validateCerts: $KEYSTORE_VALIDATE_CERTS
+
+# Logging settings.
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+  # Logger-specific levels.
+  loggers:
+    org.gluu: INFO
+    org.xdi: INFO
+
+# Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
+# Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
+# Logback's Fixed Window Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%i.log.gz
+
+  appenders:
+    - type: console
+
+defaultSiteConfig:
+  op_host: ''
+  op_discovery_path: ''
+  response_types: ['code']
+  grant_type: ['authorization_code']
+  acr_values: ['']
+  scope: ['openid', 'profile', 'email']
+  ui_locales: ['en']
+  claims_locales: ['en']
+  contacts: []
+
