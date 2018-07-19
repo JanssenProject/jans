@@ -7,5 +7,4 @@ ThumbSignIn can be integrated with Gluu Server to achieve strong authentication 
 - [Thumbsignin java SDK jar](https://thumbsignin.com/download/thumbsigninJavaSdk)
 - [Steps to perform Integration][./ThumbSignIn-howto.pdf]
 
-For more information about ThumbSignIn see:
--[Website](http://thumbsignin.com)
+For more information about ThumbSignIn, see their [website](http://thumbsignin.com)
