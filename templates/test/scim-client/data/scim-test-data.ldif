@@ -276,44 +276,44 @@ birthdate: 20160413000000Z
 
 #Users with special chars filter handling
 
-dn: inum=@!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.1111,ou=people,o=@!3245.DF39.6A34.9E97!0001!513A.9888,o=gluu
+dn: inum=%(inumOrg)s!0000!XXXX.DDDD.1111,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: @!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.1111
+inum: %(inumOrg)s!0000!XXXX.DDDD.1111
 uid: dddd1111 *char
 givenName: Dddd 1111
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 1111
 
-dn: inum=@!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.2222,ou=people,o=@!3245.DF39.6A34.9E97!0001!513A.9888,o=gluu
+dn: inum=%(inumOrg)s!0000!XXXX.DDDD.2222,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: @!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.2222
+inum: %(inumOrg)s!0000!XXXX.DDDD.2222
 uid: dddd2222 * \ (char
 givenName: Dddd 2222
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 2222
 
-dn: inum=@!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.3333,ou=people,o=@!3245.DF39.6A34.9E97!0001!513A.9888,o=gluu
+dn: inum=%(inumOrg)s!0000!XXXX.DDDD.3333,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: @!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.3333
+inum: %(inumOrg)s!0000!XXXX.DDDD.3333
 uid: dddd3333 * \ (char) /
 givenName: Dddd 3333
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 3333
 
-dn: inum=@!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.4444,ou=people,o=@!3245.DF39.6A34.9E97!0001!513A.9888,o=gluu
+dn: inum=%(inumOrg)s!0000!XXXX.DDDD.4444,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: @!3245.DF39.6A34.9E97!0001!513A.9888!0000!XXXX.DDDD.4444
+inum: %(inumOrg)s!0000!XXXX.DDDD.4444
 uid: dddd4444
 givenName: (special chars\)/*
 sn: FilterTest
