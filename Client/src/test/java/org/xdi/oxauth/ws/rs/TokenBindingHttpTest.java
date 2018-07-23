@@ -58,7 +58,7 @@ public class TokenBindingHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId);
 
         Jwt jwt = Jwt.parse(authorizationResponse.getIdToken());
-        Assert.assertEquals(EXPECTED_ID_HASH, jwt.getClaims().getClaimAsString(JwtClaimName.TOKEN_BINDING_HASH));
+        Assert.assertEquals(EXPECTED_ID_HASH, jwt.getClaims().getClaimAsJSON(JwtClaimName.CNF).optString(JwtClaimName.TOKEN_BINDING_HASH));
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,

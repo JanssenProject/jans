@@ -9,6 +9,13 @@
         </classes>
     </test>
 
+    <!-- Token binding -->
+    <test name="Token Binding test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.TokenBindingHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Authorization Code Flow test -->
     <test name="Authorization Code Flow test (HTTP)" enabled="true">
         <classes>
