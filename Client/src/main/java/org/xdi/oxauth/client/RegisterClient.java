@@ -120,6 +120,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (StringUtils.isNotBlank(getRequest().getClientName())) {
                     requestBody.put(CLIENT_NAME.toString(), getRequest().getClientName());
                 }
+                if (StringUtils.isNotBlank(getRequest().getIdTokenTokenBindingCnf())) {
+                    requestBody.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), getRequest().getIdTokenTokenBindingCnf());
+                }
                 if (StringUtils.isNotBlank(getRequest().getLogoUri())) {
                     requestBody.put(LOGO_URI.toString(), getRequest().getLogoUri());
                 }

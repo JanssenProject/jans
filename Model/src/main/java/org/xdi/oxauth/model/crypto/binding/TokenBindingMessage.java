@@ -1,5 +1,12 @@
 package org.xdi.oxauth.model.crypto.binding;
 
+import com.google.common.base.Function;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.token.JsonWebResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +20,8 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 public class TokenBindingMessage {
+
+    private static final Logger log = Logger.getLogger(TokenBindingMessage.class);
 
     private List<TokenBinding> tokenBindings = new ArrayList<TokenBinding>();
 
@@ -37,6 +46,44 @@ public class TokenBindingMessage {
             if (binding.getTokenBindingType() == type) {
                 return binding;
             }
+        }
+        return null;
+    }
+
+    public static Function<JsonWebResponse, Void> createIdTokenTokingBindingPreprocessing(String tokenBindingMessageAsString, final String rpTokenBindingMessageHashClaimKey) throws TokenBindingParseException {
+        if (StringUtils.isNotBlank(tokenBindingMessageAsString) && StringUtils.isNotBlank(rpTokenBindingMessageHashClaimKey)) {
+            TokenBindingMessage message = new TokenBindingMessage(tokenBindingMessageAsString);
+            final TokenBinding referredBinding = message.getFirstTokenBindingByType(TokenBindingType.REFERRED_TOKEN_BINDING);
+            return new Function<JsonWebResponse, Void>() {
+                @Override
+                public Void apply(JsonWebResponse jsonWebResponse) {
+                    setCnfClaim(jsonWebResponse, referredBinding.getTokenBindingID().sha256base64url(), rpTokenBindingMessageHashClaimKey);
+                    return null;
+                }
+            };
+        }
+        return null;
+    }
+
+    public static void setCnfClaim(JsonWebResponse jsonWebResponse, String tokenBindingIdHash, String rpTokenBindingMessageHashClaimKey) {
+        try {
+            JSONObject value = jsonWebResponse.getClaims().getClaimAsJSON("cnf");
+            if (value == null) {
+                value = new JSONObject();
+            }
+            value.put(rpTokenBindingMessageHashClaimKey, tokenBindingIdHash);
+
+            jsonWebResponse.getClaims().setClaim("cnf", value);
+        } catch (JSONException e) {
+            log.error("Failed to create cnf JSON object", e);
+        }
+    }
+
+    public static String getTokenBindingIdHashFromTokenBindingMessage(String tokenBindingMessageAsString, final String rpTokenBindingMessageHashClaimKey) throws TokenBindingParseException {
+        if (StringUtils.isNotBlank(tokenBindingMessageAsString) && StringUtils.isNotBlank(rpTokenBindingMessageHashClaimKey)) {
+            TokenBindingMessage message = new TokenBindingMessage(tokenBindingMessageAsString);
+            final TokenBinding referredBinding = message.getFirstTokenBindingByType(TokenBindingType.REFERRED_TOKEN_BINDING);
+            return referredBinding.getTokenBindingID().sha256base64url();
         }
         return null;
     }

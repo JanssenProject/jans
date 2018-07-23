@@ -21,6 +21,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -107,7 +110,7 @@ public class IdTokenFactory {
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
-                                     Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
+                                     Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
@@ -120,6 +123,10 @@ public class IdTokenFactory {
 
         jwt.getClaims().setExpirationTime(expiration);
         jwt.getClaims().setIssuedAt(issuedAt);
+
+        if (preProcessing != null) {
+            preProcessing.apply(jwt);
+        }
 
         if (authorizationGrant.getAcrValues() != null) {
             jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
@@ -327,7 +334,7 @@ public class IdTokenFactory {
 
     public Jwe generateEncryptedIdToken(
             IAuthorizationGrant authorizationGrant, String nonce, AuthorizationCode authorizationCode,
-            AccessToken accessToken, Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
+            AccessToken accessToken, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header
@@ -349,6 +356,10 @@ public class IdTokenFactory {
 
         jwe.getClaims().setExpirationTime(expiration);
         jwe.getClaims().setIssuedAt(issuedAt);
+
+        if (preProcessing != null) {
+            preProcessing.apply(jwe);
+        }
 
         if (authorizationGrant.getAcrValues() != null) {
             jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
@@ -523,16 +534,16 @@ public class IdTokenFactory {
 
     public JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-            Set<String> scopes, boolean includeIdTokenClaims)
+            Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing)
             throws Exception {
         final Client grantClient = grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
             return generateEncryptedIdToken(
-                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
+                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims, preProcessing);
         } else {
             return generateSignedIdToken(
-                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
+                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims, preProcessing);
         }
     }
 

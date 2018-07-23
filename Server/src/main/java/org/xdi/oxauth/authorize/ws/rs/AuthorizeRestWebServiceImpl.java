@@ -62,6 +62,7 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.AcrChangedException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -178,6 +179,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
+        String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");
+
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.USER_AUTHORIZATION);
         oAuth2AuditLog.setClientId(clientId);
         oAuth2AuditLog.setScope(scope);
@@ -192,8 +195,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         log.debug("Attempting to request authorization: "
                         + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}, "
-                        + "customRespHeaders = {}, claims = {}",
-                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims);
+                        + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
+                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims, tokenBindingHeader);
 
         ResponseBuilder builder = Response.ok();
 
@@ -568,6 +571,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             sessionUser.getAuthenticationTime());
                                     authorizationGrant.setNonce(nonce);
                                     authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                    authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
                                     authorizationGrant.setScopes(scopes);
                                     authorizationGrant.setCodeChallenge(codeChallenge);
                                     authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
@@ -622,7 +626,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                     }
                                     IdToken idToken = authorizationGrant.createIdToken(
-                                            nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims);
+                                            nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims, TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
 
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
                                 }

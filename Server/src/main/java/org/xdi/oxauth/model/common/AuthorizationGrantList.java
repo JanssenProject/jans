@@ -242,6 +242,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 final String sessionDn = tokenLdap.getSessionDn();
                 final String claims = tokenLdap.getClaims();
 
+                result.setTokenBindingHash(tokenLdap.getTokenBindingHash());
                 result.setNonce(nonce);
                 result.setTokenLdap(tokenLdap);
                 if (StringUtils.isNotBlank(grantId)) {
