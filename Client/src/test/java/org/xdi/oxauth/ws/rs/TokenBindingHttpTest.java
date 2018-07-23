@@ -51,7 +51,7 @@ public class TokenBindingHttpTest extends BaseTest {
         );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUri, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
