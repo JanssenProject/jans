@@ -54,6 +54,7 @@ public interface ConfigurationResponseClaim {
     public static final String OP_TOS_URI = "op_tos_uri";
     public static final String SCOPE_KEY = "scope";
     public static final String CLAIMS_KEY = "claims";
+    public static final String ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED = "id_token_token_binding_cnf_values_supported";
     public static final String FRONTCHANNEL_LOGOUT_SUPPORTED = "frontchannel_logout_supported";
     public static final String FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     public static final String AUTH_LEVEL_MAPPING = "auth_level_mapping";

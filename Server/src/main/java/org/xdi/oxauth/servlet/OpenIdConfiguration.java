@@ -326,6 +326,12 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(SERVICE_DOCUMENTATION, appConfiguration.getServiceDocumentation());
 
+            JSONArray idTokenTokenBindingCnfValuesSupported = new JSONArray();
+            for (String value : appConfiguration.getIdTokenTokenBindingCnfValuesSupported()) {
+                idTokenTokenBindingCnfValuesSupported.put(value);
+            }
+            jsonObj.put(ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED, idTokenTokenBindingCnfValuesSupported);
+
             JSONArray claimsLocalesSupported = new JSONArray();
             for (String claimLocale : appConfiguration.getClaimsLocalesSupported()) {
                 claimsLocalesSupported.put(claimLocale);

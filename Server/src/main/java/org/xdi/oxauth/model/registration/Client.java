@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.model.registration;
 
+import org.apache.commons.lang.StringUtils;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,6 +82,9 @@ public class Client implements Serializable {
 
     @LdapAttribute(name = "displayName")
     private String clientName;
+
+    @LdapAttribute(name = "oxIdTokenTokenBindingCnf")
+    private String idTokenTokenBindingCnf;
 
     @LdapAttribute(name = "oxAuthLogoURI")
     private String logoUri;
@@ -498,6 +507,18 @@ public class Client implements Serializable {
      */
     public void setClientName(String clientName) {
         this.clientName = clientName;
+    }
+
+    public String getIdTokenTokenBindingCnf() {
+        return idTokenTokenBindingCnf;
+    }
+
+    public void setIdTokenTokenBindingCnf(String idTokenTokenBindingCnf) {
+        this.idTokenTokenBindingCnf = idTokenTokenBindingCnf;
+    }
+
+    public boolean isTokenBindingSupported() {
+        return StringUtils.isNotBlank(idTokenTokenBindingCnf);
     }
 
     /**
