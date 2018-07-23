@@ -190,14 +190,14 @@ public class RestResource {
             return Jackson.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
             LOG.error("Invalid params: " + params, e);
-            throw new ServerErrorException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
         }
     }
 
     public static String response(CommandResponse commandResponse) {
         if (commandResponse == null) {
             LOG.error("Command response is null, please check oxd-server.log file of oxd-server application.");
-            throw new ServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command response is null, please check oxd-server.log file of oxd-server application.").build());
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command response is null, please check oxd-server.log file of oxd-server application.").build());
         }
         final String json = CoreUtils.asJsonSilently(commandResponse);
         LOG.trace("Send back response: {}", json);
@@ -213,7 +213,7 @@ public class RestResource {
             }
         }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
-        throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
+        throw new WebApplicationException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 
     public static String forbiddenErrorResponse() {
@@ -247,7 +247,7 @@ public class RestResource {
         CommandClient client = pool.checkOut();
         if (client == null) {
             LOG.error("Failed to initialize command client.");
-            throw new ServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command client is not able to connect to oxd-server.").build());
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command client is not able to connect to oxd-server.").build());
         }
         return client;
     }
