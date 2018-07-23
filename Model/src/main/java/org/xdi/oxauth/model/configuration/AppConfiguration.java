@@ -75,6 +75,7 @@ public class AppConfiguration implements Configuration {
     private List<String> claimTypesSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
+    private List<String> idTokenTokenBindingCnfValuesSupported;
     private List<String> uiLocalesSupported;
     private Boolean claimsParameterSupported;
     private Boolean requestParameterSupported;
@@ -670,6 +671,14 @@ public class AppConfiguration implements Configuration {
 
     public void setClaimsLocalesSupported(List<String> claimsLocalesSupported) {
         this.claimsLocalesSupported = claimsLocalesSupported;
+    }
+
+    public List<String> getIdTokenTokenBindingCnfValuesSupported() {
+        return idTokenTokenBindingCnfValuesSupported;
+    }
+
+    public void setIdTokenTokenBindingCnfValuesSupported(List<String> idTokenTokenBindingCnfValuesSupported) {
+        this.idTokenTokenBindingCnfValuesSupported = idTokenTokenBindingCnfValuesSupported;
     }
 
     public List<String> getUiLocalesSupported() {

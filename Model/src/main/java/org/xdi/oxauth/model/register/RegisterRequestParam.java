@@ -235,6 +235,11 @@ public enum RegisterRequestParam {
     CLAIMS("claims"),
 
     /**
+     * Optional string value specifying the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.
+     */
+    ID_TOKEN_TOKEN_BINDING_CNF("id_token_token_binding_cnf"),
+
+    /**
      * String containing a space-separated list of scope values.
      */
     SCOPE("scope"),
