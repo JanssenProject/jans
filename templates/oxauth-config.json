@@ -147,6 +147,9 @@
     "claimsLocalesSupported":[
         "en"
     ],
+    "idTokenTokenBindingCnfValuesSupported":[
+        "tbh"
+    ],
     "uiLocalesSupported":[
         "en",
         "es"
