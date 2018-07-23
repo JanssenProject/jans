@@ -55,6 +55,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
     private List<String> claimsSupported;
+    private List<String> idTokenTokenBindingCnfValuesSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
     private List<String> uiLocalesSupported;
@@ -95,6 +96,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         displayValuesSupported = new ArrayList<String>();
         claimTypesSupported = new ArrayList<String>();
         claimsSupported = new ArrayList<String>();
+        idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
         claimsLocalesSupported = new ArrayList<String>();
         uiLocalesSupported = new ArrayList<String>();
     }
@@ -738,6 +740,15 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.claimsSupported = claimsSupported;
     }
 
+
+    public List<String> getIdTokenTokenBindingCnfValuesSupported() {
+        return idTokenTokenBindingCnfValuesSupported;
+    }
+
+    public void setIdTokenTokenBindingCnfValuesSupported(List<String> idTokenTokenBindingCnfValuesSupported) {
+        this.idTokenTokenBindingCnfValuesSupported = idTokenTokenBindingCnfValuesSupported;
+    }
+
     /**
      * Returns an URL of a page containing human-readable information that
      * developers might want or need to know when using the OpenID Provider. In
@@ -996,6 +1007,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", displayValuesSupported=" + displayValuesSupported +
                 ", claimTypesSupported=" + claimTypesSupported +
                 ", claimsSupported=" + claimsSupported +
+                ", idTokenTokenBindingCnfValuesSupported=" + idTokenTokenBindingCnfValuesSupported +
                 ", serviceDocumentation='" + serviceDocumentation + '\'' +
                 ", claimsLocalesSupported=" + claimsLocalesSupported +
                 ", uiLocalesSupported=" + uiLocalesSupported +

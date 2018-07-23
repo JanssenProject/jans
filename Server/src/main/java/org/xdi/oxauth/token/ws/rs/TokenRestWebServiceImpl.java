@@ -18,6 +18,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -38,11 +41,13 @@ import org.xdi.oxauth.model.common.ResourceOwnerPasswordCredentialsGrant;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
 import org.xdi.oxauth.security.Identity;
@@ -123,6 +128,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         oAuth2AuditLog.setUsername(username);
         oAuth2AuditLog.setScope(scope);
 
+        String tokenBindingHeader = request.getHeader("Sec-Token-Binding");
+
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
 
@@ -153,13 +160,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     return response(error(401, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                 }
 
+                final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
+                        tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
+
                 if (gt == GrantType.AUTHORIZATION_CODE) {
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                     }
 
                     log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
-                    AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
+                    final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
                     log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
                     if (authorizationCodeGrant != null) {
@@ -187,8 +197,18 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             String nonce = authorizationCodeGrant.getNonce();
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                     appConfiguration.getLegacyIdTokenClaims());
+                            final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
+                            Function<JsonWebResponse, Void> authorizationCodePreProcessing = new Function<JsonWebResponse, Void>() {
+                                @Override
+                                public Void apply(JsonWebResponse jsonWebResponse) {
+                                    if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
+                                        TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
+                                    }
+                                    return null;
+                                }
+                            };
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, authorizationCodeGrant, includeIdTokenClaims);
+                                    nonce, null, accToken, authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -257,7 +277,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                 appConfiguration.getLegacyIdTokenClaims());
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, clientCredentialsGrant, includeIdTokenClaims);
+                                null, null, null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -301,7 +321,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                     appConfiguration.getLegacyIdTokenClaims());
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims);
+                                    null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                         }
 
                         oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);

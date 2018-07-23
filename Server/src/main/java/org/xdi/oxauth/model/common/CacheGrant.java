@@ -25,6 +25,7 @@ public class CacheGrant implements Serializable {
     private Date authenticationTime;
     private Set<String> scopes;
     private String grantId;
+    private String tokenBindingHash;
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
@@ -49,6 +50,7 @@ public class CacheGrant implements Serializable {
         client = grant.getClient();
         authenticationTime = grant.getAuthenticationTime();
         scopes = grant.getScopes();
+        tokenBindingHash = grant.getTokenBindingHash();
         grantId = grant.getGrantId();
         nonce = grant.getNonce();
         acrValues = grant.getAcrValues();

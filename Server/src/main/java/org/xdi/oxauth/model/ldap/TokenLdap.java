@@ -62,6 +62,8 @@ public class TokenLdap implements Serializable {
     private String codeChallengeMethod;
     @LdapAttribute(name = "oxAuthClaims")
     private String claims;
+    @LdapAttribute(name = "oxIdTokenTokenBindingCnf")
+    private String tokenBindingHash;
 
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
@@ -88,6 +90,14 @@ public class TokenLdap implements Serializable {
 
     public void setAuthorizationCode(String p_authorizationCode) {
         authorizationCode = p_authorizationCode;
+    }
+
+    public String getTokenBindingHash() {
+        return tokenBindingHash;
+    }
+
+    public void setTokenBindingHash(String tokenBindingHash) {
+        this.tokenBindingHash = tokenBindingHash;
     }
 
     public String getNonce() {
