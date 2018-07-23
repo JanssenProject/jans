@@ -60,6 +60,8 @@ public final class JwtClaimName {
      * which is intended to be consumed by the Client.
      */
     public static final String SUBJECT_IDENTIFIER = "sub"; // User Info
+
+    public static final String TOKEN_BINDING_HASH = "tbh"; // token binding hash
     /**
      * Authorized party - the party to which the ID Token was issued.
      * If present, it must contain the OAuth 2.0 Client ID of this party.
