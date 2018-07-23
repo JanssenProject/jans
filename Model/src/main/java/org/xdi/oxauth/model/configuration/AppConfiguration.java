@@ -674,6 +674,9 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getIdTokenTokenBindingCnfValuesSupported() {
+        if (idTokenTokenBindingCnfValuesSupported == null) {
+            idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
+        }
         return idTokenTokenBindingCnfValuesSupported;
     }
 
