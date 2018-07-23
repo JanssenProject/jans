@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Function;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -67,9 +68,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public IdToken createIdToken(IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode,
-                                 AccessToken accessToken, Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
+                                 AccessToken accessToken, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes,
-                includeIdTokenClaims);
+                includeIdTokenClaims, preProcessing);
         return new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
@@ -166,11 +167,11 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims)
+                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, getScopes(),
-                    includeIdTokenClaims);
+                    includeIdTokenClaims, preProcessing);
             final String acrValues = authorizationGrant.getAcrValues();
             final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {

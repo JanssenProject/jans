@@ -53,6 +53,7 @@ public class RegisterRequest extends BaseRequest {
     private String jwksUri;
     private String jwks;
     private String sectorIdentifierUri;
+    private String idTokenTokenBindingCnf;
     private SubjectType subjectType;
     private SignatureAlgorithm idTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
@@ -306,6 +307,13 @@ public class RegisterRequest extends BaseRequest {
         this.applicationType = applicationType;
     }
 
+    public String getIdTokenTokenBindingCnf() {
+        return idTokenTokenBindingCnf;
+    }
+
+    public void setIdTokenTokenBindingCnf(String idTokenTokenBindingCnf) {
+        this.idTokenTokenBindingCnf = idTokenTokenBindingCnf;
+    }
 
     /**
      * Returns a list of e-mail addresses for people allowed to administer the information
@@ -1023,6 +1031,9 @@ public class RegisterRequest extends BaseRequest {
         if (scope != null && !scope.isEmpty()) {
             parameters.put(SCOPE.toString(), implode(scope, " "));
         }
+        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
+            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
+        }
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
@@ -1221,6 +1232,7 @@ public class RegisterRequest extends BaseRequest {
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
         result.setContacts(contacts);
         result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
+        result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
         result.setLogoUri(requestObject.optString(LOGO_URI.toString()));
         result.setClientUri(requestObject.optString(CLIENT_URI.toString()));
         result.setPolicyUri(requestObject.optString(POLICY_URI.toString()));
@@ -1257,6 +1269,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(clientName)) {
             parameters.put(CLIENT_NAME.toString(), clientName);
+        }
+        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
+            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
         }
         if (StringUtils.isNotBlank(logoUri)) {
             parameters.put(LOGO_URI.toString(), logoUri);
