@@ -51,7 +51,12 @@ public class TokenBindingMessage {
     }
 
     public static Function<JsonWebResponse, Void> createIdTokenTokingBindingPreprocessing(String tokenBindingMessageAsString, final String rpTokenBindingMessageHashClaimKey) throws TokenBindingParseException {
-        if (StringUtils.isNotBlank(tokenBindingMessageAsString) && StringUtils.isNotBlank(rpTokenBindingMessageHashClaimKey)) {
+        final boolean tokenBindingMessagePresent = StringUtils.isNotBlank(tokenBindingMessageAsString);
+        final boolean rpKeyPresent = StringUtils.isNotBlank(rpTokenBindingMessageHashClaimKey);
+
+        log.trace("TokenBindingMessage present: " + tokenBindingMessagePresent + ", rpCnfKey: " + rpTokenBindingMessageHashClaimKey);
+
+        if (tokenBindingMessagePresent && rpKeyPresent) {
             TokenBindingMessage message = new TokenBindingMessage(tokenBindingMessageAsString);
             final TokenBinding referredBinding = message.getFirstTokenBindingByType(TokenBindingType.REFERRED_TOKEN_BINDING);
             return new Function<JsonWebResponse, Void>() {
