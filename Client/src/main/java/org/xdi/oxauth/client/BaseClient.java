@@ -21,6 +21,7 @@ import javax.ws.rs.core.Cookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     protected ClientRequest clientRequest = null;
     protected ClientResponse<String> clientResponse = null;
     private final List<Cookie> cookies = new ArrayList<Cookie>();
+    private final Map<String, String> headers = new HashMap<String, String>();
 
     protected ClientExecutor executor = null;
 
@@ -229,6 +231,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         for (Cookie cookie : cookies) {
             clientRequest.cookie(cookie);
         }
+        for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+            clientRequest.header(headerEntry.getKey(), headerEntry.getValue());
+        }
     }
 
     public void closeConnection() {
@@ -248,5 +253,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
     public List<Cookie> getCookies() {
         return cookies;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }
