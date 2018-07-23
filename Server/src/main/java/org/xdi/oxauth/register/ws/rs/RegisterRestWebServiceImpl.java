@@ -222,6 +222,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         client.setClientId(inum);
                         client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
                         client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
+                        client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
 
                         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                         client.setClientIdIssuedAt(calendar.getTime());
