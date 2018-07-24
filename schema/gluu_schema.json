@@ -4120,7 +4120,7 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "cred-manager - preferred method to use for user authentication",
+            "desc": "Gluu Casa - preferred method to use for user authentication",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxPreferredMethod"
@@ -4131,7 +4131,7 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "cred-manager - Json representation of OTP devices. Complementary to oxExternalUid attribute",
+            "desc": "Gluu Casa - Json representation of OTP devices. Complementary to oxExternalUid attribute",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxOTPDevices"
@@ -4142,7 +4142,7 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "cred-manager - Json representation of mobile devices. Complementary to mobile attribute",
+            "desc": "Gluu Casa - Json representation of mobile devices. Complementary to mobile attribute",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxMobileDevices"
@@ -4175,7 +4175,7 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "cred-manager - 2FA Enforcement Policy for User",
+            "desc": "Gluu Casa - 2FA Enforcement Policy for User",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxStrongAuthPolicy"
@@ -4186,7 +4186,7 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "cred-manager - List of devices with which strong authentication may be skipped",
+            "desc": "Gluu Casa - List of devices with which strong authentication may be skipped",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxTrustedDevicesInfo"
@@ -4203,6 +4203,17 @@
                 "oxIdTokenTokenBindingCnf"
             ],
             "oid": "oxAttribute:387",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Gluu Casa - List of unlinked social accounts (ie disabled oxExternalUids)",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxUnlinkedExternalUids"
+            ],
+            "oid": "oxAttribute:388",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -4309,7 +4320,8 @@
                 "oxOTPDevices",
                 "oxMobileDevices",
                 "oxStrongAuthPolicy",
-                "oxTrustedDevicesInfo"
+                "oxTrustedDevicesInfo",
+                "oxUnlinkedExternalUids"
             ],
             "must": [
                 "objectclass"
