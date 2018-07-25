@@ -1,6 +1,4 @@
 #!/bin/bash
-apt-get update
-apt-get install gettext-base -y
 
 #--- SETTING DEFAULT VALUES ---
 export SUPPORT_GOOGLE_LOGOUT=${SUPPORT_GOOGLE_LOGOUT:=true}
