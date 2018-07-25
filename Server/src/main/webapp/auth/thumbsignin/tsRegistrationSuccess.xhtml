@@ -1,0 +1,332 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:h="http://xmlns.jcp.org/jsf/html" template="/WEB-INF/incl/layout/login-template.xhtml" xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{sessionIdService.notSessionIdAuthenticated}" />
+
+        <f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
+    </f:metadata>
+
+    <ui:define name="head">
+        <meta name="description" content="Gluu, Inc." />
+
+        <script src="./js/authenticate-bundle.js"></script>
+        <script src="./js/thumbsign_widget.js"></script>
+        
+        <script>
+            var ts_host = '${identity.getWorkingParameter('ts_host')}';
+            var ts_statusPath = '${identity.getWorkingParameter('ts_statusPath')}';
+            var ts_authenticate_Url = ts_host + "/ts/secure/authenticate";
+            var ts_status_Url = ts_host + ts_statusPath;
+            
+            var authenticateResponse = '${identity.getWorkingParameter('authenticateResponseJsonStr')}'
+            var authHeader = '${identity.getWorkingParameter('authorizationHeader')}'
+            var xTsDate = '${identity.getWorkingParameter('xTsDate')}'
+            
+            $(document).ready(function() {
+                
+                thumbSignIn.addConfig('LOGIN_CONFIG', {
+                    actionUrl: ts_authenticate_Url,
+                    statusUrl: ts_status_Url,
+                    actionResponse: authenticateResponse,
+                    authHeader: authHeader,
+                    xTsDate: xTsDate,
+                    DEEP_LINK: "Authenticate via ThumbSignin",
+                    loginFlow: "Authentication"
+                });
+                thumbSignIn.init({
+                    id: 'tsLogin',
+                    config: 'LOGIN_CONFIG',
+                    container: 'loginWidgetContainer'
+                }).then(function() {
+                    
+                    tsLogin.open()
+                    /*$('#close').click(function() {
+                        tsLogin.close()
+                    });*/
+                    
+                    // Post initialisation of the 'tsLogin' widget, u will be able to add event listeners
+                    tsLogin.registerEvent('SUCCESS', function(response) {
+                        //window.location.hash = '';
+                        //window.location.pathname = response.redirectUrl;
+
+                        //form submit
+                        console.log("SUCCESS response", response);
+
+                        document.getElementById("transactionId").value = response.transactionId;
+                        document.getElementById("authenticationForm").submit();
+
+                    });
+                })
+            });
+        </script>
+
+        <style>
+            body {
+                padding-right: 0px !important;
+                padding-left: 0px !important;
+            }
+            html,
+            body {
+                height: 100%;
+            }
+            .checkmark:after {
+                left: 25% !important;
+            }
+            .forgot_link {
+                margin-top: 10px;
+            }
+            .open-app{
+                margin-top: 40px !important;
+            }
+            .navbar {
+                background: #00A8E8;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+                position: sticky !important;
+                top: 0;
+                z-index: 11;
+                left: 0;
+                right: 0;
+                padding-bottom: 10px;
+            }
+
+            .open-app {
+            	width: auto !important;
+            }
+            
+            .tsmodal-body {
+            	display: flex !important; 
+    			align-items: center !important;
+                justify-content: center !important;
+                height: auto !important;
+            }
+
+            .ui-widget-container .ui-content-left {
+    			min-height: auto !important;
+			}
+
+            .container {
+                height: calc(100% - 60px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: auto;
+            }
+            
+            .navbar a {
+                color: white;
+            }
+            
+            .ui-widget-container {
+                max-width: 650px;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+                display: flex;
+                text-align: center;
+            }
+            
+            .ui-widget-container .ui-content-left {
+                min-height: 360px;
+            }
+            
+            .ui-widget-container .ui-child {
+                flex-grow: 1;
+            }
+            
+            .ui-widget-container .ui-separator {
+                width: 2px;
+                background-color: #d4d4d4;
+            }
+            
+            .ui-child .ui-content {
+                padding: 0 30px;
+            }
+            
+            .ui-child .ui-title {
+                font-size: 20px;
+                font-weight: 300;
+            }
+            
+            .ui-form {
+                margin-top: 30px;
+            }
+            
+            .ui-form button {
+                background-color: #00A8E8;
+                border: 0;
+                margin-top: 30px;
+            }
+            
+            .ui-form input {
+                border-color: #009dd9;
+                border-width: 0;
+                border-bottom: 1px solid #ccc;
+                height: 34px;
+                line-height: 20px;
+                font-weight: 400;
+                box-shadow: none !important;
+                border-radius: 0;
+                font-size: 14px;
+                padding-left: 0;
+            }
+            
+            .ui-form input:focus {
+                border-color: #009dd9;
+            }
+
+            .tsmodal-content {
+                height: initial !important;
+            }
+            
+            .success-msg{
+            	text-align: center;
+            	width: 45%; 
+            	margin-left: 29%; 
+            	margin-bottom: 0px;
+            }
+            @media only screen and (max-width: 768px) {
+                .ui-widget-container {
+                    flex-direction: column;
+                    width: 320px;
+                    margin: auto;
+                }
+                .ui-separator {
+                    display: none;
+                }
+                .ui-widget-container .ui-content-left {
+                    margin-bottom: 26px;
+                }
+                .ui-widget-container .ui-child {
+                    flex-grow: 1;
+                    max-width: 100%;
+                    width: 325px;
+                }
+                .container {
+                    padding-bottom: 20px;
+                    height: auto;
+                }
+                .intro-conatiner {
+                	margin-top: 40% !important;
+                }
+                .overlay, .refreshImg {
+                	height: 200px !important;
+                }
+                .item {
+                	width: 100%;
+					height: 100px;                	
+                }
+                .qrcode img{
+					height: 200px !important;
+				}
+				.ui-widget-container .ui-content-left {
+    				min-height: 322px !important;
+				}
+				.success-msg
+				{
+				    width: 100%;
+				    margin-left: 0;
+				    margin-bottom: 15px;
+				}
+		
+            }
+            
+         
+        </style>
+
+    </ui:define>
+
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['login.pageTitle']}" />
+    </ui:define>
+
+    <ui:define name="body">
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand" href="#">
+                <img src="https://thumbsignin.com/styles/img/new/group-4.png"/>
+
+            </a>
+        </nav>
+		<div class="alert alert-success success-msg">
+			You have Registered Successfully! Please login using Thumbsignin.
+		</div>
+		<div class="container">
+                <div class="ui-widget-container">
+                    <div class="ui-child ui-content-left">
+                        <div class="ui-title">Passwordless Login</div>
+                        <div style="display: none;">relyingPartyId:  #{identity.getWorkingParameter('relyingPartyId')}</div>
+					    <div style="display: none;">relyingPartyLoginUrl:  #{identity.getWorkingParameter('relyingPartyLoginUrl')}</div>
+
+                        <form id="authenticationForm" method="post" action="#{request.contextPath}/postlogin">
+                            <input type="hidden" id="login_flow" name="login_flow" value="ThumbSignIn_RegistrationSucess" />
+                            <input type="hidden" id="transactionId" name="transactionId" />
+                            <div id="loginWidgetContainer"></div>
+                        </form>
+
+                        <h:form id="initForm" style="display: none;">
+                            <h:commandButton id="reinitializeCurrentStep" type="hidden" action="#{authenticator.prepareAuthenticationForStep}" />
+                        </h:form>
+
+                        <a id="expireLink" style="display: none;" href="#{request.contextPath}/auth/thumbsignin/expired?rpId=#{identity.getWorkingParameter('relyingPartyLoginUrl')}" />
+                    </div>                            
+                   
+                    
+                </div>
+        </div>
+        <script type="text/javascript">
+
+           
+            $(document).ready(function () {
+                $('.other').click(function(){
+                    $('#social_new').toggle();
+                });
+
+                // Remember me
+                if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
+                    $('#rememberme').attr('checked', 'checked')
+                    document.getElementById("loginForm:username").value = localStorage.usrname;
+                    //document.getElementById("loginForm:password").value = localStorage.password;
+
+                } else {
+                    $('#rememberme').removeAttr('checked');
+                    document.getElementById("loginForm:username").value = "";
+                    //document.getElementById("loginForm:password").value = "";
+                }
+
+                $('#rememberme').click(function() {
+                    checkRemembeMe();
+                });
+                fillPlatformField();
+            });
+
+            function checkRemembeMe() {
+                if ($('#rememberme').is(':checked')) {
+                    // save username
+                    localStorage.usrname = document.getElementById("loginForm:username").value;
+                    //localStorage.password = document.getElementById("loginForm:password").value;
+                    localStorage.chkbx = $('#rememberme').val();
+                } else {
+                    localStorage.usrname = '';
+                    //localStorage.password = '';
+                    localStorage.chkbx = '';
+                }
+            }
+
+            function fillPlatformField() {
+                //Fix browser version to contain major.minor portion only
+                try {
+                    re = /^([^\.]+\.[^\.]+)\..+/;
+                    //This will remember "33.0" in "33.0.1.2.3"
+                    result = re.exec(platform.version);
+                    if (result != null) {
+                        //There was a match against the regexp
+                        platform.version=result[1];
+                    }
+                } catch (e) {
+                }
+                document.getElementById("loginForm:platform").value = JSON.stringify(platform);
+            }
+        </script>
+    </ui:define>
+</ui:composition>
