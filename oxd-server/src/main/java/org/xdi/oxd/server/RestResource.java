@@ -127,8 +127,8 @@ public class RestResource {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getAccessTokenByRefreshToken(String params) {
-        return process(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, params, GetAccessTokenByRefreshTokenParams.class, null);
+    public String getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, params, GetAccessTokenByRefreshTokenParams.class, authorization);
     }
 
     @POST
