@@ -17,6 +17,7 @@ import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.ValidationService;
 import org.xdi.util.Pair;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 
 /**
@@ -90,12 +91,11 @@ public class Processor {
             } catch (ErrorResponseException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 return CommandResponse.createErrorResponse(e.getErrorResponseCode());
-            } catch (HttpErrorResponseException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                return CommandResponse.createErrorResponse(e.createErrorResponse());
             } catch (ClientResponseFailure e) {
                 LOG.error(e.getLocalizedMessage(), e);
-                return CommandResponse.createErrorResponse(new HttpErrorResponseException(e).createErrorResponse());
+                throw new WebApplicationException((String) e.getResponse().getEntity(String.class), e.getResponse().getStatus());
+            } catch (WebApplicationException e) {
+                throw e;
             } catch (Throwable e) {
                 LOG.error(e.getMessage(), e);
             }
