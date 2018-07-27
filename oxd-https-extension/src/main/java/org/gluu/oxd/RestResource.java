@@ -199,6 +199,12 @@ public class RestResource {
             LOG.error("Command response is null, please check oxd-server.log file of oxd-server application.");
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command response is null, please check oxd-server.log file of oxd-server application.").build());
         }
+        if (commandResponse.getStatus() == ResponseStatus.ERROR) {
+            final HttpErrorResponseException httpError = HttpErrorResponseException.parseSilently(commandResponse.dataAsResponse(ErrorResponse.class));
+            if (httpError != null) {
+                throw new WebApplicationException(httpError.getEntity(), httpError.getHttpStatus());
+            }
+        }
         final String json = CoreUtils.asJsonSilently(commandResponse);
         LOG.trace("Send back response: {}", json);
         return json;
