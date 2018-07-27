@@ -352,11 +352,6 @@ class ChangeGluuHostname:
 
                 r = self.installer.run(add_key)
 
-                #if r[1]:
-                #    print "Info:", r[1]
-                #if r[2]:
-                #    print "** ERROR:", r[2]
-
         self.installer.run('chown jetty:jetty /etc/certs/oxauth-keys.*')
 
     def modify_saml_passport(self):
@@ -364,6 +359,7 @@ class ChangeGluuHostname:
         
         files = [
             '/opt/gluu-server-{0}/opt/shibboleth-idp/conf/idp.properties'.format(self.gluu_version),
+            '/opt/gluu-server-{0}/opt/shibboleth-idp/metadata/idp-metadata.xml'.format(self.gluu_version),
             '/opt/gluu-server-{0}/etc/gluu/conf/passport-config.json'.format(self.gluu_version),
             ]
 
