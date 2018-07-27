@@ -1,4 +1,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="oxD Common module Suite" parallel="tests">
+    <test name="ParamsSecurityTest" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.common.params.ParamsSecurityTest"/>
+        </classes>
+    </test>
 </suite>
