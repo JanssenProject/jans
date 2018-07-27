@@ -105,6 +105,15 @@ objectClass: oxAuthCustomScope
 objectClass: top
 oxScopeType: uma
 
+dn: inum=%(inumOrg)s!0009!6D90,ou=scopes,o=%(inumOrg)s,o=gluu
+defaultScope: true
+description: oxd scope which is required to call oxd API
+displayName: oxd
+inum: %(inumOrg)s!0009!6D90
+objectClass: oxAuthCustomScope
+objectClass: top
+oxScopeType: openid
+
 dn: inum=%(inumOrg)s!0009!8A01,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
