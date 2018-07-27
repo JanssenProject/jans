@@ -53,8 +53,9 @@ public class RestResource {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectAccessToken(String params) {
+    public String introspectAccessToken(@HeaderParam("Authorization") String authorization, String params) {
         IntrospectAccessTokenParams p = read(params, IntrospectAccessTokenParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
         return response(send(CommandType.INTROSPECT_ACCESS_TOKEN, p));
     }
 
@@ -62,8 +63,9 @@ public class RestResource {
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectRpt(String params) {
+    public String introspectRpt(@HeaderParam("Authorization") String authorization, String params) {
         IntrospectRptParams p = read(params, IntrospectRptParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
         return response(send(CommandType.INTROSPECT_RPT, p));
     }
 
@@ -141,8 +143,10 @@ public class RestResource {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getAccessTokenByRefreshToken(String params) {
-        return response(send(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, read(params, GetAccessTokenByRefreshTokenParams.class)));
+    public String getAccessTokenByRefreshToken(@HeaderParam("Authorization") String p_authorization, String params) {
+        final GetAccessTokenByRefreshTokenParams p = read(params, GetAccessTokenByRefreshTokenParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, p));
     }
 
     @POST
