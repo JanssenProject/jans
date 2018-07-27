@@ -7,21 +7,21 @@
 %:
 	dh $@ 
 
-override_dh_clean:
-		rm -rf oxd-common/target
-		rm -rf oxd-client/target
-		rm -rf oxd-common/target		
-		rm -rf oxd-server/target
-		rm -rf oxd-rp-client/target
-		dh_clean
-override_dh_auto_build:
-#		mvn clean package -Dmaven.test.skip=true
-		mvn clean install -U -Dmaven.test.skip=true
+#override_dh_clean:
+#               rm -rf oxd-common/target
+#               rm -rf oxd-client/target
+#               rm -rf oxd-common/target
+#               rm -rf oxd-server/target
+#               rm -rf oxd-rp-client/target
+#               dh_clean
+#override_dh_auto_build:
+#               mvn clean package -Dmaven.test.skip=true
+#               mvn clean install -U -Dmaven.test.skip=true
 override_dh_auto_install:
 		mkdir -p debian/oxd-server/opt/oxd-server/conf/
 		mkdir -p debian/oxd-server/opt/oxd-server/bin/
 		mkdir -p debian/oxd-server/opt/oxd-server/lib/
-	    	mkdir -p debian/oxd-server/opt/oxd-https-extension/lib/
+		mkdir -p debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-server/src/main/resources/oxd-conf.json debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server/opt/oxd-server/conf/
@@ -32,7 +32,6 @@ override_dh_auto_install:
 		cp oxd-https-extension/target/oxd-https-extension-4.0.0-SNAPSHOT.jar debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-https-extension/oxd-https.keystore debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-https-extension/oxd-https.yml debian/oxd-server/opt/oxd-https-extension/lib/
-#		cp lib/* debian/oxd-server/opt/oxd-server/lib/
 		cp bcprov-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
 		mkdir -p debian/oxd-server/var/log/
 		mkdir -p debian/oxd-server/etc/oxd/oxd-server/
@@ -46,5 +45,4 @@ override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/lsox.sh
-		#chmod 665 debian/oxd-server/var/log/oxd-server.log
 		chmod 644 debian/oxd-server/etc/default/oxd-server

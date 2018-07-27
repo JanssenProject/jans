@@ -114,9 +114,7 @@ public class ValidationService {
 
         final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
-            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return false; // skip validation since protectCommandsWithAccessToken=false
-            } // otherwise if token is not blank then let it validate it
+            return false; // skip validation since protectCommandsWithAccessToken=false
         }
 
         final String accessToken = params.getProtectionAccessToken();
