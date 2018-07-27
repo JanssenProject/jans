@@ -13,6 +13,8 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.*;
 import org.xdi.oxd.common.params.RpGetRptParams;
 
+import javax.ws.rs.WebApplicationException;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 02/01/2014
@@ -40,7 +42,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
                 return CommandResponse.createErrorResponse(errorResponse);
             } else {
                 LOG.trace("No need_info error, re-throw exception ...", ex);
-                throw new HttpErrorResponseException(ex.getResponse().getStatus(), entity);
+                throw new WebApplicationException(entity, ex.getResponse().getStatus());
             }
         }
     }
