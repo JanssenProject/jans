@@ -26,8 +26,11 @@ public class BackCompatibleIntrospectionResponse {
 
     @JsonProperty(value = "active")
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
+    @Deprecated // redundant, in spec we have just "scope", leave it for back compatiblity
     @JsonProperty(value = "scopes")
     private List<String> scopes;
+    @JsonProperty(value = "scope")
+    private List<String> scope;
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "username")
@@ -78,6 +81,17 @@ public class BackCompatibleIntrospectionResponse {
 
     public void setScopes(Collection<String> scopes) {
         this.scopes = scopes != null ? new ArrayList<String>(scopes) : new ArrayList<String>();
+    }
+
+    public List<String> getScope() {
+        if (scope == null) {
+            scope = new ArrayList<>();
+        }
+        return scope;
+    }
+
+    public void setScope(List<String> scope) {
+        this.scope = scope;
     }
 
     public Date getExpiresAt() {
@@ -157,6 +171,7 @@ public class BackCompatibleIntrospectionResponse {
         return "BackCompatibleIntrospectionResponse{" +
                 "active=" + active +
                 ", scopes=" + scopes +
+                ", scope=" + scope +
                 ", clientId='" + clientId + '\'' +
                 ", username='" + username + '\'' +
                 ", tokenType='" + tokenType + '\'' +
