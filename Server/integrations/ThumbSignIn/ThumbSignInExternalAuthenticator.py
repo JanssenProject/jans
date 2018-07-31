@@ -1,4 +1,4 @@
-# Author: Pramati Technologies
+# Author: ThumbSignIn (A unit of Pramati Technologies)
 
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
@@ -79,7 +79,8 @@ class PersonAuthentication(PersonAuthenticationType):
             #elif (String(relyingPartyId).startsWith("xyz")):
                 #relyingPartyLoginUrl = "xyz.com"
             else:
-                relyingPartyLoginUrl = relyingPartyId
+                #If relyingPartyLoginUrl is empty, Gluu's default login URL will be used
+                relyingPartyLoginUrl = ""
         
         print "ThumbSignIn. Value of relyingPartyLoginUrl is %s" % relyingPartyLoginUrl                
         identity.setWorkingParameter("relyingPartyLoginUrl", relyingPartyLoginUrl)
