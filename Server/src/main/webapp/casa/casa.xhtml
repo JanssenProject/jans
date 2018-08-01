@@ -1,0 +1,37 @@
+<div    align="center"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <h:panelGroup rendered="${methods.size()>0}">
+    	<hr />
+        <style type="text/css">
+        input.mybtn{
+        	width: 145px !important;
+        	color: #fff !important;
+        }
+	</style>    	
+        <p>
+            <br />
+            #{msgs['casa.alternative']}
+        </p>
+
+        <form id="casa_form" action="#{request.contextPath}/postlogin">             
+             <ui:repeat value="#{methods}" var="method">
+             	<input class="btn btn-done mybtn" type="submit" onclick="return submitAlternative('#{method}')"
+             		value="${fn:startsWith(msgs['casa.button.'.concat(method)],'???') ? fn:toUpperCase(method) : msgs['casa.button.'.concat(method)]}" />
+             </ui:repeat> 
+            <input type="hidden" name="alternativeMethod" id="alternativeMethod"/>
+        </form>
+        <p>&#160;</p>
+        <script>
+            function submitAlternative(alternative){
+                var f=document.getElementById("casa_form");
+                f.alternativeMethod.value=alternative;
+                return true;
+            }
+        </script>
+    </h:panelGroup>
+</div>
