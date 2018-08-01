@@ -469,7 +469,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
