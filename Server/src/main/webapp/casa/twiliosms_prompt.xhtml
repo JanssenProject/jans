@@ -76,6 +76,7 @@
 				    margin: 0 20% auto;
 			}
         </style>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"/>
     </ui:define>
 
     <ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
@@ -105,9 +106,10 @@
 						<img
 							src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
 							alt="phone-ver" />
-						<h4>Enter the code sent via SMS</h4>
-							<input name="passcode" type="text" class="form-control" placeholder="Enter the 6 digit code" autocomplete="off" />
-							<h:commandButton styleClass="btn btn-done" value="#{msgs['twilio.login']}" action="#{authenticator.authenticate}"/>
+						<h4>#{msgs['otp_sms.choose']}</h4>
+						<div id="phones"></div>
+
+							<h:commandButton styleClass="btn btn-done" value="#{msgs['otp_sms.send']}" action="#{authenticator.authenticate}"/>
 					</div>
 				</div>
 			</div>
@@ -117,8 +119,26 @@
                             </p>
                         </h:panelGroup>
             </h:panelGroup>
+            <h:inputHidden id="indexOfNumber" value="0" />
         </h:form>
-        <ui:include src="/cm/cred-manager.xhtml">
+        <script type="text/javascript">
+        	var ast = "XXXXXX ";
+        	var numbs = "${identity.getWorkingParameter('choppedNos')}";
+        	numbs = numbs.split(",");
+        	for (var i=0; i &lt; numbs.length; i++) {
+        		var checked = (i == 0) ? "checked" : "";
+        		//very ugly... yes
+        		var line ='&lt;input type="radio" id="optionPhone" name="optionPhone" onchange="changeOption(' + i + ')"' + checked +  '/&gt; '
+        		line = '&lt;label&gt;' + line + ast + numbs[i] + '&lt;/label&gt;';        		
+        		line = '&lt;div class="checkbox"&gt;' + line + '&lt;/&gt;';
+        		var option = $(line);
+        		$('#phones').append(option);
+        	}
+        	function changeOption(index) {        
+        		document.getElementById("TwilioSmsloginForm:indexOfNumber").value = index;
+        	}
+        </script>
+        <ui:include src="/casa/casa.xhtml">
             <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
         </ui:include>
     </ui:define>
