@@ -1,0 +1,12 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JAVA_OPTIONS="-server -Xms%(casa_min_heap_mem)sm -Xmx%(casa_max_heap_mem)sm -XX:MaxMetaspaceSize=%(casa_max_meta_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/casa -Dlog.base=%(jetty_base)s/casa"
+
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/casa
+JETTY_USER=jetty
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8091"
+TMPDIR=%(jetty_dist)s/temp
+
+export PYTHON_HOME=%(jython_home)s
+
