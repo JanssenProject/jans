@@ -6,73 +6,6 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLAIMS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-import static org.xdi.oxauth.model.util.StringUtils.toList;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -85,11 +18,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -100,16 +29,29 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.registration.RegisterParamsValidator;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.InumService;
-import org.xdi.oxauth.service.MetricService;
-import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.util.*;
+
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
+import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
  * Implementation for register REST web services.
@@ -117,7 +59,7 @@ import org.xdi.util.security.StringEncrypter;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version May 30, 2018
+ * @version August 1, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -701,7 +643,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         }
 
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS.toString(), implode(claimNames, " "));
+        if (claimNames != null && claimNames.length > 0) {
+            Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS.toString(), implode(claimNames, " "));
+        }
 
         return responseJsonObject;
     }

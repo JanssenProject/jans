@@ -6,21 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -37,11 +22,22 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for Token Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version August 1, 2018
  */
 public class TokenRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -239,39 +235,6 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
             assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
             assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-        } catch (JSONException e) {
-            e.printStackTrace();
-            fail(e.getMessage() + "\nResponse was: " + entity);
-        }
-    }
-
-    @Parameters({"tokenPath"})
-    @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void requestAccessTokenExtensions(final String tokenPath) throws Exception {
-        // Testing with valid parameters
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
-
-        GrantType extension = GrantType.fromString("http://oauth.net/grant_type/assertion/saml/2.0/bearer");
-        TokenRequest tokenRequest = new TokenRequest(extension);
-        tokenRequest.setAssertion("PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQV0aG5TdGF0ZW1lbnQPC9Bc3NlcnRpb24");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-
-        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-
-        Response response = request
-                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
-        String entity = response.readEntity(String.class);
-
-        showResponse("requestAccessTokenExtensions", response, entity);
-
-        assertEquals(response.getStatus(), 501, "Unexpected response code.");
-        assertNotNull(entity, "Unexpected result: " + entity);
-        try {
-            JSONObject jsonObj = new JSONObject(entity);
-            assertTrue(jsonObj.has("error"), "The error type is null");
-            assertTrue(jsonObj.has("error_description"), "The error description is null");
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
