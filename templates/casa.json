@@ -4,11 +4,9 @@
     "host" : "%(oxd_hostname)s",
     "port" : %(oxd_port)s,
     "use_https_extension" : false,
-    "authz_redirect_uri" : "https://%(hostname)s/cred-manager"
+    "authz_redirect_uri" : "https://%(hostname)s/casa"
   },
   "ldap_settings" : {
-    "applianceInum" : "%(inumAppliance)s",
-    "orgInum" : "%(inumOrg)s",
     "salt" : "%(configFolder)s/salt",
     "ox-ldap_location" : "%(configFolder)s/ox-ldap.properties"
   },

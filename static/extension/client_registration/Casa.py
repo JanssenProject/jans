@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2018, Gluu
 #
 # Author: Yuriy Movchan
 #
@@ -17,16 +17,16 @@ class ClientRegistration(ClientRegistrationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Cred-manager client registration. Initialization"
+        print "Casa client registration. Initialization"
         
         self.clientRedirectUrisSet = self.prepareClientRedirectUris(configurationAttributes)
 
-        print "Cred-manager client registration. Initialized successfully"
+        print "Casa client registration. Initialized successfully"
         return True   
 
     def destroy(self, configurationAttributes):
-        print "Cred-manager client registration. Destroy"
-        print "Cred-manager client registration. Destroyed successfully"
+        print "Casa client registration. Destroy"
+        print "Casa client registration. Destroyed successfully"
         return True   
 
     # Update client entry before persistent it
@@ -34,10 +34,10 @@ class ClientRegistration(ClientRegistrationType):
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
-        print "Cred-manager client registration. UpdateClient method"
+        print "Casa client registration. UpdateClient method"
 
         redirectUris = client.getRedirectUris()
-        print "Cred-manager client registration. Redirect Uris: %s" % redirectUris
+        print "Casa client registration. Redirect Uris: %s" % redirectUris
 
         credManagerClient = False
         for redirectUri in redirectUris:
@@ -48,7 +48,7 @@ class ClientRegistration(ClientRegistrationType):
         if not credManagerClient:
             return True
 
-        print "Cred-manager client registration. Client is Cred-manager"
+        print "Casa client registration. Client is Cred-manager"
 
         newScopes = client.getScopes()
         
@@ -58,10 +58,10 @@ class ClientRegistration(ClientRegistrationType):
         for scopeName in requiredScopes:
             scope = scopeService.getScopeByDisplayName(scopeName)
             if not scope.getIsDefault():
-                print "Cred-manager client registration. Adding scope '%s'" % scopeName
+                print "Casa client registration. Adding scope '%s'" % scopeName
                 newScopes = ArrayHelper.addItemToStringArray(newScopes, scope.getDn())
 
-        print "Cred-manager client registration. Result scopes: %s" % newScopes
+        print "Casa client registration. Result scopes: %s" % newScopes
         client.setScopes(newScopes)
 
         #Extend client lifetime for one year
@@ -82,12 +82,12 @@ class ClientRegistration(ClientRegistrationType):
 
         clientRedirectUrisList = configurationAttributes.get("client_redirect_uris").getValue2()
         if StringHelper.isEmpty(clientRedirectUrisList):
-            print "Cred-manager client registration. The property client_redirect_uris is empty"
+            print "Casa client registration. The property client_redirect_uris is empty"
             return clientRedirectUrisSet    
 
         clientRedirectUrisArray = StringHelper.split(clientRedirectUrisList, ",")
         if ArrayHelper.isEmpty(clientRedirectUrisArray):
-            print "Cred-manager client registration. No clients specified in client_redirect_uris property"
+            print "Casa client registration. No clients specified in client_redirect_uris property"
             return clientRedirectUrisSet
         
         # Convert to HashSet to quick search
