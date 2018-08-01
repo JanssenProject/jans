@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.persist.model.base.GluuStatus;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -29,6 +30,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  */
 @LdapEntry(sortBy = { "displayName" })
 @LdapObjectClass(values = { "top", "gluuAttribute" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuAttribute extends Entry implements Serializable {
 
     private static final long serialVersionUID = 4817004894646725606L;
