@@ -92,7 +92,7 @@ public interface ClientInterface {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params);
+    CommandResponse2 getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, GetAccessTokenByRefreshTokenParams params);
 
     @POST
     @Path("/uma-rs-protect")
