@@ -67,7 +67,10 @@ public class IntrospectionService {
                 response.setAudience(backResponse.getAudience());
                 response.setTokenType(backResponse.getTokenType());
                 response.setActive(backResponse.isActive());
-                response.setScopes(backResponse.getScopes());
+                response.setScope(backResponse.getScopes());
+                if (!backResponse.getScope().isEmpty()) {
+                    response.setScope(backResponse.getScope());
+                }
                 response.setIssuer(backResponse.getIssuer());
                 response.setUsername(backResponse.getUsername());
                 response.setClientId(backResponse.getClientId());
