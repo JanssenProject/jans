@@ -80,5 +80,8 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
         if (!params.getScope().contains(UmaScopeType.PROTECTION.getValue())) {
             params.getScope().add(UmaScopeType.PROTECTION.getValue());
         }
+        if (!params.getScope().contains("oxd")) {
+            params.getScope().add("oxd");
+        }
     }
 }
