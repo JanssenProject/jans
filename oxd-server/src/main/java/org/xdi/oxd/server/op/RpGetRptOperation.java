@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.ErrorResponse;
-import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.*;
 import org.xdi.oxd.common.params.RpGetRptParams;
 
 /**
@@ -42,8 +39,8 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
                 errorResponse.setDetails(new POJONode(needInfo));
                 return CommandResponse.createErrorResponse(errorResponse);
             } else {
-                LOG.trace("Not need_info error, re-throw exception ...");
-                throw ex;
+                LOG.trace("No need_info error, re-throw exception ...", ex);
+                throw new HttpErrorResponseException(ex.getResponse().getStatus(), entity);
             }
         }
     }
