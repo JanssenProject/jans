@@ -132,7 +132,7 @@ class Setup(object):
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
         self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
         self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
-        self.cred_manager_war = 'http://ox.gluu.org/maven/org/xdi/cred-manager/%s/cred-manager-%s.war' % (self.oxVersion, self.oxVersion)
+        self.casa_war = 'http://ox.gluu.org/maven/org/xdi/casa/%s/casa-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
         self.java_1_8_jce_zip = 'http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip'
 
@@ -464,7 +464,7 @@ class Setup(object):
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
-        self.ldif_scripts_cred_manager = '%s/scripts_cred_manager.ldif' % self.outputFolder
+        self.ldif_scripts_casa = '%s/scripts_casa.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.network = "/etc/sysconfig/network"
@@ -486,7 +486,7 @@ class Setup(object):
         self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
         self.idp3_metadata = 'idp-metadata.xml'
 
-        self.cred_manager_config = '%s/cred-manager.json' % self.outputFolder
+        self.casa_config = '%s/casa.json' % self.outputFolder
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
@@ -606,8 +606,8 @@ class Setup(object):
                              self.asimba_properties: False,
                              self.asimba_selector_configuration: False,
                              self.network: False,
-                             self.cred_manager_config:False,
-                             self.ldif_scripts_cred_manager: False,
+                             casa_config: False,
+                             self.ldif_scripts_casa: False,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
