@@ -5,6 +5,7 @@ package org.xdi.oxd.server;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.*;
@@ -89,6 +90,12 @@ public class Processor {
             } catch (ErrorResponseException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 return CommandResponse.createErrorResponse(e.getErrorResponseCode());
+            } catch (HttpErrorResponseException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                return CommandResponse.createErrorResponse(e.createErrorResponse());
+            } catch (ClientResponseFailure e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                return CommandResponse.createErrorResponse(new HttpErrorResponseException(e).createErrorResponse());
             } catch (Throwable e) {
                 LOG.error(e.getMessage(), e);
             }

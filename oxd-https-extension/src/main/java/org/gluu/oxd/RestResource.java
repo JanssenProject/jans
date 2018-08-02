@@ -53,8 +53,9 @@ public class RestResource {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectAccessToken(String params) {
+    public String introspectAccessToken(@HeaderParam("Authorization") String authorization, String params) {
         IntrospectAccessTokenParams p = read(params, IntrospectAccessTokenParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
         return response(send(CommandType.INTROSPECT_ACCESS_TOKEN, p));
     }
 
@@ -62,8 +63,9 @@ public class RestResource {
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String introspectRpt(String params) {
+    public String introspectRpt(@HeaderParam("Authorization") String authorization, String params) {
         IntrospectRptParams p = read(params, IntrospectRptParams.class);
+        p.setProtectionAccessToken(validateAccessToken(authorization));
         return response(send(CommandType.INTROSPECT_RPT, p));
     }
 
@@ -141,8 +143,10 @@ public class RestResource {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getAccessTokenByRefreshToken(String params) {
-        return response(send(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, read(params, GetAccessTokenByRefreshTokenParams.class)));
+    public String getAccessTokenByRefreshToken(@HeaderParam("Authorization") String p_authorization, String params) {
+        final GetAccessTokenByRefreshTokenParams p = read(params, GetAccessTokenByRefreshTokenParams.class);
+        p.setProtectionAccessToken(validateAccessToken(p_authorization));
+        return response(send(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, p));
     }
 
     @POST
@@ -190,14 +194,20 @@ public class RestResource {
             return Jackson.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
             LOG.error("Invalid params: " + params, e);
-            throw new ServerErrorException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
         }
     }
 
     public static String response(CommandResponse commandResponse) {
         if (commandResponse == null) {
             LOG.error("Command response is null, please check oxd-server.log file of oxd-server application.");
-            throw new ServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command response is null, please check oxd-server.log file of oxd-server application.").build());
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command response is null, please check oxd-server.log file of oxd-server application.").build());
+        }
+        if (commandResponse.getStatus() == ResponseStatus.ERROR) {
+            final HttpErrorResponseException httpError = HttpErrorResponseException.parseSilently(commandResponse.dataAsResponse(ErrorResponse.class));
+            if (httpError != null) {
+                throw new WebApplicationException(httpError.getEntity(), httpError.getHttpStatus());
+            }
         }
         final String json = CoreUtils.asJsonSilently(commandResponse);
         LOG.trace("Send back response: {}", json);
@@ -213,7 +223,7 @@ public class RestResource {
             }
         }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
-        throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
+        throw new WebApplicationException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 
     public static String forbiddenErrorResponse() {
@@ -247,7 +257,7 @@ public class RestResource {
         CommandClient client = pool.checkOut();
         if (client == null) {
             LOG.error("Failed to initialize command client.");
-            throw new ServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command client is not able to connect to oxd-server.").build());
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Command client is not able to connect to oxd-server.").build());
         }
         return client;
     }
