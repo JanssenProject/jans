@@ -12,9 +12,7 @@ import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.server.introspection.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author yuriyz
@@ -141,6 +139,18 @@ public class IntrospectionService {
             }
             throw e;
         }
+    }
+
+    public static Set<String> getScopes(IntrospectionResponse response) {
+        Set<String> result = new HashSet<>();
+        if (response.getScopes() != null) {
+            result.addAll(response.getScopes());
+        }
+        if (response.getScope() != null) {
+            result.addAll(response.getScope());
+        }
+
+        return result;
     }
 
     public static Integer dateToSeconds(Date date) {
