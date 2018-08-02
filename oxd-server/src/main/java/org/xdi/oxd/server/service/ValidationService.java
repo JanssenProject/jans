@@ -140,6 +140,9 @@ public class ValidationService {
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
             throw new ErrorResponseException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
+        if (!IntrospectionService.getScopes(introspectionResponse).contains("oxd")) {
+            throw new ErrorResponseException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
+        }
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
             return true;
