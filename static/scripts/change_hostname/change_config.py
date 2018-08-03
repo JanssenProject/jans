@@ -38,7 +38,10 @@ name_changer = ChangeGluuHostname(
     local = True,
     
     # Version of Gluu Server you're trying to modify. For example: '3.1.3'
-    gluu_version='<gluu_server_version>'
+    gluu_version='<gluu_server_version>',
+    
+    #Type of LDAP Server, it will be either openldap or opendj
+    ldap_type='<openldap or opendj>'
     )
 
 r = name_changer.startup()
