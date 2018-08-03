@@ -133,7 +133,7 @@ class ChangeGluuHostname:
     def __init__(self, old_host, new_host, cert_city, cert_mail, cert_state,
                     cert_country, ldap_password, os_type, ip_address, server='localhost',
                     gluu_version='',
-                    local=True):
+                    local=True, ldap_type='opendj'):
 
         self.old_host = old_host
         self.new_host = new_host
@@ -149,6 +149,7 @@ class ChangeGluuHostname:
         self.local = local
         self.base_inum = None
         self.appliance_inum = None
+        self.ldap_type = ldap_type
 
 
     def startup(self):
@@ -157,8 +158,12 @@ class ChangeGluuHostname:
         else:
             ldap_server = self.server
 
+        ldap_bind_dn = "cn=directory manager"
+        if ldap_type == 'openldap':
+            ldap_bind_dn += ' ,o=gluu'
+
         ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
-        self.conn = Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
+        self.conn = Connection(ldap_server, user=ldap_bind_dn, password=self.ldap_password)
         r = self.conn.bind()
         if not r:
             print "Can't conect to LDAP Server"
@@ -396,6 +401,7 @@ if __name__ == "__main__":
     parser.add_argument('-country',  required=True, help="Country for creating certificates")
     parser.add_argument('-password',  required=True, help="Admin password")
     parser.add_argument('-os', required=True, help="OS type: CentOS, Ubuntu", choices=['CentOS','Ubuntu'])
+    parser.add_argument('-ldaptype', required=True, help="Ldap Server: openldap, opendj", choices=['openldap','opendj'])
 
     args = parser.parse_args()
 
@@ -408,7 +414,8 @@ if __name__ == "__main__":
         cert_country=args.country,
         server=args.server,
         ldap_password=args.password,
-        os_type=args.os
+        os_type=args.os,
+        ldap_type=ldaptype
         )
 
     name_changer.startup()
