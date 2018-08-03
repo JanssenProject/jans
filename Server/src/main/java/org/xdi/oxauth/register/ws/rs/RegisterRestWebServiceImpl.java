@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 1, 2018
+ * @version August 2, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -204,6 +204,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
                             builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+
+                            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
+                                    client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri());
 
                             oAuth2AuditLog.setClientId(client.getClientId());
                             oAuth2AuditLog.setScope(clientScopesToString(client));
