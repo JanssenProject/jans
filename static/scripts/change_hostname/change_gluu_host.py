@@ -320,7 +320,6 @@ class ChangeGluuHostname:
             '/usr/bin/openssl req -new -key /etc/certs/{0}.key -out /etc/certs/{0}.csr -subj '
             '"/C={4}/ST={5}/L={1}/O=Gluu/CN={2}/emailAddress={3}"'.format('{0}', self.cert_city, self.new_host, self.cert_mail, self.cert_country, self.cert_state),
             '/usr/bin/openssl x509 -req -days 365 -in /etc/certs/{0}.csr -signkey /etc/certs/{0}.key -out /etc/certs/{0}.crt',
-            'chmod 440 -R /etc/certs',
             'chown root:gluu -R /etc/certs/',
             'chown jetty:jetty /etc/certs/oxauth-keys*'
             ]
