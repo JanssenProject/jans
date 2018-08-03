@@ -606,7 +606,7 @@ class Setup(object):
                              self.asimba_properties: False,
                              self.asimba_selector_configuration: False,
                              self.network: False,
-                             casa_config: False,
+                             self.casa_config: False,
                              self.ldif_scripts_casa: False,
                              }
 
