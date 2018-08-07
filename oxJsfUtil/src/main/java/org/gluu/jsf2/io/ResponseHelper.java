@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.util.io;
+package org.gluu.jsf2.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,6 +24,9 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.StringHelper;
+import org.xdi.util.io.DownloadWrapper;
+import org.xdi.util.io.FileDownloader;
+import org.xdi.util.io.FileDownloader.ContentDisposition;
 
 /**
  * @author Yuriy Movchan Date: 11.24.2010
