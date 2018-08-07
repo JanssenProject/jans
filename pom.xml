@@ -20,13 +20,14 @@
 
 		<resteasy.version>3.0.24.Final</resteasy.version>
 
-		<weld.version>3.0.3.Final</weld.version>
-		<richfaces.version>4.5.17.Final</richfaces.version>
-		<jsf-api.version>2.2.16</jsf-api.version>
-		<jsf-impl.version>2.3.3.SP1</jsf-impl.version>
-		<uel.version>2.2</uel.version>
+		<weld.version>3.0.5.Final</weld.version>
+		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 		<prettyfaces.version>3.4.2.Final</prettyfaces.version>
 
+		<jsf-api.version>2.2.17</jsf-api.version>
+		<jsf-impl.version>2.2.17</jsf-impl.version>
+		<uel-api.version>2.2.1-b04</uel-api.version>
+		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
 		<jackson.version>1.9.13</jackson.version>
 		<log4j.version>2.11.0</log4j.version>
@@ -97,13 +98,13 @@
 			<dependency>
 				<groupId>javax.el</groupId>
 				<artifactId>el-api</artifactId>
-				<version>2.2.1-b04</version>
+				<version>${uel-api.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.web</groupId>
 				<artifactId>el-impl</artifactId>
-				<version>${uel.version}</version>
+				<version>${uel-impl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.faces</groupId>
@@ -111,8 +112,8 @@
 				<version>${jsf-api.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-impl</artifactId>
+			    <groupId>org.glassfish</groupId>
+			    <artifactId>javax.faces</artifactId>
 				<version>${jsf-impl.version}</version>
 			</dependency>
 
@@ -339,6 +340,20 @@
 				<scope>test</scope>
 			</dependency>
 
+            <!-- Tests -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.9.4</version>
+                <scope>test</scope>
+            </dependency>
+            <!--Can be removed once TestNG dependency contains JCommander 1.74 or newer-->
+            <dependency>
+                <groupId>com.beust</groupId>
+                <artifactId>jcommander</artifactId>
+                <version>1.72</version>
+				<scope>test</scope>
+			</dependency>
 			<!-- Other -->
 			<dependency>
 				<groupId>javax.servlet</groupId>
