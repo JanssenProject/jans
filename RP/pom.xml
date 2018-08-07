@@ -129,18 +129,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.faces</groupId>
-			<artifactId>jsf-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -280,8 +275,8 @@
 					<artifactId>javax.inject</artifactId>
 				</dependency>
 				<dependency>
-					<groupId>com.sun.faces</groupId>
-					<artifactId>jsf-impl</artifactId>
+				    <groupId>org.glassfish</groupId>
+				    <artifactId>javax.faces</artifactId>
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.spec.javax.faces</groupId>

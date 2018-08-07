@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xdi.util.StringHelper;
+
 import com.google.common.base.Preconditions;
-import com.ocpsoft.pretty.faces.util.StringUtils;
 
 /**
  * @author yuriyz
@@ -38,7 +39,7 @@ public class SessionTokens implements Serializable {
     }
 
     public String cacheKey() {
-        Preconditions.checkState(StringUtils.isNotBlank(sessionDn));
+        Preconditions.checkState(StringHelper.isNotEmpty(sessionDn));
         return sessionDn + "_tokens";
     }
 
