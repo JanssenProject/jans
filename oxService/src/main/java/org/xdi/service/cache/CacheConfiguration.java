@@ -23,6 +23,16 @@ public class CacheConfiguration implements Serializable {
 
     private RedisConfiguration redisConfiguration;
 
+    private NativePersistenceConfiguration nativePersistenceConfiguration;
+
+    public NativePersistenceConfiguration getNativePersistenceConfiguration() {
+        return nativePersistenceConfiguration;
+    }
+
+    public void setNativePersistenceConfiguration(NativePersistenceConfiguration nativePersistenceConfiguration) {
+        this.nativePersistenceConfiguration = nativePersistenceConfiguration;
+    }
+
     public RedisConfiguration getRedisConfiguration() {
         return redisConfiguration;
     }
@@ -57,7 +67,12 @@ public class CacheConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "CacheConfiguration{" + "cacheProviderType=" + cacheProviderType + ", memcachedConfiguration=" + memcachedConfiguration
-                + ", redisConfiguration=" + redisConfiguration + ", inMemoryConfiguration=" + inMemoryConfiguration + '}';
+        return "CacheConfiguration{" +
+                "cacheProviderType=" + cacheProviderType +
+                ", memcachedConfiguration=" + memcachedConfiguration +
+                ", redisConfiguration=" + redisConfiguration +
+                ", inMemoryConfiguration=" + inMemoryConfiguration +
+                ", nativePersistenceConfiguration=" + nativePersistenceConfiguration +
+                '}';
     }
 }
