@@ -7,5 +7,5 @@ import javax.xml.bind.annotation.XmlEnum;
  */
 @XmlEnum(String.class)
 public enum CacheProviderType {
-    IN_MEMORY, MEMCACHED, REDIS
+    IN_MEMORY, MEMCACHED, REDIS, NATIVE_PERSISTENCE
 }
