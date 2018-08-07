@@ -925,26 +925,24 @@ class Setup(object):
         return inFilePathText
 
     def insertLinesInFile(self, inFilePath, index, text):        
-        inFilePathLines = None
-        
-        try:
-            f = open(inFilePath, "r")
-            inFilePathLines = f.readlines()
-            f.close()
-        except:
-            self.logIt("Error reading %s" % inFilePathLines, True)
-            self.logIt(traceback.format_exc(), True)
-
-        try:
-            self.backupFile(inFilePath)
-            inFilePathLines.insert(index, text)
-            f = open(inFilePath, "w")
-            inFilePathLines = "".join(inFilePathLines)
-            f.write(inFilePathLines)
-            f.close()
-        except:            
-            self.logIt("Error writing %s" % inFilePathLines, True)            
-            self.logIt(traceback.format_exc(), True)
+            inFilePathLines = None                    
+            try:            
+                f = open(inFilePath, "r")            
+                inFilePathLines = f.readlines()            
+                f.close()
+                try:
+                    self.backupFile(inFilePath)
+                    inFilePathLines.insert(index, text)            
+                    f = open(inFilePath, "w")            
+                    inFilePathLines = "".join(inFilePathLines)            
+                    f.write(inFilePathLines)            
+                    f.close()        
+                except:            
+                    self.logIt("Error writing %s" % inFilePathLines, True)            
+                    self.logIt(traceback.format_exc(), True)
+            except:            
+                self.logIt("Error reading %s" % inFilePathLines, True)
+                self.logIt(traceback.format_exc(), True)        
                     
     def commentOutText(self, text):
         textLines = text.split('\n')
@@ -3082,7 +3080,7 @@ class Setup(object):
         else:
             self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
             # Make the generated script LSB compliant            
-            lsb_str="""#### BEGIN INIT INFO
+            lsb_str="""### BEGIN INIT INFO
 # Provides:          opendj
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
@@ -3091,9 +3089,7 @@ class Setup(object):
 # Short-Description: Start daemon at boot time
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
-
-"""
-            
+"""                        
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
         
         if self.os_type in ['centos', 'fedora', 'red']:
