@@ -37,34 +37,41 @@ public class CacheService {
         return cacheProvider.get(region, key);
     }
 
-    public void put(String region, String key, Object object) {
-        if (cacheProvider != null) {
-            cacheProvider.put(region, key, object);
-        }
-    }
+	public void put(String region, String key, Object object, boolean skipPutOnNativePersistence) {
+		if (skipPutOnNativePersistence) {
+			return;
+		}
+		if (cacheProvider != null) {
+			cacheProvider.put(region, key, object);
+		}
+	}
 
-    public void remove(String region, String key) {
-        if (cacheProvider == null) {
-            return;
-        }
+	public void put(String region, String key, Object object) {
+		put(region, key, object, false);
+	}
 
-        cacheProvider.remove(region, key);
-    }
+	public void remove(String region, String key) {
+		if (cacheProvider == null) {
+			return;
+		}
+		
+		cacheProvider.remove(region, key);
+	}
 
-    @Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
-    public void removeAll(String name) {
-        cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
-    }
+	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
+	public void removeAll(String name) {
+		cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
+	}
 
-    public void clear() {
-        if (cacheProvider != null) {
-            cacheProvider.clear();
-        }
-    }
+	public void clear() {
+		if (cacheProvider != null) {
+			cacheProvider.clear();
+		}
+	}
 
-    public CacheProvider<?> getCacheProvider() {
-        return cacheProvider;
-    }
+	public CacheProvider<?> getCacheProvider() {
+		return cacheProvider;
+	}
 
 	public boolean isNativePersistenceCacheProvider() {
 		return cacheProvider instanceof NativePersistenceCacheProvider;
