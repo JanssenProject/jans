@@ -1,18 +1,17 @@
 package org.xdi.service.cache;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.ldap.model.SearchScope;
-import org.xdi.ldap.model.SimpleBranch;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
@@ -21,14 +20,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
-public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEntryManager> {
+public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
 
     private final static Logger log = LoggerFactory.getLogger(NativePersistenceCacheProvider.class);
 
     @Inject
     CacheConfiguration cacheConfiguration;
     @Inject
-    LdapEntryManager ldapEntryManager;
+    PersistenceEntryManager ldapEntryManager;
 
     private String baseDn;
 
@@ -65,7 +64,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
     }
 
     @Override
-    public LdapEntryManager getDelegate() {
+    public PersistenceEntryManager getDelegate() {
         return ldapEntryManager;
     }
 
@@ -139,7 +138,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
         String originalKey = key;
         try {
             key = hashKey(key);
-            ldapEntryManager.removeWithSubtree(createDn(key));
+            ldapEntryManager.removeRecursively(createDn(key));
         } catch (Exception e) {
             log.trace("Failed to remove entry, key: " + originalKey + ", hashedKey: " + key); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
@@ -184,41 +183,31 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
 
     public void cleanup(final Date now, int batchSize) {
         log.debug("Start NATIVE_PERSISTENCE clean up");
-
-        BatchOperation<NativePersistenceCacheEntity> clientBatchService = new BatchOperation<NativePersistenceCacheEntity>(ldapEntryManager) {
-            private Filter getFilter() {
-                try {
-                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                }catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthExpiration");
-                }
-            }
-
-            @Override
-            protected List<NativePersistenceCacheEntity> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(baseDn, NativePersistenceCacheEntity.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<NativePersistenceCacheEntity> entries) {
-                for (NativePersistenceCacheEntity entity : entries) {
-                    try {
-                        GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                        GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                        expirationDate.setTime(entity.getExpirationDate());
-                        if (expirationDate.before(now)) {
-                            log.debug("Removing NATIVE_PERSISTENCE entity: {}, Expiration date: {}", entity.getDn(), entity.getExpirationDate());
-                            ldapEntryManager.remove(entity);
+        try {
+            BatchOperation<NativePersistenceCacheEntity> batchOperation = new ProcessBatchOperation<NativePersistenceCacheEntity>() {
+                @Override
+                public void performAction(List<NativePersistenceCacheEntity> entries) {
+                    for (NativePersistenceCacheEntity entity : entries) {
+                        try {
+                            GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                            GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                            expirationDate.setTime(entity.getExpirationDate());
+                            if (expirationDate.before(now)) {
+                                log.debug("Removing NATIVE_PERSISTENCE entity: {}, Expiration date: {}", entity.getDn(), entity.getExpirationDate());
+                                ldapEntryManager.remove(entity);
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to remove entry", e);
                         }
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
                     }
                 }
-            }
-        };
-        clientBatchService.iterateAllByChunks(batchSize);
+            };
+            Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now));
+            ldapEntryManager.findEntries(baseDn, NativePersistenceCacheEntity.class, filter, SearchScope.SUB, null, batchOperation, 0, 0, batchSize);
+            log.debug("End NATIVE_PERSISTENCE clean up");
+        } catch (Exception e) {
+            log.error("Failed to perform clean up.", e);
+        }
 
-        log.debug("End NATIVE_PERSISTENCE clean up");
     }
 }
