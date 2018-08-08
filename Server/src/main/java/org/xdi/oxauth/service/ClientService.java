@@ -28,6 +28,7 @@ import org.gluu.search.filter.Filter;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
@@ -214,8 +215,8 @@ public class ClientService {
     	}
 
         try {
-            cacheService.put(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(client.getClientId()), client);
-            cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
+            cacheService.put(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(client.getClientId()), client, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
+            cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } catch (Exception e) {
             log.error("Failed to put client in cache, client:" + client, e);
         }
