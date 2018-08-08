@@ -15,6 +15,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
@@ -48,7 +49,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
 
         if (gluuAttribute == null) {
             gluuAttribute = ldapEntryManager.find(GluuAttribute.class, dn);
-            cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute);
+            cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } else {
             log.trace("Get attribute from cache by Dn '{}'", dn);
         }
