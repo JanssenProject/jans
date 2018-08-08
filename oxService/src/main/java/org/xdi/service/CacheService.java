@@ -38,7 +38,7 @@ public class CacheService {
     }
 
 	public void put(String region, String key, Object object, boolean skipPutOnNativePersistence) {
-		if (skipPutOnNativePersistence) {
+		if (skipPutOnNativePersistence && isNativePersistenceCacheProvider()) {
 			return;
 		}
 		if (cacheProvider != null) {
