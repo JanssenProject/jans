@@ -12,26 +12,26 @@ import java.util.Map;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
- * Attribute Usage Type
+ * Status
  *
- * @author Yuriy Movchan Date: 02/12/2014
+ * @author Yuriy Movchan Date: 10.07.2010
  */
-public enum GluuAttributeUsageType implements LdapEnum {
+public enum GluuStatus implements LdapEnum {
 
-    OPENID("openid", "OpenID");
+    ACTIVE("active", "Active"), INACTIVE("inactive", "Inactive"), EXPIRED("expired", "Expired"), REGISTER("register", "Register");
 
     private String value;
     private String displayName;
 
-    private static Map<String, GluuAttributeUsageType> MAP_BY_VALUES = new HashMap<String, GluuAttributeUsageType>();
+    private static Map<String, GluuStatus> MAP_BY_VALUES = new HashMap<String, GluuStatus>();
 
     static {
-        for (GluuAttributeUsageType enumType : values()) {
+        for (GluuStatus enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    GluuAttributeUsageType(String value, String displayName) {
+    GluuStatus(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -44,7 +44,7 @@ public enum GluuAttributeUsageType implements LdapEnum {
         return displayName;
     }
 
-    public static GluuAttributeUsageType getByValue(String value) {
+    public static GluuStatus getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 
