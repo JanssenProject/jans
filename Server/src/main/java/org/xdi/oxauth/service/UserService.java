@@ -20,9 +20,9 @@ import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.persist.model.base.GluuStatus;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
+import org.xdi.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
