@@ -18,6 +18,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
+import org.xdi.oxauth.model.config.Constants;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -243,7 +244,7 @@ public class UmaResourceService {
         }
 
         try {
-            cacheService.put(Integer.toString(RESOURCE_CACHE_EXPIRATION_IN_SECONDS), resource.getDn(), resource);
+            cacheService.put(Integer.toString(RESOURCE_CACHE_EXPIRATION_IN_SECONDS), resource.getDn(), resource, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } catch (Exception e) {
             log.error("Failed to put client in cache, client:" + resource, e);
         }
