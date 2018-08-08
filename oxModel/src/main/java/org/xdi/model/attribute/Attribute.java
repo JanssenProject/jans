@@ -70,22 +70,22 @@ public class Attribute extends Entry implements Serializable {
     @LdapAttribute
     private String description;
 
-    @LdapAttribute(name = "AttributeOrigin")
+    @LdapAttribute(name = "gluuAttributeOrigin")
     private String origin;
 
     @NotNull
-    @LdapAttribute(name = "AttributeType")
+    @LdapAttribute(name = "gluuAttributeType")
     private AttributeDataType dataType;
 
     @NotNull
-    @LdapAttribute(name = "AttributeEditType")
+    @LdapAttribute(name = "gluuAttributeEditType")
     private UserRole[] editType;
 
     @NotNull
-    @LdapAttribute(name = "AttributeViewType")
+    @LdapAttribute(name = "gluuAttributeViewType")
     private UserRole[] viewType;
 
-    @LdapAttribute(name = "AttributeUsageType")
+    @LdapAttribute(name = "gluuAttributeUsageType")
     private AttributeUsageType[] usageType;
 
     @LdapAttribute(name = "oxAuthClaimName")
@@ -109,7 +109,7 @@ public class Attribute extends Entry implements Serializable {
     @LdapAttribute(name = "oxSCIMCustomAttribute")
     private ScimCustomAtribute oxSCIMCustomAttribute;
 
-    @LdapAttribute(name = "MultivaluedAttribute")
+    @LdapAttribute(name = "oxMultivaluedAttribute")
     private Multivalued multivaluedAttribute;
 
     @LdapJsonObject
