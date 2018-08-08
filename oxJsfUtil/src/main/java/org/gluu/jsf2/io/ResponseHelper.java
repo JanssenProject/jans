@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.xdi.util.StringHelper;
 import org.xdi.util.io.DownloadWrapper;
 import org.xdi.util.io.FileDownloader;
-import org.xdi.util.io.FileDownloader.ContentDisposition;
 
 /**
  * @author Yuriy Movchan Date: 11.24.2010
