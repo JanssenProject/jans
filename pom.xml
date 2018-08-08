@@ -107,6 +107,11 @@
 				<version>${uel-impl.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf-api.version}</version>
+			</dependency>
+			<dependency>
 			    <groupId>org.glassfish</groupId>
 			    <artifactId>javax.faces</artifactId>
 				<version>${jsf-impl.version}</version>
