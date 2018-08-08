@@ -128,5 +128,5 @@ public class GluuAttribute extends Attribute {
         result = prime * result + (selected ? 1231 : 1237);
         return result;
     }
-   
+
 }
