@@ -110,7 +110,7 @@ public class Attribute extends Entry implements Serializable {
     private ScimCustomAtribute oxSCIMCustomAttribute;
 
     @LdapAttribute(name = "MultivaluedAttribute")
-    private Multivalued MultivaluedAttribute;
+    private Multivalued multivaluedAttribute;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxValidation")
@@ -288,11 +288,11 @@ public class Attribute extends Entry implements Serializable {
     }
 
     public Multivalued getMultivaluedAttribute() {
-        return MultivaluedAttribute;
+        return multivaluedAttribute;
     }
 
-    public void setMultivaluedAttribute(Multivalued MultivaluedAttribute) {
-        this.MultivaluedAttribute = MultivaluedAttribute;
+    public void setMultivaluedAttribute(Multivalued multivaluedAttribute) {
+        this.multivaluedAttribute = multivaluedAttribute;
     }
 
     public String getGluuTooltip() {
@@ -331,7 +331,7 @@ public class Attribute extends Entry implements Serializable {
         result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
         result = prime * result + ((origin == null) ? 0 : origin.hashCode());
         result = prime * result + ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
-        result = prime * result + ((MultivaluedAttribute == null) ? 0 : MultivaluedAttribute.hashCode());
+        result = prime * result + ((multivaluedAttribute == null) ? 0 : multivaluedAttribute.hashCode());
         result = prime * result + ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute.hashCode());
         result = prime * result + ((salt == null) ? 0 : salt.hashCode());
         result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
