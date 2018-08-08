@@ -34,7 +34,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
-import org.xdi.model.GluuAttributeDataType;
+import org.xdi.model.attribute.AttributeDataType;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -719,9 +719,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
-                    } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
-                    } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
                         Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                         if (attributeValue != null) {
