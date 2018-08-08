@@ -4,6 +4,7 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
@@ -70,7 +71,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
 
     @Override
     public Object get(String region, String key) {
+        String originalKey = key;
         try {
+            key = hashKey(key);
             NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getExpirationDate())) {
@@ -81,7 +84,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
                 return fromString(entity.getData());
             }
         } catch (Exception e) {
-            log.trace("Didn't find entry by key: " + key + ", message: " + e.getMessage());
+            log.trace("Didn't find entry by key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key);
         }
         return null;
     }
@@ -90,22 +93,33 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
         return String.format("uniqueIdentifier=%s,%s", key, baseDn);
     }
 
+    private static String hashKey(String key) {
+        return DigestUtils.sha256Hex(key);
+    }
+
     @Override
     public void put(String expirationInSeconds, String key, Object object) {
-        Date creationDate = new Date();
+        String originalKey = key;
 
-        Calendar expirationDate = Calendar.getInstance();
-        expirationDate.setTime(creationDate);
-        expirationDate.add(Calendar.SECOND, putExpiration(expirationInSeconds));
+        try {
+            key = hashKey(key);
+            Date creationDate = new Date();
 
-        NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
-        entity.setData(asString(object));
-        entity.setId(key);
-        entity.setDn(createDn(key));
-        entity.setCreationDate(creationDate);
-        entity.setExpirationDate(expirationDate.getTime());
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.setTime(creationDate);
+            expirationDate.add(Calendar.SECOND, putExpiration(expirationInSeconds));
 
-        ldapEntryManager.persist(entity);
+            NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
+            entity.setData(asString(object));
+            entity.setId(key);
+            entity.setDn(createDn(key));
+            entity.setCreationDate(creationDate);
+            entity.setExpirationDate(expirationDate.getTime());
+
+            ldapEntryManager.persist(entity);
+        } catch (Exception e) {
+            log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key); // log as trace since it is perfectly valid that entry is removed by timer for example
+        }
     }
 
     private static boolean isExpired(Date expiredAt) {
@@ -122,7 +136,13 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
 
     @Override
     public void remove(String region, String key) {
-        ldapEntryManager.removeWithSubtree(createDn(key));
+        String originalKey = key;
+        try {
+            key = hashKey(key);
+            ldapEntryManager.removeWithSubtree(createDn(key));
+        } catch (Exception e) {
+            log.trace("Failed to remove entry, key: " + originalKey + ", hashedKey: " + key); // log as trace since it is perfectly valid that entry is removed by timer for example
+        }
     }
 
     @Override
