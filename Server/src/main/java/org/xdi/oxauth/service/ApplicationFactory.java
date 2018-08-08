@@ -14,12 +14,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.InMemoryConfiguration;
 
@@ -37,12 +39,15 @@ public class ApplicationFactory {
 
     @Inject
     private ConfigurationFactory configurationFactory;
-    
+
     @Inject
     private ApplianceService applianceService;
 
     @Inject
     private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
+
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     public static final String PERSISTENCE_AUTH_CONFIG_NAME = "persistenceAuthConfig";
 
@@ -50,7 +55,7 @@ public class ApplicationFactory {
 
     public static final String PERSISTENCE_AUTH_ENTRY_MANAGER_NAME = "persistenceAuthEntryManager";
 
-    @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
+	@Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }
@@ -67,6 +72,8 @@ public class ApplicationFactory {
 			cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
 
 			log.info("IN-MEMORY cache configuration is created.");
+		} else {
+			cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(StringUtils.remove(staticConfiguration.getBaseDn().getUmaBase(), "ou=uma,").trim());
 		}
 		log.info("Cache configuration: " + cacheConfiguration);
 		return cacheConfiguration;
