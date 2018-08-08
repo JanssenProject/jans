@@ -70,14 +70,18 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<LdapEn
 
     @Override
     public Object get(String region, String key) {
-        NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
-        if (entity != null && entity.getData() != null) {
-            if (isExpired(entity.getExpirationDate())) {
-                log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
-                remove("", key);
-                return null;
+        try {
+            NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
+            if (entity != null && entity.getData() != null) {
+                if (isExpired(entity.getExpirationDate())) {
+                    log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
+                    remove("", key);
+                    return null;
+                }
+                return fromString(entity.getData());
             }
-            return fromString(entity.getData());
+        } catch (Exception e) {
+            log.trace("Didn't find entry by key: " + key + ", message: " + e.getMessage());
         }
         return null;
     }
