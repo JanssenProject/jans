@@ -1,4 +1,4 @@
-package org.xdi.model;
+package org.xdi.model.attribute;
 
 import java.io.Serializable;
 

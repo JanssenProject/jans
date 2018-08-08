@@ -18,6 +18,16 @@
 			<artifactId>oxcore-ldap-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-persist-model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
