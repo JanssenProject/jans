@@ -115,9 +115,20 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setCreationDate(creationDate);
             entity.setExpirationDate(expirationDate.getTime());
 
+            silentlyRemoveEntityIfExists(entity);
             ldapEntryManager.persist(entity);
         } catch (Exception e) {
             log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
+        }
+    }
+
+    private void silentlyRemoveEntityIfExists(NativePersistenceCacheEntity entity) {
+        try {
+            if (ldapEntryManager.find(NativePersistenceCacheEntity.class, entity.getDn()) != null) {
+                ldapEntryManager.removeWithSubtree(entity.getDn());
+            }
+        } catch (Exception e) {
+            // ignore
         }
     }
 
