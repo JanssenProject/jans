@@ -37,8 +37,8 @@
 		<weld.version>3.0.5.Final</weld.version>
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 
-		<jsf-api.version>2.2.17</jsf-api.version>
-		<jsf-impl.version>2.2.17</jsf-impl.version>
+		<jsf-api.version>2.2.16</jsf-api.version>
+		<jsf-impl.version>2.2.16</jsf-impl.version>
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
