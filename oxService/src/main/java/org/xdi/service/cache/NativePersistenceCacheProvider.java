@@ -83,7 +83,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                 return fromString(entity.getData());
             }
         } catch (Exception e) {
-            log.trace("Didn't find entry by key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key);
+            log.trace("No entry with key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key, e);
         }
         return null;
     }
