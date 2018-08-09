@@ -132,10 +132,12 @@ public class CleanerTimer {
         }
 
         try {
+            Date now = new Date();
+
+            processCache(now);
             processAuthorizationGrantList();
             processRegisteredClients();
 
-            Date now = new Date();
             this.umaRptService.cleanup(now);
             this.umaPermissionService.cleanup(now);
             this.umaPctService.cleanup(now);
@@ -145,13 +147,18 @@ public class CleanerTimer {
             processU2fDeviceRegistrations();
 
             processMetricEntries();
-
-            if (cacheService.isNativePersistenceCacheProvider()) {
-                ((NativePersistenceCacheProvider) cacheService.getCacheProvider()).cleanup(now, BATCH_SIZE);
-
-            }
         } finally {
             this.isActive.set(false);
+        }
+    }
+
+    private void processCache(Date now) {
+        try {
+            if (cacheService.isNativePersistenceCacheProvider()) {
+                ((NativePersistenceCacheProvider) cacheService.getCacheProvider()).cleanup(now, BATCH_SIZE);
+            }
+        } catch (Exception e) {
+            log.error("Failed to clean up cache.", e);
         }
     }
 
