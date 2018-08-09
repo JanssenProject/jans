@@ -2,7 +2,7 @@
     "htop":{
         "keyLength":20,
         "digits":6,
-        "lookAheadWindow":1
+        "lookAheadWindow":10
     },
     "totp":{
         "keyLength":64,
