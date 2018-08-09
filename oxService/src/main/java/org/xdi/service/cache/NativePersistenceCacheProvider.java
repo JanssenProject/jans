@@ -80,10 +80,13 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                     remove("", key);
                     return null;
                 }
-                return fromString(entity.getData());
+                Object o = fromString(entity.getData());
+                log.trace("Returned object from cache, key: " + originalKey + ", dn: " + entity.getDn());
+                return o;
             }
         } catch (Exception e) {
-            log.trace("No entry with key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key, e);
+            // ignore, we call cache first which is empty and then fill it in
+            // log.trace("No entry with key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key);
         }
         return null;
     }
@@ -115,21 +118,23 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setCreationDate(creationDate);
             entity.setExpirationDate(expirationDate.getTime());
 
-            silentlyRemoveEntityIfExists(entity);
+            silentlyRemoveEntityIfExists(entity.getDn());
             ldapEntryManager.persist(entity);
         } catch (Exception e) {
             log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
     }
 
-    private void silentlyRemoveEntityIfExists(NativePersistenceCacheEntity entity) {
+    private boolean silentlyRemoveEntityIfExists(String dn) {
         try {
-            if (ldapEntryManager.find(NativePersistenceCacheEntity.class, entity.getDn()) != null) {
-                ldapEntryManager.removeWithSubtree(entity.getDn());
+            if (ldapEntryManager.find(NativePersistenceCacheEntity.class, dn) != null) {
+                ldapEntryManager.removeRecursively(dn);
+                return true;
             }
         } catch (Exception e) {
             // ignore
         }
+        return false;
     }
 
     private static boolean isExpired(Date expiredAt) {
@@ -146,12 +151,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Override
     public void remove(String region, String key) {
-        String originalKey = key;
-        try {
-            key = hashKey(key);
-            ldapEntryManager.removeRecursively(createDn(key));
-        } catch (Exception e) {
-            log.trace("Failed to remove entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
+        if (silentlyRemoveEntityIfExists(createDn(hashKey(key)))) {
+            log.trace("Removed entity, key: " + key);
         }
     }
 
