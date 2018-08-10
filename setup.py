@@ -2316,14 +2316,12 @@ class Setup(object):
             self.ip = self.get_ip()
 
         detectedHostname = None
+
         try:
-            detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
+            detectedHostname = socket.getfqdn(self.ip)
         except:
-            try:
-                detectedHostname = os.popen("/bin/hostname").read().strip()
-            except:
-                self.logIt("No detected hostname", True)
-                self.logIt(traceback.format_exc(), True)
+            self.logIt(traceback.format_exc(), True)
+
         if detectedHostname:
             self.hostname = self.getPrompt("Enter hostname", detectedHostname)
         else:

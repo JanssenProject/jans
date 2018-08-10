@@ -149,6 +149,7 @@ class Migration(object):
         self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
         self.setup_properties = 'backup_3031/setup.properties'
 
+        self.passport_strategies = []
 
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
@@ -539,6 +540,28 @@ class Migration(object):
             pass
         return "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
 
+    def convertPassportStrategies(self, entry):
+
+        new_strategies = {}
+        change = False
+        for pp_conf in entry['gluuPassportConfiguration']:
+            pp_conf_js = json.loads(pp_conf)
+            self.passport_strategies.append(pp_conf_js['strategy'])
+            if not pp_conf_js['strategy'] in new_strategies:
+                if pp_conf_js['fieldset'][0].has_key('value'):
+                    
+                    if not '_client_' in pp_conf_js['fieldset'][0]['value']:
+                        strategy={'strategy':pp_conf_js['strategy'], 'fieldset':[]}
+                        for st_comp in pp_conf_js['fieldset']:
+                            strategy['fieldset'].append({'value1':st_comp['key'], 'value2':st_comp['value'], "hide":False,"description":""})        
+                        new_strategies[pp_conf_js['strategy'] ] = json.dumps(strategy)
+                        change = True
+                else:
+                    new_strategies[pp_conf_js['strategy'] ] = pp_conf
+
+        return new_strategies
+
+
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
@@ -598,6 +621,7 @@ class Migration(object):
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
 
+
             for attr in old_entry.keys():
                 if attr in ignoreList:
                     continue
@@ -621,9 +645,16 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
-                        
+
+            #Convert passport strategies to new format            
+            if 'ou=oxpassport' in dn:
+                if 'gluuPassportConfiguration' in new_entry:
+                    new_strategies = self.convertPassportStrategies(new_entry)
+                    new_entry['gluuPassportConfiguration'] = new_strategies.values()
             
             ldif_writer.unparse(dn, new_entry)
+        
+        
         
         progress_bar(0, 0, 'Rewriting DNs', True)
         
@@ -636,6 +667,7 @@ class Migration(object):
 
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
+            
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
@@ -650,6 +682,18 @@ class Migration(object):
 
             entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
 
+            # Fix grabbed users form passport authentication
+            if 'oxExternalUid' in entry:
+                new_oxExternalUid = []
+                for oxExternalUid in entry['oxExternalUid']:
+                    strategy_p = oxExternalUid.split(':')
+                    if strategy_p[0] in self.passport_strategies:
+                        str_text = 'passport-{0}:{1}'.format(strategy_p[0],strategy_p[1]) 
+                        new_oxExternalUid.append(str_text)
+                    else:
+                        new_oxExternalUid.append(oxExternalUid)
+                    
+                entry['oxExternalUid'] = new_oxExternalUid
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -1012,20 +1056,20 @@ class Migration(object):
         
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
-        self.verifyBackupData()
-        self.setupWorkDirectory()
-        self.stopWebapps()
-        self.stopLDAPServer()
-        self.copyCertificates()
-        self.copyCustomFiles()
-        self.copyIDPFiles()
-        self.copyCustomSchema()
-        self.exportInstallData()
+        #self.verifyBackupData()
+        #self.setupWorkDirectory()
+        #self.stopWebapps()
+        #self.stopLDAPServer()
+        #self.copyCertificates()
+        #self.copyCustomFiles()
+        #self.copyIDPFiles()
+        #self.copyCustomSchema()
+        #self.exportInstallData()
         self.processBackupData()
-        self.importProcessedData()
-        self.fixPermissions()
-        self.startLDAPServer()
-        self.idpResolved()
+        #self.importProcessedData()
+        #self.fixPermissions()
+        #self.startLDAPServer()
+        #self.idpResolved()
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
