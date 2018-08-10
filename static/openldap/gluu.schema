@@ -3006,3 +3006,10 @@ objectclass ( oxObjectClass:50 NAME 'oxAuthUmaPCT'
 	MUST ( objectclass )
 	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
 	X-ORIGIN 'Gluu created objectclass' )
+
+objectclass ( oxObjectClass:51 NAME 'oxCacheEntity'
+	SUP ( top )
+	STRUCTURAL
+	MUST ( objectclass )
+	MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxData )
+	X-ORIGIN 'Gluu created objectclass' )
