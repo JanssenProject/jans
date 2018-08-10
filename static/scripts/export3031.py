@@ -677,6 +677,13 @@ class Exporter(object):
             '-b', '"ou=appliances,o=gluu"', '"objectclass=gluuSAMLconfig"', '>', "%s/ldif/trust_relationships.ldif" % self.backupDir]
         self.runAndLog(args)
 
+
+        # Backup the Passport Configurations
+        args = [self.ldapsearch] + self.ldapCreds + [
+            '-b', '"ou=appliances,o=gluu"', '"objectclass=oxPassportConfiguration"', '>', "%s/ldif/passport.ldif" % self.backupDir]
+        self.runAndLog(args)
+
+
         # Backup the org
         args = [self.ldapsearch] + self.ldapCreds + [
             '-s', 'base', '-b', 'o=%s,o=gluu' % orgInum, 'objectclass=*', '>', "%s/ldif/organization.ldif" % self.backupDir]
