@@ -154,7 +154,7 @@ public class CleanerTimer {
 
     private void processCache(Date now) {
         try {
-            if (cacheService.isNativePersistenceCacheProvider()) {
+            if (cacheService.getCacheProvider() instanceof NativePersistenceCacheProvider) {
                 ((NativePersistenceCacheProvider) cacheService.getCacheProvider()).cleanup(now, BATCH_SIZE);
             }
         } catch (Exception e) {
