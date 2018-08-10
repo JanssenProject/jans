@@ -103,22 +103,20 @@
 						</ui:fragment>
 					</ul>
 
-					<h:panelGroup layout="block"
-								  rendered='#{!empty client.getPolicyUri()}'>
+					<h:panelGroup layout="block" rendered='#{!empty client.getPolicyUri()}'>
 						<p>
 							<h:outputText value="#{msgs['common.agreePolicy']}" />
-							<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-									value="#{msgs['common.privacyPolicy']}" />
+							<a target="_blank" href='#{client.getPolicyUri()}'>
+								<h:outputText value="#{msgs['common.privacyPolicy']}" />
 							</a>
 						</p>
 					</h:panelGroup>
 
-					<h:panelGroup layout="block"
-								  rendered='#{!empty client.getTosUri()}'>
+					<h:panelGroup layout="block" rendered='#{!empty client.getTosUri()}'>
 						<p>
 							<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-							<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-									value="#{msgs['common.termsOfService']}" />
+							<a target="_blank" href='#{client.getTosUri()}'>
+								<h:outputText value="#{msgs['common.termsOfService']}" />
 							</a>
 						</p>
 					</h:panelGroup>
@@ -128,8 +126,7 @@
 					</div>
 				</div>
 				<center>
-					Powered by <a href="http://www.gluu.org">Gluu</a>. Free and open
-					source access management.
+					#{msgs['common.copyright']} <a href="http://www.gluu.org">Gluu</a>. #{msgs['common.allRightsReserved']}
 				</center>
 			</div>
 		</h:form>
