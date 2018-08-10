@@ -81,7 +81,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                     return null;
                 }
                 Object o = fromString(entity.getData());
-                log.trace("Returned object from cache, key: " + originalKey + ", dn: " + entity.getDn());
+                //log.trace("Returned object from cache, key: " + originalKey + ", dn: " + entity.getDn());
                 return o;
             }
         } catch (Exception e) {
