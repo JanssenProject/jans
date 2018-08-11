@@ -168,7 +168,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableJdkLogger = true;
     private Set<String> authorizationRequestCustomAllowedParameters;
     private Boolean legacyDynamicRegistrationScopeParam;
-    private Boolean disableU2fEndpoint = true;
+    private Boolean disableU2fEndpoint = false;
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
