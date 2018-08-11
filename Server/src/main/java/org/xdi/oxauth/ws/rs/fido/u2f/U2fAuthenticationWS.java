@@ -21,6 +21,7 @@ import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
@@ -40,6 +41,10 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * The endpoint allows to start and finish U2F authentication process
@@ -53,6 +58,9 @@ public class U2fAuthenticationWS {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -77,6 +85,10 @@ public class U2fAuthenticationWS {
     public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId) {
         // Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
         try {
+            if (appConfiguration.getDisableU2fEndpoint()) {
+                return Response.status(Status.FORBIDDEN).build();
+            }
+
             log.debug("Startig authentication with username '{}', keyhandle '{}' for appId '{}' and session_id '{}'", userName, keyHandle, appId, sessionId);
 
             if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
@@ -134,6 +146,10 @@ public class U2fAuthenticationWS {
     public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
         String sessionId = null;
         try {
+            if (appConfiguration.getDisableU2fEndpoint()) {
+                return Response.status(Status.FORBIDDEN).build();
+            }
+
             log.debug("Finishing authentication for username '{}' with response '{}'", userName, authenticateResponseString);
 
             AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
