@@ -12,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -50,7 +51,11 @@ public class U2fConfigurationWS {
 	@ApiResponses(value = { @ApiResponse(code = 500, message = "Failed to build FIDO U2F configuration json object.") })
 	public Response getConfiguration() {
 		try {
-			final String baseEndpointUri = appConfiguration.getBaseEndpoint();
+		    if (appConfiguration.getDisableU2fEndpoint()) {
+	            return Response.status(Status.FORBIDDEN).build();
+		    }
+
+		    final String baseEndpointUri = appConfiguration.getBaseEndpoint();
 
 			final U2fConfiguration conf = new U2fConfiguration();
 			conf.setVersion("2.0");
