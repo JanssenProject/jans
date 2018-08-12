@@ -21,10 +21,37 @@ import subprocess
 import time
 import datetime
 import shelve
-import ldap
+
 import pyDes
 import base64
+import platform
 
+
+if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+    sys.exit("Please run this script inside Gluu 3.x container.")
+
+p = platform.linux_distribution()
+
+cmd_list = [
+        ('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'),
+        ('Running get-pip.py to install pip', 'python get-pip.py'),
+        ('Installing python jsonmerge module', 'pip install jsonmerge'),
+        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py'),
+        ]
+
+if p[0].lower() in ('ubuntu','debian'):
+    cmd_list.insert(0,('Running apt-get update','apt-get update'))
+    cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
+else:
+    cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
+
+for message, cmd in cmd_list:
+    print message
+    result = os.system(cmd)
+    if result:
+        sys.exit("An error occurred while running command. Please fix it")
+
+import ldap
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
@@ -889,23 +916,19 @@ class Migration(object):
             sys.exit(1)
 
 
-    def getLDAPServerType(self):
-        self.oxIDPAuthentication = 2
-        try:
-            choice = int(raw_input(
-                "\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: "))
-        except ValueError:
-            logging.error('You entered non-interger value. Cannot decide LDAP migration'
-                          'server type. Quitting.')
-            sys.exit(1)
+    def getoxIDPAuthentication(self):
 
-        if choice == 1:
-            self.oxIDPAuthentication = 1
-        elif choice == 2:
-            self.oxIDPAuthentication = 2
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+        while True:
+            choice = raw_input("\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: ")
+            if not choice.strip():
+                self.oxIDPAuthentication = 2
+                break
+
+            if choice == '1' or choice == '2':
+                self.oxIDPAuthentication = int(choice)
+                break
+            else:
+                print ("Invalid option. Please enter either 1 or 2.")
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
@@ -1055,7 +1078,7 @@ class Migration(object):
                     '/install/community-edition-setup/setup.properties.last')
         
         self.getLDAPServerTypeChoice()
-        self.getLDAPServerType()
+        self.getoxIDPAuthentication()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopWebapps()
