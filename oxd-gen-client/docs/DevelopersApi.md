@@ -486,7 +486,7 @@ No authorization required
 
 <a name="removeSite"></a>
 # **removeSite**
-> UpdateSiteResponse removeSite(authorization, removeSiteParams)
+> RemoveSiteResponse removeSite(authorization, removeSiteParams)
 
 Remove Site
 
@@ -503,7 +503,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 RemoveSiteParams removeSiteParams = new RemoveSiteParams(); // RemoveSiteParams | 
 try {
-    UpdateSiteResponse result = apiInstance.removeSite(authorization, removeSiteParams);
+    RemoveSiteResponse result = apiInstance.removeSite(authorization, removeSiteParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#removeSite");
@@ -520,7 +520,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**UpdateSiteResponse**](UpdateSiteResponse.md)
+[**RemoveSiteResponse**](RemoveSiteResponse.md)
 
 ### Authorization
 
@@ -719,7 +719,7 @@ No authorization required
 
 <a name="umaRsProtect"></a>
 # **umaRsProtect**
-> UpdateSiteResponse umaRsProtect(authorization, umaRsProtectParams)
+> RemoveSiteResponse umaRsProtect(authorization, umaRsProtectParams)
 
 UMA RS Protect Resources
 
@@ -736,7 +736,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 UmaRsProtectParams umaRsProtectParams = new UmaRsProtectParams(); // UmaRsProtectParams | 
 try {
-    UpdateSiteResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
+    RemoveSiteResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#umaRsProtect");
@@ -753,7 +753,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**UpdateSiteResponse**](UpdateSiteResponse.md)
+[**RemoveSiteResponse**](RemoveSiteResponse.md)
 
 ### Authorization
 
@@ -766,7 +766,7 @@ No authorization required
 
 <a name="updateSite"></a>
 # **updateSite**
-> UpdateSiteResponse updateSite(authorization, updateSiteParams)
+> RemoveSiteResponse updateSite(authorization, updateSiteParams)
 
 Update Site
 
@@ -783,7 +783,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 UpdateSiteParams updateSiteParams = new UpdateSiteParams(); // UpdateSiteParams | 
 try {
-    UpdateSiteResponse result = apiInstance.updateSite(authorization, updateSiteParams);
+    RemoveSiteResponse result = apiInstance.updateSite(authorization, updateSiteParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#updateSite");
@@ -800,7 +800,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**UpdateSiteResponse**](UpdateSiteResponse.md)
+[**RemoveSiteResponse**](RemoveSiteResponse.md)
 
 ### Authorization
 

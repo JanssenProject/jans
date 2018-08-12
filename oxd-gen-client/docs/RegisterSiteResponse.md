@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **status** | **String** |  | 
-**data** | [**RegisterSiteResponseData**](RegisterSiteResponseData.md) |  | 
+**data** | [**RegisterSiteResponseData**](RegisterSiteResponseData.md) |  |  [optional]
 
 
 

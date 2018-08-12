@@ -17,7 +17,7 @@ Name | Type | Description | Notes
 **clientTokenEndpointAuthMethod** | **String** |  |  [optional]
 **clientRequestUris** | **List&lt;String&gt;** |  |  [optional]
 **clientFrontchannelLogoutUris** | **List&lt;String&gt;** |  |  [optional]
-**clientSectorIdentifierUri** | **List&lt;String&gt;** |  |  [optional]
+**clientSectorIdentifierUri** | **String** |  |  [optional]
 **contacts** | **List&lt;String&gt;** |  |  [optional]
 **redirectUris** | **List&lt;String&gt;** |  |  [optional]
 **uiLocales** | **List&lt;String&gt;** |  |  [optional]
@@ -25,6 +25,7 @@ Name | Type | Description | Notes
 **claimsRedirectUri** | **List&lt;String&gt;** |  |  [optional]
 **clientId** | **String** | client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set) |  [optional]
 **clientSecret** | **String** | client secret of existing client, must be used together with client_id |  [optional]
+**trustedClient** | **Boolean** | specified whether client is trusted. Default value is false. |  [optional]
 
 
 
