@@ -25,6 +25,25 @@ import traceback
 import subprocess
 import tempfile
 import getpass
+
+os.chdir('/root')
+if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+    sys.exit("Please run this script inside Gluu 3.x container.")
+
+cmd_list = (
+    ("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"),
+    ("Downloading get-pip.py", "wget https://bootstrap.pypa.io/get-pip.py"),
+    ("Running get-pip.py to install pip", "python get-pip.py"),
+    ("Installing python jsonmerge module", "pip install jsonmerge"),
+    )
+
+for message, cmd in cmd_list:
+    print message
+    result = os.system(cmd)
+    if result:
+        sys.exit("An error occurred while running command. Please fix it")
+
+
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from distutils.dir_util import copy_tree
 import json
@@ -427,7 +446,7 @@ def changePassportConfigJson(self, param):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = 'backup_3031'
+        self.backupDir = '/root/backup_3031'
         self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
@@ -708,16 +727,22 @@ class Exporter(object):
 
 
     def getLDAPServerTypeChoice(self):
-        try:
-            self.choice = int(raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [2]: "))
-        except ValueError:
-            logging.error("You did not enter a integer value. "
-                          "Cannot decide LDAP server type. Quitting.")
-            sys.exit(1)
+        while True:
+            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [2]: ")
+            if not self.choice.strip():
+                self.choice = 2
+                break
 
-        if self.choice != 1 and self.choice != 2:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+            if self.choice == '1' or self.choice == '2':
+                self.choice = int(self.choice)
+                break
+            else:
+                print ("Invalid option. Please enter either 1 or 2.")
+        
+        if self.choice == 1:
+            print "Target LDAP Server is OpenLDAP"
+        else:
+            print "Target LDAP Server is OpenDJ"
 
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
