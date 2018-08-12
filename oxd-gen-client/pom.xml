@@ -42,6 +42,18 @@
   </developers>
 
   <build>
+
+      <filters>
+          <filter>profiles/${cfg}/test-data.properties</filter>
+      </filters>
+
+      <testResources>
+          <testResource>
+              <directory>src/test/resources</directory>
+              <filtering>true</filtering>
+          </testResource>
+      </testResources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -73,6 +85,7 @@
           </execution>
         </executions>
       </plugin>
+
 
       <!-- attach test jar -->
       <plugin>
@@ -152,6 +165,18 @@
   </build>
 
   <profiles>
+      <profile>
+          <id>set-configuration-name</id>
+          <activation>
+              <property>
+                  <name>!cfg</name>
+              </property>
+          </activation>
+          <properties>
+              <cfg>default</cfg>
+          </properties>
+      </profile>
+
     <profile>
       <id>sign-artifacts</id>
       <build>
@@ -174,7 +199,17 @@
       </build>
     </profile>
   </profiles>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-bom</artifactId>
+                <version>${dropwizard.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.xdi</groupId>
@@ -186,6 +221,30 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+
+      <dependency>
+          <groupId>io.dropwizard</groupId>
+          <artifactId>dropwizard-core</artifactId>
+          <version>${dropwizard.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>io.dropwizard</groupId>
+          <artifactId>dropwizard-testing</artifactId>
+          <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>2.10.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>2.10.0</version>
+      </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -234,7 +293,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <swagger-core-version>1.5.15</swagger-core-version>
@@ -244,5 +303,7 @@
     <maven-plugin-version>1.0.0</maven-plugin-version>
     <junit-version>4.12</junit-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <dropwizard.version>1.3.1</dropwizard.version>
   </properties>
+
 </project>

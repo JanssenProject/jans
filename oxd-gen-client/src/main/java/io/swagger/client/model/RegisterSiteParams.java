@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
 /**
  * RegisterSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-06-25T17:25:31.367Z")
-public class RegisterSiteParams {
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JavaClientCodegen", date = "2018-07-25T18:54:39.321+05:30")
+public class RegisterSiteParams   {
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
 
@@ -25,16 +26,16 @@ public class RegisterSiteParams {
   private String applicationType = null;
 
   @SerializedName("response_types")
-  private List<String> responseTypes = null;
+  private List<String> responseTypes = new ArrayList<String>();
 
   @SerializedName("grant_types")
-  private List<String> grantTypes = null;
+  private List<String> grantTypes = new ArrayList<String>();
 
   @SerializedName("scope")
-  private List<String> scope = null;
+  private List<String> scope = new ArrayList<String>();
 
   @SerializedName("acr_values")
-  private List<String> acrValues = null;
+  private List<String> acrValues = new ArrayList<String>();
 
   @SerializedName("client_name")
   private String clientName = null;
@@ -46,28 +47,28 @@ public class RegisterSiteParams {
   private String clientTokenEndpointAuthMethod = null;
 
   @SerializedName("client_request_uris")
-  private List<String> clientRequestUris = null;
+  private List<String> clientRequestUris = new ArrayList<String>();
 
   @SerializedName("client_frontchannel_logout_uris")
-  private List<String> clientFrontchannelLogoutUris = null;
+  private List<String> clientFrontchannelLogoutUris = new ArrayList<String>();
 
-  @SerializedName("client_sector_identifier_uri")
-  private List<String> clientSectorIdentifierUri = null;
+  @SerializedName("clientSector_identifier_uri")
+  private String clientSectorIdentifierUri = new String();
 
   @SerializedName("contacts")
-  private List<String> contacts = null;
+  private List<String> contacts = new ArrayList<String>();
 
   @SerializedName("redirect_uris")
-  private List<String> redirectUris = null;
+  private List<String> redirectUris = new ArrayList<String>();
 
   @SerializedName("ui_locales")
-  private List<String> uiLocales = null;
+  private List<String> uiLocales = new ArrayList<String>();
 
   @SerializedName("claims_locales")
-  private List<String> claimsLocales = null;
+  private List<String> claimsLocales = new ArrayList<String>();
 
   @SerializedName("claims_redirect_uri")
-  private List<String> claimsRedirectUri = null;
+  private List<String> claimsRedirectUri = new ArrayList<String>();
 
   @SerializedName("client_id")
   private String clientId = null;
@@ -75,15 +76,18 @@ public class RegisterSiteParams {
   @SerializedName("client_secret")
   private String clientSecret = null;
 
+  @SerializedName("trusted_client")
+  private Boolean trustedClient = null;
+
   public RegisterSiteParams authorizationRedirectUri(String authorizationRedirectUri) {
     this.authorizationRedirectUri = authorizationRedirectUri;
     return this;
   }
 
-   /**
+  /**
    * Get authorizationRedirectUri
    * @return authorizationRedirectUri
-  **/
+   **/
   @ApiModelProperty(example = "https://client.example.org/cb", required = true, value = "")
   public String getAuthorizationRedirectUri() {
     return authorizationRedirectUri;
@@ -98,11 +102,11 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * If missing, must be present in defaults
    * @return opHost
-  **/
-  @ApiModelProperty(example = "https://<ophostname>", value = "If missing, must be present in defaults")
+   **/
+  @ApiModelProperty(example = "https://&lt;ophostname&gt;", value = "If missing, must be present in defaults")
   public String getOpHost() {
     return opHost;
   }
@@ -116,10 +120,10 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * Get postLogoutRedirectUri
    * @return postLogoutRedirectUri
-  **/
+   **/
   @ApiModelProperty(example = "https://client.example.org/cb", value = "")
   public String getPostLogoutRedirectUri() {
     return postLogoutRedirectUri;
@@ -134,10 +138,10 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * Get applicationType
    * @return applicationType
-  **/
+   **/
   @ApiModelProperty(example = "web", value = "")
   public String getApplicationType() {
     return applicationType;
@@ -153,18 +157,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addResponseTypesItem(String responseTypesItem) {
-    if (this.responseTypes == null) {
-      this.responseTypes = new ArrayList<String>();
-    }
     this.responseTypes.add(responseTypesItem);
     return this;
   }
 
-   /**
+  /**
    * Get responseTypes
    * @return responseTypes
-  **/
-  @ApiModelProperty(example = "[\"code\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getResponseTypes() {
     return responseTypes;
   }
@@ -179,18 +180,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addGrantTypesItem(String grantTypesItem) {
-    if (this.grantTypes == null) {
-      this.grantTypes = new ArrayList<String>();
-    }
     this.grantTypes.add(grantTypesItem);
     return this;
   }
 
-   /**
+  /**
    * Get grantTypes
    * @return grantTypes
-  **/
-  @ApiModelProperty(example = "[\"authorization_code\",\"client_credentials\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getGrantTypes() {
     return grantTypes;
   }
@@ -205,18 +203,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addScopeItem(String scopeItem) {
-    if (this.scope == null) {
-      this.scope = new ArrayList<String>();
-    }
     this.scope.add(scopeItem);
     return this;
   }
 
-   /**
+  /**
    * Get scope
    * @return scope
-  **/
-  @ApiModelProperty(example = "[\"openid\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getScope() {
     return scope;
   }
@@ -231,18 +226,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addAcrValuesItem(String acrValuesItem) {
-    if (this.acrValues == null) {
-      this.acrValues = new ArrayList<String>();
-    }
     this.acrValues.add(acrValuesItem);
     return this;
   }
 
-   /**
+  /**
    * Get acrValues
    * @return acrValues
-  **/
-  @ApiModelProperty(example = "[\"basic\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getAcrValues() {
     return acrValues;
   }
@@ -256,11 +248,11 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * oxd will generate its own non-human readable name by defaultif client_name is not specified
    * @return clientName
-  **/
-  @ApiModelProperty(value = "oxd will generate its own non-human readable name by defaultif client_name is not specified")
+   **/
+  @ApiModelProperty(example = "null", value = "oxd will generate its own non-human readable name by defaultif client_name is not specified")
   public String getClientName() {
     return clientName;
   }
@@ -274,11 +266,11 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * Get clientJwksUri
    * @return clientJwksUri
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public String getClientJwksUri() {
     return clientJwksUri;
   }
@@ -292,11 +284,11 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * Get clientTokenEndpointAuthMethod
    * @return clientTokenEndpointAuthMethod
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public String getClientTokenEndpointAuthMethod() {
     return clientTokenEndpointAuthMethod;
   }
@@ -311,18 +303,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addClientRequestUrisItem(String clientRequestUrisItem) {
-    if (this.clientRequestUris == null) {
-      this.clientRequestUris = new ArrayList<String>();
-    }
     this.clientRequestUris.add(clientRequestUrisItem);
     return this;
   }
 
-   /**
+  /**
    * Get clientRequestUris
    * @return clientRequestUris
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getClientRequestUris() {
     return clientRequestUris;
   }
@@ -337,18 +326,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addClientFrontchannelLogoutUrisItem(String clientFrontchannelLogoutUrisItem) {
-    if (this.clientFrontchannelLogoutUris == null) {
-      this.clientFrontchannelLogoutUris = new ArrayList<String>();
-    }
     this.clientFrontchannelLogoutUris.add(clientFrontchannelLogoutUrisItem);
     return this;
   }
 
-   /**
+  /**
    * Get clientFrontchannelLogoutUris
    * @return clientFrontchannelLogoutUris
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getClientFrontchannelLogoutUris() {
     return clientFrontchannelLogoutUris;
   }
@@ -357,29 +343,22 @@ public class RegisterSiteParams {
     this.clientFrontchannelLogoutUris = clientFrontchannelLogoutUris;
   }
 
-  public RegisterSiteParams clientSectorIdentifierUri(List<String> clientSectorIdentifierUri) {
+  public RegisterSiteParams clientSectorIdentifierUri(String clientSectorIdentifierUri) {
     this.clientSectorIdentifierUri = clientSectorIdentifierUri;
     return this;
   }
 
-  public RegisterSiteParams addClientSectorIdentifierUriItem(String clientSectorIdentifierUriItem) {
-    if (this.clientSectorIdentifierUri == null) {
-      this.clientSectorIdentifierUri = new ArrayList<String>();
-    }
-    this.clientSectorIdentifierUri.add(clientSectorIdentifierUriItem);
-    return this;
-  }
 
-   /**
+  /**
    * Get clientSectorIdentifierUri
    * @return clientSectorIdentifierUri
-  **/
-  @ApiModelProperty(value = "")
-  public List<String> getClientSectorIdentifierUri() {
+   **/
+  @ApiModelProperty(example = "null", value = "")
+  public String getClientSectorIdentifierUri() {
     return clientSectorIdentifierUri;
   }
 
-  public void setClientSectorIdentifierUri(List<String> clientSectorIdentifierUri) {
+  public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
     this.clientSectorIdentifierUri = clientSectorIdentifierUri;
   }
 
@@ -389,18 +368,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addContactsItem(String contactsItem) {
-    if (this.contacts == null) {
-      this.contacts = new ArrayList<String>();
-    }
     this.contacts.add(contactsItem);
     return this;
   }
 
-   /**
+  /**
    * Get contacts
    * @return contacts
-  **/
-  @ApiModelProperty(example = "[\"foo_bar@spam.org\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getContacts() {
     return contacts;
   }
@@ -415,18 +391,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addRedirectUrisItem(String redirectUrisItem) {
-    if (this.redirectUris == null) {
-      this.redirectUris = new ArrayList<String>();
-    }
     this.redirectUris.add(redirectUrisItem);
     return this;
   }
 
-   /**
+  /**
    * Get redirectUris
    * @return redirectUris
-  **/
-  @ApiModelProperty(example = "[\"https://client.example.org/cb\"]", value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getRedirectUris() {
     return redirectUris;
   }
@@ -441,18 +414,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addUiLocalesItem(String uiLocalesItem) {
-    if (this.uiLocales == null) {
-      this.uiLocales = new ArrayList<String>();
-    }
     this.uiLocales.add(uiLocalesItem);
     return this;
   }
 
-   /**
+  /**
    * Get uiLocales
    * @return uiLocales
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getUiLocales() {
     return uiLocales;
   }
@@ -467,18 +437,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addClaimsLocalesItem(String claimsLocalesItem) {
-    if (this.claimsLocales == null) {
-      this.claimsLocales = new ArrayList<String>();
-    }
     this.claimsLocales.add(claimsLocalesItem);
     return this;
   }
 
-   /**
+  /**
    * Get claimsLocales
    * @return claimsLocales
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getClaimsLocales() {
     return claimsLocales;
   }
@@ -493,18 +460,15 @@ public class RegisterSiteParams {
   }
 
   public RegisterSiteParams addClaimsRedirectUriItem(String claimsRedirectUriItem) {
-    if (this.claimsRedirectUri == null) {
-      this.claimsRedirectUri = new ArrayList<String>();
-    }
     this.claimsRedirectUri.add(claimsRedirectUriItem);
     return this;
   }
 
-   /**
+  /**
    * Get claimsRedirectUri
    * @return claimsRedirectUri
-  **/
-  @ApiModelProperty(value = "")
+   **/
+  @ApiModelProperty(example = "null", value = "")
   public List<String> getClaimsRedirectUri() {
     return claimsRedirectUri;
   }
@@ -518,11 +482,11 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set)
    * @return clientId
-  **/
-  @ApiModelProperty(value = "client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set)")
+   **/
+  @ApiModelProperty(example = "null", value = "client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set)")
   public String getClientId() {
     return clientId;
   }
@@ -536,17 +500,35 @@ public class RegisterSiteParams {
     return this;
   }
 
-   /**
+  /**
    * client secret of existing client, must be used together with client_id
    * @return clientSecret
-  **/
-  @ApiModelProperty(value = "client secret of existing client, must be used together with client_id")
+   **/
+  @ApiModelProperty(example = "null", value = "client secret of existing client, must be used together with client_id")
   public String getClientSecret() {
     return clientSecret;
   }
 
   public void setClientSecret(String clientSecret) {
     this.clientSecret = clientSecret;
+  }
+
+  public RegisterSiteParams trustedClient(Boolean trustedClient) {
+    this.trustedClient = trustedClient;
+    return this;
+  }
+
+  /**
+   * specified whether client is trusted. Default value is false.
+   * @return trustedClient
+   **/
+  @ApiModelProperty(example = "null", value = "specified whether client is trusted. Default value is false.")
+  public Boolean getTrustedClient() {
+    return trustedClient;
+  }
+
+  public void setTrustedClient(Boolean trustedClient) {
+    this.trustedClient = trustedClient;
   }
 
 
@@ -560,39 +542,39 @@ public class RegisterSiteParams {
     }
     RegisterSiteParams registerSiteParams = (RegisterSiteParams) o;
     return Objects.equals(this.authorizationRedirectUri, registerSiteParams.authorizationRedirectUri) &&
-        Objects.equals(this.opHost, registerSiteParams.opHost) &&
-        Objects.equals(this.postLogoutRedirectUri, registerSiteParams.postLogoutRedirectUri) &&
-        Objects.equals(this.applicationType, registerSiteParams.applicationType) &&
-        Objects.equals(this.responseTypes, registerSiteParams.responseTypes) &&
-        Objects.equals(this.grantTypes, registerSiteParams.grantTypes) &&
-        Objects.equals(this.scope, registerSiteParams.scope) &&
-        Objects.equals(this.acrValues, registerSiteParams.acrValues) &&
-        Objects.equals(this.clientName, registerSiteParams.clientName) &&
-        Objects.equals(this.clientJwksUri, registerSiteParams.clientJwksUri) &&
-        Objects.equals(this.clientTokenEndpointAuthMethod, registerSiteParams.clientTokenEndpointAuthMethod) &&
-        Objects.equals(this.clientRequestUris, registerSiteParams.clientRequestUris) &&
-        Objects.equals(this.clientFrontchannelLogoutUris, registerSiteParams.clientFrontchannelLogoutUris) &&
-        Objects.equals(this.clientSectorIdentifierUri, registerSiteParams.clientSectorIdentifierUri) &&
-        Objects.equals(this.contacts, registerSiteParams.contacts) &&
-        Objects.equals(this.redirectUris, registerSiteParams.redirectUris) &&
-        Objects.equals(this.uiLocales, registerSiteParams.uiLocales) &&
-        Objects.equals(this.claimsLocales, registerSiteParams.claimsLocales) &&
-        Objects.equals(this.claimsRedirectUri, registerSiteParams.claimsRedirectUri) &&
-        Objects.equals(this.clientId, registerSiteParams.clientId) &&
-        Objects.equals(this.clientSecret, registerSiteParams.clientSecret);
+            Objects.equals(this.opHost, registerSiteParams.opHost) &&
+            Objects.equals(this.postLogoutRedirectUri, registerSiteParams.postLogoutRedirectUri) &&
+            Objects.equals(this.applicationType, registerSiteParams.applicationType) &&
+            Objects.equals(this.responseTypes, registerSiteParams.responseTypes) &&
+            Objects.equals(this.grantTypes, registerSiteParams.grantTypes) &&
+            Objects.equals(this.scope, registerSiteParams.scope) &&
+            Objects.equals(this.acrValues, registerSiteParams.acrValues) &&
+            Objects.equals(this.clientName, registerSiteParams.clientName) &&
+            Objects.equals(this.clientJwksUri, registerSiteParams.clientJwksUri) &&
+            Objects.equals(this.clientTokenEndpointAuthMethod, registerSiteParams.clientTokenEndpointAuthMethod) &&
+            Objects.equals(this.clientRequestUris, registerSiteParams.clientRequestUris) &&
+            Objects.equals(this.clientFrontchannelLogoutUris, registerSiteParams.clientFrontchannelLogoutUris) &&
+            Objects.equals(this.clientSectorIdentifierUri, registerSiteParams.clientSectorIdentifierUri) &&
+            Objects.equals(this.contacts, registerSiteParams.contacts) &&
+            Objects.equals(this.redirectUris, registerSiteParams.redirectUris) &&
+            Objects.equals(this.uiLocales, registerSiteParams.uiLocales) &&
+            Objects.equals(this.claimsLocales, registerSiteParams.claimsLocales) &&
+            Objects.equals(this.claimsRedirectUri, registerSiteParams.claimsRedirectUri) &&
+            Objects.equals(this.clientId, registerSiteParams.clientId) &&
+            Objects.equals(this.clientSecret, registerSiteParams.clientSecret) &&
+            Objects.equals(this.trustedClient, registerSiteParams.trustedClient);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret);
+    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUri, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient);
   }
-
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegisterSiteParams {\n");
-    
+
     sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
     sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
     sb.append("    postLogoutRedirectUri: ").append(toIndentedString(postLogoutRedirectUri)).append("\n");
@@ -614,6 +596,7 @@ public class RegisterSiteParams {
     sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");
     sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
     sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
+    sb.append("    trustedClient: ").append(toIndentedString(trustedClient)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -628,6 +611,5 @@ public class RegisterSiteParams {
     }
     return o.toString().replace("\n", "\n    ");
   }
-
 }
 

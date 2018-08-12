@@ -15,6 +15,7 @@ import java.util.Collections;
 
 import static io.swagger.client.api.Tester.api;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 
 /**
@@ -24,8 +25,10 @@ public class SetupClientTestGen {
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException, ApiException {
-        SetupClientResponse resp = setupClient(opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl)  {
+      try {
+          DevelopersApi apiClient = Tester.api(host);
+        SetupClientResponse resp = setupClient(apiClient, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
@@ -34,14 +37,18 @@ public class SetupClientTestGen {
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientFrontchannelLogoutUris(new ArrayList<>(Collections.singletonList(logoutUrl)));
-        params.setRedirectUris(Arrays.asList(redirectUrl));
+        params.setRedirectUris(Collections.singletonList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(new ArrayList<>(Arrays.asList("openid", "profile")));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = api().setupClient(params);
+        resp = api(host).setupClient(params);
         assertResponse(resp);
+      } catch (Exception ex) {
+          fail(ex.getMessage());
+      }
+
     }
 
     public static void assertResponse(SetupClientResponse resp) {
@@ -51,11 +58,11 @@ public class SetupClientTestGen {
         Tester.notEmpty(resp.getData().getClientSecret());
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl) throws ApiException {
-        return setupClient(opHost, redirectUrl, redirectUrl, "");
+    public static SetupClientResponse setupClient(DevelopersApi apiClient, String opHost, String redirectUrl) throws ApiException {
+        return setupClient(apiClient, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws ApiException {
+    public static SetupClientResponse setupClient(DevelopersApi apiClient, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws ApiException {
 
         final SetupClientParams params = new SetupClientParams();
         params.setOpHost(opHost);
@@ -68,7 +75,7 @@ public class SetupClientTestGen {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        SetupClientResponse resp = api().setupClient(params);
+        SetupClientResponse resp = apiClient.setupClient(params);
 
         assertResponse(resp);
         return resp;

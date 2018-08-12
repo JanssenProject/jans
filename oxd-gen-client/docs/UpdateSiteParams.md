@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 **clientTokenEndpointAuthMethod** | **String** |  |  [optional]
 **clientRequestUris** | **List&lt;String&gt;** |  |  [optional]
 **clientSectorIdentifierUri** | **List&lt;String&gt;** |  |  [optional]
-**clientSecretExpiresAt** | **Integer** | the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object |  [optional]
+**clientSecretExpiresAt** | **Long** | the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object |  [optional]
 **contacts** | **List&lt;String&gt;** |  |  [optional]
 **uiLocales** | **List&lt;String&gt;** |  |  [optional]
 **claimsLocales** | **List&lt;String&gt;** |  |  [optional]
