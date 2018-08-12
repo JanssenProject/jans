@@ -276,5 +276,6 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "useCacheForAllImplicitFlowObjects":false
+    "useCacheForAllImplicitFlowObjects":false,
+    "disableU2fEndpoint":false
 }
