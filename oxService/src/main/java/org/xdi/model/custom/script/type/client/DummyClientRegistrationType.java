@@ -15,24 +15,29 @@ import org.xdi.model.SimpleCustomProperty;
  */
 public class DummyClientRegistrationType implements ClientRegistrationType {
 
-    @Override
-    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-        return true;
-    }
+	@Override
+	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
+	}
 
-    @Override
-    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-        return true;
-    }
+	@Override
+	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
+	}
 
-    @Override
-    public int getApiVersion() {
-        return 1;
-    }
+	@Override
+	public int getApiVersion() {
+		return 1;
+	}
 
-    @Override
-    public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
-        return false;
-    }
+	@Override
+	public boolean createClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
 
 }
