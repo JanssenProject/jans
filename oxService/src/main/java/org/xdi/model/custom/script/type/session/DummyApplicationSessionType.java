@@ -28,7 +28,12 @@ public class DummyApplicationSessionType implements ApplicationSessionType {
 
     @Override
     public int getApiVersion() {
-        return 1;
+        return 2;
+    }
+
+    @Override
+    public boolean startSession(Object httpRequest, Object authorizationGrant, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
     }
 
     @Override

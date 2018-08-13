@@ -17,6 +17,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface ApplicationSessionType extends BaseExternalType {
 
+    boolean startSession(Object httpRequest, Object sessionState, Map<String, SimpleCustomProperty> configurationAttributes);
     boolean endSession(Object httpRequest, Object sessionState, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
