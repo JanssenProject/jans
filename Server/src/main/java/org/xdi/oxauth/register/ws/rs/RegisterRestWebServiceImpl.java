@@ -189,7 +189,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                         boolean registerClient = true;
                         if (externalDynamicClientRegistrationService.isEnabled()) {
-                            registerClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
+                            registerClient = externalDynamicClientRegistrationService.executeExternalCreateClientMethods(r, client);
                         }
 
                         if (registerClient) {
@@ -482,12 +482,25 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         final Client client = clientService.getClient(clientId, accessToken);
                         if (client != null) {
                             updateClientFromRequestObject(client, request, true);
-                            clientService.merge(client);
 
-                            oAuth2AuditLog.setScope(clientScopesToString(client));
-                            oAuth2AuditLog.setSuccess(true);
-                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                            return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
+                            boolean updateClient = true;
+                            if (externalDynamicClientRegistrationService.isEnabled()) {
+                                updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(request, client);
+                            }
+                            
+                            if (updateClient) {
+                                clientService.merge(client);
+    
+                                oAuth2AuditLog.setScope(clientScopesToString(client));
+                                oAuth2AuditLog.setSuccess(true);
+                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
+                            } else {
+                                log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                return Response.status(Response.Status.BAD_REQUEST).
+                                        entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN)).build();
+                            }
                         } else {
                             log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
