@@ -37,6 +37,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -47,6 +48,7 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
@@ -76,6 +78,9 @@ public class SessionIdService {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
+    
+    @Inject
+    private ExternalApplicationSessionService externalApplicationSessionService;
 
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
@@ -370,19 +375,31 @@ public class SessionIdService {
         return null;
     }
 
-    public SessionId generateAuthenticatedSessionId(String userDn) {
-        return generateAuthenticatedSessionId(userDn, "");
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn) {
+        return generateAuthenticatedSessionId(httpRequest, userDn, "");
     }
 
-    public SessionId generateAuthenticatedSessionId(String userDn, String prompt) {
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, String prompt) {
         Map<String, String> sessionIdAttributes = new HashMap<String, String>();
         sessionIdAttributes.put("prompt", prompt);
 
-        return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+        return generateAuthenticatedSessionId(httpRequest, userDn, new Date(), sessionIdAttributes, true);
     }
 
-    public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
-        return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) {
+        return generateAuthenticatedSessionId(httpRequest, userDn, new Date(), sessionIdAttributes, true);
+    }
+
+    private SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Date authenticationDate, Map<String, String> sessionIdAttributes, boolean persist) {
+        SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+
+        if (externalApplicationSessionService.isEnabled()) {
+            String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
+            log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+        }
+        
+        return sessionId;
     }
 
     public SessionId generateUnauthenticatedSessionId(String userDn) {
@@ -471,7 +488,7 @@ public class SessionIdService {
         }
     }
 
-    public SessionId setSessionIdStateAuthenticated(SessionId sessionId, String p_userDn) {
+    public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, SessionId sessionId, String p_userDn) {
         sessionId.setUserDn(p_userDn);
         sessionId.setAuthenticationTime(new Date());
         sessionId.setState(SessionIdState.AUTHENTICATED);
@@ -480,6 +497,13 @@ public class SessionIdService {
 
         auditLogging(sessionId);
         log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), persisted);
+
+        if (externalApplicationSessionService.isEnabled()) {
+            String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
+            log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+        }
+        
         return sessionId;
     }
 

@@ -50,7 +50,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Test
     public void statePersistence(String userInum) {
         String userDn = userService.getDnForUser(userInum);
-        SessionId newId = m_service.generateAuthenticatedSessionId(userDn);
+        SessionId newId = m_service.generateAuthenticatedSessionId(null, userDn);
 
         Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
 

@@ -37,6 +37,34 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
         super(CustomScriptType.APPLICATION_SESSION);
     }
 
+    public boolean executeExternalStartSessionMethod(CustomScriptConfiguration customScriptConfiguration, HttpServletRequest httpRequest, SessionId sessionId) {
+        try {
+            log.debug("Executing python 'startSession' method");
+            ApplicationSessionType applicationSessionType = (ApplicationSessionType) customScriptConfiguration.getExternalType();
+            Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+            return applicationSessionType.startSession(httpRequest, sessionId, configurationAttributes);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+        }
+
+        return false;
+    }
+
+    public boolean executeExternalStartSessionMethods(HttpServletRequest httpRequest, SessionId sessionId) {
+        boolean result = true;
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            if (customScriptConfiguration.getExternalType().getApiVersion() > 1) {
+                result &= executeExternalStartSessionMethod(customScriptConfiguration, httpRequest, sessionId);
+                if (!result) {
+                    return result;
+                }
+            }
+        }
+
+        return result;
+    }
+
     public boolean executeExternalEndSessionMethod(CustomScriptConfiguration customScriptConfiguration, HttpServletRequest httpRequest, SessionId sessionId) {
         try {
             log.debug("Executing python 'endSession' method");

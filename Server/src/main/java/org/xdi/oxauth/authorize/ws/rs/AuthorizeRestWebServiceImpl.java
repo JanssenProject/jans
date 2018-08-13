@@ -298,7 +298,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 } else {
                                     oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
                                     user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateAuthenticatedSessionId(user.getDn(), prompt);
+                                    sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, user.getDn(), prompt);
                                     sessionUser.addPermission(client.getClientId(), true);
                                 }
                             }
@@ -443,7 +443,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
                                                 Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
-                                                sessionUser = sessionIdService.generateAuthenticatedSessionId(userDn, prompt);
+                                                sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, userDn, prompt);
                                                 sessionUser.setSessionAttributes(requestParameterMap);
 
                                                 sessionIdService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), httpResponse, false);
@@ -637,7 +637,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
                                 if (sessionUser.getId() == null) {
-                                    final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(sessionUser.getUserDn(), prompt);
+                                    final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, sessionUser.getUserDn(), prompt);
                                     String newSessionId = newSessionUser.getId();
                                     sessionUser.setId(newSessionId);
                                     log.trace("newSessionId = {}", newSessionId);
