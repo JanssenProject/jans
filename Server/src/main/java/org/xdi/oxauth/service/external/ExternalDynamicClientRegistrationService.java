@@ -36,6 +36,32 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		super(CustomScriptType.CLIENT_REGISTRATION);
 	}
 
+    public boolean executeExternalCreateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
+        try {
+            log.debug("Executing python 'createClient' method");
+            ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
+            Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+            return externalClientRegistrationType.createClient(registerRequest, client, configurationAttributes);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+        }
+        
+        return false;
+    }
+
+    public boolean executeExternalCreateClientMethods(RegisterRequest registerRequest, Client client) {
+        boolean result = true;
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client);
+            if (!result) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
 	public boolean executeExternalUpdateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
 		try {
 			log.debug("Executing python 'updateClient' method");
