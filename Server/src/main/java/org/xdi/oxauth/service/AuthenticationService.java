@@ -25,6 +25,7 @@ import javax.ejb.Stateless;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
@@ -412,13 +413,13 @@ public class AuthenticationService {
 
         SessionId newSessionId;
         if (sessionId == null) {
-            newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
+            newSessionId = sessionIdService.generateAuthenticatedSessionId((HttpServletRequest) externalContext.getRequest(), user.getDn(), sessionIdAttributes);
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
             log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
 
-            newSessionId = sessionIdService.setSessionIdStateAuthenticated(sessionId, user.getDn());
+            newSessionId = sessionIdService.setSessionIdStateAuthenticated((HttpServletRequest) externalContext.getRequest(), sessionId, user.getDn());
         }
 
         identity.setSessionId(sessionId);
@@ -434,7 +435,7 @@ public class AuthenticationService {
 
         log.debug("ConfigureEventUser: username: '{}', credentials: '{}'", user.getUserId(), System.identityHashCode(credentials));
 
-        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId((HttpServletRequest) externalContext.getRequest(), user.getDn());
 
         identity.setSessionId(sessionId);
 
