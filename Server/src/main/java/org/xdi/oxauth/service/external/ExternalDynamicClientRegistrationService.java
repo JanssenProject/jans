@@ -53,9 +53,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     public boolean executeExternalCreateClientMethods(RegisterRequest registerRequest, Client client) {
         boolean result = true;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-            result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client);
-            if (!result) {
-                return result;
+            if (customScriptConfiguration.getExternalType().getApiVersion() > 1) {
+                result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client);
+                if (!result) {
+                    return result;
+                }
             }
         }
 
