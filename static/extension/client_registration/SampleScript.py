@@ -33,8 +33,8 @@ class ClientRegistration(ClientRegistrationType):
     #   registerRequest is org.xdi.oxauth.client.RegisterRequest
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    def updateClient(self, registerRequest, client, configurationAttributes):
-        print "Client registration. UpdateClient method"
+    def createClient(self, registerRequest, client, configurationAttributes):
+        print "Client registration. CreateClient method"
 
         redirectUris = client.getRedirectUris()
         print "Client registration. Redirect Uris: %s" % redirectUris
@@ -60,8 +60,16 @@ class ClientRegistration(ClientRegistrationType):
 
         return True
 
+    # Update client entry before persistent it
+    #   registerRequest is org.xdi.oxauth.client.RegisterRequest
+    #   client is org.xdi.oxauth.model.registration.Client
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    def updateClient(self, registerRequest, client, configurationAttributes):
+        print "Client registration. UpdateClient method"
+        return True
+
     def getApiVersion(self):
-        return 1
+        return 2
 
     def prepareClientRedirectUris(self, configurationAttributes):
         clientRedirectUrisSet = HashSet()

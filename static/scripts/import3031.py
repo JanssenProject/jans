@@ -21,10 +21,37 @@ import subprocess
 import time
 import datetime
 import shelve
-import ldap
+
 import pyDes
 import base64
+import platform
 
+
+if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+    sys.exit("Please run this script inside Gluu 3.x container.")
+
+p = platform.linux_distribution()
+
+cmd_list = [
+        ('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'),
+        ('Running get-pip.py to install pip', 'python get-pip.py'),
+        ('Installing python jsonmerge module', 'pip install jsonmerge'),
+        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py'),
+        ]
+
+if p[0].lower() in ('ubuntu','debian'):
+    cmd_list.insert(0,('Running apt-get update','apt-get update'))
+    cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
+else:
+    cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
+
+for message, cmd in cmd_list:
+    print message
+    result = os.system(cmd)
+    if result:
+        sys.exit("An error occurred while running command. Please fix it")
+
+import ldap
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
@@ -149,6 +176,7 @@ class Migration(object):
         self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
         self.setup_properties = 'backup_3031/setup.properties'
 
+        self.passport_strategies = []
 
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
@@ -539,6 +567,28 @@ class Migration(object):
             pass
         return "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
 
+    def convertPassportStrategies(self, entry):
+
+        new_strategies = {}
+        change = False
+        for pp_conf in entry['gluuPassportConfiguration']:
+            pp_conf_js = json.loads(pp_conf)
+            self.passport_strategies.append(pp_conf_js['strategy'])
+            if not pp_conf_js['strategy'] in new_strategies:
+                if pp_conf_js['fieldset'][0].has_key('value'):
+                    
+                    if not '_client_' in pp_conf_js['fieldset'][0]['value']:
+                        strategy={'strategy':pp_conf_js['strategy'], 'fieldset':[]}
+                        for st_comp in pp_conf_js['fieldset']:
+                            strategy['fieldset'].append({'value1':st_comp['key'], 'value2':st_comp['value'], "hide":False,"description":""})        
+                        new_strategies[pp_conf_js['strategy'] ] = json.dumps(strategy)
+                        change = True
+                else:
+                    new_strategies[pp_conf_js['strategy'] ] = pp_conf
+
+        return new_strategies
+
+
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
@@ -598,6 +648,7 @@ class Migration(object):
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
 
+
             for attr in old_entry.keys():
                 if attr in ignoreList:
                     continue
@@ -621,9 +672,16 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
-                        
+
+            #Convert passport strategies to new format            
+            if 'ou=oxpassport' in dn:
+                if 'gluuPassportConfiguration' in new_entry:
+                    new_strategies = self.convertPassportStrategies(new_entry)
+                    new_entry['gluuPassportConfiguration'] = new_strategies.values()
             
             ldif_writer.unparse(dn, new_entry)
+        
+        
         
         progress_bar(0, 0, 'Rewriting DNs', True)
         
@@ -636,6 +694,7 @@ class Migration(object):
 
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
+            
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
@@ -650,6 +709,18 @@ class Migration(object):
 
             entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
 
+            # Fix grabbed users form passport authentication
+            if 'oxExternalUid' in entry:
+                new_oxExternalUid = []
+                for oxExternalUid in entry['oxExternalUid']:
+                    strategy_p = oxExternalUid.split(':')
+                    if strategy_p[0] in self.passport_strategies:
+                        str_text = 'passport-{0}:{1}'.format(strategy_p[0],strategy_p[1]) 
+                        new_oxExternalUid.append(str_text)
+                    else:
+                        new_oxExternalUid.append(oxExternalUid)
+                    
+                entry['oxExternalUid'] = new_oxExternalUid
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -845,23 +916,19 @@ class Migration(object):
             sys.exit(1)
 
 
-    def getLDAPServerType(self):
-        self.oxIDPAuthentication = 2
-        try:
-            choice = int(raw_input(
-                "\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: "))
-        except ValueError:
-            logging.error('You entered non-interger value. Cannot decide LDAP migration'
-                          'server type. Quitting.')
-            sys.exit(1)
+    def getoxIDPAuthentication(self):
 
-        if choice == 1:
-            self.oxIDPAuthentication = 1
-        elif choice == 2:
-            self.oxIDPAuthentication = 2
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+        while True:
+            choice = raw_input("\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: ")
+            if not choice.strip():
+                self.oxIDPAuthentication = 2
+                break
+
+            if choice == '1' or choice == '2':
+                self.oxIDPAuthentication = int(choice)
+                break
+            else:
+                print ("Invalid option. Please enter either 1 or 2.")
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
@@ -918,6 +985,22 @@ class Migration(object):
                 copy_tree(
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
+
+        logging.info("Updating idp-metadata.xml")
+        prop_dict = {}
+        prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
+        prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
+        
+        prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+        prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+
+        temp_fn = os.path.join('/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml')
+
+        new_saml_meta_data = open(temp_fn).read() % prop_dict
+
+        with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
+            f.write(new_saml_meta_data)
+
 
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
@@ -1011,7 +1094,7 @@ class Migration(object):
                     '/install/community-edition-setup/setup.properties.last')
         
         self.getLDAPServerTypeChoice()
-        self.getLDAPServerType()
+        self.getoxIDPAuthentication()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopWebapps()
@@ -1026,8 +1109,11 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         self.idpResolved()
-        # self.startWebapps()
         print("============================================================")
+        
+        if self.passport_strategies:
+            sys.stdout.write("Passpot Strategies detected. Please change \033[;1mDefault Authentication Method\033[0;0m to \033[;1mpassport\033[0;0m manually.\n")
+        
         print("The migration is complete. Gluu Server needs to be restarted.")
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")

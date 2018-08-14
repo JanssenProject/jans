@@ -119,6 +119,9 @@ class FakeRemote:
     def put_file(self, filename, filecontent):
         with open(filename, 'w') as f:
             f.write(filecontent)
+            
+    def exists(self, path):
+        return os.path.exists(path)
 
     def rename(self, oldname, newname):
         os.rename(oldname, newname)
@@ -130,7 +133,7 @@ class ChangeGluuHostname:
     def __init__(self, old_host, new_host, cert_city, cert_mail, cert_state,
                     cert_country, ldap_password, os_type, ip_address, server='localhost',
                     gluu_version='',
-                    local=True):
+                    local=True, ldap_type='opendj'):
 
         self.old_host = old_host
         self.new_host = new_host
@@ -146,6 +149,7 @@ class ChangeGluuHostname:
         self.local = local
         self.base_inum = None
         self.appliance_inum = None
+        self.ldap_type = ldap_type
 
 
     def startup(self):
@@ -154,8 +158,12 @@ class ChangeGluuHostname:
         else:
             ldap_server = self.server
 
+        ldap_bind_dn = "cn=directory manager"
+        if ldap_type == 'openldap':
+            ldap_bind_dn += ' ,o=gluu'
+
         ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
-        self.conn = Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
+        self.conn = Connection(ldap_server, user=ldap_bind_dn, password=self.ldap_password)
         r = self.conn.bind()
         if not r:
             print "Can't conect to LDAP Server"
@@ -317,7 +325,6 @@ class ChangeGluuHostname:
             '/usr/bin/openssl req -new -key /etc/certs/{0}.key -out /etc/certs/{0}.csr -subj '
             '"/C={4}/ST={5}/L={1}/O=Gluu/CN={2}/emailAddress={3}"'.format('{0}', self.cert_city, self.new_host, self.cert_mail, self.cert_country, self.cert_state),
             '/usr/bin/openssl x509 -req -days 365 -in /etc/certs/{0}.csr -signkey /etc/certs/{0}.key -out /etc/certs/{0}.crt',
-            'chmod 440 -R /etc/certs',
             'chown root:gluu -R /etc/certs/',
             'chown jetty:jetty /etc/certs/oxauth-keys*'
             ]
@@ -349,11 +356,6 @@ class ChangeGluuHostname:
 
                 r = self.installer.run(add_key)
 
-                #if r[1]:
-                #    print "Info:", r[1]
-                #if r[2]:
-                #    print "** ERROR:", r[2]
-
         self.installer.run('chown jetty:jetty /etc/certs/oxauth-keys.*')
 
     def modify_saml_passport(self):
@@ -361,6 +363,7 @@ class ChangeGluuHostname:
         
         files = [
             '/opt/gluu-server-{0}/opt/shibboleth-idp/conf/idp.properties'.format(self.gluu_version),
+            '/opt/gluu-server-{0}/opt/shibboleth-idp/metadata/idp-metadata.xml'.format(self.gluu_version),
             '/opt/gluu-server-{0}/etc/gluu/conf/passport-config.json'.format(self.gluu_version),
             ]
 
@@ -398,6 +401,7 @@ if __name__ == "__main__":
     parser.add_argument('-country',  required=True, help="Country for creating certificates")
     parser.add_argument('-password',  required=True, help="Admin password")
     parser.add_argument('-os', required=True, help="OS type: CentOS, Ubuntu", choices=['CentOS','Ubuntu'])
+    parser.add_argument('-ldaptype', required=True, help="Ldap Server: openldap, opendj", choices=['openldap','opendj'])
 
     args = parser.parse_args()
 
@@ -410,7 +414,8 @@ if __name__ == "__main__":
         cert_country=args.country,
         server=args.server,
         ldap_password=args.password,
-        os_type=args.os
+        os_type=args.os,
+        ldap_type=ldaptype
         )
 
     name_changer.startup()
