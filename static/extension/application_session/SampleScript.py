@@ -26,7 +26,17 @@ class ApplicationSession(ApplicationSessionType):
         return True   
 
     def getApiVersion(self):
-        return 1
+        return 2
+
+    # Application calls it at start session request to allow notify 3rd part systems
+    #   httpRequest is javax.servlet.http.HttpServletRequest
+    #   authorizationGrant is org.xdi.oxauth.model.common.AuthorizationGrant
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    def startSession(self, httpRequest, authorizationGrant, configurationAttributes):
+        print "Application session. Starting external session"
+
+        print "Application session. External session started successfully"
+        return True
 
     # Application calls it at end session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest

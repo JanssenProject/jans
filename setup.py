@@ -232,12 +232,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp,ext,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,ext,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp,ext,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
@@ -2316,14 +2316,12 @@ class Setup(object):
             self.ip = self.get_ip()
 
         detectedHostname = None
+
         try:
-            detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
+            detectedHostname = socket.getfqdn(self.ip)
         except:
-            try:
-                detectedHostname = os.popen("/bin/hostname").read().strip()
-            except:
-                self.logIt("No detected hostname", True)
-                self.logIt(traceback.format_exc(), True)
+            self.logIt(traceback.format_exc(), True)
+
         if detectedHostname:
             self.hostname = self.getPrompt("Enter hostname", detectedHostname)
         else:
