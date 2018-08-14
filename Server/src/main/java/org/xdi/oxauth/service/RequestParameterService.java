@@ -30,6 +30,8 @@ import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.Pair;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
@@ -164,19 +166,43 @@ public class RequestParameterService {
     }
 
     public String getParameterValue(String p_name) {
+        Pair<String, String> valueWithType = getParameterValueWithType(p_name);
+        if (valueWithType == null) {
+            return null;
+        }
+
+        return valueWithType.getFirst();
+    }
+
+    public Pair<String, String> getParameterValueWithType(String p_name) {
+        String value = null;
+        String clazz = null;
         final Object o = identity.getWorkingParameter(p_name);
         if (o instanceof String) {
             final String s = (String) o;
-            return s;
+            value = s;
+            clazz = String.class.getName();
         } else if (o instanceof Integer) {
             final Integer i = (Integer) o;
-            return i.toString();
+            value = i.toString();
+            clazz = Integer.class.getName();
         } else if (o instanceof Boolean) {
             final Boolean b = (Boolean) o;
-            return b.toString();
+            value = b.toString();
+            clazz = Boolean.class.getName();
         }
 
-        return null;
+        return new Pair<String, String>(value, clazz);
+    }
+
+    public Object getTypedValue(String stringValue, String type) {
+        if (StringHelper.equals(Boolean.class.getName(), type)) {
+            return Boolean.valueOf(stringValue);
+        } else if (StringHelper.equals(Integer.class.getName(), type)) {
+            return Integer.valueOf(stringValue);
+        }
+
+        return stringValue;
     }
 
 }
