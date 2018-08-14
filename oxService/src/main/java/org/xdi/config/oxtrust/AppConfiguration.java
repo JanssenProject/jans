@@ -141,8 +141,9 @@ public class AppConfiguration implements Configuration, Serializable {
     private String cssLocation;
     private String jsLocation;
 
-    private String recaptchaSiteKey;
-    private String recaptchaSecretKey;
+    private String recaptchaSiteKey="";
+    private String recaptchaSecretKey="";
+    private boolean authenticationRecaptchaEnabled;
 
     private boolean scimTestMode;
 
@@ -988,5 +989,13 @@ public class AppConfiguration implements Configuration, Serializable {
     public void setApiUmaClientKeyStorePassword(String apiUmaClientKeyStorePassword) {
         this.apiUmaClientKeyStorePassword = apiUmaClientKeyStorePassword;
     }
+
+	public boolean isAuthenticationRecaptchaEnabled() {
+		return authenticationRecaptchaEnabled;
+	}
+
+	public void setAuthenticationRecaptchaEnabled(boolean authenticationRecaptchaEnabled) {
+		this.authenticationRecaptchaEnabled = authenticationRecaptchaEnabled;
+	}
 
 }
