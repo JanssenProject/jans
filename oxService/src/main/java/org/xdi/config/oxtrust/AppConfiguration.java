@@ -141,8 +141,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private String cssLocation;
     private String jsLocation;
 
-    private String recaptchaSiteKey="";
-    private String recaptchaSecretKey="";
+    private String recaptchaSiteKey;
+    private String recaptchaSecretKey;
     private boolean authenticationRecaptchaEnabled;
 
     private boolean scimTestMode;
