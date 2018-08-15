@@ -288,7 +288,7 @@ public class SessionIdService {
         header += "; HttpOnly";
 
         Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
-        if (sessionStateLifetime != null) {
+        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
@@ -326,7 +326,7 @@ public class SessionIdService {
         header += "; Secure";
 
         Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
-        if (sessionStateLifetime != null) {
+        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
@@ -568,14 +568,14 @@ public class SessionIdService {
 
                 if (sessionId.getAuthenticationTime() != null) {
                     final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionId.getAuthenticationTime().getTime()) / 1000;
-                    if (appConfiguration.getSessionIdLifetime() != null) {
+                    if (appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0) {
                         if (currentLifetimeInSeconds > appConfiguration.getSessionIdLifetime()) {
                             log.debug("Session id expired: {}, remove it.", sessionId.getId());
                             remove(sessionId); // expired
                             update = false;
                         }
                     } else {
-                        log.error("Session id lifetime configuration is null.");
+                        log.debug("Session id lifetime configuration is null.");
                     }
                 }
 
@@ -594,7 +594,7 @@ public class SessionIdService {
     private void putInCache(SessionId sessionId) {
         int expirationInSeconds = sessionId.getState() == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
-                appConfiguration.getSessionIdLifetime();
+                appConfiguration.getSessionIdLifetime() != null ? appConfiguration.getSessionIdLifetime() : 1; // we don't know for how long we can put it in cache since expiration is not set for session id, so we set it to 1 second.
         cacheService.put(Integer.toString(expirationInSeconds), sessionId.getId(), sessionId); // first parameter is expiration instead of region for memcached
     }
 
