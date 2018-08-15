@@ -31,7 +31,6 @@ public enum CommandType {
     VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
-    LICENSE_STATUS("license_status"),
 
     // UMA
     RS_PROTECT("uma_rs_protect"),

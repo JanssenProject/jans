@@ -30,8 +30,6 @@ public class OperationFactory {
                     return new CheckIdTokenOperation(command, injector);
                 case CHECK_ACCESS_TOKEN:
                     return new CheckAccessTokenOperation(command, injector);
-                case LICENSE_STATUS:
-                    return new LicenseStatusOperation(command, injector);
                 case GET_AUTHORIZATION_URL:
                     return new GetAuthorizationUrlOperation(command, injector);
                 case GET_TOKENS_BY_CODE:

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.*;
 import org.xdi.oxd.common.params.IParams;
-import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
 import org.xdi.oxd.server.service.Rp;
@@ -73,13 +72,10 @@ public class Processor {
                 final IOperation<IParams> operation = (IOperation<IParams>) OperationFactory.create(command, ServerLauncher.getInjector());
                 if (operation != null) {
                     IParams iParams = Convertor.asParams(operation.getParameterClass(), command);
-                    Pair<Rp, Boolean> rpWithIsClientLocalPair = validationService.validate(iParams);
+                    validationService.validate(iParams);
 
                     CommandResponse operationResponse = operation.execute(iParams);
                     if (operationResponse != null) {
-                        if (operationResponse.getStatus() == ResponseStatus.OK && rpWithIsClientLocalPair != null) { // report usage only of operation is ok
-                            ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rpWithIsClientLocalPair.getFirst(), rpWithIsClientLocalPair.getSecond());
-                        }
                         return operationResponse;
                     } else {
                         LOG.error("No response from operation. Command: " + command);
