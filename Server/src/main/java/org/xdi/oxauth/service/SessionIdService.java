@@ -594,7 +594,7 @@ public class SessionIdService {
     private void putInCache(SessionId sessionId) {
         int expirationInSeconds = sessionId.getState() == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
-                appConfiguration.getSessionIdLifetime() != null ? appConfiguration.getSessionIdLifetime() : 1; // we don't know for how long we can put it in cache since expiration is not set for session id, so we set it to 1 second.
+                appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0 ? appConfiguration.getSessionIdLifetime() : Integer.MAX_VALUE; // we don't know for how long we can put it in cache since expiration is not set for session id, so we set it to max integer.
         cacheService.put(Integer.toString(expirationInSeconds), sessionId.getId(), sessionId); // first parameter is expiration instead of region for memcached
     }
 
