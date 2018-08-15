@@ -7,7 +7,7 @@ from org.xdi.model.custom.script.type.client import ClientRegistrationType
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import ScopeService
 from org.xdi.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet, Date, GregorianCalendar
+from java.util import Arrays, ArrayList, HashSet
 
 import java
 
@@ -55,16 +55,8 @@ class ClientRegistration(ClientRegistrationType):
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
-        print "Casa client registration. UpdateClient method"
-
-        #Extend client lifetime for one year
-        cal=GregorianCalendar()
-        cal.add(1,1)
-        client.setClientSecretExpiresAt(Date(cal.getTimeInMillis()))
-        #this style complains:  client.setClientSecretExpiresAt(Date(Date().getTime + 31536000000))
-        
+        print "Casa client registration. UpdateClient method"       
         self.setClientScopes(client, configurationAttributes.get("scopes"))
-        
         return True
 
     def getApiVersion(self):
