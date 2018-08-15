@@ -48,13 +48,13 @@ public class LicenseService {
     private final TimeService timeService;
     private final HttpService httpService;
 
-    private volatile LicenseMetadata metadata = null;
-    private volatile boolean licenseValid = false;
+    private volatile LicenseMetadata metadata = new LicenseMetadata();
+    private volatile boolean licenseValid = true;
 
-    private final Cache<String, Rp> clientUpdateCache = CacheBuilder.newBuilder()
-            .maximumSize(100000)
-            .expireAfterWrite(24, TimeUnit.HOURS)
-            .build();
+//    private final Cache<String, Rp> clientUpdateCache = CacheBuilder.newBuilder()
+//            .maximumSize(100000)
+//            .expireAfterWrite(24, TimeUnit.HOURS)
+//            .build();
 
     @Inject
     public LicenseService(OxdServerConfiguration conf, HttpService httpService, TimeService timeService) {
@@ -65,159 +65,160 @@ public class LicenseService {
     }
 
     public void start() {
-        validateConfiguration();
-
-        Optional<LicenseFile> licenseFile = LicenseFile.load();
-
-        // before license update, check existing license and make sure autoupdate=true, otherwise skip update
-        if (validateLicense() && metadata != null && metadata.getAutoupdate() != null &&
-                !metadata.getAutoupdate()) {
-            licenseValid = true;
-            schedulePeriodicValidation(Utils.hoursDiff(new Date(), metadata.getExpirationDate()));
-            return; // skip update procedure, autoupdate=false !
-        }
-
-        this.updateService.start(licenseFile);
-
-        licenseValid = validateLicense();
-        if (licenseValid) {
-            schedulePeriodicValidation(1);
-        } else {
-            ServerLauncher.shutdownDueToInvalidLicense();
-        }
+//        validateConfiguration();
+//
+//        Optional<LicenseFile> licenseFile = LicenseFile.load();
+//
+//        // before license update, check existing license and make sure autoupdate=true, otherwise skip update
+//        if (validateLicense() && metadata != null && metadata.getAutoupdate() != null &&
+//                !metadata.getAutoupdate()) {
+//            licenseValid = true;
+//            schedulePeriodicValidation(Utils.hoursDiff(new Date(), metadata.getExpirationDate()));
+//            return; // skip update procedure, autoupdate=false !
+//        }
+//
+//        this.updateService.start(licenseFile);
+//
+//        licenseValid = validateLicense();
+//        if (licenseValid) {
+//            schedulePeriodicValidation(1);
+//        } else {
+//            ServerLauncher.shutdownDueToInvalidLicense();
+//        }
     }
 
-    private void validateConfiguration() {
-        if (Strings.isNullOrEmpty(conf.getLicenseId())) {
-            LOG.error("Unable to validate license. license_id is not set in oxd configuration.");
-            ServerLauncher.shutdown();
-        }
-        if (Strings.isNullOrEmpty(conf.getPublicKey())) {
-            LOG.error("Unable to validate license. public_key is not set in oxd configuration.");
-            ServerLauncher.shutdown();
-        }
-        if (Strings.isNullOrEmpty(conf.getPublicPassword())) {
-            LOG.error("Unable to validate license. public_password is not set in oxd configuration.");
-            ServerLauncher.shutdown();
-        }
-    }
+//    private void validateConfiguration() {
+//        if (Strings.isNullOrEmpty(conf.getLicenseId())) {
+//            LOG.error("Unable to validate license. license_id is not set in oxd configuration.");
+//            ServerLauncher.shutdown();
+//        }
+//        if (Strings.isNullOrEmpty(conf.getPublicKey())) {
+//            LOG.error("Unable to validate license. public_key is not set in oxd configuration.");
+//            ServerLauncher.shutdown();
+//        }
+//        if (Strings.isNullOrEmpty(conf.getPublicPassword())) {
+//            LOG.error("Unable to validate license. public_password is not set in oxd configuration.");
+//            ServerLauncher.shutdown();
+//        }
+//    }
 
     public LicenseMetadata getMetadata() {
         return metadata;
     }
 
     public boolean isLicenseValid() {
-        return licenseValid && !updateService.isRetryLimitExceeded();
+        return true;
+//        return licenseValid && !updateService.isRetryLimitExceeded();
     }
 
-    private boolean validateLicense() {
-        try {
-            LOG.trace("Validating license ...");
-
-            metadata = null;
-            licenseValid = false;
-
-            Optional<LicenseFile> licenseFile = LicenseFile.load();
-            if (!licenseFile.isPresent() || Strings.isNullOrEmpty(licenseFile.get().getEncodedLicense())) {
-                LOG.error("Failed to load license file : " + LicenseFile.getLicenseFile().getAbsolutePath());
-                return false;
-            }
-
-            if (StringUtils.isBlank(licenseFile.get().getLicenseId()) || !licenseFile.get().getLicenseId().equals(conf.getLicenseId())) {
-                LOG.info(String.format("Deleting license file ... license id in file (%s) does not match license id from oxd-conf.json (%s)", licenseFile.get().getLicenseId(), conf.getLicenseId()));
-                LicenseFile.deleteContent();
-                this.updateService.updateLicenseFromServer();
-                licenseFile = LicenseFile.load();
-            }
-
-            LicenseContent licenseContent = LicenseValidator.validate(
-                    conf.getPublicKey(),
-                    conf.getPublicPassword(),
-                    conf.getLicensePassword(),
-                    licenseFile.get().getEncodedLicense(),
-                    Product.OXD,
-                    timeService.getCurrentLicenseServerTime()
-            );
-
-            metadata = licenseContent.getMetadata();
-            licenseValid = true;
-
-            LOG.trace("License is validated successfully.");
-            LOG.trace("License data: " + metadata);
-            return true;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return false;
-    }
-
-    private void schedulePeriodicValidation(int initialDelayInHours) {
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
-        executorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                licenseValid = validateLicense();
-            }
-        }, initialDelayInHours, 24, TimeUnit.HOURS);
-    }
+//    private boolean validateLicense() {
+//        try {
+//            LOG.trace("Validating license ...");
+//
+//            metadata = null;
+//            licenseValid = false;
+//
+//            Optional<LicenseFile> licenseFile = LicenseFile.load();
+//            if (!licenseFile.isPresent() || Strings.isNullOrEmpty(licenseFile.get().getEncodedLicense())) {
+//                LOG.error("Failed to load license file : " + LicenseFile.getLicenseFile().getAbsolutePath());
+//                return false;
+//            }
+//
+//            if (StringUtils.isBlank(licenseFile.get().getLicenseId()) || !licenseFile.get().getLicenseId().equals(conf.getLicenseId())) {
+//                LOG.info(String.format("Deleting license file ... license id in file (%s) does not match license id from oxd-conf.json (%s)", licenseFile.get().getLicenseId(), conf.getLicenseId()));
+//                LicenseFile.deleteContent();
+//                this.updateService.updateLicenseFromServer();
+//                licenseFile = LicenseFile.load();
+//            }
+//
+//            LicenseContent licenseContent = LicenseValidator.validate(
+//                    conf.getPublicKey(),
+//                    conf.getPublicPassword(),
+//                    conf.getLicensePassword(),
+//                    licenseFile.get().getEncodedLicense(),
+//                    Product.OXD,
+//                    timeService.getCurrentLicenseServerTime()
+//            );
+//
+//            metadata = licenseContent.getMetadata();
+//            licenseValid = true;
+//
+//            LOG.trace("License is validated successfully.");
+//            LOG.trace("License data: " + metadata);
+//            return true;
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//        }
+//        return false;
+//    }
+//
+//    private void schedulePeriodicValidation(int initialDelayInHours) {
+//        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
+//        executorService.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//                licenseValid = validateLicense();
+//            }
+//        }, initialDelayInHours, 24, TimeUnit.HOURS);
+//    }
 
     public void notifyClientUsed(final Rp rp, final boolean isClientLocal) {
-        CoreUtils.createExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                if (shouldNotifyAboutClientUsage(rp)) {
-                    notifyClientUsedImpl(rp, isClientLocal);
-                }
-            }
-        });
+//        CoreUtils.createExecutor().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (shouldNotifyAboutClientUsage(rp)) {
+//                    notifyClientUsedImpl(rp, isClientLocal);
+//                }
+//            }
+//        });
     }
 
-    private boolean shouldNotifyAboutClientUsage(Rp rp) {
-        boolean hasInCache = clientUpdateCache.getIfPresent(rp.getClientId()) != null;
-        if (hasInCache) {
-            return false; // skip update, client was updated already
-        }
-        clientUpdateCache.put(rp.getClientId(), rp);
-        return true;
-    }
-
-    private void notifyClientUsedImpl(Rp rp, boolean isClientLocal) {
-        try {
-            String licenseId = conf.getLicenseId();
-            String clientId = rp.getClientId();
-            String oxdId = rp.getOxdId();
-            String clientName = rp.getClientName();
-            String macAddress = MacAddressProvider.macAddress();
-
-            StatisticUpdateRequest request = StatisticUpdateRequest.clientUpdate(
-                    licenseId, clientId, oxdId, clientName, macAddress, isClientLocal);
-            request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage(), conf.getServerName()));
-            LOG.trace("Updating statistic ... , request: " + request);
-            Response response = LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
-            if (response.getStatus() == 200) {
-                LOG.trace("Updated statistic. oxdId: " + oxdId + ", response: " + response);
-            } else {
-                throw new RuntimeException("Failed to update statistic, rp: " + rp);
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to update statistic. Message: " + e.getMessage(), e);
-        }
-    }
-
-    private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
-        AppMetadata appMetadata = new AppMetadata();
-        appMetadata.setAppName("oxd");
-        appMetadata.setAppVersion(ConfigurationService.APP_VERSION);
-        appMetadata.setProgrammingLanguage(programmingLanguage);
-
-        Properties buildProperties = ServerLauncher.buildProperties();
-        if (buildProperties != null) {
-            for (String key : buildProperties.stringPropertyNames()) {
-                appMetadata.getData().put(key, buildProperties.getProperty(key));
-            }
-        }
-        appMetadata.getData().put("server_name", serverName);
-
-        return appMetadata;
-    }
+//    private boolean shouldNotifyAboutClientUsage(Rp rp) {
+//        boolean hasInCache = clientUpdateCache.getIfPresent(rp.getClientId()) != null;
+//        if (hasInCache) {
+//            return false; // skip update, client was updated already
+//        }
+//        clientUpdateCache.put(rp.getClientId(), rp);
+//        return true;
+//    }
+//
+//    private void notifyClientUsedImpl(Rp rp, boolean isClientLocal) {
+//        try {
+//            String licenseId = conf.getLicenseId();
+//            String clientId = rp.getClientId();
+//            String oxdId = rp.getOxdId();
+//            String clientName = rp.getClientName();
+//            String macAddress = MacAddressProvider.macAddress();
+//
+//            StatisticUpdateRequest request = StatisticUpdateRequest.clientUpdate(
+//                    licenseId, clientId, oxdId, clientName, macAddress, isClientLocal);
+//            request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage(), conf.getServerName()));
+//            LOG.trace("Updating statistic ... , request: " + request);
+//            Response response = LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
+//            if (response.getStatus() == 200) {
+//                LOG.trace("Updated statistic. oxdId: " + oxdId + ", response: " + response);
+//            } else {
+//                throw new RuntimeException("Failed to update statistic, rp: " + rp);
+//            }
+//        } catch (Exception e) {
+//            LOG.error("Failed to update statistic. Message: " + e.getMessage(), e);
+//        }
+//    }
+//
+//    private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
+//        AppMetadata appMetadata = new AppMetadata();
+//        appMetadata.setAppName("oxd");
+//        appMetadata.setAppVersion(ConfigurationService.APP_VERSION);
+//        appMetadata.setProgrammingLanguage(programmingLanguage);
+//
+//        Properties buildProperties = ServerLauncher.buildProperties();
+//        if (buildProperties != null) {
+//            for (String key : buildProperties.stringPropertyNames()) {
+//                appMetadata.getData().put(key, buildProperties.getProperty(key));
+//            }
+//        }
+//        appMetadata.getData().put("server_name", serverName);
+//
+//        return appMetadata;
+//    }
 }
