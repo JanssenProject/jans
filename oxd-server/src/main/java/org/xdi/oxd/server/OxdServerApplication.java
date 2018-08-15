@@ -9,7 +9,6 @@ import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.server.license.LicenseGuardFilter;
 
 public class OxdServerApplication extends Application<OxdServerConfiguration> {
 
@@ -40,7 +39,6 @@ public class OxdServerApplication extends Application<OxdServerConfiguration> {
             }
         });
         environment.jersey().register(RolesAllowedDynamicFeature.class);
-        environment.jersey().register(LicenseGuardFilter.class);
         environment.jersey().register(new RestResource());
     }
 }
