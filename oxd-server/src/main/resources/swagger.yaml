@@ -154,8 +154,6 @@ paths:
               data:
                 type: object
                 required:
-                  - oxd_id
-                  - client_id_of_oxd_id
                   - op_host
                   - setup_client_oxd_id
                   - client_id
@@ -165,12 +163,6 @@ paths:
                   - client_id_issued_at
                   - client_secret_expires_at
                 properties:
-                  oxd_id:
-                    type: string
-                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
-                  client_id_of_oxd_id:
-                    type: string
-                    example: ccad760f-91ba-46e1-a020-05e4281d91b6
                   op_host:
                     type: string
                     example: https://<op-hostname>
