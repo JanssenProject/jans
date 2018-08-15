@@ -165,6 +165,7 @@
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
+    "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "opPolicyUri":"http://ox.gluu.org/doku.php?id=oxauth:policy",
     "opTosUri":"http://ox.gluu.org/doku.php?id=oxauth:tos",
     "authorizationCodeLifetime":60,
