@@ -103,8 +103,14 @@ public class IntrospectionWebService {
                 final AuthorizationGrant authorizationGrant = getAuthorizationGrant(p_authorization, p_token);
                 if (authorizationGrant != null) {
                     final AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(tokenService.getTokenFromAuthorizationParameter(p_authorization));
-                    boolean isPat = authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue()); // #432
-                    if (authorizationAccessToken != null && authorizationAccessToken.isValid() && isPat) {
+
+                    if (authorizationAccessToken != null && authorizationAccessToken.isValid()) {
+                        if (ServerUtil.isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope())) { // #562 - make uma_protection optional
+                            if (!authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) {
+                                log.trace("access_token used to access introspection endpoint does not has uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true");
+                                return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED) + " access_token does not have uma_protection scope which is required by OP configuration.").build();
+                            }
+                        }
                         final IntrospectionResponse response = new IntrospectionResponse(false);
 
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
@@ -132,7 +138,7 @@ public class IntrospectionWebService {
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
                     } else {
-                        log.error("Access token is not valid. Valid: " + (authorizationAccessToken != null && authorizationAccessToken.isValid()) + ", isPat:" + isPat);
+                        log.error("Access token is not valid. Valid: " + (authorizationAccessToken != null && authorizationAccessToken.isValid()));
                     }
                 } else {
                     log.error("Authorization grant is null.");
