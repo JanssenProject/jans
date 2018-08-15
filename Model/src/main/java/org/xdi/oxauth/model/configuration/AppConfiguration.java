@@ -1308,6 +1308,10 @@ public class AppConfiguration implements Configuration {
         this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
     }
 
+    /**
+     *
+     * @return session_id lifetime. If null or value is zero or less then session_id lifetime is not set and will expire when browser session ends.
+     */
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
