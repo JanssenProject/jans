@@ -150,6 +150,8 @@ public class AppConfiguration implements Configuration {
     private String oxElevenVerifySignatureEndpoint;
     private String oxElevenDeleteKeyEndpoint;
 
+    private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
+
     private Boolean endSessionWithAccessToken;
     private Boolean enabledOAuthAuditLogging;
     private Set<String> jmsBrokerURISet;
@@ -200,6 +202,14 @@ public class AppConfiguration implements Configuration {
     public void setFrontChannelLogoutSessionSupported(
             Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
+
+    public Boolean getIntrospectionAccessTokenMustHaveUmaProtectionScope() {
+        return introspectionAccessTokenMustHaveUmaProtectionScope;
+    }
+
+    public void setIntrospectionAccessTokenMustHaveUmaProtectionScope(Boolean introspectionAccessTokenMustHaveUmaProtectionScope) {
+        this.introspectionAccessTokenMustHaveUmaProtectionScope = introspectionAccessTokenMustHaveUmaProtectionScope;
     }
 
     public Boolean getUmaRptAsJwt() {
