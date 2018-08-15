@@ -471,6 +471,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
 
+        # "mail" and "uid" are always present in mapping, see prepareAttributesMapping
         mailRemoteAttr = self.getRemoteAttr("mail")
         uidRemoteAttr = self.getRemoteAttr("uid")
         if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, "provider"]):
@@ -488,14 +489,16 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             externalUid = "passport-%s:%s" % (provider, uidRemoteAttrValue)
 
-        email = user_profile[mailRemoteAttr]
+        email = self.flatValues(user_profile[mailRemoteAttr])
+        email = None if len(email) == 0 else email[0]
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
 
         if userByUid != None and StringHelper.isEmptyString(email):
-            # This helps filling the missing email if the user already exists in local LDAP
+            # This helps filling the missing email if the user already exists in local LDAP (picks first email)
             email = userByUid.getAttribute("mail")
             if email != None:
+                print "Passport. attemptAuthentication. Filling missing email value with %s" % email
                 user_profile[mailRemoteAttr] = email
 
         if StringHelper.isEmptyString(email):
@@ -568,37 +571,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def checkRequiredAttributes(self, profile, attrs):
 
         for attr in attrs:
-            if (not attr in profile) or StringHelper.isEmptyString(profile[attr]):
+            if (not attr in profile) or len(self.flatValues(profile[attr])) == 0:
                 print "Passport. checkRequiredAttributes. Attribute '%s' is missing in profile" % attr
                 return False
         return True
-
-
-    def updateUser(self, foundUser, profile, userService):
-
-        # mapping is already lower cased
-        mapping = self.attributesMapping
-        for remoteAttr in mapping:
-            # "provider" is disregarded if part of mapping
-            value = profile[remoteAttr]
-
-            if remoteAttr != "provider" and StringHelper.isNotEmptyString(value):
-                localAttr = mapping[remoteAttr]
-                print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, value)
-                values = foundUser.getAttributeValues(localAttr)
-                # Make the list modifiable
-                values = ArrayList() if values == None else ArrayList(values)
-
-                # This loop helps not to add duplicated values in multivalued attributes
-                found = False
-                for v in values:
-                    found = found or StringHelper.equalsIgnoreCase(v, value)
-
-                if not found:
-                    values.add(value)
-                    foundUser.setAttribute(localAttr, values)
-
-        userService.updateUser(foundUser)
 
 
     def addUser(self, externalUid, profile, userService):
@@ -606,16 +582,58 @@ class PersonAuthentication(PersonAuthenticationType):
         newUser = User()
         #Fill user attrs
         newUser.setAttribute("oxExternalUid", externalUid)
-        mapping = self.attributesMapping
-
-        for remoteAttr in mapping:
-            value = profile[remoteAttr]
-
-            # "provider" is disregarded if part of mapping
-            if remoteAttr != "provider" and StringHelper.isNotEmptyString(value):
-                localAttr = mapping[remoteAttr]
-                print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, value)
-                newUser.setAttribute(mapping[remoteAttr], value)
-
+        self.fillUser(newUser, profile)
         newUser = userService.addUser(newUser, True)
         return newUser
+
+
+    def updateUser(self, foundUser, profile, userService):
+        self.fillUser(foundUser, profile)
+        userService.updateUser(foundUser)
+
+
+    def fillUser(self, foundUser, profile):
+
+        # mapping is already lower cased
+        mapping = self.attributesMapping
+        for remoteAttr in mapping:
+            values = self.flatValues(profile[remoteAttr])
+
+            # "provider" is disregarded if part of mapping
+            if remoteAttr != "provider":
+                localAttr = mapping[remoteAttr]
+                print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
+                foundUser.setAttribute(localAttr, values)
+
+    # This routine converts a value into an array of flat string values. Examples:
+    # "" --> []
+    # "hi" --> ["hi"]
+    # ["hi", "there"] --> ["hi", "there"]
+    # [{"attr":"hi"}, {"attr":"there"}] --> ['{"attr":"hi"}', '{"attr":"there"}']
+    # {"attr":"hi"} --> ['{"attr":"hi"}']
+    # [] --> []
+    # None --> []
+    def flatValues(self, value):
+
+        try:
+            typ = type(value)
+            if typ is str or typ is unicode:
+                return [] if len(value) == 0 else [value]
+            elif typ is dict:
+                return [json.dumps(value)]
+            elif typ is list:
+                if len(value) > 0 and type(value[0]) is dict:
+                    # it's an array of objects
+                    l = []
+                    for i in range(len(value)):
+                        l.append(json.dumps(value[i]))
+                    return l
+                else:
+                    return value
+            else:
+                # value = None?
+                return []
+        except:
+            # failed!
+            print "Passport. flatValues. Failed to convert %s to an array" % value
+            return []
