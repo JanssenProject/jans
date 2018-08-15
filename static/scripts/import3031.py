@@ -986,20 +986,21 @@ class Migration(object):
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
 
-        logging.info("Updating idp-metadata.xml")
-        prop_dict = {}
-        prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
-        prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
-        
-        prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
-        prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+        if os.path.isdir('/opt/shibboleth-idp/metadata/'):
+            logging.info("Updating idp-metadata.xml")
+            prop_dict = {}
+            prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
+            prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
+            
+            prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+            prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
 
-        temp_fn = os.path.join('/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml')
+            temp_fn = '/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml'
 
-        new_saml_meta_data = open(temp_fn).read() % prop_dict
+            new_saml_meta_data = open(temp_fn).read() % prop_dict
 
-        with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
-            f.write(new_saml_meta_data)
+            with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
+                f.write(new_saml_meta_data)
 
 
     def fixPermissions(self):
@@ -1073,6 +1074,9 @@ class Migration(object):
 
                     elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
                         f[i] = 'idp.authn.LDAP.bindDN                           = {0}\n'.format(bindDn)
+                    
+                    elif ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))\n'
 
             with open(prop_file,'w') as w:
                 w.write(''.join(f))
