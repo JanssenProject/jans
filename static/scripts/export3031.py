@@ -350,7 +350,7 @@ def doClientsChangesForUMA2(self, clientPath):
     base64Types = []
     for idx, val in enumerate(parser.entries):
         if 'displayName' in val:
-            if val['displayName'][0] == 'Pasport Resource Server Client':
+            if val['displayName'][0] == 'Passport Resource Server Client':
                 parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
             elif val['displayName'][0] == 'SCIM Resource Server Client':
                 parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
@@ -391,15 +391,15 @@ def doUmaResourcesChangesForUma2(self, UmaPath):
                                                                     'oxId=' + val['oxId'][0]).replace('resource_sets',
                                                                                                       'resources')
             if val['oxId'][0] == 'scim_access':
-                parser.entries[idx]["oxId"] = ['https://' + hostname + ' /oxauth/restv1/uma/scopes/scim_access']
+                parser.entries[idx]["oxId"] = ['https://' + hostname + '/oxauth/restv1/uma/scopes/scim_access']
             elif val['oxId'][0] == 'passport_access':
-                parser.entries[idx]["oxId"] = ['https://' + hostname + ' /oxauth/restv1/uma/scopes/passport_access']
+                parser.entries[idx]["oxId"] = ['https://' + hostname + '/oxauth/restv1/uma/scopes/passport_access']
             if val['displayName'][0] == 'SCIM Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + hostname + ' /identity/restv1/scim/v1']
+                parser.entries[idx]["oxResource"] = ['https://' + hostname + '/identity/restv1/scim/v1']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + scimClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
             elif val['displayName'][0] == 'Passport Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + hostname + ' /identity/restv1/passport/config']
+                parser.entries[idx]["oxResource"] = ['https://' + hostname + '/identity/restv1/passport/config']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + passportClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
 
