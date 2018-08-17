@@ -8,7 +8,7 @@ import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.client.OxdClient;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
-import org.xdi.oxd.common.response.SetupClientResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -24,7 +24,7 @@ public class Tester {
     }
 
     private static String AUTHORIZATION = "";
-    private static SetupClientResponse SETUP_CLIENT;
+    private static RegisterSiteResponse SETUP_CLIENT;
     private static String HOST;
     private static String OP_HOST;
 
@@ -53,11 +53,11 @@ public class Tester {
         return AUTHORIZATION;
     }
 
-    public static SetupClientResponse getSetupClient() {
+    public static RegisterSiteResponse getSetupClient() {
         return SETUP_CLIENT;
     }
 
-    public static void setSetupClient(SetupClientResponse setupClient, String host, String opHost) {
+    public static void setSetupClient(RegisterSiteResponse setupClient, String host, String opHost) {
         SETUP_CLIENT = setupClient;
         HOST = host;
         OP_HOST = opHost;
