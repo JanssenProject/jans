@@ -13,7 +13,6 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -23,9 +22,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
-import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
@@ -63,35 +60,19 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         LOG.info("Creating RP ...");
         persistRp(oxdId, params);
-        validateAccessToken(oxdId, params);
 
         LOG.info("RP created: " + rp);
 
-        RegisterSiteResponse opResponse = new RegisterSiteResponse();
-        opResponse.setOxdId(oxdId);
-        opResponse.setOpHost(params.getOpHost());
-        return opResponse;
-    }
-
-    private void validateAccessToken(String oxdId, RegisterSiteParams params) {
-        final OxdServerConfiguration conf = getConfigurationService().getConfiguration();
-        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
-            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return; // skip validation since protectCommandsWithAccessToken=false
-            } // otherwise if token is not blank then let it validate it
-        }
-        if (params instanceof SetupClientParams) {
-            return;
-        }
-
-        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
-
-        Rp setupRp = getRpService().getRpByClientId(response.getClientId());
-        LOG.trace("introspection: " + response + ", setupRp: " + rp);
-
-        rp.setSetupClientId(response.getClientId());
-        rp.setSetupOxdId(setupRp != null ? setupRp.getOxdId() : oxdId);
-        getRpService().updateSilently(rp);
+        RegisterSiteResponse response = new RegisterSiteResponse();
+        response.setOxdId(oxdId);
+        response.setOpHost(params.getOpHost());
+        response.setClientId(rp.getClientId());
+        response.setClientSecret(rp.getClientSecret());
+        response.setClientRegistrationAccessToken(rp.getClientRegistrationAccessToken());
+        response.setClientRegistrationClientUri(rp.getClientRegistrationClientUri());
+        response.setClientIdIssuedAt(Utils.date(rp.getClientIdIssuedAt()));
+        response.setClientSecretExpiresAt(Utils.date(rp.getClientSecretExpiresAt()));
+        return response;
     }
 
     @Override
@@ -129,10 +110,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (grantTypes.isEmpty() && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
             grantTypes.addAll(fallback.getGrantType());
-        }
-
-        if (grantTypes.isEmpty()) {
-            grantTypes.add(GrantType.AUTHORIZATION_CODE.getValue());
         }
 
         params.setGrantTypes(grantTypes);

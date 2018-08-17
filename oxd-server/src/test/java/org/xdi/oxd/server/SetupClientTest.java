@@ -5,10 +5,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxd.client.ClientInterface;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.params.SetupClientParams;
-import org.xdi.oxd.common.response.SetupClientResponse;
+import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +25,11 @@ public class SetupClientTest {
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
     public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-        SetupClientResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
-        final SetupClientParams params = new SetupClientParams();
+        final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -42,24 +40,25 @@ public class SetupClientTest {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).setupClient(params).dataAsResponse(SetupClientResponse.class);
+        resp = Tester.newClient(host).registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertResponse(resp);
     }
 
-    public static void assertResponse(SetupClientResponse resp) {
+    public static void assertResponse(RegisterSiteResponse resp) {
         assertNotNull(resp);
 
         notEmpty(resp.getClientId());
         notEmpty(resp.getClientSecret());
+        notEmpty(resp.getOxdId());
     }
 
-    public static SetupClientResponse setupClient(ClientInterface client, String opHost, String redirectUrl) {
+    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl) {
         return setupClient(client, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static SetupClientResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
-        final SetupClientParams params = new SetupClientParams();
+        final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -70,10 +69,7 @@ public class SetupClientTest {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        final Command command = new Command(CommandType.SETUP_CLIENT);
-        command.setParamsObject(params);
-
-        final SetupClientResponse resp = client.setupClient(params).dataAsResponse(SetupClientResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertResponse(resp);
         return resp;
     }

@@ -49,7 +49,7 @@ public class RegisterSiteTest {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        resp = Tester.newClient(host).registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertNotNull(resp.getOxdId());
         oxdId = resp.getOxdId();
@@ -91,7 +91,7 @@ public class RegisterSiteTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
