@@ -237,9 +237,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: header
-          name: Authorization
-          type: string
         - in: body
           name: RegisterSiteParams
           schema:
@@ -327,6 +324,9 @@ paths:
               client_secret:
                 type: string
                 description: client secret of existing client, must be used together with client_id
+              trusted_client:
+                type: boolean
+                description: specified whether client is trusted. Default value is false.
       responses:
         200:
           description: OK

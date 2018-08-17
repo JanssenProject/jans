@@ -2,8 +2,8 @@ package io.swagger.client.api;
 
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiException;
-import io.swagger.client.model.SetupClientParams;
-import io.swagger.client.model.SetupClientResponse;
+import io.swagger.client.model.RegisterSiteParams;
+import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.GrantType;
@@ -25,11 +25,11 @@ public class SetupClientTestGen {
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
     public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException, ApiException {
-        SetupClientResponse resp = setupClient(opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        RegisterSiteResponse resp = setupClient(opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
-        final SetupClientParams params = new SetupClientParams();
+        final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -40,24 +40,24 @@ public class SetupClientTestGen {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = api().setupClient(params);
+        resp = api().registerSite(params);
         assertResponse(resp);
     }
 
-    public static void assertResponse(SetupClientResponse resp) {
+    public static void assertResponse(RegisterSiteResponse resp) {
         assertNotNull(resp);
 
         Tester.notEmpty(resp.getData().getClientId());
         Tester.notEmpty(resp.getData().getClientSecret());
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl) throws ApiException {
+    public static RegisterSiteResponse setupClient(String opHost, String redirectUrl) throws ApiException {
         return setupClient(opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static SetupClientResponse setupClient(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws ApiException {
+    public static RegisterSiteResponse setupClient(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws ApiException {
 
-        final SetupClientParams params = new SetupClientParams();
+        final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -68,7 +68,7 @@ public class SetupClientTestGen {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        SetupClientResponse resp = api().setupClient(params);
+        RegisterSiteResponse resp = api().registerSite(params);
 
         assertResponse(resp);
         return resp;
