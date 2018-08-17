@@ -23,6 +23,7 @@ public class ParamsSecurityTest {
     private static final List<Class> EXCLUSING_LIST = Arrays.<Class>asList(
             GetClientTokenParams.class,
             GetRpParams.class,
+            RegisterSiteParams.class,
             EmptyParams.class,
             HasOxdIdParams.class,
             HasProtectionAccessTokenParams.class,
