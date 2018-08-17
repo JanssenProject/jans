@@ -413,13 +413,13 @@ public class AuthenticationService {
 
         SessionId newSessionId;
         if (sessionId == null) {
-            newSessionId = sessionIdService.generateAuthenticatedSessionId((HttpServletRequest) externalContext.getRequest(), user.getDn(), sessionIdAttributes);
+            newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(), sessionIdAttributes);
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
             log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
 
-            newSessionId = sessionIdService.setSessionIdStateAuthenticated((HttpServletRequest) externalContext.getRequest(), sessionId, user.getDn());
+            newSessionId = sessionIdService.setSessionIdStateAuthenticated(getHttpRequest(), sessionId, user.getDn());
         }
 
         identity.setSessionId(sessionId);
@@ -435,11 +435,18 @@ public class AuthenticationService {
 
         log.debug("ConfigureEventUser: username: '{}', credentials: '{}'", user.getUserId(), System.identityHashCode(credentials));
 
-        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId((HttpServletRequest) externalContext.getRequest(), user.getDn());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn());
 
         identity.setSessionId(sessionId);
 
         return sessionId;
+    }
+
+    private HttpServletRequest getHttpRequest() {
+        if (externalContext == null) {
+            return null;
+        }
+        return (HttpServletRequest) externalContext.getRequest();
     }
 
     public void configureEventUser(SessionId sessionId) {
