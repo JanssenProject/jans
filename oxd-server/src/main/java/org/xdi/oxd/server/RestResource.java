@@ -28,14 +28,6 @@ public class RestResource {
     }
 
     @POST
-    @Path("/setup-client")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public String setupClient(String params) {
-        return process(CommandType.SETUP_CLIENT, params, SetupClientParams.class, null);
-    }
-
-    @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -63,8 +55,8 @@ public class RestResource {
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String registerSite(@HeaderParam("Authorization") String authorization, String params) {
-        return process(CommandType.REGISTER_SITE, params, RegisterSiteParams.class, authorization);
+    public String registerSite(String params) {
+        return process(CommandType.REGISTER_SITE, params, RegisterSiteParams.class, null);
     }
 
     @POST
@@ -206,8 +198,7 @@ public class RestResource {
 
     public static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         T params = read(paramsAsString, paramsClass);
-        if (params instanceof HasProtectionAccessTokenParams &&
-                !(params instanceof SetupClientParams)) {
+        if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
         }
         Command command = new Command(commandType, params);

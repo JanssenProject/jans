@@ -70,13 +70,6 @@ public class Rp implements Serializable {
     @JsonProperty(value = "token_endpoint_auth_method")
     private String tokenEndpointAuthMethod;
 
-    @JsonProperty(value = "is_setup_client")
-    private Boolean setupClient;
-    @JsonProperty(value = "setup_oxd_id")
-    private String setupOxdId;
-    @JsonProperty(value = "setup_client_id")
-    private String setupClientId;
-
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
@@ -154,10 +147,6 @@ public class Rp implements Serializable {
 
         this.tokenEndpointAuthSigningAlg = conf.tokenEndpointAuthSigningAlg;
         this.tokenEndpointAuthMethod = conf.tokenEndpointAuthMethod;
-
-        this.setupClient = conf.setupClient;
-        this.setupOxdId = conf.setupOxdId;
-        this.setupClientId = conf.setupClientId;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -555,30 +544,6 @@ public class Rp implements Serializable {
         return null;
     }
 
-    public Boolean getSetupClient() {
-        return setupClient;
-    }
-
-    public void setSetupClient(Boolean setupClient) {
-        this.setupClient = setupClient;
-    }
-
-    public String getSetupOxdId() {
-        return setupOxdId;
-    }
-
-    public void setSetupOxdId(String setupOxdId) {
-        this.setupOxdId = setupOxdId;
-    }
-
-    public String getSetupClientId() {
-        return setupClientId;
-    }
-
-    public void setSetupClientId(String setupClientId) {
-        this.setupClientId = setupClientId;
-    }
-
     @Override
     public String toString() {
         return "Rp{" +
@@ -602,9 +567,6 @@ public class Rp implements Serializable {
                 ", clientName='" + clientName + '\'' +
                 ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
                 ", clientJwksUri='" + clientJwksUri + '\'' +
-                ", setupClient='" + setupClient + '\'' +
-                ", setupOxdId='" + setupOxdId + '\'' +
-                ", setupClientId='" + setupClientId + '\'' +
                 ", scope=" + scope +
                 ", uiLocales=" + uiLocales +
                 ", claimsLocales=" + claimsLocales +
