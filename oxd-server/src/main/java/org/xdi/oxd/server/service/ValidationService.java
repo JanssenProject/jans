@@ -10,7 +10,6 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
-import org.xdi.oxd.server.Utils;
 import org.xdi.util.Pair;
 
 /**
@@ -40,26 +39,22 @@ public class ValidationService {
     }
 
     public Pair<Rp, Boolean> validate(IParams params) {
-        Boolean isClientLocal = null;
         notNull(params);
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
-            isClientLocal = true;
         }
         if (params instanceof HasProtectionAccessTokenParams) {
-            if (validate((HasProtectionAccessTokenParams) params)) {
-                isClientLocal = false;
-            }
+            validate((HasProtectionAccessTokenParams) params);
         }
 
-        if (isClientLocal != null && !(params instanceof RegisterSiteParams)) {
+        if (!(params instanceof RegisterSiteParams)) {
             try {
                 String oxdId = ((HasOxdIdParams) params).getOxdId();
                 if (StringUtils.isNotBlank(oxdId)) {
                     final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
                     final Rp rp = rpService.getRp(oxdId);
                     if (rp != null) {
-                        return new Pair<>(rp, isClientLocal);
+                        return new Pair<>(rp, false);
                     }
                 }
             } catch (ErrorResponseException e) {
@@ -101,22 +96,9 @@ public class ValidationService {
      * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
      */
     private boolean validate(HasProtectionAccessTokenParams params) {
-        if (params instanceof SetupClientParams) {
-            return false;
-        }
-        if (params instanceof UpdateSiteParams) {
-            final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
-            final Rp rp = rpService.getRp(params.getOxdId());
-            if (rp.getSetupClient() != null && rp.getSetupClient()) {
-                return false; // skip validation if client is setup client (if we can setup client without protection access token then we allow also update it)
-            }
-        }
-
         final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
-            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return false; // skip validation since protectCommandsWithAccessToken=false
-            } // otherwise if token is not blank then let it validate it
+            return false; // skip validation since protectCommandsWithAccessToken=false
         }
 
         final String accessToken = params.getProtectionAccessToken();
@@ -131,24 +113,20 @@ public class ValidationService {
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
 
         final Rp rp = rpService.getRp(params.getOxdId());
-        if (StringUtils.isBlank(rp.getSetupClientId()) && !Utils.isTrue(rp.getSetupClient())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_SETUP_CLIENT_FOR_OXD_ID);
-        }
 
         final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
 
-        LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
+        LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", clientId: " + rp.getClientId());
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
             throw new ErrorResponseException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
-
-        if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
-            return true;
-        }
-        if (Utils.isTrue(rp.getSetupClient()) && introspectionResponse.getClientId().equals(rp.getClientId())) {
-            return true;
+        if (!IntrospectionService.getScopes(introspectionResponse).contains("oxd")) {
+            throw new ErrorResponseException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
+        if (introspectionResponse.getClientId().equals(rp.getClientId())) {
+            return true;
+        }
         throw new ErrorResponseException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
     }
 
@@ -159,15 +137,8 @@ public class ValidationService {
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
         final Rp rp = rpService.getRp(oxdId);
-        if (StringUtils.isNotBlank(rp.getSetupOxdId())) {
-            oxdId = rp.getSetupOxdId();
-        } else {
-            Rp firstSetupClient = rpService.getFirstSetupClient();
-            if (firstSetupClient != null) {
-                oxdId = firstSetupClient.getOxdId();
-            }
-        }
-        LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
+
+        LOG.trace("Introspect token with rp: " + rp);
 
         final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
         final IntrospectionResponse response = introspectionService.introspectToken(oxdId, accessToken);

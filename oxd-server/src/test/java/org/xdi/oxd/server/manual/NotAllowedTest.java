@@ -56,7 +56,7 @@ public class NotAllowedTest {
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(params);
 
-        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;

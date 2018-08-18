@@ -17,12 +17,6 @@ public interface ClientInterface {
     String healthCheck();
 
     @POST
-    @Path("/setup-client")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 setupClient(SetupClientParams params);
-
-    @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -44,7 +38,7 @@ public interface ClientInterface {
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 registerSite(@HeaderParam("Authorization") String authorization, RegisterSiteParams params);
+    CommandResponse2 registerSite(RegisterSiteParams params);
 
     @POST
     @Path("/update-site")
@@ -92,7 +86,7 @@ public interface ClientInterface {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params);
+    CommandResponse2 getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, GetAccessTokenByRefreshTokenParams params);
 
     @POST
     @Path("/uma-rs-protect")

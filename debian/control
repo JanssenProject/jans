@@ -3,8 +3,6 @@ Section: java
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
 Build-Depends: debhelper (>= 8.0.0),
- openjdk-8-jdk,
- maven
 Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 
@@ -12,7 +10,6 @@ Package: oxd-server
 Architecture: all
 Depends: ${shlibs:Depends},
  ${misc:Depends},
- openjdk-8-jdk|oracle-jdk8-provided,
 Description: plugins for OpenID and UMA
  oxd-server is a middleware service web application
  developers can use to facilitate user authentication
