@@ -1081,11 +1081,11 @@ public class AppConfiguration implements Configuration {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
     }
 
-    public final Boolean getMetricReporterEnabled() {
+    public Boolean getMetricReporterEnabled() {
         return metricReporterEnabled;
     }
 
-    public final void setMetricReporterEnabled(Boolean metricReporterEnabled) {
+    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
         this.metricReporterEnabled = metricReporterEnabled;
     }
 
