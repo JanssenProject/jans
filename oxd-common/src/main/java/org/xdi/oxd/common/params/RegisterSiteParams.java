@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegisterSiteParams implements HasProtectionAccessTokenParams {
+public class RegisterSiteParams implements HasOxdIdParams {
 
     @JsonProperty(value = "op_host")
     private String op_host;
@@ -22,8 +22,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String authorization_redirect_uri;
     @JsonProperty(value = "post_logout_redirect_uri")
     private String post_logout_redirect_uri;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirect_uris;
@@ -87,14 +85,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
         this.client_registration_client_uri = clientRegistrationClientUri;
-    }
-
-    public String getProtectionAccessToken() {
-        return protection_access_token;
-    }
-
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
     }
 
     public Boolean getTrustedClient() {
@@ -289,7 +279,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
                 ", op_discovery_path='" + op_discovery_path + '\'' +
                 ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
                 ", post_logout_redirect_uri='" + post_logout_redirect_uri + '\'' +
-                ", protection_access_token='" + protection_access_token + '\'' +
                 ", redirect_uris=" + redirect_uris +
                 ", response_types=" + response_types +
                 ", claims_redirect_uri=" + claims_redirect_uri +

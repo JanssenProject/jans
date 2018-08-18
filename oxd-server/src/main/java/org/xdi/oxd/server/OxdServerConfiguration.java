@@ -28,14 +28,6 @@ public class OxdServerConfiguration extends Configuration {
     private String cryptProviderKeyStorePassword;
     @JsonProperty(value = "crypt_provider_dn_name")
     private String cryptProviderDnName;
-    @JsonProperty(value = "license_id")
-    private String licenseId;
-    @JsonProperty(value = "public_key")
-    private String publicKey;
-    @JsonProperty(value = "public_password")
-    private String publicPassword;
-    @JsonProperty(value = "license_password")
-    private String licensePassword;
     @JsonProperty(value = "support-google-logout")
     private Boolean supportGoogleLogout = true;
     @JsonProperty(value = "state_expiration_in_minutes")
@@ -171,38 +163,6 @@ public class OxdServerConfiguration extends Configuration {
         this.keyStorePassword = keyStorePassword;
     }
 
-    public String getLicenseId() {
-        return licenseId;
-    }
-
-    public String getLicensePassword() {
-        return licensePassword;
-    }
-
-    public void setLicensePassword(String licensePassword) {
-        this.licensePassword = licensePassword;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPublicPassword() {
-        return publicPassword;
-    }
-
-    public void setPublicPassword(String publicPassword) {
-        this.publicPassword = publicPassword;
-    }
-
-    public void setLicenseId(String licenseId) {
-        this.licenseId = licenseId;
-    }
-
     public String getKeyStorePath() {
         return keyStorePath;
     }
@@ -272,10 +232,6 @@ public class OxdServerConfiguration extends Configuration {
                 ", cryptProviderKeyStorePath='" + cryptProviderKeyStorePath + '\'' +
                 ", cryptProviderKeyStorePassword='" + cryptProviderKeyStorePassword + '\'' +
                 ", cryptProviderDnName='" + cryptProviderDnName + '\'' +
-                ", licenseId='" + licenseId + '\'' +
-                ", publicKey='" + publicKey + '\'' +
-                ", publicPassword='" + publicPassword + '\'' +
-                ", licensePassword='" + licensePassword + '\'' +
                 ", supportGoogleLogout=" + supportGoogleLogout +
                 ", stateExpirationInMinutes=" + stateExpirationInMinutes +
                 ", nonceExpirationInMinutes=" + nonceExpirationInMinutes +

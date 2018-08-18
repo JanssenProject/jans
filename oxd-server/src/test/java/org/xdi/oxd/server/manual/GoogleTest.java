@@ -70,7 +70,7 @@ public class GoogleTest {
         params.setClientId(CLIENT_ID);
         params.setClientSecret(CLIENT_SECRET);
 
-        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;

@@ -30,8 +30,6 @@ public class OperationFactory {
                     return new CheckIdTokenOperation(command, injector);
                 case CHECK_ACCESS_TOKEN:
                     return new CheckAccessTokenOperation(command, injector);
-                case LICENSE_STATUS:
-                    return new LicenseStatusOperation(command, injector);
                 case GET_AUTHORIZATION_URL:
                     return new GetAuthorizationUrlOperation(command, injector);
                 case GET_TOKENS_BY_CODE:
@@ -60,8 +58,6 @@ public class OperationFactory {
                     return new RpGetRptOperation(command, injector);
                 case RP_GET_CLAIMS_GATHERING_URL:
                     return new RpGetGetClaimsGatheringUrlOperation(command, injector);
-                case SETUP_CLIENT:
-                    return new SetupClientOperation(command, injector);
                 case GET_CLIENT_TOKEN:
                     return new GetClientTokenOperation(command, injector);
                 case INTROSPECT_ACCESS_TOKEN:
