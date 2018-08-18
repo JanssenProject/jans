@@ -2,16 +2,17 @@
 
 <suite name="oxD Suite" parallel="false">
 
-    <parameter name="host" value="https://${oxd.server.address}"/>
-    <parameter name="opHost" value="https://${op.server.address}"/>
-    <parameter name="redirectUrl" value="${redirectUrl}"/>
-    <parameter name="postLogoutRedirectUrl" value="${postLogoutRedirectUrl}"/>
-    <parameter name="logoutUrl" value="${logoutUrl}"/>
+    <parameter name="host" value="http://localhost"/>
+    <parameter name="opHost" value="https://${test.server.name}"/>
+    <parameter name="redirectUrl" value="https://client.example.com/cb"/>
+    <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
+    <parameter name="logoutUrl" value="https://client.example.com/logout"/>
     <parameter name="userId" value="${auth.user.uid}"/>
     <parameter name="userSecret" value="${auth.user.password}"/>
     <parameter name="clientId" value="${auth.client.id}"/>
     <parameter name="clientSecret" value="${auth.client.secret}"/>
     <parameter name="licenseServerEndpoint" value="https://${oxd.server.address}/license-server"/>
+    <parameter name="licenseServerEndpoint" value="https://${test.server.name}/license-server"/>
     <parameter name="rsProtect"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
     <parameter name="rsProtectScopeExpression"
