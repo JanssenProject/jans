@@ -1000,19 +1000,19 @@ public class AppConfiguration implements Configuration, Serializable {
 		this.authenticationRecaptchaEnabled = authenticationRecaptchaEnabled;
 	}
 
-    public final int getMetricReporterKeepDataDays() {
+    public int getMetricReporterKeepDataDays() {
         return metricReporterKeepDataDays;
     }
 
-    public final void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
+    public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
     }
 
-    public final Boolean getMetricReporterEnabled() {
+    public Boolean getMetricReporterEnabled() {
         return metricReporterEnabled;
     }
 
-    public final void setMetricReporterEnabled(Boolean metricReporterEnabled) {
+    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
         this.metricReporterEnabled = metricReporterEnabled;
     }
 
