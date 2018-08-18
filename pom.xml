@@ -12,11 +12,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>3.2.0-SNAPSHOT</oxCore.version>
+        <oxCore.version>3.1.4-SNAPSHOT</oxCore.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable  -->
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>3.2.0-SNAPSHOT</oxauth.version>
+        <oxauth.version>3.1.4-SNAPSHOT</oxauth.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable -->
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
@@ -436,8 +436,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
                     <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

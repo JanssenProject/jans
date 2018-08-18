@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
-import org.xdi.oxd.common.response.SetupClientResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.RpService;
 
@@ -44,7 +44,7 @@ public class SetUpTest {
             removeExistingRps();
             LOG.debug("Existing RPs are removed.");
 
-            SetupClientResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
+            RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
             Tester.setSetupClient(setupClient, host, opHost);
             LOG.debug("SETUP_CLIENT is set in Tester.");
 
