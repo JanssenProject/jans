@@ -59,4 +59,13 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 		return instance.get();
 	}
 
+    @Override
+    public boolean isMetricReporterEnabled() {
+        if (this.appConfiguration.getMetricReporterEnabled() == null) {
+            return false;
+        }
+
+        return this.appConfiguration.getMetricReporterEnabled();
+    }
+
 }
