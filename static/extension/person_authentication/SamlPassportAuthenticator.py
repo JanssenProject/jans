@@ -3,7 +3,7 @@
 #
 # Author: Jose Gonzalez
 # Author: Yuriy Movchan
-#
+
 from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
 
@@ -123,7 +123,9 @@ class PersonAuthentication(PersonAuthenticationType):
             mail = ServerUtil.getFirstValue(requestParameters, "loginForm:email")
             json = identity.getWorkingParameter("passport_user_profile")
 
-            if mail != None and json != None:
+            if mail == None:
+                self.setEmailMessageError()
+            elif json != None:
                 # Completion of profile takes place
                 attr = self.getRemoteAttr("mail")
                 user_profile = self.getProfileFromJson(json)
@@ -302,8 +304,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. checkPropertiesConsistency. Empty attribute name detected in generic_remote_attributes_list or generic_local_attributes_list"
                 return None
 
-        if (not "uid" in local) or (not "mail" in local):
-            print "Passport. checkPropertiesConsistency. Property generic_local_attributes_list must contain 'uid' and 'mail'"
+        if not "uid" in local:
+            print "Passport. checkPropertiesConsistency. Property generic_local_attributes_list must contain 'uid'"
             return None
 
         mapping = {}
@@ -362,10 +364,13 @@ class PersonAuthentication(PersonAuthenticationType):
                 if config != None:
                     for strategy in config:
                         provider = strategy.getStrategy()
-                        self.registeredProviders[provider] = { "emailLinkingSafe" : False }
+                        self.registeredProviders[provider] = { "emailLinkingSafe" : False, "requestForEmail" : False }
                         for field in strategy.getFieldset():
-                            if StringHelper.equalsIgnoreCase(field.getValue1(), "emailLinkingSafe") and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                self.registeredProviders[provider]["emailLinkingSafe"] = True
+                            for property in self.registeredProviders[provider]:
+                                if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
+                                    self.registeredProviders[provider][property] = True
+                        
+                        self.registeredProviders[provider]["saml"] = False
 
             if self.behaveAs == None or self.behaveAs == "saml":
                 print "Passport. parseProviderConfigs. Adding SAML IDPs"
@@ -376,6 +381,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     if "enable" in provider and StringHelper.equalsIgnoreCase(provider["enable"], "true"):
                         self.registeredProviders[provider] = {
                             "emailLinkingSafe" : "emailLinkingSafe" in provider and StringHelper.equalsIgnoreCase(provider["emailLinkingSafe"], "true"),
+                            "requestForEmail" : "requestForEmail" in provider and StringHelper.equalsIgnoreCase(provider["requestForEmail"], "true"),
                             "saml" : True }
 
         except:
@@ -416,7 +422,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             tokenObj = json.loads(response)
 
-            if "saml" in self.registeredProviders[provider] and self.registeredProviders[provider]["saml"]:
+            if self.registeredProviders[provider]["saml"]:
                 provider = "saml/" + provider
 
             url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
@@ -471,8 +477,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
 
-        # "mail" and "uid" are always present in mapping, see prepareAttributesMapping
-        mailRemoteAttr = self.getRemoteAttr("mail")
+        # "uid" is always present in mapping, see prepareAttributesMapping
         uidRemoteAttr = self.getRemoteAttr("uid")
         if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, "provider"]):
             return False
@@ -482,50 +487,71 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
-        uidRemoteAttrValue = user_profile[uidRemoteAttr]
-        if "saml" in self.registeredProviders[provider] and self.registeredProviders[provider]["saml"]:
+        uidRemoteAttr = user_profile[uidRemoteAttr]
+        if self.registeredProviders[provider]["saml"]:
             # This is for backwards compat. It should be passport-saml-provider:...
-            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttrValue)
+            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
         else:
-            externalUid = "passport-%s:%s" % (provider, uidRemoteAttrValue)
-
-        email = self.flatValues(user_profile[mailRemoteAttr])
-        email = None if len(email) == 0 else email[0]
+            externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
+            
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
 
-        if userByUid != None and StringHelper.isEmptyString(email):
-            # This helps filling the missing email if the user already exists in local LDAP (picks first email)
-            email = userByUid.getAttribute("mail")
-            if email != None:
-                print "Passport. attemptAuthentication. Filling missing email value with %s" % email
+        mailRemoteAttr = self.getRemoteAttr("mail")
+        email = None
+        if mailRemoteAttr in user_profile:
+            email = self.flatValues(user_profile[mailRemoteAttr])
+            if len(email) == 0:
+                email = None
+            else:
+                email = email[0]
                 user_profile[mailRemoteAttr] = email
 
-        if StringHelper.isEmptyString(email):
+        if email == None and self.registeredProviders[provider]["requestForEmail"]:
             print "Passport. attemptAuthentication. Email was not received"
-
-            if self.registeredProviders[provider]["emailLinkingSafe"]:
-                # Store user profile in session
+            
+            if userByUid != None:
+                # This helps asking for the email over every login attempt
+                email = userByUid.getAttribute("mail")
+                if email != None:
+                    print "Passport. attemptAuthentication. Filling missing email value with %s" % email
+                    # Assumes mailRemoteAttr is not None
+                    user_profile[mailRemoteAttr] = email
+                    
+            if email == None:
+                # Store user profile in session and abort this routine
                 identity.setWorkingParameter("passport_user_profile", user_profile_json)
                 return True
-            else:
-                self.setEmailMessageError()
-                return False
-
-        userByMail = userService.getUserByAttribute("mail", email)
+                
+        userByMail = None if email == None else userService.getUserByAttribute("mail", email)
 
         # Determine if we should add entry, update existing, or deny access
         doUpdate = False
         doAdd = False
         if userByUid != None:
             print "User with externalUid '%s' already exists" % externalUid
-            if userByMail != None:
+            if userByMail == None:
+                doUpdate = True
+            else:
                 if userByMail.getUserId() == userByUid.getUserId():
                     doUpdate = True
-            else:
-                doUpdate = True
+                else:
+                    print "Users with externalUid '%s' and mail '%s' are different. Access will be denied. Impersonation attempt?" % (externalUid, email)
         else:
-            doAdd = userByMail == None
+            if userByMail == None: 
+                doAdd = True
+            elif self.registeredProviders[provider]["emailLinkingSafe"]:
+                
+                tmpList = userByMail.getAttributeValues("oxExternalUid")
+                tmpList = ArrayList() if tmpList == None else ArrayList(tmpList)
+                tmpList.add(externalUid)
+                userByMail.setAttribute("oxExternalUid", tmpList)
+                
+                userByUid = userByMail
+                print "External user supplying mail %s will be linked to existing account '%s'" % (email, userByMail.getUserId())
+                doUpdate = True
+            else:
+                print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
 
         username = None
         try:
@@ -560,7 +586,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getRemoteAttr(self, name):
 
-        # It's guaranteed this does not return None when name == "uid" or "mail" (see prepareAttributesMapping)
+        # It's guaranteed this does not return None when name == "uid" (see prepareAttributesMapping)
         mapping = self.attributesMapping
         for remoteAttr in mapping.keys():
             if mapping[remoteAttr] == name:
