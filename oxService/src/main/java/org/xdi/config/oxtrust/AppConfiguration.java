@@ -168,6 +168,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private String idp3EncryptionCert;
 
     private int metricReporterInterval;
+    private int metricReporterKeepDataDays;
+    private Boolean metricReporterEnabled;
 
     @JsonProperty("ScimProperties")
     private ScimProperties scimProperties;
@@ -997,5 +999,21 @@ public class AppConfiguration implements Configuration, Serializable {
 	public void setAuthenticationRecaptchaEnabled(boolean authenticationRecaptchaEnabled) {
 		this.authenticationRecaptchaEnabled = authenticationRecaptchaEnabled;
 	}
+
+    public final int getMetricReporterKeepDataDays() {
+        return metricReporterKeepDataDays;
+    }
+
+    public final void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
+        this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+    }
+
+    public final Boolean getMetricReporterEnabled() {
+        return metricReporterEnabled;
+    }
+
+    public final void setMetricReporterEnabled(Boolean metricReporterEnabled) {
+        this.metricReporterEnabled = metricReporterEnabled;
+    }
 
 }
