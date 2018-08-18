@@ -134,7 +134,7 @@ public class AppConfiguration implements Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private Boolean metricReporterEnabled;
+    private Boolean metricReporterEnabled = true;
     private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
