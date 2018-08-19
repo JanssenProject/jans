@@ -4,14 +4,6 @@
 
 .idea
 
-oxd-gen-client/profiles/*
-oxd-gen-client/profiles/*/
-!oxd-gen-client/profiles/default/
-oxd-gen-client/src/test/resources/properties/*
-!oxd-gen-client/src/test/resources/properties/testng.properties
-!oxd-gen-client/src/test/resources/properties/testng.xml
-oxd-gen-client/target/
-oxd-server/dependency-reduced-pom.xml
 
 
 ### Java template
@@ -34,3 +26,12 @@ hs_err_pid*
 /oxd-server/.oxd-license
 /oxd-server/oxd-server.log
 /oxd-server/oxd_db.mv.db
+oxd-gen-client/profiles/*
+oxd-gen-client/profiles/*/
+!oxd-gen-client/profiles/default/
+oxd-gen-client/src/test/resources/properties/*
+!oxd-gen-client/src/test/resources/properties/testng.properties
+!oxd-gen-client/src/test/resources/properties/testng.xml
+oxd-gen-client/target/
+oxd-server/dependency-reduced-pom.xml
+
