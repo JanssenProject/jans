@@ -28,7 +28,7 @@ import org.xdi.util.StringHelper;
  */
 public abstract class LoggerService {
 
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+    private final static int DEFAULT_INTERVAL = 15; // 15 seconds
 
     @Inject
     private Logger log;
@@ -46,7 +46,7 @@ public abstract class LoggerService {
     public void initTimer() {
         log.info("Initializing Logger Update Timer");
 
-        final int delay = 30;
+        final int delay = 15;
         final int interval = DEFAULT_INTERVAL;
 
         timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new LoggerUpdateEvent(),
@@ -130,13 +130,19 @@ public abstract class LoggerService {
     private void updateLoggers(Level level) {
         LoggerContext loggerContext = LoggerContext.getContext(false);
 
+        int count = 0;
         for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
             String loggerName = logger.getName();
             if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
                 if (logger.getLevel() != level) {
+                    count++;
                     logger.setLevel(level);
                 }
             }
+        }
+        
+        if (count > 0) {
+            log.info("Uppdated log level of '{}' loggers to {}", count, level.toString());
         }
     }
 
