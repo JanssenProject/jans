@@ -31,31 +31,31 @@ import java.util.List;
 
 public class GetTokensByCodeResponseDataIdTokenClaims {
   @SerializedName("at_hash")
-  private List<String> atHash = new ArrayList<String>();
+  private List<String> atHash = new ArrayList<>();
 
   @SerializedName("aud")
-  private List<String> aud = new ArrayList<String>();
+  private List<String> aud = new ArrayList<>();
 
   @SerializedName("sub")
-  private List<String> sub = new ArrayList<String>();
+  private List<String> sub = new ArrayList<>();
 
   @SerializedName("auth_time")
-  private List<String> authTime = new ArrayList<String>();
+  private List<String> authTime = new ArrayList<>();
 
   @SerializedName("iss")
-  private List<String> iss = new ArrayList<String>();
+  private List<String> iss = new ArrayList<>();
 
   @SerializedName("exp")
-  private List<String> exp = new ArrayList<String>();
+  private List<String> exp = new ArrayList<>();
 
   @SerializedName("iat")
-  private List<String> iat = new ArrayList<String>();
+  private List<String> iat = new ArrayList<>();
 
   @SerializedName("nonce")
-  private List<String> nonce = new ArrayList<String>();
+  private List<String> nonce = new ArrayList<>();
 
   @SerializedName("oxOpenIDConnectVersion")
-  private List<String> oxOpenIDConnectVersion = new ArrayList<String>();
+  private List<String> oxOpenIDConnectVersion = new ArrayList<>();
 
   public GetTokensByCodeResponseDataIdTokenClaims atHash(List<String> atHash) {
     this.atHash = atHash;

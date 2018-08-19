@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxD Suite" parallel="false">
+<suite name="Swagger Client Suite" parallel="false">
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>

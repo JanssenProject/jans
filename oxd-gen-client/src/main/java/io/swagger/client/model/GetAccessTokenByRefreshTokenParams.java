@@ -37,7 +37,7 @@ public class GetAccessTokenByRefreshTokenParams {
   private String refreshToken = null;
 
   @SerializedName("scope")
-  private List<String> scope = new ArrayList<String>();
+  private List<String> scope = new ArrayList<>();
 
   public GetAccessTokenByRefreshTokenParams oxdId(String oxdId) {
     this.oxdId = oxdId;
