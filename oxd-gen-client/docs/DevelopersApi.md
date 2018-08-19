@@ -15,7 +15,6 @@ Method | HTTP request | Description
 [**introspectRpt**](DevelopersApi.md#introspectRpt) | **POST** /introspect-rpt | Introspect RPT
 [**registerSite**](DevelopersApi.md#registerSite) | **POST** /register-site | Register Site
 [**removeSite**](DevelopersApi.md#removeSite) | **POST** /remove-site | Remove Site
-[**setupClient**](DevelopersApi.md#setupClient) | **POST** /setup-client | Setup Client
 [**umaRpGetClaimsGatheringUrl**](DevelopersApi.md#umaRpGetClaimsGatheringUrl) | **POST** /uma-rp-get-claims-gathering-url | UMA RP Get Claims Gathering URL
 [**umaRpGetRpt**](DevelopersApi.md#umaRpGetRpt) | **POST** /uma-rp-get-rpt | UMA RP Get RPT
 [**umaRsCheckAccess**](DevelopersApi.md#umaRsCheckAccess) | **POST** /uma-rs-check-access | UMA RS Check Access
@@ -439,7 +438,7 @@ No authorization required
 
 <a name="registerSite"></a>
 # **registerSite**
-> RegisterSiteResponse registerSite(authorization, registerSiteParams)
+> RegisterSiteResponse registerSite(registerSiteParams)
 
 Register Site
 
@@ -453,10 +452,9 @@ Registers site at oxd-server
 
 
 DevelopersApi apiInstance = new DevelopersApi();
-String authorization = "authorization_example"; // String | 
 RegisterSiteParams registerSiteParams = new RegisterSiteParams(); // RegisterSiteParams | 
 try {
-    RegisterSiteResponse result = apiInstance.registerSite(authorization, registerSiteParams);
+    RegisterSiteResponse result = apiInstance.registerSite(registerSiteParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#registerSite");
@@ -468,7 +466,6 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **authorization** | **String**|  | [optional]
  **registerSiteParams** | [**RegisterSiteParams**](RegisterSiteParams.md)|  | [optional]
 
 ### Return type
@@ -486,7 +483,7 @@ No authorization required
 
 <a name="removeSite"></a>
 # **removeSite**
-> RemoveSiteResponse removeSite(authorization, removeSiteParams)
+> UpdateSiteResponse removeSite(authorization, removeSiteParams)
 
 Remove Site
 
@@ -503,7 +500,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 RemoveSiteParams removeSiteParams = new RemoveSiteParams(); // RemoveSiteParams | 
 try {
-    RemoveSiteResponse result = apiInstance.removeSite(authorization, removeSiteParams);
+    UpdateSiteResponse result = apiInstance.removeSite(authorization, removeSiteParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#removeSite");
@@ -520,52 +517,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**RemoveSiteResponse**](RemoveSiteResponse.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-<a name="setupClient"></a>
-# **setupClient**
-> SetupClientResponse setupClient(setupClientParams)
-
-Setup Client
-
-Setups client is for securing communication to oxd-server
-
-### Example
-```java
-// Import classes:
-//import io.swagger.client.ApiException;
-//import io.swagger.client.api.DevelopersApi;
-
-
-DevelopersApi apiInstance = new DevelopersApi();
-SetupClientParams setupClientParams = new SetupClientParams(); // SetupClientParams | 
-try {
-    SetupClientResponse result = apiInstance.setupClient(setupClientParams);
-    System.out.println(result);
-} catch (ApiException e) {
-    System.err.println("Exception when calling DevelopersApi#setupClient");
-    e.printStackTrace();
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **setupClientParams** | [**SetupClientParams**](SetupClientParams.md)|  | [optional]
-
-### Return type
-
-[**SetupClientResponse**](SetupClientResponse.md)
+[**UpdateSiteResponse**](UpdateSiteResponse.md)
 
 ### Authorization
 
@@ -719,7 +671,7 @@ No authorization required
 
 <a name="umaRsProtect"></a>
 # **umaRsProtect**
-> RemoveSiteResponse umaRsProtect(authorization, umaRsProtectParams)
+> UpdateSiteResponse umaRsProtect(authorization, umaRsProtectParams)
 
 UMA RS Protect Resources
 
@@ -736,7 +688,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 UmaRsProtectParams umaRsProtectParams = new UmaRsProtectParams(); // UmaRsProtectParams | 
 try {
-    RemoveSiteResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
+    UpdateSiteResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#umaRsProtect");
@@ -753,7 +705,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**RemoveSiteResponse**](RemoveSiteResponse.md)
+[**UpdateSiteResponse**](UpdateSiteResponse.md)
 
 ### Authorization
 
@@ -766,7 +718,7 @@ No authorization required
 
 <a name="updateSite"></a>
 # **updateSite**
-> RemoveSiteResponse updateSite(authorization, updateSiteParams)
+> UpdateSiteResponse updateSite(authorization, updateSiteParams)
 
 Update Site
 
@@ -783,7 +735,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 UpdateSiteParams updateSiteParams = new UpdateSiteParams(); // UpdateSiteParams | 
 try {
-    RemoveSiteResponse result = apiInstance.updateSite(authorization, updateSiteParams);
+    UpdateSiteResponse result = apiInstance.updateSite(authorization, updateSiteParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#updateSite");
@@ -800,7 +752,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**RemoveSiteResponse**](RemoveSiteResponse.md)
+[**UpdateSiteResponse**](UpdateSiteResponse.md)
 
 ### Authorization
 
