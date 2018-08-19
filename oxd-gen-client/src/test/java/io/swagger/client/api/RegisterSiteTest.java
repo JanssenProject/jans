@@ -14,9 +14,9 @@ import org.xdi.oxauth.model.common.GrantType;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static io.swagger.client.api.TestUtils.notEmpty;
 import static io.swagger.client.api.Tester.api;
 import static io.swagger.client.api.Tester.getAuthorization;
+import static io.swagger.client.api.Tester.notEmpty;
 import static junit.framework.Assert.*;
 
 /**
@@ -34,7 +34,7 @@ public class RegisterSiteTest {
     @Test
     public void register(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws Exception {
         try {
-            DevelopersApi client = api(host);
+            DevelopersApi client = api();
             //
             RegisterSiteResponseData resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
@@ -53,7 +53,7 @@ public class RegisterSiteTest {
             params.setGrantTypes(Lists.newArrayList("authorization_code"));
             params.setResponseTypes(Lists.newArrayList("code"));
 
-            resp = client.registerSite(getAuthorization(), params).getData();
+            resp = client.registerSite(params).getData();
             assertNotNull(resp);
             assertNotNull(resp.getOxdId());
             oxdId = resp.getOxdId();
@@ -62,10 +62,8 @@ public class RegisterSiteTest {
         }
     }
 
-    @Parameters({"host"})
     @Test(dependsOnMethods = {"register"})
-    public void update(String host) {
-        try {
+    public void update() throws Exception {
             notEmpty(oxdId);
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 1);
@@ -74,12 +72,9 @@ public class RegisterSiteTest {
             params.setOxdId(oxdId);
             params.setClientSecretExpiresAt(calendar.getTime().getTime());
             params.setScope(Lists.newArrayList("profile"));
-            final DevelopersApi apiClient = api(host);
+            final DevelopersApi apiClient = api();
             UpdateSiteResponse resp = apiClient.updateSite(getAuthorization(), params);
             assertNotNull(resp);
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
     }
 
     public static RegisterSiteResponseData registerSite(DevelopersApi apiClient,
@@ -106,7 +101,7 @@ public class RegisterSiteTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        final RegisterSiteResponse resp = apiClient.registerSite(getAuthorization(), params);
+        final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getData().getOxdId()));
         return resp.getData();

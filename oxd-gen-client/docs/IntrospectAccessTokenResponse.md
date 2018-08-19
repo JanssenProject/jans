@@ -1,11 +1,11 @@
 
-# RegisterSiteResponse
+# IntrospectAccessTokenResponse
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **status** | **String** |  | 
-**data** | [**RegisterSiteResponseData**](RegisterSiteResponseData.md) |  | 
+**data** | [**IntrospectAccessTokenResponseData**](IntrospectAccessTokenResponseData.md) |  | 
 
 
 

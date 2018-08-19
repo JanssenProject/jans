@@ -31,49 +31,49 @@ import java.util.List;
 
 public class GetUserInfoResponseClaims {
   @SerializedName("sub")
-  private List<String> sub = new ArrayList<String>();
+  private List<String> sub = new ArrayList<>();
 
   @SerializedName("zoneinfo")
-  private List<String> zoneinfo = new ArrayList<String>();
+  private List<String> zoneinfo = new ArrayList<>();
 
   @SerializedName("website")
-  private List<String> website = new ArrayList<String>();
+  private List<String> website = new ArrayList<>();
 
   @SerializedName("birthdate")
-  private List<String> birthdate = new ArrayList<String>();
+  private List<String> birthdate = new ArrayList<>();
 
   @SerializedName("gender")
-  private List<String> gender = new ArrayList<String>();
+  private List<String> gender = new ArrayList<>();
 
   @SerializedName("profile")
-  private List<String> profile = new ArrayList<String>();
+  private List<String> profile = new ArrayList<>();
 
   @SerializedName("preferred_username")
-  private List<String> preferredUsername = new ArrayList<String>();
+  private List<String> preferredUsername = new ArrayList<>();
 
   @SerializedName("middle_name")
-  private List<String> middleName = new ArrayList<String>();
+  private List<String> middleName = new ArrayList<>();
 
   @SerializedName("locale")
-  private List<String> locale = new ArrayList<String>();
+  private List<String> locale = new ArrayList<>();
 
   @SerializedName("given_name")
-  private List<String> givenName = new ArrayList<String>();
+  private List<String> givenName = new ArrayList<>();
 
   @SerializedName("picture")
-  private List<String> picture = new ArrayList<String>();
+  private List<String> picture = new ArrayList<>();
 
   @SerializedName("updated_at")
-  private List<String> updatedAt = new ArrayList<String>();
+  private List<String> updatedAt = new ArrayList<>();
 
   @SerializedName("nickname")
-  private List<String> nickname = new ArrayList<String>();
+  private List<String> nickname = new ArrayList<>();
 
   @SerializedName("name")
-  private List<String> name = new ArrayList<String>();
+  private List<String> name = new ArrayList<>();
 
   @SerializedName("family_name")
-  private List<String> familyName = new ArrayList<String>();
+  private List<String> familyName = new ArrayList<>();
 
   public GetUserInfoResponseClaims sub(List<String> sub) {
     this.sub = sub;
