@@ -40,7 +40,7 @@ public class IntrospectAccessTokenResponseData {
   private String username = null;
 
   @SerializedName("scopes")
-  private List<String> scopes = new ArrayList<String>();
+  private List<String> scopes = new ArrayList<>();
 
   @SerializedName("token_type")
   private String tokenType = null;
@@ -61,7 +61,7 @@ public class IntrospectAccessTokenResponseData {
   private Integer iat = null;
 
   @SerializedName("acr_values")
-  private List<String> acrValues = new ArrayList<String>();
+  private List<String> acrValues = new ArrayList<>();
 
   @SerializedName("extension_field")
   private String extensionField = null;
