@@ -61,10 +61,10 @@ public class UpdateSiteParams {
   private List<String> clientRequestUris = null;
 
   @SerializedName("client_sector_identifier_uri")
-  private List<String> clientSectorIdentifierUri = null;
+  private String clientSectorIdentifierUri = null;
 
   @SerializedName("client_secret_expires_at")
-  private Integer clientSecretExpiresAt = null;
+  private Long clientSecretExpiresAt = null;
 
   @SerializedName("contacts")
   private List<String> contacts = null;
@@ -136,7 +136,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addResponseTypesItem(String responseTypesItem) {
     if (this.responseTypes == null) {
-      this.responseTypes = new ArrayList<String>();
+      this.responseTypes = new ArrayList<>();
     }
     this.responseTypes.add(responseTypesItem);
     return this;
@@ -162,7 +162,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addGrantTypesItem(String grantTypesItem) {
     if (this.grantTypes == null) {
-      this.grantTypes = new ArrayList<String>();
+      this.grantTypes = new ArrayList<>();
     }
     this.grantTypes.add(grantTypesItem);
     return this;
@@ -188,7 +188,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<String>();
+      this.scope = new ArrayList<>();
     }
     this.scope.add(scopeItem);
     return this;
@@ -214,7 +214,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addAcrValuesItem(String acrValuesItem) {
     if (this.acrValues == null) {
-      this.acrValues = new ArrayList<String>();
+      this.acrValues = new ArrayList<>();
     }
     this.acrValues.add(acrValuesItem);
     return this;
@@ -276,7 +276,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addClientRequestUrisItem(String clientRequestUrisItem) {
     if (this.clientRequestUris == null) {
-      this.clientRequestUris = new ArrayList<String>();
+      this.clientRequestUris = new ArrayList<>();
     }
     this.clientRequestUris.add(clientRequestUrisItem);
     return this;
@@ -295,16 +295,8 @@ public class UpdateSiteParams {
     this.clientRequestUris = clientRequestUris;
   }
 
-  public UpdateSiteParams clientSectorIdentifierUri(List<String> clientSectorIdentifierUri) {
+  public UpdateSiteParams clientSectorIdentifierUri(String clientSectorIdentifierUri) {
     this.clientSectorIdentifierUri = clientSectorIdentifierUri;
-    return this;
-  }
-
-  public UpdateSiteParams addClientSectorIdentifierUriItem(String clientSectorIdentifierUriItem) {
-    if (this.clientSectorIdentifierUri == null) {
-      this.clientSectorIdentifierUri = new ArrayList<String>();
-    }
-    this.clientSectorIdentifierUri.add(clientSectorIdentifierUriItem);
     return this;
   }
 
@@ -313,15 +305,15 @@ public class UpdateSiteParams {
    * @return clientSectorIdentifierUri
   **/
   @ApiModelProperty(value = "")
-  public List<String> getClientSectorIdentifierUri() {
+  public String getClientSectorIdentifierUri() {
     return clientSectorIdentifierUri;
   }
 
-  public void setClientSectorIdentifierUri(List<String> clientSectorIdentifierUri) {
+  public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
     this.clientSectorIdentifierUri = clientSectorIdentifierUri;
   }
 
-  public UpdateSiteParams clientSecretExpiresAt(Integer clientSecretExpiresAt) {
+  public UpdateSiteParams clientSecretExpiresAt(Long clientSecretExpiresAt) {
     this.clientSecretExpiresAt = clientSecretExpiresAt;
     return this;
   }
@@ -331,11 +323,11 @@ public class UpdateSiteParams {
    * @return clientSecretExpiresAt
   **/
   @ApiModelProperty(example = "1335205592410", value = "the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object")
-  public Integer getClientSecretExpiresAt() {
+  public Long getClientSecretExpiresAt() {
     return clientSecretExpiresAt;
   }
 
-  public void setClientSecretExpiresAt(Integer clientSecretExpiresAt) {
+  public void setClientSecretExpiresAt(Long clientSecretExpiresAt) {
     this.clientSecretExpiresAt = clientSecretExpiresAt;
   }
 
@@ -346,7 +338,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addContactsItem(String contactsItem) {
     if (this.contacts == null) {
-      this.contacts = new ArrayList<String>();
+      this.contacts = new ArrayList<>();
     }
     this.contacts.add(contactsItem);
     return this;
@@ -372,7 +364,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addUiLocalesItem(String uiLocalesItem) {
     if (this.uiLocales == null) {
-      this.uiLocales = new ArrayList<String>();
+      this.uiLocales = new ArrayList<>();
     }
     this.uiLocales.add(uiLocalesItem);
     return this;
@@ -398,7 +390,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addClaimsLocalesItem(String claimsLocalesItem) {
     if (this.claimsLocales == null) {
-      this.claimsLocales = new ArrayList<String>();
+      this.claimsLocales = new ArrayList<>();
     }
     this.claimsLocales.add(claimsLocalesItem);
     return this;
