@@ -26,20 +26,16 @@ public class SetUpTest {
             Tester.setHost(host);
             Tester.setOpHost(opHost);
 
-            RegisterSiteResponseData clientSetupInfo = RegisterSiteTest
-                    .registerSite(Tester.api(), opHost, redirectUrl);
-            Tester.setClientInfo(clientSetupInfo);
+            RegisterSiteResponseData clientSetupInfo = RegisterSiteTest.registerSite(Tester.api(), opHost, redirectUrl);
+            Tester.setSetupData(clientSetupInfo);
 
             Preconditions.checkNotNull(Tester.getAuthorization());
             LOG.debug("Tester's authorization is set.");
 
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.error("Failed to start suite.", e);
             throw new AssertionError("Failed to start suite.");
         }
     }
-
-
 }
