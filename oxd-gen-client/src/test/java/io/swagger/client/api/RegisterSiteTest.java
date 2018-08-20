@@ -15,10 +15,9 @@ import org.xdi.oxauth.model.common.GrantType;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static io.swagger.client.api.Tester.api;
-import static io.swagger.client.api.Tester.getAuthorization;
-import static io.swagger.client.api.Tester.notEmpty;
-import static junit.framework.Assert.*;
+import static io.swagger.client.api.Tester.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,51 +30,49 @@ public class RegisterSiteTest {
 
     private String oxdId = null;
 
-    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void register(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws Exception {
-        try {
-            DevelopersApi client = api();
-            //
-            RegisterSiteResponseData resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
-            assertNotNull(resp);
-            notEmpty(resp.getOxdId());
-            //
-            // more specific site registration
-            final RegisterSiteParams params = new RegisterSiteParams();
-            //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
-            params.setOpHost(opHost);
-            params.setAuthorizationRedirectUri(redirectUrl);
-            params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
-            params.setRedirectUris(Lists.newArrayList(redirectUrl));
-            params.setAcrValues(new ArrayList<String>());
-            params.setScope(Lists.newArrayList("openid", "profile"));
-            params.setGrantTypes(Lists.newArrayList("authorization_code"));
-            params.setResponseTypes(Lists.newArrayList("code"));
+    public void register(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws Exception {
 
-            resp = client.registerSite(params).getData();
-            assertNotNull(resp);
-            assertNotNull(resp.getOxdId());
-            oxdId = resp.getOxdId();
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
+        DevelopersApi client = api();
+        //
+        RegisterSiteResponseData resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        assertNotNull(resp);
+        notEmpty(resp.getOxdId());
+        //
+        // more specific site registration
+        final RegisterSiteParams params = new RegisterSiteParams();
+        //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrl));
+        params.setAcrValues(new ArrayList<String>());
+        params.setScope(Lists.newArrayList("openid", "profile"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
+        params.setResponseTypes(Lists.newArrayList("code"));
+
+        resp = client.registerSite(params).getData();
+        assertNotNull(resp);
+        assertNotNull(resp.getOxdId());
+        oxdId = resp.getOxdId();
+
     }
 
     @Test(dependsOnMethods = {"register"})
     public void update() throws Exception {
-            notEmpty(oxdId);
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-            // more specific site registration
-            final UpdateSiteParams params = new UpdateSiteParams();
-            params.setOxdId(oxdId);
-            params.setClientSecretExpiresAt(calendar.getTime().getTime());
-            params.setScope(Lists.newArrayList("profile"));
-            final DevelopersApi apiClient = api();
-            UpdateSiteResponse resp = apiClient.updateSite(getAuthorization(), params);
-            assertNotNull(resp);
+        notEmpty(oxdId);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        // more specific site registration
+        final UpdateSiteParams params = new UpdateSiteParams();
+        params.setOxdId(oxdId);
+        params.setClientSecretExpiresAt(calendar.getTime().getTime());
+        params.setScope(Lists.newArrayList("profile"));
+        final DevelopersApi apiClient = api();
+        UpdateSiteResponse resp = apiClient.updateSite(getAuthorization(), params);
+        assertNotNull(resp);
     }
 
     public static RegisterSiteResponseData registerSite(DevelopersApi apiClient,
