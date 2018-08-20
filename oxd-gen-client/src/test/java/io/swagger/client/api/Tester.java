@@ -72,7 +72,7 @@ public class Tester {
         OP_HOST = opHost;
     }
 
-    public static void setClientInfo(RegisterSiteResponseData clientInfo) {
-        setupData = clientInfo;
+    public static void setSetupData(RegisterSiteResponseData setupData) {
+        Tester.setupData = setupData;
     }
 }
