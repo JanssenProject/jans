@@ -104,7 +104,7 @@ public class UmaPermissionRegistrationWS {
             UmaPermissionList permissionList = parseRequest(requestAsString);
             umaValidationService.validatePermissions(permissionList);
 
-            String ticket = permissionService.addPermission(permissionList, rptService.rptExpirationDate(), tokenService.getClientDn(authorization));
+            String ticket = permissionService.addPermission(permissionList, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
                     entity(new PermissionTicket(ticket)).
