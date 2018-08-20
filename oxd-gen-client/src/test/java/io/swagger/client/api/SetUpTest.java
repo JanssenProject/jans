@@ -23,7 +23,8 @@ public class SetUpTest {
     public static void beforeSuite(String host, String opHost, String redirectUrl) {
         try {
             LOG.debug("Running beforeSuite ...");
-            Tester.setupHosts(host, opHost);
+            Tester.setHost(host);
+            Tester.setOpHost(opHost);
 
             RegisterSiteResponseData clientSetupInfo = RegisterSiteTest
                     .registerSite(Tester.api(), opHost, redirectUrl);
