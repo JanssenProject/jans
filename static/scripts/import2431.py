@@ -1083,24 +1083,25 @@ class Migration(object):
 
             if self.ldap_type == 'opendj':
                 ldap_properties_fn = '/opt/shibboleth-idp/conf/ldap.properties'
-                tmp_fn = '/tmp/ldap.properties_file~'
-                out_file = open(tmp_fn,'w')
-                copy_file = False
-                
-                for l in open(ldap_properties_fn):
-                    if l.startswith('idp.authn.LDAP.trustCertificates') and '/etc/certs/openldap.crt' in l:
-                        l = l.replace('/etc/certs/openldap.crt', '/etc/certs/opendj.crt')
-                        copy_file = True
-                    out_file.write(l)
+                if os.path.exists(ldap_properties_fn):
+                    tmp_fn = '/tmp/ldap.properties_file~'
+                    out_file = open(tmp_fn,'w')
+                    copy_file = False
+                    
+                    for l in open(ldap_properties_fn):
+                        if l.startswith('idp.authn.LDAP.trustCertificates') and '/etc/certs/openldap.crt' in l:
+                            l = l.replace('/etc/certs/openldap.crt', '/etc/certs/opendj.crt')
+                            copy_file = True
+                        out_file.write(l)
 
-                out_file.close()
+                    out_file.close()
 
-                if copy_file:
-                    logging.info('Fixing Shibboleth IDP conf ...')
-                    shutil.copy(tmp_fn, ldap_properties_fn)
-                    self.getOutput(['chown', 'jetty:jetty', ldap_properties_fn])
+                    if copy_file:
+                        logging.info('Fixing Shibboleth IDP conf ...')
+                        shutil.copy(tmp_fn, ldap_properties_fn)
+                        self.getOutput(['chown', 'jetty:jetty', ldap_properties_fn])
 
-                os.remove(tmp_fn)
+                    os.remove(tmp_fn)
 
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
