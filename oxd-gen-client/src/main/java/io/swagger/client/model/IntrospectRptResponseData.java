@@ -40,7 +40,7 @@ public class IntrospectRptResponseData {
   private Integer iat = null;
 
   @SerializedName("permissions")
-  private List<Object> permissions = new ArrayList<Object>();
+  private List<Object> permissions = new ArrayList<>();
 
   public IntrospectRptResponseData active(Boolean active) {
     this.active = active;

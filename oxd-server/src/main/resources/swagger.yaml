@@ -293,9 +293,7 @@ paths:
                 items:
                   type: string
               client_sector_identifier_uri:
-                type: array
-                items:
-                  type: string
+                type: string
               contacts:
                 type: array
                 items:
@@ -327,6 +325,7 @@ paths:
               trusted_client:
                 type: boolean
                 description: specified whether client is trusted. Default value is false.
+
       responses:
         200:
           description: OK
@@ -437,11 +436,10 @@ paths:
                 items:
                   type: string
               client_sector_identifier_uri:
-                type: array
-                items:
-                  type: string
+                type: string
               client_secret_expires_at:
                 type: integer
+                format: int64
                 description: the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this Date object
                 example: 1335205592410
               contacts:
