@@ -25,6 +25,7 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
@@ -40,6 +41,7 @@ import org.xdi.util.INumGenerator;
 public class UmaPermissionService {
 
     private static final String ORGUNIT_OF_RESOURCE_PERMISSION = "uma_permission";
+    private static final int DEFAULT_TICKET_LIFETIME = 3600;
 
     @Inject
     private Logger log;
@@ -53,6 +55,9 @@ public class UmaPermissionService {
     @Inject
     private UmaScopeService scopeService;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     public static String getDn(String clientDn, String ticket) {
         return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
     }
@@ -64,10 +69,10 @@ public class UmaPermissionService {
     private List<UmaPermission> createPermissions(UmaPermissionList permissions, Date expirationDate) {
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
 
+        final String ticket = generateNewTicket();
         List<UmaPermission> result = new ArrayList<UmaPermission>();
         for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
-            UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
-                    generateNewTicket(), configurationCode, expirationDate);
+            UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
             if (permission.getParams() != null && !permission.getParams().isEmpty()) {
                 p.getAttributes().putAll(permission.getParams());
             }
@@ -81,9 +86,9 @@ public class UmaPermissionService {
        return UUID.randomUUID().toString();
     }
 
-    public String addPermission(UmaPermissionList permissionList, Date expirationDate, String clientDn) throws Exception {
+    public String addPermission(UmaPermissionList permissionList, String clientDn) throws Exception {
         try {
-            List<UmaPermission> created = createPermissions(permissionList, expirationDate);
+            List<UmaPermission> created = createPermissions(permissionList, ticketExpirationDate());
             for (UmaPermission permission : created) {
                 addPermission(permission, clientDn);
             }
@@ -92,6 +97,17 @@ public class UmaPermissionService {
             log.trace(e.getMessage(), e);
             throw e;
         }
+    }
+
+    public Date ticketExpirationDate() {
+        int lifeTime = appConfiguration.getUmaTicketLifetime();
+        if (lifeTime <= 0) {
+            lifeTime = DEFAULT_TICKET_LIFETIME;
+        }
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, lifeTime);
+        return calendar.getTime();
     }
 
     public void addPermission(UmaPermission permission, String clientDn) {
