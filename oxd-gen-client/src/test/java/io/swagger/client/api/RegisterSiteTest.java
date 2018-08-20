@@ -2,6 +2,7 @@ package io.swagger.client.api;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.swagger.client.ApiResponse;
 import io.swagger.client.model.RegisterSiteParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.RegisterSiteResponseData;
@@ -101,7 +102,9 @@ public class RegisterSiteTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        final RegisterSiteResponse resp = apiClient.registerSite(params);
+        final ApiResponse<RegisterSiteResponse> regApiResponse = apiClient.registerSiteWithHttpInfo(params);
+        final RegisterSiteResponse resp = regApiResponse.getData();
+        assertTrue(regApiResponse.getStatusCode() == 200);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getData().getOxdId()));
         return resp.getData();
