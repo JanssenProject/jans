@@ -49,7 +49,7 @@ public class UmaRpGetRptParams {
   private String rpt = null;
 
   @SerializedName("scope")
-  private List<String> scope = new ArrayList<String>();
+  private List<String> scope = new ArrayList<>();
 
   @SerializedName("state")
   private String state = null;

@@ -97,7 +97,7 @@ public class GetClientTokenParams {
 
   public GetClientTokenParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<String>();
+      this.scope = new ArrayList<>();
     }
     this.scope.add(scopeItem);
     return this;
