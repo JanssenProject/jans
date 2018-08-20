@@ -733,6 +733,8 @@ class Migration(object):
                         json_value = json.loads(val)
                         if type(json_value) is list:
                             attr_values.extend([json.dumps(v) for v in json_value])
+                        else:
+                            attr_values.append(val)
                     except:
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
@@ -754,9 +756,9 @@ class Migration(object):
                         oxId = entry['inum'][:]
                         entry['oxId'] = oxId
                         del entry['inum']
-                        
+
                 if 'ou=clients' in dn:
-                    if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
+                    if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
                 
             
