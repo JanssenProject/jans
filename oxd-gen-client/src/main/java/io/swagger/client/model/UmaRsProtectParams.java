@@ -37,7 +37,7 @@ public class UmaRsProtectParams {
   private Boolean overwrite = null;
 
   @SerializedName("resources")
-  private List<Object> resources = new ArrayList<Object>();
+  private List<Object> resources = new ArrayList<>();
 
   public UmaRsProtectParams oxdId(String oxdId) {
     this.oxdId = oxdId;

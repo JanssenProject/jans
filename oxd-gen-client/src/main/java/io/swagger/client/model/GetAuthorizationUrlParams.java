@@ -71,7 +71,7 @@ public class GetAuthorizationUrlParams {
 
   public GetAuthorizationUrlParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<String>();
+      this.scope = new ArrayList<>();
     }
     this.scope.add(scopeItem);
     return this;
@@ -97,7 +97,7 @@ public class GetAuthorizationUrlParams {
 
   public GetAuthorizationUrlParams addAcrValuesItem(String acrValuesItem) {
     if (this.acrValues == null) {
-      this.acrValues = new ArrayList<String>();
+      this.acrValues = new ArrayList<>();
     }
     this.acrValues.add(acrValuesItem);
     return this;
