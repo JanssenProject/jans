@@ -347,7 +347,7 @@
                 if (errormsg[1]) {
                     history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-login');
                     jQuery('.errormsg').html(decodeURIComponent(errormsg[1]));
-                    jQuery('.errormsg').prop('style', 'display:block');
+                    jQuery('.errormsg').css('display','block');
                 }
 
             });
