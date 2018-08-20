@@ -23,13 +23,12 @@ public class Tester {
     private static String AUTHORIZATION = "";
     private static String HOST;
     private static String OP_HOST;
-    private static RegisterSiteResponseData clientData;
+    private static RegisterSiteResponseData setupData;
 
     private Tester() {
     }
 
     public static DevelopersApi api() {
-        HOST = "https://localhost:8443";//TODO: remove when the module become part of parent test suite
         ApiClient apiClient = new ApiClient();
         apiClient.setBasePath(HOST);
 
@@ -48,13 +47,13 @@ public class Tester {
     }
 
     public static String getAuthorization() throws Exception {
-        Preconditions.checkNotNull(clientData);
+        Preconditions.checkNotNull(setupData);
         if (Strings.isNullOrEmpty(AUTHORIZATION)) {
             final GetClientTokenParams params = new GetClientTokenParams();
             params.setOpHost(OP_HOST);
             params.setScope(Lists.newArrayList("openid"));
-            params.setClientId(clientData.getClientId());
-            params.setClientSecret(clientData.getClientSecret());
+            params.setClientId(setupData.getClientId());
+            params.setClientSecret(setupData.getClientSecret());
 
             GetClientTokenResponseData resp = api().getClientToken(params).getData();
             assertNotNull(resp);
@@ -65,13 +64,15 @@ public class Tester {
     }
 
 
-    public static void setupHosts(String host, String opHost) {
+    public static void setHost(String host) {
         HOST = host;
-        OP_HOST = opHost;
+    }
 
+    public static void setOpHost(String opHost) {
+        OP_HOST = opHost;
     }
 
     public static void setClientInfo(RegisterSiteResponseData clientInfo) {
-        clientData = clientInfo;
+        setupData = clientInfo;
     }
 }
