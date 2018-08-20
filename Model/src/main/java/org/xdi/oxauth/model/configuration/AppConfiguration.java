@@ -48,6 +48,7 @@ public class AppConfiguration implements Configuration {
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
     private int umaRptLifetime;
+    private int umaTicketLifetime;
     private int umaPctLifetime;
     private int umaResourceLifetime;
     private Boolean umaAddScopesAutomatically;
@@ -790,6 +791,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaRptLifetime(int umaRptLifetime) {
         this.umaRptLifetime = umaRptLifetime;
+    }
+
+    public int getUmaTicketLifetime() {
+        return umaTicketLifetime;
+    }
+
+    public void setUmaTicketLifetime(int umaTicketLifetime) {
+        this.umaTicketLifetime = umaTicketLifetime;
     }
 
     public int getUmaResourceLifetime() {
