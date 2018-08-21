@@ -94,7 +94,6 @@ public class ServerUtil {
         return cacheControl;
     }
 
-
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
