@@ -32,18 +32,33 @@ if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
 
 p = platform.linux_distribution()
 
-cmd_list = [
-        ('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'),
-        ('Running get-pip.py to install pip', 'python get-pip.py'),
-        ('Installing python jsonmerge module', 'pip install jsonmerge'),
-        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py'),
-        ]
+cmd_list = []
 
-if p[0].lower() in ('ubuntu','debian'):
-    cmd_list.insert(0,('Running apt-get update','apt-get update'))
-    cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
-else:
-    cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
+try:
+    import pip
+except:
+    cmd_list.append(('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'))
+    cmd_list.append(('Running get-pip.py to install pip', 'python get-pip.py'))
+
+try:
+    import jsonmerge
+except:
+    cmd_list.append(("Installing python jsonmerge module", "pip install jsonmerge"))
+
+
+if not os.path.exists('ldifschema_utils.py'):
+
+    cmd_list.append(
+        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py')
+        )
+try:
+    import ldap
+except:
+    if p[0].lower() in ('ubuntu','debian'):
+        cmd_list.insert(0,('Running apt-get update','apt-get update'))
+        cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
+    else:
+        cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
 
 for message, cmd in cmd_list:
     print message
