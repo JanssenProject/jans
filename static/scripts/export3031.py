@@ -25,17 +25,18 @@ import traceback
 import subprocess
 import tempfile
 import getpass
+import platform
 
 os.chdir('/root')
 if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
     sys.exit("Please run this script inside Gluu 3.x container.")
 
-cmd_list = (
-    ("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"),
-    ("Downloading get-pip.py", "wget https://bootstrap.pypa.io/get-pip.py"),
-    ("Running get-pip.py to install pip", "python get-pip.py"),
-    ("Installing python jsonmerge module", "pip install jsonmerge"),
-    )
+cmd_list =[]
+
+cur_dir=os.path.dirname(os.path.realpath(__file__))
+
+if not os.path.exists(os.path.join(cur_dir, 'ldif.py')):
+    cmd_list.append(("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"))
 
 for message, cmd in cmd_list:
     print message
@@ -608,12 +609,15 @@ class Exporter(object):
     def runAndLog(self, args):
         try:
             logging.debug("Running command : %s" % " ".join(args))
-            si,so,se = os.popen3(' '.join(args))
-            error = se.read()
-            if error:
-                logging.error(error)
+            
+            p = subprocess.Popen(' '.join(args), shell=True, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+            so, se = p.communicate()
+            
+            if se:
+                logging.error(se)
                 logging.debug(traceback.format_exc())
-            return so.read()
+            return so
         except:
             logging.error("Error running command : %s" % " ".join(args))
             logging.error(traceback.format_exc())
@@ -631,7 +635,7 @@ class Exporter(object):
             
             out_file = "%s/ldif/%s.ldif" % (self.backupDir, ou)
             args = [self.ldapsearch] + self.ldapCreds + [
-                '-b', '"%s,o=%s,o=gluu"' % (basedn, orgInum), 'objectclass=*', '>', out_file]
+                '-b', "'%s,o=%s,o=gluu'" % (basedn, orgInum), 'objectclass=*', '>', out_file]
 
             self.runAndLog(args)
 
