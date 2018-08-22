@@ -27,7 +27,14 @@ import tempfile
 import getpass
 import platform
 
-os.chdir('/root')
+if len(sys.argv) > 1 and sys.argv[1] and os.path.exists(sys.argv[1]):
+    backupRoot = sys.argv[1]
+    os.chdir(sys.argv[1])
+else:
+    os.chdir('/root')
+    backupRoot = '/root'
+
+
 if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
     sys.exit("Please run this script inside Gluu 3.x container.")
 
@@ -53,8 +60,9 @@ import os.path
 
 
 class MyLDIF(LDIFParser):
-    def __init__(self, input, output):
+    def __init__(self, input, output, keep_dn=False):
         LDIFParser.__init__(self, input)
+        self.keep_dn = keep_dn
         self.targetDN = None
         self.targetAttr = None
         self.targetEntry = None
@@ -62,6 +70,7 @@ class MyLDIF(LDIFParser):
         self.lastDN = None
         self.lastEntry = None
         self.entries = []
+        self.dn_entry = []
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -76,6 +85,9 @@ class MyLDIF(LDIFParser):
         return LDIFParser._parseAttrTypeandValue(self)
 
     def handle(self, dn, entry):
+        if self.keep_dn:
+            self.dn_entry.append((dn, entry))
+        
         if self.targetDN is None:
             self.targetDN = dn
         self.lastDN = dn
@@ -333,7 +345,7 @@ def doApplinceChanges(oxappliancesPath):
     parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxappliancesPath.replace('/appliance.ldif', '/appliancenew.ldif')
-    # print (newfile)
+
     f = open(newfile, 'w')
     f.write(out)
     f.close()
@@ -447,7 +459,8 @@ def changePassportConfigJson(self, param):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = '/root/backup_3031'
+        self.backupDir = os.path.join(backupRoot, 'backup_3031')
+        
         self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
@@ -466,6 +479,7 @@ class Exporter(object):
         self.grep = '/bin/grep'
         self.hostname = '/bin/hostname'
 
+        
 
         ldap_type = self.getProp('ldap_type')
         if not ldap_type:
@@ -476,7 +490,9 @@ class Exporter(object):
         elif ldap_type == 'opendj':
             bind_dn = '"cn=directory manager"'
             bind_dn_site = '"cn=directory manager"'
-            
+        
+        self.cur_ldap = ldap_type
+        
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                           bind_dn, '-j', self.passwordFile]
 
@@ -859,6 +875,48 @@ class Exporter(object):
             logging.error("OpenDJ did not start properly. Check "
                           "/opt/opendj/logs/errors. Restart it manually.")
 
+
+    def fixLdapBindDN(self):
+        
+        applience_fn = os.path.join(self.backupDir, 'ldif/appliance.ldif')
+        parser = MyLDIF(open(applience_fn, 'rb'), None, True)
+        parser.parse()
+        tmp_fn = '/tmp/appliance.ldif'
+        processed_fp = open(tmp_fn, 'w')
+        ldif_writer = LDIFWriter(processed_fp)
+        
+        for dn, entry in parser.dn_entry:
+            if 'oxIDPAuthentication' in entry:
+                tmp_json = json.loads(entry['oxIDPAuthentication'][0])
+                tmp_json['bindDN'] = 'cn=Directory Manager'
+                entry['oxIDPAuthentication'] = [json.dumps(tmp_json, indent=4)]
+
+            ldif_writer.unparse(dn, entry)
+        
+        processed_fp.close()
+        os.system('cp {0} {1}'.format(tmp_fn, applience_fn))
+        os.remove(tmp_fn)
+        
+        
+        oxtrust_config_fn = os.path.join(self.backupDir, 'ldif/oxtrust_config.ldif')
+        parser = MyLDIF(open(oxtrust_config_fn, 'rb'), None, True)
+        parser.parse()
+        tmp_fn = '/tmp/oxtrust_config.ldif'
+        processed_fp = open(tmp_fn, 'w')
+        ldif_writer = LDIFWriter(processed_fp)
+        
+        for dn, entry in parser.dn_entry:
+            if 'oxTrustConfCacheRefresh' in entry:
+                tmp_json = json.loads(entry['oxTrustConfCacheRefresh'][0])
+                tmp_json['inumConfig']['bindDN'] = 'cn=Directory Manager'
+                entry['oxTrustConfCacheRefresh'] = [json.dumps(tmp_json, indent=4)]
+
+            ldif_writer.unparse(dn, entry)
+        
+        processed_fp.close()
+        os.system('cp {0} {1}'.format(tmp_fn, oxtrust_config_fn))
+        os.remove(tmp_fn)
+
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
@@ -876,6 +934,8 @@ class Exporter(object):
         self.getLdif()
         self.genProperties()
         self.removeLdapConfig()
+        if self.cur_ldap == 'openldap' and self.choice == 2:
+            self.fixLdapBindDN()
         print("")
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
@@ -883,8 +943,5 @@ class Exporter(object):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 1:
-        print ("Usage: python export3031.py")
-    else:
-        exporter = Exporter()
-        exporter.export()
+    exporter = Exporter()
+    exporter.export()
