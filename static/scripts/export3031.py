@@ -747,10 +747,16 @@ class Exporter(object):
 
 
     def getLDAPServerTypeChoice(self):
+        
+        if self.cur_ldap == 'openldap':
+            cur_choice = 1
+        else:
+            cur_choice = 2
+        
         while True:
-            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [2]: ")
+            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [{0}]: ".format(cur_choice))
             if not self.choice.strip():
-                self.choice = 2
+                self.choice = cur_choice
                 break
 
             if self.choice == '1' or self.choice == '2':
