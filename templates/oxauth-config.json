@@ -280,5 +280,12 @@
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "useCacheForAllImplicitFlowObjects":false,
-    "disableU2fEndpoint":false
+    "disableU2fEndpoint":false,
+	"authenticationProtectionConfiguration": {
+		"attemptExpiration": 15,
+		"maximumAllowedAttempts": 10,
+		"maximumAllowedAttemptsWithoutDelay": 4,
+		"delayTime": 2,
+		"bruteForceProtectionEnabled": false
+	}    
 }
