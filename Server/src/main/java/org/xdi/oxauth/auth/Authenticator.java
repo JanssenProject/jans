@@ -42,6 +42,8 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.RequestParameterService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.service.security.protect.AuthenticationProtectionService;
+import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
 /**
