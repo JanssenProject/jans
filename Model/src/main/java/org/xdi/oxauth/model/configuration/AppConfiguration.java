@@ -175,6 +175,8 @@ public class AppConfiguration implements Configuration {
     private Boolean legacyDynamicRegistrationScopeParam;
     private Boolean disableU2fEndpoint = false;
 
+    private AuthenticationProtectionConfiguration authenticationProtectionConfiguration; 
+
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
     }
@@ -1393,6 +1395,14 @@ public class AppConfiguration implements Configuration {
 
     public void setDisableU2fEndpoint(Boolean disableU2fEndpoint) {
         this.disableU2fEndpoint = disableU2fEndpoint;
+    }
+
+    public AuthenticationProtectionConfiguration getAuthenticationProtectionConfiguration() {
+        return authenticationProtectionConfiguration;
+    }
+
+    public void setAuthenticationProtectionConfiguration(AuthenticationProtectionConfiguration authenticationProtectionConfiguration) {
+        this.authenticationProtectionConfiguration = authenticationProtectionConfiguration;
     }
 
 }
