@@ -54,6 +54,7 @@ public class AppConfiguration implements Configuration {
     private Boolean umaAddScopesAutomatically;
     private Boolean umaValidateClaimToken = false;
     private Boolean umaGrantAccessIfNoPolicies = false;
+    private Boolean umaRestrictResourceToAssociatedClient = false;
 
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -252,6 +253,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaGrantAccessIfNoPolicies(Boolean umaGrantAccessIfNoPolicies) {
         this.umaGrantAccessIfNoPolicies = umaGrantAccessIfNoPolicies;
+    }
+
+    public Boolean getUmaRestrictResourceToAssociatedClient() {
+        return umaRestrictResourceToAssociatedClient;
+    }
+
+    public void setUmaRestrictResourceToAssociatedClient(Boolean umaRestrictResourceToAssociatedClient) {
+        this.umaRestrictResourceToAssociatedClient = umaRestrictResourceToAssociatedClient;
     }
 
     /**
