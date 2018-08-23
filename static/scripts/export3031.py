@@ -895,7 +895,10 @@ class Exporter(object):
             if 'oxIDPAuthentication' in entry:
                 tmp_json = json.loads(entry['oxIDPAuthentication'][0])
                 tmp_json['bindDN'] = 'cn=Directory Manager'
-                entry['oxIDPAuthentication'] = [json.dumps(tmp_json, indent=4)]
+                tmp_config = json.loads(tmp_json['config'])
+                tmp_config['bindDN'] = 'cn=Directory Manager'
+                tmp_json['config'] = json.dumps(tmp_config)
+                entry['oxIDPAuthentication'] = [json.dumps(tmp_json)]
 
             ldif_writer.unparse(dn, entry)
         
@@ -915,7 +918,7 @@ class Exporter(object):
             if 'oxTrustConfCacheRefresh' in entry:
                 tmp_json = json.loads(entry['oxTrustConfCacheRefresh'][0])
                 tmp_json['inumConfig']['bindDN'] = 'cn=Directory Manager'
-                entry['oxTrustConfCacheRefresh'] = [json.dumps(tmp_json, indent=4)]
+                entry['oxTrustConfCacheRefresh'] = [json.dumps(tmp_json)]
 
             ldif_writer.unparse(dn, entry)
         
