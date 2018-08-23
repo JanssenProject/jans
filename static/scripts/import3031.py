@@ -778,8 +778,9 @@ class Migration(object):
                 
             
             ldif_writer.unparse(dn, entry)
-
+        
         # Finally
+        sdb.sdb.close()
         processed_fp.close()
 
         progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
@@ -805,7 +806,7 @@ class Migration(object):
                         line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
 
 
-                    if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
+                    if line.startswith("objectClass:") and line[12:].strip()[:3] == 'ox-':
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
@@ -1029,8 +1030,10 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+        for fn in ('/opt/shibboleth-idp/metadata', '/opt/shibboleth-idp/conf'):
+            if os.path.exists(fn):
+                self.getOutput(['chown','-R','jetty:jetty',fn])
+                self.getOutput(['chown','-R','jetty:jetty',fn])
 
 
     def getProp(self, prop, prop_file=None):
