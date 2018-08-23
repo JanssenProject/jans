@@ -180,6 +180,7 @@
     "umaAddScopesAutomatically":true,
     "umaValidateClaimToken":false,
     "umaGrantAccessIfNoPolicies":false,
+    "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
