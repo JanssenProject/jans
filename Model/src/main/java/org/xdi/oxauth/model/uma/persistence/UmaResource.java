@@ -13,6 +13,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -112,6 +113,9 @@ public class UmaResource {
     }
 
     public List<String> getClients() {
+        if (clients == null) {
+            clients = new ArrayList<String>();
+        }
         return clients;
     }
 
