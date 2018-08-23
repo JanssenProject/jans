@@ -476,6 +476,16 @@ public class UmaValidationService {
         throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
     }
 
+    public void validateRestrictedByClient(String patClientDn, String rsId) {
+        if (ServerUtil.isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
+            final List<String> clients = resourceService.getResourceById(rsId).getClients();
+            if (!clients.contains(patClientDn)) {
+                log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: " + clients + ", PAT client: " + patClientDn);
+                throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, ACCESS_DENIED);
+            }
+        }
+    }
+
     public void validateResource(org.xdi.oxauth.model.uma.UmaResource resource) {
         validateScopeExpression(resource.getScopeExpression());
 
