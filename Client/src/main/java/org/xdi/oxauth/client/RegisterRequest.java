@@ -55,6 +55,8 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private SubjectType subjectType;
+    private Boolean accessTokenAsJwt;
+    private SignatureAlgorithm accessTokenSigningAlg;
     private SignatureAlgorithm idTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
     private BlockEncryptionAlgorithm idTokenEncryptedResponseEnc;
@@ -521,6 +523,22 @@ public class RegisterRequest extends BaseRequest {
         this.subjectType = subjectType;
     }
 
+    public Boolean getAccessTokenAsJwt() {
+        return accessTokenAsJwt;
+    }
+
+    public void setAccessTokenAsJwt(Boolean accessTokenAsJwt) {
+        this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public SignatureAlgorithm getAccessTokenSigningAlg() {
+        return accessTokenSigningAlg;
+    }
+
+    public void setAccessTokenSigningAlg(SignatureAlgorithm accessTokenSigningAlg) {
+        this.accessTokenSigningAlg = accessTokenSigningAlg;
+    }
+
     /**
      * Returns th JWS alg algorithm (JWA) required for the ID Token issued to this client_id.
      *
@@ -965,6 +983,12 @@ public class RegisterRequest extends BaseRequest {
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
         }
+        if (accessTokenAsJwt != null) {
+            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
+        }
+        if (accessTokenSigningAlg != null) {
+            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
+        }
         if (idTokenSignedResponseAlg != null) {
             parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
         }
@@ -1200,6 +1224,8 @@ public class RegisterRequest extends BaseRequest {
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
+        result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
+        result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
         result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
                 SignatureAlgorithm.fromString(requestObject.getString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
@@ -1296,6 +1322,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
+        }
+        if (accessTokenAsJwt != null) {
+            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
+        }
+        if (accessTokenSigningAlg != null) {
+            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
         }
         if (idTokenSignedResponseAlg != null) {
             parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
