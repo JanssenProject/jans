@@ -182,7 +182,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
         final Jwt jwt = jwtSigner.newJwt();
-        jwt.getClaims().setClaim("active", accessToken.isValid());
         jwt.getClaims().setClaim("scope", Lists.newArrayList(getScopes()));
         jwt.getClaims().setClaim("client_id", getClientId());
         jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
@@ -191,7 +190,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
-        return jwt.asString();
+        return jwtSigner.sign().asString();
     }
 
     @Override
