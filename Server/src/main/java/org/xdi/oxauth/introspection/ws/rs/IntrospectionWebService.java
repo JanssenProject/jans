@@ -9,7 +9,6 @@ package org.xdi.oxauth.introspection.ws.rs;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
@@ -31,16 +30,13 @@ import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
-import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -71,8 +67,6 @@ public class IntrospectionWebService {
     private AuthorizationGrantList authorizationGrantList;
     @Inject
     private ClientService clientService;
-    @Inject
-    private PairwiseIdentifierService pairwiseIdentifierService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -124,7 +118,7 @@ public class IntrospectionWebService {
                             response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
                             response.setScope(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
-                            response.setSub(getSub(grantOfIntrospectionToken));
+                            response.setSub(grantOfIntrospectionToken.getSub());
                             response.setUsername(user != null ? user.getAttribute("displayName") : null);
                             response.setIssuer(appConfiguration.getIssuer());
                             response.setAudience(grantOfIntrospectionToken.getClientId());
@@ -152,42 +146,6 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
-    }
-
-    private String getSub(AuthorizationGrant grant) {
-        final User user = grant.getUser();
-        if (user == null) {
-            log.trace("User is null for grant " + grant.getGrantId());
-            return "";
-        }
-        final String subjectType = grant.getClient().getSubjectType();
-        if (SubjectType.PAIRWISE.equals(SubjectType.fromString(subjectType))) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(grant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = grant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = grant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = user.getAttribute("inum");
-            String clientId = grant.getClientId();
-
-            try {
-                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum, sectorIdentifierUri, clientId);
-                if (pairwiseIdentifier == null) {
-                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                    pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                    pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
-                    pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-                }
-                return pairwiseIdentifier.getId();
-            } catch (Exception e) {
-                log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
-                return "";
-            }
-        } else {
-            return user.getAttribute(appConfiguration.getOpenidSubAttribute());
-        }
     }
 
     private AuthorizationGrant getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
