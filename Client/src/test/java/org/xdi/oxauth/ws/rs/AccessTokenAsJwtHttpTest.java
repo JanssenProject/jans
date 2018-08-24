@@ -41,7 +41,7 @@ public class AccessTokenAsJwtHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUri, responseTypes, scopes);
 
         String clientId = registerResponse.getClientId();
 
