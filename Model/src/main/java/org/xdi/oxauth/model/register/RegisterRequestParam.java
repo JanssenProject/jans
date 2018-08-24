@@ -122,6 +122,16 @@ public enum RegisterRequestParam {
     SUBJECT_TYPE("subject_type"),
 
     /**
+     * Whether to return access token as signed JWT
+     */
+    ACCESS_TOKEN_AS_JWT("access_token_as_jwt"),
+
+    /**
+     * Algorithm used for signing of JWT
+     */
+    ACCESS_TOKEN_SIGNING_ALG("access_token_signing_alg"),
+
+    /**
      * JWS alg algorithm (JWA)0 required for the issued ID Token.
      */
     ID_TOKEN_SIGNED_RESPONSE_ALG("id_token_signed_response_alg"),
