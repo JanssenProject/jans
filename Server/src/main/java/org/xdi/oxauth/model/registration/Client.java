@@ -191,11 +191,33 @@ public class Client implements Serializable {
     @LdapCustomObjectClass
     private String[] customObjectClasses;
 
+    @LdapAttribute(name = "oxAccessTokenAsJwt")
+    private boolean accessTokenAsJwt = false;
+
+    @LdapAttribute(name = "oxAccessTokenSigningAlg")
+    private String accessTokenSigningAlg;
+
     @LdapAttribute(name = "oxDisabled")
     private boolean disabled;
 
     @LdapAttribute(name = "oxAuthAuthorizedOrigins")
     private String[] authorizedOrigins;
+
+    public boolean isAccessTokenAsJwt() {
+        return accessTokenAsJwt;
+    }
+
+    public void setAccessTokenAsJwt(boolean accessTokenAsJwt) {
+        this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public String getAccessTokenSigningAlg() {
+        return accessTokenSigningAlg;
+    }
+
+    public void setAccessTokenSigningAlg(String accessTokenSigningAlg) {
+        this.accessTokenSigningAlg = accessTokenSigningAlg;
+    }
 
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
