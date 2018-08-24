@@ -190,7 +190,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
-        return jwtSigner.sign().asString();
+        return jwtSigner.sign().toString();
     }
 
     @Override
