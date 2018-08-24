@@ -6,30 +6,38 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.oxauth.model.token.JsonWebResponse;
+import org.xdi.oxauth.model.token.JwtSigner;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.security.StringEncrypter;
+
+import javax.inject.Inject;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Base class for all the types of authorization grant.
@@ -50,6 +58,15 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private IdTokenFactory idTokenFactory;
+
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
+    private PairwiseIdentifierService pairwiseIdentifierService;
+
+    @Inject
+    private ClientService clientService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -141,6 +158,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public AccessToken createAccessToken() {
         try {
             final AccessToken accessToken = super.createAccessToken();
+            if (getClient().isAccessTokenAsJwt()) {
+                accessToken.setCode(createAccessTokenAsJwt(accessToken));
+            }
             if (accessToken.getExpiresIn() > 0) {
                 persist(asToken(accessToken));
             }
@@ -149,6 +169,29 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    private String createAccessTokenAsJwt(AccessToken accessToken) throws Exception {
+        final User user = getUser();
+        final Client client = getClient();
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
+        if (client.getAccessTokenSigningAlg() != null && SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg()) != null) {
+            signatureAlgorithm = SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg());
+        }
+
+        final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
+        final Jwt jwt = jwtSigner.newJwt();
+        jwt.getClaims().setClaim("active", accessToken.isValid());
+        jwt.getClaims().setClaim("scope", Lists.newArrayList(getScopes()));
+        jwt.getClaims().setClaim("client_id", getClientId());
+        jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
+        jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
+        jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
+        jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
+        jwt.getClaims().setAudience(getClientId());
+        jwt.getClaims().setSubjectIdentifier(getSub());
+        return jwt.asString();
     }
 
     @Override
@@ -294,6 +337,42 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public void checkExpiredTokens() {
         // do nothing, clean up is made via grant service:
         // org.xdi.oxauth.service.GrantService.cleanUp()
+    }
+
+    public String getSub() {
+        final User user = getUser();
+        if (user == null) {
+            log.trace("User is null for grant " + getGrantId());
+            return "";
+        }
+        final String subjectType = getClient().getSubjectType();
+        if (SubjectType.PAIRWISE.equals(SubjectType.fromString(subjectType))) {
+            String sectorIdentifierUri = null;
+            if (StringUtils.isNotBlank(getClient().getSectorIdentifierUri())) {
+                sectorIdentifierUri = getClient().getSectorIdentifierUri();
+            } else {
+                sectorIdentifierUri = getClient().getRedirectUris()[0];
+            }
+
+            String userInum = user.getAttribute("inum");
+            String clientId = getClientId();
+
+            try {
+                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum, sectorIdentifierUri, clientId);
+                if (pairwiseIdentifier == null) {
+                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
+                    pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                    pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
+                    pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+                }
+                return pairwiseIdentifier.getId();
+            } catch (Exception e) {
+                log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
+                return "";
+            }
+        } else {
+            return user.getAttribute(appConfiguration.getOpenidSubAttribute());
+        }
     }
 
     public boolean isCachedWithNoPersistence() {

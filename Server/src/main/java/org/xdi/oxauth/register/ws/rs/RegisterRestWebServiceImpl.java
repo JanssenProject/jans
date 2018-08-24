@@ -135,6 +135,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 if (r.getIdTokenSignedResponseAlg() == null) {
                     r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
                 }
+                if (r.getAccessTokenSigningAlg() == null) {
+                    r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
+                }
 
                 if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
                     if (!registerParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
@@ -343,6 +346,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         if (requestObject.getSubjectType() != null) {
             p_client.setSubjectType(requestObject.getSubjectType().toString());
+        }
+        if (requestObject.getAccessTokenAsJwt() != null) {
+            p_client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
+        }
+        if (requestObject.getAccessTokenSigningAlg() != null) {
+            p_client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
         }
         if (requestObject.getIdTokenSignedResponseAlg() != null) {
             p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
