@@ -4217,6 +4217,28 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxauth - indicator whether to return access token as JWT",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAccessTokenAsJwt"
+            ],
+            "oid": "oxAttribute:389",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxauth - access token signing algorithm",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAccessTokenSigningAlg"
+            ],
+            "oid": "oxAttribute:390",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4854,7 +4876,9 @@
                 "oxAuthLogoutSessionRequired",
                 "oxdId",
                 "oxAuthAuthorizedOrigins",
-                "oxIdTokenTokenBindingCnf"
+                "oxIdTokenTokenBindingCnf",
+                "oxAccessTokenAsJwt",
+                "oxAccessTokenSigningAlg"
             ],
             "must": [
                 "objectclass"
