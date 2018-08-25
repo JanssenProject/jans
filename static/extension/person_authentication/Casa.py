@@ -25,7 +25,7 @@ try:
 except ImportError:
     import simplejson as json
 import sys
-    
+
 class PersonAuthentication(PersonAuthenticationType):
 
     def __init__(self, currentTimeMillis):
@@ -34,24 +34,24 @@ class PersonAuthentication(PersonAuthenticationType):
         self.ACR_SMS = "twilio_sms"
         self.ACR_OTP = "otp"
         self.ACR_U2F = "u2f"
-        
+
         self.modulePrefix = "casa-external_"
 
     def init(self, configurationAttributes):
-        
+
         print "Casa. init called"
         self.authenticators = {}
         self.configFileLocation = "/etc/gluu/conf/casa.json"
         self.uid_attr = self.getLocalPrimaryKey()
-                
+
         custScriptService = CdiUtil.bean(CustomScriptService)
         scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "gluuStatus")
-        self.computeMethods(scriptsList)
-        
-        if len(self.dynamicMethods) > 0:
-            print "Casa. init. Loading scripts for dynamic modules: %s" % self.dynamicMethods
+        dynamicMethods = self.computeMethods(scriptsList)
 
-            for acr in self.dynamicMethods:
+        if len(dynamicMethods) > 0:
+            print "Casa. init. Loading scripts for dynamic modules: %s" % dynamicMethods
+
+            for acr in dynamicMethods:
                 moduleName = self.modulePrefix + acr
                 try:
                     external = __import__(moduleName, globals(), locals(), ["PersonAuthentication"], -1)
@@ -59,14 +59,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     print "Casa. init. Got dynamic module for acr %s" % acr
                     configAttrs = self.getConfigurationAttributes(acr, scriptsList)
-                    
+
                     if acr == self.ACR_U2F:
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
                         configAttrs.put("u2f_application_id", SimpleCustomProperty("u2f_application_id", u2f_application_id))
                     elif acr == self.ACR_SG:
                         client_redirect_uri = configurationAttributes.get("supergluu_app_id").getValue2()
                         configAttrs.put("client_redirect_uri", SimpleCustomProperty("client_redirect_uri", client_redirect_uri))
-                    
+
                     if module.init(configAttrs):
                         module.configAttrs = configAttrs
                         self.authenticators[acr] = module
@@ -75,11 +75,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 except:
                     print "Casa. init. Failed to load module %s" % moduleName
                     print "Exception: ", sys.exc_info()[1]
-                    
+
         print "Casa. init. Initialized successfully"
         return True
-        
-        
+
+
     def destroy(self, configurationAttributes):
         print "Casa. Destroyed called"
         return True
@@ -93,25 +93,25 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Casa. isValidAuthenticationMethod called"
         return True
 
-        
+
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
         return None
-        
+
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         print "Casa. authenticate %s" % str(step)
-        
+
         userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
         identity = CdiUtil.bean(Identity)
-                
+
         if step == 1:
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            
+
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            
+
                 foundUser = userService.getUserByAttribute(self.uid_attr, user_name)
                 #foundUser = userService.getUser(user_name)
                 if foundUser == None:
@@ -119,16 +119,16 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     acr = foundUser.getAttribute("oxPreferredMethod")
                     logged_in = False
-                    
+
                     if acr == None:
                         logged_in = authenticationService.authenticate(user_name, user_password)
                     elif acr in self.authenticators:
                         module = self.authenticators[acr]
                         logged_in = module.authenticate(module.configAttrs, requestParameters, step)
 
-                    if logged_in:                        
+                    if logged_in:
                         foundUser = authenticationService.getAuthenticatedUser()
-                        
+
                         if foundUser == None:
                             print "Casa. authenticate for step 1. Cannot retrieve logged user"
                         else:
@@ -141,12 +141,12 @@ class PersonAuthentication(PersonAuthenticationType):
                                 identity.setWorkingParameter("ACR", acr)
 
                             return True
-                            
+
                     else:
                         print "Casa. authenticate for step 1 was not successful"
             return False
-        
-        else:            
+
+        else:
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 print "Casa. authenticate for step 2. Cannot retrieve logged user"
@@ -156,17 +156,17 @@ class PersonAuthentication(PersonAuthenticationType):
             alter = ServerUtil.getFirstValue(requestParameters, "alternativeMethod")
             if alter != None:
                 #bypass the rest of this step if an alternative method was provided. Current step will be retried (see getNextStep)
-                self.simulateFirstStep(requestParameters, alter)                
+                self.simulateFirstStep(requestParameters, alter)
                 return True
 
             session_attributes = identity.getSessionId().getSessionAttributes()
             acr = session_attributes.get("ACR")
             #this working parameter is used in casa.xhtml
             identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
-            
+
             success = False
             if acr in self.authenticators:
-                module = self.authenticators[acr] 
+                module = self.authenticators[acr]
                 success = module.authenticate(module.configAttrs, requestParameters, step)
 
             #Update the list of trusted devices if 2fa passed
@@ -178,14 +178,14 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     user.setAttribute("oxTrustedDevicesInfo", tdi)
                     userService.updateUser(user)
-            else:        
+            else:
                 print "Casa. authenticate. 2FA authentication failed"
 
             return success
 
         return False
 
-        
+
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Casa. prepareForStep %s" % str(step)
         if step == 1:
@@ -193,90 +193,90 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             identity = CdiUtil.bean(Identity)
             session_attributes = identity.getSessionId().getSessionAttributes()
-            
+
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            
+
             if user == None:
                 print "Casa. prepareForStep. Cannot retrieve logged user"
                 return False
-                        
+
             acr = session_attributes.get("ACR")
             print "Casa. prepareForStep. ACR = %s" % acr
             identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
 
             if acr in self.authenticators:
-                module = self.authenticators[acr] 
+                module = self.authenticators[acr]
                 return module.prepareForStep(module.configAttrs, requestParameters, step)
             else:
                 return False
 
-        
+
     def getExtraParametersForStep(self, configurationAttributes, step):
         print "Casa. getExtraParametersForStep %s" % str(step)
-        
+
         if step > 1:
             list = ArrayList()
             acr = CdiUtil.bean(Identity).getWorkingParameter("ACR")
-            
+
             if acr in self.authenticators:
-                module = self.authenticators[acr] 
+                module = self.authenticators[acr]
                 params = module.getExtraParametersForStep(module.configAttrs, step)
                 if params != None:
                     list.addAll(params)
-            
+
             list.addAll(Arrays.asList("ACR", "methods", "trustedDevicesInfo"))
             print "extras are %s" % list
             return list
-        
+
         return None
-        
+
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         print "Casa. getCountAuthenticationSteps called"
-        
+
         if CdiUtil.bean(Identity).getWorkingParameter("skip2FA"):
            return 1
 
         acr = CdiUtil.bean(Identity).getWorkingParameter("ACR")
         if acr in self.authenticators:
-            module = self.authenticators[acr] 
+            module = self.authenticators[acr]
             return module.getCountAuthenticationSteps(module.configAttrs)
         else:
             return 2
-        
+
         print "Casa. getCountAuthenticationSteps. Could not determine the step count for acr %s" % acr
-        
+
 
     def getPageForStep(self, configurationAttributes, step):
         print "Casa. getPageForStep called %s" % str(step)
-        
+
         if step > 1:
             acr = CdiUtil.bean(Identity).getWorkingParameter("ACR")
             if acr in self.authenticators:
-                module = self.authenticators[acr] 
+                module = self.authenticators[acr]
                 page = module.getPageForStep(module.configAttrs, step)
             else:
                 page=None
-                
+
             return page
-            
+
         return ""
-    
-    
+
+
     def getNextStep(self, configurationAttributes, requestParameters, step):
-        
+
         print "Casa. getNextStep called %s" % str(step)
         if step > 1:
             acr = ServerUtil.getFirstValue(requestParameters, "alternativeMethod")
             if acr != None:
                 print "Casa. getNextStep. Use alternative method %s" % acr
-                CdiUtil.bean(Identity).setWorkingParameter("ACR", acr)                
+                CdiUtil.bean(Identity).setWorkingParameter("ACR", acr)
                 #retry step with different acr
                 return 2
-                
+
         return -1
-        
+
 
     def logout(self, configurationAttributes, requestParameters):
         print "Casa. logout called"
@@ -292,45 +292,30 @@ class PersonAuthentication(PersonAuthenticationType):
         uid_attr = ldapAuthConfigs.get(0).getLocalPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
-        
+
+
     def computeMethods(self, scriptList):
-    
-        f = open(self.configFileLocation, 'r')
-        defaultMethods = [self.ACR_U2F, self.ACR_SG, self.ACR_OTP, self.ACR_SMS]
-        
+
+        methods = []
         try:
+            f = open(self.configFileLocation, 'r')
             cmConfigs = json.loads(f.read())
             if 'acr_plugin_mapping' in cmConfigs:
-                methods = cmConfigs['acr_plugin_mapping']
-                methods = methods.keys()
+                mapping = cmConfigs['acr_plugin_mapping']
             else:
-                #The assumption of these 4 are supported does not harm
-                methods = defaultMethods
-            
-            self.dynamicMethods = []
-            for m in methods:
-                self.dynamicMethods.append(m)
-                            
-            tmp = []
-            for customScript in scriptList:
-                if customScript.isEnabled():
-                    tmp.append(customScript.getName())
-                    
-            self.dynamicMethods = self.getValidMethods(self.dynamicMethods, methods, tmp)
+                mapping = {}
+
+            for m in mapping:
+                for customScript in scriptList:
+                    if customScript.getName() == m and customScript.isEnabled():
+                        methods.append(m)
         except:
             print "Casa. computeMethods. Failed to read configuration file"
         finally:
             f.close()
-            
-            
-    def getValidMethods(self, list, methods, methods2):
-        tmp = []
-        for m in list:
-            if m in methods2 and m in methods:
-                tmp.append(m)
-        return tmp
-        
-        
+        return methods
+
+
     def getConfigurationAttributes(self, acr, scriptsList):
 
         configMap = HashMap()
@@ -345,8 +330,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getAvailMethodsUser(self, user, skip):
         methods = ArrayList()
-        
-        #self.dynamicMethods may contain more entries than self.authenticators
+
         for method in self.authenticators:
             try:
                 module = self.authenticators[method]
@@ -357,7 +341,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             #skip is guaranteed to be a member of methods (if hasEnrollments routines are properly implemented).
-            #A call to remove strangely crashes if skip is absent 
+            #A call to remove strangely crashes if skip is absent
             methods.remove(skip)
         except:
             print "Casa. getAvailMethodsUser. methods list does not contain %s" % skip
@@ -380,14 +364,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
 # 2FA policy enforcement
-    
+
     def determineSkip2FA(self, userService, identity, foundUser, platform):
-    
+
         f = open(self.configFileLocation, 'r')
         try:
             cmConfigs = json.loads(f.read())
             if 'policy_2fa' in cmConfigs:
-                policy2FA = ','.join(cmConfigs['policy_2fa']) 
+                policy2FA = ','.join(cmConfigs['policy_2fa'])
             else:
                 policy2FA = 'EVERY_LOGIN'
         except:
@@ -395,9 +379,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         finally:
             f.close()
-    
+
         print "Casa. determineSkip2FA with general policy %s" % policy2FA
-        policy2FA += ','            
+        policy2FA += ','
         skip2FA = False
 
         if 'CUSTOM,' in policy2FA:
@@ -413,7 +397,7 @@ class PersonAuthentication(PersonAuthenticationType):
             #If it's not custom, then apply the global setting admin defined
             policy = policy2FA
 
-        if not 'EVERY_LOGIN,' in policy:            
+        if not 'EVERY_LOGIN,' in policy:
             locationCriterion = 'LOCATION_UNKNOWN,' in policy
             deviceCriterion = 'DEVICE_UNKNOWN,' in policy
 
@@ -422,7 +406,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     #Find device info passed in HTTP request params (see index.xhtml)
                     deviceInf = json.loads(platform)
                     skip2FA = self.process2FAPolicy(identity, foundUser, deviceInf, locationCriterion, deviceCriterion)
-                    
+
                     if skip2FA:
                         print "Casa. determineSkip2FA. Second factor is skipped"
                         #Update attribute if authentication will not have second step
@@ -452,14 +436,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             encService = CdiUtil.bean(EncryptionService)
-            
+
             if devicesInfo == None:
                 print "Casa. process2FAPolicy: There are no trusted devices for user yet"
                 #Simulate empty list
                 devicesInfo = "[]"
             else:
                 devicesInfo = encService.decrypt(devicesInfo)
-                
+
             devicesInfo = json.loads(devicesInfo)
 
             partialMatch = False
@@ -470,9 +454,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if partialMatch:
                     break
                 idx+=1
-            
+
             matchFound = False
-            
+
             #At least one of locationCriterion or deviceCriterion is True
             if locationCriterion and not deviceCriterion:
                 #this check makes sense if there is city data only
@@ -505,7 +489,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         if partialMatch:
                             break;
                         idxCity+=1
-                    
+
                     if partialMatch:
                         devicesInfo[idx]['origins'][idxCity]['timestamp'] = now
                     else:
@@ -521,20 +505,20 @@ class PersonAuthentication(PersonAuthenticationType):
                     origins = [{"city": geodata['city'], "country": geodata['country'], "timestamp": now}]
 
                 obj = {"browser": browser, "os": os, "addedOn": now, "origins": origins}
-                devicesInfo.append(obj)             
+                devicesInfo.append(obj)
 
             enc = json.dumps(devicesInfo, separators=(',',':'))
             enc = encService.encrypt(enc)
             identity.setWorkingParameter("trustedDevicesInfo", enc)
-            
+
         except:
             print "Casa. process2FAPolicy. Error!", sys.exc_info()[1]
 
         return skip2FA
-        
 
-    def getGeolocation(self, identity):         
-        
+
+    def getGeolocation(self, identity):
+
         session_attributes = identity.getSessionId().getSessionAttributes()
         if session_attributes.containsKey("remote_ip"):
             remote_ip = session_attributes.get("remote_ip")
@@ -544,7 +528,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 http_client = httpService.getHttpsClient()
                 http_client_params = http_client.getParams()
-                http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 4 * 1000)   
+                http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 4 * 1000)
                 
                 geolocation_service_url = "http://ip-api.com/json/%s?fields=country,city,status,message" % remote_ip
                 geolocation_service_headers = { "Accept" : "application/json" }
