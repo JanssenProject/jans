@@ -46,12 +46,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         custScriptService = CdiUtil.bean(CustomScriptService)
         scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "gluuStatus")
-        self.computeMethods(scriptsList)
+        dynamicMethods = self.computeMethods(scriptsList)
 
-        if len(self.dynamicMethods) > 0:
-            print "Casa. init. Loading scripts for dynamic modules: %s" % self.dynamicMethods
+        if len(dynamicMethods) > 0:
+            print "Casa. init. Loading scripts for dynamic modules: %s" % dynamicMethods
 
-            for acr in self.dynamicMethods:
+            for acr in dynamicMethods:
                 moduleName = self.modulePrefix + acr
                 try:
                     external = __import__(moduleName, globals(), locals(), ["PersonAuthentication"], -1)
@@ -293,42 +293,27 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
 
+
     def computeMethods(self, scriptList):
 
-        f = open(self.configFileLocation, 'r')
-        defaultMethods = [self.ACR_U2F, self.ACR_SG, self.ACR_OTP, self.ACR_SMS]
-
+        methods = []
         try:
+            f = open(self.configFileLocation, 'r')
             cmConfigs = json.loads(f.read())
             if 'acr_plugin_mapping' in cmConfigs:
-                methods = cmConfigs['acr_plugin_mapping']
-                methods = methods.keys()
+                mapping = cmConfigs['acr_plugin_mapping']
             else:
-                #The assumption of these 4 are supported does not harm
-                methods = defaultMethods
+                mapping = {}
 
-            self.dynamicMethods = []
-            for m in methods:
-                self.dynamicMethods.append(m)
-
-            tmp = []
-            for customScript in scriptList:
-                if customScript.isEnabled():
-                    tmp.append(customScript.getName())
-
-            self.dynamicMethods = self.getValidMethods(self.dynamicMethods, methods, tmp)
+            for m in mapping:
+                for customScript in scriptList:
+                    if customScript.getName() == m and customScript.isEnabled():
+                        methods.append(m)
         except:
             print "Casa. computeMethods. Failed to read configuration file"
         finally:
             f.close()
-
-
-    def getValidMethods(self, list, methods, methods2):
-        tmp = []
-        for m in list:
-            if m in methods2 and m in methods:
-                tmp.append(m)
-        return tmp
+        return methods
 
 
     def getConfigurationAttributes(self, acr, scriptsList):
@@ -346,7 +331,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def getAvailMethodsUser(self, user, skip):
         methods = ArrayList()
 
-        #self.dynamicMethods may contain more entries than self.authenticators
         for method in self.authenticators:
             try:
                 module = self.authenticators[method]
