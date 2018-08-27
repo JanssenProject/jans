@@ -175,6 +175,12 @@
 			<artifactId>testng</artifactId>
             <scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxauth-model</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
