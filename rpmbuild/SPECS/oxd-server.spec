@@ -76,7 +76,8 @@ chown root:root /etc/default/oxd-server 2>&1
 chown jetty:jetty -R /opt/oxd-server 2>&1
 chmod 644 /etc/default/oxd-server 2>&1
 mkdir -p /var/log/oxd-server 2>&1
-chown jetty:jetty /var/log/oxd-server 2>&1
+touch /var/log/oxd-server/oxd-server.log 2>&1
+chown -R jetty:jetty /var/log/oxd-server 2>&1
 
 %preun
 if [ -x “/etc/init.d/oxd-server” ] || [ -e “/etc/init/oxd-server.conf” ]; then
