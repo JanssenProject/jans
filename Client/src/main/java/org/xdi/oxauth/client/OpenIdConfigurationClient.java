@@ -28,7 +28,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
     private static final Logger LOG = Logger.getLogger(OpenIdConfigurationClient.class);
 
-    private static final String mediaType = MediaType.TEXT_PLAIN;
+    private static final String mediaTypes = String.join(",",MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON);
 
     /**
      * Constructs an OpenID Configuration Client by providing an url where the REST service is located.
@@ -66,7 +66,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         setRequest(new OpenIdConfigurationRequest());
 
         // Prepare request parameters
-        clientRequest.accept(mediaType);
+        clientRequest.accept(mediaTypes);
         clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
