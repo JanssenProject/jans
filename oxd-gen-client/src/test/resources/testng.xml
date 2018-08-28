@@ -32,100 +32,100 @@
             <class name="io.swagger.client.api.RegisterSiteTest"/>
         </classes>
     </test>
-<!--
     <test name="Remove site" enabled="true">
         <classes>
             <class name="io.swagger.client.api.RemoveSiteTest"/>
         </classes>
     </test>
-    <test name="Get authorization url" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetAuthorizationUrlTest"/>
-        </classes>
-    </test>
+    <!--
+        <test name="Get authorization url" enabled="true">
+            <classes>
+                <class name="io.swagger.client.api.GetAuthorizationUrlTest"/>
+            </classes>
+        </test>
     <test name="Get tokens by code" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetTokensByCodeTest"/>
-        </classes>
-    </test>
-    <test name="Get user info" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetUserInfoTest"/>
-        </classes>
-    </test>
-    <test name="Log out" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetLogoutUrlTest"/>
-        </classes>
-    </test>
-    <test name="Check IdToken" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.CheckIdTokenTest"/>
-        </classes>
-    </test>
-    <test name="Check AccessToken" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.CheckAccessTokenTest"/>
-        </classes>
-    </test>
-    <test name="Authorization code flow prompt=none" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.AuthorizationCodeFlowTest"/>
-        </classes>
-    </test>
-    <test name="Migration Service Test" enabled="false">
-        <classes>
-            <class name="io.swagger.client.api.service.MigrationServiceTest"/>
-        </classes>
-    </test>
+           <classes>
+               <class name="io.swagger.client.api.GetTokensByCodeTest"/>
+           </classes>
+       </test>
+       <test name="Get user info" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.GetUserInfoTest"/>
+           </classes>
+       </test>
+       <test name="Log out" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.GetLogoutUrlTest"/>
+           </classes>
+       </test>
+       <test name="Check IdToken" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.CheckIdTokenTest"/>
+           </classes>
+       </test>
+       <test name="Check AccessToken" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.CheckAccessTokenTest"/>
+           </classes>
+       </test>
+       <test name="Authorization code flow prompt=none" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.AuthorizationCodeFlowTest"/>
+           </classes>
+       </test>
+       <test name="Migration Service Test" enabled="false">
+           <classes>
+               <class name="io.swagger.client.api.service.MigrationServiceTest"/>
+           </classes>
+       </test>
 
-    &lt;!&ndash; UMA Tests &ndash;&gt;
-    <test name="UMA - Full Flow Test" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.UmaFullTest"/>
-        </classes>
-    </test>
-    <test name="RS - Protect" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.RsProtectTest"/>
-        </classes>
-    </test>
-    <test name="RS - Check Access" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.RsCheckAccessTest"/>
-        </classes>
-    </test>
-    <test name="RP - Get RPT" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.RpGetRptTest"/>
-        </classes>
-    </test>
-    <test name="RP - Get Claims-Gathering Url" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
-        </classes>
-    </test>
-    <test name="Introspect RPT" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.IntrospectRptTest"/>
-        </classes>
-    </test>
+       &lt;!&ndash; UMA Tests &ndash;&gt;
+       <test name="UMA - Full Flow Test" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.UmaFullTest"/>
+           </classes>
+       </test>
+       <test name="RS - Protect" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.RsProtectTest"/>
+           </classes>
+       </test>
+       <test name="RS - Check Access" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.RsCheckAccessTest"/>
+           </classes>
+       </test>
+       <test name="RP - Get RPT" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.RpGetRptTest"/>
+           </classes>
+       </test>
+       <test name="RP - Get Claims-Gathering Url" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
+           </classes>
+       </test>
+       <test name="Introspect RPT" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.IntrospectRptTest"/>
+           </classes>
+       </test>
 
-    &lt;!&ndash; Custom &ndash;&gt;
-    <test name="Setup client" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.SetupClientTest"/>
-        </classes>
-    </test>
-    <test name="Get client token" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetClientTokenTest"/>
-        </classes>
-    </test>
-    <test name="Introspect access token" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.IntrospectAccessTokenTest"/>
-        </classes>
-    </test>
--->
+       &lt;!&ndash; Custom &ndash;&gt;
+       <test name="Setup client" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.SetupClientTest"/>
+           </classes>
+       </test>
+       <test name="Get client token" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.GetClientTokenTest"/>
+           </classes>
+       </test>
+       <test name="Introspect access token" enabled="true">
+           <classes>
+               <class name="io.swagger.client.api.IntrospectAccessTokenTest"/>
+           </classes>
+       </test>
+   -->
 </suite>
