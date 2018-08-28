@@ -246,7 +246,7 @@ class Migration(object):
 
     def copyCertificates(self):
         # remove opendj.crt
-        opendj_cert_file = os.path.join(self.backupDir, 'backup_2431/etc/certs/opendj.crt')
+        opendj_cert_file = os.path.join(self.backupDir, 'etc/certs/opendj.crt')
         if os.path.exists(opendj_cert_file):
             command = ['rm',opendj_cert_file]
             output = self.getOutput(command)
@@ -461,21 +461,39 @@ class Migration(object):
                 'imapData': "( 1486583825530 NAME 'imapData' EQUALITY caseIgnoreMatch ORDERING caseIgnoreOrderingMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 USAGE userApplications X-SCHEMA-FILE '100-user.ldif' X-ORIGIN 'gluu' )",
                         }
             
+            schema_77_old = OpenDjSchema(os.path.join(self.backupDir, 'opt/opendj/config/schema/77-customAttributes.ldif'))
+            
             schema_77 = OpenDjSchema(os.path.join(self.open_dj_conf_dir,'77-customAttributes.ldif'))
             
             w = False
-            
+
             for a in att_dict:
                 if not a in attr_class['attributes']:
                     schema_77.add_attributes(att_dict[a])
                     w = True
+                    
+            for a in schema_77_old.attribute_names:
+                if not a in attr_class['attributes']:
+                    _attrib = schema_77_old.get_attribute_by_name(a)
+                    schema_77.schema['attributeTypes'].append(_attrib)
+                    w = True
+
+            for c in schema_77_old.class_names:
+                if not c in attr_class['objectclasses']:
+                    _class = schema_77_old.get_class_by_name(c)
+                    schema_77.schema['objectClasses'].append(_class)
+                    w = True
+
             if w:
                 schema_77.write()
+                for a in att_dict:
+                    attr_class['attributes'][a]='77-customAttributes.ldif'
             
             if 'gluuCustomPerson' not in attr_class['objectclasses']:
                 schema_opendj = OpenDjSchema(os.path.join(self.open_dj_conf_dir,'100-user.ldif'))
                 schema_opendj.add_classs("( 1.3.6.1.4.1.48710.1.4.101 NAME 'gluuCustomPerson' SUP top AUXILIARY MAY ( telephoneNumber $ mobile $ carLicense $ facsimileTelephoneNumber $ departmentNumber $ employeeType $ cn $ st $ manager $ street $ postOfficeBox $ employeeNumber $ preferredDeliveryMethod $ roomNumber $ secretary $ homePostalAddress $ l $ postalCode $ description $ title $ gluuPermission $ imapHost $ imapPort $ imapUsername $ imapPassword ) )")
                 schema_opendj.write()
+                attr_class['objectclasses']['gluuCustomPerson'] = '100-user.ldif'
             else:
                 schema_opendj = OpenDjSchema(os.path.join(self.open_dj_conf_dir, attr_class['objectclasses']['gluuCustomPerson']))
                 w = False
@@ -505,7 +523,38 @@ class Migration(object):
                 schema_101.add_attribute_to_class('pairwiseIdentifier', 'oxSectorIdentifierURI')
                 schema_101.add_attribute_to_class('oxAuthUmaScopeDescription', 'oxUrl')
                 schema_101.write()
-        
+
+            w = False
+            for custom_schema in ['100-user.ldif','99-user.ldif']:
+
+                schema_n_old_file = os.path.join(self.backupDir, 'opt/opendj/config/schema', custom_schema)
+                if os.path.exists(schema_n_old_file):
+                    schema_n_old = OpenDjSchema(schema_n_old_file)
+                    
+                    gluuCustomPerson = schema_77.get_class_by_name('gluuCustomPerson')
+                    may_list = list(gluuCustomPerson.may)
+
+                    for a in schema_n_old.attribute_names:
+                        
+                        if not a in attr_class['attributes']:
+                            _attrib = schema_n_old.get_attribute_by_name(a)
+                            schema_77.schema['attributeTypes'].append(_attrib)
+
+                        if not a in may_list:
+                            may_list.append(a)
+                            w = True
+                    if w:
+                        gluuCustomPerson.may = tuple(may_list)
+                        schema_77.write()
+
+                    for c in schema_n_old.class_names:
+                        if not c in attr_class['objectclasses']:
+                            _class = schema_n_old.get_class_by_name(c)
+                            schema_77.schema['objectClasses'].append(_class)
+                            w = True
+
+            if w:
+                schema_77.write()
 
         #MB: I did not understand why we are doing followings
 
@@ -652,7 +701,22 @@ class Migration(object):
 
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
+        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
+        
+        
+        # Determine current primary key
+        
+        appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
+        appliences.parse()
+        
+        for entry in appliences.entries:
+            if 'oxIDPAuthentication' in entry:
+                oxIDPAuthentication = json.loads(entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                primaryKey = idp_config['primaryKey']
+                localPrimaryKey = idp_config['localPrimaryKey']
 
+        
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp,  
                                     base64_attrs=['gluuProfileConfiguration'])
@@ -677,6 +741,19 @@ class Migration(object):
             
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
+
+
+            if 'ou=appliances' in dn:
+                if 'oxIDPAuthentication' in new_entry:
+                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                    idp_config = json.loads(oxIDPAuthentication['config'])
+                    idp_config['primaryKey'] = primaryKey
+                    idp_config['localPrimaryKey'] = localPrimaryKey
+                    oxIDPAuthentication['config'] = json.dumps(idp_config)
+                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
+
+
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
@@ -776,6 +853,26 @@ class Migration(object):
 
             if 'oxAuthClientCustomAttributes' in entry['objectClass']:
                 entry['objectClass'].remove('oxAuthClientCustomAttributes')
+
+            if '3.1.3' in self.oxVersion:
+                sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
+                        entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        entry['oxAuthClaimName'] = ['member_off']
+
+                if sector_identifiers in dn:
+                    if dn.startswith('inum'):
+                        
+                        dn = dn.replace('inum=', 'oxId=')
+                        oxId = entry['inum'][:]
+                        entry['oxId'] = oxId
+                        del entry['inum']
+
+                if 'ou=clients' in dn:
+                    if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
+                        entry['oxAuthGrantType'] = ['authorization_code']
 
             ldif_writer.unparse(dn, entry)
 
@@ -962,6 +1059,28 @@ class Migration(object):
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
 
+            if self.ldap_type == 'opendj':
+                ldap_properties_fn = '/opt/shibboleth-idp/conf/ldap.properties'
+                if os.path.exists(ldap_properties_fn):
+                    tmp_fn = '/tmp/ldap.properties_file~'
+                    out_file = open(tmp_fn,'w')
+                    copy_file = False
+                    
+                    for l in open(ldap_properties_fn):
+                        if l.startswith('idp.authn.LDAP.trustCertificates') and '/etc/certs/openldap.crt' in l:
+                            l = l.replace('/etc/certs/openldap.crt', '/etc/certs/opendj.crt')
+                            copy_file = True
+                        out_file.write(l)
+
+                    out_file.close()
+
+                    if copy_file:
+                        logging.info('Fixing Shibboleth IDP conf ...')
+                        shutil.copy(tmp_fn, ldap_properties_fn)
+                        self.getOutput(['chown', 'jetty:jetty', ldap_properties_fn])
+
+                    os.remove(tmp_fn)
+
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
         if self.ldap_type == 'openldap':
@@ -970,8 +1089,9 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+        if os.path.exists(os.path.join('/opt','shibboleth-idp')):
+            self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
+            self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
     def getProp(self, prop, prop_file=None):
         if not prop_file:
@@ -1069,8 +1189,6 @@ class Migration(object):
         command = ['cp','/etc/certs/shibIDP.key','/etc/certs/idp-signing.key']
         output = self.getOutput(command)
 
-        command = ['service','idp','restart']
-        output = self.getOutput(command)
 
     def migrate(self):
         """Main function for the migration of backup data
@@ -1080,6 +1198,12 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+        self.inumOrg = self.getProp('inumOrg', 
+                    '/install/community-edition-setup/setup.properties.last')
+        self.oxVersion = self.getProp('oxVersion', 
+                    '/install/community-edition-setup/setup.properties.last')
+
+
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
@@ -1101,7 +1225,6 @@ class Migration(object):
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
         print("\n")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

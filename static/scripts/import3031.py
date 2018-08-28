@@ -21,13 +21,57 @@ import subprocess
 import time
 import datetime
 import shelve
-import ldap
+
 import pyDes
 import base64
+import platform
 
+
+if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+    sys.exit("Please run this script inside Gluu 3.x container.")
+
+p = platform.linux_distribution()
+
+cmd_list = []
+
+try:
+    import pip
+except:
+    cmd_list.append(('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'))
+    cmd_list.append(('Running get-pip.py to install pip', 'python get-pip.py'))
+
+try:
+    import jsonmerge
+except:
+    cmd_list.append(("Installing python jsonmerge module", "pip install jsonmerge"))
+
+
+if not os.path.exists('ldifschema_utils.py'):
+
+    cmd_list.append(
+        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py')
+        )
+try:
+    import ldap
+except:
+    if p[0].lower() in ('ubuntu','debian'):
+        cmd_list.insert(0,('Running apt-get update','apt-get update'))
+        cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
+    else:
+        cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
+
+for message, cmd in cmd_list:
+    print message
+    result = os.system(cmd)
+    if result:
+        sys.exit("An error occurred while running command. Please fix it")
+
+import ldap
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from jsonmerge import merge
+from ldifschema_utils import parse_open_ldap_schema
+from ldap.schema import AttributeType
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -42,6 +86,8 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
+
+
 
 
 def progress_bar(t, n, act='', finished=None):
@@ -70,7 +116,7 @@ class DBLDIF(LDIFParser):
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
-        self.sdb[dn] = entry
+        self.sdb[str(dn)] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -145,6 +191,7 @@ class Migration(object):
         self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
         self.setup_properties = 'backup_3031/setup.properties'
 
+        self.passport_strategies = []
 
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
@@ -303,12 +350,45 @@ class Migration(object):
         logging.info("Stopping OpenLDAP Server.")
         stop_msg = self.getOutput([self.service, 'solserver', 'stop'])
         output = self.getOutput([self.service, 'solserver', 'status'])
+        self.fix_openldap_ePSA()
         if "is not running" in output:
             return
         else:
             logging.error("Couldn't stop the OpenLDAP server.")
             logging.error(stop_msg)
             sys.exit(1)
+
+        
+
+    def fix_openldap_ePSA(self):
+        schema_file = '/opt/symas/etc/openldap/schema/eduperson.schema'
+        
+        schema = parse_open_ldap_schema(schema_file)
+
+        for a in schema['attributes']:
+            if 'eduPersonScopedAffiliation' in a.names:
+                break
+        else:
+            logging.info("Fixing eduperson.schema for eduPersonScopedAffiliation")
+            a_str = "( 1.3.6.1.4.1.5923.1.1.1.9 NAME 'eduPersonScopedAffiliation' DESC 'eduPerson per Internet2 and EDUCAUSE' EQUALITY caseIgnoreMatch SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' )"
+
+            ePSA_attr = AttributeType(a_str)
+
+            schema['attributes'].append(ePSA_attr)
+
+            for o in schema['objectclasses']:
+                if 'eduPerson' in o.names:
+                    may_list = list(o.may)
+                    may_list.append('eduPersonScopedAffiliation')
+                    o.may = tuple(may_list)
+
+
+            with open(schema_file, 'w') as outfile:
+                for atyp in schema['attributes']:
+                    outfile.write('attributetype {}\n'.format(atyp.__str__()))
+                for ocls in schema['objectclasses']:
+                    outfile.write('objectclass {}\n'.format(ocls.__str__()))
+
 
     def startSolserver(self):
         logging.info("Starting OpenLDAP Server.")
@@ -328,10 +408,10 @@ class Migration(object):
         if self.version < 300:
             custom = '/var/gluu/webapps/'
             folder_map = [
-                (custom + 'oxauth/pages', self.jettyDir + 'oxauth/custom/pages'),
+                #(custom + 'oxauth/pages', self.jettyDir + 'oxauth/custom/pages'),
                 (custom + 'oxauth/resources', self.jettyDir + 'oxauth/custom/static'),
                 (custom + 'oxauth/libs', self.jettyDir + 'oxauth/lib/ext'),
-                (custom + 'oxtrust/pages', self.jettyDir + 'identity/custom/pages'),
+                #(custom + 'oxtrust/pages', self.jettyDir + 'identity/custom/pages'),
                 (custom + 'oxtrust/resources', self.jettyDir + 'identity/custom/static'),
                 (custom + 'oxtrust/libs', self.jettyDir + 'identity/lib/ext'),
             ]
@@ -446,14 +526,15 @@ class Migration(object):
     def copyCustomSchema(self):
 
         if self.ldap_type == 'openldap':
+            if os.path.exists(self.backupDir + "/custom.schema"):
+                custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
+                outfile = open(custom_schema, 'w')
+            
+                output = self.readFile(self.backupDir + "/custom.schema")
 
-            custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-            outfile = open(custom_schema, 'w')
-            output = self.readFile(self.backupDir + "/custom.schema")
-
-            outfile.write("\n")
-            outfile.write(output)
-            outfile.close()
+                outfile.write("\n")
+                outfile.write(output)
+                outfile.close()
 
         else:
             return
@@ -501,11 +582,49 @@ class Migration(object):
             pass
         return "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
 
+    def convertPassportStrategies(self, entry):
+
+        new_strategies = {}
+        change = False
+        for pp_conf in entry['gluuPassportConfiguration']:
+            pp_conf_js = json.loads(pp_conf)
+            self.passport_strategies.append(pp_conf_js['strategy'])
+            if not pp_conf_js['strategy'] in new_strategies:
+                if pp_conf_js['fieldset'][0].has_key('value'):
+                    
+                    if not '_client_' in pp_conf_js['fieldset'][0]['value']:
+                        strategy={'strategy':pp_conf_js['strategy'], 'fieldset':[]}
+                        for st_comp in pp_conf_js['fieldset']:
+                            strategy['fieldset'].append({'value1':st_comp['key'], 'value2':st_comp['value'], "hide":False,"description":""})        
+                        new_strategies[pp_conf_js['strategy'] ] = json.dumps(strategy)
+                        change = True
+                else:
+                    new_strategies[pp_conf_js['strategy'] ] = pp_conf
+
+        return new_strategies
+
+
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
+        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
+
         processed_fp = open(self.processTempFile, 'w')
+
         ldif_writer = LDIFWriter(processed_fp)
+
+
+        # Determine current primary key
+        
+        appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
+        appliences.parse()
+        
+        for entry in appliences.entries:
+            if 'oxIDPAuthentication' in entry:
+                oxIDPAuthentication = json.loads(entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                primaryKey = idp_config['primaryKey']
+                localPrimaryKey = idp_config['localPrimaryKey']
 
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
@@ -525,6 +644,16 @@ class Migration(object):
         for cnt, dn in enumerate(currentDNs):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
+
+            if 'ou=appliances' in dn:
+                if 'oxIDPAuthentication' in new_entry:
+                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                    idp_config = json.loads(oxIDPAuthentication['config'])
+                    idp_config['primaryKey'] = primaryKey
+                    idp_config['localPrimaryKey'] = localPrimaryKey
+                    oxIDPAuthentication['config'] = json.dumps(idp_config)
+                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
@@ -533,6 +662,8 @@ class Migration(object):
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+
+
             for attr in old_entry.keys():
                 if attr in ignoreList:
                     continue
@@ -556,7 +687,16 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
+
+            #Convert passport strategies to new format            
+            if 'ou=oxpassport' in dn:
+                if 'gluuPassportConfiguration' in new_entry:
+                    new_strategies = self.convertPassportStrategies(new_entry)
+                    new_entry['gluuPassportConfiguration'] = new_strategies.values()
+            
             ldif_writer.unparse(dn, new_entry)
+        
+        
         
         progress_bar(0, 0, 'Rewriting DNs', True)
         
@@ -565,20 +705,37 @@ class Migration(object):
         
         ldif_shelve_dict = {}
         
+        sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
+
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
-            progress_bar(cnt, nodn, 'Perapring DNs for 3.1.2')
+            progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
+            
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
                 continue  # Already processed
 
             cur_ldif_file = old_dn_map[dn]
+
             if not cur_ldif_file in ldif_shelve_dict:
                 sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
                 sdb.parse()
                 ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
-            entry = ldif_shelve_dict[cur_ldif_file][dn]
+            entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
+
+            # Fix grabbed users form passport authentication
+            if 'oxExternalUid' in entry:
+                new_oxExternalUid = []
+                for oxExternalUid in entry['oxExternalUid']:
+                    strategy_p = oxExternalUid.split(':')
+                    if strategy_p[0] in self.passport_strategies:
+                        str_text = 'passport-{0}:{1}'.format(strategy_p[0],strategy_p[1]) 
+                        new_oxExternalUid.append(str_text)
+                    else:
+                        new_oxExternalUid.append(oxExternalUid)
+                    
+                entry['oxExternalUid'] = new_oxExternalUid
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -591,17 +748,42 @@ class Migration(object):
                         json_value = json.loads(val)
                         if type(json_value) is list:
                             attr_values.extend([json.dumps(v) for v in json_value])
+                        else:
+                            attr_values.append(val)
                     except:
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
                 entry[attr] = attr_values
+                
 
+            if '3.1.3' in self.oxVersion:
+
+                if dn == attrib_dn:
+                    if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
+                        entry['oxAuthClaimName'].append('member_off')
+                    else:
+                        entry['oxAuthClaimName'] = ['member_off']
+
+                if sector_identifiers in dn:
+                    if dn.startswith('inum'):
+                        
+                        dn = dn.replace('inum=', 'oxId=')
+                        oxId = entry['inum'][:]
+                        entry['oxId'] = oxId
+                        del entry['inum']
+
+                if 'ou=clients' in dn:
+                    if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
+                        entry['oxAuthGrantType'] = ['authorization_code']
+                
+            
             ldif_writer.unparse(dn, entry)
-
+        
         # Finally
+        sdb.sdb.close()
         processed_fp.close()
 
-        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+        progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
 
         nodn = sum(1 for line in open(self.processTempFile))
 
@@ -624,10 +806,11 @@ class Migration(object):
                         line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
 
 
-                    if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
+                    if line.startswith("objectClass:") and line[12:].strip()[:3] == 'ox-':
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
+
 
 
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
@@ -652,6 +835,7 @@ class Migration(object):
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
+
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
@@ -724,7 +908,6 @@ class Migration(object):
     def getLDAPServerTypeChoice(self):
         choice = 0
         
-        print self.setup_properties
         if os.path.isfile(self.setup_properties):
             data = ""
             
@@ -751,23 +934,19 @@ class Migration(object):
             sys.exit(1)
 
 
-    def getLDAPServerType(self):
-        self.oxIDPAuthentication = 2
-        try:
-            choice = int(raw_input(
-                "\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: "))
-        except ValueError:
-            logging.error('You entered non-interger value. Cannot decide LDAP migration'
-                          'server type. Quitting.')
-            sys.exit(1)
+    def getoxIDPAuthentication(self):
 
-        if choice == 1:
-            self.oxIDPAuthentication = 1
-        elif choice == 2:
-            self.oxIDPAuthentication = 2
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+        while True:
+            choice = raw_input("\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: ")
+            if not choice.strip():
+                self.oxIDPAuthentication = 2
+                break
+
+            if choice == '1' or choice == '2':
+                self.oxIDPAuthentication = int(choice)
+                break
+            else:
+                print ("Invalid option. Please enter either 1 or 2.")
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
@@ -825,6 +1004,23 @@ class Migration(object):
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
 
+        if os.path.isdir('/opt/shibboleth-idp/metadata/'):
+            logging.info("Updating idp-metadata.xml")
+            prop_dict = {}
+            prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
+            prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
+            
+            prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+            prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+
+            temp_fn = '/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml'
+
+            new_saml_meta_data = open(temp_fn).read() % prop_dict
+
+            with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
+                f.write(new_saml_meta_data)
+
+
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
 
@@ -834,8 +1030,10 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+        for fn in ('/opt/shibboleth-idp/metadata', '/opt/shibboleth-idp/conf'):
+            if os.path.exists(fn):
+                self.getOutput(['chown','-R','jetty:jetty',fn])
+                self.getOutput(['chown','-R','jetty:jetty',fn])
 
 
     def getProp(self, prop, prop_file=None):
@@ -857,8 +1055,12 @@ class Migration(object):
 
         if self.ldap_type == 'opendj':
             bindDn = 'cn=directory manager'
+            lfilter = '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))'
+            lcert = '/etc/certs/opendj.crt'
         else:
             bindDn = 'cn=directory manager,o=gluu'
+            lfilter = '(uid={user})'
+            lcert = '/etc/certs/openldap.crt'
 
         inumAppliance = self.getProp('inumAppliance', 
                     '/install/community-edition-setup/setup.properties.last')
@@ -876,6 +1078,31 @@ class Migration(object):
             jsons = json.dumps(jdata)
             con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
 
+        prop_file = '/opt/shibboleth-idp/conf/ldap.properties'
+        if os.path.exists(prop_file):
+            f=open(prop_file).readlines()
+
+            for i in range(len(f)):
+                l = f[i]
+                ls = l.split('=')
+                if ls:
+                    if ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = {0}\n'.format(lfilter)
+
+                    elif ls[0].strip() == 'idp.authn.LDAP.trustCertificates':
+                        f[i] = 'idp.authn.LDAP.trustCertificates                = {0}\n'.format(lcert)
+
+                    elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
+                        f[i] = 'idp.authn.LDAP.bindDN                           = {0}\n'.format(bindDn)
+                    
+                    elif ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))\n'
+
+            with open(prop_file,'w') as w:
+                w.write(''.join(f))
+
+            self.getOutput(['chown', 'jetty:jetty', prop_file])
+
 
     def migrate(self):
         """Main function for the migration of backup data
@@ -885,8 +1112,13 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+        self.inumOrg = self.getProp('inumOrg', 
+                    '/install/community-edition-setup/setup.properties.last')
+        self.oxVersion = self.getProp('oxVersion', 
+                    '/install/community-edition-setup/setup.properties.last')
+        
         self.getLDAPServerTypeChoice()
-        self.getLDAPServerType()
+        self.getoxIDPAuthentication()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopWebapps()
@@ -901,8 +1133,11 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         self.idpResolved()
-        # self.startWebapps()
         print("============================================================")
+        
+        if self.passport_strategies:
+            sys.stdout.write("Passpot Strategies detected. Please change \033[;1mDefault Authentication Method\033[0;0m to \033[;1mpassport\033[0;0m manually.\n")
+        
         print("The migration is complete. Gluu Server needs to be restarted.")
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
