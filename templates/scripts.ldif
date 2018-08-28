@@ -321,7 +321,7 @@ oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostna
 oxConfigurationProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
 oxConfigurationProperty: {"value1":"notification_service_mode","value2":"gluu","description":""}
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
-oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.super.gluu","description":""}
+oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 oxConfigurationProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
 oxLevel: 15
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
