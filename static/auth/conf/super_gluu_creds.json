@@ -1,13 +1,5 @@
 {
     "android":{
-        "gcm":{
-            "enabled":false,
-            "api_key":""
-        },
-        "sns":{
-            "enabled":false,
-            "platform_arn":"platform_arn"
-        },
         "gluu":{
             "enabled":true,
             "access_key":"36WH2JiexBOoAIBP",
@@ -15,27 +7,11 @@
         }
     },
     "ios":{
-        "apns":{
-            "enabled":false,
-            "p12_file_path":"/etc/certs/SuperGluuCertificate.p12",
-            "p12_password":"password",
-            "production":false
-        },
-        "sns":{
-            "enabled":false,
-            "platform_arn":"platform_arn",
-            "production":false
-        },
         "gluu":{
             "enabled":true,
             "access_key":"auONAdePWoYFBX6V",
             "secret_access_key":"f050aW0nnihym0GwktWd7O15jGSQcoei"
         }
-    },
-    "sns":{
-        "access_key":"access_key",
-        "secret_access_key":"encoded_secret_access_key",
-        "region":"region"
     },
     "gluu":{
         "server_uri":"https://api.gluu.org"

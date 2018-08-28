@@ -147,6 +147,9 @@
     "claimsLocalesSupported":[
         "en"
     ],
+    "idTokenTokenBindingCnfValuesSupported":[
+        "tbh"
+    ],
     "uiLocalesSupported":[
         "en",
         "es"
@@ -162,6 +165,7 @@
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
+    "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "opPolicyUri":"http://ox.gluu.org/doku.php?id=oxauth:policy",
     "opTosUri":"http://ox.gluu.org/doku.php?id=oxauth:tos",
     "authorizationCodeLifetime":60,
@@ -170,10 +174,13 @@
     "accessTokenLifetime":300,
     "umaResourceLifetime":2592000,
     "sessionAsJwt":false,
-    "umaRequesterPermissionTokenLifetime":3600,
+    "umaRptLifetime": 3600,
+    "umaTicketLifetime": 3600,
+    "umaPctLifetime": 2592000,
     "umaAddScopesAutomatically":true,
     "umaValidateClaimToken":false,
-    "umaGrantAccessIfNoPolicies":true,
+    "umaGrantAccessIfNoPolicies":false,
+    "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
@@ -272,5 +279,13 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "useCacheForAllImplicitFlowObjects":false
+    "useCacheForAllImplicitFlowObjects":false,
+    "disableU2fEndpoint":false,
+	"authenticationProtectionConfiguration": {
+		"attemptExpiration": 15,
+		"maximumAllowedAttempts": 10,
+		"maximumAllowedAttemptsWithoutDelay": 4,
+		"delayTime": 2,
+		"bruteForceProtectionEnabled": false
+	}    
 }
