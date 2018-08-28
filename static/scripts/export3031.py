@@ -25,17 +25,25 @@ import traceback
 import subprocess
 import tempfile
 import getpass
+import platform
 
-os.chdir('/root')
+if len(sys.argv) > 1 and sys.argv[1] and os.path.exists(sys.argv[1]):
+    backupRoot = sys.argv[1]
+    os.chdir(sys.argv[1])
+else:
+    os.chdir('/root')
+    backupRoot = '/root'
+
+
 if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
     sys.exit("Please run this script inside Gluu 3.x container.")
 
-cmd_list = (
-    ("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"),
-    ("Downloading get-pip.py", "wget https://bootstrap.pypa.io/get-pip.py"),
-    ("Running get-pip.py to install pip", "python get-pip.py"),
-    ("Installing python jsonmerge module", "pip install jsonmerge"),
-    )
+cmd_list =[]
+
+cur_dir=os.path.dirname(os.path.realpath(__file__))
+
+if not os.path.exists(os.path.join(cur_dir, 'ldif.py')):
+    cmd_list.append(("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"))
 
 for message, cmd in cmd_list:
     print message
@@ -52,8 +60,9 @@ import os.path
 
 
 class MyLDIF(LDIFParser):
-    def __init__(self, input, output):
+    def __init__(self, input, output, keep_dn=False):
         LDIFParser.__init__(self, input)
+        self.keep_dn = keep_dn
         self.targetDN = None
         self.targetAttr = None
         self.targetEntry = None
@@ -61,6 +70,7 @@ class MyLDIF(LDIFParser):
         self.lastDN = None
         self.lastEntry = None
         self.entries = []
+        self.dn_entry = []
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -75,6 +85,9 @@ class MyLDIF(LDIFParser):
         return LDIFParser._parseAttrTypeandValue(self)
 
     def handle(self, dn, entry):
+        if self.keep_dn:
+            self.dn_entry.append((dn, entry))
+        
         if self.targetDN is None:
             self.targetDN = dn
         self.lastDN = dn
@@ -332,7 +345,7 @@ def doApplinceChanges(oxappliancesPath):
     parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxappliancesPath.replace('/appliance.ldif', '/appliancenew.ldif')
-    # print (newfile)
+
     f = open(newfile, 'w')
     f.write(out)
     f.close()
@@ -350,7 +363,7 @@ def doClientsChangesForUMA2(self, clientPath):
     base64Types = []
     for idx, val in enumerate(parser.entries):
         if 'displayName' in val:
-            if val['displayName'][0] == 'Pasport Resource Server Client':
+            if val['displayName'][0] == 'Passport Resource Server Client':
                 parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
             elif val['displayName'][0] == 'SCIM Resource Server Client':
                 parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
@@ -391,15 +404,15 @@ def doUmaResourcesChangesForUma2(self, UmaPath):
                                                                     'oxId=' + val['oxId'][0]).replace('resource_sets',
                                                                                                       'resources')
             if val['oxId'][0] == 'scim_access':
-                parser.entries[idx]["oxId"] = ['https://' + hostname + ' /oxauth/restv1/uma/scopes/scim_access']
+                parser.entries[idx]["oxId"] = ['https://' + hostname + '/oxauth/restv1/uma/scopes/scim_access']
             elif val['oxId'][0] == 'passport_access':
-                parser.entries[idx]["oxId"] = ['https://' + hostname + ' /oxauth/restv1/uma/scopes/passport_access']
+                parser.entries[idx]["oxId"] = ['https://' + hostname + '/oxauth/restv1/uma/scopes/passport_access']
             if val['displayName'][0] == 'SCIM Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + hostname + ' /identity/restv1/scim/v1']
+                parser.entries[idx]["oxResource"] = ['https://' + hostname + '/identity/restv1/scim/v1']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + scimClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
             elif val['displayName'][0] == 'Passport Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + hostname + ' /identity/restv1/passport/config']
+                parser.entries[idx]["oxResource"] = ['https://' + hostname + '/identity/restv1/passport/config']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + passportClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
 
@@ -446,7 +459,8 @@ def changePassportConfigJson(self, param):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = '/root/backup_3031'
+        self.backupDir = os.path.join(backupRoot, 'backup_3031')
+        
         self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
@@ -465,6 +479,7 @@ class Exporter(object):
         self.grep = '/bin/grep'
         self.hostname = '/bin/hostname'
 
+        
 
         ldap_type = self.getProp('ldap_type')
         if not ldap_type:
@@ -475,7 +490,9 @@ class Exporter(object):
         elif ldap_type == 'opendj':
             bind_dn = '"cn=directory manager"'
             bind_dn_site = '"cn=directory manager"'
-            
+        
+        self.cur_ldap = ldap_type
+        
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                           bind_dn, '-j', self.passwordFile]
 
@@ -608,12 +625,15 @@ class Exporter(object):
     def runAndLog(self, args):
         try:
             logging.debug("Running command : %s" % " ".join(args))
-            si,so,se = os.popen3(' '.join(args))
-            error = se.read()
-            if error:
-                logging.error(error)
+            
+            p = subprocess.Popen(' '.join(args), shell=True, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+            so, se = p.communicate()
+            
+            if se:
+                logging.error(se)
                 logging.debug(traceback.format_exc())
-            return so.read()
+            return so
         except:
             logging.error("Error running command : %s" % " ".join(args))
             logging.error(traceback.format_exc())
@@ -631,7 +651,7 @@ class Exporter(object):
             
             out_file = "%s/ldif/%s.ldif" % (self.backupDir, ou)
             args = [self.ldapsearch] + self.ldapCreds + [
-                '-b', '"%s,o=%s,o=gluu"' % (basedn, orgInum), 'objectclass=*', '>', out_file]
+                '-b', "'%s,o=%s,o=gluu'" % (basedn, orgInum), 'objectclass=*', '>', out_file]
 
             self.runAndLog(args)
 
@@ -727,10 +747,16 @@ class Exporter(object):
 
 
     def getLDAPServerTypeChoice(self):
+        
+        if self.cur_ldap == 'openldap':
+            cur_choice = 1
+        else:
+            cur_choice = 2
+        
         while True:
-            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [2]: ")
+            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [{0}]: ".format(cur_choice))
             if not self.choice.strip():
-                self.choice = 2
+                self.choice = cur_choice
                 break
 
             if self.choice == '1' or self.choice == '2':
@@ -855,6 +881,51 @@ class Exporter(object):
             logging.error("OpenDJ did not start properly. Check "
                           "/opt/opendj/logs/errors. Restart it manually.")
 
+
+    def fixLdapBindDN(self):
+        
+        applience_fn = os.path.join(self.backupDir, 'ldif/appliance.ldif')
+        parser = MyLDIF(open(applience_fn, 'rb'), None, True)
+        parser.parse()
+        tmp_fn = '/tmp/appliance.ldif'
+        processed_fp = open(tmp_fn, 'w')
+        ldif_writer = LDIFWriter(processed_fp)
+        
+        for dn, entry in parser.dn_entry:
+            if 'oxIDPAuthentication' in entry:
+                tmp_json = json.loads(entry['oxIDPAuthentication'][0])
+                tmp_json['bindDN'] = 'cn=Directory Manager'
+                tmp_config = json.loads(tmp_json['config'])
+                tmp_config['bindDN'] = 'cn=Directory Manager'
+                tmp_json['config'] = json.dumps(tmp_config)
+                entry['oxIDPAuthentication'] = [json.dumps(tmp_json)]
+
+            ldif_writer.unparse(dn, entry)
+        
+        processed_fp.close()
+        os.system('cp {0} {1}'.format(tmp_fn, applience_fn))
+        os.remove(tmp_fn)
+        
+        
+        oxtrust_config_fn = os.path.join(self.backupDir, 'ldif/oxtrust_config.ldif')
+        parser = MyLDIF(open(oxtrust_config_fn, 'rb'), None, True)
+        parser.parse()
+        tmp_fn = '/tmp/oxtrust_config.ldif'
+        processed_fp = open(tmp_fn, 'w')
+        ldif_writer = LDIFWriter(processed_fp)
+        
+        for dn, entry in parser.dn_entry:
+            if 'oxTrustConfCacheRefresh' in entry:
+                tmp_json = json.loads(entry['oxTrustConfCacheRefresh'][0])
+                tmp_json['inumConfig']['bindDN'] = 'cn=Directory Manager'
+                entry['oxTrustConfCacheRefresh'] = [json.dumps(tmp_json)]
+
+            ldif_writer.unparse(dn, entry)
+        
+        processed_fp.close()
+        os.system('cp {0} {1}'.format(tmp_fn, oxtrust_config_fn))
+        os.remove(tmp_fn)
+
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
@@ -872,6 +943,8 @@ class Exporter(object):
         self.getLdif()
         self.genProperties()
         self.removeLdapConfig()
+        if self.cur_ldap == 'openldap' and self.choice == 2:
+            self.fixLdapBindDN()
         print("")
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
@@ -879,8 +952,5 @@ class Exporter(object):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 1:
-        print ("Usage: python export3031.py")
-    else:
-        exporter = Exporter()
-        exporter.export()
+    exporter = Exporter()
+    exporter.export()
