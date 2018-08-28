@@ -137,6 +137,6 @@
 
     "scimTestMode":false,
     "ScimProperties": {
-        "maxCount": 1000
+        "maxCount": 200
     }
 }

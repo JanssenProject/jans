@@ -8,9 +8,10 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
+from org.xdi.oxauth.model.uma import UmaConstants
+from org.xdi.model.uma import ClaimDefinitionBuilder
 from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
 from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.uma import ClaimDefinitionBuilder
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 from java.lang import String
@@ -55,7 +56,7 @@ class UmaRptPolicy(UmaRptPolicyType):
             return False
 
     def getClaimsGatheringScriptName(self, context):
-        return ""
+        return UmaConstants.NO_SCRIPT
 
     def prepareClientsSet(self, configurationAttributes):
         clientsSet = HashSet()
