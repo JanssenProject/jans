@@ -51,8 +51,8 @@ class UpdateUser(UpdateUserType):
         print "Update user. updateUser method"
 
         uid = user.getUid()
-        print "Update user. User Uid:", uid
-        
+        print "Update user. User uid: {}".format(uid)
+       
         mail = uid + "@example.org"
         user.setMail(mail)
 
