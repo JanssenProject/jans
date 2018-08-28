@@ -147,7 +147,7 @@ programmingLanguage: python
 dn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Sample client authz UMA RPT Policy
+description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F9A5
