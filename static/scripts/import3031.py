@@ -32,18 +32,33 @@ if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
 
 p = platform.linux_distribution()
 
-cmd_list = [
-        ('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'),
-        ('Running get-pip.py to install pip', 'python get-pip.py'),
-        ('Installing python jsonmerge module', 'pip install jsonmerge'),
-        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py'),
-        ]
+cmd_list = []
 
-if p[0].lower() in ('ubuntu','debian'):
-    cmd_list.insert(0,('Running apt-get update','apt-get update'))
-    cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
-else:
-    cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
+try:
+    import pip
+except:
+    cmd_list.append(('Downloading get-pip.py', 'wget https://bootstrap.pypa.io/get-pip.py'))
+    cmd_list.append(('Running get-pip.py to install pip', 'python get-pip.py'))
+
+try:
+    import jsonmerge
+except:
+    cmd_list.append(("Installing python jsonmerge module", "pip install jsonmerge"))
+
+
+if not os.path.exists('ldifschema_utils.py'):
+
+    cmd_list.append(
+        ('Downloading ldifschema_utils.py', 'wget https://raw.githubusercontent.com/GluuFederation/cluster-mgr/master/testing/ldifschema_utils.py')
+        )
+try:
+    import ldap
+except:
+    if p[0].lower() in ('ubuntu','debian'):
+        cmd_list.insert(0,('Running apt-get update','apt-get update'))
+        cmd_list.insert(0,('Installing python-ldap','apt-get install -y python-ldap'))
+    else:
+        cmd_list.insert(0,('Installing python-ldap','yum install -y python-ldap'))
 
 for message, cmd in cmd_list:
     print message
@@ -733,6 +748,8 @@ class Migration(object):
                         json_value = json.loads(val)
                         if type(json_value) is list:
                             attr_values.extend([json.dumps(v) for v in json_value])
+                        else:
+                            attr_values.append(val)
                     except:
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
@@ -754,15 +771,16 @@ class Migration(object):
                         oxId = entry['inum'][:]
                         entry['oxId'] = oxId
                         del entry['inum']
-                        
+
                 if 'ou=clients' in dn:
-                    if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
+                    if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
                 
             
             ldif_writer.unparse(dn, entry)
-
+        
         # Finally
+        sdb.sdb.close()
         processed_fp.close()
 
         progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
@@ -788,7 +806,7 @@ class Migration(object):
                         line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
 
 
-                    if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
+                    if line.startswith("objectClass:") and line[12:].strip()[:3] == 'ox-':
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
@@ -986,20 +1004,21 @@ class Migration(object):
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
 
-        logging.info("Updating idp-metadata.xml")
-        prop_dict = {}
-        prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
-        prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
-        
-        prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
-        prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+        if os.path.isdir('/opt/shibboleth-idp/metadata/'):
+            logging.info("Updating idp-metadata.xml")
+            prop_dict = {}
+            prop_dict['hostname'] = self.getProp('hostname', prop_file='/install/community-edition-setup/setup.properties.last')
+            prop_dict['orgName'] = self.getProp('orgName', prop_file='/install/community-edition-setup/setup.properties.last')
+            
+            prop_dict['idp3SigningCertificateText'] = open('/etc/certs/idp-signing.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
+            prop_dict['idp3EncryptionCertificateText'] = open('/etc/certs/idp-encryption.crt').read().replace('-----BEGIN CERTIFICATE-----','').replace('-----END CERTIFICATE-----','')
 
-        temp_fn = os.path.join('/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml')
+            temp_fn = '/install/community-edition-setup/static/idp3/metadata/idp-metadata.xml'
 
-        new_saml_meta_data = open(temp_fn).read() % prop_dict
+            new_saml_meta_data = open(temp_fn).read() % prop_dict
 
-        with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
-            f.write(new_saml_meta_data)
+            with open('/opt/shibboleth-idp/metadata/idp-metadata.xml','w') as f:
+                f.write(new_saml_meta_data)
 
 
     def fixPermissions(self):
@@ -1011,8 +1030,10 @@ class Migration(object):
         else:
             self.getOutput(['chown', '-R', 'ldap:ldap', '/opt/opendj/db'])
 
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
-        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+        for fn in ('/opt/shibboleth-idp/metadata', '/opt/shibboleth-idp/conf'):
+            if os.path.exists(fn):
+                self.getOutput(['chown','-R','jetty:jetty',fn])
+                self.getOutput(['chown','-R','jetty:jetty',fn])
 
 
     def getProp(self, prop, prop_file=None):
@@ -1073,6 +1094,9 @@ class Migration(object):
 
                     elif ls[0].strip() == 'idp.authn.LDAP.bindDN':
                         f[i] = 'idp.authn.LDAP.bindDN                           = {0}\n'.format(bindDn)
+                    
+                    elif ls[0].strip() == 'idp.attribute.resolver.LDAP.searchFilter':
+                        f[i] = 'idp.attribute.resolver.LDAP.searchFilter        = (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))\n'
 
             with open(prop_file,'w') as w:
                 w.write(''.join(f))
