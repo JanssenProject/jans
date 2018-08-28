@@ -1,8 +1,7 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2018, Gluu
 #
-# Author: Yuriy Movchan
-#
+# Author: Jose Gonzalez
 
 from org.xdi.model.custom.script.type.client import ClientRegistrationType
 from org.xdi.service.cdi.util import CdiUtil
@@ -17,16 +16,14 @@ class ClientRegistration(ClientRegistrationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Client registration. Initialization"
-        
+        print "Casa client registration. Initialization"
         self.clientRedirectUrisSet = self.prepareClientRedirectUris(configurationAttributes)
-
-        print "Client registration. Initialized successfully"
+        print "Casa client registration. Initialized successfully"
         return True   
 
     def destroy(self, configurationAttributes):
-        print "Client registration. Destroy"
-        print "Client registration. Destroyed successfully"
+        print "Casa client registration. Destroy"
+        print "Casa client registration. Destroyed successfully"
         return True   
 
     # Update client entry before persistent it
@@ -34,29 +31,22 @@ class ClientRegistration(ClientRegistrationType):
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def createClient(self, registerRequest, client, configurationAttributes):
-        print "Client registration. CreateClient method"
 
+        print "Casa client registration. CreateClient method"
         redirectUris = client.getRedirectUris()
-        print "Client registration. Redirect Uris: %s" % redirectUris
+        print "Casa client registration. Redirect Uris: %s" % redirectUris
 
-        addAddressScope = False
+        credManagerClient = False
         for redirectUri in redirectUris:
-            if (self.clientRedirectUrisSet.contains(redirectUri)):
-                addAddressScope = True
+            if self.clientRedirectUrisSet.contains(redirectUri):
+                credManagerClient = True
                 break
         
-        print "Client registration. Is add address scope: %s" % addAddressScope
+        if not credManagerClient:
+            return True
 
-        if addAddressScope:
-            currentScopes = client.getScopes()
-            print "Client registration. Current scopes: %s" % currentScopes
-            
-            scopeService = CdiUtil.bean(ScopeService)
-            addressScope = scopeService.getScopeByDisplayName("address")
-            newScopes = ArrayHelper.addItemToStringArray(currentScopes, addressScope.getDn())
-    
-            print "Client registration. Result scopes: %s" % newScopes
-            client.setScopes(newScopes)
+        print "Casa client registration. Client is Gluu Casa"
+        self.setClientScopes(client, configurationAttributes.get("scopes"))
 
         return True
 
@@ -65,12 +55,33 @@ class ClientRegistration(ClientRegistrationType):
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
-        print "Client registration. UpdateClient method"
+        print "Casa client registration. UpdateClient method"       
+        self.setClientScopes(client, configurationAttributes.get("scopes"))
         return True
 
     def getApiVersion(self):
         return 2
 
+    def setClientScopes(self, client, requiredScopes):
+        
+        if requiredScopes == None:
+            print "Casa client registration. No list of scopes was passed in script parameters"
+            return
+        
+        requiredScopes = StringHelper.split(requiredScopes.getValue2(), ",")
+        newScopes = client.getScopes()
+        scopeService = CdiUtil.bean(ScopeService)
+        
+        for scopeName in requiredScopes:
+            scope = scopeService.getScopeByDisplayName(scopeName)
+            if not scope.getIsDefault():
+                print "Casa client registration. Adding scope '%s'" % scopeName
+                newScopes = ArrayHelper.addItemToStringArray(newScopes, scope.getDn())
+
+        print "Casa client registration. Result scopes are: %s" % newScopes
+        client.setScopes(newScopes)
+        
+        
     def prepareClientRedirectUris(self, configurationAttributes):
         clientRedirectUrisSet = HashSet()
         if not configurationAttributes.containsKey("client_redirect_uris"):
@@ -78,12 +89,12 @@ class ClientRegistration(ClientRegistrationType):
 
         clientRedirectUrisList = configurationAttributes.get("client_redirect_uris").getValue2()
         if StringHelper.isEmpty(clientRedirectUrisList):
-            print "Client registration. The property client_redirect_uris is empty"
+            print "Casa client registration. The property client_redirect_uris is empty"
             return clientRedirectUrisSet    
 
         clientRedirectUrisArray = StringHelper.split(clientRedirectUrisList, ",")
         if ArrayHelper.isEmpty(clientRedirectUrisArray):
-            print "Client registration. No clients specified in client_redirect_uris property"
+            print "Casa client registration. No clients specified in client_redirect_uris property"
             return clientRedirectUrisSet
         
         # Convert to HashSet to quick search

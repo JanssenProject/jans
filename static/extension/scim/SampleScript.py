@@ -1,12 +1,13 @@
 # oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
 # Copyright (c) 2014, Gluu
 #
-# Author: Val Pecaoco
+# Author: Jose Gonzalez
 #
 from org.xdi.model.custom.script.type.scim import ScimType
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.gluu.oxtrust.ldap.service import IPersonService, PersonService
+from org.gluu.oxtrust.ldap.service import PersonService
+from org.xdi.service.cdi.util import CdiUtil
 from org.gluu.oxtrust.model import GluuCustomPerson
 
 import java
@@ -25,6 +26,7 @@ class ScimEventHandler(ScimType):
         return True   
 
     def getApiVersion(self):
+        #return 2 if you want the post* scripts being executed
         return 1
 
     def createUser(self, user, configurationAttributes):
@@ -40,10 +42,10 @@ class ScimEventHandler(ScimType):
         return True
 
     def updateUser(self, user, configurationAttributes):
-        personService = PersonService.instance()
+        personService = CdiUtil.bean(PersonService)
         oldUser = personService.getPersonByUid(user.getUid())
-        print "ScimEventHandler (updateUser): Old displayName = " + oldUser .getDisplayName()
-        print "ScimEventHandler (updateUser): New displayName = " + user.getDisplayName()
+        print "ScimEventHandler (updateUser): Old displayName %s" % oldUser.getDisplayName()
+        print "ScimEventHandler (updateUser): New displayName " + user.getDisplayName()
         return True
 
     def deleteUser(self, user, configurationAttributes):
@@ -60,4 +62,22 @@ class ScimEventHandler(ScimType):
 
     def deleteGroup(self, group, configurationAttributes):
         print "ScimEventHandler (deleteGroup): Current displayName = " + group.getDisplayName()
+        return True
+        
+    def postCreateUser(self, user, configurationAttributes):
+        return True
+
+    def postUpdateUser(self, user, configurationAttributes):
+        return True
+
+    def postDeleteUser(self, user, configurationAttributes):
+        return True
+
+    def postUpdateGroup(self, group, configurationAttributes):
+        return True
+
+    def postCreateGroup(self, group, configurationAttributes):
+        return True
+
+    def postDeleteGroup(self, group, configurationAttributes):
         return True

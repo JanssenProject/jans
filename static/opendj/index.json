@@ -56,6 +56,13 @@
 	},
 
 	{
+		"attribute": "oxAuthClientSecretExpiresAt",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxAuthGrantId",
 		"type": "string",
 		"index": ["equality"],
@@ -190,6 +197,20 @@
 
 	{
 		"attribute": "oxExternalUid",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxTicket",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	}, 
+		
+	{
+		"attribute": "oxAuthCreation",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
