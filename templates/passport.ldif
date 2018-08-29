@@ -1,5 +1,5 @@
 # Passport Resource Server Client
-dn: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+-dn: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 inum: %(passport_rs_client_id)s
