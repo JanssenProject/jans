@@ -71,7 +71,7 @@ class DBLDIF(LDIFParser):
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
-        self.sdb[dn] = entry
+        self.sdb[str(dn)] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -716,7 +716,6 @@ class Migration(object):
                 primaryKey = idp_config['primaryKey']
                 localPrimaryKey = idp_config['localPrimaryKey']
 
-        
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp,  
                                     base64_attrs=['gluuProfileConfiguration'])
@@ -741,7 +740,7 @@ class Migration(object):
             
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
-
+    
 
             if 'ou=appliances' in dn:
                 if 'oxIDPAuthentication' in new_entry:
@@ -763,7 +762,7 @@ class Migration(object):
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
             for attr in old_entry.keys():
-                
+   
                 if attr in ignoreList:
                     continue
                 
@@ -786,6 +785,7 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
+            
             ldif_writer.unparse(dn, new_entry)
 
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -796,6 +796,8 @@ class Migration(object):
         ldif_shelve_dict = {}
         
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
+
+
 
             progress_bar(cnt, nodn, 'Perapring DNs for 3.1.2')
             if "o=site" in dn:
@@ -809,7 +811,13 @@ class Migration(object):
                 sdb.parse()
                 ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
-            entry = ldif_shelve_dict[cur_ldif_file][dn]
+            entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
+
+            #Do not import guuStatus
+            if ('gluuAttributeName' in entry) and ('gluuStatus' in entry['gluuAttributeName']):
+                print "IGNORE", dn
+                continue
+
 
             #MB: (1) TODO: instead of processing ldif twice, appy this method for (2)
             if 'ou=people' in dn:
@@ -873,6 +881,7 @@ class Migration(object):
                 if 'ou=clients' in dn:
                     if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
+
 
             ldif_writer.unparse(dn, entry)
 
@@ -1211,8 +1220,10 @@ class Migration(object):
         self.copyCertificates()
         self.copyCustomFiles()
         self.copyIDPFiles()
+        
         if self.version < 300 or self.ldap_type == 'opendj':
             self.copyCustomSchema()
+            
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
