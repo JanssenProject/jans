@@ -37,7 +37,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Functional tests for Authorize Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version March 31, 2018
+ * @version August 29, 2018
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
@@ -366,6 +366,75 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 401, "Unexpected response code: " + authorizationResponse.getStatus());
         assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT);
+        assertNotNull(authorizationResponse.getErrorType(), "The error type is null");
+        assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationCodeFail4(
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationCodeFail4");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+
+        // 3. Request authorization
+        List<String> scopes = Arrays.asList("openid", "email");
+        String nonce = UUID.randomUUID().toString();
+        String redirectUri = "https://evil.com/oxLicenceAdmin";
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(authorizationResponse.getStatus(), 400, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getErrorType(), "The error type is null");
         assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
