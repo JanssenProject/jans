@@ -2363,7 +2363,7 @@ class Setup(object):
         detectedHostname = None
 
         try:
-            detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
+            detectedHostname = socket.gethostbyaddr(self.ip)[0]
         except:
             try:
                 detectedHostname = os.popen("/bin/hostname").read().strip()
