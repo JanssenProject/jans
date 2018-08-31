@@ -169,7 +169,7 @@ paths:
                   - active
                   - client_id
                   - username
-                  - scopes
+                  - scope
                   - token_type
                   - sub
                   - aud
@@ -190,7 +190,7 @@ paths:
                   username:
                     type: string
                     example: John Black
-                  scopes:
+                  scope:
                     type: array
                     items:
                       type: string
