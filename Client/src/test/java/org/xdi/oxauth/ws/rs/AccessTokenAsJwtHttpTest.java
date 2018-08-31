@@ -60,6 +60,7 @@ public class AccessTokenAsJwtHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
     }
 
     private RegisterResponse registerClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
