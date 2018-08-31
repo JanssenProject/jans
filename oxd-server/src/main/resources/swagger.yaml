@@ -209,18 +209,18 @@ paths:
                   exp:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when this token will expire
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                    example: 1535709072
                   iat:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when the token was issued at
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                    example: 1535709072
                   nbf:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when the token not to be used before
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                    example: 1535709072
                   jti:
                     type: string
                     description: a unique identifier for the JWT
@@ -1195,18 +1195,18 @@ paths:
                   exp:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when this token will expire
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                    example: 1535709072
                   iat:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when the token was issued at
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                    example: 1535709072
                   nbf:
                     type: integer
                     format: int64
-                    description: number of milliseconds since January 1 1970 UTC, indicating when the token not to be used before
-                    example: 1335205592410
+                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                    example: 1535709072
                   permissions:
                     type: array
                     items:
