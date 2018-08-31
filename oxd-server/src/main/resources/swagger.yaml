@@ -169,7 +169,7 @@ paths:
                   - active
                   - client_id
                   - username
-                  - scopes
+                  - scope
                   - token_type
                   - sub
                   - aud
@@ -178,6 +178,8 @@ paths:
                   - iat
                   - acr_values
                   - extension_field
+                  - nbf
+                  - jti
                 properties:
                   active:
                     type: boolean
@@ -188,7 +190,7 @@ paths:
                   username:
                     type: string
                     example: John Black
-                  scopes:
+                  scope:
                     type: array
                     items:
                       type: string
@@ -206,10 +208,22 @@ paths:
                     example: https://as.gluu.org/
                   exp:
                     type: integer
-                    example: 299
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                    example: 1535709072
                   iat:
                     type: integer
-                    example: 1419350238
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                    example: 1535709072
+                  nbf:
+                    type: integer
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                    example: 1535709072
+                  jti:
+                    type: string
+                    description: a unique identifier for the JWT
                   acr_values:
                     type: array
                     items:
@@ -279,7 +293,7 @@ paths:
                 example: ["basic"]
               client_name:
                 type: string
-                description: oxd will generate its own non-human readable name by defaultif client_name is not specified
+                description: oxd will generate its own non-human readable name by default if client_name is not specified
               client_jwks_uri:
                 type: string
               client_token_endpoint_auth_method:
@@ -1172,6 +1186,7 @@ paths:
                   - active
                   - exp
                   - iat
+                  - nbf
                   - permissions
                 properties:
                   active:
@@ -1179,10 +1194,19 @@ paths:
                     example: true
                   exp:
                     type: integer
-                    example: 299
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                    example: 1535709072
                   iat:
                     type: integer
-                    example: 1419350238
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                    example: 1535709072
+                  nbf:
+                    type: integer
+                    format: int64
+                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                    example: 1535709072
                   permissions:
                     type: array
                     items:
