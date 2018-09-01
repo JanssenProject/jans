@@ -138,5 +138,7 @@
     "scimTestMode":false,
     "ScimProperties": {
         "maxCount": 200
-    }
+    },
+    "cleanServiceInterval":300,
+    "passwordResetRequestExpirationTime":600
 }
