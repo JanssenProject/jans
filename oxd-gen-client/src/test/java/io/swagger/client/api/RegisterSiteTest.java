@@ -35,14 +35,13 @@ public class RegisterSiteTest {
     public void register(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws Exception {
 
         DevelopersApi client = api();
-        //
+
         RegisterSiteResponseData resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
         assertNotNull(resp);
         notEmpty(resp.getOxdId());
-        //
+
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
-        //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -57,7 +56,6 @@ public class RegisterSiteTest {
         assertNotNull(resp);
         assertNotNull(resp.getOxdId());
         oxdId = resp.getOxdId();
-
     }
 
     @Test(dependsOnMethods = {"register"})
