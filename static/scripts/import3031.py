@@ -27,8 +27,8 @@ import base64
 import platform
 
 
-#if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
-#    sys.exit("Please run this script inside Gluu 3.x container.")
+if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+    sys.exit("Please run this script inside Gluu 3.x container.")
 
 p = platform.linux_distribution()
 
@@ -1132,20 +1132,20 @@ class Migration(object):
         
         self.getLDAPServerTypeChoice()
         self.getoxIDPAuthentication()
-        #self.verifyBackupData()
-        #self.setupWorkDirectory()
-        #self.stopWebapps()
-        #self.stopLDAPServer()
-        #self.copyCertificates()
-        #self.copyCustomFiles()
-        #self.copyIDPFiles()
-        #self.copyCustomSchema()
-        #self.exportInstallData()
+        self.verifyBackupData()
+        self.setupWorkDirectory()
+        self.stopWebapps()
+        self.stopLDAPServer()
+        self.copyCertificates()
+        self.copyCustomFiles()
+        self.copyIDPFiles()
+        self.copyCustomSchema()
+        self.exportInstallData()
         self.processBackupData()
-        #self.importProcessedData()
-        #self.fixPermissions()
-        #self.startLDAPServer()
-        #self.idpResolved()
+        self.importProcessedData()
+        self.fixPermissions()
+        self.startLDAPServer()
+        self.idpResolved()
         print("============================================================")
         
         if self.passport_strategies:
