@@ -11,8 +11,7 @@ import org.testng.annotations.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RemoveSiteTest {
 
@@ -24,17 +23,10 @@ public class RemoveSiteTest {
         String oxdId = response.getOxdId();
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(oxdId);
-        ApiResponse<UpdateSiteResponse> apiResponse =
-                api.removeSiteWithHttpInfo(Tester.getAuthorization(), params);
-        assertTrue(apiResponse.getStatusCode() == 200);
-        assertNotNull(apiResponse);
-        assertNotNull(apiResponse.getData());
-        /*
-        Swagger hub doesn't generate RemoveSiteResponse for some reason, so we have to
-        use UpdateSiteResponse.
-         */
-        UpdateSiteResponse removeSiteResponse = apiResponse.getData();
-        final UpdateSiteResponseData responseData = removeSiteResponse.getData();
+        UpdateSiteResponse removeSiteResp =
+                api.removeSite(Tester.getAuthorization(), params);
+        assertNotNull(removeSiteResp);
+        final UpdateSiteResponseData responseData = removeSiteResp.getData();
         assertNotNull(responseData);
         assertTrue(StringUtils.isNotEmpty(responseData.getOxdId()));
     }
@@ -50,7 +42,8 @@ public class RemoveSiteTest {
         /*
         //FIXME: Status code should be 404, and not 200.
          */
-        assertTrue(removeSiteResponse.getStatusCode() == 200);
+        assertEquals(removeSiteResponse.getStatusCode(), 200);
     }
+
 
 }
