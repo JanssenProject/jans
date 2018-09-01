@@ -815,7 +815,6 @@ class Migration(object):
 
             #Do not import guuStatus
             if ('gluuAttributeName' in entry) and ('gluuStatus' in entry['gluuAttributeName']):
-                print "IGNORE", dn
                 continue
 
 
