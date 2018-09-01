@@ -313,6 +313,20 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     os.rename(newfile, oxAuthPath)
 
 
+def addMigratedData(data):
+    json_file = os.path.join(exporter.backupDir, 'migrate_data.json')
+    
+    if os.path.exists(json_file):
+        cur_data = json.loads(open(json_file).read())
+    else:
+        cur_data = []
+
+    cur_data.append(data)
+    
+    with open(json_file,'w') as w:
+        w.write(json.dumps(cur_data))
+
+
 def removeDeprecatedScripts(self, oxScriptPath):
     parser = MyLDIF(open(oxScriptPath, 'rb'), sys.stdout)
     parser.parse()
@@ -320,10 +334,11 @@ def removeDeprecatedScripts(self, oxScriptPath):
     newfile = oxScriptPath.replace('/scripts.ldif', '/scripts_new.ldif')
     f = open(newfile, 'a')
     for idx, val in enumerate(parser.entries):
-        if 'displayName' in val:
-            if val['displayName'][0] != 'uma_authorization_policy':
-                out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
-                f.write(out)
+        if 'inum' in val and val['inum'][0].endswith('2DAF.F995'):
+            addMigratedData({'inum':val['inum'][0], 'gluuStatus': val['gluuStatus'][0]})
+            continue
+        out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+        f.write(out)
     f.close()
 
     os.remove(oxScriptPath)

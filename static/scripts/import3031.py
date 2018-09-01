@@ -27,8 +27,8 @@ import base64
 import platform
 
 
-if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
-    sys.exit("Please run this script inside Gluu 3.x container.")
+#if not os.path.exists('/etc/gluu/conf/ox-ldap.properties'):
+#    sys.exit("Please run this script inside Gluu 3.x container.")
 
 p = platform.linux_distribution()
 
@@ -151,6 +151,15 @@ class MyLDIF(LDIFParser):
             if self.targetAttr in entry:
                 self.targetAttr = entry[self.targetAttr]
 
+
+def getMigratedConfig(key_type, key_value):
+    migrate_data_json_fn = os.path.join(backup_dir, 'migrate_data.json')
+    
+    if os.path.exists(migrate_data_json_fn):
+        config = json.loads(open(migrate_data_json_fn).read())
+        for conf in config:
+            if conf.get(key_type) == key_value:
+                return conf
 
 class Migration(object):
     def __init__(self, backup):
@@ -645,6 +654,11 @@ class Migration(object):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
 
+            #If uma_rpt_policy is enabled on old system enable here
+            if 'inum' in new_entry and new_entry['inum'][0].endswith('2DAF.F995'):
+                conf_data = getMigratedConfig('inum', new_entry['inum'][0])
+                new_entry['gluuStatus'] = [ conf_data['gluuStatus'] ]
+
             if 'ou=appliances' in dn:
                 if 'oxIDPAuthentication' in new_entry:
                     oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
@@ -695,9 +709,8 @@ class Migration(object):
                     new_entry['gluuPassportConfiguration'] = new_strategies.values()
             
             ldif_writer.unparse(dn, new_entry)
-        
-        
-        
+
+
         progress_bar(0, 0, 'Rewriting DNs', True)
         
         # Pick all the left out DNs from the old DN map and write them to the LDIF
@@ -1119,20 +1132,20 @@ class Migration(object):
         
         self.getLDAPServerTypeChoice()
         self.getoxIDPAuthentication()
-        self.verifyBackupData()
-        self.setupWorkDirectory()
-        self.stopWebapps()
-        self.stopLDAPServer()
-        self.copyCertificates()
-        self.copyCustomFiles()
-        self.copyIDPFiles()
-        self.copyCustomSchema()
-        self.exportInstallData()
+        #self.verifyBackupData()
+        #self.setupWorkDirectory()
+        #self.stopWebapps()
+        #self.stopLDAPServer()
+        #self.copyCertificates()
+        #self.copyCustomFiles()
+        #self.copyIDPFiles()
+        #self.copyCustomSchema()
+        #self.exportInstallData()
         self.processBackupData()
-        self.importProcessedData()
-        self.fixPermissions()
-        self.startLDAPServer()
-        self.idpResolved()
+        #self.importProcessedData()
+        #self.fixPermissions()
+        #self.startLDAPServer()
+        #self.idpResolved()
         print("============================================================")
         
         if self.passport_strategies:
@@ -1149,5 +1162,6 @@ if __name__ == "__main__":
         print "Usage: ./import3031.py <path_to_backup_folder>"
         print "Example:\n ./import3031.py /root/backup_3031"
     else:
-        migrator = Migration(sys.argv[1])
+        backup_dir = sys.argv[1]
+        migrator = Migration(backup_dir)
         migrator.migrate()
