@@ -129,16 +129,17 @@ public class IntrospectionWebService {
                             }
                         } else {
                             log.error("Failed to find grant for access_token: " + p_token);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
                     } else {
                         log.error("Access token is not valid. Valid: " + (authorizationAccessToken != null && authorizationAccessToken.isValid()));
+                        return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
                     }
                 } else {
                     log.error("Authorization grant is null.");
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
                 }
-
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
