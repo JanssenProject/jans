@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version September 3, 2018
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
@@ -60,7 +60,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.addCustomParameter("mail", userEmail);
@@ -77,8 +76,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
@@ -113,7 +110,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.addCustomParameter("uid", userId);
@@ -130,8 +126,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "userInum", "userEmail", "sectorIdentifierUri"})
@@ -166,7 +160,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.addCustomParameter("mail", userEmail);
@@ -183,8 +176,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -221,7 +212,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.addCustomParameter("uid", userId);
@@ -240,8 +230,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "sectorIdentifierUri"})
