@@ -1058,6 +1058,48 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
 
+dn: inum=%(inumOrg)s!0005!4A0A,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!4A0A
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeName: eduPersonPrincipalNamePrior
+description: Person principal name prior
+displayName: eduPersonPrincipalNamePrior
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeEditType: admin
+gluuAttributeViewType: admin
+gluuStatus: inactive
+urn: oid:1.3.6.1.4.1.5923.1.1.1.12
+
+dn: inum=%(inumOrg)s!0005!4A0B,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!4A0B
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeName: eduPersonUniqueId
+description: Person unique Id
+displayName: eduPersonUniqueId
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeEditType: admin
+gluuAttributeViewType: admin
+gluuStatus: inactive
+urn: oid:1.3.6.1.4.1.5923.1.1.1.13
+
+dn: inum=%(inumOrg)s!0005!4A0C,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!4A0C
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeName: eduPersonOrcid
+description: ORCID researcher identifiers belonging to the principal
+displayName: eduPersonOrcid
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeEditType: admin
+gluuAttributeViewType: admin
+gluuStatus: inactive
+urn: oid:1.3.6.1.4.1.5923.1.1.1.16
+
 dn: inum=%(inumOrg)s!0005!5039,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
