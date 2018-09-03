@@ -671,7 +671,7 @@ class Exporter(object):
             self.runAndLog(args)
 
         if oxVersion < '3.1.2':
-            removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
+            #removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
             doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
             doUmaResourcesChangesForUma2(self, "%s/ldif/uma.ldif" % self.backupDir)
             changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
