@@ -112,7 +112,7 @@ class DBLDIF(LDIFParser):
         sdb_file = os.path.join('/tmp', db_file+'.sdb')
         if os.path.exists(sdb_file):
             os.remove(sdb_file)
-        #logging.info("\nDumping %s to shelve database" % ldif_file)
+        logging.debug("Dumping %s to shelve database" % ldif_file)
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
@@ -616,17 +616,20 @@ class Migration(object):
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
+        ldif_shelve_dict = {}
+
         attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
 
         processed_fp = open(self.processTempFile, 'w')
 
         ldif_writer = LDIFWriter(processed_fp)
 
-
         # Determine current primary key
         
         appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
         appliences.parse()
+        
+        oxScripts = []
         
         for entry in appliences.entries:
             if 'oxIDPAuthentication' in entry:
@@ -638,6 +641,7 @@ class Migration(object):
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
+
         ignoreList = ['objectClass', 'ou', 'oxIDPAuthentication',
                       'gluuFreeMemory', 'gluuSystemUptime',
                       'oxLogViewerConfig', 'gluuLastUpdate']
@@ -648,16 +652,35 @@ class Migration(object):
         if self.oxIDPAuthentication == 1:
             ignoreList.remove('oxIDPAuthentication')
 
+        #First dump scripts.ldif, we need it to determine if gluuStatus of script is enabled
+        sdb=DBLDIF(os.path.join(self.ldifDir, 'scripts.ldif'))
+        sdb.parse()
+        ldif_shelve_dict['scripts.ldif']=sdb.sdb
+
+        script_replacements = {
+                '@!4B1F.7902.08B0.401D!0001!D6AE.31BA!0011!2DAF.F995': '@!4B1F.7902.08B0.401D!0001!D6AE.31BA!0011!2DAF.F9A5'
+            }
+
+        enabled_scripts = []
+        
+        for dn in ldif_shelve_dict['scripts.ldif']:
+            entry = ldif_shelve_dict['scripts.ldif'][dn]
+            if ('gluuStatus' in entry) and (entry['gluuStatus'][0] == 'true'):
+                inum = entry['inum'][0]
+                enabled_scripts.append(script_replacements.get(inum, inum))
+
         # Rewriting all the new DNs in the new installation to ldif file
         nodn=len(currentDNs)
         for cnt, dn in enumerate(currentDNs):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
 
-            #If uma_rpt_policy is enabled on old system enable here
-            if 'inum' in new_entry and new_entry['inum'][0].endswith('2DAF.F995'):
-                conf_data = getMigratedConfig('inum', new_entry['inum'][0])
-                new_entry['gluuStatus'] = [ conf_data['gluuStatus'] ]
+            #If the script was previously enabled, eneble now
+            if 'oxCustomScript' in new_entry['objectClass']:
+                oxScripts.append(dn)
+                if new_entry['inum'][0] in enabled_scripts:
+                    logging.debug('Enabling script inum: %s' % new_entry['inum'][0])
+                    new_entry['gluuStatus']=['true']
 
             if 'ou=appliances' in dn:
                 if 'oxIDPAuthentication' in new_entry:
@@ -670,13 +693,14 @@ class Migration(object):
 
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
-            if dn not in old_dn_map.keys():
-                #  Write to the file if there is no matching old DN data
+            
+            #  Write to the file if there is no matching old DN data, or it is custom script.
+            if (dn not in old_dn_map) or (dn in oxScripts):
+                
                 ldif_writer.unparse(dn, new_entry)
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
-
 
             for attr in old_entry.keys():
                 if attr in ignoreList:
@@ -716,7 +740,6 @@ class Migration(object):
         # Pick all the left out DNs from the old DN map and write them to the LDIF
         nodn = len(old_dn_map)
         
-        ldif_shelve_dict = {}
         
         sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
 
@@ -725,6 +748,8 @@ class Migration(object):
             
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
+            
+            #Do not import any dn existing in new system
             if dn in currentDNs:
                 continue  # Already processed
 
@@ -788,10 +813,9 @@ class Migration(object):
                 if 'ou=clients' in dn:
                     if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
-                
-            
+
             ldif_writer.unparse(dn, entry)
-        
+
         # Finally
         sdb.sdb.close()
         processed_fp.close()
@@ -828,7 +852,7 @@ class Migration(object):
 
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
-                    base64Types = [""]
+                    #base64Types = [""]
                     # for idx, val in enumerate(parser.entries):
                     # if 'displayName' in val:
                     #     if val['displayName'][0] == 'SCIM Resource Set':
