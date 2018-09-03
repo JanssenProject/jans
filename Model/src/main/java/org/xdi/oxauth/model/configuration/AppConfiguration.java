@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 31, 2018
+ * @version September 3, 2018
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -173,6 +173,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableJdkLogger = true;
     private Set<String> authorizationRequestCustomAllowedParameters;
     private Boolean legacyDynamicRegistrationScopeParam;
+    private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration; 
@@ -1387,6 +1388,14 @@ public class AppConfiguration implements Configuration {
 
     public void setLegacyDynamicRegistrationScopeParam(Boolean legacyDynamicRegistrationScopeParam) {
         this.legacyDynamicRegistrationScopeParam = legacyDynamicRegistrationScopeParam;
+    }
+
+    public Boolean getOpenidScopeBackwardCompatibility() {
+        return openidScopeBackwardCompatibility;
+    }
+
+    public void setOpenidScopeBackwardCompatibility(Boolean openidScopeBackwardCompatibility) {
+        this.openidScopeBackwardCompatibility = openidScopeBackwardCompatibility;
     }
 
     public Boolean getDisableU2fEndpoint() {
