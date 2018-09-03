@@ -6,24 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -31,11 +13,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.ResponseAsserter;
-import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -45,11 +23,25 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for the Client Authentication Filter (embedded)
  *
  * @author Javier Rojas Blum
- * @version March 4, 2016
+ * @version September 3, 2018
  */
 public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
@@ -60,7 +52,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 	private static String authorizationCode1;
 	private static String customAttrValue1;
 
-	@Parameters({ "registerPath", "redirectUris" })
+	@Parameters({"registerPath", "redirectUris"})
 	@Test
 	public void requestClientRegistrationWithCustomAttributes(final String registerPath, final String redirectUris)
 			throws Exception {
@@ -78,10 +70,10 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
 
-	        List<GrantType> grantTypes = Arrays.asList(
-	                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-	        );
-	        registerRequest.setGrantTypes(grantTypes);
+			List<GrantType> grantTypes = Arrays.asList(
+					GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+			);
+			registerRequest.setGrantTypes(grantTypes);
 
 			registerRequestContent = registerRequest.getJSONParameters().toString(4);
 		} catch (JSONException e) {
@@ -99,10 +91,10 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 		clientId = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
-	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
 	@Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
 	public void requestAccessTokenCustomClientAuth1Step1(final String authorizePath, final String userId,
-			final String userSecret, final String redirectUri) throws Exception {
+														 final String userSecret, final String redirectUri) throws Exception {
 		final String state = UUID.randomUUID().toString();
 		final String nonce = UUID.randomUUID().toString();
 
@@ -150,8 +142,8 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 		}
 	}
 
-	@Parameters({ "tokenPath", "redirectUri" })
-	@Test(dependsOnMethods = { "requestAccessTokenCustomClientAuth1Step1" })
+	@Parameters({"tokenPath", "redirectUri"})
+	@Test(dependsOnMethods = {"requestAccessTokenCustomClientAuth1Step1"})
 	public void requestAccessTokenCustomClientAuth1Step2(final String tokenPath, final String redirectUri)
 			throws Exception {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
@@ -193,16 +185,16 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 		}
 	}
 
-	@Parameters({ "tokenPath", "userId", "userSecret" })
+	@Parameters({"tokenPath", "userId", "userSecret"})
 	@Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
 	public void requestAccessTokenCustomClientAuth2(final String tokenPath, final String userId,
-			final String userSecret) throws Exception {
+													final String userSecret) throws Exception {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
 		TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
 		tokenRequest.setUsername(userId);
 		tokenRequest.setPassword(userSecret);
-		tokenRequest.setScope("openid profile email");
+		tokenRequest.setScope("profile email");
 		tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 		tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
@@ -223,7 +215,6 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 		try {
 			JSONObject jsonObj = new JSONObject(entity);
 			assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-			assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
 			assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
 			assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
 			assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
