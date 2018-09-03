@@ -2387,7 +2387,7 @@ class Setup(object):
             elif self.os_type in ('centos', 'red', 'fedora'):
                 suffix = 'rpm'
 
-            if glob.glob(self.distFolder+'/symas/symas-openldap*.'+suffix):
+            if self.allowDeprecatedApplications and glob.glob(self.distFolder+'/symas/symas-openldap*.'+suffix):
                 backend_types.append(('OpenLDAP Gluu Edition','openldap'))
                 
             if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
