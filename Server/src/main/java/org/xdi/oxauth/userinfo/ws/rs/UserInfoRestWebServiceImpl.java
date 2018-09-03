@@ -6,28 +6,6 @@
 
 package org.xdi.oxauth.userinfo.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -39,14 +17,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.AuthorizationGrantType;
-import org.xdi.oxauth.model.common.DefaultScope;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -73,21 +44,31 @@ import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.PairwiseIdentifierService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version June 30, 2018
+ * @version September 3, 2018
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -161,12 +142,19 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 } else if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
                     builder = Response.status(403);
                     builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
-                } else if (!authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())
+                } else if (appConfiguration.getOpenidScopeBackwardCompatibility()
+                        && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())
                         && !authorizationGrant.getScopes().contains(DefaultScope.PROFILE.toString())) {
                     builder = Response.status(403);
                     builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
-                } else {
+                } else if (!appConfiguration.getOpenidScopeBackwardCompatibility()
+                        && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())) {
+                    builder = Response.status(403);
+                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
+                }
+                else {
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                     CacheControl cacheControl = new CacheControl();
                     cacheControl.setPrivate(true);

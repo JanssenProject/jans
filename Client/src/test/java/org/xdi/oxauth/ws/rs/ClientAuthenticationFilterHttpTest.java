@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version September 3, 2018
  */
 public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
@@ -157,12 +157,10 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
         String username = userId;
         String password = userSecret;
-        String scope = "openid";
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(username);
         tokenRequest.setPassword(password);
-        tokenRequest.setScope(scope);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
@@ -176,7 +174,5 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 }

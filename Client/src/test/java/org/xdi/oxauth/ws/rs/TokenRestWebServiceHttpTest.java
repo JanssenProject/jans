@@ -29,7 +29,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version August 16, 2017
+ * @version September 3, 2018
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -110,10 +110,9 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         // 2. Request Resource Owner Credentials Grant
         String username = userId;
         String password = userSecret;
-        String scope = "openid";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
+        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, null,
                 clientId, clientSecret);
 
         showClient(tokenClient);
@@ -122,8 +121,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -162,10 +159,9 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         // 2. Request Resource Owner Credentials Grant
         String username = userId;
         String password = "BAD_PASSWORD";
-        String scope = "openid";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
+        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, null,
                 clientId, clientSecret);
 
         showClient(tokenClient);
@@ -210,7 +206,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         request.setUsername(userId);
         request.setPassword(userSecret);
-        request.setScope("openid");
         request.setAuthUsername(clientId);
         request.setAuthPassword(clientSecret);
         request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
@@ -225,8 +220,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -267,7 +260,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -284,8 +276,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -326,7 +316,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -344,8 +333,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -386,7 +373,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -404,8 +390,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -450,7 +434,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -470,8 +453,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -516,7 +497,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -536,8 +516,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
@@ -582,7 +560,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -601,8 +578,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
@@ -647,7 +622,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -667,8 +641,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
@@ -713,7 +685,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -733,8 +704,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
@@ -779,7 +748,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -799,8 +767,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -845,7 +811,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -865,8 +830,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -911,7 +874,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -931,8 +893,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
@@ -977,7 +937,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -996,8 +955,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
@@ -1042,7 +999,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1062,8 +1018,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
@@ -1108,7 +1062,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1128,8 +1081,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
@@ -1174,7 +1125,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
-        tokenRequest.setScope("openid");
 
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1194,8 +1144,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getScope(), "The scope is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -1229,12 +1177,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         // 2. Request with invalid Client Secret
         String username = userId;
         String password = userSecret;
-        String scope = "openid";
 
         TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         request.setUsername(username);
         request.setPassword(password);
-        request.setScope(scope);
         request.setAuthUsername(clientId);
         request.setAuthPassword("INVALID_CLIENT_SECRET");
         request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);

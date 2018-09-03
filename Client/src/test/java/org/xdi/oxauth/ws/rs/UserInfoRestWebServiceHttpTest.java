@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version September 3, 2018
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -1494,4 +1494,56 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         return authorizationResponse;
     }
 
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestUserInfoWithoutOpenidScope(final String userId, final String userSecret,
+                                                  final String redirectUris, final String redirectUri,
+                                                  final String sectorIdentifierUri) throws Exception {
+        showTitle("requestUserInfoWithoutOpenidScope");
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN
+        );
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        String clientId = registerResponse.getClientId();
+        // 2. Request authorization
+        List<String> scopes = Arrays.asList("profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
+        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
+        assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
+        String accessToken = authorizationResponse.getAccessToken();
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 403, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getErrorType(), "Unexpected result: errorType not found");
+        assertNotNull(userInfoResponse.getErrorDescription(), "Unexpected result: errorDescription not found");
+    }
 }
