@@ -318,9 +318,15 @@ class Setup(object):
         self.inumOrgFN = None
         self.inumApplianceFN = None
         self.ldapBaseFolderldapPass = None
+
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
+
+        self.idp_client_id = None
+        self.idpClient_pw = None
+        self.idpClient_encoded_pw = None
+
         self.oxTrustConfigGeneration = None
 
         self.oxd_hostname = '%(oxd_hostname)s'
@@ -816,6 +822,9 @@ class Setup(object):
         if not self.oxauth_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.oxauth_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
+
+            clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.idp_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
         if not self.scim_rs_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.scim_rs_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
@@ -1485,8 +1494,13 @@ class Setup(object):
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
             self.encoded_openldapJksPass = self.obscure(self.openldapJksPass)
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
+
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
+
+            self.idpClient_pw = self.getPW()
+            self.idpClient_encoded_pw = self.obscure(self.idpClient_pw)
+
             self.encoded_couchbaseTrustStorePass = self.obscure(self.couchbaseTrustStorePass)
         except:
             self.logIt("Error encoding passwords", True)
