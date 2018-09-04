@@ -47,7 +47,7 @@ public class ValidationService {
             validate((HasProtectionAccessTokenParams) params);
         }
 
-        if (!(params instanceof RegisterSiteParams)) {
+        if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
             try {
                 String oxdId = ((HasOxdIdParams) params).getOxdId();
                 if (StringUtils.isNotBlank(oxdId)) {
@@ -63,7 +63,7 @@ public class ValidationService {
                 }
                 // ignore
             } catch (Exception e) {
-                LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);
+                LOG.error("Failed to identify RP. Message: " + e.getMessage(), e);
             }
         }
         if (params instanceof GetClientTokenParams) {
