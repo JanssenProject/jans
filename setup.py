@@ -2129,6 +2129,10 @@ class Setup(object):
 
         # Create logs folder
         self.run([self.cmd_mkdir, '-p', '%s/server/logs' % self.gluu_passport_base])
+        
+        #create empty log file
+        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
+        open(log_file,'w')
 
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
