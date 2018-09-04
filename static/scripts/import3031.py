@@ -658,7 +658,7 @@ class Migration(object):
         ldif_shelve_dict['scripts.ldif']=sdb.sdb
 
         script_replacements = {
-                '@!4B1F.7902.08B0.401D!0001!D6AE.31BA!0011!2DAF.F995': '@!4B1F.7902.08B0.401D!0001!D6AE.31BA!0011!2DAF.F9A5'
+                self.inumOrg + '!0011!2DAF.F995': self.inumOrg +'!0011!2DAF.F9A5'
             }
 
         enabled_scripts = []
@@ -741,7 +741,7 @@ class Migration(object):
         nodn = len(old_dn_map)
         
         
-        sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
+        sector_identifiers = 'ou=sector_identifiers,o={0},o=gluu'.format(self.inumOrg)
 
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
