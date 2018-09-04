@@ -51,6 +51,7 @@ public class SetUpTest {
             Preconditions.checkNotNull(Tester.getAuthorization());
             LOG.debug("Tester's authorization is set.");
 
+            io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrl); // manual swagger tests setup
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
             LOG.error("Failed to start suite.", e);
