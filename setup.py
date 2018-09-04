@@ -2397,7 +2397,10 @@ class Setup(object):
             self.installLdap = True
             option = None
             
-            if backend_types:
+            if len(backend_types) == 1:
+                self.ldap_type = backend_types[0][1] 
+            
+            else:
                 prompt_text = 'Install '
                 options = []
                 for i, backend in enumerate(backend_types):
