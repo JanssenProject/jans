@@ -2106,10 +2106,18 @@ class Setup(object):
         except:
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
+        
+        passport_modules_archive = os.path.join(self.distGluuFolder, 'passport-%s-node_modules.tar.gz' % self.githubBranchName)
+        modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
+        self.run([self.cmd_mkdir, '-p', modules_target_dir])
 
-        # Install dependencies
-        try:
-            self.logIt("Running npm install in %s" % self.gluu_passport_base)
+        if os.path.exists(passport_modules_archive):
+            self.logIt("Extracting passport node modules")
+            self.run(['tar', '--strip', '1', '-xzf', passport_modules_archive, '-C', modules_target_dir, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+        else:
+            # Install dependencies
+            try: 
+                self.logIt("Running npm install in %s" % self.gluu_passport_base)
 
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
