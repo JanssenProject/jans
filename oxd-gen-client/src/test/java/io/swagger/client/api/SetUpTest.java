@@ -34,7 +34,7 @@ public class SetUpTest {
 
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
-            LOG.error("Failed to start suite.", e);
+            LOG.error("Failed to start swagger suite.", e);
             throw new AssertionError("Failed to start suite.");
         }
     }
