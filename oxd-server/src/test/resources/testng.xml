@@ -125,4 +125,8 @@
             <class name="org.xdi.oxd.server.IntrospectAccessTokenTest"/>
         </classes>
     </test>
+
+    <suite-files>
+        <suite-file path="swagger-testng.xml" />
+    </suite-files>
 </suite>
