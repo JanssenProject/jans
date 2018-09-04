@@ -762,6 +762,17 @@ class Migration(object):
 
             entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
 
+
+            #Add client_credentials to oxAuthGrantType if client is custom client
+            if 'oxAuthClient' in entry['objectClass']:
+                inum = entry['inum'][0]
+                inum_l = inum.split('!0008!')
+                #custom clients has three quads
+                if inum_l[1].count('.') > 2:
+                    if entry['oxAuthGrantType'] and  not 'client_credentials' in entry['oxAuthGrantType']:
+                        logging.debug('Adding client_credentials to oxAuthGrantType of client inum=%s', inum)
+                        entry['oxAuthGrantType'].append('client_credentials')
+
             # Fix grabbed users form passport authentication
             if 'oxExternalUid' in entry:
                 new_oxExternalUid = []
