@@ -867,6 +867,22 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
+
+    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None):
+        # Enable service autoload on Gluu-Server startup
+        if self.os_type in ['centos', 'fedora', 'red']:
+            if self.os_initdaemon == 'systemd':
+                self.run(["/usr/bin/systemctl", 'enable', serviceName])
+            else:
+                self.run(["/sbin/chkconfig", serviceName, "on"])
+        elif self.os_type in ['ubuntu', 'debian']:
+            cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
+            if startSequence and stopSequence:
+                cmd_list.append(str(startSequence))
+                cmd_list.append(str(stopSequence))
+            self.run(cmd_list)
+
+
     # = File system  =================================================================
     def findFiles(self, filePatterns, filesFolder):
         foundFiles = []
@@ -2122,6 +2138,8 @@ class Setup(object):
         # Install passport system service script
         self.installNodeService('passport')
 
+        # enable service at startup
+        self.enable_service_at_start('passport')
 
     def install_gluu_components(self):
         if self.installLdap:
@@ -3142,6 +3160,10 @@ class Setup(object):
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if applicationConfiguration['installed']:
                 self.run_service_command(applicationName, 'start')
+                
+        # Passport service
+        if self.installPassport:
+            self.run_service_command('passport', 'start')
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
