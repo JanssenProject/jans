@@ -102,7 +102,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
         // yuriyz : we have to re-visit this since it doesn't look safe to redirect error to uri which is not validated.
-        if (pair.getFirst() == null && pair.getSecond() == null) {
+        if (pair.getFirst() == null && pair.getSecond() == null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
             try {
             	String error = errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
                 return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(error).build();
