@@ -703,6 +703,8 @@ class Migration(object):
         logging.info('Processing the LDIF data.')
         attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
         
+        ldif_shelve_dict = {}
+        oxScripts = []
         
         # Determine current primary key
         
@@ -734,6 +736,24 @@ class Migration(object):
             ignoreList.remove('oxIDPAuthentication')
 
 
+        #First dump scripts.ldif, we need it to determine if gluuStatus of script is enabled
+        sdb=DBLDIF(os.path.join(self.ldifDir, 'scripts.ldif'))
+        sdb.parse()
+        ldif_shelve_dict['scripts.ldif']=sdb.sdb
+
+        script_replacements = {
+                self.inumOrg + '!0011!2DAF.F995': self.inumOrg +'!0011!2DAF.F9A5'
+            }
+
+        enabled_scripts = []
+        
+        for dn in ldif_shelve_dict['scripts.ldif']:
+            entry = ldif_shelve_dict['scripts.ldif'][dn]
+            if ('gluuStatus' in entry) and (entry['gluuStatus'][0] == 'true'):
+                inum = entry['inum'][0]
+                enabled_scripts.append(script_replacements.get(inum, inum))
+
+
         # Rewriting all the new DNs in the new installation to ldif file
         nodn=len(currentDNs)
         for cnt, dn in enumerate(currentDNs):
@@ -741,6 +761,14 @@ class Migration(object):
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
     
+
+            #If the script was previously enabled, eneble now
+            if 'oxCustomScript' in new_entry['objectClass']:
+                oxScripts.append(dn)
+                if new_entry['inum'][0] in enabled_scripts:
+                    logging.debug('Enabling script inum: %s' % new_entry['inum'][0])
+                    new_entry['gluuStatus']=['true']
+
 
             if 'ou=appliances' in dn:
                 if 'oxIDPAuthentication' in new_entry:
@@ -755,8 +783,9 @@ class Migration(object):
 
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
-            if dn not in old_dn_map.keys():
-                #  Write to the file if there is no matching old DN data
+
+            if (dn not in old_dn_map) or (dn in oxScripts):
+                
                 ldif_writer.unparse(dn, new_entry)
                 continue
 
@@ -793,13 +822,12 @@ class Migration(object):
         # Pick all the left out DNs from the old DN map and write them to the LDIF
         nodn = len(old_dn_map)
         
-        ldif_shelve_dict = {}
         
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
 
 
 
-            progress_bar(cnt, nodn, 'Perapring DNs for 3.1.2')
+            progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
@@ -816,6 +844,17 @@ class Migration(object):
             #Do not import guuStatus
             if ('gluuAttributeName' in entry) and ('gluuStatus' in entry['gluuAttributeName']):
                 continue
+
+            #Add client_credentials to oxAuthGrantType if client is custom client
+            if 'oxAuthClient' in entry['objectClass']:
+                inum = entry['inum'][0]
+                inum_l = inum.split('!0008!')
+                #custom clients has three quads
+                if inum_l[1].count('.') > 2:
+                    if entry['oxAuthGrantType'] and  not 'client_credentials' in entry['oxAuthGrantType']:
+                        logging.debug('Adding client_credentials to oxAuthGrantType of client inum=%s', inum)
+                        entry['oxAuthGrantType'].append('client_credentials')
+
 
 
             #MB: (1) TODO: instead of processing ldif twice, appy this method for (2)
@@ -1229,7 +1268,7 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         self.idpResolved()
-        #self.startWebapps()
+
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
