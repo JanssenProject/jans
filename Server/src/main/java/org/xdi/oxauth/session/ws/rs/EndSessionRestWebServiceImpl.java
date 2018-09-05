@@ -33,7 +33,6 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
-import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
@@ -94,13 +93,15 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
-        EndSessionParamsValidator.validateParams(idTokenHint, sessionId, errorResponseFactory);
+        validateIdTokenHint(idTokenHint);
+        validateSessionIdRequestParameter(sessionId);
 
-        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
+        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse);
 
         auditLogging(httpRequest, pair);
 
         //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
+        // yuriyz : we have to re-visit this since it doesn't look safe to redirect error to uri which is not validated.
         if (pair.getFirst() == null && pair.getSecond() == null) {
             try {
             	String error = errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
@@ -113,19 +114,53 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return httpBased(postLogoutRedirectUri, state, pair);
     }
 
+    private void validateSessionIdRequestParameter(String sessionId) {
+        // session_id is not required but if it is present then we must validate it #831
+        if (StringUtils.isNotBlank(sessionId)) {
+            SessionId sessionIdObject = sessionIdService.getSessionId(sessionId);;
+            if (sessionIdObject == null) {
+                final String reason = "session_id parameter in request is not valid. Logout is rejected. session_id parameter in request can be skipped or otherwise valid value must be provided.";
+                log.error(reason);
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
+                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+            }
+        }
+    }
+
+    private void validateIdTokenHint(String idTokenHint) {
+        // id_token_hint is not required but if it is present then we must validate it #831
+        if (StringUtils.isNotBlank(idTokenHint)) {
+            AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
+            if (authorizationGrant == null) {
+                final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
+                log.error(reason);
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
+                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+            }
+        }
+    }
+
+    private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
+        try {
+            if (pair.getSecond() == null) {
+                return redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
+            } else {
+                return redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+            }
+        } catch (WebApplicationException e) {
+            if (pair.getFirst() != null) { // session_id was found and removed
+                String reason = "Session was removed successfully but redirect to post_logout_redirect_uri fails since AS failed to validate it against clients associated with session (which was just removed).";
+                log.error(reason, e);
+                throw new WebApplicationException(Response.status(Response.Status.OK).entity(
+                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, reason)).build());
+            } else {
+                throw e;
+            }
+        }
+    }
 
     public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair) {
-        SessionId sessionId = pair.getFirst();
-        AuthorizationGrant authorizationGrant = pair.getSecond();
-
-        // Validate redirectUri
-        String redirectUri;
-        if (authorizationGrant == null) {
-            redirectUri = redirectionUriService.validatePostLogoutRedirectUri(sessionId, postLogoutRedirectUri);
-        } else {
-            redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
-        }
-
+        final String redirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
         final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
         final String html = constructPage(frontchannelLogoutUris, redirectUri, state);
         log.debug("Constructed http logout page: " + html);
@@ -136,8 +171,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 build();
     }
 
-    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId,
-                                                           HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
+    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
             Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
@@ -265,10 +299,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 if (ldapSessionId != null) {
                     boolean result = sessionIdService.remove(ldapSessionId);
                     if (!result) {
-                        log.error("Failed to remove session_id '{}'", id);
+                        log.error("Failed to remove consent_session_id '{}'", id);
                     }
                 } else {
-                    log.error("Failed to load session by session_id: '{}'", id);
+                    log.error("Failed to load session by consent_session_id: '{}'", id);
                 }
             }
         } catch (Exception e) {
