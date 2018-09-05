@@ -6,13 +6,14 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Base class for error responses.
@@ -26,6 +27,7 @@ public abstract class ErrorResponse {
 
 	private String errorDescription;
 	private String errorUri;
+	private String reason;
 
 	/**
 	 * Returns the error code of the response.
@@ -88,7 +90,15 @@ public abstract class ErrorResponse {
 		this.errorUri = errorUri;
 	}
 
-	/**
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    /**
 	 * Returns a query string representation of the object.
 	 *
 	 * @return The object represented in a query string.
@@ -108,6 +118,10 @@ public abstract class ErrorResponse {
 				queryStringBuilder.append("&error_uri=").append(
 						URLEncoder.encode(errorUri, "UTF-8"));
 			}
+
+            if (StringUtils.isNotBlank(reason)) {
+                queryStringBuilder.append("&reason=").append(URLEncoder.encode(reason, "UTF-8"));
+            }
 
 			if (getState() != null && !getState().isEmpty()) {
 				queryStringBuilder.append("&state=").append(getState());
@@ -138,6 +152,10 @@ public abstract class ErrorResponse {
 			if (errorUri != null && !errorUri.isEmpty()) {
 				jsonObj.put("error_uri", errorUri);
 			}
+
+			if (StringUtils.isNotBlank(reason)) {
+			    jsonObj.put("reason", reason);
+            }
 
 			if (getState() != null && !getState().isEmpty()) {
 				jsonObj.put("state", getState());
