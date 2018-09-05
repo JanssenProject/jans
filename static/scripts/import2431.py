@@ -926,7 +926,7 @@ class Migration(object):
         # Finally
         processed_fp.close()
 
-        progress_bar(0, 0, 'Perapring DNs for 3.1.2', True)
+        progress_bar(0, 0, 'Perapring DNs for ' + self.oxVersion, True)
         
         #MB: (2) replace the following with above method
         # Update the Schema change for lastModifiedTime
