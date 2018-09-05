@@ -15,7 +15,7 @@ import static junit.framework.Assert.assertTrue;
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class RemoveSiteTest {
+public class RemoveSiteSwaggerTest {
 
     @Test
     @Parameters({"opHost", "redirectUrl"})
