@@ -1,10 +1,10 @@
 package org.xdi.oxauth.util;
 
-import java.io.File;
-
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+
+import java.io.File;
 
 /**
  * Creates a deployment from a build Web Archive using ShrinkWrap ZipImporter
@@ -25,8 +25,12 @@ public class Deployments {
 				// Servlets
 		        .addAsWebInfResource("jetty-env.xml").addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
 				.setWebXML("web.xml");
-	    File dir = new File("src/main/webapp");
-	    addFiles(war, dir);
+	    try {
+            File dir = new File("src/main/webapp");
+            addFiles(war, dir);
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
 
 	    return war;
 	}
