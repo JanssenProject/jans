@@ -87,6 +87,12 @@ public class ErrorResponseFactory implements Configuration {
         return getErrorResponse(p_type).toJSonString();
     }
 
+    public String errorAsJson(IErrorType p_type, String reason) {
+        final DefaultErrorResponse error = getErrorResponse(p_type);
+        error.setReason(reason);
+        return error.toJSonString();
+    }
+
     public void throwUnauthorizedException(IErrorType type) throws WebApplicationException {
         throwWebApplicationException(Response.Status.UNAUTHORIZED, type);
     }
