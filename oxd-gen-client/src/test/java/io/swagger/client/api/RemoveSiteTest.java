@@ -40,9 +40,10 @@ public class RemoveSiteTest {
         ApiResponse<UpdateSiteResponse> removeSiteResponse =
                 api.removeSiteWithHttpInfo(Tester.getAuthorization(), params);
         /*
-        //FIXME: Status code should be 404, and not 200.
+        FIXME: Status code should be 404, and not 200.
          */
         assertEquals(removeSiteResponse.getStatusCode(), 200);
+        assertTrue("error".equalsIgnoreCase(removeSiteResponse.getData().getStatus()));
     }
 
 
