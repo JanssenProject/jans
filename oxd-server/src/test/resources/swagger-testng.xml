@@ -24,12 +24,13 @@
             <class name="io.swagger.client.api.RegisterSiteTest"/>
         </classes>
     </test-->
+
+    <test name="Remove site" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.RemoveSiteTest"/>
+        </classes>
+    </test>
     <!--
-        <test name="Remove site" enabled="true">
-            <classes>
-                <class name="io.swagger.client.api.RemoveSiteTest"/>
-            </classes>
-        </test>
         <test name="Get authorization url" enabled="true">
             <classes>
                 <class name="io.swagger.client.api.GetAuthorizationUrlTest"/>
