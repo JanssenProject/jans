@@ -19,11 +19,11 @@
                value="{'resources':[{'path':'/GetAll','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'ticketScopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}}]}]}"/>
 
     <!-- Connect -->
-    <test name="Register site" enabled="true">
+    <!--test name="Register site" enabled="true">
         <classes>
             <class name="io.swagger.client.api.RegisterSiteTest"/>
         </classes>
-    </test>
+    </test-->
     <!--
         <test name="Remove site" enabled="true">
             <classes>
