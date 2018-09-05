@@ -126,7 +126,11 @@
         </classes>
     </test>
 
-    <suite-files>
-        <suite-file path="swagger-testng.xml" />
-    </suite-files>
+    <!-- SWAGGER TESTS -->
+
+    <test name="Remove site swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.RemoveSiteSwaggerTest"/>
+        </classes>
+    </test>
 </suite>
