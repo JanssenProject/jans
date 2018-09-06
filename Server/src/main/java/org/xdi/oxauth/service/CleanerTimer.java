@@ -55,7 +55,7 @@ import org.xdi.service.timer.schedule.TimerSchedule;
 @Named
 public class CleanerTimer {
 
-    public final static int BATCH_SIZE = 100;
+    public final static int BATCH_SIZE = 25;
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
     @Inject
