@@ -279,6 +279,16 @@
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.ocpsoft.rewrite</groupId>
+					<artifactId>rewrite-config-prettyfaces</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.ocpsoft.rewrite</groupId>
+					<artifactId>rewrite-servlet</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- oxEleven -->
@@ -322,16 +332,6 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
-
-		<!-- Pretty Faces -->
-		<dependency>
-			<groupId>org.ocpsoft.rewrite</groupId>
-			<artifactId>rewrite-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ocpsoft.rewrite</groupId>
-			<artifactId>rewrite-config-prettyfaces</artifactId>
 		</dependency>
 
 			<!-- OmniFaces -->
