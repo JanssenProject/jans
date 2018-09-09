@@ -3,7 +3,7 @@
 <suite name="oxD Suite" parallel="false">
 
     <parameter name="host" value="http://localhost"/>
-    <parameter name="opHost" value="https://dev.ubuntuvm.my"/>
+    <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
     <parameter name="logoutUrl" value="https://client.example.com/logout"/>
