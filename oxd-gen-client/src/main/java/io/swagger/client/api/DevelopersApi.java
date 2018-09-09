@@ -46,6 +46,7 @@ import io.swagger.client.model.IntrospectRptResponse;
 import io.swagger.client.model.RegisterSiteParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.RemoveSiteParams;
+import io.swagger.client.model.RemoveSiteResponse;
 import io.swagger.client.model.UmaRpGetClaimsGatheringUrlParams;
 import io.swagger.client.model.UmaRpGetClaimsGatheringUrlResponse;
 import io.swagger.client.model.UmaRpGetRptParams;
@@ -53,6 +54,7 @@ import io.swagger.client.model.UmaRpGetRptResponse;
 import io.swagger.client.model.UmaRsCheckAccessParams;
 import io.swagger.client.model.UmaRsCheckAccessResponse;
 import io.swagger.client.model.UmaRsProtectParams;
+import io.swagger.client.model.UmaRsProtectResponse;
 import io.swagger.client.model.UpdateSiteParams;
 import io.swagger.client.model.UpdateSiteResponse;
 
@@ -1351,11 +1353,11 @@ public class DevelopersApi {
      * Removes site from oxd-server
      * @param authorization  (optional)
      * @param removeSiteParams  (optional)
-     * @return UpdateSiteResponse
+     * @return RemoveSiteResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public UpdateSiteResponse removeSite(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
-        ApiResponse<UpdateSiteResponse> resp = removeSiteWithHttpInfo(authorization, removeSiteParams);
+    public RemoveSiteResponse removeSite(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
+        ApiResponse<RemoveSiteResponse> resp = removeSiteWithHttpInfo(authorization, removeSiteParams);
         return resp.getData();
     }
 
@@ -1364,12 +1366,12 @@ public class DevelopersApi {
      * Removes site from oxd-server
      * @param authorization  (optional)
      * @param removeSiteParams  (optional)
-     * @return ApiResponse&lt;UpdateSiteResponse&gt;
+     * @return ApiResponse&lt;RemoveSiteResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<UpdateSiteResponse> removeSiteWithHttpInfo(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
+    public ApiResponse<RemoveSiteResponse> removeSiteWithHttpInfo(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
         com.squareup.okhttp.Call call = removeSiteValidateBeforeCall(authorization, removeSiteParams, null, null);
-        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<RemoveSiteResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
@@ -1382,7 +1384,7 @@ public class DevelopersApi {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call removeSiteAsync(String authorization, RemoveSiteParams removeSiteParams, final ApiCallback<UpdateSiteResponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call removeSiteAsync(String authorization, RemoveSiteParams removeSiteParams, final ApiCallback<RemoveSiteResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1404,7 +1406,7 @@ public class DevelopersApi {
         }
 
         com.squareup.okhttp.Call call = removeSiteValidateBeforeCall(authorization, removeSiteParams, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<RemoveSiteResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
@@ -1843,11 +1845,11 @@ public class DevelopersApi {
      * UMA RS Protect Resources. It&#39;s important to have a single HTTP method, mentioned only once within a given path in JSON, otherwise, the operation will fail.
      * @param authorization  (optional)
      * @param umaRsProtectParams  (optional)
-     * @return UpdateSiteResponse
+     * @return UmaRsProtectResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public UpdateSiteResponse umaRsProtect(String authorization, UmaRsProtectParams umaRsProtectParams) throws ApiException {
-        ApiResponse<UpdateSiteResponse> resp = umaRsProtectWithHttpInfo(authorization, umaRsProtectParams);
+    public UmaRsProtectResponse umaRsProtect(String authorization, UmaRsProtectParams umaRsProtectParams) throws ApiException {
+        ApiResponse<UmaRsProtectResponse> resp = umaRsProtectWithHttpInfo(authorization, umaRsProtectParams);
         return resp.getData();
     }
 
@@ -1856,12 +1858,12 @@ public class DevelopersApi {
      * UMA RS Protect Resources. It&#39;s important to have a single HTTP method, mentioned only once within a given path in JSON, otherwise, the operation will fail.
      * @param authorization  (optional)
      * @param umaRsProtectParams  (optional)
-     * @return ApiResponse&lt;UpdateSiteResponse&gt;
+     * @return ApiResponse&lt;UmaRsProtectResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<UpdateSiteResponse> umaRsProtectWithHttpInfo(String authorization, UmaRsProtectParams umaRsProtectParams) throws ApiException {
+    public ApiResponse<UmaRsProtectResponse> umaRsProtectWithHttpInfo(String authorization, UmaRsProtectParams umaRsProtectParams) throws ApiException {
         com.squareup.okhttp.Call call = umaRsProtectValidateBeforeCall(authorization, umaRsProtectParams, null, null);
-        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<UmaRsProtectResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
@@ -1874,7 +1876,7 @@ public class DevelopersApi {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call umaRsProtectAsync(String authorization, UmaRsProtectParams umaRsProtectParams, final ApiCallback<UpdateSiteResponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call umaRsProtectAsync(String authorization, UmaRsProtectParams umaRsProtectParams, final ApiCallback<UmaRsProtectResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1896,7 +1898,7 @@ public class DevelopersApi {
         }
 
         com.squareup.okhttp.Call call = umaRsProtectValidateBeforeCall(authorization, umaRsProtectParams, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<UmaRsProtectResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
