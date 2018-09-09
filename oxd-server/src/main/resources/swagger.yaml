@@ -104,7 +104,7 @@ paths:
                   - refresh_token
                 properties:
                   scope:
-                    type: string
+                      type: string
                     example: ["openid"]
                   access_token:
                     type: string
@@ -483,13 +483,8 @@ paths:
                 type: string
                 example: ok
               data:
-                type: object
-                required:
-                  - oxd_id
-                properties:
-                  oxd_id:
-                    type: string
-                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
+                $ref: "#/definitions/UpdateSiteResponseData"
+
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -536,13 +531,7 @@ paths:
                 type: string
                 example: ok
               data:
-                type: object
-                required:
-                  - oxd_id
-                properties:
-                  oxd_id:
-                    type: string
-                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
+                $ref: "#/definitions/RemoveSiteResponseData"
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1368,4 +1357,40 @@ paths:
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
-          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).             
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+
+definitions:
+  # List of reusable properties
+  oxd_id:
+    type: string
+    example: bcad760f-91ba-46e1-a020-05e4281d91b6
+
+  # Schemas
+  UpdateSiteResponseData:
+    type: object
+    required:
+    - oxd_id
+    properties:
+      oxd_id:
+        $ref: "#/definitions/oxd_id"
+      error:
+        type: string
+      errorDescription:
+        type: string
+      details:
+        type: object
+
+  RemoveSiteResponseData:
+    type: object
+    required:
+    - oxd_id
+    properties:
+      oxd_id:
+        $ref: "#/definitions/oxd_id"
+      error:
+        type: string
+      errorDescription:
+        type: string
+      details:
+        type: object
+
