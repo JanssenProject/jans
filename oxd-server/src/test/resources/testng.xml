@@ -130,7 +130,7 @@
 
     <test name="Remove site swagger" enabled="true">
         <classes>
-            <class name="io.swagger.client.api.RegisterSiteTest"/>
+            <class name="io.swagger.client.api.RemoveSiteTest"/>
         </classes>
     </test>
 </suite>
