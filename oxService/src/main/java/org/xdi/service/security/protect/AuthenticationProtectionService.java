@@ -30,7 +30,7 @@ public abstract class AuthenticationProtectionService {
     public void create() {
         init();
     }
-    
+
     protected abstract void init();
 
     public void storeAttempt(String key, boolean success) {
