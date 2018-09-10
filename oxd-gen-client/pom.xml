@@ -223,7 +223,7 @@
     <dependencies>
         <dependency>
             <groupId>org.xdi</groupId>
-            <artifactId>oxauth-client</artifactId>
+            <artifactId>oxd-common</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
