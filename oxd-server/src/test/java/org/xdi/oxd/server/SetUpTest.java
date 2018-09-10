@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
@@ -61,6 +62,9 @@ public class SetUpTest {
 
     private static void setupSwaggerSuite(String host, String opHost, String redirectUrl) {
         try {
+            if (StringUtils.countMatches(host, ":") < 2 && "http://localhost".equalsIgnoreCase(host) || "http://127.0.0.1".equalsIgnoreCase(host) ) {
+                host = host + ":" + SetUpTest.SUPPORT.getLocalPort();
+            }
             io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrl); // manual swagger tests setup
         } catch (Throwable e) {
             LOG.error("Failed to setup swagger suite.");
