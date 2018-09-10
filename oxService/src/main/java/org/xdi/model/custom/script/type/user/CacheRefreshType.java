@@ -8,6 +8,7 @@ package org.xdi.model.custom.script.type.user;
 import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.custom.script.model.bind.BindCredentials;
 import org.xdi.model.custom.script.type.BaseExternalType;
 
 /**
@@ -17,7 +18,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface CacheRefreshType extends BaseExternalType {
 
-    public String getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes);
+    public BindCredentials getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes);
 
     public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes);
 

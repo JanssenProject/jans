@@ -8,6 +8,7 @@ package org.xdi.model.custom.script.type.user;
 import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.custom.script.model.bind.BindCredentials;
 
 /**
  * Dummy implementation of interface CacheRefreshType
@@ -37,7 +38,7 @@ public class DummyCacheRefreshType implements CacheRefreshType {
 	}
 
     @Override
-    public String getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public BindCredentials getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes) {
         return null;
     }
 
