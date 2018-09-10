@@ -48,7 +48,6 @@ public class RemoveSiteTest {
         RemoveSiteResponse removeSiteResponse = apiResponse.getData();
         assertNotNull(removeSiteResponse);
         assertNotNull(removeSiteResponse.getData());
-        assertNotNull(removeSiteResponse.getData().getError());
         final String error = removeSiteResponse.getData().getError();
         assertEquals(error, ErrorResponseCode.INVALID_OXD_ID.getCode());
 
