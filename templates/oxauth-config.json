@@ -1,7 +1,7 @@
 {
     "issuer":"https://%(hostname)s",
-    "loginPage":"https://%(hostname)s/oxauth/login",
-    "authorizationPage":"https://%(hostname)s/oxauth/authorize",
+    "loginPage":"https://%(hostname)s/oxauth/login.htm",
+    "authorizationPage":"https://%(hostname)s/oxauth/authorize.htm",
     "baseEndpoint":"https://%(hostname)s/oxauth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/oxauth/restv1/authorize",
     "tokenEndpoint":"https://%(hostname)s/oxauth/restv1/token",
