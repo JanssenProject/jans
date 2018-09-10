@@ -90,7 +90,6 @@ public class SocketService {
                                 " re-tries. Shutdown the server.");
                     }
 
-                    LOG.debug("Start new SocketProcessor...");
                     executorService().execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
