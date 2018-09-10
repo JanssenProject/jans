@@ -50,7 +50,7 @@ public class RemoveSiteTest {
         assertNotNull(removeSiteResponse.getData());
         assertNotNull(removeSiteResponse.getData().getError());
         final String error = removeSiteResponse.getData().getError();
-        assertTrue(error.equals(ErrorResponseCode.INVALID_OXD_ID.getCode()));
+        assertEquals(error, ErrorResponseCode.INVALID_OXD_ID.getCode());
 
     }
 
