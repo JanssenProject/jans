@@ -17,6 +17,8 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface CacheRefreshType extends BaseExternalType {
 
-    boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes);
+    public String getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
