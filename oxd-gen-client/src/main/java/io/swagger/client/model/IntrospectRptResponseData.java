@@ -34,10 +34,13 @@ public class IntrospectRptResponseData {
   private Boolean active = null;
 
   @SerializedName("exp")
-  private Integer exp = null;
+  private Long exp = null;
 
   @SerializedName("iat")
-  private Integer iat = null;
+  private Long iat = null;
+
+  @SerializedName("nbf")
+  private Long nbf = null;
 
   @SerializedName("permissions")
   private List<Object> permissions = new ArrayList<>();
@@ -60,40 +63,58 @@ public class IntrospectRptResponseData {
     this.active = active;
   }
 
-  public IntrospectRptResponseData exp(Integer exp) {
+  public IntrospectRptResponseData exp(Long exp) {
     this.exp = exp;
     return this;
   }
 
    /**
-   * Get exp
+   * number of seconds since January 1 1970 UTC, indicating when this token will expire
    * @return exp
   **/
-  @ApiModelProperty(example = "299", required = true, value = "")
-  public Integer getExp() {
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when this token will expire")
+  public Long getExp() {
     return exp;
   }
 
-  public void setExp(Integer exp) {
+  public void setExp(Long exp) {
     this.exp = exp;
   }
 
-  public IntrospectRptResponseData iat(Integer iat) {
+  public IntrospectRptResponseData iat(Long iat) {
     this.iat = iat;
     return this;
   }
 
    /**
-   * Get iat
+   * number of seconds since January 1 1970 UTC, indicating when the token was issued at
    * @return iat
   **/
-  @ApiModelProperty(example = "1419350238", required = true, value = "")
-  public Integer getIat() {
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when the token was issued at")
+  public Long getIat() {
     return iat;
   }
 
-  public void setIat(Integer iat) {
+  public void setIat(Long iat) {
     this.iat = iat;
+  }
+
+  public IntrospectRptResponseData nbf(Long nbf) {
+    this.nbf = nbf;
+    return this;
+  }
+
+   /**
+   * number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+   * @return nbf
+  **/
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when the token not to be used before")
+  public Long getNbf() {
+    return nbf;
+  }
+
+  public void setNbf(Long nbf) {
+    this.nbf = nbf;
   }
 
   public IntrospectRptResponseData permissions(List<Object> permissions) {
@@ -132,12 +153,13 @@ public class IntrospectRptResponseData {
     return Objects.equals(this.active, introspectRptResponseData.active) &&
         Objects.equals(this.exp, introspectRptResponseData.exp) &&
         Objects.equals(this.iat, introspectRptResponseData.iat) &&
+        Objects.equals(this.nbf, introspectRptResponseData.nbf) &&
         Objects.equals(this.permissions, introspectRptResponseData.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(active, exp, iat, permissions);
+    return Objects.hash(active, exp, iat, nbf, permissions);
   }
 
 
@@ -149,6 +171,7 @@ public class IntrospectRptResponseData {
     sb.append("    active: ").append(toIndentedString(active)).append("\n");
     sb.append("    exp: ").append(toIndentedString(exp)).append("\n");
     sb.append("    iat: ").append(toIndentedString(iat)).append("\n");
+    sb.append("    nbf: ").append(toIndentedString(nbf)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");
     return sb.toString();

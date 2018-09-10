@@ -39,8 +39,8 @@ public class IntrospectAccessTokenResponseData {
   @SerializedName("username")
   private String username = null;
 
-  @SerializedName("scopes")
-  private List<String> scopes = new ArrayList<>();
+  @SerializedName("scope")
+  private List<String> scope = new ArrayList<>();
 
   @SerializedName("token_type")
   private String tokenType = null;
@@ -55,10 +55,16 @@ public class IntrospectAccessTokenResponseData {
   private String iss = null;
 
   @SerializedName("exp")
-  private Integer exp = null;
+  private Long exp = null;
 
   @SerializedName("iat")
-  private Integer iat = null;
+  private Long iat = null;
+
+  @SerializedName("nbf")
+  private Long nbf = null;
+
+  @SerializedName("jti")
+  private String jti = null;
 
   @SerializedName("acr_values")
   private List<String> acrValues = new ArrayList<>();
@@ -120,27 +126,27 @@ public class IntrospectAccessTokenResponseData {
     this.username = username;
   }
 
-  public IntrospectAccessTokenResponseData scopes(List<String> scopes) {
-    this.scopes = scopes;
+  public IntrospectAccessTokenResponseData scope(List<String> scope) {
+    this.scope = scope;
     return this;
   }
 
-  public IntrospectAccessTokenResponseData addScopesItem(String scopesItem) {
-    this.scopes.add(scopesItem);
+  public IntrospectAccessTokenResponseData addScopeItem(String scopeItem) {
+    this.scope.add(scopeItem);
     return this;
   }
 
    /**
-   * Get scopes
-   * @return scopes
+   * Get scope
+   * @return scope
   **/
   @ApiModelProperty(required = true, value = "")
-  public List<String> getScopes() {
-    return scopes;
+  public List<String> getScope() {
+    return scope;
   }
 
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
+  public void setScope(List<String> scope) {
+    this.scope = scope;
   }
 
   public IntrospectAccessTokenResponseData tokenType(String tokenType) {
@@ -215,40 +221,76 @@ public class IntrospectAccessTokenResponseData {
     this.iss = iss;
   }
 
-  public IntrospectAccessTokenResponseData exp(Integer exp) {
+  public IntrospectAccessTokenResponseData exp(Long exp) {
     this.exp = exp;
     return this;
   }
 
    /**
-   * Get exp
+   * number of seconds since January 1 1970 UTC, indicating when this token will expire
    * @return exp
   **/
-  @ApiModelProperty(example = "299", required = true, value = "")
-  public Integer getExp() {
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when this token will expire")
+  public Long getExp() {
     return exp;
   }
 
-  public void setExp(Integer exp) {
+  public void setExp(Long exp) {
     this.exp = exp;
   }
 
-  public IntrospectAccessTokenResponseData iat(Integer iat) {
+  public IntrospectAccessTokenResponseData iat(Long iat) {
     this.iat = iat;
     return this;
   }
 
    /**
-   * Get iat
+   * number of seconds since January 1 1970 UTC, indicating when the token was issued at
    * @return iat
   **/
-  @ApiModelProperty(example = "1419350238", required = true, value = "")
-  public Integer getIat() {
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when the token was issued at")
+  public Long getIat() {
     return iat;
   }
 
-  public void setIat(Integer iat) {
+  public void setIat(Long iat) {
     this.iat = iat;
+  }
+
+  public IntrospectAccessTokenResponseData nbf(Long nbf) {
+    this.nbf = nbf;
+    return this;
+  }
+
+   /**
+   * number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+   * @return nbf
+  **/
+  @ApiModelProperty(example = "1535709072", required = true, value = "number of seconds since January 1 1970 UTC, indicating when the token not to be used before")
+  public Long getNbf() {
+    return nbf;
+  }
+
+  public void setNbf(Long nbf) {
+    this.nbf = nbf;
+  }
+
+  public IntrospectAccessTokenResponseData jti(String jti) {
+    this.jti = jti;
+    return this;
+  }
+
+   /**
+   * a unique identifier for the JWT
+   * @return jti
+  **/
+  @ApiModelProperty(required = true, value = "a unique identifier for the JWT")
+  public String getJti() {
+    return jti;
+  }
+
+  public void setJti(String jti) {
+    this.jti = jti;
   }
 
   public IntrospectAccessTokenResponseData acrValues(List<String> acrValues) {
@@ -305,20 +347,22 @@ public class IntrospectAccessTokenResponseData {
     return Objects.equals(this.active, introspectAccessTokenResponseData.active) &&
         Objects.equals(this.clientId, introspectAccessTokenResponseData.clientId) &&
         Objects.equals(this.username, introspectAccessTokenResponseData.username) &&
-        Objects.equals(this.scopes, introspectAccessTokenResponseData.scopes) &&
+        Objects.equals(this.scope, introspectAccessTokenResponseData.scope) &&
         Objects.equals(this.tokenType, introspectAccessTokenResponseData.tokenType) &&
         Objects.equals(this.sub, introspectAccessTokenResponseData.sub) &&
         Objects.equals(this.aud, introspectAccessTokenResponseData.aud) &&
         Objects.equals(this.iss, introspectAccessTokenResponseData.iss) &&
         Objects.equals(this.exp, introspectAccessTokenResponseData.exp) &&
         Objects.equals(this.iat, introspectAccessTokenResponseData.iat) &&
+        Objects.equals(this.nbf, introspectAccessTokenResponseData.nbf) &&
+        Objects.equals(this.jti, introspectAccessTokenResponseData.jti) &&
         Objects.equals(this.acrValues, introspectAccessTokenResponseData.acrValues) &&
         Objects.equals(this.extensionField, introspectAccessTokenResponseData.extensionField);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(active, clientId, username, scopes, tokenType, sub, aud, iss, exp, iat, acrValues, extensionField);
+    return Objects.hash(active, clientId, username, scope, tokenType, sub, aud, iss, exp, iat, nbf, jti, acrValues, extensionField);
   }
 
 
@@ -330,13 +374,15 @@ public class IntrospectAccessTokenResponseData {
     sb.append("    active: ").append(toIndentedString(active)).append("\n");
     sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
-    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    sub: ").append(toIndentedString(sub)).append("\n");
     sb.append("    aud: ").append(toIndentedString(aud)).append("\n");
     sb.append("    iss: ").append(toIndentedString(iss)).append("\n");
     sb.append("    exp: ").append(toIndentedString(exp)).append("\n");
     sb.append("    iat: ").append(toIndentedString(iat)).append("\n");
+    sb.append("    nbf: ").append(toIndentedString(nbf)).append("\n");
+    sb.append("    jti: ").append(toIndentedString(jti)).append("\n");
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
     sb.append("    extensionField: ").append(toIndentedString(extensionField)).append("\n");
     sb.append("}");
