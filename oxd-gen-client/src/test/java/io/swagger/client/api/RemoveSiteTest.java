@@ -24,8 +24,7 @@ public class RemoveSiteTest {
         String oxdId = response.getOxdId();
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(oxdId);
-        RemoveSiteResponse removeSiteResp =
-                api.removeSite(Tester.getAuthorization(), params);
+        RemoveSiteResponse removeSiteResp = api.removeSite(Tester.getAuthorization(), params);
         assertNotNull(removeSiteResp);
         final RemoveSiteResponseData responseData = removeSiteResp.getData();
         assertNotNull(responseData);
@@ -38,8 +37,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         final String someRandomId = UUID.randomUUID().toString();
         params.setOxdId(someRandomId);
-        ApiResponse<RemoveSiteResponse> apiResponse =
-                api.removeSiteWithHttpInfo(Tester.getAuthorization(), params);
+        ApiResponse<RemoveSiteResponse> apiResponse = api.removeSiteWithHttpInfo(Tester.getAuthorization(), params);
         /*
         FIXME: Status code should be 404, and not 200.
          */
@@ -48,8 +46,7 @@ public class RemoveSiteTest {
         RemoveSiteResponse removeSiteResponse = apiResponse.getData();
         assertNotNull(removeSiteResponse);
         assertNotNull(removeSiteResponse.getData());
-        final String error = removeSiteResponse.getData().getError();
-        assertEquals(error, ErrorResponseCode.INVALID_OXD_ID.getCode());
+        assertEquals(removeSiteResponse.getData().getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());
 
     }
 
