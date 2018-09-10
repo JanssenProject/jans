@@ -34,4 +34,4 @@ oxd-gen-client/src/test/resources/properties/*
 !oxd-gen-client/src/test/resources/properties/testng.xml
 oxd-gen-client/target/
 oxd-server/dependency-reduced-pom.xml
-
+oxd-server/src/test/resources/properties/users/*
