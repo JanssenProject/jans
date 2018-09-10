@@ -126,7 +126,7 @@ public class UmaGatheringWS {
                 baseEndpoint = StringUtils.removeEnd(baseEndpoint, "/");
 
                 String fullUri = baseEndpoint + page;
-                fullUri = StringUtils.removeEnd(fullUri, ".xhtml");
+                fullUri = StringUtils.removeEnd(fullUri, ".xhtml") + ".htm";
                 log.trace("Redirecting to page: '{}', fullUri: {}", page, fullUri);
                 return Response.status(FOUND).location(new URI(fullUri)).build();
             } else {
