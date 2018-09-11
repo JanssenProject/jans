@@ -5,6 +5,7 @@
  */
 package org.xdi.oxauth.model.crypto;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -28,7 +29,9 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -36,9 +39,11 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version December 5, 2017
+ * @version September 10, 2018
  */
 public abstract class AbstractCryptoProvider {
+
+    protected static final Logger LOG = Logger.getLogger(AbstractCryptoProvider.class);
 
     public abstract JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception;
 
@@ -156,9 +161,35 @@ public abstract class AbstractCryptoProvider {
                                     new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
                             ), ecParameters));
                 }
+
+                if (key.has(EXPIRATION_TIME)) {
+                    checkKeyExpiration(alias, key.getLong(EXPIRATION_TIME));
+                }
             }
         }
 
         return publicKey;
+    }
+
+    protected void checkKeyExpiration(String alias, Long expirationTime) {
+        try {
+            Date expirationDate = new Date(expirationTime);
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date today = new Date();
+            long DateDiff = expirationTime - today.getTime();
+            long expiresIn = DateDiff / (24 * 60 * 60 * 1000);
+            if (expiresIn <= 0) {
+                LOG.warn("\nWARNING! Expired Key with alias: " + alias
+                        + "\n\tExpires On: " + ft.format(expirationDate)
+                        + "\n\tToday's Date: " + ft.format(today));
+            } else if (expiresIn <= 100) {
+                LOG.warn("\nWARNING! Key with alias: " + alias
+                        + "\n\tExpires In: " + expiresIn + " days"
+                        + "\n\tExpires On: " + ft.format(expirationDate)
+                        + "\n\tToday's Date: " + ft.format(today));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

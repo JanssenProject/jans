@@ -57,7 +57,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 28, 2017
+ * @version September 10, 2018
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -252,6 +252,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 return null;
             }
             publicKey = certificate.getPublicKey();
+
+            checkKeyExpiration(alias);
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
@@ -270,6 +272,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             return null;
         }
         PrivateKey privateKey = (PrivateKey) key;
+
+        checkKeyExpiration(alias);
 
         return privateKey;
     }
@@ -332,4 +336,12 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return null;
     }
 
+    private void checkKeyExpiration(String alias) {
+        try {
+            Date expirationDate = ((X509Certificate) keyStore.getCertificate(alias)).getNotAfter();
+            checkKeyExpiration(alias, expirationDate.getTime());
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+    }
 }
