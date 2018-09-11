@@ -278,10 +278,10 @@ public class RegisterSiteParams {
   }
 
    /**
-   * oxd will generate its own non-human readable name by defaultif client_name is not specified
+   * oxd will generate its own non-human readable name by default if client_name is not specified
    * @return clientName
   **/
-  @ApiModelProperty(value = "oxd will generate its own non-human readable name by defaultif client_name is not specified")
+  @ApiModelProperty(value = "oxd will generate its own non-human readable name by default if client_name is not specified")
   public String getClientName() {
     return clientName;
   }
