@@ -57,14 +57,6 @@ public class OxdServerConfiguration extends Configuration {
         this.defaultSiteConfig = defaultSiteConfig;
     }
 
-    public Boolean getRemoveExpiredClients() {
-        return removeExpiredClients;
-    }
-
-    public void setRemoveExpiredClients(Boolean removeExpiredClients) {
-        this.removeExpiredClients = removeExpiredClients;
-    }
-
     public String getCryptProviderKeyStorePath() {
         return cryptProviderKeyStorePath;
     }

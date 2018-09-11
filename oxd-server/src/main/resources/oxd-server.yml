@@ -18,7 +18,6 @@ migration_source_folder_path: ''
 storage: h2
 storage_configuration:
   dbFileLocation: "/opt/oxd-server/data/oxd_db"
-remove_expired_clients: false
 
 # Connectors
 server:
