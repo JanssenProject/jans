@@ -83,7 +83,6 @@ public class RegisterSiteTest {
             // more specific site registration
             final UpdateSiteParams commandParams = new UpdateSiteParams();
             commandParams.setOxdId(oxdId);
-            commandParams.setClientSecretExpiresAt(calendar.getTime());
             commandParams.setScope(Lists.newArrayList("profile"));
 
             final Command command = new Command(CommandType.UPDATE_SITE);
