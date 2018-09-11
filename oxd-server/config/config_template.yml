@@ -22,7 +22,6 @@ migration_source_folder_path: $MIGRATION_SOURCE_FOLDER_PATH
 storage: h2
 storage_configuration:
   dbFileLocation: "./oxd_db"
-remove_expired_clients: $REMOVE_EXPIRED_CLIENTS
 
 # Connectors
 server:
