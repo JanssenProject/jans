@@ -62,9 +62,6 @@ public class ValidationService {
                     }
                 }
             } catch (ErrorResponseException e) {
-                if (e.getErrorResponseCode() == ErrorResponseCode.EXPIRED_CLIENT) {
-                    throw e;
-                }
                 // ignore
             } catch (Exception e) {
                 LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);

@@ -4,6 +4,7 @@
 package org.xdi.oxd.server;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -11,6 +12,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  *
  * @author Yuriy Zabrovarnyy
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
 
     @JsonProperty(value = "port")
@@ -65,16 +67,6 @@ public class Configuration {
     private String storage;
     @JsonProperty(value = "storage_configuration")
     private JsonNode storageConfiguration;
-    @JsonProperty(value = "remove_expired_clients")
-    private Boolean removeExpiredClients = false;
-
-    public Boolean getRemoveExpiredClients() {
-        return removeExpiredClients;
-    }
-
-    public void setRemoveExpiredClients(Boolean removeExpiredClients) {
-        this.removeExpiredClients = removeExpiredClients;
-    }
 
     public String getCryptProviderKeyStorePath() {
         return cryptProviderKeyStorePath;
@@ -313,7 +305,6 @@ public class Configuration {
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
                 ", storageConfiguration=" + storageConfiguration +
-                ", removeExpiredClients=" + removeExpiredClients +
                 '}';
     }
 }
