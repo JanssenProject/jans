@@ -26,6 +26,7 @@ hs_err_pid*
 /oxd-server/.oxd-license
 /oxd-server/oxd-server.log
 /oxd-server/oxd_db.mv.db
+/oxd-server/oxd_db.trace.db
 oxd-gen-client/profiles/*
 oxd-gen-client/profiles/*/
 !oxd-gen-client/profiles/default/
