@@ -58,9 +58,6 @@ public class ValidationService {
                     }
                 }
             } catch (ErrorResponseException e) {
-                if (e.getErrorResponseCode() == ErrorResponseCode.EXPIRED_CLIENT) {
-                    throw e;
-                }
                 // ignore
             } catch (Exception e) {
                 LOG.error("Failed to identify RP. Message: " + e.getMessage(), e);
