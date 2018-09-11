@@ -158,8 +158,8 @@ class Setup(object):
         self.cmd_jar = '%s/bin/jar' % self.jre_home
 
         # Component ithversions
-        self.jre_version = '162'
-        self.jetty_version = '9.4.9.v20180320'
+        self.jre_version = '181'
+        self.jetty_version = '9.4.12.v20180830'
         self.jython_version = '2.7.2a'
         self.node_version = '9.9.0'
         self.opendj_version_number = '3.0.0.2'
