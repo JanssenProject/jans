@@ -68,7 +68,7 @@
             <class name="org.xdi.oxd.client.CheckAccessTokenTest"/>
         </classes>
     </test>
-    <test name="Authorization code flow prompt=none" enabled="true">
+    <test name="Authorization code flow prompt=none" enabled="false">
         <classes>
             <class name="org.xdi.oxd.client.AuthorizationCodeFlowTest"/>
         </classes>
