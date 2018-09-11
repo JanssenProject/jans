@@ -22,8 +22,6 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * GetClientTokenResponseData
@@ -31,7 +29,7 @@ import java.util.List;
 
 public class GetClientTokenResponseData {
   @SerializedName("scope")
-  private List<String> scope = new ArrayList<>();
+  private String scope = null;
 
   @SerializedName("access_token")
   private String accessToken = null;
@@ -42,13 +40,8 @@ public class GetClientTokenResponseData {
   @SerializedName("refresh_token")
   private String refreshToken = null;
 
-  public GetClientTokenResponseData scope(List<String> scope) {
+  public GetClientTokenResponseData scope(String scope) {
     this.scope = scope;
-    return this;
-  }
-
-  public GetClientTokenResponseData addScopeItem(String scopeItem) {
-    this.scope.add(scopeItem);
     return this;
   }
 
@@ -56,12 +49,12 @@ public class GetClientTokenResponseData {
    * Get scope
    * @return scope
   **/
-  @ApiModelProperty(example = "[\"openid\"]", required = true, value = "")
-  public List<String> getScope() {
+  @ApiModelProperty(example = "", required = true, value = "")
+  public String getScope() {
     return scope;
   }
 
-  public void setScope(List<String> scope) {
+  public void setScope(String scope) {
     this.scope = scope;
   }
 
