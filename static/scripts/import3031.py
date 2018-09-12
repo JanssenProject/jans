@@ -726,6 +726,21 @@ class Migration(object):
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
 
+            #Convert Custom NameID to new format
+            if 'oxTrustConfAttributeResolver' in new_entry:
+                oldConfig = json.loads(new_entry['oxTrustConfAttributeResolver'][0])
+                if not 'nameIdConfigs' in oldConfig:
+                    newConfig = json.dumps(
+                            {'nameIdConfigs':[ {
+
+                                    'name':oldConfig['attributeName'],
+                                    'sourceAttribute': oldConfig['attributeBase'],
+                                    'nameIdType': oldConfig['nameIdType'],
+                                    'enabled': oldConfig['enabled'],
+                            }]})
+                    new_entry['oxTrustConfAttributeResolver'] = [newConfig]
+
+
             #Convert passport strategies to new format            
             if 'ou=oxpassport' in dn:
                 if 'gluuPassportConfiguration' in new_entry:
@@ -785,6 +800,7 @@ class Migration(object):
                         new_oxExternalUid.append(oxExternalUid)
                     
                 entry['oxExternalUid'] = new_oxExternalUid
+
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
