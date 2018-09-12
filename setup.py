@@ -2807,6 +2807,8 @@ class Setup(object):
                           ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
                           ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
+                          ['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'],
+                          ['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'],
                           ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                           ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
@@ -3129,6 +3131,8 @@ class Setup(object):
     
                     self.run([service_path, 'rsyslog', 'restart'])
                     self.run([service_path, 'solserver', 'start'])
+            elif self.ldap_type == 'opendj':
+                self.run([service_path, 'opendj', 'restart'])
 
         # Jetty services
         # Iterate through all components and start installed
