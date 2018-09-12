@@ -3131,6 +3131,8 @@ class Setup(object):
     
                     self.run([service_path, 'rsyslog', 'restart'])
                     self.run([service_path, 'solserver', 'start'])
+            elif self.ldap_type == 'opendj':
+                self.run([service_path, 'opendj', 'restart'])
 
         # Jetty services
         # Iterate through all components and start installed
