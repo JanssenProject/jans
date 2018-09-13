@@ -87,7 +87,7 @@
     <ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
 
     <ui:define name="body">
-        <form method="post" action="#{request.contextPath}/postlogin" id="u2f_form" onsubmit="return false;">
+        <form method="post" action="#{request.contextPath}/postlogin.htm" id="u2f_form" onsubmit="return false;">
             <input type="hidden" name="username" value="${credentials.username}"/>
             <input type="hidden" name="authMethod" id="authMethod"/>
             <input type="hidden" name="tokenResponse" id="tokenResponse"/>
