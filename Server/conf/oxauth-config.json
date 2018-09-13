@@ -1,8 +1,8 @@
 {
     "mode":"ldap",
     "issuer":"${config.oxauth.issuer}",
-    "loginPage":"${config.oxauth.contextPath}/login",
-    "authorizationPage":"${config.oxauth.contextPath}/authorize",
+    "loginPage":"${config.oxauth.contextPath}/login.htm",
+    "authorizationPage":"${config.oxauth.contextPath}/authorize.htm",
     "baseEndpoint":"${config.oxauth.contextPath}/restv1",
     "authorizationEndpoint":"${config.oxauth.contextPath}/restv1/authorize",
     "tokenEndpoint":"${config.oxauth.contextPath}/restv1/token",
