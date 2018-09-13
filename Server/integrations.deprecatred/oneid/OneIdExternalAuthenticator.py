@@ -196,7 +196,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             facesContext = CdiUtil.bean(FacesContext)
             request = facesContext.getExternalContext().getRequest()
-            validation_page = request.getContextPath() + "/postlogin?" + "request_uri=&" + authenticationService.parametersAsString()
+            validation_page = request.getContextPath() + "/postlogin.htm?" + "request_uri=&" + authenticationService.parametersAsString()
             print "OneId. Prepare for step 1. validation_page: " + validation_page
 
             oneid_login_button = authn.draw_signin_button(validation_page, callback_attrs, True)

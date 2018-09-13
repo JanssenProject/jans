@@ -145,7 +145,7 @@ class PersonAuthentication(PersonAuthenticationType):
             request = facesContext.getExternalContext().getRequest()
 
             parametersMap = HashMap()
-            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
+            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin.htm")
             if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
             parametersMap.put("ticket", ticket)
@@ -274,7 +274,7 @@ class PersonAuthentication(PersonAuthenticationType):
             request = facesContext.getExternalContext().getRequest()
 
             parametersMap = HashMap()
-            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
+            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin.htm")
             if self.cas_renew_opt:
                 parametersMap.put("renew", "true")
             cas_service_request_uri = requestParameterService.parametersAsString(parametersMap)
