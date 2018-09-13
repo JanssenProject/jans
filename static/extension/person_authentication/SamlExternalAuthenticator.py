@@ -440,7 +440,7 @@ class PersonAuthentication(PersonAuthenticationType):
             httpService = CdiUtil.bean(HttpService)
             facesContext = CdiUtil.bean(FacesContext)
             request = facesContext.getExternalContext().getRequest()
-            assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin"
+            assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin.htm"
             print "Asimba. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
             
             currentSamlConfiguration = self.getCurrentSamlConfiguration(self.samlConfiguration, configurationAttributes, requestParameters)
