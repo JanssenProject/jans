@@ -10,3 +10,8 @@ This module has 2 properties:
    Allowed values: integer value greater that 0
    Example: 3
    Default value: 3
+   
+ 2) lock_expiration_time - Specify expiration time in seconds when lock will be expired and user will be able to login with correct password.
+   Allowed values: integer value greater that 0
+   Example: 30
+   Default value: 180
