@@ -18,7 +18,7 @@
             #{msgs['casa.alternative']}
         </p>
 
-        <form id="casa_form" action="#{request.contextPath}/postlogin">             
+        <form id="casa_form" action="#{request.contextPath}/postlogin.htm">
              <ui:repeat value="#{methods}" var="method">
              	<input class="btn btn-done mybtn" type="submit" onclick="return submitAlternative('#{method}')"
              		value="${fn:startsWith(msgs['casa.button.'.concat(method)],'???') ? fn:toUpperCase(method) : msgs['casa.button.'.concat(method)]}" />

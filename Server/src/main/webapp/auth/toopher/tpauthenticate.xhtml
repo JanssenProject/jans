@@ -58,7 +58,7 @@
     <ui:define name="pageTitle">#{msgs['toopher.pageTitle']}</ui:define>
 
     <ui:define name="body">
-        <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
+        <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.htm">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
                     <div class="login-panel-header">#{msgs['toopher.login']}</div>
