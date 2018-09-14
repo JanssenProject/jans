@@ -900,7 +900,7 @@ class Migration(object):
             if 'oxAuthClientCustomAttributes' in entry['objectClass']:
                 entry['objectClass'].remove('oxAuthClientCustomAttributes')
 
-            if '3.1.3' in self.oxVersion:
+            if self.oxVersion >='3.1.3':
                 sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
                 if dn == attrib_dn:
                     if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
@@ -908,13 +908,14 @@ class Migration(object):
                     else:
                         entry['oxAuthClaimName'] = ['member_off']
 
-                if sector_identifiers in dn:
+                if 'oxUmaResource' in entry['objectClass']:
                     if dn.startswith('inum'):
-                        
-                        dn = dn.replace('inum=', 'oxId=')
-                        oxId = entry['inum'][:]
-                        entry['oxId'] = oxId
+                        exploded_dn = ldap.dn.explode_dn(dn)
+                        exploded_dn[0] = 'oxId=' + entry['oxId'][0]
+                        exploded_dn[1] = 'ou=resources'
+                        dn = ','.join(exploded_dn)
                         del entry['inum']
+
 
                 if 'ou=clients' in dn:
                     if ('oxAuthGrantType' not in entry) or ('oxauthgranttype' not in entry):
