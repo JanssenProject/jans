@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -29,16 +30,21 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.RequestParameterService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Authenticator component
@@ -78,6 +84,9 @@ public class Authenticator {
     private AppConfiguration appConfiguration;
 
     @Inject
+    private FacesContext facesContext;
+
+    @Inject
     private ExternalContext externalContext;
 
     @Inject
@@ -105,7 +114,9 @@ public class Authenticator {
      * @return Returns <code>true</code> if the authentication succeed
      */
     public boolean authenticate() {
-        HttpServletRequest servletRequest = (HttpServletRequest) externalContext.getRequest();
+    	logger.info("Start authentication 1");
+        HttpServletRequest servletRequest = (HttpServletRequest) facesContext.getExternalContext().getRequest();
+        logger.info("Start authentication 2");
         if (!authenticateImpl(servletRequest, true, false)) {
             return authenticationFailed();
         } else {
@@ -114,7 +125,7 @@ public class Authenticator {
     }
 
     public String authenticateWithOutcome() {
-        HttpServletRequest servletRequest = (HttpServletRequest) externalContext.getRequest();
+        HttpServletRequest servletRequest = (HttpServletRequest) facesContext.getExternalContext().getRequest();
         boolean result = authenticateImpl(servletRequest, true, false);
         if (result) {
             return Constants.RESULT_SUCCESS;
@@ -138,6 +149,7 @@ public class Authenticator {
         try {
             logger.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword
                     + ", credentials.username: " + credentials.getUsername() + ")");
+            logger.info("Start authentication 3");
             if (StringHelper.isNotEmpty(credentials.getUsername())
                     && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword()))
                     && servletRequest != null && servletRequest.getRequestURI().endsWith("/token")) {
@@ -150,6 +162,7 @@ public class Authenticator {
                 }
             }
         } catch (Exception ex) {
+        	logger.info("Start authentication error");
             logger.error(ex.getMessage(), ex);
         }
 
@@ -273,6 +286,8 @@ public class Authenticator {
             }
 
             if (!result && (overridenNextStep == -1)) {
+                // Force session lastUsedAt update if authentication attempt is failed
+                sessionIdService.updateSessionId(sessionId);
                 return false;
             }
 
@@ -364,6 +379,9 @@ public class Authenticator {
                     // Redirect to authorization workflow
                     logger.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
                     authenticationService.onSuccessfulLogin(eventSessionId);
+                } else {
+                    // Force session lastUsedAt update if authentication attempt is failed
+                    sessionIdService.updateSessionId(sessionId);
                 }
 
                 logger.info("Authentication success for User: '{}'", credentials.getUsername());
@@ -432,16 +450,20 @@ public class Authenticator {
                 .executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
 
         // Load extra parameters set
-        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
 
         if (extraParameters != null) {
             for (String extraParameter : extraParameters) {
                 if (authenticationService.isParameterExists(extraParameter)) {
-                    // Store parameter name
-                    authExternalAttributes.add(extraParameter);
+                    Pair<String, String> extraParameterValueWithType = requestParameterService.getParameterValueWithType(extraParameter);
+                    String extraParameterValue = extraParameterValueWithType.getFirst();
+                    String extraParameterType = extraParameterValueWithType.getSecond();
 
-                    String extraParameterValue = requestParameterService.getParameterValue(extraParameter);
+                    // Store parameter name and value
                     sessionIdAttributes.put(extraParameter, extraParameterValue);
+
+                    // Store parameter name and type
+                    authExternalAttributes.put(extraParameter, extraParameterType);
                 }
             }
         }
@@ -450,30 +472,34 @@ public class Authenticator {
         setExternalScriptExtraParameters(sessionIdAttributes, authExternalAttributes);
     }
 
-    private Set<String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
+    private Map<String, String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
         String authExternalAttributesString = sessionIdAttributes.get(AUTH_EXTERNAL_ATTRIBUTES);
-        Set<String> authExternalAttributes = new HashSet<String>();
+        Map<String, String> authExternalAttributes = new HashMap<String, String>();
         try {
-            List<String> list = Util.jsonArrayStringAsList(authExternalAttributesString);
-            authExternalAttributes = new HashSet<String>(list);
+            authExternalAttributes = Util.jsonObjectArrayStringAsMap(authExternalAttributesString);
         } catch (JSONException ex) {
-            logger.error("Failed to convert list of auth_external_attributes to list");
+            logger.error("Failed to convert JSON array of auth_external_attributes to Map<String, String>");
         }
 
         return authExternalAttributes;
     }
 
     private void setExternalScriptExtraParameters(Map<String, String> sessionIdAttributes,
-                                                  Set<String> authExternalAttributes) {
-        String authExternalAttributesString = Util.listToJsonArray(authExternalAttributes).toString();
+                                                  Map<String, String> authExternalAttributes) {
+        String authExternalAttributesString = null;
+        try {
+            authExternalAttributesString = Util.mapAsString(authExternalAttributes);
+        } catch (JSONException ex) {
+            logger.error("Failed to convert Map<String, String> of auth_external_attributes to JSON array");
+        }
 
         sessionIdAttributes.put(AUTH_EXTERNAL_ATTRIBUTES, authExternalAttributesString);
     }
 
     private void clearExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
-        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
 
-        for (String authExternalAttribute : authExternalAttributes) {
+        for (String authExternalAttribute : authExternalAttributes.keySet()) {
             sessionIdAttributes.remove(authExternalAttribute);
         }
 
@@ -481,13 +507,18 @@ public class Authenticator {
     }
 
     private void setIdentityWorkingParameters(Map<String, String> sessionIdAttributes) {
-        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
 
         HashMap<String, Object> workingParameters = identity.getWorkingParameters();
-        for (String authExternalAttribute : authExternalAttributes) {
-            if (sessionIdAttributes.containsKey(authExternalAttribute)) {
-                String authExternalAttributeValue = sessionIdAttributes.get(authExternalAttribute);
-                workingParameters.put(authExternalAttribute, authExternalAttributeValue);
+        for (Entry<String, String> authExternalAttributeEntry : authExternalAttributes.entrySet()) {
+            String authExternalAttributeName = authExternalAttributeEntry.getKey();
+            String authExternalAttributeType = authExternalAttributeEntry.getValue();
+
+            if (sessionIdAttributes.containsKey(authExternalAttributeName)) {
+                String authExternalAttributeValue = sessionIdAttributes.get(authExternalAttributeName);
+                Object typedValue = requestParameterService.getTypedValue(authExternalAttributeValue, authExternalAttributeType);
+
+                workingParameters.put(authExternalAttributeName, typedValue);
             }
         }
     }
@@ -593,8 +624,8 @@ public class Authenticator {
         // Check if all previous steps had passed
         boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
         if (!passedPreviousSteps) {
-            logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'",
-                    this.authAcr, this.authStep);
+            logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'", this.authAcr,
+                    this.authStep);
             return Constants.RESULT_FAILURE;
         }
 
@@ -714,10 +745,9 @@ public class Authenticator {
     }
 
     public void addMessage(Severity severity, String summary) {
-        String message = languageBean.getMessage(summary);
-        if (StringHelper.isNotEmpty(message)) {
-            facesMessages.add(severity, message);
-        }
+        String msg = languageBean.getMessage(summary);
+        FacesMessage message = new FacesMessage(severity, msg, null);
+        facesContext.addMessage(null, message);
     }
 
     public String getMaskMobilenumber(String mobile_number) {
