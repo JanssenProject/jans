@@ -1,30 +1,49 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-				xmlns:f="http://xmlns.jcp.org/jsf/core"
-				xmlns:h="http://xmlns.jcp.org/jsf/html"
-				template="/WEB-INF/incl/layout/template.xhtml">
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/template.xhtml">
 
-	<ui:param name="showGlobalMessages" value="false"/>
+	<ui:param name="showGlobalMessages" value="false" />
 
 	<ui:define name="body">
+		<header class="bs-docs-nav navbar navbar-static-top" id="top">
+		<div class="container">
+			<div class="logo span2">
+				<h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
+					<object data="ext/resources/img/logo.png" type="image/png">
+						<img src="img/logo.png" />
+					</object>
+				</h:panelGroup>
+			</div>
+		</div>
+		</header>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-8">
+					<h1>GLUU SERVER</h1>
+					<div class="section">
+						<p>
+							<h:outputFormat value="#{msgs['error.unexpectedError']}">
+								<f:param value="#{pageService.currentDateTime}" />
+							</h:outputFormat>
+						</p>
+						<div class="body">
+							<h:messages id="globalMessage" styleClass="message"
+								errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+								globalOnly="true" />
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4"></div>
+			</div>
+		</div>
 		<div class="section">
 			<h1>#{msgs['error.errorEncountered']}</h1>
 		</div>
 
-		<div class="section">
-			<p>
-				<h:outputFormat value="#{msgs['error.unexpectedError']}">
-					<f:param value="#{pageService.currentDateTime}"/>
-				</h:outputFormat>
-			</p>
-			<div class="body">
-				<h:messages id="globalMessage" styleClass="message"
-							errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
-							globalOnly="true" />
-			</div>
-		</div>
 	</ui:define>
 
 </ui:composition>
