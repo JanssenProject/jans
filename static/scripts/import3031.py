@@ -821,7 +821,7 @@ class Migration(object):
                 entry[attr] = attr_values
                 
 
-            if '3.1.3' in self.oxVersion:
+            if self.oxVersion >= '3.1.3':
 
                 if dn == attrib_dn:
                     if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
@@ -829,12 +829,12 @@ class Migration(object):
                     else:
                         entry['oxAuthClaimName'] = ['member_off']
 
-                if sector_identifiers in dn:
+                if 'oxUmaResource' in entry['objectClass']:
                     if dn.startswith('inum'):
-                        
-                        dn = dn.replace('inum=', 'oxId=')
-                        oxId = entry['inum'][:]
-                        entry['oxId'] = oxId
+                        exploded_dn = ldap.dn.explode_dn(dn)
+                        exploded_dn[0] = 'oxId=' + entry['oxId'][0]
+                        exploded_dn[1] = 'ou=resources'
+                        dn = ','.join(exploded_dn)
                         del entry['inum']
 
                 if 'ou=clients' in dn:
