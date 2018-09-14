@@ -2,6 +2,7 @@
 # Copyright (c) 2016, Gluu
 #
 # Author: Yuriy Movchan
+# Author: Gasmyr Mougang
 #
 
 from org.xdi.service.cdi.util import CdiUtil
@@ -10,6 +11,8 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.gluu.site.ldap.persistence.exception import AuthenticationException
+from javax.faces.application import FacesMessage
+from org.gluu.jsf2.message import FacesMessages
 
 import java
 
@@ -55,7 +58,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             print "Basic (lock account). Authenticate for step 1"
-
+            facesMessages = CdiUtil.bean(FacesMessages)
+            facesMessages.setKeepMessages()
             identity = CdiUtil.bean(Identity)
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
@@ -70,14 +74,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if not logged_in:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
+                userSatus = self.getUserAttributeValue(user_name, "gluuStatus")
+                print "Current user status %s" %userSatus
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
+
+                if userSatus == "inactive":
+                     facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact your system administrator")
+                return False
 
                 if countInvalidLogin < self.maximumInvalidLoginAttemps:
                     countInvalidLogin = countInvalidLogin + 1
+                    remainingAttempts=self.maximumInvalidLoginAttemps-countInvalidLogin
+                    print "Remainings counts %s" %remainingAttempts
                     self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(countInvalidLogin))
+                    if remainingAttempts > 0 and userSatus =="active":
+                        facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
+                    
 
-                if countInvalidLogin >= self.maximumInvalidLoginAttemps:
-                    self.lockUser(user_name)
+                if countInvalidLogin >= self.maximumInvalidLoginAttemps :
+                    self.lockUser(user_name, self.maximumInvalidLoginAttemps)
+                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString("0"))
+                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account has been locked due to too many failed login attempts. Please contact your system administrator")
                     
                 return False
 
@@ -143,7 +160,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return updated_user
 
-    def lockUser(self, user_name):
+    def lockUser(self, user_name, maxCount):
         if StringHelper.isEmpty(user_name):
             return None
 
@@ -162,5 +179,4 @@ class PersonAuthentication(PersonAuthenticationType):
         
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
         updated_user = userService.updateUser(find_user_by_uid)
-
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
