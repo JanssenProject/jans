@@ -9,6 +9,6 @@
         "email",
         "user_name"
     ],
-    "openIdRedirectUrl": "https://%(hostname)s/idp/auth-code.jsp",
+    "openIdRedirectUrl": "https://%(hostname)s/idp/Authn/oxAuth",
     "openIdPostLogoutRedirectUri": "https://%(hostname)s/identity/authentication/finishlogout"
 }
