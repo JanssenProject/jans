@@ -67,7 +67,7 @@ public class RegisterSiteTest {
         final UpdateSiteParams params = new UpdateSiteParams();
         params.setOxdId(oxdId);
         params.setClientSecretExpiresAt(calendar.getTime().getTime());
-        params.setScope(Lists.newArrayList("profile"));
+        params.setScope(Lists.newArrayList("profile", "oxd"));
         final DevelopersApi apiClient = api();
         UpdateSiteResponse resp = apiClient.updateSite(getAuthorization(), params);
         assertNotNull(resp);
@@ -90,7 +90,7 @@ public class RegisterSiteTest {
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile","oxd"));
         params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
