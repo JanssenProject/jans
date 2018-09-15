@@ -1,12 +1,10 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	template="/WEB-INF/incl/layout/login-template.xhtml">
-
-	<ui:param name="showGlobalMessages" value="false" />
 
 	<ui:define name="body">
 		<header class="bs-docs-nav navbar navbar-static-top" id="top">
@@ -21,36 +19,30 @@
 		</div>
 		</header>
 		<div class="bs-docs-section"
-			style="padding-bottom: 1px; border-top: 2px solid #1ab26b !important;"></div>
+			style="border-top: 2px solid #1ab26b !important;"></div>
+		<h1 class="text-center col-sm-12"
+			style="color: #fff; font-size: 5em; font-weight: bold; font-family: Helvetica; text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);">
+			Your session has expired</h1>
 		<div class="container-fluid"
-			style="padding-bottom: 5%; width: 50%; height: 50%;">
+			style="padding-top: 1%; padding-bottom: 10%; width: 50%; height: 50%;">
 			<div class="row">
 				<div class="text-center col-sm-12">
-					<div class="section">
-						<h1
-							style="color: #fff; font-size: 5em; font-weight: bold; font-family: Helvetica; text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0, 0, 0, .1), 0 0 5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .3), 0 3px 5px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, .25), 0 10px 10px rgba(0, 0, 0, .2), 0 20px 20px rgba(0, 0, 0, .15);">
-							OOPS</h1>
-					</div>
-					<div class="section text-center">
-						<p>
-							<h:outputFormat value="#{msgs['error.unexpectedError']}">
-								<f:param value="#{pageService.currentDateTime}" />
-							</h:outputFormat>
-						</p>
-						<div class="body text-center">
-							<h:messages id="globalMessage" styleClass="message text-center"
-								errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
-								globalOnly="true" />
-						</div>
-						<p>
-							<button class="text-center btn btn-primary"
-								style="width: 50%; color: white; font-weight: bold; background: #1ab26b !important; border: none !important;"
-								onclick="window.history.back();">Go Back</button>
-						</p>
-					</div>
+
+					<p style="padding: 2px;">Looks like your session has expired
+						due to inactivity. Please try again.</p>
+					<p>
+						<button class="text-center btn btn-primary"
+							style="width: 50%; color: white; font-weight: bold; background: #1ab26b !important; border: none !important;"
+							onclick="window.location.replace(window.location.origin);">Try
+							login</button>
+					</p>
 				</div>
 			</div>
 		</div>
+
+
+
+
 		<div class="footer-copyright text-center py-3"
 			style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
 			<div class="footer">
@@ -77,7 +69,5 @@
 				</div>
 			</div>
 		</div>
-
 	</ui:define>
-
 </ui:composition>
