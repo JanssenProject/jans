@@ -373,9 +373,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 config = json.loads(f.read())
 
                 for provider in config:
-                    if "enable" in config[provider] and StringHelper.equalsIgnoreCase(config[provider]["enable"], "true"):
+                    providerCfg = config[provider]
+                    if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
                         self.registeredProviders[provider] = {
-                            "emailLinkingSafe" : "emailLinkingSafe" in provider and StringHelper.equalsIgnoreCase(config[provider]["emailLinkingSafe"], "true"),
+                            "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["emailLinkingSafe"], "true"),
                             "saml" : True }
 
         except:
