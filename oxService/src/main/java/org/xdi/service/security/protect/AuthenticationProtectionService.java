@@ -21,7 +21,6 @@ public abstract class AuthenticationProtectionService {
     private CacheService cacheService;
 
     protected int attemptExpiration;
-    protected int maximumAllowedAttempts;
     protected int maximumAllowedAttemptsWithoutDelay;
 
     protected int delayTime;
@@ -85,21 +84,12 @@ public abstract class AuthenticationProtectionService {
         return authenticationAttemptList.getAuthenticationAttempts().size() >= maximumAllowedAttemptsWithoutDelay;
     }
 
-    public boolean isReachAttemptCountLimit(String key) {
-        AuthenticationAttemptList authenticationAttemptList = getNonExpiredAttempts(key);
-        if (authenticationAttemptList == null) {
-            return false;
-        }
-
-        return authenticationAttemptList.getAuthenticationAttempts().size() >= maximumAllowedAttempts;
-    }
-
     public int getDelayTime() {
         return delayTime;
     }
     
     public void doDelayIfNeeded(String key) {
-        boolean processDelay = isReachAttemptRateLimit(key) || isReachAttemptCountLimit(key);
+        boolean processDelay = isReachAttemptRateLimit(key);
         if (!processDelay) {
             return;
         }
