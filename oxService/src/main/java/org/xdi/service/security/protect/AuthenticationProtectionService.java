@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 import org.xdi.model.security.protect.AuthenticationAttempt;
 import org.xdi.model.security.protect.AuthenticationAttemptList;
 import org.xdi.service.CacheService;
@@ -19,6 +20,9 @@ public abstract class AuthenticationProtectionService {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private Logger log;
 
     protected int attemptExpiration;
     protected int maximumAllowedAttemptsWithoutDelay;
@@ -91,12 +95,14 @@ public abstract class AuthenticationProtectionService {
     public void doDelayIfNeeded(String key) {
         boolean processDelay = isReachAttemptRateLimit(key);
         if (!processDelay) {
+            log.debug("Allowing current login attempt without delay");
             return;
         }
         
         int delayTime = getDelayTime();
         
         try {
+            log.debug("Current login attempt requires delay: '{}' seconds", delayTime);
             Thread.sleep(delayTime * 1000);
         } catch (InterruptedException ex) {
             Log.error("Failed to process authentication delay");
