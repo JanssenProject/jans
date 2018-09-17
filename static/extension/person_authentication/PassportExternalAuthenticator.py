@@ -3,7 +3,7 @@
 #
 # Author: Jose Gonzalez
 # Author: Yuriy Movchan
-
+#
 from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
 
@@ -41,9 +41,9 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        self.readBehaviour(configurationAttributes)
+        self.behaveAs = self.readBehaviour(configurationAttributes)
         self.attributesMapping = self.prepareAttributesMapping(configurationAttributes)
-        success = self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
+        success = self.behaveAs != None and self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
 
         self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
         print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
@@ -272,14 +272,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def readBehaviour(self, configurationAttributes):
-        # Behave with both behaviours by default
-        self.behaveAs = None
+
         behave = configurationAttributes.get("behaviour")
         if behave != None:
-            if StringHelper.equalsIgnoreCase(behave.getValue2(), "saml"):
-                self.behaveAs = "saml"
-            elif StringHelper.equalsIgnoreCase(behave.getValue2(), "social"):
-                self.behaveAs = "social"
+            behave = behave.getValue2()
+
+            if behave != None:
+                if StringHelper.equalsIgnoreCase(behave, "saml") or StringHelper.equalsIgnoreCase(behave, "social"):
+                    behave = behave.lower()
+                else:
+                    behave = None
+
+        if behave == None:
+            print "readBehaviour. Failure to determine behaviour. Check script config properties (valid values are 'social' or 'saml')"
+
+        return behave
 
 
     def prepareAttributesMapping(self, attrs):
@@ -354,7 +361,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registeredProviders = {}
         try:
-            if self.behaveAs == None or self.behaveAs == "social":
+            if self.behaveAs == "social":
                 print "Passport. parseProviderConfigs. Adding social providers"
                 passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
                 entryManager = CdiUtil.bean(AppInitializer).getLdapEntryManager()
@@ -369,19 +376,20 @@ class PersonAuthentication(PersonAuthenticationType):
                             for property in self.registeredProviders[provider]:
                                 if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
                                     self.registeredProviders[provider][property] = True
-                        
+
                         self.registeredProviders[provider]["saml"] = False
 
-            if self.behaveAs == None or self.behaveAs == "saml":
+            if self.behaveAs == "saml":
                 print "Passport. parseProviderConfigs. Adding SAML IDPs"
                 f = open("/etc/gluu/conf/passport-saml-config.json", 'r')
                 config = json.loads(f.read())
 
                 for provider in config:
-                    if "enable" in provider and StringHelper.equalsIgnoreCase(provider["enable"], "true"):
+                    providerCfg = config[provider]
+                    if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
                         self.registeredProviders[provider] = {
-                            "emailLinkingSafe" : "emailLinkingSafe" in provider and StringHelper.equalsIgnoreCase(provider["emailLinkingSafe"], "true"),
-                            "requestForEmail" : "requestForEmail" in provider and StringHelper.equalsIgnoreCase(provider["requestForEmail"], "true"),
+                            "emailLinkingSafe" : False,
+                            "requestForEmail" : "requestForEmail" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["requestForEmail"], "true"),
                             "saml" : True }
 
         except:
@@ -479,21 +487,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # "uid" is always present in mapping, see prepareAttributesMapping
         uidRemoteAttr = self.getRemoteAttr("uid")
-        if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, "provider"]):
-            return False
-
-        provider = user_profile["provider"]
-        if not provider in self.registeredProviders:
-            print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
+        attrArr = [uidRemoteAttr, "provider"] if self.behaveAs == "social" else [uidRemoteAttr]
+        if not self.checkRequiredAttributes(user_profile, attrArr):
             return False
 
         uidRemoteAttr = user_profile[uidRemoteAttr]
-        if self.registeredProviders[provider]["saml"]:
-            # This is for backwards compat. It should be passport-saml-provider:...
-            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
-        else:
+        if self.behaveAs == "social":
+            provider = user_profile["provider"]
+            if not provider in self.registeredProviders:
+                print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
+                return False
             externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
-            
+        else:
+            # This is for backwards compat. Should it be passport-saml-provider:...??
+            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
+
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
 
@@ -509,7 +517,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if email == None and self.registeredProviders[provider]["requestForEmail"]:
             print "Passport. attemptAuthentication. Email was not received"
-            
+
             if userByUid != None:
                 # This helps asking for the email over every login attempt
                 email = userByUid.getAttribute("mail")
@@ -517,12 +525,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Passport. attemptAuthentication. Filling missing email value with %s" % email
                     # Assumes mailRemoteAttr is not None
                     user_profile[mailRemoteAttr] = email
-                    
+
             if email == None:
                 # Store user profile in session and abort this routine
                 identity.setWorkingParameter("passport_user_profile", user_profile_json)
                 return True
-                
+
         userByMail = None if email == None else userService.getUserByAttribute("mail", email)
 
         # Determine if we should add entry, update existing, or deny access
@@ -538,15 +546,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     print "Users with externalUid '%s' and mail '%s' are different. Access will be denied. Impersonation attempt?" % (externalUid, email)
         else:
-            if userByMail == None: 
+            if userByMail == None:
                 doAdd = True
             elif self.registeredProviders[provider]["emailLinkingSafe"]:
-                
+
                 tmpList = userByMail.getAttributeValues("oxExternalUid")
                 tmpList = ArrayList() if tmpList == None else ArrayList(tmpList)
                 tmpList.add(externalUid)
                 userByMail.setAttribute("oxExternalUid", tmpList)
-                
+
                 userByUid = userByMail
                 print "External user supplying mail %s will be linked to existing account '%s'" % (email, userByMail.getUserId())
                 doUpdate = True
