@@ -1,14 +1,16 @@
 package org.xdi.oxauth.model.configuration;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Brute Force authentication configuration
  *
  * @author Yuriy Movchan Date: 08/22/2018
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticationProtectionConfiguration {
 
     private int attemptExpiration;
-    private int maximumAllowedAttempts;
     private int maximumAllowedAttemptsWithoutDelay;
 
     private int delayTime;
@@ -21,14 +23,6 @@ public class AuthenticationProtectionConfiguration {
 
     public final void setAttemptExpiration(int attemptExpiration) {
         this.attemptExpiration = attemptExpiration;
-    }
-
-    public final int getMaximumAllowedAttempts() {
-        return maximumAllowedAttempts;
-    }
-
-    public final void setMaximumAllowedAttempts(int maximumAllowedAttempts) {
-        this.maximumAllowedAttempts = maximumAllowedAttempts;
     }
 
     public final int getMaximumAllowedAttemptsWithoutDelay() {
