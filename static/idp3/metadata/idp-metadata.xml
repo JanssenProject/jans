@@ -41,7 +41,6 @@
         <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
         <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
 
-        <SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="$idpHost/idp/profile/Shibboleth/SSO" />
         <SingleSignOnService Binding="urn:mace:shibboleth:2.0:profiles:AuthnRequest" Location="$idpHost/idp/profile/SAML2/Unsolicited/SSO"/>
         <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://%(hostname)s/idp/profile/SAML2/POST/SSO"/>
         <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://%(hostname)s/idp/profile/SAML2/POST-SimpleSign/SSO"/>
@@ -74,13 +73,9 @@
             </ds:KeyInfo>
         </KeyDescriptor>
 
-        <AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding"
-                          Location="$idpHost/idp/profile/SAML1/SOAP/AttributeQuery"/>
-
         <AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
                           Location="$idpHost/idp/profile/SAML2/SOAP/AttributeQuery"/>
 
-        <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
         <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
         <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
 
