@@ -45,6 +45,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.attributesMapping = self.prepareAttributesMapping(configurationAttributes)
         success = self.behaveAs != None and self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
 
+        print "Passport. init. Behaviour is %s" % self.behaveAs
         self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
         print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
         return success
@@ -147,7 +148,9 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
+            # This param is needed in passportlogin.xhtml
             identity.setWorkingParameter("behaviour", self.behaveAs)
+
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)
             self.parseProviderConfigs()
             providerParam = self.customAuthzParameter
@@ -388,8 +391,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     providerCfg = config[provider]
                     if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
                         self.registeredProviders[provider] = {
-                            "emailLinkingSafe" : False,
-                            "requestForEmail" : "requestForEmail" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["requestForEmail"], "true"),
+                            "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
+                            "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
                             "saml" : True }
 
         except:
@@ -487,16 +490,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # "uid" is always present in mapping, see prepareAttributesMapping
         uidRemoteAttr = self.getRemoteAttr("uid")
-        attrArr = [uidRemoteAttr, "provider"] if self.behaveAs == "social" else [uidRemoteAttr]
-        if not self.checkRequiredAttributes(user_profile, attrArr):
+        providerKey = "provider" if self.behaveAs == "social" else "providerkey"
+        if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, providerKey]):
+            return False
+
+        provider = user_profile[providerKey]
+        if not provider in self.registeredProviders:
+            print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
         uidRemoteAttr = user_profile[uidRemoteAttr]
         if self.behaveAs == "social":
-            provider = user_profile["provider"]
-            if not provider in self.registeredProviders:
-                print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
-                return False
             externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
         else:
             # This is for backwards compat. Should it be passport-saml-provider:...??
