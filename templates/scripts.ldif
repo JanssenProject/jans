@@ -331,6 +331,24 @@ oxScript::%(person_authentication_supergluuexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!0011!92F0.759E,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: ThumbSignIn authentication module
+displayName: thumb_sign_in
+gluuStatus: false
+inum: %(inumOrg)s!0011!92F0.759E
+oxConfigurationProperty: {"value1":"ts_host","value2":"https://ts.host.com","description":""}
+oxConfigurationProperty: {"value1":"ts_apiKey","value2":"ts_api_key","description":""}
+oxConfigurationProperty: {"value1":"ts_apiSecret","value2":"ts_api_secret","description":""}
+oxLevel: 15
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+oxRevision: 1
+oxScript::%(person_authentication_thumbsigninexternalauthenticator)s
+oxScriptType: person_authentication
+programmingLanguage: python
+
 dn: inum=%(inumOrg)s!0011!A51E.76DA,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
