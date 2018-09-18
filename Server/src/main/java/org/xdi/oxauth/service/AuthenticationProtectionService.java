@@ -1,11 +1,13 @@
 package org.xdi.oxauth.service;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.configuration.AuthenticationProtectionConfiguration;
+import org.xdi.service.cdi.event.ConfigurationUpdate;
 
 /**
  * Brute Force authentication protection service implementation
@@ -18,7 +20,6 @@ public class AuthenticationProtectionService extends org.xdi.service.security.pr
 
     private static final int DEFAULT_ATTEMPT_EXPIRATION = 15; // 15 seconds
 
-    private static final int DEFAULT_MAXIMUM_ALLOWED_ATTEMPTS = 10; // 10 attempts
     private static final int DEFAULT_MAXIMUM_ALLOWED_ATTEMPTS_WITHOUT_DELAY = 4; // 4 attempts
 
     private static final int DEFAULT_DELAY_TIME = 2; // 5 seconds
@@ -30,21 +31,22 @@ public class AuthenticationProtectionService extends org.xdi.service.security.pr
 
     @Override
     protected void init() {
+        updateConfiguration(appConfiguration);
+    }
+
+    public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         AuthenticationProtectionConfiguration authenticationProtectionConfiguration = appConfiguration.getAuthenticationProtectionConfiguration();
         if (authenticationProtectionConfiguration == null) {
             this.attemptExpiration = DEFAULT_ATTEMPT_EXPIRATION;
-            this.maximumAllowedAttempts = DEFAULT_MAXIMUM_ALLOWED_ATTEMPTS;
             this.maximumAllowedAttemptsWithoutDelay = DEFAULT_MAXIMUM_ALLOWED_ATTEMPTS_WITHOUT_DELAY;
 
             this.delayTime = DEFAULT_DELAY_TIME;
         } else {
             this.attemptExpiration = authenticationProtectionConfiguration.getAttemptExpiration();
-            this.maximumAllowedAttempts = authenticationProtectionConfiguration.getMaximumAllowedAttempts();
             this.maximumAllowedAttemptsWithoutDelay = authenticationProtectionConfiguration.getMaximumAllowedAttemptsWithoutDelay();
 
             this.delayTime = authenticationProtectionConfiguration.getDelayTime();
         }
-
     }
 
     @Override
