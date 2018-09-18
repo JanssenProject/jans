@@ -63,7 +63,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 23, 2018
+ * @version September 17, 2018
  */
 public abstract class BaseTest {
 
@@ -751,7 +751,7 @@ public abstract class BaseTest {
     }
 
     private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
-        return authorizationEndpoint.replace("/restv1/authorize", "/authorize");
+        return authorizationEndpoint.replace("/restv1/authorize.htm", "/authorize");
     }
 
     private String determineGluuConfigurationEndpoint(String host) {
