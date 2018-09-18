@@ -8,7 +8,7 @@
     "tokenEndpoint":"${config.oxauth.contextPath}/restv1/token",
     "userInfoEndpoint":"${config.oxauth.contextPath}/restv1/userinfo",
     "clientInfoEndpoint":"${config.oxauth.contextPath}/restv1/clientinfo",
-    "checkSessionIFrame":"${config.oxauth.contextPath}/opiframe",
+    "checkSessionIFrame":"${config.oxauth.contextPath}/opiframe.htm",
     "endSessionEndpoint":"${config.oxauth.contextPath}/restv1/end_session",
     "jwksUri":"${config.oxauth.contextPath}/restv1/jwks",
     "registrationEndpoint":"${config.oxauth.contextPath}/restv1/register",
