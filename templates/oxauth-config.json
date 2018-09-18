@@ -7,7 +7,7 @@
     "tokenEndpoint":"https://%(hostname)s/oxauth/restv1/token",
     "userInfoEndpoint":"https://%(hostname)s/oxauth/restv1/userinfo",
     "clientInfoEndpoint":"https://%(hostname)s/oxauth/restv1/clientinfo",
-    "checkSessionIFrame":"https://%(hostname)s/oxauth/opiframe",
+    "checkSessionIFrame":"https://%(hostname)s/oxauth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/oxauth/restv1/end_session",
     "jwksUri":"https://%(hostname)s/oxauth/restv1/jwks",
     "registrationEndpoint":"https://%(hostname)s/oxauth/restv1/register",
