@@ -10,5 +10,5 @@
         "user_name"
     ],
     "openIdRedirectUrl": "https://%(hostname)s/idp/Authn/oxAuth",
-    "openIdPostLogoutRedirectUri": "https://%(hostname)s/identity/authentication/finishlogout"
+    "openIdPostLogoutRedirectUri": "https://%(hostname)s/idp/profile/Logout"
 }
