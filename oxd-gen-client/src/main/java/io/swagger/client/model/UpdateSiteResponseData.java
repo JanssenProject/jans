@@ -31,6 +31,15 @@ public class UpdateSiteResponseData {
   @SerializedName("oxd_id")
   private String oxdId = null;
 
+  @SerializedName("error")
+  private String error = null;
+
+  @SerializedName("errorDescription")
+  private String errorDescription = null;
+
+  @SerializedName("details")
+  private Object details = null;
+
   public UpdateSiteResponseData oxdId(String oxdId) {
     this.oxdId = oxdId;
     return this;
@@ -40,13 +49,67 @@ public class UpdateSiteResponseData {
    * Get oxdId
    * @return oxdId
   **/
-  @ApiModelProperty(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getOxdId() {
     return oxdId;
   }
 
   public void setOxdId(String oxdId) {
     this.oxdId = oxdId;
+  }
+
+  public UpdateSiteResponseData error(String error) {
+    this.error = error;
+    return this;
+  }
+
+   /**
+   * Get error
+   * @return error
+  **/
+  @ApiModelProperty(value = "")
+  public String getError() {
+    return error;
+  }
+
+  public void setError(String error) {
+    this.error = error;
+  }
+
+  public UpdateSiteResponseData errorDescription(String errorDescription) {
+    this.errorDescription = errorDescription;
+    return this;
+  }
+
+   /**
+   * Get errorDescription
+   * @return errorDescription
+  **/
+  @ApiModelProperty(value = "")
+  public String getErrorDescription() {
+    return errorDescription;
+  }
+
+  public void setErrorDescription(String errorDescription) {
+    this.errorDescription = errorDescription;
+  }
+
+  public UpdateSiteResponseData details(Object details) {
+    this.details = details;
+    return this;
+  }
+
+   /**
+   * Get details
+   * @return details
+  **/
+  @ApiModelProperty(value = "")
+  public Object getDetails() {
+    return details;
+  }
+
+  public void setDetails(Object details) {
+    this.details = details;
   }
 
 
@@ -59,12 +122,15 @@ public class UpdateSiteResponseData {
       return false;
     }
     UpdateSiteResponseData updateSiteResponseData = (UpdateSiteResponseData) o;
-    return Objects.equals(this.oxdId, updateSiteResponseData.oxdId);
+    return Objects.equals(this.oxdId, updateSiteResponseData.oxdId) &&
+        Objects.equals(this.error, updateSiteResponseData.error) &&
+        Objects.equals(this.errorDescription, updateSiteResponseData.errorDescription) &&
+        Objects.equals(this.details, updateSiteResponseData.details);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId);
+    return Objects.hash(oxdId, error, errorDescription, details);
   }
 
 
@@ -74,6 +140,9 @@ public class UpdateSiteResponseData {
     sb.append("class UpdateSiteResponseData {\n");
     
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    error: ").append(toIndentedString(error)).append("\n");
+    sb.append("    errorDescription: ").append(toIndentedString(errorDescription)).append("\n");
+    sb.append("    details: ").append(toIndentedString(details)).append("\n");
     sb.append("}");
     return sb.toString();
   }

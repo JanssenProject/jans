@@ -128,9 +128,28 @@
 
     <!-- SWAGGER TESTS -->
 
+    <test name="Register site swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.RegisterSiteTest"/>
+        </classes>
+    </test>
+
     <test name="Remove site swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.RemoveSiteTest"/>
         </classes>
     </test>
+
+    <test name="Get client token swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetClientTokenTest"/>
+        </classes>
+    </test>
+
+    <test name="Introspect access token swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.IntrospectAccessTokenTest"/>
+        </classes>
+    </test>
+
 </suite>
