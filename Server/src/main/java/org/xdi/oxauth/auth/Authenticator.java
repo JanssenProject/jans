@@ -279,7 +279,7 @@ public class Authenticator {
                 logger.trace("According to API version script supports steps overriding");
                 overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration,
                         externalContext.getRequestParameterValuesMap(), this.authStep);
-                logger.debug("Get next step from script: '{}'", apiVersion);
+                logger.debug("Get next step from script: '{}'", overridenNextStep);
             }
 
             if (!result && (overridenNextStep == -1)) {
