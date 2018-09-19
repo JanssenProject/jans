@@ -682,14 +682,13 @@ class Migration(object):
                     logging.debug('Enabling script inum: %s' % new_entry['inum'][0])
                     new_entry['gluuStatus']=['true']
 
-            if 'ou=appliances' in dn:
-                if 'oxIDPAuthentication' in new_entry:
-                    oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
-                    idp_config = json.loads(oxIDPAuthentication['config'])
-                    idp_config['primaryKey'] = primaryKey
-                    idp_config['localPrimaryKey'] = localPrimaryKey
-                    oxIDPAuthentication['config'] = json.dumps(idp_config)
-                    new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+            if ('ou=appliances' in dn) and ('oxIDPAuthentication' in new_entry):
+                oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                idp_config['primaryKey'] = primaryKey
+                idp_config['localPrimaryKey'] = localPrimaryKey
+                oxIDPAuthentication['config'] = json.dumps(idp_config)
+                new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
 
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
@@ -725,6 +724,21 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
+
+
+            if (self.oxIDPAuthentication == 1) and ('ou=appliances' in dn) and ('oxIDPAuthentication' in new_entry):
+                oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                idp_config = json.loads(oxIDPAuthentication['config'])
+                try:
+                    idp_config['version'] = idp_config['version']
+                    idp_config['level'] = idp_config['level']
+                    del idp_config['version']
+                    del idp_config['level']                    
+                except:
+                    pass
+                oxIDPAuthentication['config'] = json.dumps(idp_config)
+                new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
 
             #Convert Custom NameID to new format
             if 'oxTrustConfAttributeResolver' in new_entry:
@@ -819,7 +833,6 @@ class Migration(object):
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
                 entry[attr] = attr_values
-                
 
             if self.oxVersion >= '3.1.3':
 
@@ -841,6 +854,10 @@ class Migration(object):
                     if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
 
+
+            if 'oxIDPAuthentication' in entry:
+                print entry
+                
             ldif_writer.unparse(dn, entry)
 
         # Finally
@@ -874,8 +891,6 @@ class Migration(object):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
-
-
 
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
