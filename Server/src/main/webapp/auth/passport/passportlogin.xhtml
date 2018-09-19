@@ -298,7 +298,16 @@
         </div>
 
         <script type="text/javascript">
-		var behaviour = "${identity.getWorkingParameter('behaviour')}";
+		    var behaviour = "${identity.getWorkingParameter('behaviour')}";
+
+            try {
+                if (behaviour == "") {
+                    behaviour = localStorage.behaviour ? localStorage.behaviour : "";
+                } else {
+                    localStorage.behaviour = behaviour;
+                }
+            } catch (e) {
+            }
 
             function idp_redirect(provider) {
                 var form = document.forms.loginForm;
@@ -317,30 +326,30 @@
 
                 var APIURL = window.location.origin;
 
-		if (behaviour == "" || behaviour == "social") {
-			//passport-based provider
-			$.get(APIURL + "/passport/passportstrategies", function (data) {
+                if (behaviour == "social") {
+                    //social provider
+                    $.get(APIURL + "/passport/passportstrategies", function (data) {
 
-			    var providers = JSON.parse(data);
-			    for (var name in providers) {
-				dynamic_link(name, providers[name].logo_img);
-			    }
+                        var providers = JSON.parse(data);
+                        for (var name in providers) {
+                        dynamic_link(name, providers[name].logo_img);
+                        }
 
-			});
+                    });
+                        }
+                if (behaviour == "saml") {
+                    //saml provider
+                    $.get(APIURL + "/passport/saml_config", function (data) {
+
+                        var providers = JSON.parse(data);
+                        for (var name in providers) {
+                        if (providers[name].enable == "true") {
+                            dynamic_link(name, providers[name].logo_img);
+                        }
+                        }
+
+                    });
                 }
-		if (behaviour == "" || behaviour == "saml") {
-			//saml provider
-			$.get(APIURL + "/passport/saml_config", function (data) {
-
-			    var providers = JSON.parse(data);
-			    for (var name in providers) {
-				if (providers[name].enable == "true") {
-				    dynamic_link(name, providers[name].logo_img);
-				}
-			    }
-
-			});
-		}
 
                 //error message display
                 var errormsg = window.location.href.split("=");
