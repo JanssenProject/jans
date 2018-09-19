@@ -38,4 +38,9 @@ public class SetUpTest {
             throw new AssertionError("Failed to start suite.");
         }
     }
+
+    public static void setTokenProtectionEnabled(Boolean isTokenProtectionEnabled) {
+        Tester.setTokenProtectionEnabled(isTokenProtectionEnabled);
+    }
+
 }

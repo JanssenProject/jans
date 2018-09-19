@@ -66,6 +66,7 @@ public class SetUpTest {
                 host = host + ":" + SetUpTest.SUPPORT.getLocalPort();
             }
             io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrl); // manual swagger tests setup
+            io.swagger.client.api.SetUpTest.setTokenProtectionEnabled(SUPPORT.getConfiguration().getProtectCommandsWithAccessToken());
         } catch (Throwable e) {
             LOG.error("Failed to setup swagger suite.");
         }

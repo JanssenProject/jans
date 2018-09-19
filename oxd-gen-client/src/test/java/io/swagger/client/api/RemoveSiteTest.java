@@ -24,7 +24,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(response.getOxdId());
 
-        RemoveSiteResponse removeSiteResp = api.removeSite(Tester.getAuthorization(), params);
+        RemoveSiteResponse removeSiteResp = api.removeSite(Tester.getAuthorization(response), params);
         assertNotNull(removeSiteResp);
         assertNotNull(removeSiteResp.getData());
         assertTrue(StringUtils.isNotEmpty(removeSiteResp.getData().getOxdId()));
