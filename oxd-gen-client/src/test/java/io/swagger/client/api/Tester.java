@@ -25,7 +25,7 @@ public class Tester {
     private static String HOST;
     private static String OP_HOST;
     private static RegisterSiteResponseData setupData;
-    private static Boolean isTokenProtectionEnabled = Boolean.FALSE;
+    private static boolean isTokenProtectionEnabled = false;
 
     private Tester() {
     }
