@@ -2,6 +2,8 @@ package org.xdi.oxd.common.response;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 31/03/2017
@@ -16,7 +18,7 @@ public class GetClientTokenResponse implements IOpResponse {
     @JsonProperty(value = "refresh_token")
     private String refreshToken;
     @JsonProperty(value = "scope")
-    private String scope;
+    private List<String> scope;
 
     public String getAccessToken() {
         return accessToken;
@@ -42,11 +44,11 @@ public class GetClientTokenResponse implements IOpResponse {
         this.refreshToken = refreshToken;
     }
 
-    public String getScope() {
+    public List<String> getScope() {
         return scope;
     }
 
-    public void setScope(String scope) {
+    public void setScope(List<String> scope) {
         this.scope = scope;
     }
 
