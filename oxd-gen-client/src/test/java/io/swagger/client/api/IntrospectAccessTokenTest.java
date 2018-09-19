@@ -36,18 +36,15 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         //
         final String authorization = "Bearer " + accessToken;
         final IntrospectAccessTokenResponse iaTokenResponse = client.introspectAccessToken(authorization, introspectParams);
-        IntrospectAccessTokenResponseData iatResponseData = iaTokenResponse.getData();
-        assertNotNull(iatResponseData);
-        assertTrue(iatResponseData.isActive());
-        final Long issuedAt = iatResponseData.getIat();
-        assertNotNull(issuedAt);
-        Long expiresAt = iatResponseData.getExp();
-        assertNotNull(expiresAt);
-        assertTrue(expiresAt >= issuedAt);
-        final Long nbf = iatResponseData.getNbf();
+        assertNotNull(iaTokenResponse.getData());
+        assertTrue(iaTokenResponse.getData().isActive());
+        assertNotNull(iaTokenResponse.getData().getIat());
+        assertNotNull(iaTokenResponse.getData().getExp());
+        assertTrue(iaTokenResponse.getData().getExp() >= iaTokenResponse.getData().getIat());
+        final Long nbf = iaTokenResponse.getData().getNbf();
         if (nbf != null) {
-            assertTrue(nbf > issuedAt);
-            assertTrue(nbf < expiresAt);
+            assertTrue(nbf > iaTokenResponse.getData().getIat());
+            assertTrue(nbf < iaTokenResponse.getData().getExp());
         }
     }
 
@@ -79,12 +76,12 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         IntrospectAccessTokenResponseData responseData = apiIatResponse.getData().getData();
         assertNotNull(responseData);
         // verify client is NOT active
-        assertEquals(responseData.isActive(), Boolean.FALSE);
+        assertFalse(responseData.isActive());
     }
 
     @Parameters({"opHost", "redirectUrl"})
     @Test
-    @EnabledProtectionAccessToken
+    @ProtectionAccessTokenRequired
     public void testWithInvalidAuthorization(String opHost, String redirectUrl) throws Exception {
 
         DevelopersApi client = Tester.api();
@@ -108,9 +105,8 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
 
     }
 
-    private static GetClientTokenResponseData getGetClientTokenResponseData(
-            String opHost, DevelopersApi client, RegisterSiteResponseData setupResponse)
-            throws ApiException {
+    private static GetClientTokenResponseData getGetClientTokenResponseData(String opHost, DevelopersApi client,
+                                                                            RegisterSiteResponseData setupResponse) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
         params.setScope(Lists.newArrayList("openid","oxd"));
