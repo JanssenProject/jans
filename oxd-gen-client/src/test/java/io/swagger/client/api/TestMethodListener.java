@@ -20,7 +20,7 @@ public class TestMethodListener implements IInvokedMethodListener {
         if (method == null) {
             return;
         }
-        if (method.isAnnotationPresent(EnabledProtectionAccessToken.class)) {
+        if (method.isAnnotationPresent(ProtectionAccessTokenRequired.class)) {
             if (!Tester.isTokenProtectionEnabled()) {
                 iTestResult.setStatus(ITestResult.SKIP);
                 throw new SkipException("Skipping the test as protection access token is not enabled. Ignore the exception.");
