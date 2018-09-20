@@ -9,6 +9,7 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.service import CacheService
 from org.xdi.util import StringHelper
 from org.gluu.site.ldap.persistence.exception import AuthenticationException
 from javax.faces.application import FacesMessage
@@ -34,6 +35,13 @@ class PersonAuthentication(PersonAuthenticationType):
             self.maximumInvalidLoginAttemps = StringHelper.toInteger(configurationAttributes.get("maximum_invalid_login_attemps").getValue2())
         else:
             print "Basic (lock account). Initialization. Using default number attempts"
+
+        self.lockExpirationTime= 180
+        if configurationAttributes.containsKey("lock_expiration_time"):
+            self.lockExpirationTime= StringHelper.toInteger(configurationAttributes.get("lock_expiration_time").getValue2())
+        else:
+            print "Basic (lock account). Initialization. Using default lock expiration time"
+
 
         print "Basic (lock account). Initialized successfully. invalid_login_count_attribute: '%s', maximum_invalid_login_attemps: '%s'" % (self.invalidLoginCountAttribute, self.maximumInvalidLoginAttemps)
 
@@ -64,6 +72,9 @@ class PersonAuthentication(PersonAuthenticationType):
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
+            cacheService= CdiUtil.bean(CacheService)
+            userService = CdiUtil.bean(UserService)
+
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
@@ -78,10 +89,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Current user status %s" %userSatus
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
 
-                if userSatus == "inactive":
-                     facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact your system administrator")
-                return False
-
                 if countInvalidLogin < self.maximumInvalidLoginAttemps:
                     countInvalidLogin = countInvalidLogin + 1
                     remainingAttempts=self.maximumInvalidLoginAttemps-countInvalidLogin
@@ -91,11 +98,20 @@ class PersonAuthentication(PersonAuthenticationType):
                         facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
                     
 
-                if countInvalidLogin >= self.maximumInvalidLoginAttemps :
+                if countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     self.lockUser(user_name, self.maximumInvalidLoginAttemps)
                     self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString("0"))
-                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account has been locked due to too many failed login attempts. Please contact your system administrator")
-                    
+
+		object_from_store = cacheService.get(None, "lock_user_" + user_name);
+		if object_from_store == None and countInvalidLogin >= self.maximumInvalidLoginAttemps:
+                    print "Basic (lock account).Lock Expired for '%s'" % user_name
+		    find_user_by_uid = userService.getUser(user_name)
+                    userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
+                    updated_user = userService.updateUser(find_user_by_uid)              
+                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, "0")
+                elif object_from_store != None:
+                    print "Basic (lock account). Lock Expiration time is ACTIVE for user '%s'" % user_name
+
                 return False
 
             self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
@@ -165,6 +181,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         userService = CdiUtil.bean(UserService)
+        cacheService= CdiUtil.bean(CacheService)
+	object_to_store = "{'locked': true}"
+        facesMessages = CdiUtil.bean(FacesMessages)
+        facesMessages.setKeepMessages()
 
         find_user_by_uid = userService.getUser(user_name)
         if (find_user_by_uid == None):
@@ -179,4 +199,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
         updated_user = userService.updateUser(find_user_by_uid)
+        cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
+
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
