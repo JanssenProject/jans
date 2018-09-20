@@ -2812,7 +2812,9 @@ class Setup(object):
                           ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                           ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                          ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true']
+                          ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
+                          ['create-plugin', '--plugin-name', '"Unique mail address"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:mail'],
+                          ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
                           ]
         for changes in config_changes:
             dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
