@@ -728,12 +728,14 @@ class Migration(object):
 
             if (self.oxIDPAuthentication == 1) and ('ou=appliances' in dn) and ('oxIDPAuthentication' in new_entry):
                 oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                if 'bindDN' in oxIDPAuthentication:
+                    del oxIDPAuthentication['bindDN']
                 idp_config = json.loads(oxIDPAuthentication['config'])
                 try:
-                    idp_config['version'] = idp_config['version']
-                    idp_config['level'] = idp_config['level']
+                    oxIDPAuthentication['version'] = idp_config['version']
+                    oxIDPAuthentication['level'] = idp_config['level']
                     del idp_config['version']
-                    del idp_config['level']                    
+                    del idp_config['level']
                 except:
                     pass
                 oxIDPAuthentication['config'] = json.dumps(idp_config)
