@@ -20,7 +20,7 @@ public class RedisConfiguration implements Serializable {
 
     private String password;
 
-    private Boolean useSsl = false;
+    private Boolean useSSL = false;
 
     private String sslTrustStoreFilePath = "";
 
@@ -56,12 +56,12 @@ public class RedisConfiguration implements Serializable {
         this.password = password;
     }
 
-    public Boolean getUseSsl() {
-        return useSsl != null ? useSsl : false;
+    public Boolean getUseSSL() {
+        return useSSL != null ? useSSL : false;
     }
 
-    public void setUseSsl(Boolean useSsl) {
-        this.useSsl = useSsl;
+    public void setUseSSL(Boolean useSSL) {
+        this.useSSL = useSSL;
     }
 
     public String getSslTrustStoreFilePath() {
@@ -74,7 +74,12 @@ public class RedisConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "RedisConfiguration{" + "servers='" + servers + '\'' + ", defaultPutExpiration=" + defaultPutExpiration + ", redisProviderType="
-                + redisProviderType + ", useSsl=" + useSsl + ", sslTrustStoreFilePath=" + sslTrustStoreFilePath + '}';
+        return "RedisConfiguration{" +
+                "servers='" + servers + '\'' +
+                ", defaultPutExpiration=" + defaultPutExpiration +
+                ", redisProviderType=" + redisProviderType +
+                ", useSSL=" + useSSL +
+                ", sslTrustStoreFilePath=" + sslTrustStoreFilePath +
+                '}';
     }
 }

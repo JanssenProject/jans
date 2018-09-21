@@ -40,7 +40,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
 
             HostAndPort hostAndPort = RedisClusterProvider.hosts(redisConfiguration.getServers()).iterator().next();
 
-            if (redisConfiguration.getUseSsl()) {
+            if (redisConfiguration.getUseSSL()) {
                 if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
                     pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
                             RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())),
