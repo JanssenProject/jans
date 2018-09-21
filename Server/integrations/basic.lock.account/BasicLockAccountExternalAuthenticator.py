@@ -107,6 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
 		    find_user_by_uid = userService.getUser(user_name)
                     self.setUserAttributeValue(user_name, "gluuStatus", "active")
                     self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, "0")
+                    logged_in = authenticationService.authenticate(user_name, user_password)
                     return True
                 elif object_from_store != None:
                     print "Basic (lock account). Lock Expiration time is ACTIVE for user '%s'" % user_name
