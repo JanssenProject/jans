@@ -750,7 +750,7 @@ class Migration(object):
                             {'nameIdConfigs':[ {
 
                                     'name':oldConfig['attributeName'],
-                                    'sourceAttribute': oldConfig['attributeBase'],
+                                    'sourceAttribute': oldConfig.get('attributeBase', oldConfig.get('base')),
                                     'nameIdType': oldConfig['nameIdType'],
                                     'enabled': oldConfig['enabled'],
                             }]})
