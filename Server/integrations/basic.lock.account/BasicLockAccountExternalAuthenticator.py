@@ -100,15 +100,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     self.lockUser(user_name, self.maximumInvalidLoginAttemps)
-                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString("0"))
 
 		object_from_store = cacheService.get(None, "lock_user_" + user_name);
 		if object_from_store == None and countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     print "Basic (lock account).Lock Expired for '%s'" % user_name
 		    find_user_by_uid = userService.getUser(user_name)
-                    userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
-                    updated_user = userService.updateUser(find_user_by_uid)              
+                    self.setUserAttributeValue(user_name, "gluuStatus", "active")
                     self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, "0")
+                    return True
                 elif object_from_store != None:
                     print "Basic (lock account). Lock Expiration time is ACTIVE for user '%s'" % user_name
 
