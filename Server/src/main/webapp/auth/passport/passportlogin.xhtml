@@ -1,366 +1,395 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                template="/WEB-INF/incl/layout/login-template.xhtml">
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
 
-    <f:metadata>
-        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
-    </f:metadata>
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
+	</f:metadata>
 
-    <ui:define name="head">
-        <meta name="description" content="Gluu Inc."/>
-        <script type="text/javascript" src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js">
-        </script>
-        <style type="text/css">
-            body {
-                padding: 0;
-            }
+	<ui:define name="head">
+		<meta name="description" content="Gluu Inc." />
+		<script type="text/javascript"
+			src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js">
+			
+		</script>
+		<style type="text/css">
+body {
+	padding: 0;
+}
 
-            .navbar-nav {
-                padding-top: 30px;
-            }
+.navbar-nav {
+	padding-top: 30px;
+}
 
-            ul, ol {
-                margin-bottom: 0;
-            }
+ul, ol {
+	margin-bottom: 0;
+}
 
-            a {
-                color: #2300cc;
-                transition: all 0.5s ease-in-out 0s;
-            }
+a {
+	color: #2300cc;
+	transition: all 0.5s ease-in-out 0s;
+}
 
-            a:hover, a:focus {
-                color: #079857;
-                text-decoration: none;
-                transition: all 0.5s ease-in-out 0s;
-            }
+a:hover, a:focus {
+	color: #079857;
+	text-decoration: none;
+	transition: all 0.5s ease-in-out 0s;
+}
 
-            .btn-login {
-                color: #fff;
-                background-color: #007541;
-                border-color: #ffffff;
-                min-width: 100px;
-                transition: all 0.5s ease-in-out 0s;
-            }
+.btn-login {
+	color: #fff;
+	background-color: #007541;
+	border-color: #ffffff;
+	min-width: 100px;
+	transition: all 0.5s ease-in-out 0s;
+}
 
-            .btn-login:hover,
-            .btn-login:focus {
-                background-color: #ffffff;
-                border-color: #079857;
-                color: #079857;
-                transition: all 0.5s ease-in-out 0s;
-            }
+.btn-login:hover, .btn-login:focus {
+	background-color: #ffffff;
+	border-color: #079857;
+	color: #079857;
+	transition: all 0.5s ease-in-out 0s;
+}
 
-            .form-control:focus {
-                border-color: #007541;
-            }
+.form-control:focus {
+	border-color: #007541;
+}
 
-            input[type="text"]:focus,
-            input[type="password"]:focus {
-                box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 117, 65, 0.71), inset 0px 0px 3px #007541;
-            }
+input[type="text"]:focus, input[type="password"]:focus {
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px
+		rgba(0, 117, 65, 0.71), inset 0px 0px 3px #007541;
+}
 
-            .panel-default > .panel-heading {
-                color: #079857;
-                font-size: 18px;
-            }
+.panel-default>.panel-heading {
+	color: #079857;
+	font-size: 18px;
+}
 
-            .input-name {
-                padding-top: 3px;
-            }
+.input-name {
+	padding-top: 3px;
+}
 
-            .panel-order hr {
-                margin: 10px 15px;
-            }
+.panel-order hr {
+	margin: 10px 15px;
+}
 
-            .panel-order .panel-body {
-                height: 260px;
-                overflow-y: auto;
-            }
+.panel-order .panel-body {
+	height: 260px;
+	overflow-y: auto;
+}
 
-            .panel-order .panel-body > .row:last-child hr {
-                display: none;
-            }
+.panel-order .panel-body>.row:last-child hr {
+	display: none;
+}
 
-            .list-inline>li {
-                margin-bottom: 5px;
-                vertical-align: middle;
-            }
+.list-inline>li {
+	margin-bottom: 5px;
+	vertical-align: middle;
+}
 
-            .list-inline>li img{
-                max-width:40px;
-            }
+.list-inline>li img {
+	max-width: 40px;
+}
 
-            .social-wrapper {
-                position: relative;
-                text-align: center;
-                padding: 20px;
-                border: 1px solid #dfdfdf;
-                border-radius: 4px;
-                background-color: #f5f5f5;
-            }
+.social-wrapper {
+	position: relative;
+	text-align: center;
+	padding: 20px;
+	border: 1px solid #dfdfdf;
+	border-radius: 4px;
+	background-color: #f5f5f5;
+}
 
-            #footer {
-                padding: 30px 0 20px;
-                text-align: center;
-                border-top: 0;
-            }
+#footer {
+	padding: 30px 0 20px;
+	text-align: center;
+	border-top: 0;
+}
 
-            /* Media Query */
-            @media (max-width: 979px) {
-                .navbar .container {
-                    padding: 0 15px;
-                }
-            }
-            @media (max-width: 767px) {
-                .navbar {
-                    text-align: center;
-                }
-                .navbar-nav {
-                    padding-top: 0px;
-                }
-                .navbar-header img{
-                    max-width: 130px;
-                }
-                #content.sign-in-page {
-                    padding-top: 30px;
-                }
-                .list-inline>li img{
-                    max-width: 30px;
-                }
-            }
-        </style>
-    </ui:define>
+/* Media Query */
+@media ( max-width : 979px) {
+	.navbar .container {
+		padding: 0 15px;
+	}
+}
 
-    <ui:define name="pageTitle">
-        <h:outputText value="#{msgs['passport.oxAuthPassportLogin']}"/>
-    </ui:define>
+@media ( max-width : 767px) {
+	.navbar {
+		text-align: center;
+	}
+	.navbar-nav {
+		padding-top: 0px;
+	}
+	.navbar-header img {
+		max-width: 130px;
+	}
+	#content.sign-in-page {
+		padding-top: 30px;
+	}
+	.list-inline>li img {
+		max-width: 30px;
+	}
+}
+</style>
+	</ui:define>
 
-    <ui:define name="body">
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['passport.oxAuthPassportLogin']}" />
+	</ui:define>
 
-        <!--Header-->
-        <nav class="navbar navbar-default">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-3">
-                        <div class="navbar-header">
-                            <ui:param name="client"
-                                      value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}"/>
-                            <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
-                                <h:graphicImage url='#{client.getLogoUri()}'/>
-                            </h:panelGroup>
-                            <h:panelGroup rendered='#{empty client.getLogoUri()}'>
-                                <a href="http://www.gluu.org/">
-                                    <h:graphicImage url="../../img/logo.png"/>
-                                </a>
-                            </h:panelGroup>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-9">
-                        <div class="nav navbar-nav navbar-right">
-                            #{msgs['passport.needAGluuAccount']}
-                            <a class=""
-                               href="../identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <!--Header End-->
+	<ui:define name="body">
 
-        <div class="container">
-            <div id="content" class="sign-in-page">
-                <noscript>
-                    <b>#{msgs['passport.javascriptRequired']}</b>
-                </noscript>
-                <div class="row">
-                    <div class="col-xs-12 col-md-6">
-                        <div class="panel panel-default panel-order">
-                            <div class="panel-heading">Login</div>
-                            <div class="panel-body">
-                                <h:form id="loginForm">
-                                    <h:panelGroup rendered="#{not identity.loggedIn}">
-                                        <p class="text-danger errormsg" style="display:none"></p>
-                                        <h:inputHidden id="provider"/>
-                                        <div class="row form-group">
-                                            <h:messages class="text-danger"/>
-                                            <span class="input-name col-md-3">
-                                                <h:outputLabel for="username" value="#{msgs['login.username']}"/>
-                                            </span>
-                                            <div class="col-md-6">
-                                                <h:inputText id="username" value="#{credentials.username}"
-                                                             autocomplete="off" class="form-control"/>
-                                            </div>
-                                        </div>
+		<!--Header-->
+		<!--         <nav class="navbar navbar-default"> -->
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12 col-sm-3">
+					<div class="navbar-header">
+						<ui:param name="client"
+							value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+							<h:graphicImage url='#{client.getLogoUri()}' />
+						</h:panelGroup>
+						<h:panelGroup rendered='#{empty client.getLogoUri()}'>
+							<object data="../../ext/resources/img/logo.png" type="image/png">
+								<img src="../../img/logo.png" />
+							</object>
+						</h:panelGroup>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-9"></div>
+			</div>
+		</div>
+		<div class="bs-docs-section"
+			style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top:1px !important; "></div>
+		<!--         </nav> -->
 
-                                        <div class="row form-group">
-                                            <span class="input-name col-md-3">
-                                                <h:outputLabel for="password" value="#{msgs['login.password']}"/>
-                                            </span>
-                                            <div class="col-md-6">
-                                                <h:inputSecret id="password" value="#{credentials.password}"
-                                                               autocomplete="off" class="form-control"/>
+		<!--Header End-->
 
-                                            </div>
-                                        </div>
+		<div class="container" style="padding-top: 1px;">
+			<div id="content" class="sign-in-page">
+				<noscript>
+					<b>#{msgs['passport.javascriptRequired']}</b>
+				</noscript>
+				<div class="row">
+					<div class="col-xs-12 col-md-6">
+						<div class="panel panel-default panel-order">
+							<div class="panel-heading">Login</div>
+							<div class="panel-body">
+								<h:form id="loginForm">
+									<h:panelGroup rendered="#{not identity.loggedIn}">
+										<p class="text-danger errormsg" style="display: none"></p>
+										<h:inputHidden id="provider" />
+										<div class="row form-group">
+											<h:messages class="text-danger" />
+											<span class="input-name col-md-3"> <h:outputLabel
+													for="username" value="#{msgs['login.username']}" />
+											</span>
+											<div class="col-md-6">
+												<h:inputText id="username" value="#{credentials.username}"
+													autocomplete="off" class="form-control" />
+											</div>
+										</div>
 
-                                        <div class="row form-group">
-                                            <div id="submit_block" class="col-md-offset-3 col-md-3">
-                                                <h:commandButton id="loginButton"
-                                                                 value="#{msgs['login.login']}"
-                                                                 action="#{authenticator.authenticate}"
-                                                                 class="btn btn-login"/>
-                                            </div>
-                                        </div>
+										<div class="row form-group">
+											<span class="input-name col-md-3"> <h:outputLabel
+													for="password" value="#{msgs['login.password']}" />
+											</span>
+											<div class="col-md-6">
+												<h:inputSecret id="password" value="#{credentials.password}"
+													autocomplete="off" class="form-control" />
 
-                                        <div class="row">
-                                            <div class="col-md-offset-3 col-md-6">
-                                                <a href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
-                                            </div>
-                                        </div>
-                                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-                                            <p>
-                                                <h:outputText value="#{msgs['common.agreePolicy']}"/>
-                                                <a target="_blank" href='#{client.getPolicyUri()}'>
-                                                    <h:outputText
-                                                            value="#{msgs['common.privacyPolicy']}"/>
-                                                </a>
-                                            </p>
-                                        </h:panelGroup>
-                                        <h:panelGroup rendered='#{!empty client.getTosUri()}'>
-                                            <p>
-                                                <h:outputText value="#{msgs['common.pleaseReadTheTos']}"/>
-                                                <a target="_blank" href='#{client.getTosUri()}'>
-                                                    <h:outputText
-                                                            value="#{msgs['common.termsOfService']}"/>
-                                                </a>
-                                            </p>
-                                        </h:panelGroup>
-                                        <h:panelGroup
-                                                rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
-                                            <li class="row-fluid submit-container">
-                                                <div class="gradient contact-button green span2 offset3"
-                                                     style="width:320px;">
-                                                    <h:panelGroup
-                                                            rendered="#{external_auth_request_uri != Null}">
-                                                        <a id="externalAuthButton"
-                                                           href="#{external_auth_request_uri}"> <input
-                                                                type="button"
-                                                                value="#{msgs['passport.useExternalAuthentication']}"/>
-                                                        </a>
-                                                    </h:panelGroup>
-                                                    <h:panelGroup
-                                                            rendered="#{external_registration_uri != Null}">
-                                                        <a id="externalRegistrationButton"
-                                                           href="#{external_registration_uri}"> <input
-                                                                type="button" style="width:220px;"
-                                                                value="#{msgs['passport.registerNewUser']}"/>
-                                                        </a>
-                                                    </h:panelGroup>
-                                                </div>
-                                            </li>
-                                        </h:panelGroup>
-                                    </h:panelGroup>
-                                </h:form>
-                            </div>
-                        </div>
-                    </div>
+											</div>
+										</div>
 
-                    <div class="col-xs-12 col-md-6">
-                        <div visibility="hidden" id="provider_panel">
-                            <div class="panel panel-default panel-order">
-                                <div class="panel-heading">External Providers</div>
-                                <div class="panel-body" id="add_here">
+										<div class="row form-group">
+											<div id="submit_block" class="col-md-offset-3 col-md-3">
+												<h:commandButton id="loginButton"
+													value="#{msgs['login.login']}"
+													action="#{authenticator.authenticate}"
+													class="btn btn-login" />
+											</div>
+										</div>
 
-                                    <div id="signinButton">
+										<div class="row">
+											<div class="col-md-offset-3 col-md-6">
+												<a href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
+											</div>
+										</div>
+										<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+											<p>
+												<h:outputText value="#{msgs['common.agreePolicy']}" />
+												<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+														value="#{msgs['common.privacyPolicy']}" />
+												</a>
+											</p>
+										</h:panelGroup>
+										<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+											<p>
+												<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+												<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+														value="#{msgs['common.termsOfService']}" />
+												</a>
+											</p>
+										</h:panelGroup>
+										<h:panelGroup
+											rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+											<li class="row-fluid submit-container">
+												<div class="gradient contact-button green span2 offset3"
+													style="width: 320px;">
+													<h:panelGroup
+														rendered="#{external_auth_request_uri != Null}">
+														<a id="externalAuthButton"
+															href="#{external_auth_request_uri}"> <input
+															type="button"
+															value="#{msgs['passport.useExternalAuthentication']}" />
+														</a>
+													</h:panelGroup>
+													<h:panelGroup
+														rendered="#{external_registration_uri != Null}">
+														<a id="externalRegistrationButton"
+															href="#{external_registration_uri}"> <input
+															type="button" style="width: 220px;"
+															value="#{msgs['passport.registerNewUser']}" />
+														</a>
+													</h:panelGroup>
+												</div>
+											</li>
+										</h:panelGroup>
+									</h:panelGroup>
+								</h:form>
+							</div>
+						</div>
+					</div>
 
+					<div class="col-xs-12 col-md-6">
+						<div visibility="hidden" id="provider_panel">
+							<div class="panel panel-default panel-order">
+								<div class="panel-heading">External Providers</div>
+								<div class="panel-body" id="add_here">
 
-                                    </div>
+									<div id="signinButton"></div>
 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
+		<div class="footer-copyright text-center py-3"
+			style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
+			<div class="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="padding_spc"
+							style="padding-bottom: 5px; padding-top: 5px;">
+							<p>
+								<h:outputText value="#{msgs['common.gluuInc']}" />
+								| <a target="_blank"
+									href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+										value="#{msgs['common.caution']}" escape="false" /></a>
+								<h:panelGroup rendered='#{!empty client.policyUri}'>
+					| <a target="_blank" href="#{client.policyUri}"><h:outputText
+											value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
+								</h:panelGroup>
+								<h:panelGroup rendered='#{!empty client.tosUri}'>
+					| <a target="_blank" href="#{client.tosUri}"><h:outputText
+											value="#{msgs['common.termsOfService']}" escape="false" /></a>
+								</h:panelGroup>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-            <footer id="footer">
-                <p>
-                    <h:outputText value="#{msgs['common.gluuInc']}"/>
-                    , |
-                    <h:outputText value="#{msgs['common.caution']}" escape="false"/>
-                </p>
-            </footer>
-        </div>
+		<script type="text/javascript">
+			var behaviour = "${identity.getWorkingParameter('behaviour')}";
 
-        <script type="text/javascript">
-		    var behaviour = "${identity.getWorkingParameter('behaviour')}";
+			try {
+				if (behaviour == "") {
+					behaviour = localStorage.behaviour ? localStorage.behaviour
+							: "";
+				} else {
+					localStorage.behaviour = behaviour;
+				}
+			} catch (e) {
+			}
 
-            try {
-                if (behaviour == "") {
-                    behaviour = localStorage.behaviour ? localStorage.behaviour : "";
-                } else {
-                    localStorage.behaviour = behaviour;
-                }
-            } catch (e) {
-            }
+			function idp_redirect(provider) {
+				var form = document.forms.loginForm;
+				form["loginForm:provider"].value = provider;
+				form["loginForm:loginButton"].click();
+			}
 
-            function idp_redirect(provider) {
-                var form = document.forms.loginForm;
-                form["loginForm:provider"].value = provider;
-                form["loginForm:loginButton"].click();
-            }
+			function dynamic_link(provider, logo_img) {
+				imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="'
+						+ provider
+						+ '" onclick="idp_redirect(\''
+						+ provider
+						+ '\')" src="' + logo_img + '"></img>';
+				leftMarkup = '<div class="col-xs-3 col-sm-1 col-md-2">'
+						+ imgMarkup + '</div>';
+				rightMarkup = '<div class="col-xs-9 col-sm-11 col-md-10"><h4>'
+						+ provider + '</h4></div>'
+				$('#add_here').append(
+						'<div class="row">' + leftMarkup + rightMarkup
+								+ '<div class="clearfix"></div><hr /></div>');
+			}
 
-            function dynamic_link(provider, logo_img) {
-            	imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="' + provider + '" onclick="idp_redirect(\'' + provider + '\')" src="' + logo_img + '"></img>';
-            	leftMarkup = '<div class="col-xs-3 col-sm-1 col-md-2">' + imgMarkup + '</div>';
-            	rightMarkup = '<div class="col-xs-9 col-sm-11 col-md-10"><h4>' + provider + '</h4></div>'
-            	$('#add_here').append('<div class="row">' + leftMarkup + rightMarkup + '<div class="clearfix"></div><hr /></div>');
-            }
+			jQuery(document).ready(
+					function() {
 
-            jQuery(document).ready(function () {
+						var APIURL = window.location.origin;
 
-                var APIURL = window.location.origin;
+						if (behaviour == "social") {
+							//social provider
+							$.get(APIURL + "/passport/passportstrategies",
+									function(data) {
 
-                if (behaviour == "social") {
-                    //social provider
-                    $.get(APIURL + "/passport/passportstrategies", function (data) {
+										var providers = JSON.parse(data);
+										for ( var name in providers) {
+											dynamic_link(name,
+													providers[name].logo_img);
+										}
 
-                        var providers = JSON.parse(data);
-                        for (var name in providers) {
-                        dynamic_link(name, providers[name].logo_img);
-                        }
+									});
+						}
+						if (behaviour == "saml") {
+							//saml provider
+							$.get(APIURL + "/passport/saml_config", function(
+									data) {
 
-                    });
-                        }
-                if (behaviour == "saml") {
-                    //saml provider
-                    $.get(APIURL + "/passport/saml_config", function (data) {
+								var providers = JSON.parse(data);
+								for ( var name in providers) {
+									if (providers[name].enable == "true") {
+										dynamic_link(name,
+												providers[name].logo_img);
+									}
+								}
 
-                        var providers = JSON.parse(data);
-                        for (var name in providers) {
-                        if (providers[name].enable == "true") {
-                            dynamic_link(name, providers[name].logo_img);
-                        }
-                        }
+							});
+						}
 
-                    });
-                }
+						//error message display
+						var errormsg = window.location.href.split("=");
+						if (errormsg[1]) {
+							history.replaceState({}, 'oxAuth-Login',
+									'/oxauth/auth/passport/passport-login');
+							jQuery('.errormsg').html(
+									decodeURIComponent(errormsg[1]));
+							jQuery('.errormsg').css('display', 'block');
+						}
 
-                //error message display
-                var errormsg = window.location.href.split("=");
-                if (errormsg[1]) {
-                    history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-login');
-                    jQuery('.errormsg').html(decodeURIComponent(errormsg[1]));
-                    jQuery('.errormsg').css('display','block');
-                }
+					});
+		</script>
 
-            });
-        </script>
-
-    </ui:define>
+	</ui:define>
 </ui:composition>
