@@ -757,6 +757,13 @@ class Migration(object):
                     new_entry['oxTrustConfAttributeResolver'] = [newConfig]
 
 
+            if 'oxAuthConfDynamic' in new_entry:
+                oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
+                for endpoint in ('loginPage', 'authorizationPage', 'checkSessionIFrame'):
+                    if not endpoint.endswith('.htm'):
+                        oxAuthConfDynamic[endpoint] += '.htm'
+                new_entry['oxAuthConfDynamic'][0] = json.dumps(oxAuthConfDynamic)
+    
             #Convert passport strategies to new format            
             if 'ou=oxpassport' in dn:
                 if 'gluuPassportConfiguration' in new_entry:
