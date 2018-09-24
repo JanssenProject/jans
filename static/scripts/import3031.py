@@ -760,7 +760,7 @@ class Migration(object):
             if 'oxAuthConfDynamic' in new_entry:
                 oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
                 for endpoint in ('loginPage', 'authorizationPage', 'checkSessionIFrame'):
-                    if not endpoint.endswith('.htm'):
+                    if not oxAuthConfDynamic[endpoint].endswith('.htm'):
                         oxAuthConfDynamic[endpoint] += '.htm'
                 new_entry['oxAuthConfDynamic'][0] = json.dumps(oxAuthConfDynamic)
     
