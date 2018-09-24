@@ -863,10 +863,6 @@ class Migration(object):
                     if not ('oxAuthGrantType' in entry or 'oxauthgranttype' in entry):
                         entry['oxAuthGrantType'] = ['authorization_code']
 
-
-            if 'oxIDPAuthentication' in entry:
-                print entry
-                
             ldif_writer.unparse(dn, entry)
 
         # Finally
