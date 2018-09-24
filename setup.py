@@ -3920,7 +3920,7 @@ def print_help():
     print "    -w   Get the development head war files"
     print "    -e   Download JCE 1.8 and install it"
     print "    -t   Load test data"
-    print "    --allow_pre_released_applications"
+#    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
 
