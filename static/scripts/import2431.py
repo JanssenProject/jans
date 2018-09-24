@@ -779,15 +779,6 @@ class Migration(object):
                     oxIDPAuthentication['config'] = json.dumps(idp_config)
                     new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
 
-
-            if 'oxAuthConfDynamic' in new_entry:
-                oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
-                for endpoint in ('loginPage', 'authorizationPage', 'checkSessionIFrame'):
-                    if not endpoint.endswith('.htm'):
-                        oxAuthConfDynamic[endpoint] += '.htm'
-                new_entry['oxAuthConfDynamic'][0] = json.dumps(oxAuthConfDynamic)
-
-
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
 
@@ -797,6 +788,9 @@ class Migration(object):
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+            
+
+            
             for attr in old_entry.keys():
    
                 if attr in ignoreList:
@@ -821,6 +815,13 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
+
+            if 'oxAuthConfDynamic' in new_entry:
+                oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
+                for endpoint in ('loginPage', 'authorizationPage', 'checkSessionIFrame'):
+                    if not oxAuthConfDynamic[endpoint].endswith('.htm'):
+                        oxAuthConfDynamic[endpoint] += '.htm'
+                new_entry['oxAuthConfDynamic'][0] = json.dumps(oxAuthConfDynamic)            
             
             ldif_writer.unparse(dn, new_entry)
 
