@@ -100,13 +100,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     self.lockUser(user_name, self.maximumInvalidLoginAttemps)
+                    return False
 
-		object_from_store = cacheService.get(None, "lock_user_" + user_name);
-		if object_from_store == None and countInvalidLogin >= self.maximumInvalidLoginAttemps:
+                object_from_store = cacheService.get(None, "lock_user_" + user_name)
+                if object_from_store == None and countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     print "Basic (lock account).Lock Expired for '%s'" % user_name
-		    find_user_by_uid = userService.getUser(user_name)
-                    self.setUserAttributeValue(user_name, "gluuStatus", "active")
-                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, "0")
+                    self.unLockUser(user_name)
                     logged_in = authenticationService.authenticate(user_name, user_password)
                     return True
                 elif object_from_store != None:
@@ -182,7 +181,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = CdiUtil.bean(UserService)
         cacheService= CdiUtil.bean(CacheService)
-	object_to_store = "{'locked': true}"
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
 
@@ -199,7 +197,26 @@ class PersonAuthentication(PersonAuthenticationType):
         
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
         updated_user = userService.updateUser(find_user_by_uid)
+
+        object_to_store = "{'locked': true}"
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
 
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
+
+    def unLockUser(self, user_name):
+        if StringHelper.isEmpty(user_name):
+            return None
+
+        userService = CdiUtil.bean(UserService)
+
+        find_user_by_uid = userService.getUser(user_name)
+        if (find_user_by_uid == None):
+            return None
+
+        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
+        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
+        updated_user = userService.updateUser(find_user_by_uid)
+
+
+        print "Basic (lock account). Lock user. User '%s' unlocked" % user_name
