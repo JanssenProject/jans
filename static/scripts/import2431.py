@@ -823,6 +823,20 @@ class Migration(object):
                         oxAuthConfDynamic[endpoint] += '.htm'
                 new_entry['oxAuthConfDynamic'][0] = json.dumps(oxAuthConfDynamic)            
             
+            if 'oxIDPAuthentication'  in new_entry:
+                oxIDPAuthentication = json.loads(new_entry['oxIDPAuthentication'][0])
+                oxIDPAuthentication_config = json.loads(oxIDPAuthentication["config"])
+                new_server_list = []
+                
+                for server in oxIDPAuthentication_config['servers']:
+                    if server.startswith(self.hostname) or server.startswith(self.ip):
+                        server = server.replace(self.hostname, 'localhost')
+                    new_server_list.append(server)
+                    
+                oxIDPAuthentication_config['servers'] = new_server_list
+                oxIDPAuthentication["config"] = json.dumps(oxIDPAuthentication_config)
+                new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
+
             ldif_writer.unparse(dn, new_entry)
 
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -1254,11 +1268,18 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+
         self.inumOrg = self.getProp('inumOrg', 
                     '/install/community-edition-setup/setup.properties.last')
+
         self.oxVersion = self.getProp('oxVersion', 
                     '/install/community-edition-setup/setup.properties.last')
+    
+        self.hostname = self.getProp('hostname', 
+                    '/install/community-edition-setup/setup.properties.last')
 
+        self.ip = self.getProp('ip', 
+                    '/install/community-edition-setup/setup.properties.last')
 
         self.getLDAPServerType()
         self.verifyBackupData()
