@@ -28,7 +28,6 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
@@ -59,7 +58,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -137,9 +135,17 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
                 if (authorizationGrant == null) {
-                    builder = Response.status(400);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INVALID_TOKEN));
-                } else if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
+                    log.trace("Failed to find authorization grant by access_token: " + accessToken);
+                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                }
+
+                final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
+                if (accessTokenObject == null || !accessTokenObject.isValid()) {
+                    log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, accessTokenObject.isValid());
+                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                }
+
+                if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
                     builder = Response.status(403);
                     builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
                 } else if (appConfiguration.getOpenidScopeBackwardCompatibility()
@@ -198,25 +204,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
             }
-        } catch (StringEncrypter.EncryptionException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
-        } catch (InvalidJwtException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
-        } catch (SignatureException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
-        } catch (InvalidClaimException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
             log.error(e.getMessage(), e);
+            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
+        } finally {
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
 
-        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private Response response(int status, UserInfoErrorResponseType errorResponseType) {
+        return Response.status(status).entity(errorResponseFactory.getErrorAsJson(errorResponseType)).build();
     }
 
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
