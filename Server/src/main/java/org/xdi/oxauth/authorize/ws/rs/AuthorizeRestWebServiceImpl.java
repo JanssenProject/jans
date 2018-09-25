@@ -286,8 +286,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             if (StringUtils.isNotBlank(accessToken)) {
                                 boolean onlyFromCache = ServerUtil.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects() && ResponseType.isImplicitFlow(responseType));
                                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken, onlyFromCache);
+                                boolean denyAccess = true;
 
-                                if (authorizationGrant == null) {
+                                if (authorizationGrant != null) {
+                                    final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
+                                    if (accessTokenObject != null && accessTokenObject.isValid()) {
+                                        denyAccess = false;
+                                    }
+                                }
+
+                                if (denyAccess) {
                                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                             AuthorizeErrorResponseType.ACCESS_DENIED, state));
