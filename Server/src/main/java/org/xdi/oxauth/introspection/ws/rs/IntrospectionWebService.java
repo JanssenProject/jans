@@ -151,36 +151,45 @@ public class IntrospectionWebService {
 
     private AuthorizationGrant getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
         AuthorizationGrant grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Bearer ");
-        if (grant == null) {
-            grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Basic ");
-            if (grant != null) {
+        if (grant != null) {
+            final String authorizationAccessToken = authorization.substring("Bearer ".length());
+            final AbstractToken accessTokenObject = grant.getAccessToken(authorizationAccessToken);
+            if (accessTokenObject != null && accessTokenObject.isValid()) {
                 return grant;
+            } else {
+                log.error("Access token is not valid: " + authorizationAccessToken);
+                return null;
             }
-            if (StringUtils.startsWithIgnoreCase(authorization, "Basic ")) {
+        }
 
-                String encodedCredentials = authorization.substring("Basic ".length());
+        grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Basic ");
+        if (grant != null) {
+            return grant;
+        }
+        if (StringUtils.startsWithIgnoreCase(authorization, "Basic ")) {
 
-                String token = new String(Base64.decodeBase64(encodedCredentials), Util.UTF8_STRING_ENCODING);
+            String encodedCredentials = authorization.substring("Basic ".length());
 
-                int delim = token.indexOf(":");
+            String token = new String(Base64.decodeBase64(encodedCredentials), Util.UTF8_STRING_ENCODING);
 
-                if (delim != -1) {
-                    String clientId = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
-                    String password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
-                    if (clientService.authenticate(clientId, password)) {
-                        final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
-                        if (grantOfIntrospectionToken != null) {
-                            if (!grantOfIntrospectionToken.getClientId().equals(clientId)) {
-                                log.trace("Failed to match grant object clientId and client id provided during authentication.");
-                                return null;
-                            }
-                            return authorizationGrantList.getAuthorizationGrantByAccessToken(encodedCredentials);
+            int delim = token.indexOf(":");
+
+            if (delim != -1) {
+                String clientId = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
+                String password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
+                if (clientService.authenticate(clientId, password)) {
+                    final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+                    if (grantOfIntrospectionToken != null) {
+                        if (!grantOfIntrospectionToken.getClientId().equals(clientId)) {
+                            log.trace("Failed to match grant object clientId and client id provided during authentication.");
+                            return null;
                         }
-                    } else {
-                        log.trace("Failed to perform basic authentication for client: " + clientId);
+                        return authorizationGrantList.getAuthorizationGrantByAccessToken(encodedCredentials);
                     }
-
+                } else {
+                    log.trace("Failed to perform basic authentication for client: " + clientId);
                 }
+
             }
         }
         return grant;
