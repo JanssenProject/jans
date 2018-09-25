@@ -10,7 +10,7 @@
  * @author Yuriy Movchan
  * @version 0.1, 10/14/2010
  */
-public final class OxConstants {
+public class OxConstants {
 
     private OxConstants() {
     }
