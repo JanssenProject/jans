@@ -12,9 +12,6 @@
  */
 public class OxConstants {
 
-    private OxConstants() {
-    }
-
     public static final String UID = "uid";
     public static final String OBJECT_CLASS = "objectClass";
 
