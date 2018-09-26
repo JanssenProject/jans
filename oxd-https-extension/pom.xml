@@ -4,13 +4,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-https-extension</artifactId>
-    <version>3.1.4-SNAPSHOT</version>
+    <version>3.1.4.Final</version>
     <name>oxd-https-extension</name>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>3.1.4-SNAPSHOT</version>
+        <version>3.1.4.Final</version>
     </parent>
 
     <dependencyManagement>

@@ -44,7 +44,7 @@ mvn package
 
 To run the server : 
 ```sh
-java -jar target/oxd-https-extension-3.1.4-SNAPSHOT.jar server oxd-https.yml
+java -jar target/oxd-https-extension-3.1.4.Final.jar server oxd-https.yml
 ```
 
 Open this URL in browser:
