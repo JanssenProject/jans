@@ -5,18 +5,18 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.4-SNAPSHOT</version>
+    <version>3.1.4.Final</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>3.1.4-SNAPSHOT</oxCore.version>
+        <oxCore.version>3.1.4.Final</oxCore.version>
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>3.1.4-SNAPSHOT</oxauth.version>
+        <oxauth.version>3.1.4.Final</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
