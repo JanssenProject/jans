@@ -376,6 +376,14 @@ public class GrantService {
     }
 
     public void cleanUp() {
+        try {
+            cleanUpImpl();
+        } catch (EntryPersistenceException ex) {
+            log.error("Failed to process grant clean up properly", ex);
+        }
+    }
+
+    private void cleanUpImpl() {
         // Cleaning oxAuthToken
     	BatchOperation<TokenLdap> tokenBatchService = new ProcessBatchOperation<TokenLdap>() {
             @Override
