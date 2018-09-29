@@ -376,6 +376,17 @@ public final class StringHelper {
         }
     }
 
+    public static long toLong(String string, int defaultValue) {
+        if (isEmpty(string)) {
+            return defaultValue;
+        }
+
+        try {
+            return Long.parseLong(string);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
     public static boolean toBoolean(final String string, boolean defaultValue) {
         if (isEmpty(string)) {
             return defaultValue;
