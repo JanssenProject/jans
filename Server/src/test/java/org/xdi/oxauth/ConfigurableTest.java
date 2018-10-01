@@ -17,6 +17,7 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.testng.ITestContext;
@@ -37,6 +38,7 @@ public abstract class ConfigurableTest extends Arquillian {
 	public static FileConfiguration testData;
 
 	@Deployment
+	@OverProtocol("Servlet 3.0")
 	public static Archive<?> createDeployment() {
 		return Deployments.createDeployment();
 	}
@@ -71,7 +73,7 @@ public abstract class ConfigurableTest extends Arquillian {
 			parameters.put(key.toString(), value.toString());
 		}
 
-		// Overrided test parameters
+		// Override test parameters
 		context.getSuite().getXmlSuite().setParameters(parameters);
 	}
 
