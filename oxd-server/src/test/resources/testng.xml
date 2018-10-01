@@ -152,4 +152,11 @@
         </classes>
     </test>
 
+    <test name="Get authorization url swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetAuthorizationUrlTest"/>
+        </classes>
+    </test>
+
+
 </suite>
