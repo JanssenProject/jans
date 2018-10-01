@@ -29,9 +29,9 @@
                                         <h:graphicImage url='#{client.logoUri}' />
                                 </h:panelGroup>
                                 <h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
-                                        <a href="http://www.gluu.org/"> <h:graphicImage
-                                                        url="../../img/logo.png" />
-                                        </a>
+                                        <object data="../../ext/resources/img/logo.png" type="image/png">
+                                         <img src="../../img/logo.png" />
+                                        </object>
                                 </h:panelGroup>
                         </div>
                         <!-- end logo-->
