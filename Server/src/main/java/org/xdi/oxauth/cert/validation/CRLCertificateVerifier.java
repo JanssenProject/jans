@@ -186,7 +186,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 	private X509CRL getCrl(String url) throws CertificateException, CRLException, NoSuchProviderException, NoSuchParserException, StreamParsingException,
 			MalformedURLException, IOException, ExecutionException {
 		if (!(url.startsWith("http://") || url.startsWith("https://"))) {
-			log.error("It's possbile to download CRL via HTTP and HTTPS only");
+			log.error("It's possible to download CRL via HTTP and HTTPS only");
 			return null;
 		}
 		

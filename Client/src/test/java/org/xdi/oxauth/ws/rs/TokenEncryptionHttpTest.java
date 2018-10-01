@@ -30,11 +30,13 @@ import static org.testng.Assert.*;
  * @author Javier Rojas Blum
  * @version September 3, 2018
  */
+@Deprecated
 public class TokenEncryptionHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
             "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     //@Test // Before run this test, set openidScopeBackwardCompatibility to true
+    @Deprecated
     public void requestIdTokenAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
             final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) {
@@ -113,6 +115,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
             "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     //@Test // Before run this test, set openidScopeBackwardCompatibility to true
+    @Deprecated
     public void requestIdTokenAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
             final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) {
@@ -191,6 +194,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
             "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     //@Test // Before run this test, set openidScopeBackwardCompatibility to true
+    @Deprecated
     public void requestIdTokenAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
             final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) {
@@ -268,6 +272,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     //@Test // Before run this test, set openidScopeBackwardCompatibility to true
+    @Deprecated
     public void requestIdTokenAlgA128KWEncA128GCM(
             final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) {
         try {
@@ -340,6 +345,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     //@Test // Before run this test, set openidScopeBackwardCompatibility to true
+    @Deprecated
     public void requestIdTokenAlgA256KWEncA256GCM(
             final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) {
         try {
