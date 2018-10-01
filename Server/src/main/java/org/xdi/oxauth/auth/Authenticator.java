@@ -92,9 +92,6 @@ public class Authenticator {
 
     @Inject
     private FacesService facesService;
-    
-    @Inject
-    private FacesMessages facesMessages;
 
     @Inject
     private FacesMessages facesMessages;
