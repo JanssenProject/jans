@@ -1,3 +1,4 @@
+
 This is person authentication module for oxAuth which do basic authentication.
 It looks user account after specified number of unsuccessful login attempts.
 
@@ -10,8 +11,5 @@ This module has 2 properties:
    Allowed values: integer value greater that 0
    Example: 3
    Default value: 3
-   
- 2) lock_expiration_time - Specify expiration time in seconds when lock will be expired and user will be able to login with correct password.
-   Allowed values: integer value greater that 0
-   Example: 30
+3) lock_expiration_time - Specify the time in seconds when lock will be expired
    Default value: 180
