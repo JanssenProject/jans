@@ -649,7 +649,7 @@ class Setup(object):
 
     def __repr__(self):
         try:
-            txt  = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
+            txt = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
             txt += 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n"
             txt += 'os'.ljust(30) + self.os_type.rjust(35) + "\n"
             txt += 'city'.ljust(30) + self.city.rjust(35) + "\n"
@@ -668,11 +668,12 @@ class Setup(object):
             
             if self.ldap_type != 'couchbase':
                 txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
-            
-            txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
-            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
-            txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
-            
+
+            if self.allowDeprecatedApplications:       
+                txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
+            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
+                    + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+
             return txt
         except:
             s = ""
