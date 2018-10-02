@@ -2117,13 +2117,13 @@ class Setup(object):
             try: 
                 self.logIt("Running npm install in %s" % self.gluu_passport_base)
 
-            nodeEnv = os.environ.copy()
-            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
+                nodeEnv = os.environ.copy()
+                nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
-            self.run(['npm', 'install', '-P'], self.gluu_passport_base, nodeEnv, True)
-        except:
-            self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
-            self.logIt(traceback.format_exc(), True)
+                self.run(['npm', 'install', '-P'], self.gluu_passport_base, nodeEnv, True)
+            except:
+                self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
+                self.logIt(traceback.format_exc(), True)
 
         # Create logs folder
         self.run([self.cmd_mkdir, '-p', '%s/server/logs' % self.gluu_passport_base])
