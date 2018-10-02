@@ -23,6 +23,10 @@
         <priority value="TRACE"/>
     </category>
 
+    <category name="org.xdi.oxd.common.CoreUtils">
+        <priority value="OFF"/>
+    </category>
+
     <root>
         <priority value="INFO"/>
         <appender-ref ref="FILE"/>

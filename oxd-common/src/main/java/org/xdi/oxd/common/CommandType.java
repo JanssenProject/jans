@@ -14,7 +14,6 @@ import org.codehaus.jackson.annotate.JsonValue;
 public enum CommandType {
 
     // Register
-    SETUP_CLIENT("setup_client"),
     REGISTER_SITE("register_site"),
     UPDATE_SITE("update_site"),
     REMOVE_SITE("remove_site"),
@@ -31,7 +30,6 @@ public enum CommandType {
     VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
-    LICENSE_STATUS("license_status"),
 
     // UMA
     RS_PROTECT("uma_rs_protect"),
