@@ -61,29 +61,21 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
-        String uri = endSessionEndpoint +
-                "?id_token_hint=" + getIdToken(params, site);
+        String uri = endSessionEndpoint;
         if (!Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
-            uri += "&post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
+            uri += separator(uri) + "post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
         }
         if (!Strings.isNullOrEmpty(params.getState())) {
-            uri += "&state=" + params.getState();
+            uri += separator(uri) + "state=" + params.getState();
         }
         if (!Strings.isNullOrEmpty(params.getSessionState())) {
-            uri += "&session_state=" + params.getSessionState();
+            uri += separator(uri) + "session_state=" + params.getSessionState();
         }
 
         return okResponse(new LogoutResponse(uri));
     }
 
-    private String getIdToken(GetLogoutUrlParams params, Rp site) {
-        if (!Strings.isNullOrEmpty(params.getIdTokenHint())) {
-            return params.getIdTokenHint();
-        }
-        if (!Strings.isNullOrEmpty(site.getIdToken())) {
-            return site.getIdToken();
-        }
-        throw new RuntimeException("id_token is not present in command parameter and also is not present in site conf.");
+    private static String separator(String uri) {
+        return uri.contains("?") ? "&" : "?";
     }
-
 }
