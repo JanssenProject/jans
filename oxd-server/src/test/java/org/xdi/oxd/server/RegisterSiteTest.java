@@ -41,15 +41,15 @@ public class RegisterSiteTest {
         //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPost_logout_redirect_uri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(Lists.newArrayList("openid", "profile"));
-        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        resp = Tester.newClient(host).registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertNotNull(resp.getOxdId());
         oxdId = resp.getOxdId();
@@ -66,7 +66,6 @@ public class RegisterSiteTest {
         // more specific site registration
         final UpdateSiteParams params = new UpdateSiteParams();
         params.setOxdId(oxdId);
-        params.setClientSecretExpiresAt(calendar.getTime());
         params.setScope(Lists.newArrayList("profile"));
 
         UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(), params).dataAsResponse(UpdateSiteResponse.class);
@@ -82,17 +81,16 @@ public class RegisterSiteTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPost_logout_redirect_uri(postLogoutRedirectUrl);
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
-        params.setGrantType(Lists.newArrayList(
+        params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
-        params.setOxdRpProgrammingLanguage("java");
 
-        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;

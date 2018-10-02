@@ -12,8 +12,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Utility class with static methods.
@@ -90,5 +92,9 @@ public class Utils {
 
     public static boolean isTrue(Boolean bool) {
         return bool != null && bool;
+    }
+
+    public static List<String> stringToList(String source) {
+        return Arrays.asList(source.split("\\s+"));
     }
 }

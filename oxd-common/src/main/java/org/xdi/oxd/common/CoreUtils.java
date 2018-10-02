@@ -47,6 +47,8 @@ import java.util.concurrent.ThreadFactory;
  */
 public class CoreUtils {
 
+    public static final String DOC_URL = "https://gluu.org/docs/oxd";
+
     public static boolean isExpired(Date expiredAt) {
         return expiredAt != null && expiredAt.before(new Date());
     }
@@ -236,11 +238,8 @@ public class CoreUtils {
      */
     public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password) throws Exception {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream instream = new FileInputStream(pathToKeyStore);
-        try {
+        try (FileInputStream instream = new FileInputStream(pathToKeyStore)) {
             keyStore.load(instream, password.toCharArray());
-        } finally {
-            instream.close();
         }
 
         HttpClient httpClient = new DefaultHttpClient();

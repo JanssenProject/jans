@@ -3,7 +3,6 @@ package org.xdi.oxd.common.params;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,8 +39,6 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
     private List<String> client_request_uris;
     @JsonProperty(value = "client_logout_uris")
     private List<String> client_logout_uris;
-    @JsonProperty(value = "client_secret_expires_at")
-    private Date client_secret_expires_at;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -67,14 +64,6 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
 
     public void setProtectionAccessToken(String protectionAccessToken) {
         this.protection_access_token = protectionAccessToken;
-    }
-
-    public Date getClientSecretExpiresAt() {
-        return client_secret_expires_at;
-    }
-
-    public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
-        this.client_secret_expires_at = clientSecretExpiresAt;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -238,7 +227,6 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         sb.append(", claims_locales=").append(claims_locales);
         sb.append(", grant_types=").append(grant_types);
         sb.append(", contacts=").append(contacts);
-        sb.append(", client_secret_expires_at=").append(client_secret_expires_at);
         sb.append(", protection_access_token=").append(protection_access_token);
         sb.append('}');
         return sb.toString();

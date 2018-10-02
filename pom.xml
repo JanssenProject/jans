@@ -12,16 +12,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>4.0.0-SNAPSHOT</oxCore.version>
+        <oxCore.version>3.1.4-SNAPSHOT</oxCore.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable  -->
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>4.0.0-SNAPSHOT</oxauth.version>
+        <oxauth.version>3.1.4-SNAPSHOT</oxauth.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable -->
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
-        <oxlicense.version>4.0.0-SNAPSHOT</oxlicense.version>
+        <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
     </properties>
 
     <prerequisites>
@@ -31,6 +31,7 @@
     <modules>
         <module>oxd-common</module>
         <module>oxd-client</module>
+        <module>oxd-gen-client</module>
         <module>oxd-server</module>
     </modules>
 
@@ -68,7 +69,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
-                <version>4.0.0-SNAPSHOT</version>
+                <version>3.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
@@ -279,6 +280,7 @@
                 <artifactId>guava</artifactId>
                 <version>18.0</version>
             </dependency>
+
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -434,8 +436,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
                     <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

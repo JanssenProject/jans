@@ -13,8 +13,8 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
@@ -22,9 +22,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
-import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
@@ -62,35 +60,19 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         LOG.info("Creating RP ...");
         persistRp(oxdId, params);
-        validateAccessToken(oxdId, params);
 
         LOG.info("RP created: " + rp);
 
-        RegisterSiteResponse opResponse = new RegisterSiteResponse();
-        opResponse.setOxdId(oxdId);
-        opResponse.setOpHost(params.getOpHost());
-        return opResponse;
-    }
-
-    private void validateAccessToken(String oxdId, RegisterSiteParams params) {
-        final OxdServerConfiguration conf = getConfigurationService().getConfiguration();
-        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
-            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return; // skip validation since protectCommandsWithAccessToken=false
-            } // otherwise if token is not blank then let it validate it
-        }
-        if (params instanceof SetupClientParams) {
-            return;
-        }
-
-        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
-
-        Rp setupRp = getRpService().getRpByClientId(response.getClientId());
-        LOG.trace("introspection: " + response + ", setupRp: " + rp);
-
-        rp.setSetupClientId(response.getClientId());
-        rp.setSetupOxdId(setupRp != null ? setupRp.getOxdId() : oxdId);
-        getRpService().updateSilently(rp);
+        RegisterSiteResponse response = new RegisterSiteResponse();
+        response.setOxdId(oxdId);
+        response.setOpHost(params.getOpHost());
+        response.setClientId(rp.getClientId());
+        response.setClientSecret(rp.getClientSecret());
+        response.setClientRegistrationAccessToken(rp.getClientRegistrationAccessToken());
+        response.setClientRegistrationClientUri(rp.getClientRegistrationClientUri());
+        response.setClientIdIssuedAt(Utils.date(rp.getClientIdIssuedAt()));
+        response.setClientSecretExpiresAt(Utils.date(rp.getClientSecretExpiresAt()));
+        return response;
     }
 
     @Override
@@ -122,19 +104,15 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         // grant_type
         List<String> grantTypes = Lists.newArrayList();
 
-        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
-            grantTypes.addAll(params.getGrantType());
+        if (params.getGrantTypes() != null && !params.getGrantTypes().isEmpty()) {
+            grantTypes.addAll(params.getGrantTypes());
         }
 
         if (grantTypes.isEmpty() && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
             grantTypes.addAll(fallback.getGrantType());
         }
 
-        if (grantTypes.isEmpty()) {
-            grantTypes.add(GrantType.AUTHORIZATION_CODE.getValue());
-        }
-
-        params.setGrantType(grantTypes);
+        params.setGrantTypes(grantTypes);
 
         // authorization_redirect_uri
         if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
@@ -145,8 +123,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //post_logout_redirect_uri
-        if (Strings.isNullOrEmpty(params.getPost_logout_redirect_uri()) && !Strings.isNullOrEmpty(fallback.getPostLogoutRedirectUri())) {
-            params.setPost_logout_redirect_uri(fallback.getPostLogoutRedirectUri());
+        if (Strings.isNullOrEmpty(params.getPostLogoutRedirectUri()) && !Strings.isNullOrEmpty(fallback.getPostLogoutRedirectUri())) {
+            params.setPostLogoutRedirectUri(fallback.getPostLogoutRedirectUri());
         }
 
         // response_type
@@ -167,8 +145,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         redirectUris.add(params.getAuthorizationRedirectUri());
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
-            if (!Strings.isNullOrEmpty(params.getPost_logout_redirect_uri())) {
-                redirectUris.add(params.getPost_logout_redirect_uri());
+            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+                redirectUris.add(params.getPostLogoutRedirectUri());
             }
         }
         final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
@@ -288,7 +266,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             responseTypes.add(ResponseType.fromString(type));
         }
 
-        String clientName = "oxD client for site: " + rp.getOxdId();
+        String clientName = "oxd client for rp: " + rp.getOxdId();
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
             rp.setClientName(clientName);
@@ -298,24 +276,34 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
-        request.setPostLogoutRedirectUris(params.getPost_logout_redirect_uri() != null ? Lists.newArrayList(params.getPost_logout_redirect_uri()) : Lists.<String>newArrayList());
+        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
+
+        if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthSigningAlg())) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_ALGORITHM);
+            }
+            request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
+            rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());
+        }
 
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
-        for (String grantType : params.getGrantType()) {
+        for (String grantType : params.getGrantTypes()) {
             grantTypes.add(GrantType.fromString(grantType));
         }
         request.setGrantTypes(grantTypes);
 
-        if (params.getClientFrontchannelLogoutUri() != null) {
-            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUri()));
+        if (params.getClientFrontchannelLogoutUris() != null) {
+            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
             if (rp.getFrontChannelLogoutUri() != null) {
                 request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
@@ -326,6 +314,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getClientTokenEndpointAuthMethod());
             if (authenticationMethod != null) {
                 request.setTokenEndpointAuthMethod(authenticationMethod);
+                rp.setTokenEndpointAuthMethod(params.getClientTokenEndpointAuthMethod());
             }
         }
 
@@ -338,7 +327,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         rp.setResponseTypes(params.getResponseTypes());
-        rp.setPostLogoutRedirectUri(params.getPost_logout_redirect_uri());
+        rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         rp.setContacts(params.getContacts());
         rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
         return request;
@@ -356,12 +345,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setRedirectUris(params.getRedirectUris());
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
-        rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
         rp.setUmaProtectedResources(new ArrayList<UmaResource>());
-        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
+        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
 
-        if (!Strings.isNullOrEmpty(params.getPost_logout_redirect_uri())) {
-            rp.setPostLogoutRedirectUri(params.getPost_logout_redirect_uri());
+        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+            rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
@@ -383,7 +371,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp.setContacts(params.getContacts());
         }
 
-        rp.setGrantType(params.getGrantType());
+        rp.setGrantType(params.getGrantTypes());
         rp.setResponseTypes(params.getResponseTypes());
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {
