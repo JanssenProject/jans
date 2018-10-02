@@ -65,13 +65,10 @@ public class Rp implements Serializable {
     private String sectorIdentifierUri;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
-
-    @JsonProperty(value = "is_setup_client")
-    private Boolean setupClient;
-    @JsonProperty(value = "setup_oxd_id")
-    private String setupOxdId;
-    @JsonProperty(value = "setup_client_id")
-    private String setupClientId;
+    @JsonProperty(value = "token_endpoint_auth_signing_alg")
+    private String tokenEndpointAuthSigningAlg;
+    @JsonProperty(value = "token_endpoint_auth_method")
+    private String tokenEndpointAuthMethod;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -148,9 +145,8 @@ public class Rp implements Serializable {
         this.sectorIdentifierUri = conf.sectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
 
-        this.setupClient = conf.setupClient;
-        this.setupOxdId = conf.setupOxdId;
-        this.setupClientId = conf.setupClientId;
+        this.tokenEndpointAuthSigningAlg = conf.tokenEndpointAuthSigningAlg;
+        this.tokenEndpointAuthMethod = conf.tokenEndpointAuthMethod;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -184,6 +180,22 @@ public class Rp implements Serializable {
 
     public void setFrontChannelLogoutUri(List<String> frontChannelLogoutUri) {
         this.frontChannelLogoutUri = frontChannelLogoutUri;
+    }
+
+    public String getTokenEndpointAuthSigningAlg() {
+        return tokenEndpointAuthSigningAlg;
+    }
+
+    public void setTokenEndpointAuthSigningAlg(String tokenEndpointAuthSigningAlg) {
+        this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
+    }
+
+    public String getTokenEndpointAuthMethod() {
+        return tokenEndpointAuthMethod;
+    }
+
+    public void setTokenEndpointAuthMethod(String tokenEndpointAuthMethod) {
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 
     public String getClientJwksUri() {
@@ -532,30 +544,6 @@ public class Rp implements Serializable {
         return null;
     }
 
-    public Boolean getSetupClient() {
-        return setupClient;
-    }
-
-    public void setSetupClient(Boolean setupClient) {
-        this.setupClient = setupClient;
-    }
-
-    public String getSetupOxdId() {
-        return setupOxdId;
-    }
-
-    public void setSetupOxdId(String setupOxdId) {
-        this.setupOxdId = setupOxdId;
-    }
-
-    public String getSetupClientId() {
-        return setupClientId;
-    }
-
-    public void setSetupClientId(String setupClientId) {
-        this.setupClientId = setupClientId;
-    }
-
     @Override
     public String toString() {
         return "Rp{" +
@@ -572,7 +560,6 @@ public class Rp implements Serializable {
                 ", claimsRedirectUri=" + claimsRedirectUri +
                 ", responseTypes=" + responseTypes +
                 ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
                 ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
                 ", clientIdIssuedAt=" + clientIdIssuedAt +
@@ -580,9 +567,6 @@ public class Rp implements Serializable {
                 ", clientName='" + clientName + '\'' +
                 ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
                 ", clientJwksUri='" + clientJwksUri + '\'' +
-                ", setupClient='" + setupClient + '\'' +
-                ", setupOxdId='" + setupOxdId + '\'' +
-                ", setupClientId='" + setupClientId + '\'' +
                 ", scope=" + scope +
                 ", uiLocales=" + uiLocales +
                 ", claimsLocales=" + claimsLocales +
@@ -602,6 +586,8 @@ public class Rp implements Serializable {
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
                 ", rptUpgraded=" + rptUpgraded +
+                ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
+                ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
                 '}';
     }

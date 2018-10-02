@@ -9,9 +9,10 @@ import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.params.IntrospectAccessTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
-import org.xdi.oxd.common.response.SetupClientResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 /**
@@ -25,7 +26,7 @@ public class IntrospectAccessTokenTest {
 
         ClientInterface client = Tester.newClient(host);
 
-        SetupClientResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrl);
+        RegisterSiteResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrl);
 
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
@@ -39,11 +40,19 @@ public class IntrospectAccessTokenTest {
         notEmpty(tokenResponse.getAccessToken());
 
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
-        introspectParams.setOxdId(setupResponse.getSetupClientOxdId());
+        introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken(introspectParams).dataAsResponse(IntrospectionResponse.class);
+        IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams).dataAsResponse(IntrospectionResponse.class);
         assertNotNull(introspectionResponse);
-        Assert.assertTrue(introspectionResponse.isActive());
+        assertTrue(introspectionResponse.isActive());
+
+        final Integer issuedAt = introspectionResponse.getIssuedAt();
+        assertNotNull(issuedAt);
+        Integer expiresAt = introspectionResponse.getExpiresAt();
+        assertNotNull(expiresAt);
+        assertTrue(expiresAt >= issuedAt);
+        //todo : add check for nbf when ready
+
     }
 }

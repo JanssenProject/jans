@@ -41,7 +41,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
     }
 
     @Override
-    public CommandResponse execute(GetClientTokenParams params) throws Exception {
+    public CommandResponse execute(GetClientTokenParams params) {
         try {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
             final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
@@ -78,7 +78,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
                     response.setAccessToken(tokenResponse.getAccessToken());
                     response.setExpiresIn(tokenResponse.getExpiresIn());
                     response.setRefreshToken(tokenResponse.getRefreshToken());
-                    response.setScope(tokenResponse.getScope());
+                    response.setScope(Utils.stringToList(tokenResponse.getScope()));
 
                     return okResponse(response);
                 } else {

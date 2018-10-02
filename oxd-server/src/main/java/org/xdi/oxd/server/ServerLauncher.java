@@ -10,8 +10,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
-import org.xdi.oxd.server.license.LicenseFileUpdateService;
-import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.MigrationService;
@@ -45,7 +43,6 @@ public class ServerLauncher {
 
         try {
             INJECTOR.getInstance(ConfigurationService.class).setConfiguration(configuration);
-            INJECTOR.getInstance(LicenseService.class).start();
             INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(RpService.class).load();
             INJECTOR.getInstance(MigrationService.class).migrate();
@@ -121,12 +118,6 @@ public class ServerLauncher {
         if (systemExit) {
             System.exit(0);
         }
-    }
-
-    public static void shutdownDueToInvalidLicense() {
-        LOG.error("License is invalid. Please check your license_id and make sure it is not expired.");
-        LOG.error("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT + " re-tries.");
-        shutdown();
     }
 
     public static Injector getInjector() {

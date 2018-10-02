@@ -48,15 +48,15 @@ public class NotAllowedTest {
         params.setOpHost("https://ce-dev.gluu.org");
         params.setAuthorizationRedirectUri("https://192.168.200.58:5053");
         params.setScope(Lists.newArrayList("openid", "profile", "email", "address", "clientinfo", "mobile_phone", "phone", "uma_protection"));
-        params.setPost_logout_redirect_uri("https://192.168.200.58:5053");
-        params.setClientFrontchannelLogoutUri(Lists.newArrayList("https://192.168.200.58:5053/logout"));
+        params.setPostLogoutRedirectUri("https://192.168.200.58:5053");
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList("https://192.168.200.58:5053/logout"));
         params.setAcrValues(Lists.newArrayList("gplus", "basic", "duo", "u2f"));
-        params.setGrantType(Lists.newArrayList("authorization_code"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(params);
 
-        final RegisterSiteResponse resp = client.registerSite(Tester.getAuthorization(), params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;

@@ -48,7 +48,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
                     response.setAccessToken(tokenResponse.getAccessToken());
                     response.setExpiresIn(tokenResponse.getExpiresIn());
                     response.setRefreshToken(tokenResponse.getRefreshToken());
-                    response.setScope(tokenResponse.getScope());
+                    response.setScope(Utils.stringToList(tokenResponse.getScope()));
 
                     return okResponse(response);
                 } else {
