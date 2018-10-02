@@ -21,5 +21,6 @@ chown jetty:jetty -R /opt/oxd-server 2>&1
 #chmod 665 /var/log/oxd-server.log 2>&1
 chmod 644 /etc/default/oxd-server 2>&1
 mkdir -p /var/log/oxd-server 2>&1
-chown jetty:jetty /var/log/oxd-server 2>&1
+touch /var/log/oxd-server/oxd-server.log 2>&1
+chown -R jetty:jetty /var/log/oxd-server 2>&1
 mv /etc/init.d/oxd-https-extension.init.d /etc/init.d/oxd-https-extension 2>&1

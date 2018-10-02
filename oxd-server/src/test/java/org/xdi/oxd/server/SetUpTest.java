@@ -4,12 +4,13 @@ import com.google.common.base.Preconditions;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
-import org.xdi.oxd.common.response.SetupClientResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.RpService;
 
@@ -44,17 +45,30 @@ public class SetUpTest {
             removeExistingRps();
             LOG.debug("Existing RPs are removed.");
 
-            SetupClientResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
+            RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
             Tester.setSetupClient(setupClient, host, opHost);
             LOG.debug("SETUP_CLIENT is set in Tester.");
 
             Preconditions.checkNotNull(Tester.getAuthorization());
             LOG.debug("Tester's authorization is set.");
 
+            setupSwaggerSuite(host, opHost, redirectUrl);
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
             LOG.error("Failed to start suite.", e);
             throw new AssertionError("Failed to start suite.");
+        }
+    }
+
+    private static void setupSwaggerSuite(String host, String opHost, String redirectUrl) {
+        try {
+            if (StringUtils.countMatches(host, ":") < 2 && "http://localhost".equalsIgnoreCase(host) || "http://127.0.0.1".equalsIgnoreCase(host) ) {
+                host = host + ":" + SetUpTest.SUPPORT.getLocalPort();
+            }
+            io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrl); // manual swagger tests setup
+            io.swagger.client.api.SetUpTest.setTokenProtectionEnabled(SUPPORT.getConfiguration().getProtectCommandsWithAccessToken());
+        } catch (Throwable e) {
+            LOG.error("Failed to setup swagger suite.");
         }
     }
 
@@ -72,8 +86,6 @@ public class SetUpTest {
     @AfterSuite
     public static void afterSuite() {
         try {
-            LOG.debug("Starting afterSuite ...");
-            Thread.sleep(25 * 1000); // hack: need to investigate why after suite is called before actual suite is finished
             LOG.debug("Running afterSuite ...");
             SUPPORT.after();
             ServerLauncher.shutdown(false);

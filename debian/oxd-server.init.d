@@ -178,7 +178,7 @@ TMPDIR=${TMPDIR:-/tmp}
 ##################################################
 # oxd-server's hallmark
 ##################################################
-OXD_INSTALL_TRACE_FILE="oxd-server-jar-with-dependencies.jar"
+OXD_INSTALL_TRACE_FILE="oxd-server.jar"
 
 
 ##################################################

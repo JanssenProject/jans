@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegisterSiteParams implements HasProtectionAccessTokenParams {
+public class RegisterSiteParams implements HasOxdIdParams {
 
     @JsonProperty(value = "op_host")
     private String op_host;
@@ -22,8 +22,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String authorization_redirect_uri;
     @JsonProperty(value = "post_logout_redirect_uri")
     private String post_logout_redirect_uri;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirect_uris;
@@ -46,6 +44,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String client_jwks_uri;
     @JsonProperty(value = "client_token_endpoint_auth_method")
     private String client_token_endpoint_auth_method;
+    @JsonProperty(value = "client_token_endpoint_auth_signing_alg")
+    private String client_token_endpoint_auth_signing_alg;
     @JsonProperty(value = "client_request_uris")
     private List<String> client_request_uris;
     @JsonProperty(value = "client_frontchannel_logout_uris")
@@ -67,8 +67,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> contacts;
     @JsonProperty(value = "trusted_client")
     private Boolean trusted_client = false;
-    @JsonProperty(value = "oxd_rp_programming_language")
-    private String oxd_rp_programming_language;
 
     public RegisterSiteParams() {
     }
@@ -87,22 +85,6 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
         this.client_registration_client_uri = clientRegistrationClientUri;
-    }
-
-    public String getOxdRpProgrammingLanguage() {
-        return oxd_rp_programming_language;
-    }
-
-    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
-        this.oxd_rp_programming_language = oxdRpProgrammingLanguage;
-    }
-
-    public String getProtectionAccessToken() {
-        return protection_access_token;
-    }
-
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
     }
 
     public Boolean getTrustedClient() {
@@ -145,12 +127,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_sector_identifier_uri = clientSectorIdentifierUri;
     }
 
-    public List<String> getClientFrontchannelLogoutUri() {
+    public List<String> getClientFrontchannelLogoutUris() {
         return client_frontchannel_logout_uris;
     }
 
-    public void setClientFrontchannelLogoutUri(List<String> clientFrontchannelLogoutUri) {
-        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUri;
+    public void setClientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
+        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUris;
     }
 
     public List<String> getClientRequestUris() {
@@ -169,12 +151,20 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_token_endpoint_auth_method = clientTokenEndpointAuthMethod;
     }
 
-    public String getPost_logout_redirect_uri() {
+    public String getPostLogoutRedirectUri() {
         return post_logout_redirect_uri;
     }
 
-    public void setPost_logout_redirect_uri(String post_logout_redirect_uri) {
+    public void setPostLogoutRedirectUri(String post_logout_redirect_uri) {
         this.post_logout_redirect_uri = post_logout_redirect_uri;
+    }
+
+    public String getClientTokenEndpointAuthSigningAlg() {
+        return client_token_endpoint_auth_signing_alg;
+    }
+
+    public void setClientTokenEndpointAuthSigningAlg(String clientTokenEndpointAuthSigningAlg) {
+        this.client_token_endpoint_auth_signing_alg = clientTokenEndpointAuthSigningAlg;
     }
 
     public String getClientJwksUri() {
@@ -217,12 +207,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.client_secret = clientSecret;
     }
 
-    public List<String> getGrantType() {
+    public List<String> getGrantTypes() {
         return grant_types;
     }
 
-    public void setGrantType(List<String> grantType) {
-        this.grant_types = grantType;
+    public void setGrantTypes(List<String> grantTypes) {
+        this.grant_types = grantTypes;
     }
 
     public List<String> getRedirectUris() {
@@ -281,28 +271,35 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.claims_redirect_uri = claimsRedirectUri;
     }
 
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("RegisterSiteParams");
-        sb.append("{acr_values=").append(acr_values);
-        sb.append(", op_host='").append(op_host).append('\'');
-        sb.append(", op_discovery_path='").append(op_discovery_path).append('\'');
-        sb.append(", authorization_redirect_uri='").append(authorization_redirect_uri).append('\'');
-        sb.append(", redirect_uris=").append(redirect_uris);
-        sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
-        sb.append(", response_types=").append(response_types);
-        sb.append(", client_id='").append(client_id).append('\'');
-        sb.append(", client_secret='").append(client_secret).append('\'');
-        sb.append(", client_name='").append(client_name).append('\'');
-        sb.append(", client_sector_identifier_uri='").append(client_sector_identifier_uri).append('\'');
-        sb.append(", scope=").append(scope);
-        sb.append(", ui_locales=").append(ui_locales);
-        sb.append(", claims_locales=").append(claims_locales);
-        sb.append(", grant_types=").append(grant_types);
-        sb.append(", contacts=").append(contacts);
-        sb.append('}');
-        return sb.toString();
+        return "RegisterSiteParams{" +
+                "op_host='" + op_host + '\'' +
+                ", op_discovery_path='" + op_discovery_path + '\'' +
+                ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
+                ", post_logout_redirect_uri='" + post_logout_redirect_uri + '\'' +
+                ", redirect_uris=" + redirect_uris +
+                ", response_types=" + response_types +
+                ", claims_redirect_uri=" + claims_redirect_uri +
+                ", client_id='" + client_id + '\'' +
+                ", client_registration_access_token='" + client_registration_access_token + '\'' +
+                ", client_registration_client_uri='" + client_registration_client_uri + '\'' +
+                ", client_name='" + client_name + '\'' +
+                ", client_jwks_uri='" + client_jwks_uri + '\'' +
+                ", client_token_endpoint_auth_method='" + client_token_endpoint_auth_method + '\'' +
+                ", client_token_endpoint_auth_signing_alg='" + client_token_endpoint_auth_signing_alg + '\'' +
+                ", client_request_uris=" + client_request_uris +
+                ", client_frontchannel_logout_uris=" + client_frontchannel_logout_uris +
+                ", client_sector_identifier_uri='" + client_sector_identifier_uri + '\'' +
+                ", scope=" + scope +
+                ", ui_locales=" + ui_locales +
+                ", claims_locales=" + claims_locales +
+                ", acr_values=" + acr_values +
+                ", grant_types=" + grant_types +
+                ", contacts=" + contacts +
+                ", trusted_client=" + trusted_client +
+                '}';
     }
 
     @JsonIgnore

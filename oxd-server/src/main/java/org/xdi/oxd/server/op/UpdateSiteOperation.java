@@ -21,7 +21,6 @@ import org.xdi.oxd.server.service.Rp;
 
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,16 +99,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         final RegisterRequest request = new RegisterRequest(rp.getClientRegistrationAccessToken());
         request.setHttpMethod(HttpMethod.PUT); // force update
 
-        Date clientSecretExpiresAt = params.getClientSecretExpiresAt();
-        if (clientSecretExpiresAt != null && clientSecretExpiresAt.getTime() != 0) {
-            // translate it into milliseconds if someone sends it in seconds by miskate
-            if (String.valueOf(clientSecretExpiresAt.getTime()).length() < 11) {
-                clientSecretExpiresAt = new Date(clientSecretExpiresAt.getTime() * 1000);
-            }
-            request.setClientSecretExpiresAt(clientSecretExpiresAt);
-            rp.setClientSecretExpiresAt(clientSecretExpiresAt);
-        }
-
         List<ResponseType> responseTypes = Lists.newArrayList();
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
             for (String type : params.getResponseTypes()) {
@@ -121,14 +110,13 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
-        if (params.getGrantType() != null) {
-            for (String grantType : params.getGrantType()) {
-                GrantType t = GrantType.fromString(grantType);
-                if (t != null) {
-                    grantTypes.add(t);
-                }
+        for (String grantType : params.getGrantType() != null ? params.getGrantType() : rp.getGrantType()) {
+            GrantType t = GrantType.fromString(grantType);
+            if (t != null) {
+                grantTypes.add(t);
             }
         }
+
         request.setGrantTypes(grantTypes);
         rp.setGrantType(params.getGrantType());
 

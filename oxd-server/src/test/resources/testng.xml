@@ -11,7 +11,6 @@
     <parameter name="userSecret" value="${auth.user.password}"/>
     <parameter name="clientId" value="${auth.client.id}"/>
     <parameter name="clientSecret" value="${auth.client.secret}"/>
-    <parameter name="licenseServerEndpoint" value="https://${test.server.name}/license-server"/>
     <parameter name="rsProtect"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
     <parameter name="rsProtectScopeExpression"
@@ -67,7 +66,7 @@
             <class name="org.xdi.oxd.server.CheckAccessTokenTest"/>
         </classes>
     </test>
-    <test name="Authorization code flow prompt=none" enabled="true">
+    <test name="Authorization code flow prompt=none" enabled="false">
         <classes>
             <class name="org.xdi.oxd.server.AuthorizationCodeFlowTest"/>
         </classes>
@@ -126,4 +125,38 @@
             <class name="org.xdi.oxd.server.IntrospectAccessTokenTest"/>
         </classes>
     </test>
+
+    <!-- SWAGGER TESTS -->
+
+    <test name="Register site swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.RegisterSiteTest"/>
+        </classes>
+    </test>
+
+    <test name="Remove site swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.RemoveSiteTest"/>
+        </classes>
+    </test>
+
+    <test name="Get client token swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetClientTokenTest"/>
+        </classes>
+    </test>
+
+    <test name="Introspect access token swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.IntrospectAccessTokenTest"/>
+        </classes>
+    </test>
+
+    <test name="Get authorization url swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetAuthorizationUrlTest"/>
+        </classes>
+    </test>
+
+
 </suite>

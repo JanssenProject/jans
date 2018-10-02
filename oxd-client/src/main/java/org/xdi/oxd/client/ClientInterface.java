@@ -17,12 +17,6 @@ public interface ClientInterface {
     String healthCheck();
 
     @POST
-    @Path("/setup-client")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 setupClient(SetupClientParams params);
-
-    @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -32,19 +26,19 @@ public interface ClientInterface {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 introspectAccessToken(IntrospectAccessTokenParams params);
+    CommandResponse2 introspectAccessToken(@HeaderParam("Authorization") String authorization, IntrospectAccessTokenParams params);
 
     @POST
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 introspectRpt(IntrospectRptParams params);
+    CommandResponse2 introspectRpt(@HeaderParam("Authorization") String authorization, IntrospectRptParams params);
 
     @POST
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 registerSite(@HeaderParam("Authorization") String authorization, RegisterSiteParams params);
+    CommandResponse2 registerSite(RegisterSiteParams params);
 
     @POST
     @Path("/update-site")
@@ -92,7 +86,7 @@ public interface ClientInterface {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    CommandResponse2 getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params);
+    CommandResponse2 getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, GetAccessTokenByRefreshTokenParams params);
 
     @POST
     @Path("/uma-rs-protect")
@@ -135,4 +129,10 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     CommandResponse2 checkIdToken(@HeaderParam("Authorization") String authorization, CheckIdTokenParams params);
+
+    @POST
+    @Path("/get-rp")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CommandResponse2 getRp(@HeaderParam("Authorization") String authorization, GetRpParams params);
 }
