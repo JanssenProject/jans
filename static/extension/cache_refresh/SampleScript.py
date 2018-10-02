@@ -8,6 +8,7 @@ from org.xdi.model.custom.script.type.user import CacheRefreshType
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.oxtrust.model import GluuCustomAttribute
+from org.xdi.model.custom.script.model.bind import BindCredentials
 
 import java
 
@@ -24,7 +25,18 @@ class CacheRefresh(CacheRefreshType):
     def destroy(self, configurationAttributes):
         print "Cache refresh. Destroy"
         print "Cache refresh. Destroyed successfully"
-        return True   
+        return True
+    
+    # Get bind credentials required to access source server 
+    #   configId is the source server
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    #   return None (use password from configuration) or org.xdi.model.custom.script.model.bind.BindCredentials
+    def getBindCredentials(self, configId, configurationAttributes):
+        print "Cache refresh. GetBindCredentials method"
+#        if configId == "source":
+#            return BindCredentials("cn=Directory Manager", "password")
+
+        return None
 
     # Update user entry before persist it
     #   user is org.gluu.oxtrust.model.GluuCustomPerson
@@ -51,4 +63,4 @@ class CacheRefresh(CacheRefreshType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 2
