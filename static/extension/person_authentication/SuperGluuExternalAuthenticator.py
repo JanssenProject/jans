@@ -21,7 +21,15 @@ from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService 
 from org.gluu.oxnotify.client import NotifyClientFactory 
-from java.util import Arrays, HashMap, IdentityHashMap
+from java.util import Arrays, HashMap, IdentityHashMap, Date
+
+try:
+    from org.xdi.oxd.license.client.js import Product
+    from org.xdi.oxd.license.validator import LicenseValidator
+    has_license_api = True
+except ImportError:
+    print "Super-Gluu. Load. Failed to load licensing API"
+    has_license_api = False
 
 import datetime
 import urllib
@@ -99,6 +107,32 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             else:
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
+
+        self.valid_license = False
+        # Removing or altering this block validation is against the terms of the license. 
+        if has_license_api and configurationAttributes.containsKey("license_file"):
+            license_file = configurationAttributes.get("license_file").getValue2()
+
+            # Load license from file
+            f = open(license_file, 'r')
+            try:
+                license = json.loads(f.read())
+            except:
+                print "Super-Gluu. Initialization. Failed to load license from file: %s" % license_file
+                return False
+            finally:
+                f.close()
+            
+            # Validate license
+            try:
+                self.license_content = LicenseValidator.validate(license["public_key"], license["public_password"], license["license_password"], license["license"],
+                                          Product.fromValue("super_gluu"), Date())
+                self.valid_license = self.license_content.isValid()
+            except:
+                print "Super-Gluu. Initialization. Failed to validate license. Exception: ", sys.exc_info()[1]
+                return False
+
+            print "Super-Gluu. Initialization. License status: '%s'. License metadata: '%s'" % (self.valid_license, self.license_content.getMetadata())
 
         print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications, self.customLabel)
 
@@ -314,6 +348,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_id,
+                                   'licensed': self.valid_license,
                                    'created': datetime.datetime.now().isoformat()}
 
                 self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
@@ -361,6 +396,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'issuer': issuer,
                                'method': auth_method,
                                'state': session_id,
+                               'licensed': self.valid_license,
                                'created': datetime.datetime.now().isoformat()}
 
             self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
@@ -433,7 +469,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
