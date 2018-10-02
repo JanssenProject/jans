@@ -207,13 +207,6 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
-	}, 
-		
-	{
-		"attribute": "oxAuthCreation",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
 	}
 
 ]
