@@ -179,7 +179,7 @@ class Setup(object):
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
 
-        self.currentGluuVersion = '3.1.3'
+        self.currentGluuVersion = '4.0.0'
 
         self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
