@@ -2172,7 +2172,7 @@ class Setup(object):
             self.install_oxauth()
 
         if self.installOxTrust:
-            progress_bar(27, "Installing Gluu components: oxtruest")
+            progress_bar(27, "Installing Gluu components: oxTrust")
             self.install_oxtrust()
 
         if self.installSaml:
