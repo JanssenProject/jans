@@ -3059,6 +3059,9 @@ class Setup(object):
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
+        if 'importLDIFDir' in setupOptions.keys():
+            self.import_custom_ldif_opendj(setupOptions['importLDIFDir'])
+
         self.run([self.cmd_chmod, '-R', 'a+rX', self.ldapBaseFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
 
