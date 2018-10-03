@@ -236,7 +236,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
+            throw new ErrorResponseException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }
 
         final RegisterClient registerClient = new RegisterClient(registrationEndpoint);
