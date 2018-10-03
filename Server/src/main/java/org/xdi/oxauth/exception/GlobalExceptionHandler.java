@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ExceptionHandlerWrapper {
             final ConfigurableNavigationHandler nav = (ConfigurableNavigationHandler) fc.getApplication().getNavigationHandler();
             try {
                 log.error(t.getMessage(), t);
-                performRedirect(externalContext, "/error_service");
+                performRedirect(externalContext, "/error_service.htm");
                 fc.renderResponse();
             } finally {
                 i.remove();
