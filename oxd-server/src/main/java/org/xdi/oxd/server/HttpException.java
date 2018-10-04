@@ -5,6 +5,7 @@ import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
 
@@ -16,7 +17,7 @@ public class HttpException extends WebApplicationException {
     private final ErrorResponseCode code;
 
     public HttpException(ErrorResponseCode code) {
-        super(Response.status(code.getHttpStatus()).entity(CoreUtils.asJsonSilently(new ErrorResponse(code))).build());
+        super(Response.status(code.getHttpStatus()).type(MediaType.APPLICATION_JSON_TYPE).entity(CoreUtils.asJsonSilently(new ErrorResponse(code))).build());
         this.code = code;
     }
 
