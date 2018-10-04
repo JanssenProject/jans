@@ -61,7 +61,6 @@ public class RsProtectTest {
         }
 
         throw new AssertionError("Expected 400 (bad request) but got successful result.");
-
     }
 
     @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
