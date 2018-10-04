@@ -18,10 +18,10 @@ import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RpGetRptResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.oxd.server.Utils;
@@ -121,7 +121,7 @@ public class UmaTokenService {
         }
 
         LOG.error("Failed to get RPT for rp: " + rp);
-        throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
+        throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
 
     public Pat getPat(String oxdId) {
@@ -247,7 +247,7 @@ public class UmaTokenService {
         final String scope = response1.getScope();
         final String authorizationCode = response1.getCode();
         if (!state.equals(response1.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_STATE);
+            throw new HttpException(ErrorResponseCode.INVALID_STATE);
         }
 
         if (Util.allNotBlank(authorizationCode)) {

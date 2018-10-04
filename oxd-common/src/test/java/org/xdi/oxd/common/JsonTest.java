@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.common;
@@ -45,8 +45,7 @@ public class JsonTest {
 
     @Test
     public void testErrorResponseJson() throws IOException {
-        final CommandResponse response = CommandResponse.createInternalError();
-        final String json = CoreUtils.asJson(response);
+        final String json = CoreUtils.asJson(new ErrorResponse(ErrorResponseCode.INTERNAL_ERROR_UNKNOWN));
         Assert.assertTrue(StringUtils.isNotBlank(json));
     }
 }

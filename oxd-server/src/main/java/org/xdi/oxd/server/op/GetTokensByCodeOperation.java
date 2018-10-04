@@ -11,9 +11,9 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
 import java.util.HashMap;
@@ -63,12 +63,12 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             if (Strings.isNullOrEmpty(response.getIdToken())) {
                 LOG.error("id_token is not returned. Please check whether 'openid' scope is present for 'get_authorization_url' command");
-                throw new ErrorResponseException(ErrorResponseCode.NO_ID_TOKEN_RETURNED);
+                throw new HttpException(ErrorResponseCode.NO_ID_TOKEN_RETURNED);
             }
 
             if (Strings.isNullOrEmpty(response.getAccessToken())) {
                 LOG.error("access_token is not returned");
-                throw new ErrorResponseException(ErrorResponseCode.NO_ACCESS_TOKEN_RETURNED);
+                throw new HttpException(ErrorResponseCode.NO_ACCESS_TOKEN_RETURNED);
             }
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
@@ -103,13 +103,13 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
     private void validate(GetTokensByCodeParams params) {
         if (Strings.isNullOrEmpty(params.getCode())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
         }
         if (Strings.isNullOrEmpty(params.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         if (!getStateService().isStateValid(params.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
     }
 }

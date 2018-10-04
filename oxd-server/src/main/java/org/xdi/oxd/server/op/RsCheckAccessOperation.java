@@ -17,6 +17,7 @@ import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
@@ -128,10 +129,10 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
     private void validate(RsCheckAccessParams params) {
         if (Strings.isNullOrEmpty(params.getHttpMethod())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_HTTP_METHOD);
+            throw new HttpException(ErrorResponseCode.NO_UMA_HTTP_METHOD);
         }
         if (Strings.isNullOrEmpty(params.getPath())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_PATH_PARAMETER);
+            throw new HttpException(ErrorResponseCode.NO_UMA_PATH_PARAMETER);
         }
     }
 }
