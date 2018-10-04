@@ -20,9 +20,9 @@ import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
@@ -79,12 +79,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     public CommandResponse execute(RegisterSiteParams params) {
         try {
             return okResponse(execute_(params));
-        } catch (ErrorResponseException e) {
+        } catch (HttpException e) {
             throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        throw HttpException.internalError();
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
@@ -95,7 +95,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             LOG.warn("'op_host' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_host'");
             String fallbackOpHost = fallback.getOpHost();
             if (Strings.isNullOrEmpty(fallbackOpHost)) {
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
+                throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
             }
             LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from configuration file.");
             params.setOpHost(fallbackOpHost);
@@ -119,7 +119,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             params.setAuthorizationRedirectUri(fallback.getAuthorizationRedirectUri());
         }
         if (!Utils.isValidUrl(params.getAuthorizationRedirectUri())) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_REDIRECT_URI);
+            throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_REDIRECT_URI);
         }
 
         //post_logout_redirect_uri
@@ -176,7 +176,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             params.setScope(fallback.getScope());
         }
         if (params.getScope() == null || params.getScope().isEmpty()) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_SCOPE);
+            throw new HttpException(ErrorResponseCode.INVALID_SCOPE);
         }
 
         // acr_values
@@ -236,7 +236,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
-            throw new ErrorResponseException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
+            throw new HttpException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }
 
         final RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -285,7 +285,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg());
             if (signatureAlgorithms == null) {
                 LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ALGORITHM);
+                throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
             }
             request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
             rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());

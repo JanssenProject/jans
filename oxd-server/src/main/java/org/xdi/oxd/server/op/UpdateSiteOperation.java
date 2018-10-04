@@ -14,9 +14,9 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
 import javax.ws.rs.HttpMethod;
@@ -70,7 +70,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     private void updateRegisteredClient(Rp rp, UpdateSiteParams params) {
         if (StringUtils.isBlank(rp.getClientRegistrationClientUri())) {
             LOG.error("Registration client url is blank.");
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
+            throw new HttpException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
         }
 
         final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());

@@ -15,7 +15,6 @@ import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.Condition;
@@ -24,6 +23,7 @@ import org.xdi.oxd.rs.protect.resteasy.Key;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
@@ -123,10 +123,10 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
     private void validate(RsProtectParams params) {
         if (params.getResources() == null || params.getResources().isEmpty()) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
+            throw new HttpException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
         }
         if (!org.xdi.oxd.rs.protect.ResourceValidator.isHttpMethodUniqueInPath(params.getResources())) {
-            throw new ErrorResponseException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
+            throw new HttpException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
         }
         if (params.getResources() != null){
             for (RsResource resource : params.getResources()) {
@@ -138,7 +138,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                                 boolean nodeValid = JsonLogicNodeParser.isNodeValid(json);
                                 LOG.trace("Scope expression validator - Valid: " + nodeValid + ", expression: " + json);
                                 if (!nodeValid) {
-                                    throw new ErrorResponseException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
+                                    throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
                                 }
                             }
                         }
@@ -151,7 +151,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         List<UmaResource> existingUmaResources = rp.getUmaProtectedResources();
         if (existingUmaResources != null && !existingUmaResources.isEmpty()) {
             if (params.getOverwrite() == null || !params.getOverwrite()) {
-                throw new ErrorResponseException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
+                throw new HttpException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
             } else {
                 // remove existing resources, overwrite=true
                 UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());

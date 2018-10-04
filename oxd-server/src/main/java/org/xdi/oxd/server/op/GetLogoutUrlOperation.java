@@ -8,9 +8,9 @@ import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
@@ -58,7 +58,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             }
 
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
-            throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
+            throw new HttpException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
         String uri = endSessionEndpoint;

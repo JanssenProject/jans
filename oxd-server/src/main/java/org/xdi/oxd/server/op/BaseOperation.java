@@ -1,22 +1,20 @@
-/**
- * All rights reserved -- Copyright 2015 Gluu Inc.
+/*
+  All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.codehaus.jackson.node.POJONode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
-import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.Convertor;
+import org.xdi.oxd.server.HttpException;
+import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.service.*;
 
 /**
@@ -27,11 +25,6 @@ import org.xdi.oxd.server.service.*;
  */
 
 public abstract class BaseOperation<T extends IParams> implements IOperation<T> {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(BaseOperation.class);
 
     private final Command command;
     private final Injector injector;
@@ -115,7 +108,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
             return getRpService().getRp(hasOxdId.getOxdId());
         }
-        throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+        throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }
 
     public ValidationService getValidationService() {
@@ -139,7 +132,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
      */
     public CommandResponse okResponse(IOpResponse p_data) {
         if (p_data == null) {
-            return CommandResponse.createInternalError();
+            throw HttpException.internalError();
         }
         return CommandResponse.ok().setData(new POJONode(p_data));
     }
