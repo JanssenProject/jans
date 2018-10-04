@@ -1,6 +1,6 @@
 package io.swagger.client.api;
 
-import io.swagger.client.ApiResponse;
+import io.swagger.client.ApiException;
 import io.swagger.client.model.RegisterSiteResponseData;
 import io.swagger.client.model.RemoveSiteParams;
 import io.swagger.client.model.RemoveSiteResponse;
@@ -37,15 +37,12 @@ public class RemoveSiteTest {
 
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(someRandomId);
-        ApiResponse<RemoveSiteResponse> apiResponse = api.removeSiteWithHttpInfo(Tester.getAuthorization(), params);
-
-        assertEquals(apiResponse.getStatusCode(), 200); // todo 404
-        assertTrue("error".equalsIgnoreCase(apiResponse.getData().getStatus()));
-        assertNotNull(apiResponse.getData());
-        assertNotNull(apiResponse.getData().getData());
-        assertEquals(apiResponse.getData().getData().getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());
-
+        try {
+            api.removeSite(Tester.getAuthorization(), params);
+        } catch (ApiException e) {
+            assertEquals(e.getCode(), 400);
+            assertEquals(Tester.asError(e).getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());
+        }
+        throw new AssertionError("Expected 400 error but got successful result.");
     }
-
-
 }

@@ -1,7 +1,11 @@
 package org.xdi.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
+import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.ErrorResponse;
 
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
 import java.util.List;
 
 import static junit.framework.Assert.assertTrue;
@@ -22,5 +26,11 @@ public class TestUtils {
 
     public static void notEmpty(List<String> str) {
         assertTrue(str != null && !str.isEmpty() && StringUtils.isNotBlank(str.get(0)));
+    }
+
+    public static ErrorResponse asError(WebApplicationException e) throws IOException {
+        final Object entity = e.getResponse().getEntity();
+        System.out.println(entity);
+        return CoreUtils.createJsonMapper().readValue((String) entity, ErrorResponse.class);
     }
 }
