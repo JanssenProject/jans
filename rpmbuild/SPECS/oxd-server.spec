@@ -38,7 +38,7 @@ install -m 755 %SOURCE1 %{buildroot}/etc/init.d/%{name1}
 install -m 755 %SOURCE2 %{buildroot}/etc/init.d/oxd-https-extension
 install -m 755 %SOURCE1 %{buildroot}/%{_initddir}/%{name1}
 install -m 755 %SOURCE2 %{buildroot}/%{_initddir}/oxd-https-extension
-install -m 644 %SOURCE3 %{buildroot}/etc/default/oxd-server
+install -m 644 %SOURCE3 %{buildroot}/etc/default/oxd-server-3.1.4
 install -m 755 oxd-server/src/main/bin/oxd-start.sh %{buildroot}/opt/%{name1}/bin
 install -m 755 oxd-server/src/main/bin/lsox.sh %{buildroot}/opt/%{name1}/bin
 install -m 644 oxd-server/src/main/resources/log4j.xml %{buildroot}/opt/%{name1}/conf/
