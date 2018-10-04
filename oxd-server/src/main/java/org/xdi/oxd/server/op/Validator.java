@@ -12,7 +12,7 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.PublicOpKeyService;
 import org.xdi.oxd.server.service.StateService;
 
@@ -52,7 +52,7 @@ public class Validator {
             }
             if (!rsaSigner.validateAccessToken(accessToken, idToken)) {
                 LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
+                throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
             }
         }
     }
@@ -60,7 +60,7 @@ public class Validator {
     public void validateAuthorizationCode(String code) {
         if (!Strings.isNullOrEmpty(code)) {
             if (!rsaSigner.validateAuthorizationCode(code, idToken)) {
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
+                throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
             }
         }
     }
@@ -78,7 +78,7 @@ public class Validator {
     public void validateNonce(StateService stateService) {
         final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
         if (!stateService.isNonceValid(nonceFromToken)) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
+            throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
     }
 
@@ -103,7 +103,7 @@ public class Validator {
 
             if (!Strings.isNullOrEmpty(nonce) && !nonceFromToken.endsWith(nonce)) {
                 LOG.error("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_NONCE);
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_NONCE);
             }
 
             if (!clientId.equalsIgnoreCase(audienceFromToken)) {
@@ -111,7 +111,7 @@ public class Validator {
                 if (audAsList != null && audAsList.size() == 1) {
                     if (!clientId.equalsIgnoreCase(audAsList.get(0))) {
                         LOG.error("ID Token has invalid audience (string list). Expected audience: " + clientId + ", audience from token is: " + audAsList);
-                        throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
                     }
                 }
 
@@ -119,7 +119,7 @@ public class Validator {
                 boolean equalsWithSingleValuedArray = ("[\"" + clientId + "\"]").equalsIgnoreCase(audienceFromToken);
                 if (!equalsWithSingleValuedArray) {
                     LOG.error("ID Token has invalid audience (single valued array). Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
+                    throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
                 }
             }
 
@@ -127,13 +127,13 @@ public class Validator {
             final Date now = new Date();
             if (now.after(expiresAt)) {
                 LOG.error("ID Token is expired. (It is after " + now + ").");
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_EXPIRED);
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_EXPIRED);
             }
 
             // 1. validate issuer
             if (!issuer.equals(discoveryResponse.getIssuer())) {
                 LOG.error("ID Token issuer is invalid. Token issuer: " + issuer + ", discovery issuer: " + discoveryResponse.getIssuer());
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_ISSUER);
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_ISSUER);
             }
 
             // 2. validate signature
@@ -149,14 +149,14 @@ public class Validator {
 
                 if (!signature) {
                     LOG.error("ID Token signature is invalid.");
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
+                    throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
                 } else {
                     this.rsaSigner = signerWithRefreshedKey;
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_UNKNOWN);
+            throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_UNKNOWN);
         }
     }
 

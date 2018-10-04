@@ -11,9 +11,9 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
@@ -46,12 +46,12 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             opResponse.setExpiresAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME)));
             opResponse.setClaims(jwt.getClaims().toMap());
             return okResponse(opResponse);
-        } catch (ErrorResponseException e) {
+        } catch (HttpException e) {
             throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        throw HttpException.internalError();
     }
 
 }

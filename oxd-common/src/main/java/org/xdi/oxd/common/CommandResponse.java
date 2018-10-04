@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.common;
@@ -10,7 +10,6 @@ import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -22,12 +21,6 @@ import java.io.Serializable;
 public class CommandResponse implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandResponse.class);
-
-    public static final CommandResponse INTERNAL_ERROR_RESPONSE = CommandResponse.createInternalError();
-
-    public static final String INTERNAL_ERROR_RESPONSE_AS_STRING = createInternalErrorAsString();
-
-    public static final CommandResponse OPERATION_IS_NOT_SUPPORTED = CommandResponse.createUnsupportedOperationError();
 
     @JsonProperty(value = "status")
     @com.fasterxml.jackson.annotation.JsonProperty(value="status")
@@ -91,30 +84,6 @@ public class CommandResponse implements Serializable {
         return CommandResponse.error().setData(new POJONode(p_error));
     }
 
-    public static CommandResponse createErrorResponse(ErrorResponseCode p_errorCode) {
-        final ErrorResponse error = new ErrorResponse(p_errorCode);
-        error.setErrorDescription(p_errorCode.getDescription());
-        return CommandResponse.error().setData(new POJONode(error));
-    }
-
-    public static CommandResponse createInternalError() {
-        return createErrorResponse(ErrorResponseCode.INTERNAL_ERROR_UNKNOWN);
-    }
-
-    public static CommandResponse createUnsupportedOperationError() {
-        return createErrorResponse(ErrorResponseCode.UNSUPPORTED_OPERATION);
-    }
-
-    private static String createInternalErrorAsString() {
-        final CommandResponse response = CommandResponse.createInternalError();
-        try {
-            return CoreUtils.asJson(response);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            return "";
-        }
-    }
-
     /**
      * Returns string representation of object
      *
@@ -122,11 +91,9 @@ public class CommandResponse implements Serializable {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("CommandResponse");
-        sb.append("{status=").append(status);
-        sb.append(", params=").append(data);
-        sb.append('}');
-        return sb.toString();
+        return "CommandResponse" +
+                "{status=" + status +
+                ", params=" + data +
+                '}';
     }
 }

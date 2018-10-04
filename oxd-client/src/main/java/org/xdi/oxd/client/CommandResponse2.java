@@ -19,10 +19,6 @@ public class CommandResponse2 implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(org.xdi.oxd.common.CommandResponse.class);
 
-    public static final org.xdi.oxd.common.CommandResponse INTERNAL_ERROR_RESPONSE = org.xdi.oxd.common.CommandResponse.createInternalError();
-
-    public static final org.xdi.oxd.common.CommandResponse OPERATION_IS_NOT_SUPPORTED = org.xdi.oxd.common.CommandResponse.createUnsupportedOperationError();
-
     @JsonProperty(value = "status")
     private ResponseStatus status;
     @JsonProperty(value = "data")

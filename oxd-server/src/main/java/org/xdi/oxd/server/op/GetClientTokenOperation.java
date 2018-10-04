@@ -14,9 +14,9 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 
 import java.io.UnsupportedEncodingException;
@@ -54,7 +54,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
 
                 SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(params.getAlgorithm());
                 if (algorithm == null) {
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ALGORITHM);
+                    throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
                 }
 
                 TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -89,12 +89,12 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
                 LOG.error("No response from TokenClient");
                 LOG.error("Please check AS logs for more details (oxauth.log for CE).");
             }
-        } catch (ErrorResponseException e) {
+        } catch (HttpException e) {
             throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        throw HttpException.internalError();
     }
 
     private String scopeAsString(GetClientTokenParams params) throws UnsupportedEncodingException {
