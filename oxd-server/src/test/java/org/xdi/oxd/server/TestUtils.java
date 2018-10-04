@@ -1,11 +1,13 @@
 package org.xdi.oxd.server;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponse;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static junit.framework.Assert.assertTrue;
@@ -30,7 +32,15 @@ public class TestUtils {
 
     public static ErrorResponse asError(WebApplicationException e) throws IOException {
         final Object entity = e.getResponse().getEntity();
-        System.out.println(entity);
-        return CoreUtils.createJsonMapper().readValue((String) entity, ErrorResponse.class);
+        String entityAsString = null;
+        if (entity instanceof String) {
+            entityAsString = (String) entity;
+        } else if (entity instanceof InputStream) {
+            entityAsString = IOUtils.toString((InputStream) entity, "UTF-8");
+        } else {
+            throw new RuntimeException("Failed to identify type of the entity");
+        }
+        System.out.println(entityAsString);
+        return CoreUtils.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
     }
 }

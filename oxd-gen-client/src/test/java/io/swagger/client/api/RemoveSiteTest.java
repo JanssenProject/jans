@@ -42,6 +42,7 @@ public class RemoveSiteTest {
         } catch (ApiException e) {
             assertEquals(e.getCode(), 400);
             assertEquals(Tester.asError(e).getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());
+            return;
         }
         throw new AssertionError("Expected 400 error but got successful result.");
     }
