@@ -18,7 +18,7 @@ oxd - OpenID Connect and UMA plugins for
 Apache and nginx web containers
 
 %prep
-%setup -qn %{name}-%{version}
+%setup -qn %{name}
 
 %build
 #mvn clean package -U -Dmaven.test.skip=true
