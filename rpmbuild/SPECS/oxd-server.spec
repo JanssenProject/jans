@@ -1,6 +1,6 @@
-%define name1 oxd-server
-Name:           oxd-server
-Version:        3.1.4
+%define name1 oxd-server-3.1.4
+Name:           oxd-server-3.1.4
+Version:        1
 Release:        1.centos6
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
@@ -11,7 +11,7 @@ Source1:        oxd-server.init.d
 Source2:        oxd-https-extension
 Source3:        oxd-server-default
 BuildArch:      noarch
-Conflicts:      oxd-server
+Conflicts:      oxd-server-3.1.4
 
 %description
 oxd - OpenID Connect and UMA plugins for
@@ -55,7 +55,7 @@ mkdir -p %{buildroot}/var/log/oxd-server
 mkdir -p %{buildroot}/etc/oxd/oxd-server
 mkdir -p %{buildroot}/etc/default/
 cp -a %{buildroot}/opt/oxd-server/conf/* %{buildroot}/etc/oxd/oxd-server/.
-cp -a debian/oxd-server-default %{buildroot}/etc/default/oxd-server
+cp -a debian/oxd-server-default %{buildroot}/etc/default/oxd-server-3.1.4
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -72,18 +72,18 @@ if [ $? -ne 0 ]; then
     /usr/sbin/usermod -a -G gluu jetty
 fi
 
-chown root:root /etc/default/oxd-server 2>&1
-chown jetty:jetty -R /opt/oxd-server 2>&1
-chmod 644 /etc/default/oxd-server 2>&1
+chown root:root /etc/default/oxd-server-3.1.4 2>&1
+chown jetty:jetty -R /opt/oxd-server-3.1.4 2>&1
+chmod 644 /etc/default/oxd-server-3.1.4 2>&1
 mkdir -p /var/log/oxd-server 2>&1
 touch /var/log/oxd-server/oxd-server.log 2>&1
 chown -R jetty:jetty /var/log/oxd-server 2>&1
 
 %preun
-if [ -x “/etc/init.d/oxd-server” ] || [ -e “/etc/init/oxd-server.conf” ]; then
-service oxd-server stop || exit $?
+if [ -x “/etc/init.d/oxd-server-3.1.4” ] || [ -e “/etc/init/oxd-server.conf” ]; then
+service oxd-server-3.1.4 stop || exit $?
 fi
-chkconfig --del oxd-server
+chkconfig --del oxd-server-3.1.4
 
 %files
 %defattr(-,root,root,-)
@@ -93,7 +93,7 @@ chkconfig --del oxd-server
 /etc/init.d/oxd-https-extension
 %{_initddir}/%{name1}
 %{_initddir}/oxd-https-extension
-/etc/default/oxd-server
+/etc/default/oxd-server-3.1.4
 /etc/oxd/*
 /var/log/oxd-server
 
