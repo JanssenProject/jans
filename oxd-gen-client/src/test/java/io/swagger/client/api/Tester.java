@@ -8,7 +8,10 @@ import io.swagger.client.ApiException;
 import io.swagger.client.model.GetClientTokenParams;
 import io.swagger.client.model.GetClientTokenResponseData;
 import io.swagger.client.model.RegisterSiteResponseData;
+import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.ErrorResponse;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -104,5 +107,13 @@ public class Tester {
 
     public static Boolean isTokenProtectionEnabled() {
         return isTokenProtectionEnabled;
+    }
+
+    public static ErrorResponse asError(String entity) throws IOException {
+        return CoreUtils.createJsonMapper().readValue(entity, ErrorResponse.class);
+    }
+
+    public static ErrorResponse asError(ApiException e) throws IOException {
+        return asError(e.getResponseBody());
     }
 }
