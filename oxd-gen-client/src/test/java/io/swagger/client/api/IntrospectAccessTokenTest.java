@@ -75,7 +75,6 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
 
         IntrospectAccessTokenResponseData responseData = apiIatResponse.getData().getData();
         assertNotNull(responseData);
-        // verify client is NOT active
         assertFalse(responseData.isActive());
     }
 
@@ -92,12 +91,10 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());
 
-        final String invalidAuthString = "Bearer " + "NotAuthorized";
-        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse =
-                client.introspectAccessTokenWithHttpInfo(invalidAuthString, introspectParams);
+        final String invalidAuthString = "Bearer NotAuthorized";
+        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse = client.introspectAccessTokenWithHttpInfo(invalidAuthString, introspectParams);
 
-        //Fixme: Status code should be 401
-        assertTrue(introApiResponse.getStatusCode() == 200);
+        assertEquals(403,introApiResponse.getStatusCode());
 
         IntrospectAccessTokenResponseData responseData = introApiResponse.getData().getData();
         assertNotNull(responseData);
@@ -117,6 +114,4 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         assertNotNull(clientTokenResponse);
         return clientTokenResponse.getData();
     }
-
-
 }
