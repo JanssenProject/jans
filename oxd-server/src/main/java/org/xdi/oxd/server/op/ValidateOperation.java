@@ -7,8 +7,8 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.ValidateParams;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
 /**
@@ -47,16 +47,16 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
 
     private void validateParams(ValidateParams params) {
         if (Strings.isNullOrEmpty(params.getCode())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
         }
         if (Strings.isNullOrEmpty(params.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         if (!getStateService().isStateValid(params.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
         if (!Strings.isNullOrEmpty(params.getIdToken())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_ID_TOKEN_PARAM);
+            throw new HttpException(ErrorResponseCode.NO_ID_TOKEN_PARAM);
         }
     }
 }
