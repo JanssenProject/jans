@@ -6,7 +6,7 @@ Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://www.gluu.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        %{name}.tar.gz
 Source1:        oxd-server.init.d
 Source2:        oxd-https-extension
 Source3:        oxd-server-default
