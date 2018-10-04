@@ -1,7 +1,6 @@
 package org.xdi.oxd.server;
 
 import com.google.common.collect.Lists;
-import junit.framework.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
@@ -44,15 +43,11 @@ public class IntrospectAccessTokenTest {
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
         IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams).dataAsResponse(IntrospectionResponse.class);
+
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());
-
-        final Integer issuedAt = introspectionResponse.getIssuedAt();
-        assertNotNull(issuedAt);
-        Integer expiresAt = introspectionResponse.getExpiresAt();
-        assertNotNull(expiresAt);
-        assertTrue(expiresAt >= issuedAt);
-        //todo : add check for nbf when ready
-
+        assertNotNull(introspectionResponse.getIssuedAt());
+        assertNotNull(introspectionResponse.getExpiresAt());
+        assertTrue(introspectionResponse.getExpiresAt() >= introspectionResponse.getIssuedAt());
     }
 }
