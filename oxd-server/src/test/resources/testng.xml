@@ -158,5 +158,11 @@
         </classes>
     </test>
 
+    <test name="Get tokens by code swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetTokensByCodeTest"/>
+        </classes>
+    </test>
+
 
 </suite>
