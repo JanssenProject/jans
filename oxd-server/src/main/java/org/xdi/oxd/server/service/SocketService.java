@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.service;
@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.Configuration;
-import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.SocketProcessor;
-import org.xdi.oxd.server.license.LicenseFileUpdateService;
-import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -45,23 +42,18 @@ public class SocketService {
 
     private Configuration conf;
     private HttpService httpService;
-    private TimeService timeService;
 
     /**
      * Avoid direct instance creation
      */
     @Inject
-    public SocketService(Configuration conf, HttpService httpService, TimeService timeService) {
+    public SocketService(Configuration conf, HttpService httpService) {
         this.conf = conf;
         this.httpService = httpService;
-        this.timeService = timeService;
     }
 
     public void listenSocket() throws IOException {
         final int port = conf.getPort();
-
-        final LicenseService licenseService = new LicenseService(conf, httpService, timeService);
-        licenseService.start();
 
         try {
             final Boolean localhostOnly = conf.getLocalhostOnly();
@@ -81,15 +73,6 @@ public class SocketService {
             while (!shutdown) {
                 try {
                     final Socket clientSocket = serverSocket.accept();
-
-                    if (!licenseService.isLicenseValid()) {
-                        LOG.error("License is invalid. Please check your license_id and make sure it is not expired.");
-                        LOG.error("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
-                                " re-tries. Shutdown the server.");
-                        throw new ShutdownException("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
-                                " re-tries. Shutdown the server.");
-                    }
-
                     executorService().execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);

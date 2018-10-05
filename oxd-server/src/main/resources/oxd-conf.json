@@ -1,5 +1,4 @@
 {
-    "server_name":"",
     "port":8099,
     "localhost_only":true,
     "time_out_in_seconds":0,
@@ -10,10 +9,6 @@
     "crypt_provider_key_store_path":"",
     "crypt_provider_key_store_password":"",
     "crypt_provider_dn_name":"",
-    "license_id":"",
-    "public_key":"",
-    "public_password":"",
-    "license_password":"",
     "support-google-logout":true,
     "state_expiration_in_minutes":5,
     "nonce_expiration_in_minutes":5,
