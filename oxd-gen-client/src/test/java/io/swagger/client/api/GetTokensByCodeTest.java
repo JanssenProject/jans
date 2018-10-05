@@ -40,20 +40,22 @@ public class GetTokensByCodeTest {
 
         GetTokensByCodeResponseData tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
 
-        refreshToken(tokensResponse, client, site.getOxdId());
+        refreshToken(tokensResponse, client, site);
     }
 
-    private static void refreshToken(GetTokensByCodeResponseData resp, DevelopersApi client, String oxdId) throws Exception {
+    private static void refreshToken(GetTokensByCodeResponseData resp, DevelopersApi client, RegisterSiteResponseData site) throws Exception {
         notEmpty(resp.getRefreshToken());
+
+        final String authorization = Tester.getAuthorization(site);
 
         // refresh token
         final GetAccessTokenByRefreshTokenParams refreshParams = new GetAccessTokenByRefreshTokenParams();
-        refreshParams.setOxdId(oxdId);
+        refreshParams.setOxdId(site.getOxdId());
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
-        refreshParams.setProtectionToken(Tester.getAuthorization());
+        refreshParams.setProtectionToken(authorization);
 
-        GetAccessTokenByRefreshTokenResponseData refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(), refreshParams).getData();
+        GetAccessTokenByRefreshTokenResponseData refreshResponse = client.getAccessTokenByRefreshToken(authorization, refreshParams).getData();
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
@@ -64,7 +66,7 @@ public class GetTokensByCodeTest {
 
         final String state = CoreUtils.secureRandomString();
 
-        final String authorizationStr = Tester.getAuthorization(site); //getAuthorization(opHost, client, site);
+        final String authorizationStr = Tester.getAuthorization(site);
 
         final String code = codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce, authorizationStr);
 
