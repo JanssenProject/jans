@@ -1,5 +1,4 @@
 {
-    "server_name":"build_server",
     "port":8099,
     "localhost_only":true,
     "time_out_in_seconds":0,
@@ -10,10 +9,6 @@
     "crypt_provider_key_store_path":"",
     "crypt_provider_key_store_password":"",
     "crypt_provider_dn_name":"",
-    "license_id":"b9d9140e-0732-4a96-b4be-215597377a10",
-    "public_key":"47SbaB5bmXBXpKWgtMGNot9CIN++xJITnqlOsCRsQA4swMFwPeSIBIyPqSPB0qBGBCvI9ER0FTYqH9z6XnRJ1txNdzc0voY/SDGw+OQe0emC3HgXax0+lR4JsYkuQ3C+cnfqyunHQgnwDVcx4fS0MvxWewu03q9ppc1UlImNe7nesm3tzP0dsvVkEMeAWyEbrsu58JzUmFDGDzl0sVKjtBs+czf1ETWd48q5a3IDq5DNSbT4E4Hr3dmLz72nEPBr9Bsoqik4wWiGl8YMa9w4BZiKZQjoIfvboxSwhJRy1kKCEzi/kJqLX6EZ/cCUw8fgn/Xu2Kaov8CI7dtOSi3DqKWQbcDdRpoZJTas+6uyux4tMzZPnblfYnlPaDJRBt9WOgL4SWBdoukw9/QXubXSEA==",
-    "public_password":"3Rczv1eJ0sDnFOGLLEkX",
-    "license_password":"a7rkv7VCFOum40eFtfbL",
     "support-google-logout":true,
     "state_expiration_in_minutes":5,
     "nonce_expiration_in_minutes":5,

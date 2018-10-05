@@ -37,7 +37,7 @@ public class ConfigurationService implements Provider<Configuration> {
     /**
      * Configuration file name.
      */
-    public static final String FILE_NAME = Utils.isTestMode() ? TEST_FILE_NAME : "oxd-conf.json";
+    private static final String FILE_NAME = Utils.isTestMode() ? TEST_FILE_NAME : "oxd-conf.json";
 
     private Configuration configuration = null;
     private Rp defaultRp = null;
@@ -70,11 +70,6 @@ public class ConfigurationService implements Provider<Configuration> {
     public void load() {
         loadImpl();
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
-
-        if (StringUtils.isBlank(configuration.getServerName())) {
-            LOG.error("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
-            throw new AssertionError("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
-        }
     }
 
     private void loadImpl() {
