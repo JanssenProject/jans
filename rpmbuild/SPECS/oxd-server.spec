@@ -7,7 +7,7 @@ Group:          System Environment/Daemons
 License:        MIT
 URL:            http://www.gluu.org
 Source0:        %{name}.tar.gz
-Source1:        oxd-server.init.d
+Source1:        oxd-server-3.1.4.init.d
 Source2:        oxd-https-extension
 Source3:        oxd-server-default
 BuildArch:      noarch
