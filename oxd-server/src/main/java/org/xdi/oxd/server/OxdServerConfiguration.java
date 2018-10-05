@@ -12,8 +12,6 @@ public class OxdServerConfiguration extends Configuration {
     private String registerClientAppType = "web";
     //    @JsonProperty(value = "register_client_response_types")
     private String registerClientResponesType = "code";
-    @JsonProperty(value = "server_name")
-    private String serverName;
     @JsonProperty(value = "use_client_authentication_for_pat")
     private Boolean useClientAuthenticationForPat = true;
     @JsonProperty(value = "trust_all_certs")
@@ -87,14 +85,6 @@ public class OxdServerConfiguration extends Configuration {
 
     public void setMigrationSourceFolderPath(String migrationSourceFolderPath) {
         this.migrationSourceFolderPath = migrationSourceFolderPath;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
     }
 
     public Boolean getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient() {
@@ -214,7 +204,6 @@ public class OxdServerConfiguration extends Configuration {
         return "OxdServerConfiguration{" +
                 ", registerClientAppType='" + registerClientAppType + '\'' +
                 ", registerClientResponesType='" + registerClientResponesType + '\'' +
-                ", serverName='" + serverName + '\'' +
                 ", useClientAuthenticationForPat=" + useClientAuthenticationForPat +
                 ", trustAllCerts=" + trustAllCerts +
                 ", keyStorePath='" + keyStorePath + '\'' +
