@@ -2,7 +2,6 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import org.codehaus.jackson.node.POJONode;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
+import org.xdi.oxd.rs.protect.Jackson;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
@@ -21,6 +21,8 @@ import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +41,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
      *
      * @param command command
      */
-    protected RsCheckAccessOperation(Command command, final Injector injector) {
+    RsCheckAccessOperation(Command command, final Injector injector) {
         super(command, injector, RsCheckAccessParams.class);
     }
 
@@ -54,7 +56,11 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
                     ". Please protect your resource first with uma_rs_protect command. Check details on " + CoreUtils.DOC_URL);
             LOG.error(error.getErrorDescription());
-            return CommandResponse.error().setData(new POJONode(error));
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(Jackson.asJson(error))
+                    .build());
         }
 
         PatProvider patProvider = new PatProvider() {

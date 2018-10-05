@@ -6,7 +6,6 @@ package org.xdi.oxd.common;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,47 +40,13 @@ public class CommandResponse implements Serializable {
         data = p_data;
     }
 
-    public ResponseStatus getStatus() {
-        return status;
-    }
-
-    public CommandResponse setStatus(ResponseStatus p_status) {
-        status = p_status;
-        return this;
-    }
-
-    public JsonNode getData() {
-        return data;
-    }
-
     public CommandResponse setData(JsonNode p_data) {
         data = p_data;
         return this;
     }
 
-    public <T> T dataAsResponse(Class<T> p_class) {
-        if (data != null && p_class != null) {
-            final String asString = data.toString();
-            try {
-                return CoreUtils.createJsonMapper().readValue(asString, p_class);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-            LOG.error("Unable to parse string to response, string: {}", asString);
-        }
-        return null;
-    }
-
     public static CommandResponse ok() {
         return new CommandResponse(ResponseStatus.OK);
-    }
-
-    public static CommandResponse error() {
-        return new CommandResponse(ResponseStatus.ERROR);
-    }
-
-    public static CommandResponse createErrorResponse(ErrorResponse p_error) {
-        return CommandResponse.error().setData(new POJONode(p_error));
     }
 
     /**
