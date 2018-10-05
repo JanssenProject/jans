@@ -1,10 +1,11 @@
 package org.xdi.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.*;
 
 import javax.ws.rs.*;
@@ -196,7 +197,7 @@ public class RestResource {
         }
     }
 
-    public static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
+    private static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         T params = read(paramsAsString, paramsClass);
         if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
@@ -207,7 +208,7 @@ public class RestResource {
         return json;
     }
 
-    public static String validateAccessToken(String authorization) {
+    private static String validateAccessToken(String authorization) {
         final String prefix = "Bearer ";
         if (StringUtils.isNotEmpty(authorization) && authorization.startsWith(prefix)) {
             String accessToken = authorization.substring(prefix.length());
@@ -216,14 +217,6 @@ public class RestResource {
             }
         }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
-        throw new WebApplicationException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
-    }
-
-    public static String forbiddenErrorResponse() {
-        final ErrorResponse error = new ErrorResponse("403");
-        error.setErrorDescription("Forbidden Access");
-
-        CommandResponse commandResponse = CommandResponse.error().setData(new POJONode(error));
-        return CoreUtils.asJsonSilently(commandResponse);
+        throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build());
     }
 }
