@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/etc/init.d/oxd-server stop > /dev/null 2>&1
+/etc/init.d/oxd-server-3.1.4 stop > /dev/null 2>&1
 /etc/init.d/oxd-https-extension stop > /dev/null 2>&1
 
 getent passwd jetty > /dev/null 2>&1
