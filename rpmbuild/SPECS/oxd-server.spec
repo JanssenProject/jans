@@ -54,7 +54,7 @@ install -m 644 bcprov-jdk15on-1.54.jar %{buildroot}/opt/oxd-server/lib/
 mkdir -p %{buildroot}/var/log/oxd-server
 mkdir -p %{buildroot}/etc/oxd/oxd-server
 mkdir -p %{buildroot}/etc/default/
-cp -a %{buildroot}/opt/oxd-server-3.1.4/conf/* %{buildroot}/etc/oxd/oxd-server/.
+cp -a %{buildroot}/opt/oxd-server/conf/* %{buildroot}/etc/oxd/oxd-server/.
 cp -a debian/oxd-server-default %{buildroot}/etc/default/oxd-server-3.1.4
 
 %clean
