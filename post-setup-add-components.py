@@ -41,6 +41,9 @@ setupObj.setup = setupObj
 
 setupObj.load_properties('/install/community-edition-setup/setup.properties.last')
 
+if not hasattr(setupObj, 'ldap_type'):
+    setupObj.ldap_type = 'open_ldap'
+
 if setupObj.ldap_type == 'opendj':
     setupObj.ldapCertFn = setupObj.opendj_cert_fn
 else:
