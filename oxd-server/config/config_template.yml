@@ -1,6 +1,5 @@
 
 # server configuration
-server_name: $SERVER_NAME
 use_client_authentication_for_pat: $USE_CLIENT_AUTHENTICATION_FOR_PAT
 trust_all_certs: $TRUST_ALL_CERTS
 trust_store_path: $TRUST_STORE_PATH
