@@ -11,7 +11,6 @@ docker run -p 8443:8443
 --env PUBLIC_KEY=<YOUR_PUBLIC_KEY> 
 --env PUBLIC_PASSWORD=<YOUR_PUBLIC_PASSWORD> 
 --env LICENSE_PASSWORD=<YOUR_LICENSEE_PASSWORD> 
---env SERVER_NAME=my_oxd 
 --env KEYSTORE_PATH=/vol/oxd-server.keystore 
 --env KEYSTORE_PASSWORD=example 
 --name oxd-server 

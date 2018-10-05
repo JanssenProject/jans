@@ -1,5 +1,4 @@
 {
-    "server_name":"build_server",
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
