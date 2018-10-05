@@ -44,6 +44,14 @@ import platform
 from ldif import LDIFParser
 import copy
 
+
+file_max = int(open("/proc/sys/fs/file-max").read().strip())
+
+if file_max < 64000:
+    sys.exit("""
+Maximum number of files that can be opened on this computer is less then 64000.
+Please increase number of file-max on the host system and re-run setup.py""")
+
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
 except:
