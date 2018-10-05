@@ -18,7 +18,7 @@ public class GetAuthorizationUrlTest {
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
 
-        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
         assertNotNull(resp);
         Tester.notEmpty(resp.getData().getAuthorizationUrl());
     }
