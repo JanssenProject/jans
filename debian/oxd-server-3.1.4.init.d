@@ -59,7 +59,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   first available of /var/run, /usr/var/run OXD_BASE and /tmp
 #   if not set.
 #
-# OXD_PID
+# OXD_PID_FILE
 #   The oxd-server PID file, defaults to $OXD_RUN/$NAME.pid
 #
 # OXD_ARGS
@@ -73,6 +73,9 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   no effect if start-stop-daemon exists.  Useful when OXD_USER does not
 #   have shell access, e.g. /bin/false
 #
+# OXD_INIT_LOG
+SERVICE_NAME="oxd-server"
+OXD_INIT_LOG=/var/log/oxd-server/oxd-server.log
 
 usage()
 {
@@ -244,10 +247,23 @@ fi
 #####################################################
 # Find a pid and state file
 #####################################################
-if [ -z "$OXD_PID" ]
+if [ -z "$OXD_PID_FILE" ]
 then
-  OXD_PID="$OXD_RUN/${NAME}.pid"
+  OXD_PID_FILE="$OXD_RUN/${NAME}.pid"
 fi
+
+get_pid() {
+        if [ -f $OXD_PID_FILE ]; then
+                PID_NUM=$(cat $OXD_PID_FILE)
+                echo "$PID_NUM"
+        else
+                PID_NUM="`ps -eaf|grep -i java|grep -v grep|grep -i 'oxd-conf.json'|awk '{print $2}'`"
+                ###For one more possible bug, find and kill oxd
+                if [ "x$PID_NUM" != "x" ]; then
+                        echo "$PID_NUM"
+                fi
+        fi
+}
 
 if [ -z "$OXD_STATE" ]
 then
@@ -265,6 +281,11 @@ OXD_ARGS=(${OXD_ARGS[*]} "oxd-server.state=$OXD_STATE")
 # Setup JAVA if unset
 ##################################################
 if [ -z "$JAVA" ]
+then
+  JAVA=$(which java)
+fi
+
+if [ ! -f "$JAVA" ]
 then
   JAVA=$(which java)
 fi
@@ -341,122 +362,159 @@ then
   echo "OXD_HOME     =  $OXD_HOME"
   echo "OXD_BASE     =  $OXD_BASE"
   echo "OXD_CONF     =  $OXD_CONF"
-  echo "OXD_PID      =  $OXD_PID"
+  echo "OXD_PID_FILE      =  $OXD_PID_FILE"
   echo "OXD_START    =  $OXD_START"
   echo "OXD_ARGS     =  ${OXD_ARGS[*]}"
   echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
   echo "JAVA           =  $JAVA"
   echo "RUN_CMD        =  ${RUN_CMD[*]}"
 fi
+dip_in_logs() {
+	if [ ! -f $OXD_INIT_LOG ]; then
+		sleep 10
+	fi
+	echo "Checking logs for possible errors:"
+	INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+	while true;
+	do
+		if [ "x$INIT_START_STATUS" != "x" ]; then
+			if [ "x$PREV_START_STATUS" = "x" ]; then
+				PREV_START_STATUS=$INIT_START_STATUS
+				sleep 10
+				INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+			fi
+		fi
+		if [ "$INIT_START_STATUS" != "$PREV_START_STATUS" ]; then
+			PREV_START_STATUS=$INIT_START_STATUS	
+			sleep 10
+			INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+		else
+			break;
+		fi
+	done	
+}
 
+do_start () {
+        PID_NUM=`get_pid`
+        if [ "x$PID_NUM" = "x" ]; then
+                echo "Starting $SERVICE_NAME:"
+
+    		if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1
+    		then
+      			unset CH_USER
+      			if [ -n "$OXD_USER" ]
+      			then
+        			CH_USER="-c$OXD_USER"
+      			fi
+      			start-stop-daemon -S -p"$OXD_PID_FILE" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
+
+			dip_in_logs
+                	START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'Start listening for notifications'`
+                	ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"`
+                	if [ "x$START_STATUS" = "x" ]; then
+                        	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
+                        	if [ "x$ERROR_STATUS" != "x" ]; then
+                                	### Since error occurred, we should remove the PID file at this point itself.
+					rm -f  $OXD_PID_FILE
+                                	echo "Some error encountered..."
+                                	echo "See log below: "
+                                	echo ""
+                                	echo "$ERROR_STATUS"
+                                	echo ""
+                                	echo "For details please check $OXD_INIT_LOG ."
+                                	echo "Exiting..."
+                                	exit 1
+                        	fi
+	
+                	fi
+        		chown "$OXD_USER" "$OXD_PID_FILE"
+		else
+      			if [ -n "$OXD_USER" ] && [ `whoami` != "$OXD_USER" ]
+      			then
+        			unset SU_SHELL
+        			if [ "$OXD_SHELL" ]
+        			then
+          				SU_SHELL="-s $OXD_SHELL"
+        			fi
+
+        			touch "$OXD_PID_FILE"
+        			chown "$OXD_USER" "$OXD_PID_FILE"
+        			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
+        			su - "$OXD_USER" $SU_SHELL -c "
+          			exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
+          			disown \$!
+          			echo \$! > '$OXD_PID_FILE'"
+      			else
+        			"${RUN_CMD[@]}" > /dev/null &
+        			disown $!
+        			echo $! > "$OXD_PID_FILE"
+      			fi
+               	fi 	
+        	echo "PID: [`get_pid`]"
+        	echo "OK `date`"
+       	else
+               	echo "$SERVICE_NAME is already running ..."
+        	echo "PID: [$PID_NUM]"
+		exit 1
+	fi
+}
+
+do_stop () {
+	PID_NUM=`get_pid`
+        if [ "x$PID_NUM" != "x" ]; then 
+    		echo -n "Stopping $SERVICE_NAME: "
+    		if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1; then
+      			start-stop-daemon -K -p"$OXD_PID_FILE" -d"$OXD_HOME" -a "$JAVA" -s HUP
+
+      			TIMEOUT=30
+      			while running "$OXD_PID_FILE"; do
+        			if (( TIMEOUT-- == 0 )); then
+          				start-stop-daemon -K -p"$OXD_PID_FILE" -d"$OXD_HOME" -a "$JAVA" -s KILL
+        			fi
+
+        			sleep 1
+      			done
+    		else
+      			if [ ! -f "$OXD_PID_FILE" ] ; then
+        			echo "ERROR: no pid found at $OXD_PID_FILE"
+        			exit 1
+      			fi
+
+      			PID=$(cat "$OXD_PID_FILE" 2>/dev/null)
+      			if [ -z "$PID" ] ; then
+        			echo "ERROR: no pid id found in $OXD_PID_FILE"
+        			exit 1
+      			fi
+      			kill "$PID" 2>/dev/null
+
+      			TIMEOUT=30
+      			while running $OXD_PID_FILE; do
+        			if (( TIMEOUT-- == 0 )); then
+          				kill -KILL "$PID" 2>/dev/null
+        			fi
+
+        			sleep 1
+      			done
+    		fi
+
+    		rm -f "$OXD_PID_FILE"
+    		rm -f "$OXD_STATE"
+    		echo OK
+	else
+                echo "$SERVICE_NAME is not running ..."     
+		exit 1
+	fi
+}
 ##################################################
 # Do the action
 ##################################################
 case "$ACTION" in
   start)
-    echo -n "Starting oxd server: "
-
-    if (( NO_START )); then
-      echo "Not starting ${NAME} - NO_START=1";
-      exit
-    fi
-
-    if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1
-    then
-      unset CH_USER
-      if [ -n "$OXD_USER" ]
-      then
-        CH_USER="-c$OXD_USER"
-      fi
-
-      start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
-
-    else
-
-      if running $OXD_PID
-      then
-        echo "Already Running $(cat $OXD_PID)!"
-        exit 1
-      fi
-
-      if [ -n "$OXD_USER" ] && [ `whoami` != "$OXD_USER" ]
-      then
-        unset SU_SHELL
-        if [ "$OXD_SHELL" ]
-        then
-          SU_SHELL="-s $OXD_SHELL"
-        fi
-
-        touch "$OXD_PID"
-        chown "$OXD_USER" "$OXD_PID"
-        # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
-        su - "$OXD_USER" $SU_SHELL -c "
-          exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
-          disown \$!
-          echo \$! > '$OXD_PID'"
-      else
-        "${RUN_CMD[@]}" > /dev/null &
-        disown $!
-        echo $! > "$OXD_PID"
-      fi
-
-    fi
-
-    if expr "${OXD_ARGS[*]}" : '.*oxd-server-started.xml.*' >/dev/null
-    then
-      if started "$OXD_STATE" "$OXD_PID"
-      then
-        echo "OK `date`"
-      else
-        echo "FAILED `date`"
-        exit 1
-      fi
-    else
-      echo "ok `date`"
-    fi
-
+	do_start
     ;;
 
   stop)
-    echo -n "Stopping oxd server: "
-    if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1; then
-      start-stop-daemon -K -p"$OXD_PID" -d"$OXD_HOME" -a "$JAVA" -s HUP
-
-      TIMEOUT=30
-      while running "$OXD_PID"; do
-        if (( TIMEOUT-- == 0 )); then
-          start-stop-daemon -K -p"$OXD_PID" -d"$OXD_HOME" -a "$JAVA" -s KILL
-        fi
-
-        sleep 1
-      done
-    else
-      if [ ! -f "$OXD_PID" ] ; then
-        echo "ERROR: no pid found at $OXD_PID"
-        exit 1
-      fi
-
-      PID=$(cat "$OXD_PID" 2>/dev/null)
-      if [ -z "$PID" ] ; then
-        echo "ERROR: no pid id found in $OXD_PID"
-        exit 1
-      fi
-      kill "$PID" 2>/dev/null
-
-      TIMEOUT=30
-      while running $OXD_PID; do
-        if (( TIMEOUT-- == 0 )); then
-          kill -KILL "$PID" 2>/dev/null
-        fi
-
-        sleep 1
-      done
-    fi
-
-    rm -f "$OXD_PID"
-    rm -f "$OXD_STATE"
-    echo OK
-
+	do_stop
     ;;
 
   restart)
@@ -480,9 +538,9 @@ case "$ACTION" in
   run|demo)
     echo "Running oxd server: "
 
-    if running "$OXD_PID"
+    if running "$OXD_PID_FILE"
     then
-      echo Already Running $(cat "$OXD_PID")!
+      echo Already Running $(cat "$OXD_PID_FILE")!
       exit 1
     fi
 
@@ -490,9 +548,9 @@ case "$ACTION" in
     ;;
 
   check|status)
-    if running "$OXD_PID"
+    if running "$OXD_PID_FILE"
     then
-      echo "oxd server running pid=$(< "$OXD_PID")"
+      echo "oxd server running pid=$(< "$OXD_PID_FILE")"
     else
       echo "oxd server NOT running"
     fi
@@ -500,7 +558,7 @@ case "$ACTION" in
     echo "OXD_HOME     =  $OXD_HOME"
     echo "OXD_BASE     =  $OXD_BASE"
     echo "OXD_CONF     =  $OXD_CONF"
-    echo "OXD_PID      =  $OXD_PID"
+    echo "OXD_PID_FILE      =  $OXD_PID_FILE"
     echo "OXD_START    =  $OXD_START"
     echo "OXD_LOGS     =  $OXD_LOGS"
     echo "OXD_STATE    =  $OXD_STATE"
@@ -511,7 +569,7 @@ case "$ACTION" in
     echo "RUN_CMD        =  ${RUN_CMD[*]}"
     echo
 
-    if running "$OXD_PID"
+    if running "$OXD_PID_FILE"
     then
       exit 0
     fi
