@@ -53,7 +53,6 @@ public class GetTokensByCodeTest {
         refreshParams.setOxdId(site.getOxdId());
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
-        refreshParams.setProtectionToken(authorization);
 
         GetAccessTokenByRefreshTokenResponseData refreshResponse = client.getAccessTokenByRefreshToken(authorization, refreshParams).getData();
 
