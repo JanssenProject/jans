@@ -8,9 +8,9 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.IParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
 import org.xdi.oxd.server.service.ValidationService;
@@ -36,7 +36,7 @@ public class Processor {
         this.validationService = validationService;
     }
 
-    public CommandResponse process(Command command) {
+    public IOpResponse process(Command command) {
         if (command != null) {
             try {
                 final IOperation<IParams> operation = (IOperation<IParams>) OperationFactory.create(command, ServerLauncher.getInjector());
@@ -44,7 +44,7 @@ public class Processor {
                     IParams iParams = Convertor.asParams(operation.getParameterClass(), command);
                     validationService.validate(iParams);
 
-                    CommandResponse operationResponse = operation.execute(iParams);
+                    IOpResponse operationResponse = operation.execute(iParams);
                     if (operationResponse != null) {
                         return operationResponse;
                     } else {

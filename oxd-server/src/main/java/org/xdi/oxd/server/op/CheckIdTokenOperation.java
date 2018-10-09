@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
@@ -10,9 +10,9 @@ import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
@@ -31,7 +31,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
     }
 
     @Override
-    public CommandResponse execute(CheckIdTokenParams params) throws Exception {
+    public IOpResponse execute(CheckIdTokenParams params) throws Exception {
         try {
             OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
@@ -45,7 +45,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             opResponse.setIssuedAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT)));
             opResponse.setExpiresAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME)));
             opResponse.setClaims(jwt.getClaims().toMap());
-            return okResponse(opResponse);
+            return opResponse;
         } catch (HttpException e) {
             throw e;
         } catch (Exception e) {

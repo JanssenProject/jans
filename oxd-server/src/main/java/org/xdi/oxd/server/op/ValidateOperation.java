@@ -5,9 +5,10 @@ import com.google.inject.Injector;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.ValidateParams;
+import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.common.response.POJOResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
@@ -28,7 +29,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     }
 
     @Override
-    public CommandResponse execute(ValidateParams params) throws Exception {
+    public IOpResponse execute(ValidateParams params) throws Exception {
         validateParams(params);
 
         Rp site = getRp();
@@ -42,7 +43,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
         validator.validateAccessToken(params.getAccessToken());
         validator.validateAuthorizationCode(params.getCode());
 
-        return CommandResponse.ok();
+        return new POJOResponse("");
     }
 
     private void validateParams(ValidateParams params) {

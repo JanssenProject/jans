@@ -13,9 +13,9 @@ import org.xdi.oxauth.client.uma.UmaResourceService;
 import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.RsProtectParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.Condition;
 import org.xdi.oxd.rs.protect.RsResource;
@@ -46,7 +46,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     }
 
     @Override
-    public CommandResponse execute(final RsProtectParams params) throws Exception {
+    public IOpResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
         Rp site = getRp();
@@ -79,7 +79,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
         persist(registrar, site);
 
-        return okResponse(new RsProtectResponse(site.getOxdId()));
+        return new RsProtectResponse(site.getOxdId());
     }
 
     private void persist(ResourceRegistrar registrar, Rp site) throws IOException {

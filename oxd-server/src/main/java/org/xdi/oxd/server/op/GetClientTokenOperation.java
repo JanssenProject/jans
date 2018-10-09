@@ -12,10 +12,10 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 
@@ -41,7 +41,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
     }
 
     @Override
-    public CommandResponse execute(GetClientTokenParams params) {
+    public IOpResponse execute(GetClientTokenParams params) {
         try {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
             final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
@@ -80,7 +80,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
                     response.setRefreshToken(tokenResponse.getRefreshToken());
                     response.setScope(Utils.stringToList(tokenResponse.getScope()));
 
-                    return okResponse(response);
+                    return response;
                 } else {
                     LOG.error("access_token is blank in response, params: " + params + ", response: " + tokenResponse);
                     LOG.error("Please check AS logs for more details (oxauth.log for CE).");

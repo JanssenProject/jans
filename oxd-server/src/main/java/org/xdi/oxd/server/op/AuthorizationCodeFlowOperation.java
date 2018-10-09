@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
@@ -15,9 +15,9 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.AuthorizationCodeFlowParams;
 import org.xdi.oxd.common.response.AuthorizationCodeFlowResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,10 +38,10 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
     }
 
     @Override
-    public CommandResponse execute(AuthorizationCodeFlowParams params) {
+    public IOpResponse execute(AuthorizationCodeFlowParams params) {
         final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
-            return okResponse(requestToken(discovery, params));
+            return requestToken(discovery, params);
         }
 
         return null;

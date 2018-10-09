@@ -32,7 +32,7 @@ public class GetUserInfoTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
 
-        final GetUserInfoResponse resp = client.getUserInfo(Tester.getAuthorization(), params).dataAsResponse(GetUserInfoResponse.class);
+        final GetUserInfoResponse resp = client.getUserInfo(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getClaims().get("sub"));
     }
@@ -47,7 +47,7 @@ public class GetUserInfoTest {
         params.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params).dataAsResponse(GetTokensByCodeResponse.class);
+        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
