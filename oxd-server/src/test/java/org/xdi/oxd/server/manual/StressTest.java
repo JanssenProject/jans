@@ -32,7 +32,7 @@ public class StressTest {
         final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
         params.setOxdId(site.getOxdId());
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationUrlResponse.class);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));

@@ -12,9 +12,9 @@ import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.UpdateSiteParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
@@ -44,7 +44,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     }
 
     @Override
-    public CommandResponse execute(UpdateSiteParams params) {
+    public IOpResponse execute(UpdateSiteParams params) {
         final Rp rp = getRp();
 
         LOG.info("Updating rp ... rp: " + rp);
@@ -52,7 +52,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         UpdateSiteResponse response = new UpdateSiteResponse();
         response.setOxdId(rp.getOxdId());
-        return okResponse(response);
+        return response;
     }
 
     private void persistRp(Rp rp, UpdateSiteParams params) {

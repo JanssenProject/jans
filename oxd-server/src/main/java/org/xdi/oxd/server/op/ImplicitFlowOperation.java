@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
@@ -13,8 +13,8 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ImplicitFlowParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.ImplicitFlowResponse;
 
 import java.util.ArrayList;
@@ -35,10 +35,10 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
     }
 
     @Override
-    public CommandResponse execute(ImplicitFlowParams params) {
+    public IOpResponse execute(ImplicitFlowParams params) {
         final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
-            return okResponse(requestToken(discovery, params));
+            return requestToken(discovery, params);
         }
         return null;
     }

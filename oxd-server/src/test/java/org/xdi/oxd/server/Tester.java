@@ -44,7 +44,7 @@ public class Tester {
             params.setClientId(Tester.getSetupClient().getClientId());
             params.setClientSecret(Tester.getSetupClient().getClientSecret());
 
-            GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+            GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params);
             assertNotNull(resp);
             assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 

@@ -37,7 +37,7 @@ public class UmaGetClaimsGatheringUrlTest {
         params.setTicket(checkAccess.getTicket());
         params.setClaimsRedirectUri(redirectUrl);
 
-        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params).dataAsResponse(RpGetClaimsGatheringUrlResponse.class);
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params);
 
         Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
 

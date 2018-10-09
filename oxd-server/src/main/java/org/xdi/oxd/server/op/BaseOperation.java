@@ -4,14 +4,11 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.codehaus.jackson.node.POJONode;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
-import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.Convertor;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.OxdServerConfiguration;
@@ -122,18 +119,5 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
      */
     public Command getCommand() {
         return command;
-    }
-
-    /**
-     * Ok response for operation
-     *
-     * @param p_data response
-     * @return ok response with data
-     */
-    public CommandResponse okResponse(IOpResponse p_data) {
-        if (p_data == null) {
-            throw HttpException.internalError();
-        }
-        return CommandResponse.ok().setData(new POJONode(p_data));
     }
 }
