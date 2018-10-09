@@ -15,12 +15,16 @@ import java.util.List;
 public class LicenseStatusOpResponse implements IOpResponse {
 
     @JsonProperty(value = "valid")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "valid")
     private boolean valid = false;
     @JsonProperty(value = "thread_count")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "thread_count")
     private int threadCount;
     @JsonProperty(value = "name")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "name")
     private String name;
     @JsonProperty(value = "features")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "features")
     private List<String> features;
 
     public LicenseStatusOpResponse() {

@@ -13,12 +13,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RpGetRptResponse implements IOpResponse {
 
     @JsonProperty(value = "access_token")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "access_token")
     private String rpt;
     @JsonProperty(value = "token_type")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "token_type")
     private String tokenType;
     @JsonProperty(value = "pct")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "pct")
     private String pct;
     @JsonProperty(value = "updated")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "updated")
     private Boolean updated;
 
     public RpGetRptResponse() {
