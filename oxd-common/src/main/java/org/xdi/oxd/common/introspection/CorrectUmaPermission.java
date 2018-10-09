@@ -16,6 +16,7 @@ import java.util.List;
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({"resource_id", "resource_scopes", "exp"})
 @JsonIgnoreProperties(ignoreUnknown = true)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 public class CorrectUmaPermission implements Serializable {
 
@@ -32,6 +33,7 @@ public class CorrectUmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "resource_id")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "resource_id")
     @XmlElement(name = "resource_id")
     public String getResourceId() {
         return resourceId;
@@ -42,6 +44,7 @@ public class CorrectUmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "resource_scopes")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "resource_scopes")
     @XmlElement(name = "resource_scopes")
     public List<String> getScopes() {
         return scopes;
@@ -52,6 +55,7 @@ public class CorrectUmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "exp")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "exp")
     @XmlElement(name = "exp")
     public Integer getExpiresAt() {
         return expiresAt;
