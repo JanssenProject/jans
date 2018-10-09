@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
@@ -36,7 +36,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     @Override
-    public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
+    public IOpResponse execute(GetAuthorizationUrlParams params) throws Exception {
         final Rp site = getRp();
 
         String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint();
@@ -71,7 +71,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             authorizationEndpoint += "&" + AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS + "=" + Utils.encode(Util.mapAsString(params.getCustomParameters()));
         }
 
-        return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
+        return new GetAuthorizationUrlResponse(authorizationEndpoint);
     }
 
     private List<String> acrValues(Rp site, GetAuthorizationUrlParams params) {

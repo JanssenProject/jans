@@ -37,7 +37,7 @@ public class RsCheckAccessTest {
         params.setPath("/ws/phone");
         params.setRpt("dummy");
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params).dataAsResponse(RsCheckAccessResponse.class);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));

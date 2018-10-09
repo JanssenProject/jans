@@ -18,9 +18,9 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
@@ -76,9 +76,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     @Override
-    public CommandResponse execute(RegisterSiteParams params) {
+    public IOpResponse execute(RegisterSiteParams params) {
         try {
-            return okResponse(execute_(params));
+            return execute_(params);
         } catch (HttpException e) {
             throw e;
         } catch (Exception e) {

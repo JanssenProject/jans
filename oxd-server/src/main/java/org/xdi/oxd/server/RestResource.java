@@ -7,6 +7,8 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.*;
+import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.common.response.POJOResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -203,7 +205,12 @@ public class RestResource {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
         }
         Command command = new Command(commandType, params);
-        final String json = CoreUtils.asJsonSilently(ServerLauncher.getInjector().getInstance(Processor.class).process(command));
+        final IOpResponse response = ServerLauncher.getInjector().getInstance(Processor.class).process(command);
+        Object forJsonConversion = response;
+        if (response instanceof POJOResponse) {
+            forJsonConversion = ((POJOResponse) response).getNode();
+        }
+        final String json = CoreUtils.asJsonSilently(forJsonConversion);
         LOG.trace("Send back response: {}", json);
         return json;
     }

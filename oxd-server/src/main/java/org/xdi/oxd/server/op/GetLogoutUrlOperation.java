@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.ConfigurationService;
@@ -37,7 +37,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     }
 
     @Override
-    public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
+    public IOpResponse execute(GetLogoutUrlParams params) throws Exception {
         final Rp site = getRp();
 
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
@@ -54,7 +54,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
             if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
-                return okResponse(new LogoutResponse(logoutUrl));
+                return new LogoutResponse(logoutUrl);
             }
 
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
@@ -72,7 +72,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             uri += separator(uri) + "session_state=" + params.getSessionState();
         }
 
-        return okResponse(new LogoutResponse(uri));
+        return new LogoutResponse(uri);
     }
 
     private static String separator(String uri) {

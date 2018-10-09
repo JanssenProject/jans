@@ -9,10 +9,10 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
@@ -39,7 +39,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     }
 
     @Override
-    public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
+    public IOpResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
         final Rp site = getRp();
@@ -94,7 +94,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             opResponse.setRefreshToken(response.getRefreshToken());
             opResponse.setExpiresIn(response.getExpiresIn() != null ? response.getExpiresIn() : -1);
             opResponse.setIdTokenClaims(claims);
-            return okResponse(opResponse);
+            return opResponse;
         } else {
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }

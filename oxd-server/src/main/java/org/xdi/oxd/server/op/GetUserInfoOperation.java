@@ -4,9 +4,9 @@ import com.google.inject.Injector;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoRequest;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetUserInfoParams;
 import org.xdi.oxd.common.response.GetUserInfoResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,7 +27,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     }
 
     @Override
-    public CommandResponse execute(GetUserInfoParams params) {
+    public IOpResponse execute(GetUserInfoParams params) {
         getValidationService().validate(params);
 
         UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId()).getUserInfoEndpoint());
@@ -35,6 +35,6 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
         GetUserInfoResponse opResponse = new GetUserInfoResponse(client.exec().getClaims());
-        return okResponse(opResponse);
+        return opResponse;
     }
 }

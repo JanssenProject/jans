@@ -33,7 +33,7 @@ public class IntrospectAccessTokenTest {
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 
-        GetClientTokenResponse tokenResponse = client.getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+        GetClientTokenResponse tokenResponse = client.getClientToken(params);
 
         assertNotNull(tokenResponse);
         notEmpty(tokenResponse.getAccessToken());
@@ -42,7 +42,7 @@ public class IntrospectAccessTokenTest {
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams).dataAsResponse(IntrospectionResponse.class);
+        IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams);
 
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());
