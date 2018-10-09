@@ -1,6 +1,5 @@
 package org.xdi.oxd.client;
 
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.common.response.*;
@@ -29,7 +28,7 @@ public interface ClientInterface {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    IntrospectionResponse introspectAccessToken(@HeaderParam("Authorization") String authorization, IntrospectAccessTokenParams params);
+    IntrospectAccessTokenResponse introspectAccessToken(@HeaderParam("Authorization") String authorization, IntrospectAccessTokenParams params);
 
     @POST
     @Path("/introspect-rpt")
