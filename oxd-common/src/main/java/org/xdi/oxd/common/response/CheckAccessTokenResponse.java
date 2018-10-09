@@ -15,10 +15,13 @@ import java.util.Date;
 public class CheckAccessTokenResponse implements IOpResponse {
 
     @JsonProperty(value = "active")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "active")
     private boolean active;
     @JsonProperty(value = "expires_at")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "expires_at")
     private Date expiresAt;
     @JsonProperty(value = "issued_at")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "issued_at")
     private Date issuedAt;
 
     public CheckAccessTokenResponse() {

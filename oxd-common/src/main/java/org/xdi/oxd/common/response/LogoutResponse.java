@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class LogoutResponse implements IOpResponse {
 
     @JsonProperty(value = "uri")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "uri")
     private String uri;
 
     public LogoutResponse() {
