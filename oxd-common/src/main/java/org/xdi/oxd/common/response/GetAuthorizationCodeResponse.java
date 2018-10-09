@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetAuthorizationCodeResponse implements IOpResponse {
 
     @JsonProperty(value = "code")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "code")
     private String code;
 
     public GetAuthorizationCodeResponse() {
