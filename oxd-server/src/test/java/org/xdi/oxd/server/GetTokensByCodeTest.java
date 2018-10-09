@@ -8,7 +8,6 @@ import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
-import org.xdi.oxd.common.response.GetAuthorizationCodeResponse;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
@@ -44,7 +43,7 @@ public class GetTokensByCodeTest {
         refreshParams.setRefreshToken(resp.getRefreshToken());
         refreshParams.setProtectionAccessToken(Tester.getAuthorization());
 
-        GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(), refreshParams).dataAsResponse(GetClientTokenResponse.class);
+        GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(), refreshParams);
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
@@ -65,7 +64,7 @@ public class GetTokensByCodeTest {
         params.setCode(code);
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params).dataAsResponse(GetTokensByCodeResponse.class);
+        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -81,6 +80,6 @@ public class GetTokensByCodeTest {
         params.setState(state);
         params.setNonce(nonce);
 
-        return client.getAuthorizationCode(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationCodeResponse.class).getCode();
+        return client.getAuthorizationCode(Tester.getAuthorization(), params).getCode();
     }
 }

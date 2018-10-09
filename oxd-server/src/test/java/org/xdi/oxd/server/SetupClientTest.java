@@ -40,7 +40,7 @@ public class SetupClientTest {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).registerSite(params).dataAsResponse(RegisterSiteResponse.class);
+        resp = Tester.newClient(host).registerSite(params);
         assertResponse(resp);
     }
 
@@ -69,7 +69,7 @@ public class SetupClientTest {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
-        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params);
         assertResponse(resp);
         return resp;
     }

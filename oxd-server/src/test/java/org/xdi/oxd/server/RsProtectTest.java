@@ -78,7 +78,7 @@ public class RsProtectTest {
         params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
-        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
+        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params);
         assertNotNull(response);
     }
 
@@ -108,7 +108,7 @@ public class RsProtectTest {
         params.setPath("/GetAll");
         params.setRpt("");
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params).dataAsResponse(RsCheckAccessResponse.class);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -123,7 +123,7 @@ public class RsProtectTest {
             e.printStackTrace();
         }
 
-        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params);
         assertNotNull(resp);
         return resp;
     }
