@@ -178,7 +178,7 @@ TMPDIR=${TMPDIR:-/tmp}
 ##################################################
 # oxd-server's hallmark
 ##################################################
-OXD_INSTALL_TRACE_FILE="oxd-server.jar"
+OXD_INSTALL_TRACE_FILE="oxd-server-jar-with-dependencies.jar"
 
 
 ##################################################
@@ -370,6 +370,9 @@ then
   echo "RUN_CMD        =  ${RUN_CMD[*]}"
 fi
 dip_in_logs() {
+	if [ ! -f $OXD_INIT_LOG ]; then
+		sleep 10
+	fi
 	echo "Checking logs for possible errors:"
 	INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
 	while true;
