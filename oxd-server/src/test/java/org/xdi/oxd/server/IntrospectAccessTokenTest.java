@@ -3,11 +3,11 @@ package org.xdi.oxd.server;
 import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.params.IntrospectAccessTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
+import org.xdi.oxd.common.response.IntrospectAccessTokenResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import static junit.framework.Assert.assertNotNull;
@@ -42,7 +42,7 @@ public class IntrospectAccessTokenTest {
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams);
+        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams);
 
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());
