@@ -7,11 +7,7 @@ import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import io.swagger.client.model.GetAccessTokenByRefreshTokenParams;
-import io.swagger.client.model.GetAccessTokenByRefreshTokenResponseData;
-import io.swagger.client.model.GetTokensByCodeParams;
-import io.swagger.client.model.GetTokensByCodeResponseData;
-import io.swagger.client.model.RegisterSiteResponseData;
+import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.CoreUtils;
@@ -36,14 +32,14 @@ public class GetTokensByCodeTest {
 
         DevelopersApi client = Tester.api();
 
-        final RegisterSiteResponseData site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-        GetTokensByCodeResponseData tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
+        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
 
         refreshToken(tokensResponse, client, site);
     }
 
-    private static void refreshToken(GetTokensByCodeResponseData resp, DevelopersApi client, RegisterSiteResponseData site) throws Exception {
+    private static void refreshToken(GetTokensByCodeResponse resp, DevelopersApi client, RegisterSiteResponse site) throws Exception {
         notEmpty(resp.getRefreshToken());
 
         final String authorization = Tester.getAuthorization(site);
@@ -54,14 +50,14 @@ public class GetTokensByCodeTest {
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
-        GetAccessTokenByRefreshTokenResponseData refreshResponse = client.getAccessTokenByRefreshToken(authorization, refreshParams).getData();
+        GetAccessTokenByRefreshTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(authorization, refreshParams);
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
         notEmpty(refreshResponse.getRefreshToken());
     }
 
-    private GetTokensByCodeResponseData tokenByCode(DevelopersApi client, RegisterSiteResponseData site, String userId, String userSecret, String nonce) throws Exception {
+    private GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String userId, String userSecret, String nonce) throws Exception {
 
         final String state = CoreUtils.secureRandomString();
 
@@ -76,7 +72,7 @@ public class GetTokensByCodeTest {
         params.setCode(code);
         params.setState(state);
 
-        final GetTokensByCodeResponseData resp = client.getTokensByCode(authorizationStr, params).getData();
+        final GetTokensByCodeResponse resp = client.getTokensByCode(authorizationStr, params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());

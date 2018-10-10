@@ -6,8 +6,8 @@ import com.google.common.collect.Lists;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.model.GetClientTokenParams;
-import io.swagger.client.model.GetClientTokenResponseData;
-import io.swagger.client.model.RegisterSiteResponseData;
+import io.swagger.client.model.GetClientTokenResponse;
+import io.swagger.client.model.RegisterSiteResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponse;
 
@@ -27,7 +27,7 @@ public class Tester {
     private static String AUTHORIZATION = "";
     private static String HOST;
     private static String OP_HOST;
-    private static RegisterSiteResponseData setupData;
+    private static RegisterSiteResponse setupData;
     private static boolean isTokenProtectionEnabled = false;
 
     private Tester() {
@@ -70,14 +70,14 @@ public class Tester {
      * @return access token for the provided site's client id
      * @throws ApiException
      */
-    public static String getAuthorization(RegisterSiteResponseData siteResponseData) throws ApiException {
+    public static String getAuthorization(RegisterSiteResponse siteResponseData) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(OP_HOST);
         params.setScope(Lists.newArrayList("openid", "oxd"));
         params.setClientId(siteResponseData.getClientId());
         params.setClientSecret(siteResponseData.getClientSecret());
 
-        GetClientTokenResponseData resp = api().getClientToken(params).getData();
+        GetClientTokenResponse resp = api().getClientToken(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 
@@ -93,7 +93,7 @@ public class Tester {
         OP_HOST = opHost;
     }
 
-    public static void setSetupData(RegisterSiteResponseData setupData) {
+    public static void setSetupData(RegisterSiteResponse setupData) {
         Tester.setupData = setupData;
     }
 
@@ -101,7 +101,7 @@ public class Tester {
         Tester.isTokenProtectionEnabled = isTokenProtectionEnabled;
     }
 
-    public static RegisterSiteResponseData getSetupData() {
+    public static RegisterSiteResponse getSetupData() {
         return setupData;
     }
 
