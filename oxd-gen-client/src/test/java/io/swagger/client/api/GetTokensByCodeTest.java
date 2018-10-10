@@ -89,7 +89,7 @@ public class GetTokensByCodeTest {
 
         final JsonElement jsonResponse = new JsonParser().parse(response.body().string());
 
-        return jsonResponse.getAsJsonObject().getAsJsonObject("data").get("code").getAsString();
+        return jsonResponse.getAsJsonObject().get("code").getAsString();
 
     }
 
