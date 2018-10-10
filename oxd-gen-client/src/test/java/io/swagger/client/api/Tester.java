@@ -55,7 +55,7 @@ public class Tester {
     public static String getAuthorization() throws Exception {
         Preconditions.checkNotNull(setupData);
         if (Strings.isNullOrEmpty(AUTHORIZATION)) {
-            AUTHORIZATION = "Bearer " + getAuthorization(setupData);
+            AUTHORIZATION = getAuthorization(setupData);
         }
         return AUTHORIZATION;
     }

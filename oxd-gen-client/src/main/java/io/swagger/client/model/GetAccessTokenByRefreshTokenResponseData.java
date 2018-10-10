@@ -22,14 +22,16 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GetAccessTokenByRefreshTokenResponseData
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-05T11:02:24.520Z")
 public class GetAccessTokenByRefreshTokenResponseData {
   @SerializedName("scope")
-  private String scope = null;
+  private List<String> scope = new ArrayList<>();
 
   @SerializedName("access_token")
   private String accessToken = null;
@@ -40,8 +42,13 @@ public class GetAccessTokenByRefreshTokenResponseData {
   @SerializedName("refresh_token")
   private String refreshToken = null;
 
-  public GetAccessTokenByRefreshTokenResponseData scope(String scope) {
+  public GetAccessTokenByRefreshTokenResponseData scope(List<String> scope) {
     this.scope = scope;
+    return this;
+  }
+
+  public GetAccessTokenByRefreshTokenResponseData addScopeItem(String scopeItem) {
+    this.scope.add(scopeItem);
     return this;
   }
 
@@ -49,12 +56,12 @@ public class GetAccessTokenByRefreshTokenResponseData {
    * Get scope
    * @return scope
   **/
-  @ApiModelProperty(example = "openid profile uma_protection email", required = true, value = "")
-  public String getScope() {
+  @ApiModelProperty(example = "[\"openid\",\"profile\",\"uma_protection\",\"email\"]", required = true, value = "")
+  public List<String> getScope() {
     return scope;
   }
 
-  public void setScope(String scope) {
+  public void setScope(List<String> scope) {
     this.scope = scope;
   }
 
