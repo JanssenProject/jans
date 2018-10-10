@@ -954,7 +954,6 @@ paths:
               - oxd_id
               - refresh_token
               - scope
-              - protection_token
             properties:
               oxd_id:
                 type: string
@@ -962,9 +961,6 @@ paths:
               refresh_token:
                 type: string
                 example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
-              protection_token:
-                type: string
-                example: Bearer 33d7988e-6ffb-4fe5-8c2a-0e158691d446
               scope:
                 type: array
                 items:
