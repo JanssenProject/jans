@@ -15,10 +15,6 @@ import java.io.IOException;
 
 public class ConfigurationService implements Provider<OxdServerConfiguration> {
 
-    public static final String DOC_URL = "https://www.gluu.org/docs/oxd";
-
-    public static final String APP_VERSION = "3.2.0";
-
     /**
      * Logger
      */
