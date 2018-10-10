@@ -988,8 +988,10 @@ paths:
                   - refresh_token
                 properties:
                   scope:
-                    type: string
-                    example: "openid profile uma_protection email"
+                    type: array
+                    items:
+                      type: string
+                    example: ["openid", "profile", "uma_protection", "email"]
                   access_token:
                     type: string
                     example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
