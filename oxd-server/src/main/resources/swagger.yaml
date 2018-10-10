@@ -89,33 +89,24 @@ paths:
             type: object
             title: GetClientTokenResponse
             required:
-              - status
-              - data
+              - scope
+              - access_token
+              - expires_in
+              - refresh_token
             properties:
-              status:
+              scope:
+                type: array
+                items:
+                  type: string
+                example: ["openid","oxd"]
+              access_token:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - scope
-                  - access_token
-                  - expires_in
-                  - refresh_token
-                properties:
-                  scope:
-                    type: array
-                    items:
-                      type: string
-                    example: ["openid","oxd"]
-                  access_token:
-                    type: string
-                    example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
-                  expires_in:
-                    type: integer
-                    example: 299
-                  refresh_token:
-                    type: string
+                example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
+              expires_in:
+                type: integer
+                example: 299
+              refresh_token:
+                type: string
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -159,81 +150,72 @@ paths:
             type: object
             title: IntrospectAccessTokenResponse
             required:
-              - status
-              - data
+              - active
+              - client_id
+              - username
+              - scope
+              - token_type
+              - sub
+              - aud
+              - iss
+              - exp
+              - iat
+              - acr_values
+              - extension_field
+              - nbf
+              - jti
             properties:
-              status:
+              active:
+                type: boolean
+                example: true
+              client_id:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - active
-                  - client_id
-                  - username
-                  - scope
-                  - token_type
-                  - sub
-                  - aud
-                  - iss
-                  - exp
-                  - iat
-                  - acr_values
-                  - extension_field
-                  - nbf
-                  - jti
-                properties:
-                  active:
-                    type: boolean
-                    example: true
-                  client_id:
-                    type: string
-                    example: '@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387'
-                  username:
-                    type: string
-                    example: John Black
-                  scope:
-                    type: array
-                    items:
-                      type: string
-                  token_type:
-                    type: string
-                    example: bearer
-                  sub:
-                    type: string
-                    example: jblack
-                  aud:
-                    type: string
-                    example: l238j323ds-23ij4
-                  iss:
-                    type: string
-                    example: https://as.gluu.org/
-                  exp:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
-                    example: 1535709072
-                  iat:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
-                    example: 1535709072
-                  nbf:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
-                    example: 1535709072
-                  jti:
-                    type: string
-                    description: a unique identifier for the JWT
-                  acr_values:
-                    type: array
-                    items:
-                      type: string
-                    example: ["basic"]
-                  extension_field:
-                    type: string
-                    example: twenty-seven
+                example: '@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387'
+              username:
+                type: string
+                example: John Black
+              scope:
+                type: array
+                items:
+                  type: string
+              token_type:
+                type: string
+                example: bearer
+              sub:
+                type: string
+                example: jblack
+              aud:
+                type: string
+                example: l238j323ds-23ij4
+              iss:
+                type: string
+                example: https://as.gluu.org/
+              exp:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                example: 1535709072
+              iat:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                example: 1535709072
+              nbf:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                example: 1535709072
+              jti:
+                type: string
+                description: a unique identifier for the JWT
+              acr_values:
+                type: array
+                items:
+                  type: string
+                example: ["basic"]
+              extension_field:
+                type: string
+                example: twenty-seven
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -349,42 +331,33 @@ paths:
             type: object
             title: RegisterSiteResponse
             required:
-              - status
-              - data
+              - oxd_id
+              - op_host
             properties:
-              status:
+              oxd_id:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - oxd_id
-                  - op_host
-                properties:
-                  oxd_id:
-                    type: string
-                    example: bcad760f-91ba-46e1-a020-05e4281d91b6
-                  op_host:
-                    type: string
-                    example: https://<op-hostname>
-                  client_id:
-                    type: string
-                    example: "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387"
-                  client_secret:
-                    type: string
-                    example: f436b936-03fc-433f-9772-53c2bc9e1c74
-                  client_registration_access_token:
-                    type: string
-                    example: d836df94-44b0-445a-848a-d43189839b17
-                  client_registration_client_uri:
-                    type: string
-                    example: https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387
-                  client_id_issued_at:
-                    type: integer
-                    example: 1501854943
-                  client_secret_expires_at:
-                    type: integer
-                    example: 1501941343
+                example: bcad760f-91ba-46e1-a020-05e4281d91b6
+              op_host:
+                type: string
+                example: https://<op-hostname>
+              client_id:
+                type: string
+                example: "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387"
+              client_secret:
+                type: string
+                example: f436b936-03fc-433f-9772-53c2bc9e1c74
+              client_registration_access_token:
+                type: string
+                example: d836df94-44b0-445a-848a-d43189839b17
+              client_registration_client_uri:
+                type: string
+                example: https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387
+              client_id_issued_at:
+                type: integer
+                example: 1501854943
+              client_secret_expires_at:
+                type: integer
+                example: 1501941343
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -478,15 +451,10 @@ paths:
             type: object
             title: UpdateSiteResponse
             required:
-              - status
-              - data
+              - oxd_id
             properties:
-              status:
-                type: string
-                example: ok
-              data:
-                $ref: "#/definitions/UpdateSiteResponseData"
-
+              oxd_id:
+                $ref: "#/definitions/oxd_id"
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -526,14 +494,10 @@ paths:
             type: object
             title: RemoveSiteResponse
             required:
-              - status
-              - data
+              - oxd_id
             properties:
-              status:
-                type: string
-                example: ok
-              data:
-                $ref: "#/definitions/RemoveSiteResponseData"
+              oxd_id:
+                $ref: "#/definitions/oxd_id"
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -595,20 +559,11 @@ paths:
             type: object
             title: GetAuthorizationUrlResponse
             required:
-              - status
-              - data
+              - authorization_url
             properties:
-              status:
+              authorization_url:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - authorization_url
-                properties:
-                  authorization_url:
-                    type: string
-                    example: https://<op-hostname>/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm
+                example: https://<op-hostname>/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -656,86 +611,77 @@ paths:
             type: object
             title: GetTokensByCodeResponse
             required:
-              - status
-              - data
+              - access_token
+              - expires_in
+              - id_token
+              - refresh_token
+              - id_token_claims
             properties:
-              status:
+              access_token:
                 type: string
-                example: ok
-              data:
+                example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
+              expires_in:
+                type: integer
+                example: 299
+              id_token:
+                type: string
+                example: eyJraWQiOiI5MTUyNTU1Ni04YmIwLTQ2MzYtYTFhYy05ZGVlNjlhMDBmYWUiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJp
+              refresh_token:
+                type: string
+                example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
+              id_token_claims:
                 type: object
                 required:
-                  - access_token
-                  - expires_in
-                  - id_token
-                  - refresh_token
-                  - id_token_claims
+                  - at_hash
+                  - aud
+                  - sub
+                  - auth_time
+                  - iss
+                  - exp
+                  - iat
+                  - nonce
+                  - oxOpenIDConnectVersion
                 properties:
-                  access_token:
-                    type: string
-                    example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
-                  expires_in:
-                    type: integer
-                    example: 299
-                  id_token:
-                    type: string
-                    example: eyJraWQiOiI5MTUyNTU1Ni04YmIwLTQ2MzYtYTFhYy05ZGVlNjlhMDBmYWUiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJp
-                  refresh_token:
-                    type: string
-                    example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
-                  id_token_claims:
-                    type: object
-                    required:
-                      - at_hash
-                      - aud
-                      - sub
-                      - auth_time
-                      - iss
-                      - exp
-                      - iat
-                      - nonce
-                      - oxOpenIDConnectVersion
-                    properties:
-                      at_hash:
-                        type: array
-                        items:
-                          type: string
-                        example: ["Cx2dz5Wvw_kBXAcTs3mFA"]
-                      aud:
-                        type: array
-                        items:
-                          type: string
-                        example: ["l238j323ds-23ij4"]
-                      sub:
-                        type: array
-                        items:
-                          type: string
-                        example: ["jblack"]
-                      auth_time:
-                        type: array
-                        items:
-                          type: string
-                      iss:
-                        type: array
-                        items:
-                          type: string
-                        example: ["https://as.gluu.org/"]
-                      exp:
-                        type: array
-                        items:
-                          type: string
-                      iat:
-                        type: array
-                        items:
-                          type: string
-                      nonce:
-                        type: array
-                        items:
-                          type: string
-                      oxOpenIDConnectVersion:
-                        type: array
-                        items:
-                          type: string
+                  at_hash:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Cx2dz5Wvw_kBXAcTs3mFA"]
+                  aud:
+                    type: array
+                    items:
+                      type: string
+                    example: ["l238j323ds-23ij4"]
+                  sub:
+                    type: array
+                    items:
+                      type: string
+                    example: ["jblack"]
+                  auth_time:
+                    type: array
+                    items:
+                      type: string
+                  iss:
+                    type: array
+                    items:
+                      type: string
+                    example: ["https://as.gluu.org/"]
+                  exp:
+                    type: array
+                    items:
+                      type: string
+                  iat:
+                    type: array
+                    items:
+                      type: string
+                  nonce:
+                    type: array
+                    items:
+                      type: string
+                  oxOpenIDConnectVersion:
+                    type: array
+                    items:
+                      type: string
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -973,34 +919,25 @@ paths:
             type: object
             title: GetAccessTokenByRefreshTokenResponse
             required:
-              - status
-              - data
+              - scope
+              - access_token
+              - expires_in
+              - refresh_token
             properties:
-              status:
+              scope:
+                type: array
+                items:
+                  type: string
+                example: ["openid", "profile", "uma_protection", "email"]
+              access_token:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - scope
-                  - access_token
-                  - expires_in
-                  - refresh_token
-                properties:
-                  scope:
-                    type: array
-                    items:
-                      type: string
-                    example: ["openid", "profile", "uma_protection", "email"]
-                  access_token:
-                    type: string
-                    example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
-                  expires_in:
-                    type: integer
-                    example: 299
-                  refresh_token:
-                    type: string
-                    example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
+                example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
+              expires_in:
+                type: integer
+                example: 299
+              refresh_token:
+                type: string
+                example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1048,20 +985,11 @@ paths:
             type: object
             title: UmaRsProtectResponse
             required:
-              - status
-              - data
+              - oxd_id
             properties:
-              status:
+              oxd_id:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - oxd_id
-                properties:
-                  oxd_id:
-                    type: string
-                    example: "bcad760f-91ba-46e1-a020-05e4281d91b6"
+                example: "bcad760f-91ba-46e1-a020-05e4281d91b6"
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1110,21 +1038,12 @@ paths:
             type: object
             title: UmaRsCheckAccessResponse
             required:
-              - status
-              - data
+              - access
             properties:
-              status:
+              access:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - access
-                properties:
-                  access:
-                    type: string
-                    example: granted
-                    description: Possible values are granted, denied
+                example: granted
+                description: Possible values are granted, denied
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1167,43 +1086,34 @@ paths:
             type: object
             title: IntrospectRptResponse
             required:
-              - status
-              - data
+              - active
+              - exp
+              - iat
+              - nbf
+              - permissions
             properties:
-              status:
-                type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - active
-                  - exp
-                  - iat
-                  - nbf
-                  - permissions
-                properties:
-                  active:
-                    type: boolean
-                    example: true
-                  exp:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when this token will expire
-                    example: 1535709072
-                  iat:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
-                    example: 1535709072
-                  nbf:
-                    type: integer
-                    format: int64
-                    description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
-                    example: 1535709072
-                  permissions:
-                    type: array
-                    items:
-                      type: object
+              active:
+                type: boolean
+                example: true
+              exp:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when this token will expire
+                example: 1535709072
+              iat:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
+                example: 1535709072
+              nbf:
+                type: integer
+                format: int64
+                description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
+                example: 1535709072
+              permissions:
+                type: array
+                items:
+                  type: object
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1267,30 +1177,21 @@ paths:
             type: object
             title: UmaRpGetRptResponse
             required:
-              - status
-              - data
+              - pct
+              - updated
+              - access_token
+              - token_type
             properties:
-              status:
+              pct:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - pct
-                  - updated
-                  - access_token
-                  - token_type
-                properties:
-                  pct:
-                    type: string
-                  updated:
-                    type: boolean
-                  access_token:
-                    type: string
-                    example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
-                  token_type:
-                    type: string
-                    example: bearer
+              updated:
+                type: boolean
+              access_token:
+                type: string
+                example: b75434ff-f465-4b70-92e4-b7ba6b6c58f2
+              token_type:
+                type: string
+                example: bearer
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1338,24 +1239,15 @@ paths:
             type: object
             title: UmaRpGetClaimsGatheringUrlResponse
             required:
-              - status
-              - data
+              - url
+              - state
             properties:
-              status:
+              url:
                 type: string
-                example: ok
-              data:
-                type: object
-                required:
-                  - url
-                  - state
-                properties:
-                  url:
-                    type: string
-                    example: https://<op-hostname>/oxauth/restv1/uma/gather_claims?client_id@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!4508.BF20.9B81.E904&ticket=fba00191-59ab-4ed6-ac99-a786a88a9f40&claims_redirect_uri=https://client.example.com/cb&state=d871gpie16np0f5kfv936sc33k
-                  state:
-                    type: string
-                    example: d871gpie16np0f5kfv936sc33k
+                example: https://<op-hostname>/oxauth/restv1/uma/gather_claims?client_id@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!4508.BF20.9B81.E904&ticket=fba00191-59ab-4ed6-ac99-a786a88a9f40&claims_redirect_uri=https://client.example.com/cb&state=d871gpie16np0f5kfv936sc33k
+              state:
+                type: string
+                example: d871gpie16np0f5kfv936sc33k
         400:            
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1368,33 +1260,3 @@ definitions:
   oxd_id:
     type: string
     example: bcad760f-91ba-46e1-a020-05e4281d91b6
-
-  # Schemas
-  UpdateSiteResponseData:
-    type: object
-    required:
-    - oxd_id
-    properties:
-      oxd_id:
-        $ref: "#/definitions/oxd_id"
-      error:
-        type: string
-      errorDescription:
-        type: string
-      details:
-        type: object
-
-  RemoveSiteResponseData:
-    type: object
-    required:
-    - oxd_id
-    properties:
-      oxd_id:
-        $ref: "#/definitions/oxd_id"
-      error:
-        type: string
-      errorDescription:
-        type: string
-      details:
-        type: object
-

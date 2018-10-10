@@ -21,54 +21,95 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.UmaRpGetRptResponseData;
 import java.io.IOException;
 
 /**
  * UmaRpGetRptResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRpGetRptResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("pct")
+  private String pct = null;
 
-  @SerializedName("data")
-  private UmaRpGetRptResponseData data = null;
+  @SerializedName("updated")
+  private Boolean updated = null;
 
-  public UmaRpGetRptResponse status(String status) {
-    this.status = status;
+  @SerializedName("access_token")
+  private String accessToken = null;
+
+  @SerializedName("token_type")
+  private String tokenType = null;
+
+  public UmaRpGetRptResponse pct(String pct) {
+    this.pct = pct;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
-  **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public UmaRpGetRptResponse data(UmaRpGetRptResponseData data) {
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
+   * Get pct
+   * @return pct
   **/
   @ApiModelProperty(required = true, value = "")
-  public UmaRpGetRptResponseData getData() {
-    return data;
+  public String getPct() {
+    return pct;
   }
 
-  public void setData(UmaRpGetRptResponseData data) {
-    this.data = data;
+  public void setPct(String pct) {
+    this.pct = pct;
+  }
+
+  public UmaRpGetRptResponse updated(Boolean updated) {
+    this.updated = updated;
+    return this;
+  }
+
+   /**
+   * Get updated
+   * @return updated
+  **/
+  @ApiModelProperty(required = true, value = "")
+  public Boolean isUpdated() {
+    return updated;
+  }
+
+  public void setUpdated(Boolean updated) {
+    this.updated = updated;
+  }
+
+  public UmaRpGetRptResponse accessToken(String accessToken) {
+    this.accessToken = accessToken;
+    return this;
+  }
+
+   /**
+   * Get accessToken
+   * @return accessToken
+  **/
+  @ApiModelProperty(example = "b75434ff-f465-4b70-92e4-b7ba6b6c58f2", required = true, value = "")
+  public String getAccessToken() {
+    return accessToken;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  public UmaRpGetRptResponse tokenType(String tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+   /**
+   * Get tokenType
+   * @return tokenType
+  **/
+  @ApiModelProperty(example = "bearer", required = true, value = "")
+  public String getTokenType() {
+    return tokenType;
+  }
+
+  public void setTokenType(String tokenType) {
+    this.tokenType = tokenType;
   }
 
 
@@ -81,13 +122,15 @@ public class UmaRpGetRptResponse {
       return false;
     }
     UmaRpGetRptResponse umaRpGetRptResponse = (UmaRpGetRptResponse) o;
-    return Objects.equals(this.status, umaRpGetRptResponse.status) &&
-        Objects.equals(this.data, umaRpGetRptResponse.data);
+    return Objects.equals(this.pct, umaRpGetRptResponse.pct) &&
+        Objects.equals(this.updated, umaRpGetRptResponse.updated) &&
+        Objects.equals(this.accessToken, umaRpGetRptResponse.accessToken) &&
+        Objects.equals(this.tokenType, umaRpGetRptResponse.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(pct, updated, accessToken, tokenType);
   }
 
 
@@ -96,8 +139,10 @@ public class UmaRpGetRptResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRpGetRptResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    pct: ").append(toIndentedString(pct)).append("\n");
+    sb.append("    updated: ").append(toIndentedString(updated)).append("\n");
+    sb.append("    accessToken: ").append(toIndentedString(accessToken)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -13,51 +13,11 @@
 
 package io.swagger.client.api;
 
-import io.swagger.client.ApiCallback;
-import io.swagger.client.ApiClient;
-import io.swagger.client.ApiException;
-import io.swagger.client.ApiResponse;
-import io.swagger.client.Configuration;
-import io.swagger.client.Pair;
-import io.swagger.client.ProgressRequestBody;
-import io.swagger.client.ProgressResponseBody;
-
 import com.google.gson.reflect.TypeToken;
+import io.swagger.client.*;
+import io.swagger.client.model.*;
 
 import java.io.IOException;
-
-
-import io.swagger.client.model.GetAccessTokenByRefreshTokenParams;
-import io.swagger.client.model.GetAccessTokenByRefreshTokenResponse;
-import io.swagger.client.model.GetAuthorizationUrlParams;
-import io.swagger.client.model.GetAuthorizationUrlResponse;
-import io.swagger.client.model.GetClientTokenParams;
-import io.swagger.client.model.GetClientTokenResponse;
-import io.swagger.client.model.GetLogoutUriParams;
-import io.swagger.client.model.GetLogoutUriResponse;
-import io.swagger.client.model.GetTokensByCodeParams;
-import io.swagger.client.model.GetTokensByCodeResponse;
-import io.swagger.client.model.GetUserInfoParams;
-import io.swagger.client.model.GetUserInfoResponse;
-import io.swagger.client.model.IntrospectAccessTokenParams;
-import io.swagger.client.model.IntrospectAccessTokenResponse;
-import io.swagger.client.model.IntrospectRptParams;
-import io.swagger.client.model.IntrospectRptResponse;
-import io.swagger.client.model.RegisterSiteParams;
-import io.swagger.client.model.RegisterSiteResponse;
-import io.swagger.client.model.RemoveSiteParams;
-import io.swagger.client.model.RemoveSiteResponse;
-import io.swagger.client.model.UmaRpGetClaimsGatheringUrlParams;
-import io.swagger.client.model.UmaRpGetClaimsGatheringUrlResponse;
-import io.swagger.client.model.UmaRpGetRptParams;
-import io.swagger.client.model.UmaRpGetRptResponse;
-import io.swagger.client.model.UmaRsCheckAccessParams;
-import io.swagger.client.model.UmaRsCheckAccessResponse;
-import io.swagger.client.model.UmaRsProtectParams;
-import io.swagger.client.model.UmaRsProtectResponse;
-import io.swagger.client.model.UpdateSiteParams;
-import io.swagger.client.model.UpdateSiteResponse;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1353,11 +1313,11 @@ public class DevelopersApi {
      * Removes site from oxd-server
      * @param authorization  (optional)
      * @param removeSiteParams  (optional)
-     * @return RemoveSiteResponse
+     * @return UpdateSiteResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public RemoveSiteResponse removeSite(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
-        ApiResponse<RemoveSiteResponse> resp = removeSiteWithHttpInfo(authorization, removeSiteParams);
+    public UpdateSiteResponse removeSite(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
+        ApiResponse<UpdateSiteResponse> resp = removeSiteWithHttpInfo(authorization, removeSiteParams);
         return resp.getData();
     }
 
@@ -1366,12 +1326,12 @@ public class DevelopersApi {
      * Removes site from oxd-server
      * @param authorization  (optional)
      * @param removeSiteParams  (optional)
-     * @return ApiResponse&lt;RemoveSiteResponse&gt;
+     * @return ApiResponse&lt;UpdateSiteResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<RemoveSiteResponse> removeSiteWithHttpInfo(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
+    public ApiResponse<UpdateSiteResponse> removeSiteWithHttpInfo(String authorization, RemoveSiteParams removeSiteParams) throws ApiException {
         com.squareup.okhttp.Call call = removeSiteValidateBeforeCall(authorization, removeSiteParams, null, null);
-        Type localVarReturnType = new TypeToken<RemoveSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
@@ -1384,7 +1344,7 @@ public class DevelopersApi {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call removeSiteAsync(String authorization, RemoveSiteParams removeSiteParams, final ApiCallback<RemoveSiteResponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call removeSiteAsync(String authorization, RemoveSiteParams removeSiteParams, final ApiCallback<UpdateSiteResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1406,7 +1366,7 @@ public class DevelopersApi {
         }
 
         com.squareup.okhttp.Call call = removeSiteValidateBeforeCall(authorization, removeSiteParams, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<RemoveSiteResponse>(){}.getType();
+        Type localVarReturnType = new TypeToken<UpdateSiteResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
