@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * UpdateSiteParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UpdateSiteParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -136,7 +136,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addResponseTypesItem(String responseTypesItem) {
     if (this.responseTypes == null) {
-      this.responseTypes = new ArrayList<>();
+      this.responseTypes = new ArrayList<String>();
     }
     this.responseTypes.add(responseTypesItem);
     return this;
@@ -162,7 +162,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addGrantTypesItem(String grantTypesItem) {
     if (this.grantTypes == null) {
-      this.grantTypes = new ArrayList<>();
+      this.grantTypes = new ArrayList<String>();
     }
     this.grantTypes.add(grantTypesItem);
     return this;
@@ -188,7 +188,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<>();
+      this.scope = new ArrayList<String>();
     }
     this.scope.add(scopeItem);
     return this;
@@ -214,7 +214,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addAcrValuesItem(String acrValuesItem) {
     if (this.acrValues == null) {
-      this.acrValues = new ArrayList<>();
+      this.acrValues = new ArrayList<String>();
     }
     this.acrValues.add(acrValuesItem);
     return this;
@@ -276,7 +276,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addClientRequestUrisItem(String clientRequestUrisItem) {
     if (this.clientRequestUris == null) {
-      this.clientRequestUris = new ArrayList<>();
+      this.clientRequestUris = new ArrayList<String>();
     }
     this.clientRequestUris.add(clientRequestUrisItem);
     return this;
@@ -338,7 +338,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addContactsItem(String contactsItem) {
     if (this.contacts == null) {
-      this.contacts = new ArrayList<>();
+      this.contacts = new ArrayList<String>();
     }
     this.contacts.add(contactsItem);
     return this;
@@ -364,7 +364,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addUiLocalesItem(String uiLocalesItem) {
     if (this.uiLocales == null) {
-      this.uiLocales = new ArrayList<>();
+      this.uiLocales = new ArrayList<String>();
     }
     this.uiLocales.add(uiLocalesItem);
     return this;
@@ -390,7 +390,7 @@ public class UpdateSiteParams {
 
   public UpdateSiteParams addClaimsLocalesItem(String claimsLocalesItem) {
     if (this.claimsLocales == null) {
-      this.claimsLocales = new ArrayList<>();
+      this.claimsLocales = new ArrayList<String>();
     }
     this.claimsLocales.add(claimsLocalesItem);
     return this;

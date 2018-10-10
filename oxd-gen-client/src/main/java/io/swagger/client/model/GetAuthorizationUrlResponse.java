@@ -21,54 +21,32 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.GetAuthorizationUrlResponseData;
 import java.io.IOException;
 
 /**
  * GetAuthorizationUrlResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetAuthorizationUrlResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("authorization_url")
+  private String authorizationUrl = null;
 
-  @SerializedName("data")
-  private GetAuthorizationUrlResponseData data = null;
-
-  public GetAuthorizationUrlResponse status(String status) {
-    this.status = status;
+  public GetAuthorizationUrlResponse authorizationUrl(String authorizationUrl) {
+    this.authorizationUrl = authorizationUrl;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get authorizationUrl
+   * @return authorizationUrl
   **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
+  @ApiModelProperty(example = "https://<op-hostname>/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm", required = true, value = "")
+  public String getAuthorizationUrl() {
+    return authorizationUrl;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public GetAuthorizationUrlResponse data(GetAuthorizationUrlResponseData data) {
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public GetAuthorizationUrlResponseData getData() {
-    return data;
-  }
-
-  public void setData(GetAuthorizationUrlResponseData data) {
-    this.data = data;
+  public void setAuthorizationUrl(String authorizationUrl) {
+    this.authorizationUrl = authorizationUrl;
   }
 
 
@@ -81,13 +59,12 @@ public class GetAuthorizationUrlResponse {
       return false;
     }
     GetAuthorizationUrlResponse getAuthorizationUrlResponse = (GetAuthorizationUrlResponse) o;
-    return Objects.equals(this.status, getAuthorizationUrlResponse.status) &&
-        Objects.equals(this.data, getAuthorizationUrlResponse.data);
+    return Objects.equals(this.authorizationUrl, getAuthorizationUrlResponse.authorizationUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(authorizationUrl);
   }
 
 
@@ -96,8 +73,7 @@ public class GetAuthorizationUrlResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAuthorizationUrlResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    authorizationUrl: ").append(toIndentedString(authorizationUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * GetLogoutUriResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetLogoutUriResponse {
   @SerializedName("claims")
   private GetLogoutUriResponseClaims claims = null;

@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **grantTypes** | **List&lt;String&gt;** |  |  [optional]
 **scope** | **List&lt;String&gt;** |  |  [optional]
 **acrValues** | **List&lt;String&gt;** |  |  [optional]
-**clientName** | **String** | oxd will generate its own non-human readable name by defaultif client_name is not specified |  [optional]
+**clientName** | **String** | oxd will generate its own non-human readable name by default if client_name is not specified |  [optional]
 **clientJwksUri** | **String** |  |  [optional]
 **clientTokenEndpointAuthMethod** | **String** |  |  [optional]
 **clientRequestUris** | **List&lt;String&gt;** |  |  [optional]

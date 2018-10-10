@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * GetClientTokenParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetClientTokenParams {
   @SerializedName("op_host")
   private String opHost = null;
@@ -97,7 +97,7 @@ public class GetClientTokenParams {
 
   public GetClientTokenParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<>();
+      this.scope = new ArrayList<String>();
     }
     this.scope.add(scopeItem);
     return this;

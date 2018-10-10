@@ -671,7 +671,7 @@ No authorization required
 
 <a name="umaRsProtect"></a>
 # **umaRsProtect**
-> UpdateSiteResponse umaRsProtect(authorization, umaRsProtectParams)
+> UmaRsProtectResponse umaRsProtect(authorization, umaRsProtectParams)
 
 UMA RS Protect Resources
 
@@ -688,7 +688,7 @@ DevelopersApi apiInstance = new DevelopersApi();
 String authorization = "authorization_example"; // String | 
 UmaRsProtectParams umaRsProtectParams = new UmaRsProtectParams(); // UmaRsProtectParams | 
 try {
-    UpdateSiteResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
+    UmaRsProtectResponse result = apiInstance.umaRsProtect(authorization, umaRsProtectParams);
     System.out.println(result);
 } catch (ApiException e) {
     System.err.println("Exception when calling DevelopersApi#umaRsProtect");
@@ -705,7 +705,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**UpdateSiteResponse**](UpdateSiteResponse.md)
+[**UmaRsProtectResponse**](UmaRsProtectResponse.md)
 
 ### Authorization
 

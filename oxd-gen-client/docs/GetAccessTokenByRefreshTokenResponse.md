@@ -4,8 +4,10 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **String** |  | 
-**data** | [**GetAccessTokenByRefreshTokenResponseData**](GetAccessTokenByRefreshTokenResponseData.md) |  | 
+**scope** | **List&lt;String&gt;** |  | 
+**accessToken** | **String** |  | 
+**expiresIn** | **Integer** |  | 
+**refreshToken** | **String** |  | 
 
 
 

@@ -26,7 +26,7 @@ import java.io.IOException;
 /**
  * UmaRsCheckAccessParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRsCheckAccessParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
