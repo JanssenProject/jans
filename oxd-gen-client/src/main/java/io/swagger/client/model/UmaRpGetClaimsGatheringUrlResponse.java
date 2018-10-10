@@ -21,54 +21,53 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.UmaRpGetClaimsGatheringUrlResponseData;
 import java.io.IOException;
 
 /**
  * UmaRpGetClaimsGatheringUrlResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRpGetClaimsGatheringUrlResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("url")
+  private String url = null;
 
-  @SerializedName("data")
-  private UmaRpGetClaimsGatheringUrlResponseData data = null;
+  @SerializedName("state")
+  private String state = null;
 
-  public UmaRpGetClaimsGatheringUrlResponse status(String status) {
-    this.status = status;
+  public UmaRpGetClaimsGatheringUrlResponse url(String url) {
+    this.url = url;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get url
+   * @return url
   **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
+  @ApiModelProperty(example = "https://<op-hostname>/oxauth/restv1/uma/gather_claims?client_id@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!4508.BF20.9B81.E904&ticket=fba00191-59ab-4ed6-ac99-a786a88a9f40&claims_redirect_uri=https://client.example.com/cb&state=d871gpie16np0f5kfv936sc33k", required = true, value = "")
+  public String getUrl() {
+    return url;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setUrl(String url) {
+    this.url = url;
   }
 
-  public UmaRpGetClaimsGatheringUrlResponse data(UmaRpGetClaimsGatheringUrlResponseData data) {
-    this.data = data;
+  public UmaRpGetClaimsGatheringUrlResponse state(String state) {
+    this.state = state;
     return this;
   }
 
    /**
-   * Get data
-   * @return data
+   * Get state
+   * @return state
   **/
-  @ApiModelProperty(required = true, value = "")
-  public UmaRpGetClaimsGatheringUrlResponseData getData() {
-    return data;
+  @ApiModelProperty(example = "d871gpie16np0f5kfv936sc33k", required = true, value = "")
+  public String getState() {
+    return state;
   }
 
-  public void setData(UmaRpGetClaimsGatheringUrlResponseData data) {
-    this.data = data;
+  public void setState(String state) {
+    this.state = state;
   }
 
 
@@ -81,13 +80,13 @@ public class UmaRpGetClaimsGatheringUrlResponse {
       return false;
     }
     UmaRpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrlResponse = (UmaRpGetClaimsGatheringUrlResponse) o;
-    return Objects.equals(this.status, umaRpGetClaimsGatheringUrlResponse.status) &&
-        Objects.equals(this.data, umaRpGetClaimsGatheringUrlResponse.data);
+    return Objects.equals(this.url, umaRpGetClaimsGatheringUrlResponse.url) &&
+        Objects.equals(this.state, umaRpGetClaimsGatheringUrlResponse.state);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(url, state);
   }
 
 
@@ -96,8 +95,8 @@ public class UmaRpGetClaimsGatheringUrlResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRpGetClaimsGatheringUrlResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    url: ").append(toIndentedString(url)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("}");
     return sb.toString();
   }

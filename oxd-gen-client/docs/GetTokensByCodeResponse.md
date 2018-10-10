@@ -4,8 +4,11 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **String** |  | 
-**data** | [**GetTokensByCodeResponseData**](GetTokensByCodeResponseData.md) |  | 
+**accessToken** | **String** |  | 
+**expiresIn** | **Integer** |  | 
+**idToken** | **String** |  | 
+**refreshToken** | **String** |  | 
+**idTokenClaims** | [**GetTokensByCodeResponseIdTokenClaims**](GetTokensByCodeResponseIdTokenClaims.md) |  | 
 
 
 

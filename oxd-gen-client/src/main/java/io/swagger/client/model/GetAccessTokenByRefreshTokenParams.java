@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * GetAccessTokenByRefreshTokenParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:09:57.852Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetAccessTokenByRefreshTokenParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -37,7 +37,7 @@ public class GetAccessTokenByRefreshTokenParams {
   private String refreshToken = null;
 
   @SerializedName("scope")
-  private List<String> scope = new ArrayList<>();
+  private List<String> scope = new ArrayList<String>();
 
   public GetAccessTokenByRefreshTokenParams oxdId(String oxdId) {
     this.oxdId = oxdId;

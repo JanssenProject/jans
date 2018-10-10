@@ -21,54 +21,32 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.UmaRsCheckAccessResponseData;
 import java.io.IOException;
 
 /**
  * UmaRsCheckAccessResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRsCheckAccessResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("access")
+  private String access = null;
 
-  @SerializedName("data")
-  private UmaRsCheckAccessResponseData data = null;
-
-  public UmaRsCheckAccessResponse status(String status) {
-    this.status = status;
+  public UmaRsCheckAccessResponse access(String access) {
+    this.access = access;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Possible values are granted, denied
+   * @return access
   **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
+  @ApiModelProperty(example = "granted", required = true, value = "Possible values are granted, denied")
+  public String getAccess() {
+    return access;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public UmaRsCheckAccessResponse data(UmaRsCheckAccessResponseData data) {
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public UmaRsCheckAccessResponseData getData() {
-    return data;
-  }
-
-  public void setData(UmaRsCheckAccessResponseData data) {
-    this.data = data;
+  public void setAccess(String access) {
+    this.access = access;
   }
 
 
@@ -81,13 +59,12 @@ public class UmaRsCheckAccessResponse {
       return false;
     }
     UmaRsCheckAccessResponse umaRsCheckAccessResponse = (UmaRsCheckAccessResponse) o;
-    return Objects.equals(this.status, umaRsCheckAccessResponse.status) &&
-        Objects.equals(this.data, umaRsCheckAccessResponse.data);
+    return Objects.equals(this.access, umaRsCheckAccessResponse.access);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(access);
   }
 
 
@@ -96,8 +73,7 @@ public class UmaRsCheckAccessResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRsCheckAccessResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    access: ").append(toIndentedString(access)).append("\n");
     sb.append("}");
     return sb.toString();
   }

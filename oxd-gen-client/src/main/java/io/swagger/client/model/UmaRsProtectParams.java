@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * UmaRsProtectParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRsProtectParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -37,7 +37,7 @@ public class UmaRsProtectParams {
   private Boolean overwrite = null;
 
   @SerializedName("resources")
-  private List<Object> resources = new ArrayList<>();
+  private List<Object> resources = new ArrayList<Object>();
 
   public UmaRsProtectParams oxdId(String oxdId) {
     this.oxdId = oxdId;
