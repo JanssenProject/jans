@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * GetAccessTokenByRefreshTokenParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:09:57.852Z")
 public class GetAccessTokenByRefreshTokenParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
