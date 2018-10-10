@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * GetUserInfoResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetUserInfoResponse {
   @SerializedName("claims")
   private GetUserInfoResponseClaims claims = null;

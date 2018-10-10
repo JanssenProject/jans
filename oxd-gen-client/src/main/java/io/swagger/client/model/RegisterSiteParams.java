@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * RegisterSiteParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class RegisterSiteParams {
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
@@ -175,7 +175,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addResponseTypesItem(String responseTypesItem) {
     if (this.responseTypes == null) {
-      this.responseTypes = new ArrayList<>();
+      this.responseTypes = new ArrayList<String>();
     }
     this.responseTypes.add(responseTypesItem);
     return this;
@@ -201,7 +201,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addGrantTypesItem(String grantTypesItem) {
     if (this.grantTypes == null) {
-      this.grantTypes = new ArrayList<>();
+      this.grantTypes = new ArrayList<String>();
     }
     this.grantTypes.add(grantTypesItem);
     return this;
@@ -227,7 +227,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<>();
+      this.scope = new ArrayList<String>();
     }
     this.scope.add(scopeItem);
     return this;
@@ -253,7 +253,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addAcrValuesItem(String acrValuesItem) {
     if (this.acrValues == null) {
-      this.acrValues = new ArrayList<>();
+      this.acrValues = new ArrayList<String>();
     }
     this.acrValues.add(acrValuesItem);
     return this;
@@ -333,7 +333,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addClientRequestUrisItem(String clientRequestUrisItem) {
     if (this.clientRequestUris == null) {
-      this.clientRequestUris = new ArrayList<>();
+      this.clientRequestUris = new ArrayList<String>();
     }
     this.clientRequestUris.add(clientRequestUrisItem);
     return this;
@@ -359,7 +359,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addClientFrontchannelLogoutUrisItem(String clientFrontchannelLogoutUrisItem) {
     if (this.clientFrontchannelLogoutUris == null) {
-      this.clientFrontchannelLogoutUris = new ArrayList<>();
+      this.clientFrontchannelLogoutUris = new ArrayList<String>();
     }
     this.clientFrontchannelLogoutUris.add(clientFrontchannelLogoutUrisItem);
     return this;
@@ -403,7 +403,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addContactsItem(String contactsItem) {
     if (this.contacts == null) {
-      this.contacts = new ArrayList<>();
+      this.contacts = new ArrayList<String>();
     }
     this.contacts.add(contactsItem);
     return this;
@@ -429,7 +429,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addRedirectUrisItem(String redirectUrisItem) {
     if (this.redirectUris == null) {
-      this.redirectUris = new ArrayList<>();
+      this.redirectUris = new ArrayList<String>();
     }
     this.redirectUris.add(redirectUrisItem);
     return this;
@@ -455,7 +455,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addUiLocalesItem(String uiLocalesItem) {
     if (this.uiLocales == null) {
-      this.uiLocales = new ArrayList<>();
+      this.uiLocales = new ArrayList<String>();
     }
     this.uiLocales.add(uiLocalesItem);
     return this;
@@ -481,7 +481,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addClaimsLocalesItem(String claimsLocalesItem) {
     if (this.claimsLocales == null) {
-      this.claimsLocales = new ArrayList<>();
+      this.claimsLocales = new ArrayList<String>();
     }
     this.claimsLocales.add(claimsLocalesItem);
     return this;
@@ -507,7 +507,7 @@ public class RegisterSiteParams {
 
   public RegisterSiteParams addClaimsRedirectUriItem(String claimsRedirectUriItem) {
     if (this.claimsRedirectUri == null) {
-      this.claimsRedirectUri = new ArrayList<>();
+      this.claimsRedirectUri = new ArrayList<String>();
     }
     this.claimsRedirectUri.add(claimsRedirectUriItem);
     return this;

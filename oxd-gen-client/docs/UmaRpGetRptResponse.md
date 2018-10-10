@@ -4,8 +4,10 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **String** |  | 
-**data** | [**UmaRpGetRptResponseData**](UmaRpGetRptResponseData.md) |  | 
+**pct** | **String** |  | 
+**updated** | **Boolean** |  | 
+**accessToken** | **String** |  | 
+**tokenType** | **String** |  | 
 
 
 
