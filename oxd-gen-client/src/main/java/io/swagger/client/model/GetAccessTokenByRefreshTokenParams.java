@@ -28,16 +28,13 @@ import java.util.List;
 /**
  * GetAccessTokenByRefreshTokenParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-05T11:02:24.520Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:09:57.852Z")
 public class GetAccessTokenByRefreshTokenParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
 
   @SerializedName("refresh_token")
   private String refreshToken = null;
-
-  @SerializedName("protection_token")
-  private String protectionToken = null;
 
   @SerializedName("scope")
   private List<String> scope = new ArrayList<>();
@@ -78,24 +75,6 @@ public class GetAccessTokenByRefreshTokenParams {
     this.refreshToken = refreshToken;
   }
 
-  public GetAccessTokenByRefreshTokenParams protectionToken(String protectionToken) {
-    this.protectionToken = protectionToken;
-    return this;
-  }
-
-   /**
-   * Get protectionToken
-   * @return protectionToken
-  **/
-  @ApiModelProperty(example = "Bearer 33d7988e-6ffb-4fe5-8c2a-0e158691d446", required = true, value = "")
-  public String getProtectionToken() {
-    return protectionToken;
-  }
-
-  public void setProtectionToken(String protectionToken) {
-    this.protectionToken = protectionToken;
-  }
-
   public GetAccessTokenByRefreshTokenParams scope(List<String> scope) {
     this.scope = scope;
     return this;
@@ -131,13 +110,12 @@ public class GetAccessTokenByRefreshTokenParams {
     GetAccessTokenByRefreshTokenParams getAccessTokenByRefreshTokenParams = (GetAccessTokenByRefreshTokenParams) o;
     return Objects.equals(this.oxdId, getAccessTokenByRefreshTokenParams.oxdId) &&
         Objects.equals(this.refreshToken, getAccessTokenByRefreshTokenParams.refreshToken) &&
-        Objects.equals(this.protectionToken, getAccessTokenByRefreshTokenParams.protectionToken) &&
         Objects.equals(this.scope, getAccessTokenByRefreshTokenParams.scope);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, refreshToken, protectionToken, scope);
+    return Objects.hash(oxdId, refreshToken, scope);
   }
 
 
@@ -148,7 +126,6 @@ public class GetAccessTokenByRefreshTokenParams {
     
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    refreshToken: ").append(toIndentedString(refreshToken)).append("\n");
-    sb.append("    protectionToken: ").append(toIndentedString(protectionToken)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("}");
     return sb.toString();
