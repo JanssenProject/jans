@@ -1,13 +1,13 @@
 package io.swagger.client.api;
 
-import static org.testng.Assert.assertNotNull;
-
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiException;
 import io.swagger.client.model.GetClientTokenParams;
-import io.swagger.client.model.GetClientTokenResponseData;
+import io.swagger.client.model.GetClientTokenResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertNotNull;
 
 
 
@@ -28,7 +28,7 @@ public class GetClientTokenTest {
         params.setClientId(Tester.getSetupData().getClientId());
         params.setClientSecret(Tester.getSetupData().getClientSecret());
 
-        GetClientTokenResponseData resp = Tester.api().getClientToken(params).getData();
+        GetClientTokenResponse resp = Tester.api().getClientToken(params);
         assertNotNull(resp);
         Tester.notEmpty(resp.getAccessToken());
 
