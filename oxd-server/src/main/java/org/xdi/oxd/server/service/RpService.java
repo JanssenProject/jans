@@ -30,13 +30,10 @@ public class RpService {
 
     private PersistenceService persistenceService;
 
-    private ConfigurationService configurationService;
-
     @Inject
-    public RpService(ValidationService validationService, PersistenceService persistenceService, ConfigurationService configurationService) {
+    public RpService(ValidationService validationService, PersistenceService persistenceService) {
         this.validationService = validationService;
         this.persistenceService = persistenceService;
-        this.configurationService = configurationService;
     }
 
     public void removeAllRps() {
