@@ -7,6 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -354,6 +355,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getContacts() {
+        if (contacts == null) {
+            contacts = new ArrayList<>();
+        }
         return contacts;
     }
 
@@ -362,6 +366,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getAcrValues() {
+        if (acrValues == null) {
+            acrValues = new ArrayList<>();
+        }
         return acrValues;
     }
 
@@ -370,6 +377,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getClaimsLocales() {
+        if (claimsLocales == null) {
+            claimsLocales = new ArrayList<>();
+        }
         return claimsLocales;
     }
 
@@ -394,6 +404,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getGrantType() {
+        if (grantType == null) {
+            grantType = new ArrayList<>();
+        }
         return grantType;
     }
 
@@ -433,6 +446,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getClaimsRedirectUri() {
+        if (claimsRedirectUri == null) {
+            claimsRedirectUri = new ArrayList<>();
+        }
         return claimsRedirectUri;
     }
 
@@ -441,6 +457,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getRedirectUris() {
+        if (redirectUris == null) {
+            redirectUris = new ArrayList<>();
+        }
         return redirectUris;
     }
 
@@ -449,6 +468,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getResponseTypes() {
+        if (responseTypes == null) {
+            responseTypes = new ArrayList<>();
+        }
         return responseTypes;
     }
 
@@ -457,6 +479,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getScope() {
+        if (scope == null) {
+            scope = new ArrayList<>();
+        }
         return scope;
     }
 
@@ -465,6 +490,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getUiLocales() {
+        if (uiLocales == null) {
+            uiLocales = new ArrayList<>();
+        }
         return uiLocales;
     }
 
