@@ -2,8 +2,7 @@
 	"your_idp_name1": {
 		"SP_1": {
 			"openidclient": {
-				"client_id": "",
-				"redirect_uri": ""
+				"client_id": ""
 			}
 			"authorization_params": {
 				"client_id": "",
