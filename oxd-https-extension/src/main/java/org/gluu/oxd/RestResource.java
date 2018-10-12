@@ -210,7 +210,7 @@ public class RestResource {
             }
         }
         final String json = CoreUtils.asJsonSilently(commandResponse);
-        LOG.trace("Send back response: {}", json);
+        LOG.trace("Send back response: {}", CoreUtils.cleanUpLog(json));
         return json;
     }
 
