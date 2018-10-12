@@ -5,6 +5,13 @@
 				"client_id": "",
 				"redirect_uri": ""
 			}
+			"authorization_params": {
+				"client_id": "",
+				"redirect_uri": "",
+				"acr_values": "passport_saml",
+				"response_type": "code",
+				"scope": ["openid", "user_name", "email"]
+			}
 		},
 		"SP_2": {
 		}
