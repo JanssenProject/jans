@@ -14,7 +14,6 @@ import org.xdi.oxd.common.response.UpdateSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -77,19 +76,19 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-
             // more specific site registration
             final UpdateSiteParams commandParams = new UpdateSiteParams();
             commandParams.setOxdId(oxdId);
-            commandParams.setScope(Lists.newArrayList("profile"));
 
             final Command command = new Command(CommandType.UPDATE_SITE);
             command.setParamsObject(commandParams);
 
             UpdateSiteResponse resp = client.send(command).dataAsResponse(UpdateSiteResponse.class);
+            UpdateSiteResponse resp2 = client.send(command).dataAsResponse(UpdateSiteResponse.class); // send 2 more update calls to make sure we are consistent
+            UpdateSiteResponse resp3 = client.send(command).dataAsResponse(UpdateSiteResponse.class);
             assertNotNull(resp);
+            assertNotNull(resp2);
+            assertNotNull(resp3);
         } finally {
             CommandClient.closeQuietly(client);
         }
