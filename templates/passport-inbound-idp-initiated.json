@@ -3,7 +3,7 @@
 		"SP_1": {
 			"openidclient": {
 				"client_id": ""
-			}
+			},
 			"authorization_params": {
 				"client_id": "",
 				"redirect_uri": "",
