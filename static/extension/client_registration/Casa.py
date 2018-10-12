@@ -7,7 +7,7 @@ from org.xdi.model.custom.script.type.client import ClientRegistrationType
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import ScopeService
 from org.xdi.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet
+from java.util import Arrays, ArrayList, HashSet, Date, GregorianCalendar
 
 import java
 
@@ -47,7 +47,10 @@ class ClientRegistration(ClientRegistrationType):
 
         print "Casa client registration. Client is Gluu Casa"
         self.setClientScopes(client, configurationAttributes.get("scopes"))
-
+        #Extend client lifetime for one year
+        cal=GregorianCalendar()
+        cal.add(1,1)
+        client.setClientSecretExpiresAt(Date(cal.getTimeInMillis()))
         return True
 
     # Update client entry before persistent it
