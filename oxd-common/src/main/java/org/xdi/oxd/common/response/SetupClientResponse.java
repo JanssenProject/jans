@@ -120,7 +120,6 @@ public class SetupClientResponse implements IOpResponse {
                 ", setupClientOxdId='" + setupClientOxdId + '\'' +
                 ", clientIdOfOxdId='" + clientIdOfOxdId + '\'' +
                 ", clientId='" + clientId + '\'' +
-                ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
                 ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
                 ", clientIdIssuedAt='" + clientIdIssuedAt + '\'' +

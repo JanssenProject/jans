@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.common;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -315,5 +316,19 @@ public class CoreUtils {
             queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
         }
         return queryPairs;
+    }
+
+    public static String cleanUpLog(String log) {
+        try {
+            // remove `client_secret` from logs
+            final int index = StringUtils.indexOf(log, "client_secret");
+            if (index != -1) {
+                final int commaIndex = StringUtils.indexOf(log, ",", index + 1);
+                return log.substring(0, index - 1) + log.substring(commaIndex + 1, log.length());
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return log;
     }
 }

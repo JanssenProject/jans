@@ -49,7 +49,7 @@ public class Processor {
                 final CommandResponse response = process(command);
                 if (response != null) {
                     final String json = CoreUtils.asJson(response);
-                    LOG.trace("Send back response: {}", json);
+                    LOG.trace("Send back response: {}", CoreUtils.cleanUpLog(json));
                     return json;
                 } else {
                     LOG.error("There is no response produced by Processor.");
