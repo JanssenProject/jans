@@ -79,7 +79,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             # Get JWT token
-            jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+
+            # TODO: I'm not sure this is the right way to retrieve it for IDP-initiated
+            jwt_param = identity.getSessionId().getSessionAttributes().get("user_profile")
+
+            if jwt_param == None:
+                jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+                
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
@@ -148,6 +154,12 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
+        
+            # TODO: I'm not sure this is the right way to retrieve it for IDP-initiated
+            jwt_param = identity.getSessionId().getSessionAttributes().get("user_profile")
+            if jwt_param != None:
+                return True
+                
             # This param is needed in passportlogin.xhtml
             identity.setWorkingParameter("behaviour", self.behaveAs)
 
