@@ -156,8 +156,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
         
             # TODO: I'm not sure this is the right way to retrieve it for IDP-initiated
-            jwt_param = identity.getSessionId().getSessionAttributes().get("user_profile")
-            if jwt_param != None:
+            session_state = identity.getSessionId().getSessionState()
+            if isJwt(session_state):
                 return True
                 
             # This param is needed in passportlogin.xhtml
@@ -654,6 +654,17 @@ class PersonAuthentication(PersonAuthenticationType):
                 localAttr = mapping[remoteAttr]
                 print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
                 foundUser.setAttribute(localAttr, values)
+
+    def isJwt(self, value):
+        if value == None:
+            return False
+        
+        try:
+            jwt = Jwt.parse(value)
+        finally:
+            return False
+
+        return True
 
     # This routine converts a value into an array of flat string values. Examples:
     # "" --> []
