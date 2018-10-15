@@ -5,13 +5,15 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.io.Serializable;
+
 /**
  * @author Javier Rojas Blum
  * @version October 16, 2015
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxClientAuthorizations"})
-public class ClientAuthorizations {
+public class ClientAuthorizations implements Serializable {
 
     @LdapDN
     private String dn;
