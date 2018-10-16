@@ -14,6 +14,7 @@ from org.xdi.oxauth.model.crypto import CryptoProviderFactory
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
 from org.xdi.oxauth.model.util import Base64Util
 from org.xdi.oxauth.service import AppInitializer, AuthenticationService, UserService
+from org.xdi.oxauth.model.authorize import AuthorizeRequestParam
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.util import ServerUtil
@@ -48,6 +49,10 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. init. Behaviour is %s" % self.behaveAs
         self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
         print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
+
+        # Re-read the strategies config
+        self.parseProviderConfigs()
+
         return success
 
 
@@ -74,14 +79,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        print "Passport. authenticate called %s" % str(step)
+        print "Passport. authenticate for step %s called" % str(step)
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
-            # Get JWT token
-
-            # TODO: I'm not sure this is the right way to retrieve it for IDP-initiated
-            jwt_param = identity.getSessionId().getSessionAttributes().get("user_profile")
+            jwt_param = None
+            if self.isInboundFlow(identity):
+                print "Passport. authenticate for step 1. Detected inbound Saml flow"
+                jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
 
             if jwt_param == None:
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
@@ -145,7 +150,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-
         extensionResult = self.extensionPrepareForStep(configurationAttributes, requestParameters, step)
         if extensionResult != None:
             return extensionResult
@@ -154,12 +158,6 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
-        
-            # TODO: I'm not sure this is the right way to retrieve it for IDP-initiated
-            session_state = identity.getSessionId().getSessionState()
-            if isJwt(session_state):
-                return True
-                
             # This param is needed in passportlogin.xhtml
             identity.setWorkingParameter("behaviour", self.behaveAs)
 
@@ -216,18 +214,24 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getPageForStep(self, configurationAttributes, step):
+        print "Passport. getPageForStep called"
 
         extensionResult = self.extensionGetPageForStep(configurationAttributes, step)
         if extensionResult != None:
             return extensionResult
 
         if (step == 1):
+            identity = CdiUtil.bean(Identity)
+            if self.isInboundFlow(identity):
+                print "Passport. getPageForStep for step 1. Detected inbound Saml flow"
+                return "/postlogin.xhtml"
+
             return "/auth/passport/passportlogin.xhtml"
+
         return "/auth/passport/passportpostlogin.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
-
         if step == 1:
             identity = CdiUtil.bean(Identity)
             provider = identity.getWorkingParameter("selectedProvider")
@@ -507,6 +511,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         provider = user_profile[providerKey]
+        print provider
+        print self.registeredProviders
         if not provider in self.registeredProviders:
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
@@ -655,13 +661,29 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
                 foundUser.setAttribute(localAttr, values)
 
+    def isInboundFlow(self, identity):
+        sessionId = identity.getSessionId()
+        if sessionId == None:
+            # Detect mode if there is no session yet. It's needed for getPageForStep method
+            facesContext = CdiUtil.bean(FacesContext)
+            requestParameters = facesContext.getExternalContext().getRequestParameterMap()
+
+            authz_state = requestParameters.get(AuthorizeRequestParam.STATE)
+        else:
+            authz_state = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
+
+        if self.isJwt(authz_state):
+            return True
+
+        return False
+
     def isJwt(self, value):
         if value == None:
             return False
         
         try:
             jwt = Jwt.parse(value)
-        finally:
+        except:
             return False
 
         return True
