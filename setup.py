@@ -476,7 +476,8 @@ class Setup(object):
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.network = "/etc/sysconfig/network"
-        self.system_profile_update = '%s/system_profile' % self.outputFolder
+        self.system_profile_update_init = '%s/system_profile_init' % self.outputFolder
+        self.system_profile_update_systemd = '%s/system_profile_systemd' % self.outputFolder
 
         self.asimba_conf_folder = '%s/asimba' % self.configFolder
         self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
@@ -2308,21 +2309,25 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def customiseSystem(self):
-        # Render customized part
         if self.os_initdaemon == 'init':
-            self.renderTemplate(self.system_profile_update)
-            renderedSystemProfile = self.readFile(self.system_profile_update)
+            system_profile_update = self.system_profile_update_init
+        else:
+            system_profile_update = self.system_profile_update_systemd
 
-            # Read source file
-            currentSystemProfile = self.readFile(self.sysemProfile)
+        # Render customized part
+        self.renderTemplate(system_profile_update)
+        renderedSystemProfile = self.readFile(system_profile_update)
 
-            # Write merged file
-            self.backupFile(self.sysemProfile)
-            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-            self.writeFile(self.sysemProfile, resultSystemProfile)
+        # Read source file
+        currentSystemProfile = self.readFile(self.sysemProfile)
 
-            # Fix new file permissions
-            self.run([self.cmd_chmod, '644', self.sysemProfile])
+        # Write merged file
+        self.backupFile(self.sysemProfile)
+        resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+        self.writeFile(self.sysemProfile, resultSystemProfile)
+
+        # Fix new file permissions
+        self.run([self.cmd_chmod, '644', self.sysemProfile])
 
     def configureSystem(self):
         self.customiseSystem()
