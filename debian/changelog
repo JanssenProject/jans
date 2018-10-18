@@ -1,4 +1,4 @@
-oxd-server-3.1.4 (1-1~trusty+Ub14.04) trusty; urgency=low
+oxd-server (3.1.4-1~trusty+Ub14.04) trusty; urgency=low
 
   * Initial release (Closes: #1232)
 
