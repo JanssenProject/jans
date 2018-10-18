@@ -17,9 +17,11 @@ import org.xdi.oxd.common.response.GetRpResponse;
 import org.xdi.oxd.common.response.RemoveSiteResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.RpService;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +51,15 @@ public class Cli {
 
             // list
             if (cmd.hasOption("l")) {
-                for (String oxdIdKey : rpService.getRps().keySet()) {
-                    System.out.println(oxdIdKey);
+                final Collection<Rp> values = rpService.getRps().values();
+                if (values.isEmpty()) {
+                    System.out.println("There are no any entries yet in database.");
+                    return;
+                }
+
+                System.out.println("oxd_id                                client_name");
+                for (Rp rp : values) {
+                    System.out.println(String.format("%s  %s", rp.getOxdId(), rp.getClientName() != null ? rp.getClientName() : ""));
                 }
                 return;
             }
@@ -119,9 +128,17 @@ public class Cli {
 
                 GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
                 if (resp.getNode() instanceof ArrayNode) {
-                    Iterator<JsonNode> elements = ((ArrayNode) resp.getNode()).getElements();
+                    final ArrayNode arrayNode = (ArrayNode) resp.getNode();
+                    if (arrayNode.size() == 0) {
+                        System.out.println("There are no any entries yet in database.");
+                        return;
+                    }
+
+                    Iterator<JsonNode> elements = arrayNode.getElements();
+                    System.out.println("oxd_id                                client_name");
                     while (elements.hasNext()) {
-                        System.out.println(sanitizeOutput(elements.next().toString()));
+                        final JsonNode element = elements.next();
+                        System.out.println(String.format("%s  %s", element.get("oxd_id").asText(), element.get("client_name").asText()));
                     }
                 } else {
                     System.out.println(resp.getNode());
