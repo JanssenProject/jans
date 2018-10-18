@@ -1,6 +1,6 @@
 %define name1 oxd-server
 Name:           oxd-server
-Version:        1
+Version:        3.1.4
 Release:        1.centos6
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
