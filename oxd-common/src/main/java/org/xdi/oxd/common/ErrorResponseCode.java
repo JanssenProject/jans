@@ -45,7 +45,7 @@ public enum ErrorResponseCode {
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),
     UNSUPPORTED_OPERATION("unsupported_operation", "Operation is not supported by server error."),
     INVALID_OP_HOST("invalid_op_host", "Invalid op_host (empty or blank)."),
-    NO_SETUP_CLIENT_FOR_OXD_ID("no_setup_client_for_oxd_id", "There are no setup client for given oxd_id. Please obtain oxd_id via setup_client command in order to force protection_access_token validation."),
+    NO_SETUP_CLIENT_FOR_OXD_ID("no_setup_client_for_oxd_id", "There is no setup client for given oxd_id. Please obtain oxd_id via setup_client command in order to force protection_access_token validation."),
     BLANK_PROTECTION_ACCESS_TOKEN("blank_protection_access_token", "protection_access_token is blank. Command is protected by protection_access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     INVALID_PROTECTION_ACCESS_TOKEN("invalid_protection_access_token", "Invalid protection_access_token. Command is protected by protection_access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE("invalid_introspection_response", "AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later)."),
