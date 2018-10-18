@@ -607,6 +607,10 @@ public class Rp implements Serializable {
         this.setupClientId = setupClientId;
     }
 
+    public MinimumRp asMinimumRp() {
+        return new MinimumRp(oxdId, clientName);
+    }
+
     @Override
     public String toString() {
         return "Rp{" +
