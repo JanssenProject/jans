@@ -8,10 +8,11 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetRpParams;
 import org.xdi.oxd.common.response.GetRpResponse;
 import org.xdi.oxd.rs.protect.Jackson;
+import org.xdi.oxd.server.service.MinimumRp;
 import org.xdi.oxd.server.service.Rp;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuriyz
@@ -33,8 +34,11 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
     @Override
     public CommandResponse execute(GetRpParams params) {
         if (params.getList() != null && params.getList()) {
-            Set<String> oxdIds = getRpService().getRps().keySet();
-            return okResponse(new GetRpResponse(Jackson.createJsonMapper().valueToTree(new HashSet<>(oxdIds))));
+            List<MinimumRp> rps = new ArrayList<>();
+            for (Rp rp : getRpService().getRps().values()) {
+                rps.add(rp.asMinimumRp());
+            }
+            return okResponse(new GetRpResponse(Jackson.createJsonMapper().valueToTree(rps)));
         }
 
         Rp rp = getRpService().getRp(params.getOxdId());
