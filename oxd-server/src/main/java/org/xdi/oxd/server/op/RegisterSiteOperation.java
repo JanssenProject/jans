@@ -29,6 +29,7 @@ import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.IntrospectionService;
 import org.xdi.oxd.server.service.Rp;
 
 import java.io.IOException;
@@ -87,6 +88,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
         LOG.trace("introspection: " + response + ", setupClientId: " + rp.getSetupClientId());
+        if (!IntrospectionService.getScopes(response).contains("oxd")) {
+            throw new ErrorResponseException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
+        }
 
         rp.setSetupClientId(response.getClientId());
         rp.setSetupOxdId(oxdId);
