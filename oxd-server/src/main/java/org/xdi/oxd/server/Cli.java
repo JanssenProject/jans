@@ -138,7 +138,9 @@ public class Cli {
                     System.out.println("oxd_id                                client_name");
                     while (elements.hasNext()) {
                         final JsonNode element = elements.next();
-                        System.out.println(String.format("%s  %s", element.get("oxd_id").asText(), element.get("client_name").asText()));
+                        final JsonNode oxdIdNode = element.get("oxd_id");
+                        final JsonNode clientNameNode = element.get("client_name");
+                        System.out.println(String.format("%s  %s", oxdIdNode != null ? oxdIdNode.asText() : "", clientNameNode != null ? clientNameNode.asText() : "null"));
                     }
                 } else {
                     System.out.println(resp.getNode());
