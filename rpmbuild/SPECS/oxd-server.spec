@@ -80,7 +80,7 @@ touch /var/log/oxd-server/oxd-server.log 2>&1
 chown -R jetty:jetty /var/log/oxd-server 2>&1
 
 %preun
-if [ -x “/etc/init.d/oxd-server-4.0.0” ] || [ -e “/etc/init/oxd-server.conf” ]; then
+if [ -x /etc/init.d/oxd-server-4.0.0 ] || [ -e /etc/init/oxd-server.conf ]; then
 service oxd-server-4.0.0 stop || exit $?
 fi
 chkconfig --del oxd-server-4.0.0
