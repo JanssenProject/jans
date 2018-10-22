@@ -147,8 +147,10 @@ public class ServerLauncher {
                         hasBC = true;
                     }
                 }
+                LOG.debug("BC registered: " + hasBC);
                 if (!hasBC) {
                     Security.addProvider(new BouncyCastleProvider());
+                    LOG.debug("Registered BC successfully.");
                 }
             }
         } catch (Exception e) {
