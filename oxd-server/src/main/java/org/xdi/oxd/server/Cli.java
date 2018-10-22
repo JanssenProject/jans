@@ -168,7 +168,7 @@ public class Cli {
                 }
                 return;
             }
-
+            printHelpAndExit();
         } catch (IOException e) {
             System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
             e.printStackTrace();
