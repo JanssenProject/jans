@@ -408,15 +408,16 @@ do_start () {
       			fi
       			start-stop-daemon -S -p"$OXD_PID_FILE" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
 
-			dip_in_logs
-                	START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'Start listening for notifications'`
-                	ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"`
+			#dip_in_logs
+			sleep 2
+                	START_STATUS=`tail -n 10 $OXD_LOGS/start.log|grep -i 'Start listening for notifications'` > /dev/null 2>&1
+                	ERROR_STATUS=`tail -n 10 $OXD_LOGS/start.log|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1
                 	if [ "x$START_STATUS" = "x" ]; then
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
                         	if [ "x$ERROR_STATUS" != "x" ]; then
                                 	### Since error occurred, we should remove the PID file at this point itself.
 					rm -f  $OXD_PID_FILE
-                                	echo "Some error encountered..."
+                                	echo "Some errors encountered..."
                                 	echo "See log below: "
                                 	echo ""
                                 	echo "$ERROR_STATUS"
@@ -424,6 +425,14 @@ do_start () {
                                 	echo "For details please check $OXD_INIT_LOG ."
                                 	echo "Exiting..."
                                 	exit 1
+				else
+                                	### Since error occurred, we should remove the PID file at this point itself.
+					rm -f  $OXD_PID_FILE
+                                	echo "Some errors encountered..."
+                                	echo ""
+                                	echo "For details please check $OXD_INIT_LOG ."
+                                	echo "Exiting..."
+                                	exit 1				   
                         	fi
 	
                 	fi
@@ -444,6 +453,33 @@ do_start () {
           			exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
           			disown \$!
           			echo \$! > '$OXD_PID_FILE'"
+				#dip_in_logs
+				sleep 2
+                		START_STATUS=`tail -n 10 $OXD_LOGS/start.log|grep -i 'Start listening for notifications'` > /dev/null 2>&1
+                		ERROR_STATUS=`tail -n 10 $OXD_LOGS/start.log|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1
+                		if [ "x$START_STATUS" = "x" ]; then
+	                        	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
+	                        	if [ "x$ERROR_STATUS" != "x" ]; then
+	                                	### Since error occurred, we should remove the PID file at this point itself.
+						rm -f  $OXD_PID_FILE
+	                                	echo "Some errors encountered..."
+	                                	echo "See log below: "
+	                                	echo ""
+	                                	echo "$ERROR_STATUS"
+	                                	echo ""
+	                                	echo "For details please check $OXD_INIT_LOG ."
+	                                	echo "Exiting..."
+	                                	exit 1
+					else
+	                                	### Since error occurred, we should remove the PID file at this point itself.
+						rm -f  $OXD_PID_FILE
+	                                	echo "Some errors encountered..."
+	                                	echo ""
+	                                	echo "For details please check $OXD_INIT_LOG ."
+	                                	echo "Exiting..."
+	                                	exit 1				   
+	                        	fi	
+	                	fi
       			else
         			"${RUN_CMD[@]}" > /dev/null &
         			disown $!
