@@ -30,7 +30,7 @@ do_start () {
 do_stop () {
         if [ -f $PID_PATH_NAME ]; then
             PID=$(cat $PID_PATH_NAME);
-            echo "$SERVICE_NAME stoping ..."
+            echo "$SERVICE_NAME stopping ..."
             kill $PID;
             rm $PID_PATH_NAME
         else
