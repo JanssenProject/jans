@@ -120,7 +120,14 @@
 			<artifactId>metrics-core</artifactId>
 		</dependency>
 
-		<!-- Quartz -->
+		<!-- Google Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <!-- Quartz -->
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
