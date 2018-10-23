@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
+import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
@@ -50,6 +51,26 @@ public abstract class AbstractCustomScriptService implements Serializable {
     public CustomScript getCustomScriptByDn(Class<?> customScriptType, String customScriptDn) {
         return (CustomScript) ldapEntryManager.find(customScriptType, customScriptDn);
     }
+
+    public Optional<CustomScript> getCustomScriptByINum(String baseDn, String inum, String... returnAttributes) {
+
+        final List<Filter> customScriptTypeFilters = new ArrayList<Filter>();
+
+        final Filter customScriptTypeFilter = Filter.createEqualityFilter("inum", inum);
+        customScriptTypeFilters.add(customScriptTypeFilter);
+
+        final Filter filter = Filter.createORFilter(customScriptTypeFilters);
+
+        final List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
+
+        if (result.isEmpty()) {
+
+            return  Optional.absent();
+        }
+
+        return Optional.of(result.get(0));
+    }
+
 
     public List<CustomScript> findAllCustomScripts(String[] returnAttributes) {
         String baseDn = baseDn();

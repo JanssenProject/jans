@@ -36,6 +36,8 @@
 		<gxt.version>3.1.1</gxt.version>
 		<gwt.version>2.8.20160720</gwt.version>
 		<tomcat.version>7.0.67</tomcat.version>
+		<guava.version>18.0</guava.version>
+
 	</properties>
 
 	<repositories>
