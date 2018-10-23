@@ -1,2 +1,15 @@
 #!/bin/sh -e
+
+# Stopping oxd-server-4.0.0
+if [ -x /etc/init.d/oxd-server-4.0.0 ]; then
+service oxd-server-4.0.0 stop > /dev/null 2>&1
+fi
+chkconfig --del oxd-server-4.0.0 > /dev/null 2>&1
+
+# Stopping oxd-https-extension
+if [ -x /etc/init.d/oxd-https-extension ]; then
+service oxd-https-extension stop > /dev/null 2>&1
+fi
+chkconfig --del oxd-https-extension > /dev/null 2>&1
+
 exit 0
