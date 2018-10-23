@@ -410,8 +410,8 @@ do_start () {
 
 			#dip_in_logs
 			sleep 2
-                	START_STATUS=`tail -n 10 $OXD_LOGS/start.log|grep -i 'Start listening for notifications'` > /dev/null 2>&1
-                	ERROR_STATUS=`tail -n 10 $OXD_LOGS/start.log|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1
+                	START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'Start listening for notifications'` > /dev/null 2>&1
+                	ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1
                 	if [ "x$START_STATUS" = "x" ]; then
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
                         	if [ "x$ERROR_STATUS" != "x" ]; then
