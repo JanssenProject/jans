@@ -168,7 +168,7 @@ public class Cli {
                 if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
                     System.out.println("Entry removed successfully.");
                 } else {
-                    System.out.println("Failed to remove entry from database, please check oxd_id really exist and is not malformed (more details at oxd-server.log file).");
+                    System.out.println("Failed to remove entry from database, please check oxd_id really exists and is not malformed (more details in oxd-server.log file).");
                 }
                 return;
             }
