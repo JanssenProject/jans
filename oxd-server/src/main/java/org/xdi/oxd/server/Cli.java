@@ -6,11 +6,22 @@ import io.dropwizard.configuration.ConfigurationFactory;
 import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.jersey.validation.Validators;
+import io.dropwizard.jetty.ConnectorFactory;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.server.DefaultServerFactory;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
+import org.xdi.oxd.client.ClientInterface;
+import org.xdi.oxd.client.OxdClient;
+import org.xdi.oxd.common.params.GetRpParams;
+import org.xdi.oxd.common.params.RemoveSiteParams;
+import org.xdi.oxd.common.response.GetRpResponse;
+import org.xdi.oxd.common.response.RemoveSiteResponse;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
@@ -20,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -125,20 +137,41 @@ public class Cli {
         }
     }
 
-    private static void tryToConnectToRunningOxd(CommandLine cmd) {
-        CommandClient client = null;
-        int port = 8099;
-        try {
-            port = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get().getPort();
-            client = new CommandClient("localhost", port);
+    private static int getPort(OxdServerConfiguration conf) {
+        final List<ConnectorFactory> applicationConnectors = ((DefaultServerFactory) conf.getServerFactory()).getApplicationConnectors();
+        if (applicationConnectors == null || applicationConnectors.isEmpty()) {
+            System.out.println("Failed to fetch port from configuration.");
+            return -1;
+        }
+        for (ConnectorFactory connectorFactory : applicationConnectors) {
+            if (connectorFactory instanceof HttpConnectorFactory) {
+                return ((HttpConnectorFactory) connectorFactory).getPort();
+            }
+        }
+        return -1;
+    }
 
+    private static void tryToConnectToRunningOxd(CommandLine cmd) {
+        final Injector injector = ServerLauncher.getInjector();
+        final OxdServerConfiguration conf = injector.getInstance(ConfigurationService.class).get();
+        if (conf == null) {
+            System.out.println("Failed to load configuration file of oxd-server.");
+            return;
+        }
+
+        final int port = getPort(conf);
+        if (port == -1) {
+            return;
+        }
+
+        final ClientInterface client = OxdClient.newClient("https://localhost:" + port);
+        String authorization = ""; // todo get authorization here
+        try {
             if (cmd.hasOption("l")) {
-                final Command command = new Command(CommandType.GET_RP);
                 GetRpParams params = new GetRpParams();
                 params.setList(true);
-                command.setParamsObject(params);
 
-                GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
+                GetRpResponse resp = client.getRp(authorization, params);
                 if (resp.getNode() instanceof ArrayNode) {
                     final ArrayNode arrayNode = (ArrayNode) resp.getNode();
                     if (arrayNode.size() == 0) {
@@ -162,10 +195,8 @@ public class Cli {
 
             if (cmd.hasOption("oxd_id")) {
                 final String oxdId = cmd.getOptionValue("oxd_id");
-                final Command command = new Command(CommandType.GET_RP);
-                command.setParamsObject(new GetRpParams(oxdId));
 
-                GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
+                GetRpResponse resp = client.getRp(authorization, new GetRpParams(oxdId));
                 if (resp != null) {
                     print(oxdId, resp.getNode());
                 } else {
@@ -175,8 +206,7 @@ public class Cli {
             }
 
             if (cmd.hasOption("d")) {
-                final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
-                RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
+                RemoveSiteResponse resp = client.removeSite(authorization, new RemoveSiteParams(cmd.getOptionValue("d")));
                 if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
                     System.out.println("Entry removed successfully.");
                 } else {
@@ -185,12 +215,10 @@ public class Cli {
                 return;
             }
             printHelpAndExit();
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
-        } finally {
-            CommandClient.closeQuietly(client);
         }
     }
 
