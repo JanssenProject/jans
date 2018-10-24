@@ -28,7 +28,7 @@ override_dh_auto_install:
 		cp oxd-server/src/main/bin/oxd-start.sh debian/oxd-server/opt/oxd-server/bin/
 		cp oxd-server/src/main/bin/lsox.sh debian/oxd-server/opt/oxd-server/bin/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-https-extension/target/oxd-https-extension-4.0.0-SNAPSHOT.jar debian/oxd-server/opt/oxd-https-extension/lib/oxd-https-extension-jar-with-dependencies.jar
+		cp oxd-https-extension/target/oxd-https-extension-4.0.beta-SNAPSHOT.jar debian/oxd-server/opt/oxd-https-extension/lib/oxd-https-extension-jar-with-dependencies.jar
 		cp oxd-https-extension/oxd-https.keystore debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-https-extension/oxd-https.yml debian/oxd-server/opt/oxd-https-extension/lib/
 		cp bcprov-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
