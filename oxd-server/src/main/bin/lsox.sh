@@ -2,7 +2,7 @@
 # Please run it with JDK 1.6 or higher
 
 BASEDIR=$(dirname $0)
-CONF=$BASEDIR/../conf/oxd-conf.json
+CONF=/etc/oxd/oxd-server/oxd-conf.json
 echo BASEDIR=$BASEDIR
 echo CONF=$CONF
 
