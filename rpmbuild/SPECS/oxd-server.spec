@@ -81,9 +81,13 @@ chown -R jetty:jetty /var/log/oxd-server 2>&1
 
 %preun
 if [ -x /etc/init.d/oxd-server ] || [ -e /etc/init/oxd-server.conf ]; then
-service oxd-server stop || exit $?
+service oxd-server stop > /dev/null 2>&1
 fi
 chkconfig --del oxd-server
+if [ -x /etc/init.d/oxd-https-extension ]; then
+service oxd-https-extension stop > /dev/null 2>&1
+fi
+chkconfig --del oxd-https-extension
 
 %files
 %defattr(-,root,root,-)
