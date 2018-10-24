@@ -18,31 +18,31 @@
 #               mvn clean package -Dmaven.test.skip=true
 #               mvn clean install -U -Dmaven.test.skip=true
 override_dh_auto_install:
-		mkdir -p debian/oxd-server-4.0/opt/oxd-server/conf/
-		mkdir -p debian/oxd-server-4.0/opt/oxd-server/bin/
-		mkdir -p debian/oxd-server-4.0/opt/oxd-server/lib/
-		mkdir -p debian/oxd-server-4.0/opt/oxd-https-extension/lib/
-		cp oxd-server/src/main/resources/oxd-conf.json debian/oxd-server-4.0/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/oxd-server-4.0/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server-4.0/opt/oxd-server/conf/
-		cp oxd-server/src/main/bin/oxd-start.sh debian/oxd-server-4.0/opt/oxd-server/bin/
-		cp oxd-server/src/main/bin/lsox.sh debian/oxd-server-4.0/opt/oxd-server/bin/
-		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server-4.0/opt/oxd-server/lib/
-		cp oxd-https-extension/target/oxd-https-extension-4.0.0-SNAPSHOT.jar debian/oxd-server-4.0/opt/oxd-https-extension/lib/oxd-https-extension-jar-with-dependencies.jar
-		cp oxd-https-extension/oxd-https.keystore debian/oxd-server-4.0/opt/oxd-https-extension/lib/
-		cp oxd-https-extension/oxd-https.yml debian/oxd-server-4.0/opt/oxd-https-extension/lib/
-		cp bcprov-jdk15on-1.54.jar debian/oxd-server-4.0/opt/oxd-server/lib/
-		mkdir -p debian/oxd-server-4.0/var/log/
-		mkdir -p debian/oxd-server-4.0/etc/oxd/oxd-server/
-		mkdir -p debian/oxd-server-4.0/etc/default/
-		cp -a debian/oxd-server-4.0/opt/oxd-server/conf/* debian/oxd-server-4.0/etc/oxd/oxd-server/.
-		#cp -a logs/oxd-server.log debian/oxd-server-4.0/var/log/
-		cp -a debian/oxd-server-default debian/oxd-server-4.0/etc/default/oxd-server-4.0
-		cp -a debian/oxd-https-extension-default debian/oxd-server-4.0/etc/default/oxd-https-extension
-		rm -rf debian/oxd-server-4.0/opt/oxd-server/conf
+		mkdir -p debian/oxd-server/opt/oxd-server/conf/
+		mkdir -p debian/oxd-server/opt/oxd-server/bin/
+		mkdir -p debian/oxd-server/opt/oxd-server/lib/
+		mkdir -p debian/oxd-server/opt/oxd-https-extension/lib/
+		cp oxd-server/src/main/resources/oxd-conf.json debian/oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/bin/oxd-start.sh debian/oxd-server/opt/oxd-server/bin/
+		cp oxd-server/src/main/bin/lsox.sh debian/oxd-server/opt/oxd-server/bin/
+		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
+		cp oxd-https-extension/target/oxd-https-extension-3.1.4.Final.jar debian/oxd-server/opt/oxd-https-extension/lib/oxd-https-extension-jar-with-dependencies.jar
+		cp oxd-https-extension/oxd-https.keystore debian/oxd-server/opt/oxd-https-extension/lib/
+		cp oxd-https-extension/oxd-https.yml debian/oxd-server/opt/oxd-https-extension/lib/
+		cp bcprov-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
+		mkdir -p debian/oxd-server/var/log/
+		mkdir -p debian/oxd-server/etc/oxd/oxd-server/
+		mkdir -p debian/oxd-server/etc/default/
+		cp -a debian/oxd-server/opt/oxd-server/conf/* debian/oxd-server/etc/oxd/oxd-server/.
+		#cp -a logs/oxd-server.log debian/oxd-server/var/log/
+		cp -a debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
+		cp -a debian/oxd-https-extension-default debian/oxd-server/etc/default/oxd-https-extension
+		rm -rf debian/oxd-server/opt/oxd-server/conf
 
 override_dh_fixperms:
 		dh_fixperms
-		chmod 755 debian/oxd-server-4.0/opt/oxd-server/bin/oxd-start.sh
-		chmod 755 debian/oxd-server-4.0/opt/oxd-server/bin/lsox.sh
-		chmod 644 debian/oxd-server-4.0/etc/default/oxd-server-4.0
+		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
+		chmod 755 debian/oxd-server/opt/oxd-server/bin/lsox.sh
+		chmod 644 debian/oxd-server/etc/default/oxd-server
