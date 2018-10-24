@@ -1,15 +1,18 @@
 #!/bin/sh -e
+mkdir -p /opt
 
-# Stopping oxd-server-4.0.0
-if [ -x /etc/init.d/oxd-server-4.0.0 ]; then
-service oxd-server-4.0.0 stop > /dev/null 2>&1
+# Stopping oxd-server
+# This will stop oxd-server if its have been removed by purge 
+if [ -e /var/run/oxd-server.pid ]; then
+kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
 fi
-chkconfig --del oxd-server-4.0.0 > /dev/null 2>&1
 
 # Stopping oxd-https-extension
-if [ -x /etc/init.d/oxd-https-extension ]; then
-service oxd-https-extension stop > /dev/null 2>&1
+# This will stop oxd-https-extension if its have been removed by purge 
+if [ -e /var/run/oxd-https-extension.pid ]; then
+kill -9 `cat /var/run/oxd-https-extension.pid` > /dev/null 2>&1
+rm -rf /var/run/oxd-https-extension.pid > /dev/null 2>&1
 fi
-chkconfig --del oxd-https-extension > /dev/null 2>&1
 
 exit 0
