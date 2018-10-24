@@ -191,6 +191,10 @@ public class Rp implements Serializable {
         this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
     }
 
+    public MinimumRp asMinimumRp() {
+        return new MinimumRp(oxdId, clientName);
+    }
+
     public String getTokenEndpointAuthMethod() {
         return tokenEndpointAuthMethod;
     }
