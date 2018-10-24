@@ -1,2 +1,18 @@
 #!/bin/sh -e
 mkdir -p /opt
+
+# Stopping oxd-server
+# This will stop oxd-server if its have been removed by purge 
+if [ -e /var/run/oxd-server.pid ]; then
+kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
+fi
+
+# Stopping oxd-https-extension
+# This will stop oxd-https-extension if its have been removed by purge 
+if [ -e /var/run/oxd-https-extension.pid ]; then
+kill -9 `cat /var/run/oxd-https-extension.pid` > /dev/null 2>&1
+rm -rf /var/run/oxd-https-extension.pid > /dev/null 2>&1
+fi
+
+exit 0
