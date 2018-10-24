@@ -154,17 +154,21 @@ public class Cli {
                 command.setParamsObject(new GetRpParams(oxdId));
 
                 GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
-                print(oxdId, resp.getNode());
+                if (resp != null) {
+                    print(oxdId, resp.getNode());
+                } else {
+                    System.out.println("Failed to fetch entry from database, please check oxd_id really exist and is not malformed (more details at oxd-server.log file).");
+                }
                 return;
             }
 
             if (cmd.hasOption("d")) {
                 final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
                 RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
-                if (StringUtils.isNotBlank(resp.getOxdId())) {
+                if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
                     System.out.println("Entry removed successfully.");
                 } else {
-                    System.out.println("Failed to remove entry from database, please check oxd-server.log file.");
+                    System.out.println("Failed to remove entry from database, please check oxd_id really exist and is not malformed (more details at oxd-server.log file).");
                 }
                 return;
             }
