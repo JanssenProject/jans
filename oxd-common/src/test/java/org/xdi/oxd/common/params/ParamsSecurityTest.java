@@ -1,6 +1,7 @@
 package org.xdi.oxd.common.params;
 
 import org.apache.commons.lang.StringUtils;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class ParamsSecurityTest {
             IParams.class
     );
 
-    @Test(enabled = false)
+    @Test
     public void checkParamsImplementsHasProtectionAccessTokenInterface() throws IOException {
         for (Class clazz : getAllParamsClasses()) {
             if (EXCLUSING_LIST.contains(clazz)) {
@@ -45,7 +46,9 @@ public class ParamsSecurityTest {
     private Set<Class> getAllParamsClasses() throws IOException {
         final URL packageResource = Thread.currentThread().getContextClassLoader().getResource(StringUtils.replace(PARAMS_PACKAGE, ".", "/"));
         final File packageFile = new File(StringUtils.replace(packageResource.getFile(), "test-classes", "classes"));
-        assertTrue(packageFile.exists());
+        if (packageFile.exists()) {
+            throw new SkipException("Failed to find test-classes.");
+        }
         assertTrue(packageFile.isDirectory());
 
         final File[] classFiles = packageFile.listFiles();
