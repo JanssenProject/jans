@@ -13,10 +13,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.RpService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,8 +47,15 @@ public class Cli {
 
             // list
             if (cmd.hasOption("l")) {
-                for (String oxdIdKey : rpService.getRps().keySet()) {
-                    System.out.println(oxdIdKey);
+                final Collection<Rp> values = rpService.getRps().values();
+                if (values.isEmpty()) {
+                    System.out.println("There are no any entries yet in database.");
+                    return;
+                }
+
+                System.out.println("oxd_id                                client_name");
+                for (Rp rp : values) {
+                    System.out.println(String.format("%s  %s", rp.getOxdId(), rp.getClientName() != null ? rp.getClientName() : ""));
                 }
                 return;
             }
@@ -73,9 +82,12 @@ public class Cli {
             System.out.println(e.getMessage());
             printHelpAndExit();
         } catch (RuntimeException e) {
-            System.out.println("Failed to open database file, make sure oxd-server is stopped. Otherwise it locks database and it is not possible to open it.");
-            e.printStackTrace();
-            printHelpAndExit();
+            // oxd is running and keeps h2 database locked, so we connect to oxd-server and fetch RP via client connection
+            if (cmd != null) {
+                tryToConnectToRunningOxd(cmd);
+            } else {
+                printHelpAndExit();
+            }
         } catch (Throwable e) {
             System.out.println("Failed to run oxd CLI (make sure oxd-server was run at least one time and database file is created). Error: " + e.getMessage());
             e.printStackTrace();
@@ -110,6 +122,75 @@ public class Cli {
         loggers.add(LogManager.getRootLogger());
         for (Logger logger : loggers) {
             logger.setLevel(Level.OFF);
+        }
+    }
+
+    private static void tryToConnectToRunningOxd(CommandLine cmd) {
+        CommandClient client = null;
+        int port = 8099;
+        try {
+            port = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get().getPort();
+            client = new CommandClient("localhost", port);
+
+            if (cmd.hasOption("l")) {
+                final Command command = new Command(CommandType.GET_RP);
+                GetRpParams params = new GetRpParams();
+                params.setList(true);
+                command.setParamsObject(params);
+
+                GetRpResponse resp = client.send(new Command(CommandType.GET_RP).setParamsObject(params)).dataAsResponse(GetRpResponse.class);
+                if (resp.getNode() instanceof ArrayNode) {
+                    final ArrayNode arrayNode = (ArrayNode) resp.getNode();
+                    if (arrayNode.size() == 0) {
+                        System.out.println("There are no any entries yet in database.");
+                        return;
+                    }
+
+                    Iterator<JsonNode> elements = arrayNode.getElements();
+                    System.out.println("oxd_id                                client_name");
+                    while (elements.hasNext()) {
+                        final JsonNode element = elements.next();
+                        final JsonNode oxdIdNode = element.get("oxd_id");
+                        final JsonNode clientNameNode = element.get("client_name");
+                        System.out.println(String.format("%s  %s", oxdIdNode != null ? oxdIdNode.asText() : "", clientNameNode != null ? clientNameNode.asText() : "null"));
+                    }
+                } else {
+                    System.out.println(resp.getNode());
+                }
+                return;
+            }
+
+            if (cmd.hasOption("oxd_id")) {
+                final String oxdId = cmd.getOptionValue("oxd_id");
+                final Command command = new Command(CommandType.GET_RP);
+                command.setParamsObject(new GetRpParams(oxdId));
+
+                GetRpResponse resp = client.send(command).dataAsResponse(GetRpResponse.class);
+                if (resp != null) {
+                    print(oxdId, resp.getNode());
+                } else {
+                    System.out.println("Failed to fetch entry from database, please check oxd_id really exist and is not malformed (more details at oxd-server.log file).");
+                }
+                return;
+            }
+
+            if (cmd.hasOption("d")) {
+                final Command command = new Command(CommandType.REMOVE_SITE).setParamsObject(new RemoveSiteParams(cmd.getOptionValue("d")));
+                RemoveSiteResponse resp = client.send(command).dataAsResponse(RemoveSiteResponse.class);
+                if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
+                    System.out.println("Entry removed successfully.");
+                } else {
+                    System.out.println("Failed to remove entry from database, please check oxd_id really exists and is not malformed (more details in oxd-server.log file).");
+                }
+                return;
+            }
+            printHelpAndExit();
+        } catch (IOException e) {
+            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } finally {
+            CommandClient.closeQuietly(client);
         }
     }
 
