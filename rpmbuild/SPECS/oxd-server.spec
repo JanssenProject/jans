@@ -45,7 +45,7 @@ install -m 644 oxd-server/src/main/resources/log4j.xml %{buildroot}/opt/oxd-serv
 install -m 644 oxd-server/src/main/resources/oxd-conf.json %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/src/main/resources/oxd-default-site-config.json %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/target/oxd-server-jar-with-dependencies.jar %{buildroot}/opt/oxd-server/lib/
-install -m 644 oxd-https-extension/target/oxd-https-extension-4.0.0-SNAPSHOT.jar %{buildroot}/opt/oxd-https-extension/lib/
+install -m 644 oxd-https-extension/target/oxd-https-extension-4.0.beta-SNAPSHOT.jar %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 oxd-https-extension/oxd-https.keystore %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 oxd-https-extension/oxd-https.yml %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 README.md %{buildroot}/opt/oxd-server/
