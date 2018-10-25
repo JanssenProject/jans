@@ -62,14 +62,11 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         iatParams.setAccessToken(invalidToken);
         iatParams.setOxdId(setupData.getOxdId());
 
-        try {
-            client.introspectAccessToken(validHeader, iatParams);
-        } catch (ApiException e) {
-            assertEquals(400, e.getCode());
-            return;
-        }
-        throw new AssertionError("Got response while we expect failure because there is not such token on the server.");
-
+        ApiResponse<IntrospectAccessTokenResponse> apiIatResponse = client.introspectAccessTokenWithHttpInfo(validHeader, iatParams);
+        assertEquals(apiIatResponse.getStatusCode(), 200);
+        assertNotNull(apiIatResponse.getData());
+        // verify client is NOT active
+        assertFalse(apiIatResponse.getData().isActive());
     }
 
     @Parameters({"opHost", "redirectUrl"})
