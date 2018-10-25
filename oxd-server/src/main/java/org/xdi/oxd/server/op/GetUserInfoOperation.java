@@ -8,6 +8,10 @@ import org.xdi.oxd.common.params.GetUserInfoParams;
 import org.xdi.oxd.common.response.GetUserInfoResponse;
 import org.xdi.oxd.common.response.IOpResponse;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
@@ -34,7 +38,17 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
         client.setExecutor(getHttpService().getClientExecutor());
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
-        GetUserInfoResponse opResponse = new GetUserInfoResponse(client.exec().getClaims());
-        return opResponse;
+        final Map<String, List<String>> claims = client.exec().getClaims();
+        return new GetUserInfoResponse(normalize(claims));
+    }
+
+    private static Map<String, List<String>> normalize(Map<String, List<String>> claims) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : claims.entrySet()) {
+            if (entry.getValue() != null) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 }
