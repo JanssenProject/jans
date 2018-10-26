@@ -8,5 +8,4 @@ echo CONF=$CONF
 
 LIB=$BASEDIR/../lib
 javaExe=java
-#javaExe=/usr/java/jdk1.6.0_30/bin/java
-$javaExe -jar $LIB/oxd-server.jar server $CONF
+$javaExe -cp %LIB%/bcprov-jdk15on-1.54.jar:$LIB/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server $CONF
