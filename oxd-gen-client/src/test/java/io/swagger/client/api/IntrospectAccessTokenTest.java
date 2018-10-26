@@ -49,10 +49,6 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
     @Parameters({"opHost", "redirectUrl"})
     @Test
     public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
-        Tester.setHost("http://localhost:8084");
-        opHost = "https://ce-dev3.gluu.org";
-        redirectUrl = "https://client.example.com/cb";
-
         DevelopersApi client = Tester.api();
         RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
