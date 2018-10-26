@@ -49,6 +49,10 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
     @Parameters({"opHost", "redirectUrl"})
     @Test
     public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
+        Tester.setHost("http://localhost:8084");
+        opHost = "https://ce-dev3.gluu.org";
+        redirectUrl = "https://client.example.com/cb";
+
         DevelopersApi client = Tester.api();
         RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
@@ -62,11 +66,20 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         iatParams.setAccessToken(invalidToken);
         iatParams.setOxdId(setupData.getOxdId());
 
-        ApiResponse<IntrospectAccessTokenResponse> apiIatResponse = client.introspectAccessTokenWithHttpInfo(validHeader, iatParams);
-        assertEquals(apiIatResponse.getStatusCode(), 200);
-        assertNotNull(apiIatResponse.getData());
-        // verify client is NOT active
-        assertFalse(apiIatResponse.getData().isActive());
+        try {
+            client.introspectAccessToken(validHeader, iatParams);
+        } catch (ApiException e) {
+            assertEquals(400, e.getCode());
+            return;
+        }
+        throw new AssertionError("Got response while we expect failure because there is not such token on the server.");
+
+        // return back to it after oxd is switched to oxauth 3.1.5 or later, see https://github.com/GluuFederation/oxAuth/issues/929
+//        ApiResponse<IntrospectAccessTokenResponse> apiIatResponse = client.introspectAccessTokenWithHttpInfo(validHeader, iatParams);
+//        assertEquals(apiIatResponse.getStatusCode(), 200);
+//        assertNotNull(apiIatResponse.getData());
+//        // verify client is NOT active
+//        assertFalse(apiIatResponse.getData().isActive());
     }
 
     @Parameters({"opHost", "redirectUrl"})
