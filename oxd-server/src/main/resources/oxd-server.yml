@@ -23,13 +23,13 @@ server:
   applicationConnectors:
     - type: https
       port: 8443
-      keyStorePath: /opt/oxd-server/conf/oxd-server.keystore
+      keyStorePath: oxd-server.keystore
       keyStorePassword: example
       validateCerts: false
   adminConnectors:
     - type: https
       port: 8444
-      keyStorePath: /opt/oxd-server/conf/oxd-server.keystore
+      keyStorePath: oxd-server.keystore
       keyStorePassword: example
       validateCerts: false
 
