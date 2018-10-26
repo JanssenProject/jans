@@ -6,6 +6,16 @@
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>org.bouncycastle:bcprov-jdk15on</include>
+            </includes>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
     <files>
         <file>
             <source>${project.basedir}/src/main/resources/oxd-server.yml</source>
@@ -13,6 +23,10 @@
         </file>
         <file>
             <source>${project.basedir}/src/main/resources/oxd-server.keystore</source>
+            <outputDirectory>/conf</outputDirectory>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/resources/swagger.yaml</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>

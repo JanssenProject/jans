@@ -31,6 +31,7 @@
                     <include>**/*.json</include>
                     <include>**/*.xml</include>
                     <include>**/*.yml</include>
+                    <include>**/*.keystore</include>
                 </includes>
             </resource>
         </resources>
@@ -42,6 +43,7 @@
                     <include>**/*.json</include>
                     <include>**/*.xml</include>
                     <include>**/*.yml</include>
+                    <include>**/*.keystore</include>
                 </includes>
             </testResource>
         </testResources>
