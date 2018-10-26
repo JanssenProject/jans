@@ -80,7 +80,7 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    private String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
+    static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
                                String nonce, String authorization) throws Exception {
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);
@@ -93,7 +93,7 @@ public class GetTokensByCodeTest {
 
     }
 
-    private Request buildRequest(String authorization, String oxdId, String userId, String userSecret, String state, String nonce, DevelopersApi client) {
+    private static Request buildRequest(String authorization, String oxdId, String userId, String userSecret, String state, String nonce, DevelopersApi client) {
 
         final String json = "{\"oxd_id\":\"" + oxdId + "\",\"username\":\"" + userId + "\",\"password\":\"" + userSecret
                 + "\",\"state\":\"" + state + "\",\"nonce\":\"" + nonce + "\"}";
