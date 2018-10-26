@@ -172,6 +172,10 @@ public class Cli {
                 params.setList(true);
 
                 GetRpResponse resp = client.getRp(authorization, params);
+                if (resp == null) {
+                    System.out.println("Failed to fetch entries from database. Please check oxd-server.log file for details.");
+                    return;
+                }
                 if (resp.getNode() instanceof ArrayNode) {
                     final ArrayNode arrayNode = (ArrayNode) resp.getNode();
                     if (arrayNode.size() == 0) {
