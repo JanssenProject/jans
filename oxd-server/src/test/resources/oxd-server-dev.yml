@@ -25,13 +25,13 @@ server:
       port: 8084
     - type: https
       port: 8443
-      keyStorePath: oxd-server.keystore
+      keyStorePath: U:\own\project\git\oxd\master\oxd-server\src\main\resources\oxd-server.keystore
       keyStorePassword: example
       validateCerts: false
   adminConnectors:
     - type: https
       port: 8444
-      keyStorePath: oxd-server.keystore
+      keyStorePath: U:\own\project\git\oxd\master\oxd-server\src\main\resources\oxd-server.keystore
       keyStorePassword: example
       validateCerts: false
 
