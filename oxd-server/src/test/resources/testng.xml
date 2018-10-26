@@ -164,5 +164,10 @@
         </classes>
     </test>
 
+    <test name="Get User Info swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetUserInfoTest"/>
+        </classes>
+    </test>
 
 </suite>
