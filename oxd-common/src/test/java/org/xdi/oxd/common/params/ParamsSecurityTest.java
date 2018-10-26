@@ -46,7 +46,7 @@ public class ParamsSecurityTest {
     private Set<Class> getAllParamsClasses() throws IOException {
         final URL packageResource = Thread.currentThread().getContextClassLoader().getResource(StringUtils.replace(PARAMS_PACKAGE, ".", "/"));
         final File packageFile = new File(StringUtils.replace(packageResource.getFile(), "test-classes", "classes"));
-        if (packageFile.exists()) {
+        if (!packageFile.exists()) {
             throw new SkipException("Failed to find test-classes.");
         }
         assertTrue(packageFile.isDirectory());
