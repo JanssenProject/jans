@@ -128,8 +128,7 @@ public class IntrospectionWebService {
                                 response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : TokenType.BEARER.getName());
                             }
                         } else {
-                            log.error("Failed to find grant for access_token: " + p_token);
-                            return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+                            log.error("Failed to find grant for access_token: " + p_token + ". Return 200 with active=false.");
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
                     } else {
