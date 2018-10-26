@@ -729,84 +729,10 @@ paths:
             properties:
               claims:
                 type: object
-                required:
-                  - sub
-                  - zoneinfo
-                  - website
-                  - birthdate
-                  - gender
-                  - profile
-                  - preferred_username
-                  - middle_name
-                  - locale
-                  - given_name
-                  - picture
-                  - updated_at
-                  - nickname
-                  - name
-                  - family_name
-                properties:
-                  sub:
-                    type: array
-                    items:
-                      type: string
-                    example: jblack
-                  zoneinfo:
-                    type: array
-                    items:
-                      type: string
-                  website:
-                    type: array
-                    items:
-                      type: string
-                  birthdate:
-                    type: array
-                    items:
-                      type: string
-                  gender:
-                    type: array
-                    items:
-                      type: string
-                  profile:
-                    type: array
-                    items:
-                      type: string
-                  preferred_username:
-                    type: array
-                    items:
-                      type: string
-                  middle_name:
-                    type: array
-                    items:
-                      type: string
-                  locale:
-                    type: array
-                    items:
-                      type: string
-                  given_name:
-                    type: array
-                    items:
-                      type: string
-                  picture:
-                    type: array
-                    items:
-                      type: string
-                  updated_at:
-                    type: array
-                    items:
-                      type: string
-                  nickname:
-                    type: array
-                    items:
-                      type: string
-                  name:
-                    type: array
-                    items:
-                      type: string
-                  family_name:
-                    type: array
-                    items:
-                      type: string
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
         400:
           description: Invalid parameters are provided to endpoint.
         403:
