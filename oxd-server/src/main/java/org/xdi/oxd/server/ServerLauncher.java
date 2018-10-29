@@ -42,6 +42,7 @@ public class ServerLauncher {
         registerResteasyProviders();
 
         try {
+            LOG.info("Configuration: " + configuration);
             INJECTOR.getInstance(ConfigurationService.class).setConfiguration(configuration);
             INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(RpService.class).load();
