@@ -9,6 +9,7 @@ import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.POJOResponse;
+import org.xdi.oxd.server.service.ConfigurationService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -200,6 +201,7 @@ public class RestResource {
     }
 
     private static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
+        LOG.trace("Command: {}", paramsAsString);
         T params = read(paramsAsString, paramsClass);
         if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
@@ -222,6 +224,11 @@ public class RestResource {
             if (StringUtils.isNotBlank(accessToken)) {
                 return accessToken;
             }
+        }
+        final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
+            LOG.debug("Skip protection because protect_commands_with_access_token: false in configuration file.");
+            return "";
         }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
         throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build());
