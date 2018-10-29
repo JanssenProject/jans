@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+if [ "$1" = upgrade ] || [ "$1" = install ]; then
+    # Stopping oxd-server
+    # This will stop oxd-server before upgrade|install 
+    if [ -e /var/run/oxd-server.pid ]; then
+        kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+        rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
+    fi
+
+    # Stopping oxd-https-extension
+    # This will stop oxd-https-extension before upgrade|install
+    if [ -e /var/run/oxd-https-extension.pid ]; then
+        kill -9 `cat /var/run/oxd-https-extension.pid` > /dev/null 2>&1
+        rm -rf /var/run/oxd-https-extension.pid > /dev/null 2>&1
+    fi
+fi
+exit 0
