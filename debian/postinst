@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/etc/init.d/oxd-server-4.0 stop > /dev/null 2>&1
+/etc/init.d/oxd-server stop > /dev/null 2>&1
 /etc/init.d/oxd-https-extension stop > /dev/null 2>&1
 
 getent passwd jetty > /dev/null 2>&1
@@ -14,13 +14,17 @@ if [ $? -ne 0 ]; then
 fi
 
 #chown root:gluu /var/log/oxd-server.log 2>&1
-chown root:root /etc/default/oxd-server-4.0 2>&1
+chown root:root /etc/default/oxd-server 2>&1
 chown jetty:jetty -R /opt/oxd-server 2>&1
 #touch /var/log/oxd-server.log 2>&1
 #chown jetty:jetty /var/log/oxd-server.log 2>&1
 #chmod 665 /var/log/oxd-server.log 2>&1
-chmod 644 /etc/default/oxd-server-4.0 2>&1
+chmod 644 /etc/default/oxd-server 2>&1
 mkdir -p /var/log/oxd-server 2>&1
 touch /var/log/oxd-server/oxd-server.log 2>&1
 chown -R jetty:jetty /var/log/oxd-server 2>&1
-mv /etc/init.d/oxd-https-extension.init.d /etc/init.d/oxd-https-extension 2>&1
+if [ -e /etc/init.d/oxd-https-extension.init.d ]; then
+    rm -rf /etc/init.d/oxd-https-extension > /dev/null 2>&1
+    mv /etc/init.d/oxd-https-extension.init.d /etc/init.d/oxd-https-extension > /dev/null 2>&1
+fi
+exit 0
