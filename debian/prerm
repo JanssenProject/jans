@@ -6,8 +6,8 @@ if [ -x /etc/init.d/oxd-server-4.0.beta ]; then
 fi
 
 # Stopping oxd-https-extension
-if [ -x /etc/init.d/oxd-https-extension ]; then
-/etc/init.d/oxd-https-extension stop > /dev/null 2>&1 &
-fi
+#if [ -x /etc/init.d/oxd-https-extension ]; then
+#/etc/init.d/oxd-https-extension stop > /dev/null 2>&1 &
+#fi
 
 exit 0
