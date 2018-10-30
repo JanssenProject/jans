@@ -2,12 +2,12 @@
 
 # Stopping oxd-server
 if [ -x /etc/init.d/oxd-server ]; then
-/etc/init.d/oxd-server stop > /dev/null 2>&1
+/etc/init.d/oxd-server stop > /dev/null 2>&1 &
 fi
 
 # Stopping oxd-https-extension
 if [ -x /etc/init.d/oxd-https-extension ]; then
-/etc/init.d/oxd-https-extension stop > /dev/null 2>&1
+/etc/init.d/oxd-https-extension stop > /dev/null 2>&1 &
 fi
 
 exit 0
