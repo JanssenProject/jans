@@ -1016,6 +1016,9 @@ paths:
               - exp
               - iat
               - nbf
+              - client_id
+              - aud
+              - iss
               - permissions
             properties:
               active:
@@ -1036,6 +1039,19 @@ paths:
                 format: int64
                 description: number of seconds since January 1 1970 UTC, indicating when the token not to be used before
                 example: 1535709072
+              client_id:
+                type: string
+                example: @!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42
+              sub:
+                type: string
+              aud:
+                type: string
+                example: @!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42
+              iss:
+                type: string
+                example: http://as.com
+              jti:
+                type: string
               permissions:
                 type: array
                 items:
@@ -1046,7 +1062,6 @@ paths:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
-
   /uma-rp-get-rpt:
     post:
       tags:
