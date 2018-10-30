@@ -2,7 +2,7 @@
 
 # LSB Tags
 ### BEGIN INIT INFO
-# Provides:          oxd-server
+# Provides:          oxd-server-4.0.beta
 # Required-Start:    $local_fs $network
 # Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
@@ -74,7 +74,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   have shell access, e.g. /bin/false
 #
 # OXD_INIT_LOG
-SERVICE_NAME="oxd-server"
+SERVICE_NAME="oxd-server-4.0.beta"
 OXD_INIT_LOG=/var/log/oxd-server/oxd-server.log
 
 usage()
