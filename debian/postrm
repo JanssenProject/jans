@@ -18,9 +18,9 @@ fi
 if [ "$1" = purge ]; then
     rm -rf /var/log/oxd-server > /dev/null 2>&1
     rm -rf /var/log/oxd-https.log > /dev/null 2>&1
-    rm -rf /etc/init.d/oxd-server > /dev/null 2>&1
+    rm -rf /etc/init.d/oxd-server-4.0.beta > /dev/null 2>&1
     rm -rf /etc/init.d/oxd-https-extension > /dev/null 2>&1
-    rm -rf /opt/oxd-server > /dev/null 2>&1
+    rm -rf /opt/oxd-server-4.0.beta > /dev/null 2>&1
     rm -rf /opt/oxd-https-extension > /dev/null 2>&1
 fi
 
