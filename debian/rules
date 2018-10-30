@@ -50,3 +50,5 @@ override_dh_fixperms:
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/lsox.sh
 		chmod 644 debian/oxd-server/etc/default/oxd-server
+		chown -R jetty:jetty debian/oxd-server/opt/oxd-server/data
+		chmod 664 debian/oxd-server/opt/oxd-server/data
