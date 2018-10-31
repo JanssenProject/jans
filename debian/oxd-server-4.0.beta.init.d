@@ -414,7 +414,7 @@ do_start () {
         			CH_USER="-c$OXD_USER"
       			fi
 	
-			start-stop-daemon --start --quiet --make-pidfile --pidfile $OXD_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $OXD_LOGS/start.log 2>&1
+			start-stop-daemon --start --quiet --chuid $OXD_USER --make-pidfile --pidfile $OXD_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $OXD_LOGS/start.log 2>&1
 
 			#dip_in_logs
 			sleep 4
