@@ -4,7 +4,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
-import org.xdi.oxd.common.response.LogoutResponse;
+import org.xdi.oxd.common.response.GetLogoutUriResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class GetLogoutUrlTest {
         params.setState(UUID.randomUUID().toString());
         params.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-        final LogoutResponse resp = client.getLogoutUri(Tester.getAuthorization(), params);
+        final GetLogoutUriResponse resp = client.getLogoutUri(Tester.getAuthorization(), params);
         assertNotNull(resp);
         assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
     }
