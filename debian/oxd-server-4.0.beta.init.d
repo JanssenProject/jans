@@ -2,7 +2,7 @@
 
 # LSB Tags
 ### BEGIN INIT INFO
-# Provides:          oxd-server
+# Provides:          oxd-server-4.0.beta
 # Required-Start:    $local_fs $network
 # Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
@@ -74,7 +74,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   have shell access, e.g. /bin/false
 #
 # OXD_INIT_LOG
-SERVICE_NAME="oxd-server"
+SERVICE_NAME="oxd-server-4.0.beta"
 OXD_INIT_LOG=/var/log/oxd-server/oxd-server.log
 
 usage()
@@ -346,8 +346,8 @@ TMPDIR="`cygpath -w $TMPDIR`"
 ;;
 esac
 
-JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
-
+#JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
+JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml")
 #####################################################
 # This is how the oxd server will be started
 #####################################################
@@ -414,13 +414,14 @@ do_start () {
       			then
         			CH_USER="-c$OXD_USER"
       			fi
+			
       			start-stop-daemon -S -p"$OXD_PID_FILE" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
 
 			#dip_in_logs
 			sleep 4
 			for i in 1 2 3 4 5 
                         do
-                	        START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'Start listening for notifications'` > /dev/null 2>&1
+                	        START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'org.eclipse.jetty.server.Server: Started'` > /dev/null 2>&1
                 	        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1			        
 			        if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	        break
@@ -473,8 +474,8 @@ do_start () {
 			        sleep 4
 			        for i in 1 2 3 4 5 
                                 do
-                		        START_STATUS=`tail -n 10 $OXD_LOGS/start.log|grep -i 'Start listening for notifications'` > /dev/null 2>&1
-                		        ERROR_STATUS=`tail -n 10 $OXD_LOGS/start.log|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1                	                		        
+                		        START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'org.eclipse.jetty.server.Server: Started'` > /dev/null 2>&1
+                		        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1                	                		        
 			                if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	                break
 		                 	fi
