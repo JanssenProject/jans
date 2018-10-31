@@ -170,4 +170,11 @@
         </classes>
     </test>
 
+    <test name="Get Logout Url swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetLogoutUrlTest"/>
+        </classes>
+    </test>
+
+
 </suite>
