@@ -7,16 +7,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 17/11/2015
  */
 
-public class LogoutResponse implements IOpResponse {
+public class GetLogoutUriResponse implements IOpResponse {
 
     @JsonProperty(value = "uri")
     @com.fasterxml.jackson.annotation.JsonProperty(value = "uri")
     private String uri;
 
-    public LogoutResponse() {
+    public GetLogoutUriResponse() {
     }
 
-    public LogoutResponse(String uri) {
+    public GetLogoutUriResponse(String uri) {
         this.uri = uri;
     }
 
@@ -30,10 +30,8 @@ public class LogoutResponse implements IOpResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("LogoutResponse");
-        sb.append("{uri='").append(uri).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "GetLogoutUriResponse" +
+                "{uri='" + uri + '\'' +
+                '}';
     }
 }
