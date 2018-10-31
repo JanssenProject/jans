@@ -8,6 +8,7 @@ import io.dropwizard.jackson.Jackson;
 import io.dropwizard.jersey.validation.Validators;
 import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.jetty.HttpsConnectorFactory;
 import io.dropwizard.server.DefaultServerFactory;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
@@ -26,6 +27,7 @@ import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.RpService;
+import org.xdi.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +53,8 @@ public class Cli {
 
             Injector injector = ServerLauncher.getInjector();
 
-            injector.getInstance(ConfigurationService.class).setConfiguration(parseConfiguration(cmd.getOptionValue("c")));
+            final OxdServerConfiguration conf = parseConfiguration(cmd.getOptionValue("c"));
+            injector.getInstance(ConfigurationService.class).setConfiguration(conf);
             injector.getInstance(PersistenceService.class).create();
 
             RpService rpService = injector.getInstance(RpService.class);
@@ -137,18 +140,23 @@ public class Cli {
         }
     }
 
-    private static int getPort(OxdServerConfiguration conf) {
+    private static Pair<Integer, Boolean> getPort(OxdServerConfiguration conf) {
         final List<ConnectorFactory> applicationConnectors = ((DefaultServerFactory) conf.getServerFactory()).getApplicationConnectors();
         if (applicationConnectors == null || applicationConnectors.isEmpty()) {
             System.out.println("Failed to fetch port from configuration.");
-            return -1;
+            return null;
         }
-        for (ConnectorFactory connectorFactory : applicationConnectors) {
-            if (connectorFactory instanceof HttpConnectorFactory) {
-                return ((HttpConnectorFactory) connectorFactory).getPort();
+        for (ConnectorFactory connectorFactory : applicationConnectors) { // first look up https
+            if (connectorFactory instanceof HttpsConnectorFactory) {
+                return new Pair<>(((HttpsConnectorFactory) connectorFactory).getPort(), true);
             }
         }
-        return -1;
+        for (ConnectorFactory connectorFactory : applicationConnectors) { // then http
+            if (connectorFactory instanceof HttpConnectorFactory) {
+                return new Pair<>(((HttpsConnectorFactory) connectorFactory).getPort(), false);
+            }
+        }
+        return null;
     }
 
     private static void tryToConnectToRunningOxd(CommandLine cmd) {
@@ -159,12 +167,14 @@ public class Cli {
             return;
         }
 
-        final int port = getPort(conf);
-        if (port == -1) {
+        final Pair<Integer, Boolean> port = getPort(conf);
+        if (port == null) {
+            System.out.println("Failed to fetch port from configuration.");
             return;
         }
 
-        final ClientInterface client = OxdClient.newClient("https://localhost:" + port);
+        final String protocol = port.getSecond() ? "https" : "http";
+        final ClientInterface client = OxdClient.newClient(protocol + "://localhost:" + port.getFirst());
         String authorization = ""; // todo get authorization here
         try {
             if (cmd.hasOption("l")) {
