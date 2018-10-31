@@ -9,7 +9,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.IOpResponse;
-import org.xdi.oxd.common.response.LogoutResponse;
+import org.xdi.oxd.common.response.GetLogoutUriResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
@@ -54,7 +54,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
             if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
-                return new LogoutResponse(logoutUrl);
+                return new GetLogoutUriResponse(logoutUrl);
             }
 
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
@@ -72,7 +72,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             uri += separator(uri) + "session_state=" + params.getSessionState();
         }
 
-        return new LogoutResponse(uri);
+        return new GetLogoutUriResponse(uri);
     }
 
     private static String separator(String uri) {

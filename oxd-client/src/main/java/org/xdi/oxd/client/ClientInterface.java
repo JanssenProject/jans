@@ -82,7 +82,7 @@ public interface ClientInterface {
     @Path("/get-logout-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    LogoutResponse getLogoutUri(@HeaderParam("Authorization") String authorization, GetLogoutUrlParams params);
+    GetLogoutUriResponse getLogoutUri(@HeaderParam("Authorization") String authorization, GetLogoutUrlParams params);
 
     @POST
     @Path("/get-access-token-by-refresh-token")
