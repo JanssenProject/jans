@@ -1041,12 +1041,12 @@ paths:
                 example: 1535709072
               client_id:
                 type: string
-                example: @!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42
+                example: "@!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42"
               sub:
                 type: string
               aud:
                 type: string
-                example: @!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42
+                example: "@!DBE5.84F8.631A.9172!0001!CD07.49BE!0008!0ED4.C61D.6FA7.8F42"
               iss:
                 type: string
                 example: http://as.com
