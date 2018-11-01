@@ -14,6 +14,8 @@ from org.xdi.util import StringHelper
 from org.gluu.site.ldap.persistence.exception import AuthenticationException
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
+from java.time import LocalDateTime, Duration
+from java.time.format import DateTimeFormatter
 
 import java
 import datetime
@@ -38,14 +40,14 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             print "Basic (lock account). Initialization. Using default number attempts"
 
-        self.lockExpirationTime= 180
+        self.lockExpirationTime = 180
         if configurationAttributes.containsKey("lock_expiration_time"):
-            self.lockExpirationTime= StringHelper.toInteger(configurationAttributes.get("lock_expiration_time").getValue2())
+            self.lockExpirationTime = StringHelper.toInteger(configurationAttributes.get("lock_expiration_time").getValue2())
         else:
             print "Basic (lock account). Initialization. Using default lock expiration time"
 
 
-        print "Basic (lock account). Initialized successfully. invalid_login_count_attribute: '%s', maximum_invalid_login_attemps: '%s'" % (self.invalidLoginCountAttribute, self.maximumInvalidLoginAttemps)
+        print "Basic (lock account). Initialized successfully. invalid_login_count_attribute: '%s', maximum_invalid_login_attemps: '%s', lock_expiration_time: '%s'" % (self.invalidLoginCountAttribute, self.maximumInvalidLoginAttemps, self.lockExpirationTime)
 
         return True   
 
@@ -74,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            cacheService= CdiUtil.bean(CacheService)
+            cacheService = CdiUtil.bean(CacheService)
             userService = CdiUtil.bean(UserService)
 
 
@@ -88,7 +90,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if not logged_in:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
                 userSatus = self.getUserAttributeValue(user_name, "gluuStatus")
-                print "Current user status %s" %userSatus
+                print "Current user '%s' status is '%s'" % ( user_name, userSatus )
+
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
 
                 if countInvalidLogin < self.maximumInvalidLoginAttemps:
@@ -101,7 +104,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     if remainingAttempts > 0 and userSatus == "active":
                         facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
 
-                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and userSatus == "active":
+                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus == None) or (userSatus == "active")):
                     print "Basic (lock account). Locking '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
                     self.lockUser(user_name, self.maximumInvalidLoginAttemps)
                     return False
@@ -122,8 +125,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         user_lock_details_locked = user_lock_details['locked']
                         user_lock_details_created = user_lock_details['created']
-                        user_lock_details_created_diff = (datetime.datetime.now() - user_lock_details_created).total_seconds()
-                        print "Basic (lock account). Get user '%s' locking details. locked: '%s', Created: '%s', Difference in seconds: '%s'" % ( user_name, user_lock_details_locked, user_lock_details__created, user_lock_details_created_diff )
+                        user_lock_details_created_date = LocalDateTime.parse(user_lock_details_created, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                        user_lock_details_created_diff = Duration.between(user_lock_details_created_date, LocalDateTime.now()).getSeconds()
+                        print "Basic (lock account). Get user '%s' locking details. locked: '%s', Created: '%s', Difference in seconds: '%s'" % ( user_name, user_lock_details_locked, user_lock_details_created, user_lock_details_created_diff )
 
                         if user_lock_details_locked and user_lock_details_created_diff >= self.lockExpirationTime:
                             print "Basic (lock account). Unlocking user '%s' after lock expiration" % user_name
@@ -217,7 +221,7 @@ class PersonAuthentication(PersonAuthenticationType):
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
         updated_user = userService.updateUser(find_user_by_uid)
 
-        object_to_store = json.dumps({'locked': True, 'created': datetime.datetime.now()}, separators=(',',':'))
+        object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
 
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
@@ -229,12 +233,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         userService = CdiUtil.bean(UserService)
+        cacheService= CdiUtil.bean(CacheService)
 
         find_user_by_uid = userService.getUser(user_name)
         if (find_user_by_uid == None):
             return None
 
-        object_to_store = json.dumps({'locked': False, 'created': datetime.datetime.now()}, separators=(',',':'))
+        object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
