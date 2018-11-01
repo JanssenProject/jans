@@ -182,6 +182,7 @@ gluuStatus: false
 inum: %(inumOrg)s!0011!4BBE.C6A8
 oxConfigurationProperty: {"value1":"invalid_login_count_attribute","value2":"oxCountInvalidLogin","description":""}
 oxConfigurationProperty: {"value1":"maximum_invalid_login_attemps","value2":"3","description":""}
+oxConfigurationProperty: {"value1":"lock_expiration_time","value2":"120","description":""}
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
