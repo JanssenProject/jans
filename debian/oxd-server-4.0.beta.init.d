@@ -178,7 +178,7 @@ TMPDIR=${TMPDIR:-/tmp}
 ##################################################
 # oxd-server's hallmark
 ##################################################
-OXD_INSTALL_TRACE_FILE="oxd-server-jar-with-dependencies.jar"
+OXD_INSTALL_TRACE_FILE="oxd-server.jar"
 
 
 ##################################################
@@ -322,7 +322,7 @@ then
   CYGWIN*) OXD_LOGS="`cygpath -w $OXD_LOGS`";;
   esac
 
-  JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.logging.dir=$OXD_LOGS")
+  #JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.logging.dir=$OXD_LOGS")
 fi
 
 #####################################################
@@ -347,7 +347,6 @@ TMPDIR="`cygpath -w $TMPDIR`"
 esac
 
 #JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
-JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml")
 #####################################################
 # This is how the oxd server will be started
 #####################################################
@@ -414,14 +413,14 @@ do_start () {
       			then
         			CH_USER="-c$OXD_USER"
       			fi
-			
-      			start-stop-daemon -S -p"$OXD_PID_FILE" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
+	
+			start-stop-daemon --start --quiet --chuid $OXD_USER --make-pidfile --pidfile $OXD_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $OXD_LOGS/start.log 2>&1
 
 			#dip_in_logs
 			sleep 4
 			for i in 1 2 3 4 5 
                         do
-                	        START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'org.eclipse.jetty.server.Server: Started'` > /dev/null 2>&1
+                	        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
                 	        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1			        
 			        if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	        break
@@ -453,7 +452,7 @@ do_start () {
                         	fi
 	
                 	fi
-        		chown "$OXD_USER" "$OXD_PID_FILE"
+        		chown "$OXD_USER" "$OXD_PID_FILE" > /dev/null 2>&1
 		else
       			if [ -n "$OXD_USER" ] && [ `whoami` != "$OXD_USER" ]
       			then
@@ -467,14 +466,14 @@ do_start () {
         			chown "$OXD_USER" "$OXD_PID_FILE"
         			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         			su - "$OXD_USER" $SU_SHELL -c "
-          			exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
+				exec $JAVA ${JAVA_OPTIONS[@]} >> "$OXD_LOGS/start.log" 2>&1 &
           			disown \$!
           			echo \$! > '$OXD_PID_FILE'"
 				#dip_in_logs
 			        sleep 4
 			        for i in 1 2 3 4 5 
                                 do
-                		        START_STATUS=`tail -n 10 $OXD_INIT_LOG|grep -i 'org.eclipse.jetty.server.Server: Started'` > /dev/null 2>&1
+                		        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
                 		        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1                	                		        
 			                if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	                break
@@ -506,7 +505,7 @@ do_start () {
 	                        	fi	
 	                	fi
       			else
-        			"${RUN_CMD[@]}" > /dev/null &
+        			$JAVA ${JAVA_OPTIONS[@]} > /dev/null &
         			disown $!
         			echo $! > "$OXD_PID_FILE"
       			fi
