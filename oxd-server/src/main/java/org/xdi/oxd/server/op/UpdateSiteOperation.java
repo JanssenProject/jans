@@ -11,6 +11,7 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.UpdateSiteParams;
@@ -136,6 +137,20 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
             request.setRedirectUris(Lists.newArrayList(redirectUris));
             rp.setRedirectUris(Lists.newArrayList(redirectUris));
+        }
+
+        if (params.getAccessTokenAsJwt() != null) {
+            rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+            request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+        } else {
+            request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
+        }
+
+        if (params.getAccessTokenSigningAlg() != null) {
+            rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
+            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
+        } else {
+            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(rp.getAccessTokenSigningAlg()));
         }
 
         if (!Strings.isNullOrEmpty(params.getClientJwksUri())) {

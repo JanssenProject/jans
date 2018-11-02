@@ -322,7 +322,13 @@ paths:
                 description: client secret of existing client, must be used together with client_id
               trusted_client:
                 type: boolean
-                description: specified whether client is trusted. Default value is false.
+                description: specifies whether client is trusted. Default value is false.
+              access_token_as_jwt:
+                type: boolean
+                description: specifies whether access_token should be return as JWT or not. Default value is false.
+              accessTokenSigningAlg:
+                type: string
+                description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
 
       responses:
         200:
@@ -444,6 +450,13 @@ paths:
                 type: array
                 items:
                   type: string
+              access_token_as_jwt:
+                type: boolean
+                description: specifies whether access_token should be return as JWT or not. Default value is false.
+              accessTokenSigningAlg:
+                type: string
+                description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
+
       responses:
         200:
           description: OK
