@@ -114,6 +114,10 @@ public class Rp implements Serializable {
     private Date rptCreatedAt;
     @JsonProperty(value = "oxd_rp_programming_language")
     private String oxdRpProgrammingLanguage;
+    @JsonProperty(value = "access_token_as_jwt")
+    private Boolean accessTokenAsJwt = false;
+    @JsonProperty(value = "access_token_signing_alg")
+    private String accessTokenSigningAlg;
 
     public Rp() {
     }
@@ -173,6 +177,24 @@ public class Rp implements Serializable {
 
         this.umaProtectedResources = conf.umaProtectedResources;
         this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
+        this.accessTokenAsJwt = conf.accessTokenAsJwt;
+        this.accessTokenSigningAlg = conf.accessTokenSigningAlg;
+    }
+
+    public Boolean getAccessTokenAsJwt() {
+        return accessTokenAsJwt;
+    }
+
+    public void setAccessTokenAsJwt(Boolean accessTokenAsJwt) {
+        this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public String getAccessTokenSigningAlg() {
+        return accessTokenSigningAlg;
+    }
+
+    public void setAccessTokenSigningAlg(String accessTokenSigningAlg) {
+        this.accessTokenSigningAlg = accessTokenSigningAlg;
     }
 
     public List<String> getFrontChannelLogoutUri() {
@@ -621,6 +643,8 @@ public class Rp implements Serializable {
                 ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
                 ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
+                ", accessTokenAsJwt=" + accessTokenAsJwt +
+                ", accessTokenSigningAlg=" + accessTokenSigningAlg +
                 '}';
     }
 }

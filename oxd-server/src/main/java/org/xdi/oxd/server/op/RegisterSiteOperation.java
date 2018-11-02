@@ -326,6 +326,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
+        request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+        request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
+
+        rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+        rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
         rp.setResponseTypes(params.getResponseTypes());
         rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         rp.setContacts(params.getContacts());
