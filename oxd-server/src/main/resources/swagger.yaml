@@ -911,7 +911,7 @@ paths:
               resources:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/definitions/RsResource"
       responses:
         200:
           description: OK
@@ -973,11 +973,14 @@ paths:
             title: UmaRsCheckAccessResponse
             required:
               - access
+              - ticket
             properties:
               access:
                 type: string
                 example: granted
                 description: Possible values are granted, denied
+              ticket:
+                type: string
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1209,3 +1212,43 @@ definitions:
   oxd_id:
     type: string
     example: bcad760f-91ba-46e1-a020-05e4281d91b6
+
+  # List of reusable objects
+  Condition:
+    type: object
+    required:
+      - httpMethods
+      - scopes
+      - scope_expression
+      - ticketScopes
+    properties:
+     httpMethods:
+       type: array
+       items:
+         type: string
+     scopes:
+       type: array
+       items:
+         type: string
+     scope_expression:
+       type: array
+       items:
+         type: string
+     ticketScopes:
+       type: array
+       items:
+        type: string
+
+  RsResource:
+    type: object
+    required:
+      - path
+      - conditions
+    properties:
+      path:
+        type: string
+      conditions:
+        type: array
+        items:
+          $ref: "#/definitions/Condition"
+
