@@ -10,6 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.BaseRequest;
 import org.xdi.oxauth.client.service.ClientFactory;
 import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
@@ -26,12 +27,21 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void test(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-
         final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
         final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
 
         final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint);
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Bearer " + authorization.getAccessToken(), tokenToIntrospect.getAccessToken());
+        Assert.assertTrue(introspectionResponse != null && introspectionResponse.isActive());
+    }
+
+    @Test
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void basicAuthentication(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
+        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor(true));
+        final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Basic " + BaseRequest.getEncodedCredentials(umaPatClientId, umaPatClientSecret), tokenToIntrospect.getAccessToken());
         Assert.assertTrue(introspectionResponse != null && introspectionResponse.isActive());
     }
 }

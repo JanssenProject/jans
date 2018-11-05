@@ -101,7 +101,7 @@ public class IntrospectionWebService {
                     if (authorizationAccessToken != null && authorizationAccessToken.isValid()) {
                         if (ServerUtil.isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope())) { // #562 - make uma_protection optional
                             if (!authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) {
-                                log.trace("access_token used to access introspection endpoint does not has uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true");
+                                log.trace("access_token used to access introspection endpoint does not have uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true");
                                 return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED) + " access_token does not have uma_protection scope which is required by OP configuration.").build();
                             }
                         }
@@ -183,7 +183,7 @@ public class IntrospectionWebService {
                             log.trace("Failed to match grant object clientId and client id provided during authentication.");
                             return null;
                         }
-                        return authorizationGrantList.getAuthorizationGrantByAccessToken(encodedCredentials);
+                        return grantOfIntrospectionToken;
                     }
                 } else {
                     log.trace("Failed to perform basic authentication for client: " + clientId);
