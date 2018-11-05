@@ -39,6 +39,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.Pair;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -94,11 +95,12 @@ public class IntrospectionWebService {
         try {
             log.trace("Introspect token, authorization: {}, token to introsppect: {}, tokenTypeHint:", p_authorization, p_token, tokenTypeHint);
             if (StringUtils.isNotBlank(p_authorization) && StringUtils.isNotBlank(p_token)) {
-                final AuthorizationGrant authorizationGrant = getAuthorizationGrant(p_authorization, p_token);
+                final Pair<AuthorizationGrant, Boolean> pair = getAuthorizationGrant(p_authorization, p_token);
+                final AuthorizationGrant authorizationGrant = pair.getFirst();
                 if (authorizationGrant != null) {
                     final AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(tokenService.getTokenFromAuthorizationParameter(p_authorization));
 
-                    if (authorizationAccessToken != null && authorizationAccessToken.isValid()) {
+                    if ((authorizationAccessToken != null && authorizationAccessToken.isValid()) || pair.getSecond()) {
                         if (ServerUtil.isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope())) { // #562 - make uma_protection optional
                             if (!authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) {
                                 log.trace("access_token used to access introspection endpoint does not have uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true");
@@ -148,13 +150,13 @@ public class IntrospectionWebService {
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
     }
 
-    private AuthorizationGrant getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
+    private Pair<AuthorizationGrant, Boolean> getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
         AuthorizationGrant grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Bearer ");
         if (grant != null) {
             final String authorizationAccessToken = authorization.substring("Bearer ".length());
             final AbstractToken accessTokenObject = grant.getAccessToken(authorizationAccessToken);
             if (accessTokenObject != null && accessTokenObject.isValid()) {
-                return grant;
+                return new Pair<AuthorizationGrant, Boolean>(grant, false);
             } else {
                 log.error("Access token is not valid: " + authorizationAccessToken);
                 return null;
@@ -163,7 +165,7 @@ public class IntrospectionWebService {
 
         grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Basic ");
         if (grant != null) {
-            return grant;
+            return new Pair<AuthorizationGrant, Boolean>(grant, false);
         }
         if (StringUtils.startsWithIgnoreCase(authorization, "Basic ")) {
 
@@ -187,7 +189,7 @@ public class IntrospectionWebService {
                 }
             }
         }
-        return grant;
+        return new Pair<AuthorizationGrant, Boolean>(grant, true);
     }
 
 }
