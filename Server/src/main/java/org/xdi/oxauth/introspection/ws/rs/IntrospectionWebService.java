@@ -56,6 +56,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
         "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
+    public static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<AuthorizationGrant, Boolean>(null, false);
+
     @Inject
     private Logger log;
     @Inject
@@ -159,7 +161,7 @@ public class IntrospectionWebService {
                 return new Pair<AuthorizationGrant, Boolean>(grant, false);
             } else {
                 log.error("Access token is not valid: " + authorizationAccessToken);
-                return null;
+                return EMPTY;
             }
         }
 
@@ -182,14 +184,15 @@ public class IntrospectionWebService {
                     grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
                     if (grant != null && !grant.getClientId().equals(clientId)) {
                         log.trace("Failed to match grant object clientId and client id provided during authentication.");
-                        return null;
+                        return EMPTY;
                     }
+                    return new Pair<AuthorizationGrant, Boolean>(grant, true);
                 } else {
                     log.trace("Failed to perform basic authentication for client: " + clientId);
                 }
             }
         }
-        return new Pair<AuthorizationGrant, Boolean>(grant, true);
+        return EMPTY;
     }
 
 }
