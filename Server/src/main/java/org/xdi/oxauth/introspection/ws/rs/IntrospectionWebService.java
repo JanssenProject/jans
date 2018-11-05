@@ -177,18 +177,14 @@ public class IntrospectionWebService {
                 String clientId = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
                 String password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
                 if (clientService.authenticate(clientId, password)) {
-                    final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
-                    if (grantOfIntrospectionToken != null) {
-                        if (!grantOfIntrospectionToken.getClientId().equals(clientId)) {
-                            log.trace("Failed to match grant object clientId and client id provided during authentication.");
-                            return null;
-                        }
-                        return grantOfIntrospectionToken;
+                    grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+                    if (grant != null && !grant.getClientId().equals(clientId)) {
+                        log.trace("Failed to match grant object clientId and client id provided during authentication.");
+                        return null;
                     }
                 } else {
                     log.trace("Failed to perform basic authentication for client: " + clientId);
                 }
-
             }
         }
         return grant;
