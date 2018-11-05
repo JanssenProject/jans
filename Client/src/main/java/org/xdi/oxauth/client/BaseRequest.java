@@ -129,6 +129,10 @@ public abstract class BaseRequest {
         return null;
     }
 
+    public static String getEncodedCredentials(String clientId, String clientSecret) throws UnsupportedEncodingException {
+        return Base64.encodeBase64String(Util.getBytes(URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING) + ":" + URLEncoder.encode(clientSecret, Util.UTF8_STRING_ENCODING)));
+    }
+
     public Map<String, String> getParameters() {
         return EMPTY_MAP;
     }

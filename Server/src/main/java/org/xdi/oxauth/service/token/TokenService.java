@@ -28,11 +28,14 @@ public class TokenService {
     private AuthorizationGrantList authorizationGrantList;
 
 	public String getTokenFromAuthorizationParameter(String authorizationParameter) {
-        final String prefix = "Bearer ";
-        if (StringHelper.isNotEmpty(authorizationParameter) && authorizationParameter.startsWith(prefix)) {
-        	return authorizationParameter.substring(prefix.length());
+        if (StringHelper.isNotEmpty(authorizationParameter)) {
+            if (authorizationParameter.startsWith("Bearer ")) {
+                return authorizationParameter.substring("Bearer ".length());
+            }
+            if (authorizationParameter.startsWith("Basic ")) {
+                return authorizationParameter.substring("Basic ".length());
+            }
         }
-
         return null;
 	}
 
