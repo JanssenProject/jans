@@ -377,7 +377,7 @@ paths:
       - developers
       summary: Update Site
       operationId: update-site
-      description: Updates site at oxd-server
+      description: Updates site at oxd-server. If something changes in a pre-registered client, you can use this API to update your client in the OP.
       consumes:
         - application/json
       produces:
