@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
@@ -64,28 +65,28 @@ public class Fido2GlobalBeans {
     }
 
     @Produces
-    @ApplicationScoped
+    @Singleton
     @Named("base64UrlEncoder")
     public Base64.Encoder getBase64UrlEncoder() {
         return Base64.getUrlEncoder().withoutPadding();
     }
 
     @Produces
-    @ApplicationScoped
+    @Singleton
     @Named("base64Encoder")
     public Base64.Encoder getBase64Encoder() {
         return Base64.getEncoder().withoutPadding();
     }
 
     @Produces
-    @ApplicationScoped
+    @Singleton
     @Named("base64UrlDecoder")
     public Base64.Decoder getBase64UrlDecoder() {
         return Base64.getUrlDecoder();
     }
 
     @Produces
-    @ApplicationScoped
+    @Singleton
     @Named("base64Decoder")
     public Base64.Decoder getBase64Decoder() {
         return Base64.getDecoder();
