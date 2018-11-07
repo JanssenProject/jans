@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -44,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 @Named
+@Stateless
 public class CertificateValidator {
 
     @Inject
