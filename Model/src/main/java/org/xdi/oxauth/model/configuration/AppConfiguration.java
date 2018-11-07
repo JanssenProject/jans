@@ -179,6 +179,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableU2fEndpoint = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration; 
+    private Fido2Configuration fido2Configuration;
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -1433,6 +1434,14 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthenticationProtectionConfiguration(AuthenticationProtectionConfiguration authenticationProtectionConfiguration) {
         this.authenticationProtectionConfiguration = authenticationProtectionConfiguration;
+    }
+
+    public Fido2Configuration getFido2Configuration() {
+        return fido2Configuration;
+    }
+
+    public void setFido2Configuration(Fido2Configuration fido2Configuration) {
+        this.fido2Configuration = fido2Configuration;
     }
 
 }
