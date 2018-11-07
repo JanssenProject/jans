@@ -20,13 +20,10 @@ public class ErrorResponse implements Serializable, IOpResponse {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorResponse.class);
 
     @JsonProperty(value = "error")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "error")
     private String error;
     @JsonProperty(value = "error_description")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "error_description")
     private String error_description;
     @JsonProperty(value = "details")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "details")
     private JsonNode details;
 
     public ErrorResponse() {
@@ -54,12 +51,13 @@ public class ErrorResponse implements Serializable, IOpResponse {
         this.error = error;
     }
 
+    @JsonProperty(value = "error_description")
     public String getErrorDescription() {
         return error_description;
     }
 
-    public void setErrorDescription(String errorDescription) {
-        this.error_description = errorDescription;
+    public void setErrorDescription(String error_description) {
+        this.error_description = error_description;
     }
 
     public JsonNode getDetails() {
