@@ -807,7 +807,7 @@ class Migration(object):
                 inum_l = inum.split('!0008!')
                 #custom clients has three quads
                 if inum_l[1].count('.') > 2:
-                    if entry['oxAuthGrantType'] and  not 'client_credentials' in entry['oxAuthGrantType']:
+                    if entry.get('oxAuthGrantType') and  not 'client_credentials' in entry['oxAuthGrantType']:
                         logging.debug('Adding client_credentials to oxAuthGrantType of client inum=%s', inum)
                         entry['oxAuthGrantType'].append('client_credentials')
 
