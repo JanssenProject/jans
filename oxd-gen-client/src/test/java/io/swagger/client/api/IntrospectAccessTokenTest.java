@@ -48,6 +48,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
      */
     @Parameters({"opHost", "redirectUrl"})
     @Test
+    @ProtectionAccessTokenRequired
     public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
         DevelopersApi client = Tester.api();
         RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
