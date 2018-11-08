@@ -27,9 +27,9 @@ public class GetLogoutUrlTest {
     @Parameters({"opHost", "redirectUrl", "postLogoutRedirectUrl"})
     @Test
     public void test(String opHost, String redirectUrl, String postLogoutRedirectUrl) throws Exception {
-        DevelopersApi client = api();
+        final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "", "", "");
 
         final GetLogoutUriParams params = new GetLogoutUriParams();
         params.setOxdId(site.getOxdId());
