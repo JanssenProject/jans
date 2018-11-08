@@ -29,7 +29,7 @@ public class GetLogoutUrlTest {
     public void test(String opHost, String redirectUrl, String postLogoutRedirectUrl) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "", "", "");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "" );
 
         final GetLogoutUriParams params = new GetLogoutUriParams();
         params.setOxdId(site.getOxdId());
