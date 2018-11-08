@@ -76,6 +76,11 @@
             <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
         </classes>
     </test>
+    <test name="Access Token as JWT Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.AccessTokenAsJwtTest"/>
+        </classes>
+    </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
