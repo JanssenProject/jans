@@ -206,5 +206,12 @@
         </classes>
     </test>
 
+    <test name="Access Token as JWT Test Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.AccessTokenAsJwtTest"/>
+        </classes>
+    </test>
+
+
 
 </suite>
