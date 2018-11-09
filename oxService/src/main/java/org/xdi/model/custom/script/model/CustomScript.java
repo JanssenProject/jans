@@ -40,7 +40,7 @@ public class CustomScript extends BaseEntry {
     private String inum;
 
     @LdapAttribute(name = "displayName")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Name should contain only letters, digits and underscores")
+    @Pattern(regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$", message = "Name should contain only letters, digits and underscores")
     @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
     private String name;
 
