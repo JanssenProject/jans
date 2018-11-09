@@ -1,1 +1,2 @@
 org.xdi.service.security.SecurityExtension
+org.xdi.service.exception.ExceptionHandlerExtension
