@@ -136,5 +136,5 @@ public interface ClientInterface {
     @Path("/get-rp")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    GetRpResponse getRp(@HeaderParam("Authorization") String authorization, GetRpParams params);
+    String getRp(@HeaderParam("Authorization") String authorization, GetRpParams params);
 }

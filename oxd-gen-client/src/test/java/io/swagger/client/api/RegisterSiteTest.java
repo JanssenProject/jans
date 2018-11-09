@@ -2,6 +2,7 @@ package io.swagger.client.api;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.swagger.client.ApiException;
 import io.swagger.client.model.RegisterSiteParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.UpdateSiteParams;
@@ -14,13 +15,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static io.swagger.client.api.Tester.*;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.Assert.*;
+
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Shoeb Khan
- * @version 07/26/2018
+ * @version 11/07/2018
  */
 
 @Test
@@ -28,13 +29,13 @@ public class RegisterSiteTest {
 
     private String oxdId = null;
 
-    @Parameters({"opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws Exception {
+    public void register(String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
 
         DevelopersApi client = api();
 
-        registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+        registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl, clientJwksUri, accessTokenSigningAlg);
 
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
@@ -43,7 +44,7 @@ public class RegisterSiteTest {
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrl));
-        params.setAcrValues(new ArrayList<String>());
+        params.setAcrValues(new ArrayList<>());
         params.setScope(Lists.newArrayList("openid", "profile"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
@@ -71,10 +72,10 @@ public class RegisterSiteTest {
     }
 
     public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl) throws Exception {
-        return registerSite(apiClient, opHost, redirectUrl, redirectUrl, "");
+        return registerSite(apiClient, opHost, redirectUrl, redirectUrl, "", "", "");
     }
 
-    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) throws Exception {
+    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
@@ -87,10 +88,40 @@ public class RegisterSiteTest {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
-
+        params.setClientJwksUri(clientJwksUri);
+        params.setAccessTokenSigningAlg(accessTokenSigningAlg);
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
     }
+
+    @Parameters({"opHost", "redirectUrl", "postLogoutRedirectUrl", "clientJwksUri"})
+    @Test
+    public void registerWithInvalidAlgorithm(String opHost, String redirectUrl, String postLogoutRedirectUrl, String clientJwksUri) {
+
+        final DevelopersApi client = api();
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(""));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setTrustedClient(true);
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setClientJwksUri(clientJwksUri);
+        params.setAccessTokenSigningAlg("blahBlah");
+
+        try {
+            client.registerSite(params);
+        } catch (ApiException ex) {
+            assertEquals(ex.getCode(), 400);  //BAD Request
+        }
+
+    }
+
 }
