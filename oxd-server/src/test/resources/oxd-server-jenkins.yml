@@ -45,7 +45,7 @@ logging:
   appenders:
     - type: console
     - type: file
-      threshold: INFO
+      threshold: TRACE
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
       currentLogFilename: oxd-server.log
       archivedLogFilenamePattern: oxd-server-%d{yyyy-MM-dd}-%i.log.gz

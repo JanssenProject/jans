@@ -57,7 +57,7 @@ public class GetTokensByCodeTest {
         notEmpty(refreshResponse.getRefreshToken());
     }
 
-    private GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String userId, String userSecret, String nonce) throws Exception {
+    private static GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String userId, String userSecret, String nonce) throws Exception {
 
         final String state = CoreUtils.secureRandomString();
 
