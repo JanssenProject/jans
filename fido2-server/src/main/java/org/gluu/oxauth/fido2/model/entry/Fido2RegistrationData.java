@@ -22,7 +22,6 @@ public class Fido2RegistrationData extends Fido2Data {
     private String username;
     private String domain;
     private String userId;
-
     private String challenge;
 
     private String w3cCredentialCreationOptions;
@@ -167,6 +166,4 @@ public class Fido2RegistrationData extends Fido2Data {
                 .append(attestationConveyancePreferenceType).append("]");
         return builder.toString();
     }
-
-
 }

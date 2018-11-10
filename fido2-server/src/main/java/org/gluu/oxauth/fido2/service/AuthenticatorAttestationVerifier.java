@@ -14,52 +14,51 @@
 package org.gluu.oxauth.fido2.service;
 
 import java.io.IOException;
-import java.util.Base64;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
-import org.gluu.oxauth.fido2.service.processors.AttestationProcessorFactory;
+import org.gluu.oxauth.fido2.service.processors.impl.AttestationProcessorFactory;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Named
+@ApplicationScoped
 public class AuthenticatorAttestationVerifier {
 
     @Inject
     private Logger log;
 
     @Inject
-    CommonVerifiers commonVerifiers;
+    private CommonVerifiers commonVerifiers;
 
     @Inject
-    AuthenticatorDataParser authenticatorDataParser;
+    private AuthenticatorDataParser authenticatorDataParser;
 
     @Inject
-    @Named("cborMapper")
-    ObjectMapper cborMapper;
+    private Base64Service base64Service;
 
     @Inject
-    @Named("base64UrlDecoder")
-    private Base64.Decoder base64UrlDecoder;
+    private DataMapperService dataMapperService;
 
     @Inject
-    AttestationProcessorFactory attestationProcessorFactory;
+    private AttestationProcessorFactory attestationProcessorFactory;
 
     public CredAndCounterData verifyAuthenticatorAttestationResponse(JsonNode response, Fido2RegistrationData credential) {
         JsonNode authenticatorResponse = response;
         String base64AuthenticatorData = authenticatorResponse.get("attestationObject").asText();
         String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
-        byte[] authenticatorDataBuffer = base64UrlDecoder.decode(base64AuthenticatorData);
+        byte[] authenticatorDataBuffer = base64Service.urlDecode(base64AuthenticatorData);
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         try {
             AuthData authData;
-            JsonNode authenticatorDataNode = cborMapper.readTree(authenticatorDataBuffer);
+            JsonNode authenticatorDataNode = dataMapperService.cborReadTree(authenticatorDataBuffer);
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode.get("fmt"));
             log.info("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
             credential.setAttestationType(fmt);
@@ -71,7 +70,7 @@ public class AuthenticatorAttestationVerifier {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
             commonVerifiers.verifyCounter(counter);
             credIdAndCounters.setCounters(counter);
-            byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64UrlDecoder.decode(clientDataJson));
+            byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
             return credIdAndCounters;
@@ -79,5 +78,4 @@ public class AuthenticatorAttestationVerifier {
             throw new Fido2RPRuntimeException("Problem with processing authenticator data");
         }
     }
-
 }

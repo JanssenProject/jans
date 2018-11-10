@@ -132,5 +132,4 @@ public class OfflineVerify {
         }
         process(args[0]);
     }
-
 }

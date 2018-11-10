@@ -14,21 +14,19 @@
 package org.gluu.oxauth.fido2.service;
 
 import java.security.SecureRandom;
-import java.util.Base64;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
-@Named
+@ApplicationScoped
 public class ChallengeGenerator {
 
     @Inject
-    @Named("base64UrlEncoder")
-    private Base64.Encoder base64UrlEncoder;
+    private Base64Service base64Service;
 
     public String getChallenge() {
         byte buffer[] = new byte[32];
         new SecureRandom().nextBytes(buffer);
-        return base64UrlEncoder.withoutPadding().encodeToString(buffer);
+        return base64Service.urlEncodeToStringWithoutPadding(buffer);
     }
 }

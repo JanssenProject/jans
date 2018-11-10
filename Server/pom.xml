@@ -242,12 +242,12 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
-<!--
+
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-fido2</artifactId>
 		</dependency>
--->
+
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-client</artifactId>
@@ -688,13 +688,12 @@
 				    <groupId>org.hibernate</groupId>
 				    <artifactId>hibernate-validator-cdi</artifactId>
 				</dependency>
-
 		        <dependency>
 		            <groupId>org.jboss.spec.javax.ejb</groupId>
 		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
 		            <scope>provided</scope>
 		        </dependency>
-
+ 
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
