@@ -14,16 +14,14 @@
 package org.gluu.oxauth.fido2.service.processors;
 
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
+import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.service.AuthData;
-import org.gluu.oxauth.fido2.service.CredAndCounterData;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface AttestationFormatProcessor {
     AttestationFormat getAttestationFormat();
 
-    void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
-            CredAndCounterData credIdAndCounters);
-
+    void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash, CredAndCounterData credIdAndCounters);
 }

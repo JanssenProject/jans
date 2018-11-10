@@ -30,7 +30,6 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -39,30 +38,28 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 
-@Named
-@Stateless
+@ApplicationScoped
 public class CertificateValidator {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64Encoder")
-    private Base64.Encoder base64Encoder;
+    private Base64Service base64Service;
 
-    void saveCertificate(X509Certificate certificate) throws IOException {
+    public void saveCertificate(X509Certificate certificate) throws IOException {
         FileUtils.writeStringToFile(new File("c:/tmp/cert-" + certificate.getSerialNumber() + ".crt"), certificate.toString());
     }
 
-    void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
-        final List<String> trustedSignatures = trustChainCertificates.stream().map(cert -> base64Encoder.encodeToString(cert.getSignature()))
+    public void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
+        final List<String> trustedSignatures = trustChainCertificates.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .collect(Collectors.toList());
-        List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Encoder.encodeToString(cert.getSignature()))
+        List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .filter(sig -> trustedSignatures.contains(sig)).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
             throw new Fido2RPRuntimeException("Root certificate in the attestation ");
@@ -76,7 +73,7 @@ public class CertificateValidator {
 
             if (trustAnchors.isEmpty()) {
                 log.warn("Empty list of trust managers");
-                return (X509Certificate) certs.get(0);
+                return certs.get(0);
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);

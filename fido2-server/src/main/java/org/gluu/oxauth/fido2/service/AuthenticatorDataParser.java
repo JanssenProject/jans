@@ -16,39 +16,36 @@ package org.gluu.oxauth.fido2.service;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Base64;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.codec.binary.Hex;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
-@Named
+@ApplicationScoped
 public class AuthenticatorDataParser {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64UrlDecoder")
-    private Base64.Decoder base64UrlDecoder;
+    private DataMapperService dataMapperService;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private Base64Service base64Service;
 
     @Inject
     private CommonVerifiers commonVerifiers;
 
-    AuthData parseAttestationData(String incomingAuthData) {
+    public AuthData parseAttestationData(String incomingAuthData) {
         return parseAuthData(incomingAuthData, true);
     }
 
@@ -61,9 +58,9 @@ public class AuthenticatorDataParser {
         byte[] buffer;
 
         if (isAttestation)
-            buffer = base64Decoder.decode(incomingAuthData.getBytes());
+            buffer = base64Service.decode(incomingAuthData.getBytes());
         else {
-            buffer = base64UrlDecoder.decode(incomingAuthData.getBytes());
+            buffer = base64Service.urlDecode(incomingAuthData.getBytes());
         }
         authData.setAuthDataDecoded(buffer);
         int offset = 0;
@@ -93,12 +90,11 @@ public class AuthenticatorDataParser {
 
             byte[] cosePublicKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
             log.info("cosePublicKey hex {}", Hex.encodeHexString(cosePublicKeyBuffer));
-            CBORFactory f = new CBORFactory();
 
             long keySize = 0;
             CBORParser parser = null;
             try {
-                parser = f.createParser(cosePublicKeyBuffer);
+                parser = dataMapperService.cborCreateParser(cosePublicKeyBuffer);
                 while (!parser.isClosed()) {
                     JsonToken t = parser.nextToken();
                     JsonLocation tocloc = parser.getTokenLocation();
@@ -119,11 +115,10 @@ public class AuthenticatorDataParser {
                 }
             }
             offset += keySize;
-            ObjectMapper mapper = new ObjectMapper(f);
 
             int keyType = -100;
             try {
-                JsonNode key = mapper.readTree(cosePublicKeyBuffer);
+                JsonNode key = dataMapperService.cborReadTree(cosePublicKeyBuffer);
                 keyType = key.get("3").asInt();
                 log.info("cosePublicKey {}", key);
             } catch (IOException e) {

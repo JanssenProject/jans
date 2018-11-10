@@ -13,9 +13,11 @@
 
 package org.gluu.oxauth.fido2.service;
 
-import javax.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
 
-@Named
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+
+@ApplicationScoped
 public class ChallengeVerifier {
 
     public boolean verifyChallenge(String challengeSent, String challengeReceived, String challengeInClientDataOrigin) {

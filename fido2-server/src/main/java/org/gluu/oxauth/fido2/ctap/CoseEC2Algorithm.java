@@ -48,5 +48,4 @@ public enum CoseEC2Algorithm {
     int getNumericValue() {
         return numericValue;
     }
-
 }

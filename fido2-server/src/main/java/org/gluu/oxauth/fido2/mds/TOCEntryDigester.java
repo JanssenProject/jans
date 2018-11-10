@@ -15,15 +15,18 @@ package org.gluu.oxauth.fido2.mds;
 
 import java.security.MessageDigest;
 
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
 public class TOCEntryDigester {
 
     private MessageDigest digester;
 
-    public synchronized MessageDigest getDigester() {
+    public MessageDigest getDigester() {
         return digester;
     }
 
-    public synchronized TOCEntryDigester setDigester(MessageDigest digester) {
+    public TOCEntryDigester setDigester(MessageDigest digester) {
         this.digester = digester;
         return this;
     }

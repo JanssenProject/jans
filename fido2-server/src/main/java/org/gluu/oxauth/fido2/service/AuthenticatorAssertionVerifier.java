@@ -13,28 +13,25 @@
 
 package org.gluu.oxauth.fido2.service;
 
-import java.util.Base64;
-
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.service.processors.AssertionFormatProcessor;
-import org.gluu.oxauth.fido2.service.processors.AssertionProcessorFactory;
+import org.gluu.oxauth.fido2.service.processors.impl.AssertionFormatProcessor;
+import org.gluu.oxauth.fido2.service.processors.impl.AssertionProcessorFactory;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@Named
+@ApplicationScoped
 public class AuthenticatorAssertionVerifier {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private Base64Service base64Service;
 
     @Inject
     private AssertionProcessorFactory assertionProcessorFactory;

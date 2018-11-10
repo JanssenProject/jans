@@ -116,5 +116,4 @@ public abstract class Fido2Data implements Serializable {
         return "Fido2Entity [createdDate=" + createdDate + ", updatedDate=" + updatedDate + ", createdBy=" + createdBy + ", updatedBy=" + updatedBy
                 + "]";
     }
-
 }

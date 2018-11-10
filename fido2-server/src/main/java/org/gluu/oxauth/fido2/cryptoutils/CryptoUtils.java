@@ -18,28 +18,27 @@ import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
-import org.gluu.oxauth.fido2.service.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
-@Named
+@ApplicationScoped
 public class CryptoUtils {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private Base64Service base64Service;
 
     public X509Certificate getCertificate(String x509certificate) {
-        return getCertificate(new ByteArrayInputStream(base64Decoder.decode(x509certificate)));
+        return getCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
 
     }
 
@@ -61,7 +60,7 @@ public class CryptoUtils {
 
         return certificatePath.parallelStream().map(x509certificate -> {
             try {
-                return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(base64Decoder.decode(x509certificate)));
+                return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
             } catch (CertificateException e) {
                 throw new Fido2RPRuntimeException(e.getMessage());
             }

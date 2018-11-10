@@ -25,6 +25,7 @@ import com.google.api.client.util.Key;
  * A statement returned by the Attestation API.
  */
 public class AttestationStatement extends JsonWebSignature.Payload {
+
     /**
      * Embedded nonce sent as part of the request.
      */

@@ -18,29 +18,29 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.codec.binary.Hex;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CommonVerifiers;
-import org.gluu.oxauth.fido2.service.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.DataMapperService;
+import org.gluu.oxauth.fido2.service.processors.impl.ResteasyClientFactory;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Named
+@ApplicationScoped
 public class MDSService {
 
     @Inject
@@ -50,22 +50,19 @@ public class MDSService {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    @Named("resteasyClient")
-    private ResteasyClient resteasyClient;
+    private MDSTOCHandler mDSTOCHandler;
 
     @Inject
-    @Named("tocEntries")
-    private Map<String, JsonNode> tocEntries;
+    private DataMapperService dataMapperService;
 
     @Inject
-    private ObjectMapper om;
+    private Base64Service base64Service;
 
     @Inject
     private TOCEntryDigester tocEntryDigester;
 
     @Inject
-    @Named("base64UrlDecoder")
-    private Base64.Decoder base64UrlDecoder;
+    private ResteasyClientFactory resteasyClientFactory;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -73,7 +70,7 @@ public class MDSService {
     public JsonNode fetchMetadata(byte[] aaguidBuffer) {
         String aaguid = deconvert(aaguidBuffer);
 
-        JsonNode tocEntry = tocEntries.get(aaguid);
+        JsonNode tocEntry = mDSTOCHandler.getAuthenticatorsMetadata(aaguid);
         if (tocEntry == null) {
             throw new Fido2RPRuntimeException("Authenticator not in TOC aaguid " + aaguid);
         }
@@ -91,6 +88,7 @@ public class MDSService {
 
         log.info("Reaching MDS at {}", metadataUrl.toString());
 
+        ResteasyClient resteasyClient = resteasyClientFactory.buildResteasyClient();
         Response response = resteasyClient.target(metadataUrl).request().header("Content-Type", MediaType.APPLICATION_JSON).get();
         String body = response.readEntity(String.class);
 
@@ -104,12 +102,12 @@ public class MDSService {
                 throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + deconvert(aaguidBuffer));
             }
             byte[] digest = tocEntryDigester.getDigester().digest(bodyBuffer);
-            if (!Arrays.equals(digest, base64UrlDecoder.decode(metadataHash))) {
+            if (!Arrays.equals(digest, base64Service.urlDecode(metadataHash))) {
                 throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + deconvert(aaguidBuffer));
             }
 
             try {
-                return om.readTree(base64UrlDecoder.decode(body));
+                return dataMapperService.readTree(base64Service.urlDecode(body));
             } catch (IOException e) {
                 log.warn("Can't parse payload from the server ");
                 throw new Fido2RPRuntimeException("Unable to parse payload from server for aaguid " + deconvert(aaguidBuffer));
@@ -129,18 +127,16 @@ public class MDSService {
             AuthenticatorStatus authenticatorStatus = AuthenticatorStatus.valueOf(statusReport.get("status").asText());
             String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
             log.info("Authenticator AAGUI {} status {} effective date {}", aaguid, authenticatorStatus, authenticatorEffectiveDate);
-            verifyStatusAcceptaable(aaguid, authenticatorStatus);
+            verifyStatusAcceptable(aaguid, authenticatorStatus);
         }
     }
-
-    ;
 
     private String deconvert(byte[] aaguidBuffer) {
         return Hex.encodeHexString(aaguidBuffer).replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)",
                 "$1-$2-$3-$4-$5");
     }
 
-    private void verifyStatusAcceptaable(String aaguid, AuthenticatorStatus status) {
+    private void verifyStatusAcceptable(String aaguid, AuthenticatorStatus status) {
         final List<AuthenticatorStatus> undesiredAuthenticatorStatus = Arrays
                 .asList(new AuthenticatorStatus[] { AuthenticatorStatus.USER_VERIFICATION_BYPASS, AuthenticatorStatus.ATTESTATION_KEY_COMPROMISE,
                         AuthenticatorStatus.USER_KEY_REMOTE_COMPROMISE, AuthenticatorStatus.USER_KEY_PHYSICAL_COMPROMISE,
@@ -150,5 +146,4 @@ public class MDSService {
         }
 
     }
-
 }

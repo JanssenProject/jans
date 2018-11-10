@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 
-import javax.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Enumerated;
@@ -31,7 +31,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
  * https://github.com/googlesamples/android-key-attestation/blob/master/server/src/main/java/com/android/example/KeyAttestationExample.java
  **/
 
-@Named
+@ApplicationScoped
 public class AndroidKeyUtils {
 
     public static final String KEY_DESCRIPTION_OID = "1.3.6.1.4.1.11129.2.1.17";
@@ -87,7 +87,7 @@ public class AndroidKeyUtils {
         }
     }
 
-    static int bigIntegerToInt(BigInteger bigInt) throws Exception {
+    public static int bigIntegerToInt(BigInteger bigInt) throws Exception {
         if (bigInt.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0 || bigInt.compareTo(BigInteger.ZERO) < 0) {
             throw new Exception("INTEGER out of bounds");
         }
