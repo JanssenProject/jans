@@ -31,14 +31,15 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     public Fido2RegistrationEntry(Fido2RegistrationData registrationData) {
         this.registrationData = registrationData;
         // TODO: Fix
-//        this.requestId = registrationData.getRequestId();
+        // this.requestId = registrationData.getRequestId();
     }
 
     public Fido2RegistrationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
             Fido2RegistrationData registrationData) {
         // TODO: Fix
 
-        //        super(dn, id, registrationData.getRequestId(), creationDate, sessionId, userInum);
+        // super(dn, id, registrationData.getRequestId(), creationDate, sessionId,
+        // userInum);
         this.registrationData = registrationData;
     }
 
@@ -56,5 +57,4 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         builder.append("Fido2RegistrationEntry [registrationData=").append(registrationData).append("]");
         return builder.toString();
     }
-
 }

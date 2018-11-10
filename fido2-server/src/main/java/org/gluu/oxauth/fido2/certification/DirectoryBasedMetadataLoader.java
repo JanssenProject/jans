@@ -24,20 +24,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Named;
 
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Named
+@ApplicationScoped
 public class DirectoryBasedMetadataLoader {
 
     @Inject
@@ -47,13 +47,23 @@ public class DirectoryBasedMetadataLoader {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private ObjectMapper om;
+    private DataMapperService dataMapperService;
 
-    @Inject
-    @Named("authenticatorsMetadata")
-    Map<String, JsonNode> authenticatorsMetadata;
+    private Map<String, JsonNode> authenticatorsMetadata;
 
-    Map<String, JsonNode> getAAGUIDMapOfMetadata() {
+    @PostConstruct
+    public void create() throws Exception {
+        this.authenticatorsMetadata = Collections.synchronizedMap(new HashMap());
+    }
+
+    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws Exception {
+        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
+
+        log.info("Populating metadata from {}", certificationServerMetadataFolder);
+        authenticatorsMetadata.putAll(getAAGUIDMapOfMetadata());
+    }
+
+    private Map<String, JsonNode> getAAGUIDMapOfMetadata() {
         Map<String, JsonNode> nodes = Collections.synchronizedMap(new HashMap<>());
 
         String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
@@ -72,7 +82,7 @@ public class DirectoryBasedMetadataLoader {
                 try {
                     log.info("Reading file {}", filePath);
                     BufferedReader reader = Files.newBufferedReader(filePath);
-                    JsonNode jsonNode = om.readTree(reader);
+                    JsonNode jsonNode = dataMapperService.readTree(reader);
                     if (jsonNode.hasNonNull("aaguid")) {
                         String aaguid = jsonNode.get("aaguid").asText();
                         String convertedAaguid = aaguid.replaceAll("-", "");
@@ -100,10 +110,11 @@ public class DirectoryBasedMetadataLoader {
         return nodes;
     }
 
-    public void run(@Observes @Initialized(ApplicationScoped.class) Object init) throws Exception {
-        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
+    public void registerAuthenticatorsMetadata(String aaguid, JsonNode metadata) {
+        this.authenticatorsMetadata.put(aaguid, metadata);
+    }
 
-        log.info("Populating metadata from {}", certificationServerMetadataFolder);
-        authenticatorsMetadata.putAll(getAAGUIDMapOfMetadata());
+    public JsonNode getAuthenticatorsMetadata(String aaguid) {
+        return authenticatorsMetadata.get(aaguid);
     }
 }

@@ -27,7 +27,6 @@ import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,31 +35,30 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
-import org.gluu.oxauth.fido2.service.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.api.client.util.Value;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 
-@Named
 @ApplicationScoped
 public class MDSTOCHandler {
 
@@ -68,11 +66,7 @@ public class MDSTOCHandler {
     private Logger log;
 
     @Inject
-    private ObjectMapper om;
-
-    @Inject
-    @Named("tocEntries")
-    private Map<String, JsonNode> tocEntries;
+    private DataMapperService dataMapperService;
 
     @Inject
     private TOCEntryDigester tocEntryDigester;
@@ -84,11 +78,17 @@ public class MDSTOCHandler {
     private CryptoUtils cryptoUtils;
 
     @Inject
-    @Named("base64Encoder")
-    private Base64.Encoder base64Encoder;
+    private Base64Service base64Service;
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    private Map<String, JsonNode> tocEntries;
+
+    @PostConstruct
+    public void create() throws Exception {
+        this.tocEntries = Collections.synchronizedMap(new HashMap());
+    }
 
     public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws Exception {
         tocEntries.putAll(parseTOCs());
@@ -97,7 +97,8 @@ public class MDSTOCHandler {
     private Map<String, JsonNode> parseTOCs() {
         String mdsTocRootFileLocation = appConfiguration.getFido2Configuration().getMdsTocRootFileLocation();
         String mdsTocFilesFolder = appConfiguration.getFido2Configuration().getMdsTocFilesFolder();
-//        String mdsTocFileLocation = appConfiguration.getFido2Configuration().getMdsTocFileLocation();
+        // String mdsTocFileLocation =
+        // appConfiguration.getFido2Configuration().getMdsTocFileLocation();
         if (StringHelper.isEmpty(mdsTocRootFileLocation) || StringHelper.isEmpty(mdsTocFilesFolder)) {
             log.warn("Fido2 MDS properties should be set");
             return new HashMap<String, JsonNode>();
@@ -152,7 +153,7 @@ public class MDSTOCHandler {
             reader = Files.newBufferedReader(path);
             JWSObject jwsObject = JWSObject.parse(reader.readLine());
 
-            List<String> certificateChain = jwsObject.getHeader().getX509CertChain().stream().map(c -> base64Encoder.encodeToString(c.decode()))
+            List<String> certificateChain = jwsObject.getHeader().getX509CertChain().stream().map(c -> base64Service.encodeToString(c.decode()))
                     .collect(Collectors.toList());
             JWSAlgorithm algorithm = jwsObject.getHeader().getAlgorithm();
 
@@ -171,7 +172,7 @@ public class MDSTOCHandler {
             }
             tocEntryDigester.setDigester(resolveDigester(algorithm));
             String jwtPayload = jwsObject.getPayload().toString();
-            JsonNode toc = om.readTree(jwtPayload);
+            JsonNode toc = dataMapperService.readTree(jwtPayload);
             log.info("Legal header {}", toc.get("legalHeader"));
             ArrayNode entries = (ArrayNode) toc.get("entries");
             int numberOfEntries = toc.get("no").asInt();
@@ -263,4 +264,7 @@ public class MDSTOCHandler {
         return date;
     }
 
+    public JsonNode getAuthenticatorsMetadata(String aaguid) {
+        return tocEntries.get(aaguid);
+    }
 }
