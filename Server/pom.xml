@@ -242,12 +242,12 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
-
+<!--
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-fido2</artifactId>
 		</dependency>
-
+ -->
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-client</artifactId>
