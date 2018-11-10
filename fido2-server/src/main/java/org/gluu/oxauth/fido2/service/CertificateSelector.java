@@ -23,16 +23,16 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
+import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
-import com.google.api.client.util.Value;
-
-@Named
+@ApplicationScoped
 public class CertificateSelector {
 
     @Inject
@@ -42,7 +42,7 @@ public class CertificateSelector {
     private AppConfiguration appConfiguration;
 
     @Inject
-    Provider provider;
+    private CryptoUtilsBouncyCastle cryptoUtilsBouncyCastle;
 
     public List<X509Certificate> selectRootCertificate(X509Certificate certificate) {
         ArrayList<X509Certificate> certs = new ArrayList<>();
@@ -52,6 +52,8 @@ public class CertificateSelector {
             log.warn("Fido2 folder with certificates is not specified");
             return certs;
         }
+
+        Provider provider = cryptoUtilsBouncyCastle.getBouncyCastleProvider();
 
         try {
             switch (certificate.getIssuerDN().getName()) {
@@ -81,5 +83,4 @@ public class CertificateSelector {
         return certs;
 
     }
-
 }

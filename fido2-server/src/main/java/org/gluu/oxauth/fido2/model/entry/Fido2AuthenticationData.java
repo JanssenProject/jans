@@ -18,19 +18,13 @@ public class Fido2AuthenticationData extends Fido2Data {
     private static final long serialVersionUID = 1382804326976802044L;
 
     private String id;
-
     private String registrationId;
-
     private String username;
-
     private String domain;
-
     private String userId;
-
     private String challenge;
 
     private String w3cCredentialRequestOptions;
-
     private String w3cAuthenticatorAssertionResponse;
 
     private String userVerificationOption;
@@ -106,5 +100,4 @@ public class Fido2AuthenticationData extends Fido2Data {
     public void setUserVerificationOption(String userVerificationOption) {
         this.userVerificationOption = userVerificationOption;
     }
-
 }

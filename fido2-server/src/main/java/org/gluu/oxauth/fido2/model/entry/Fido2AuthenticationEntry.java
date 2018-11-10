@@ -31,13 +31,14 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     public Fido2AuthenticationEntry(Fido2AuthenticationData authenticationData) {
         this.authenticationData = authenticationData;
         // TODO: Fix
-//        this.requestId = authenticationData.getRequestId();
+        // this.requestId = authenticationData.getRequestId();
     }
 
     public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
             Fido2AuthenticationData authenticationData) {
         // TODO: Fix
-//        super(dn, id, authenticationData.getRequestId(), creationDate, sessionId, userInum);
+        // super(dn, id, authenticationData.getRequestId(), creationDate, sessionId,
+        // userInum);
         this.authenticationData = authenticationData;
     }
 
@@ -55,5 +56,4 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
         builder.append("Fido2AuthenticationEntry [authenticationData=").append(authenticationData).append("]");
         return builder.toString();
     }
-
 }
