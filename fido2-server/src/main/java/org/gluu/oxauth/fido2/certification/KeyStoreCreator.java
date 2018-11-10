@@ -20,24 +20,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
-@Named
+@ApplicationScoped
 public class KeyStoreCreator {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64Encoder")
-    private Base64.Encoder base64Encoder;
+    private Base64Service base64Service;
 
     public KeyStore createKeyStore(List<CertificateHolder> certificates) {
         byte[] password = new byte[200];
@@ -45,13 +44,13 @@ public class KeyStoreCreator {
 
         try {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null, base64Encoder.encodeToString(password).toCharArray());
+            ks.load(null, base64Service.encodeToString(password).toCharArray());
 
             certificates.stream().forEach(ch -> {
                 try {
-                    ks.setCertificateEntry(ch.alias, ch.cert);
+                    ks.setCertificateEntry(ch.getAlias(), ch.getCert());
                 } catch (KeyStoreException e) {
-                    log.warn("Can't load certificate {} {}", ch.alias, e.getMessage());
+                    log.warn("Can't load certificate {} {}", ch.getAlias(), e.getMessage());
                 }
             });
             return ks;
@@ -66,7 +65,7 @@ public class KeyStoreCreator {
 
         try {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null, base64Encoder.encodeToString(password).toCharArray());
+            ks.load(null, base64Service.encodeToString(password).toCharArray());
 
             AtomicInteger counter = new AtomicInteger(0);
 
@@ -83,5 +82,4 @@ public class KeyStoreCreator {
             throw new RuntimeException(e);
         }
     }
-
 }

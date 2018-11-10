@@ -28,24 +28,25 @@ import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
 import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Named
+@ApplicationScoped
 public class CommonVerifiers {
 
     private static final int FLAG_USER_PRESENT = 0x01;
@@ -57,26 +58,16 @@ public class CommonVerifiers {
     private Logger log;
 
     @Inject
-    @Named("base64UrlDecoder")
-    private Base64.Decoder base64UrlDecoder;
+    private Base64Service base64Service;
 
     @Inject
-    @Named("base64UrlEncoder")
-    private Base64.Encoder base64UrlEncoder;
+    private DataMapperService dataMapperService;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private CryptoUtilsBouncyCastle cryptoUtilsBouncyCastle;
 
     @Inject
-    @Named("cborMapper")
-    private ObjectMapper cborMapper;
-
-    @Inject
-    private Provider provider;
-
-    @Inject
-    private List<AttestationFormatProcessor> supportedAttestationFormats;
+    private Instance<AttestationFormatProcessor> supportedAttestationFormats;
 
     public void verifyU2FAttestationSignature(AuthData authData, byte[] clientDataHash, String signature, Certificate certificate,
             int signatureAlgorithm) {
@@ -93,7 +84,7 @@ public class CommonVerifiers {
         bufferSize += publicKey.length;
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(reserved).put(rpIdHash).put(clientDataHash).put(credId).put(publicKey).array();
-        byte[] signatureBytes = base64Decoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.decode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         verifySignature(signatureBytes, signatureBase, certificate, signatureAlgorithm);
@@ -113,7 +104,7 @@ public class CommonVerifiers {
 
         bufferSize += clientDataHash.length;
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHashBuffer).put(flagsBuffer).put(countersBuffer).put(clientDataHash).array();
-        byte[] signatureBytes = base64Decoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.decode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         log.info("Signature BaseLen {}", signatureBase.length);
@@ -126,7 +117,7 @@ public class CommonVerifiers {
         bufferSize += authData.length;
         bufferSize += clientDataHash.length;
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(authData).put(clientDataHash).array();
-        byte[] signatureBytes = base64Decoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.decode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         log.info("Signature BaseLen {}", signatureBase.length);
@@ -149,7 +140,7 @@ public class CommonVerifiers {
         bufferSize += clientDataHash.length;
         log.info("Client data hash HEX {}", Hex.encodeHexString(clientDataHash));
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHash).put(flags).put(counters).put(clientDataHash).array();
-        byte[] signatureBytes = base64UrlDecoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.urlDecode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         verifySignature(signatureBytes, signatureBase, publicKey, signatureAlgorithm);
@@ -197,9 +188,9 @@ public class CommonVerifiers {
 
     private byte[] convertCOSEtoPublicKey(byte[] cosePublicKey) {
         try {
-            JsonNode cborPublicKey = cborMapper.readTree(cosePublicKey);
-            byte[] x = base64Decoder.decode(cborPublicKey.get("-2").asText());
-            byte[] y = base64Decoder.decode(cborPublicKey.get("-3").asText());
+            JsonNode cborPublicKey = dataMapperService.cborReadTree(cosePublicKey);
+            byte[] x = base64Service.decode(cborPublicKey.get("-2").asText());
+            byte[] y = base64Service.decode(cborPublicKey.get("-3").asText());
             byte[] keyBytes = ByteBuffer.allocate(1 + x.length + y.length).put((byte) 0x04).put(x).put(y).array();
             log.info("KeyBytes HEX {}", Hex.encodeHexString(keyBytes));
             return keyBytes;
@@ -227,6 +218,7 @@ public class CommonVerifiers {
     }
 
     private Signature getSignatureChecker(int signatureAlgorithm) {
+        Provider provider = cryptoUtilsBouncyCastle.getBouncyCastleProvider();
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {
@@ -334,7 +326,7 @@ public class CommonVerifiers {
     public String verifyBase64UrlString(JsonNode node) {
         String value = verifyThatString(node);
         try {
-            base64UrlDecoder.decode(value.getBytes("UTF-8"));
+            base64Service.urlDecode(value.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new Fido2RPRuntimeException("Invalid id");
         } catch (IllegalArgumentException e) {
@@ -424,7 +416,7 @@ public class CommonVerifiers {
             throw new Fido2RPRuntimeException("Invalid data");
         }
         try {
-            base64Decoder.decode(value.getBytes("UTF-8"));
+            base64Service.decode(value.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new Fido2RPRuntimeException("Invalid data");
         } catch (IllegalArgumentException e) {
@@ -441,7 +433,7 @@ public class CommonVerifiers {
         bufferSize += authData.length;
         bufferSize += clientDataHash.length;
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(authData).put(clientDataHash).array();
-        byte[] signatureBytes = base64Decoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.decode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         log.info("Signature BaseLen {}", signatureBase.length);
@@ -532,7 +524,7 @@ public class CommonVerifiers {
         bufferSize += clientDataHash.length;
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(authDataBuffer).put(clientDataHash).array();
-        byte[] signatureBytes = base64Decoder.decode(signature.getBytes());
+        byte[] signatureBytes = base64Service.decode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         verifySignature(signatureBytes, signatureBase, certificate, signatureAlgorithm);
@@ -592,5 +584,4 @@ public class CommonVerifiers {
             throw new Fido2RPRuntimeException("Invalid parameters in metadata");
         }
     }
-
 }

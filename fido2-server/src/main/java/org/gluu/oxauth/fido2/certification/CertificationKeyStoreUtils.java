@@ -18,14 +18,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -33,44 +31,35 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.mds.MDSService;
-import org.gluu.oxauth.fido2.service.AuthData;
+import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.service.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-@Named
+@ApplicationScoped
 public class CertificationKeyStoreUtils {
 
     @Inject
     private Logger log;
 
     @Inject
-    KeyStoreCreator keyStoreCreator;
+    private KeyStoreCreator keyStoreCreator;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private CryptoUtils cryptoUtils;
 
     @Inject
-    CryptoUtils cryptoUtils;
+    private CommonVerifiers commonVerifiers;
 
     @Inject
-    CommonVerifiers commonVerifiers;
+    private MDSService mdsService;
 
     @Inject
-    ObjectMapper mapper;
+    private DirectoryBasedMetadataLoader directoryBasedMetadataLoader;
 
-    @Inject
-    MDSService mdsService;
-
-    @Inject
-    @Named("authenticatorsMetadata")
-    Map<String, JsonNode> authenticatorsMetadata;
-
-    List<X509Certificate> getCertificates(JsonNode metadataNode) {
+    private List<X509Certificate> getCertificates(JsonNode metadataNode) {
 
         if (metadataNode == null || !metadataNode.has("attestationRootCertificates")) {
             return Collections.emptyList();
@@ -88,14 +77,13 @@ public class CertificationKeyStoreUtils {
 
     public List<X509Certificate> getCertificates(AuthData authData) {
         String aaguid = Hex.encodeHexString(authData.getAaguid());
-        Map<String, JsonNode> aaguidMapOfMetadata = authenticatorsMetadata;
 
-        JsonNode metadataForAuthenticator = aaguidMapOfMetadata.get(aaguid);
+        JsonNode metadataForAuthenticator = directoryBasedMetadataLoader.getAuthenticatorsMetadata(aaguid);
         if (metadataForAuthenticator == null) {
             log.info("No metadata for authenticator {}. Attempting to contact MDS", aaguid);
             JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
             commonVerifiers.verifyThatMetadataIsValid(metadata);
-            authenticatorsMetadata.put(aaguid, metadata);
+            directoryBasedMetadataLoader.registerAuthenticatorsMetadata(aaguid, metadata);
             metadataForAuthenticator = metadata;
         }
         return getCertificates(metadataForAuthenticator);

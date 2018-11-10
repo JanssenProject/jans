@@ -18,30 +18,38 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
-import org.gluu.oxauth.fido2.service.Fido2RPRuntimeException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
-@Named
+@ApplicationScoped
 public class CryptoUtilsBouncyCastle {
 
     @Inject
     private Logger log;
 
     @Inject
-    @Named("base64Decoder")
-    private Base64.Decoder base64Decoder;
+    private Base64Service base64Service;
+
+    private BouncyCastleProvider bouncyCastleProvider;
+
+    @PostConstruct
+    public void init() {
+        this.bouncyCastleProvider = new BouncyCastleProvider();
+    }
 
     public X509Certificate getCertificate(String x5c) {
         try {
-            return (X509Certificate) new CertificateFactory().engineGenerateCertificate(new ByteArrayInputStream(base64Decoder.decode(x5c)));
+            return (X509Certificate) new CertificateFactory().engineGenerateCertificate(new ByteArrayInputStream(base64Service.decode(x5c)));
         } catch (CertificateException e) {
             throw new Fido2RPRuntimeException(e.getMessage());
         }
@@ -58,6 +66,10 @@ public class CryptoUtilsBouncyCastle {
                 throw new Fido2RPRuntimeException("Certificate not valid ");
             }
         }).collect(Collectors.toList());
-
     }
+
+    public BouncyCastleProvider getBouncyCastleProvider() {
+        return bouncyCastleProvider;
+    }
+
 }

@@ -16,12 +16,13 @@ package org.gluu.oxauth.fido2.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 
-@Named
+@ApplicationScoped
 public class DomainVerifier {
 
     @Inject

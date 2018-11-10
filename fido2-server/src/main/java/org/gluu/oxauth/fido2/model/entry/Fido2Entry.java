@@ -14,7 +14,7 @@ import org.xdi.ldap.model.BaseEntry;
  * @version 11/02/2018
  */
 @LdapEntry(sortBy = "creationDate")
-@LdapObjectClass(values = {"top", "oxU2fRequest"})
+@LdapObjectClass(values = { "top", "oxFido2fRequest" })
 public class Fido2Entry extends BaseEntry {
 
     @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
@@ -87,5 +87,4 @@ public class Fido2Entry extends BaseEntry {
     public void setUserInum(String userInum) {
         this.userInum = userInum;
     }
-
 }
