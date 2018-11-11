@@ -166,7 +166,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 			</div>
 		</div>
 		<div class="bs-docs-section"
-			style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top:1px !important; "></div>
+			style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top: 1px !important;"></div>
 		<!--         </nav> -->
 
 		<!--Header End-->
@@ -206,11 +206,19 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 											</div>
 										</div>
+										<div class="row form-group">
+											<h:outputLabel styleClass="col-sm-3 control-label"
+												for="rememberme" value="#{msgs['login.rememberMe']}" />
+											<div class="col-sm-6">
+												<input type="checkbox" value="rememberme" id="rememberme" />
+											</div>
+										</div>
 
 										<div class="row form-group">
 											<div id="submit_block" class="col-md-offset-3 col-md-3">
 												<h:commandButton id="loginButton"
 													value="#{msgs['login.login']}"
+													onclick="checkRemembeMe()"
 													action="#{authenticator.authenticate}"
 													class="btn btn-login" />
 											</div>
@@ -389,6 +397,16 @@ input[type="text"]:focus, input[type="password"]:focus {
 						}
 
 					});
+			
+			function checkRemembeMe() {
+                if ($('#rememberme').is(':checked')) {
+                    localStorage.usrname = document.getElementById("loginForm:username").value;
+                    localStorage.chkbx = $('#rememberme').val();
+                } else {
+                    localStorage.usrname = '';
+                    localStorage.chkbx = '';
+                }
+			}
 		</script>
 
 	</ui:define>
