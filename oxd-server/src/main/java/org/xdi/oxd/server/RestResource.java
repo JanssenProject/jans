@@ -191,6 +191,15 @@ public class RestResource {
         return process(CommandType.GET_RP, params, GetRpParams.class, authorization);
     }
 
+    @POST
+    @Path("/get-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getJwks(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization);
+    }
+
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return CoreUtils.createJsonMapper().readValue(params, clazz);
