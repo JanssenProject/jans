@@ -42,7 +42,8 @@ public enum CommandType {
     AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
     IMPLICIT_FLOW("implicit_flow"),
     GET_CLIENT_TOKEN("get_client_token"),
-    GET_RP("get_rp");
+    GET_RP("get_rp"),
+    GET_JWKS("get_jwks");
 
     private final String value;
 
