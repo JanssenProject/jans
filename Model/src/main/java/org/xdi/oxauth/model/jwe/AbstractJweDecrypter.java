@@ -44,7 +44,7 @@ public abstract class AbstractJweDecrypter implements JweDecrypter {
         this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
     }
 
-    @Override
+    /*@Override
     public Jwe decrypt(String encryptedJwe) throws InvalidJweException {
         try {
             if (StringUtils.isBlank(encryptedJwe)) {
@@ -91,7 +91,7 @@ public abstract class AbstractJweDecrypter implements JweDecrypter {
         } catch (UnsupportedEncodingException e) {
             throw new InvalidJweException(e);
         }
-    }
+    }*/
 
     public abstract byte[] decryptEncryptionKey(String encodedEncryptedKey) throws InvalidJweException;
 
