@@ -131,6 +131,12 @@
             <class name="org.xdi.oxd.server.IntrospectAccessTokenTest"/>
         </classes>
     </test>
+    <test name="JWKS Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.GetJwksTest"/>
+        </classes>
+    </test>
+
 
     <!-- SWAGGER TESTS -->
 
@@ -209,6 +215,12 @@
     <test name="Access Token as JWT Test Swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.AccessTokenAsJwtTest"/>
+        </classes>
+    </test>
+
+    <test name="JWKS Test Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetJwksTest"/>
         </classes>
     </test>
 
