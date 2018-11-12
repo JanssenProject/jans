@@ -39,7 +39,7 @@ public abstract class AbstractJweEncrypter implements JweEncrypter {
         return blockEncryptionAlgorithm;
     }
 
-    @Override
+    /*@Override
     public Jwe encrypt(Jwe jwe) throws InvalidJweException {
         try {
             jwe.setEncodedHeader(jwe.getHeader().toBase64JsonObject());
@@ -68,7 +68,7 @@ public abstract class AbstractJweEncrypter implements JweEncrypter {
         } catch (UnsupportedEncodingException e) {
             throw new InvalidJweException(e);
         }
-    }
+    }*/
 
     public abstract String generateEncryptedKey(byte[] contentMasterKey) throws InvalidJweException;
 
