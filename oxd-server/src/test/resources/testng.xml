@@ -131,6 +131,12 @@
             <class name="org.xdi.oxd.server.IntrospectAccessTokenTest"/>
         </classes>
     </test>
+    <test name="JWKS Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.GetJwksTest"/>
+        </classes>
+    </test>
+
 
     <!-- SWAGGER TESTS -->
 
@@ -212,6 +218,17 @@
         </classes>
     </test>
 
+    <test name="JWKS Test Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetJwksTest"/>
+        </classes>
+    </test>
+
+    <test name="RP - Get Claims-Gathering Url Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
 
 
 </suite>
