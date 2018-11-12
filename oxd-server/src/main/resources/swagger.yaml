@@ -1207,6 +1207,50 @@ paths:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+  /get-jwks:
+    post:
+      tags:
+      - developers
+      summary: Get JSON Web Key Set
+      operationId: get-json-web-key-set
+      description: Get JSON Web Key Set
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: header
+        name: Authorization
+        type: string
+      - in: body
+        name: GetJwksParams
+        schema:
+          type: object
+          required:
+          - op_host
+          properties:
+            op_host:
+              type: string
+              example: https://<ophostname>
+            op_discovery_path:
+              type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            title: GetJwksResponse
+            required:
+            - jwks
+            properties:
+              jwks:
+                type: string
+        400:
+          description: Invalid parameters are provided to endpoint.
+        403:
+          description: Forbidden. Invalid access token provided in Authorization header.
+        500:
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
 
 definitions:
   # List of reusable properties
