@@ -6,6 +6,13 @@
 
 package org.xdi.oxauth.model.jwe;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWEDecrypter;
+import com.nimbusds.jose.crypto.RSADecrypter;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.EncryptedJWT;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -14,22 +21,36 @@ import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.jose4j.jwa.AlgorithmConstraints;
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
+import org.jose4j.lang.JoseException;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.exception.InvalidParameterException;
+import org.xdi.oxauth.model.jwt.JwtClaims;
+import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.*;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
+import java.text.ParseException;
 import java.util.Arrays;
 
 /**
@@ -54,6 +75,69 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
     public JweDecrypterImpl(PrivateKey privateKey) {
         this.privateKey = privateKey;
+    }
+
+    @Override
+    public Jwe decrypt(String encryptedJwe) throws InvalidJweException {
+        try {
+            String[] jweParts = encryptedJwe.split("\\.");
+            if (jweParts.length != 5) {
+                throw new InvalidJwtException("Invalid JWS format.");
+            }
+
+            String encodedHeader = jweParts[0];
+            String encodedEncryptedKey = jweParts[1];
+            String encodedInitializationVector = jweParts[2];
+            String encodedCipherText = jweParts[3];
+            String encodedIntegrityValue = jweParts[4];
+
+            Jwe jwe = new Jwe();
+            jwe.setEncodedHeader(encodedHeader);
+            jwe.setEncodedEncryptedKey(encodedEncryptedKey);
+            jwe.setEncodedInitializationVector(encodedInitializationVector);
+            jwe.setEncodedCiphertext(encodedCipherText);
+            jwe.setEncodedIntegrityValue(encodedIntegrityValue);
+            jwe.setHeader(new JwtHeader(encodedHeader));
+
+            // jose4j
+
+            JsonWebEncryption receiverJwe = new JsonWebEncryption();
+
+            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
+            receiverJwe.setAlgorithmConstraints(algConstraints);
+            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM);
+            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
+
+            receiverJwe.setKey(privateKey);
+
+            receiverJwe.setCompactSerialization(encryptedJwe);
+            String payload = new String(receiverJwe.getPlaintextBytes());
+            jwe.setClaims(new JwtClaims(payload));
+
+            // joseJwt
+
+            /*EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
+
+            JWEDecrypter decrypter = new RSADecrypter(privateKey);
+            decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+
+            encryptedJwt.decrypt(decrypter);
+
+            String payload = encryptedJwt.getPayload().toString();
+            jwe.setClaims(new JwtClaims(payload));*/
+
+            return jwe;
+        } /*catch (ParseException e) {
+            throw new InvalidJweException(e);
+        } catch (JOSEException e) {
+            throw new InvalidJweException(e);
+        } catch (InvalidJwtException e) {
+            throw new InvalidJweException(e);
+        } catch (JoseException e) {
+            throw new InvalidJweException(e);
+        }*/ catch (Exception e) {
+            throw new InvalidJweException(e);
+        }
     }
 
     @Override
@@ -149,6 +233,52 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
         try {
             if (getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A128GCM
                     || getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A256GCM) {
+                /*final SecretKey aesKey = new SecretKeySpec(contentMasterKey, "AES");
+
+                final Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+                GCMParameterSpec gcmSpec = new GCMParameterSpec(128, initializationVector);
+                cipher.init(Cipher.DECRYPT_MODE, aesKey, gcmSpec);
+
+                cipher.updateAAD(additionalAuthenticatedData);
+
+                byte[] cipherText = Base64Util.base64urldecode(encodedCipherText);
+                //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                //baos.write(cipherText);
+                //baos.write(authenticationTag);
+
+                //byte[] plainTextBytes = cipher.doFinal(baos.toByteArray());
+
+                cipher.update(cipherText);
+                byte[] plainTextBytes = cipher.doFinal(authenticationTag);
+
+                String plainText = new String(plainTextBytes, Charset.forName(Util.UTF8_STRING_ENCODING));
+
+                return plainText;*/
+
+                /*byte[] cipherText = Base64Util.base64urldecode(encodedCipherText);
+                ByteBuffer byteBuffer = ByteBuffer.wrap(cipherText);
+                int ivLength = byteBuffer.getInt();
+                if(ivLength < 12 || ivLength >= 16) { // check input parameter
+                    throw new IllegalArgumentException("invalid iv length");
+                }
+                byte[] iv = new byte[ivLength];
+                byteBuffer.get(iv);
+                byte[] cipherMessage = new byte[byteBuffer.remaining()];
+                byteBuffer.get(cipherMessage);
+
+                final Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+                cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(contentMasterKey, "AES"), new GCMParameterSpec(128, iv));
+                if (additionalAuthenticatedData != null) {
+                    cipher.updateAAD(additionalAuthenticatedData);
+                }
+                byte[] plainTextBytes = cipher.doFinal(cipherMessage);
+
+                String plainText = new String(plainTextBytes, Charset.forName(Util.UTF8_STRING_ENCODING));
+
+                return plainText;*/
+
+
                 final int MAC_SIZE_BITS = 128;
                 byte[] cipherText = Base64Util.base64urldecode(encodedCipherText);
 
@@ -219,6 +349,8 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             throw new InvalidJweException(e);
         } catch (InvalidParameterException e) {
             throw new InvalidJweException(e);
-        }
+        } /*catch (IOException e) {
+            throw new InvalidJweException(e);
+        }*/
     }
 }
