@@ -6,13 +6,16 @@ package org.xdi.oxd.server.op;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.client.JwkClient;
 import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetJwksParams;
 import org.xdi.oxd.common.response.GetJwksResponse;
 import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.DiscoveryService;
 
 /**
@@ -29,6 +32,11 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
     @Override
     public IOpResponse execute(GetJwksParams params) {
+
+        if (StringUtils.isEmpty(params.getOpHost())) {
+            throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
+        }
+
         try {
 
             final DiscoveryService discoveryService = getDiscoveryService();
