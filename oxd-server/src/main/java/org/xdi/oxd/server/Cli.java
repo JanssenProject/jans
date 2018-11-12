@@ -17,8 +17,10 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.client.OxdClient;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetRpParams;
 import org.xdi.oxd.common.params.RemoveSiteParams;
 import org.xdi.oxd.common.response.GetRpResponse;
@@ -44,7 +46,7 @@ public class Cli {
     public static void main(String[] args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
-        String oxdId = null;
+        String oxdId;
         switchOffLogging();
         try {
             cmd = parser.parse(options(), args);
@@ -138,6 +140,9 @@ public class Cli {
         for (Logger logger : loggers) {
             logger.setLevel(Level.OFF);
         }
+
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        root.setLevel(ch.qos.logback.classic.Level.OFF);
     }
 
     private static Pair<Integer, Boolean> getPort(OxdServerConfiguration conf) {
@@ -174,14 +179,27 @@ public class Cli {
         }
 
         final String protocol = port.getSecond() ? "https" : "http";
-        final ClientInterface client = OxdClient.newClient(protocol + "://localhost:" + port.getFirst());
-        String authorization = ""; // todo get authorization here
         try {
+            final ClientInterface client = OxdClient.newTrustAllClient(protocol + "://localhost:" + port.getFirst());
+            String authorization = "";
+
+            if (cmd.hasOption("a")) {
+                authorization = cmd.getOptionValue("a");
+            }
+
+            if (StringUtils.isBlank(authorization)) {
+                System.out.println("Failed to connect to running oxd. There are two ways to proceed: \n" +
+                        " - 1) stop oxd and then run command again. Then script can connect to database directly. If oxd is running it has exclusive lock on database, so script is not able to connect to database directly\n" +
+                        " - 2) provide authorization access_token (same that is provided in Authorization header in oxd API) via -a parameter (e.g. lsox.sh -a xxxx-xxxx-xxxx-xxxx -l), so script can connect to running oxd");
+                return;
+            }
+
             if (cmd.hasOption("l")) {
                 GetRpParams params = new GetRpParams();
                 params.setList(true);
 
-                GetRpResponse resp = client.getRp(authorization, params);
+                String respString = client.getRp(authorization, params);
+                GetRpResponse resp = CoreUtils.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp == null) {
                     System.out.println("Failed to fetch entries from database. Please check oxd-server.log file for details.");
                     return;
@@ -210,7 +228,8 @@ public class Cli {
             if (cmd.hasOption("oxd_id")) {
                 final String oxdId = cmd.getOptionValue("oxd_id");
 
-                GetRpResponse resp = client.getRp(authorization, new GetRpParams(oxdId));
+                String respString = client.getRp(authorization, new GetRpParams(oxdId));
+                GetRpResponse resp = CoreUtils.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp != null) {
                     print(oxdId, resp.getNode());
                 } else {
@@ -267,6 +286,10 @@ public class Cli {
         Option configOption = new Option("c", "config", true, "path to yml configuration file");
         configOption.setRequired(true);
         options.addOption(configOption);
+
+        Option authorizationOption = new Option("a", "authorization", true, "authorization access_token used to connect to running oxd");
+        authorizationOption.setRequired(false);
+        options.addOption(authorizationOption);
 
         return options;
     }
