@@ -103,10 +103,10 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             JsonWebEncryption receiverJwe = new JsonWebEncryption();
 
-            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
-            receiverJwe.setAlgorithmConstraints(algConstraints);
-            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "RSA1_5");
-            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
+//            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
+//            receiverJwe.setAlgorithmConstraints(algConstraints);
+//            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "A256CBC+HS512", "RSA1_5");
+//            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
 
             receiverJwe.setKey(privateKey);
 
