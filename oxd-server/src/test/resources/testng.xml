@@ -224,6 +224,11 @@
         </classes>
     </test>
 
+    <test name="RP - Get Claims-Gathering Url Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
 
 
 </suite>
