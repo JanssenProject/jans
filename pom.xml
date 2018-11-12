@@ -392,7 +392,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>6.0.2</version>
+				<version>6.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
