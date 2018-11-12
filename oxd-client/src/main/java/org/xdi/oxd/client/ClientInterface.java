@@ -137,4 +137,11 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     String getRp(@HeaderParam("Authorization") String authorization, GetRpParams params);
+
+    @POST
+    @Path("/get-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    GetJwksResponse getJwks(@HeaderParam("Authorization") String authorization, GetJwksParams params);
+
 }
