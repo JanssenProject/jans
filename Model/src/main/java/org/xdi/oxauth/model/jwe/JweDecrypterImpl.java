@@ -105,7 +105,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
             receiverJwe.setAlgorithmConstraints(algConstraints);
-            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM);
+            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "RSA1_5");
             receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
 
             receiverJwe.setKey(privateKey);
