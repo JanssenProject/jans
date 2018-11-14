@@ -49,6 +49,7 @@ import org.gluu.oxauth.fido2.service.CertificateValidator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Fido2Configuration;
 import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -86,19 +87,25 @@ public class MDSTOCHandler {
     private Map<String, JsonNode> tocEntries;
 
     @PostConstruct
-    public void create() throws Exception {
+    public void create() {
         this.tocEntries = Collections.synchronizedMap(new HashMap());
     }
 
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws Exception {
+    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
         tocEntries.putAll(parseTOCs());
     }
 
     private Map<String, JsonNode> parseTOCs() {
-        String mdsTocRootFileLocation = appConfiguration.getFido2Configuration().getMdsTocRootFileLocation();
-        String mdsTocFilesFolder = appConfiguration.getFido2Configuration().getMdsTocFilesFolder();
+        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+        if (fido2Configuration == null) {
+            log.warn("Fido2 configuration not exists");
+            return new HashMap<String, JsonNode>();
+        }
+
+        String mdsTocRootFileLocation = fido2Configuration.getMdsTocRootFileLocation();
+        String mdsTocFilesFolder = fido2Configuration.getMdsTocFilesFolder();
         // String mdsTocFileLocation =
-        // appConfiguration.getFido2Configuration().getMdsTocFileLocation();
+        // fido2Configuration.getMdsTocFileLocation();
         if (StringHelper.isEmpty(mdsTocRootFileLocation) || StringHelper.isEmpty(mdsTocFilesFolder)) {
             log.warn("Fido2 MDS properties should be set");
             return new HashMap<String, JsonNode>();
