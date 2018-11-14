@@ -37,7 +37,7 @@ public class AttestationProcessorFactory {
     private Map<AttestationFormat, AttestationFormatProcessor> processorsMap;
 
     @PostConstruct
-    public void create() throws Exception {
+    public void create() {
         this.processorsMap = new EnumMap<>(AttestationFormat.class);
     }
 
