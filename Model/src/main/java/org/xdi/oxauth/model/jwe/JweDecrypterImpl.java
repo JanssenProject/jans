@@ -112,11 +112,6 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             receiverJwe.setCompactSerialization(encryptedJwe);
             String payload = new String(receiverJwe.getPlaintextBytes());
-            try {
-                payload = new String(Base64Util.base64urldecode(payload), "UTF-8");
-            } catch (IllegalArgumentException ex) {
-                payload = Base64Util.base64urlencode((payload.getBytes()));
-            }
             jwe.setClaims(new JwtClaims(payload));
 
             // joseJwt
