@@ -7,6 +7,8 @@ import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.EncryptedJWT;
+
+import org.apache.commons.codec.Charsets;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -21,7 +23,9 @@ import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.util.Base64Util;
 
+import java.nio.charset.Charset;
 import java.security.Security;
 
 import static org.junit.Assert.assertTrue;
@@ -82,6 +86,9 @@ public class CrossEncryptionTest {
 
     @Test
     public void testGluuJweDecrypter_first() {
+        String str = encryptWithNimbusJoseJwt();
+        System.out.println(str);
+        System.out.println(encryptedJweProducedByGluu);
 
         //jwe produced by gluu 3.1.2 in development environment
         assertTrue(testDecryptWithGluuDecrypter(encryptedJweProducedByGluu));
@@ -236,7 +243,7 @@ public class CrossEncryptionTest {
                             .type(JOSEObjectType.JWT)
                             .keyID(senderJWK.getKeyID())
                             .build(),
-                    new Payload(json));
+                    new Payload(Base64Util.base64urlencode(json.getBytes(Charsets.UTF_8))));
 
 
             // Encrypt with the recipient's public key
