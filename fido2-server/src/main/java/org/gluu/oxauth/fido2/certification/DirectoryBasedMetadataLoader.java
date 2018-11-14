@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Fido2Configuration;
 import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,11 +53,16 @@ public class DirectoryBasedMetadataLoader {
     private Map<String, JsonNode> authenticatorsMetadata;
 
     @PostConstruct
-    public void create() throws Exception {
+    public void create() {
         this.authenticatorsMetadata = Collections.synchronizedMap(new HashMap());
     }
 
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) throws Exception {
+    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+        if (fido2Configuration == null) {
+            return;
+        }
+
         String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
 
         log.info("Populating metadata from {}", certificationServerMetadataFolder);
