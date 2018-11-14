@@ -166,6 +166,12 @@
 		</classes>
 	</test>
 
+	<test name="Cross Encryption test" enabled="true">
+		<classes>
+			<class name="org.xdi.oxauth.comp.CrossEncryptionTest" />
+		</classes>
+	</test>
+
 	<test name="Session ID service test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.comp.SessionIdServiceTest" />
