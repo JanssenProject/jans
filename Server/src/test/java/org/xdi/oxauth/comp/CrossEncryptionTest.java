@@ -7,7 +7,6 @@ import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.EncryptedJWT;
-
 import org.apache.commons.codec.Charsets;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jose4j.jwa.AlgorithmConstraints;
@@ -25,7 +24,6 @@ import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
 
-import java.nio.charset.Charset;
 import java.security.Security;
 
 import static org.junit.Assert.assertTrue;
@@ -41,6 +39,7 @@ public class CrossEncryptionTest {
     final String senderJwkJson = "{\"kty\":\"RSA\",\"d\":\"iSx-zxihgOITpEhz6WwGiiCZjxx597wqblhSYgFWa_bL9esLY3FT_Kq9sdvGPiI8QmObRxPZuTi4n3BVKYUWcfjVz3swq7VmESxnJJZE-vMI9NTaZ-CT2b4I-c3qwAsejhWagJf899I3MRtPOnyxMimyOw4_5YYvXjBkXkCMfCsbj5TBR3RbtMrUYzDMXsVT1EJ_7H76DPBFJx5JptsEAA17VMtqwvWhRutnPyQOftDGPxD-1aGgpteKOUCv7Lx-mFX-zV6nnPB8vmgTgaMqCbCFKSZI567p714gzWBkwnNdRHleX8wos8yZAGbdwGqqUz5x3iKKdn3c7U9TTU7DAQ\",\"e\":\"AQAB\",\"use\":\"sig\",\"kid\":\"1\",\"alg\":\"RS256\",\"n\":\"i6tdK2fREwykTUU-qkYkiSHgg9B31-8EjVCbH0iyrewY9s7_WYPT7I3argjcmiDkufnVfGGW0FadtO3br-Qgk_N2e9LqGMtjUoGMZKFS3fJhqjnLYDi_E5l2FYU_ilw4EXPsZJY0CaM7BxjwUBoCjopYrgvtdxA9G6gpGoAH4LopAkgX-gkawVLpB4NpLvA09FLF2OlYZL7aaybvM2Lz_IXEPa-LSOwLum80Et-_A1-YMx_Z767Iwl1pGTpgZ87jrDD1vEdMdiLcWFG3UIYAAIxtg6X23cvQVLMaXKpyV0USDCWRJrZYxEDgZngbDRj3Sd2-LnixPkMWAfo_D9lBVQ\"}";
 
     final String recipientJwkJson = "{\"kty\":\"RSA\",\"d\":\"jAFM0c4oXxh5YcEujZRVY5LNUzkm0OZf8OUZ31DockQE07BwSAsi4_y6vursS4Z74EurjYlfPx7WoZZokTLyBReVvG8XQZ-AQ5smU9gXQrsiVdU2kOp17oYnOP3OKc0HtvlfTPKdz0DhoA--wAsPFCL2ei4Qly_J3IQTF9ffJJMEyzgabcV1xqrk8NEK5XfEHOdNHzzg-doRe4lCsDcEfIppCIxPHTozhYpwH0_OrssAX1OwX5Jx6-5pXc_BIBrymIkjfwlPYBC32f0iD6VTntJfIngMOdeu0t6krOaWlbfmf6RdoM5sugT-j3mYnd3w4c2eFW23Z9sPCrQvDNlTcQ\",\"e\":\"AQAB\",\"use\":\"enc\",\"kid\":\"2\",\"alg\":\"RS256\",\"n\":\"oaPsFKHgVnK0d04rjN5GgZFqCh9HwYkLMdDQDIgkM3x4sxTpctS5NJQK7iKWNxPTtULdzrY6NLqtrNWmIrJFC6f2h4q5p46Kmc8vdhm_Ph_jpYfsXWTdsHAoee6iJPMoie7rBGoscr3y2DdNlyxAO_jHLUkaaSAqDQrH_f4zVTO0XKisJu8DxKoh2U8myOow_kxx4PUxEdlH6XclpxYT5lIZijOZ8wehFad_BAJ2iZM40JDoqOgspUF1Jyq7FjOoMQabYYwDMyfs2rEALcTU1UsvLeWbl95T3mdAw64Ux3uFCZzHdXF4IDr7xH4NrEVT7SMAlwNoaRfmFbtL-WoISw\"}";
+    public static final String PAYLOAD = "{\"iss\":\"https:devgluu.saminet.local\",\"sub\":\"testing\"}";
 
     @Test
     public void testNimbusJoseJwt_first() {
@@ -122,16 +121,16 @@ public class CrossEncryptionTest {
             decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 
             encryptedJwt.decrypt(decrypter);
-            System.out.println("Nimbusds decrypt succeed: " + encryptedJwt.getPayload().toString());
-            if (encryptedJwt.getPayload().toString().equals("null.null.null.null.null")) {
-                return false;
+            final String decryptedPayload = new String(Base64Util.base64urldecode(encryptedJwt.getPayload().toString()));
+            System.out.println("Nimbusds decrypt succeed: " + decryptedPayload);
+            if (decryptedPayload.equals(PAYLOAD)) {
+                return true;
             }
-
-            return true;
         } catch (Exception e) {
             System.out.println("Nimbusds decrypt failed: " + e.getMessage());
-            return false;
+            e.printStackTrace();
         }
+        return false;
     }
 
     public boolean testDecryptWithJose4J(String jwe) {
@@ -150,18 +149,16 @@ public class CrossEncryptionTest {
             receiverJwe.setKey(jwk.getPrivateKey());
 
             receiverJwe.setCompactSerialization(jwe);
-            System.out.println("Jose4j decrypt succeed: " + receiverJwe.getPlaintextString());
-            if (receiverJwe.getPlaintextString().equals("null.null.null.null.null")) {
-                return false;
+            final String decryptedPayload = new String(Base64Util.base64urldecode(receiverJwe.getPlaintextString()));
+            System.out.println("Jose4j decrypt succeed: " + decryptedPayload);
+            if (decryptedPayload.equals(PAYLOAD)) {
+                return true;
             }
-
-            return true;
         } catch (Exception e) {
             System.out.println("Jose4j decrypt failed: " + e.getMessage());
-            return false;
+            e.printStackTrace();
         }
-
-
+        return false;
     }
 
     public boolean testDecryptWithGluuDecrypter(String jwe) {
@@ -178,6 +175,7 @@ public class CrossEncryptionTest {
             return true;
         } catch (Exception e) {
             System.out.println("Gluu decrypt failed: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -236,14 +234,13 @@ public class CrossEncryptionTest {
             //		        .build(),
             //		    new Payload(signedJWT));
 
-            String json = "{\"iss\":\"https:devgluu.saminet.local\",\"sub\":\"testing\"}";
             @SuppressWarnings("deprecation")
             JWEObject jweObject = new JWEObject(
                     new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A128GCM)
                             .type(JOSEObjectType.JWT)
                             .keyID(senderJWK.getKeyID())
                             .build(),
-                    new Payload(Base64Util.base64urlencode(json.getBytes(Charsets.UTF_8))));
+                    new Payload(Base64Util.base64urlencode(PAYLOAD.getBytes(Charsets.UTF_8))));
 
 
             // Encrypt with the recipient's public key
