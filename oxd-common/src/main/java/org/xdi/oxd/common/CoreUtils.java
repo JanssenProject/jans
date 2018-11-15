@@ -20,6 +20,9 @@ import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -27,6 +30,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -257,11 +261,20 @@ public class CoreUtils {
 //                return true;
 //            }
 //        }, new AllowAllHostnameVerifier());
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
 
-        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustStore.load(null, null);
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
 
-        SSLSocketFactory sf = new SSLSocketFactory(trustStore);
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }}, new SecureRandom());
+
+        SSLSocketFactory sf = new SSLSocketFactory(sslContext);
         sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
         SchemeRegistry registry = new SchemeRegistry();
