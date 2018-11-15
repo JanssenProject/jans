@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.service;
@@ -12,7 +12,7 @@ import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.server.HttpException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -79,7 +79,7 @@ public class DiscoveryService {
             LOG.error(e.getMessage(), e);
         }
         LOG.error("Unable to fetch discovery information for op_host: {}", opHost);
-        throw new ErrorResponseException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
+        throw new HttpException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
     }
 
     public UmaMetadata getUmaDiscoveryByOxdId(String oxdId) {
@@ -107,7 +107,7 @@ public class DiscoveryService {
             LOG.error(e.getMessage(), e);
         }
         LOG.error("Unable to fetch UMA discovery information for op_host: {}", opHost);
-        throw new ErrorResponseException(ErrorResponseCode.NO_UMA_DISCOVERY_RESPONSE);
+        throw new HttpException(ErrorResponseCode.NO_UMA_DISCOVERY_RESPONSE);
     }
 
     public String getConnectDiscoveryUrl(Rp rp) {

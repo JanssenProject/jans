@@ -2,24 +2,31 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import org.codehaus.jackson.node.POJONode;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.ErrorResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
+import org.xdi.oxd.rs.protect.Jackson;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
@@ -38,12 +45,12 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
      *
      * @param command command
      */
-    protected RsCheckAccessOperation(Command command, final Injector injector) {
+    RsCheckAccessOperation(Command command, final Injector injector) {
         super(command, injector, RsCheckAccessParams.class);
     }
 
     @Override
-    public CommandResponse execute(final RsCheckAccessParams params) throws Exception {
+    public IOpResponse execute(final RsCheckAccessParams params) throws Exception {
         validate(params);
 
         Rp site = getRp();
@@ -53,7 +60,11 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
                     ". Please protect your resource first with uma_rs_protect command. Check details on " + CoreUtils.DOC_URL);
             LOG.error(error.getErrorDescription());
-            return CommandResponse.error().setData(new POJONode(error));
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(Jackson.asJson(error))
+                    .build());
         }
 
         PatProvider patProvider = new PatProvider() {
@@ -91,7 +102,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                 if (containsAny) {
                     if ((permission.getResourceId() != null && permission.getResourceId().equals(resource.getId()))) { // normal UMA
                         LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
-                        return okResponse(new RsCheckAccessResponse("granted"));
+                        return new RsCheckAccessResponse("granted");
                     }
                 }
             }
@@ -123,15 +134,15 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         opResponse.setTicket(((PermissionTicket) response.getEntity()).getTicket());
         LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
 
-        return okResponse(opResponse);
+        return opResponse;
     }
 
     private void validate(RsCheckAccessParams params) {
         if (Strings.isNullOrEmpty(params.getHttpMethod())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_HTTP_METHOD);
+            throw new HttpException(ErrorResponseCode.NO_UMA_HTTP_METHOD);
         }
         if (Strings.isNullOrEmpty(params.getPath())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_PATH_PARAMETER);
+            throw new HttpException(ErrorResponseCode.NO_UMA_PATH_PARAMETER);
         }
     }
 }

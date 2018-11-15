@@ -25,7 +25,7 @@ public class GetClientTokenTest {
         params.setClientId(Tester.getSetupClient().getClientId());
         params.setClientSecret(Tester.getSetupClient().getClientSecret());
 
-        GetClientTokenResponse resp = Tester.newClient(host).getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+        GetClientTokenResponse resp = Tester.newClient(host).getClientToken(params);
 
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());

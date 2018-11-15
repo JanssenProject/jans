@@ -28,52 +28,52 @@ import java.util.List;
 /**
  * GetUserInfoResponseClaims
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetUserInfoResponseClaims {
   @SerializedName("sub")
-  private List<String> sub = new ArrayList<>();
+  private List<String> sub = new ArrayList<String>();
 
   @SerializedName("zoneinfo")
-  private List<String> zoneinfo = new ArrayList<>();
+  private List<String> zoneinfo = new ArrayList<String>();
 
   @SerializedName("website")
-  private List<String> website = new ArrayList<>();
+  private List<String> website = new ArrayList<String>();
 
   @SerializedName("birthdate")
-  private List<String> birthdate = new ArrayList<>();
+  private List<String> birthdate = new ArrayList<String>();
 
   @SerializedName("gender")
-  private List<String> gender = new ArrayList<>();
+  private List<String> gender = new ArrayList<String>();
 
   @SerializedName("profile")
-  private List<String> profile = new ArrayList<>();
+  private List<String> profile = new ArrayList<String>();
 
   @SerializedName("preferred_username")
-  private List<String> preferredUsername = new ArrayList<>();
+  private List<String> preferredUsername = new ArrayList<String>();
 
   @SerializedName("middle_name")
-  private List<String> middleName = new ArrayList<>();
+  private List<String> middleName = new ArrayList<String>();
 
   @SerializedName("locale")
-  private List<String> locale = new ArrayList<>();
+  private List<String> locale = new ArrayList<String>();
 
   @SerializedName("given_name")
-  private List<String> givenName = new ArrayList<>();
+  private List<String> givenName = new ArrayList<String>();
 
   @SerializedName("picture")
-  private List<String> picture = new ArrayList<>();
+  private List<String> picture = new ArrayList<String>();
 
   @SerializedName("updated_at")
-  private List<String> updatedAt = new ArrayList<>();
+  private List<String> updatedAt = new ArrayList<String>();
 
   @SerializedName("nickname")
-  private List<String> nickname = new ArrayList<>();
+  private List<String> nickname = new ArrayList<String>();
 
   @SerializedName("name")
-  private List<String> name = new ArrayList<>();
+  private List<String> name = new ArrayList<String>();
 
   @SerializedName("family_name")
-  private List<String> familyName = new ArrayList<>();
+  private List<String> familyName = new ArrayList<String>();
 
   public GetUserInfoResponseClaims sub(List<String> sub) {
     this.sub = sub;

@@ -7,13 +7,13 @@ import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.client.RsProtectParams2;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.RsResource;
 
+import javax.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.util.List;
 
@@ -53,9 +53,14 @@ public class RsProtectTest {
         params.setOxdId(site.getOxdId());
         params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
 
-        ErrorResponse errorResponse = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(ErrorResponse.class);
-        assertNotNull(errorResponse);
-        assertEquals(errorResponse.getError(), "uma_protection_exists");
+        try {
+            client.umaRsProtect(Tester.getAuthorization(), params);
+        } catch (BadRequestException e) {
+            assertEquals("uma_protection_exists", TestUtils.asError(e).getError());
+            return;
+        }
+
+        throw new AssertionError("Expected 400 (bad request) but got successful result.");
     }
 
     @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
@@ -73,7 +78,7 @@ public class RsProtectTest {
         params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
-        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
+        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params);
         assertNotNull(response);
     }
 
@@ -103,7 +108,7 @@ public class RsProtectTest {
         params.setPath("/GetAll");
         params.setRpt("");
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params).dataAsResponse(RsCheckAccessResponse.class);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -118,7 +123,7 @@ public class RsProtectTest {
             e.printStackTrace();
         }
 
-        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params).dataAsResponse(RsProtectResponse.class);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params);
         assertNotNull(resp);
         return resp;
     }

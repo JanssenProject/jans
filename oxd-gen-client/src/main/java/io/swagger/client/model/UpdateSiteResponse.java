@@ -21,54 +21,32 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.UpdateSiteResponseData;
 import java.io.IOException;
 
 /**
  * UpdateSiteResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UpdateSiteResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("oxd_id")
+  private String oxdId = null;
 
-  @SerializedName("data")
-  private UpdateSiteResponseData data = null;
-
-  public UpdateSiteResponse status(String status) {
-    this.status = status;
+  public UpdateSiteResponse oxdId(String oxdId) {
+    this.oxdId = oxdId;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
-  **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public UpdateSiteResponse data(UpdateSiteResponseData data) {
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
+   * Get oxdId
+   * @return oxdId
   **/
   @ApiModelProperty(required = true, value = "")
-  public UpdateSiteResponseData getData() {
-    return data;
+  public String getOxdId() {
+    return oxdId;
   }
 
-  public void setData(UpdateSiteResponseData data) {
-    this.data = data;
+  public void setOxdId(String oxdId) {
+    this.oxdId = oxdId;
   }
 
 
@@ -81,13 +59,12 @@ public class UpdateSiteResponse {
       return false;
     }
     UpdateSiteResponse updateSiteResponse = (UpdateSiteResponse) o;
-    return Objects.equals(this.status, updateSiteResponse.status) &&
-        Objects.equals(this.data, updateSiteResponse.data);
+    return Objects.equals(this.oxdId, updateSiteResponse.oxdId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(oxdId);
   }
 
 
@@ -96,8 +73,7 @@ public class UpdateSiteResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UpdateSiteResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

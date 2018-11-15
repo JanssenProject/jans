@@ -3,7 +3,6 @@ package org.xdi.oxd.server;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
-import org.xdi.oxd.client.CommandResponse2;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
@@ -39,10 +38,7 @@ public class CheckIdTokenTest {
         params.setIdToken(response.getIdToken());
         params.setNonce(nonce);
 
-        final CommandResponse2 r = client.checkIdToken(Tester.getAuthorization(), params);
-        assertNotNull(r);
-
-        final CheckIdTokenResponse checkR = r.dataAsResponse(CheckIdTokenResponse.class);
+        final CheckIdTokenResponse checkR = client.checkIdToken(Tester.getAuthorization(), params);
         assertNotNull(checkR);
         assertTrue(checkR.isActive());
         assertNotNull(checkR.getExpiresAt());

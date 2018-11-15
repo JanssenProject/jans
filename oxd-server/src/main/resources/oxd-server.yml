@@ -1,6 +1,5 @@
 
 # server configuration
-server_name: ''
 use_client_authentication_for_pat: true
 trust_all_certs: true
 trust_store_path: ''
@@ -12,12 +11,12 @@ support-google-logout: true
 state_expiration_in_minutes: 5
 nonce_expiration_in_minutes: 5
 public_op_key_cache_expiration_in_minutes: 60
-protect_commands_with_access_token: false
+protect_commands_with_access_token: true
 uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: true
 migration_source_folder_path: ''
 storage: h2
 storage_configuration:
-  dbFileLocation: "/opt/oxd-server/data/oxd_db"
+  dbFileLocation: /opt/oxd-server/data/oxd_db
 
 # Connectors
 server:
@@ -52,10 +51,10 @@ logging:
   appenders:
     - type: console
     - type: file
-      threshold: INFO
+      threshold: TRACE
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: /var/log/oxd-server.log
-      archivedLogFilenamePattern: /var/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: /var/log/oxd-server/oxd-server.log
+      archivedLogFilenamePattern: /var/log/oxd-server/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB

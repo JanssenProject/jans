@@ -21,54 +21,102 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.GetAccessTokenByRefreshTokenResponseData;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GetAccessTokenByRefreshTokenResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetAccessTokenByRefreshTokenResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("scope")
+  private List<String> scope = new ArrayList<String>();
 
-  @SerializedName("data")
-  private GetAccessTokenByRefreshTokenResponseData data = null;
+  @SerializedName("access_token")
+  private String accessToken = null;
 
-  public GetAccessTokenByRefreshTokenResponse status(String status) {
-    this.status = status;
+  @SerializedName("expires_in")
+  private Integer expiresIn = null;
+
+  @SerializedName("refresh_token")
+  private String refreshToken = null;
+
+  public GetAccessTokenByRefreshTokenResponse scope(List<String> scope) {
+    this.scope = scope;
+    return this;
+  }
+
+  public GetAccessTokenByRefreshTokenResponse addScopeItem(String scopeItem) {
+    this.scope.add(scopeItem);
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get scope
+   * @return scope
   **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
+  @ApiModelProperty(example = "[\"openid\",\"profile\",\"uma_protection\",\"email\"]", required = true, value = "")
+  public List<String> getScope() {
+    return scope;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
+  public void setScope(List<String> scope) {
+    this.scope = scope;
   }
 
-  public GetAccessTokenByRefreshTokenResponse data(GetAccessTokenByRefreshTokenResponseData data) {
-    this.data = data;
+  public GetAccessTokenByRefreshTokenResponse accessToken(String accessToken) {
+    this.accessToken = accessToken;
     return this;
   }
 
    /**
-   * Get data
-   * @return data
+   * Get accessToken
+   * @return accessToken
   **/
-  @ApiModelProperty(required = true, value = "")
-  public GetAccessTokenByRefreshTokenResponseData getData() {
-    return data;
+  @ApiModelProperty(example = "b75434ff-f465-4b70-92e4-b7ba6b6c58f2", required = true, value = "")
+  public String getAccessToken() {
+    return accessToken;
   }
 
-  public void setData(GetAccessTokenByRefreshTokenResponseData data) {
-    this.data = data;
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  public GetAccessTokenByRefreshTokenResponse expiresIn(Integer expiresIn) {
+    this.expiresIn = expiresIn;
+    return this;
+  }
+
+   /**
+   * Get expiresIn
+   * @return expiresIn
+  **/
+  @ApiModelProperty(example = "299", required = true, value = "")
+  public Integer getExpiresIn() {
+    return expiresIn;
+  }
+
+  public void setExpiresIn(Integer expiresIn) {
+    this.expiresIn = expiresIn;
+  }
+
+  public GetAccessTokenByRefreshTokenResponse refreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
+    return this;
+  }
+
+   /**
+   * Get refreshToken
+   * @return refreshToken
+  **/
+  @ApiModelProperty(example = "33d7988e-6ffb-4fe5-8c2a-0e158691d446", required = true, value = "")
+  public String getRefreshToken() {
+    return refreshToken;
+  }
+
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
   }
 
 
@@ -81,13 +129,15 @@ public class GetAccessTokenByRefreshTokenResponse {
       return false;
     }
     GetAccessTokenByRefreshTokenResponse getAccessTokenByRefreshTokenResponse = (GetAccessTokenByRefreshTokenResponse) o;
-    return Objects.equals(this.status, getAccessTokenByRefreshTokenResponse.status) &&
-        Objects.equals(this.data, getAccessTokenByRefreshTokenResponse.data);
+    return Objects.equals(this.scope, getAccessTokenByRefreshTokenResponse.scope) &&
+        Objects.equals(this.accessToken, getAccessTokenByRefreshTokenResponse.accessToken) &&
+        Objects.equals(this.expiresIn, getAccessTokenByRefreshTokenResponse.expiresIn) &&
+        Objects.equals(this.refreshToken, getAccessTokenByRefreshTokenResponse.refreshToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(scope, accessToken, expiresIn, refreshToken);
   }
 
 
@@ -96,8 +146,10 @@ public class GetAccessTokenByRefreshTokenResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAccessTokenByRefreshTokenResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
+    sb.append("    accessToken: ").append(toIndentedString(accessToken)).append("\n");
+    sb.append("    expiresIn: ").append(toIndentedString(expiresIn)).append("\n");
+    sb.append("    refreshToken: ").append(toIndentedString(refreshToken)).append("\n");
     sb.append("}");
     return sb.toString();
   }
