@@ -42,6 +42,25 @@ public class CrossEncryptionTest {
     public static final String PAYLOAD = "{\"iss\":\"https:devgluu.saminet.local\",\"sub\":\"testing\"}";
 
     @Test
+    public void encryptWithNimbus_decryptByAll() {
+        final String jwt = encryptWithNimbusJoseJwt();
+
+        assertTrue(testDecryptNimbusJoseJwt(jwt));
+        assertTrue(testDecryptWithJose4J(jwt));
+        assertTrue(testDecryptWithGluuDecrypter(jwt));
+    }
+
+    @Test
+    public void encryptWithGluu_decryptByAll() {
+        final String jwt = encryptWithGluuJweEncrypter();
+        System.out.println("Gluu encrypted: " + jwt);
+
+        assertTrue(testDecryptNimbusJoseJwt(jwt));
+        assertTrue(testDecryptWithJose4J(jwt));
+        assertTrue(testDecryptWithGluuDecrypter(jwt));
+    }
+
+    @Test
     public void testNimbusJoseJwt_first() {
 
         //jwe produced by gluu 3.1.2 in development environment
@@ -171,13 +190,16 @@ public class CrossEncryptionTest {
 
             decrypter.setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.RSA_OAEP);
             decrypter.setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.A128GCM);
-            System.out.println("Gluu decrypt succeed: " + decrypter.decrypt(jwe).getClaims().toJsonString().toString());
-            return true;
+            final String decryptedPayload = decrypter.decrypt(jwe).getClaims().toJsonString().toString();
+            System.out.println("Gluu decrypt succeed: " + decryptedPayload);
+            if (decryptedPayload.equals(PAYLOAD)) {
+                return true;
+            }
         } catch (Exception e) {
             System.out.println("Gluu decrypt failed: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     private String encryptWithGluuJweEncrypter() {
