@@ -1,10 +1,10 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
 
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.IParams;
+import org.xdi.oxd.common.response.IOpResponse;
 
 /**
  * Base interface for oxd operations. Operation parameter must be specified via contructor.
@@ -20,7 +20,7 @@ public interface IOperation<T extends IParams> {
      *
      * @return command response
      */
-    public CommandResponse execute(T params) throws Exception;
+    IOpResponse execute(T params) throws Exception;
 
-    public Class<T> getParameterClass();
+    Class<T> getParameterClass();
 }

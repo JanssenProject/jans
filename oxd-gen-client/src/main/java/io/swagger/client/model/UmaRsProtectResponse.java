@@ -21,54 +21,32 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.UmaRsProtectResponseData;
 import java.io.IOException;
 
 /**
  * UmaRsProtectResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRsProtectResponse {
-  @SerializedName("status")
-  private String status = null;
+  @SerializedName("oxd_id")
+  private String oxdId = null;
 
-  @SerializedName("data")
-  private UmaRsProtectResponseData data = null;
-
-  public UmaRsProtectResponse status(String status) {
-    this.status = status;
+  public UmaRsProtectResponse oxdId(String oxdId) {
+    this.oxdId = oxdId;
     return this;
   }
 
    /**
-   * Get status
-   * @return status
+   * Get oxdId
+   * @return oxdId
   **/
-  @ApiModelProperty(example = "ok", required = true, value = "")
-  public String getStatus() {
-    return status;
+  @ApiModelProperty(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, value = "")
+  public String getOxdId() {
+    return oxdId;
   }
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public UmaRsProtectResponse data(UmaRsProtectResponseData data) {
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public UmaRsProtectResponseData getData() {
-    return data;
-  }
-
-  public void setData(UmaRsProtectResponseData data) {
-    this.data = data;
+  public void setOxdId(String oxdId) {
+    this.oxdId = oxdId;
   }
 
 
@@ -81,13 +59,12 @@ public class UmaRsProtectResponse {
       return false;
     }
     UmaRsProtectResponse umaRsProtectResponse = (UmaRsProtectResponse) o;
-    return Objects.equals(this.status, umaRsProtectResponse.status) &&
-        Objects.equals(this.data, umaRsProtectResponse.data);
+    return Objects.equals(this.oxdId, umaRsProtectResponse.oxdId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, data);
+    return Objects.hash(oxdId);
   }
 
 
@@ -96,8 +73,7 @@ public class UmaRsProtectResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRsProtectResponse {\n");
     
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
+    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

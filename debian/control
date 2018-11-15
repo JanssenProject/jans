@@ -1,4 +1,4 @@
-Source: oxd-server-4.0
+Source: oxd-server-4.0.beta
 Section: java
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 8.0.0),
 Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 
-Package: oxd-server-4.0
+Package: oxd-server-4.0.beta
 Architecture: all
 Depends: ${shlibs:Depends},
  ${misc:Depends},
@@ -14,4 +14,4 @@ Description: plugins for OpenID and UMA
  oxd-server is a middleware service web application
  developers can use to facilitate user authentication
  and authorization with an external OAuth 2.0
-identity provider.
+ identity provider.

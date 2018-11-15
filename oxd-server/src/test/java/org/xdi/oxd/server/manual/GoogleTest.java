@@ -47,7 +47,7 @@ public class GoogleTest {
         params.setOxdId(site.getOxdId());
         params.setCode(code);
 
-        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params).dataAsResponse(GetTokensByCodeResponse.class);
+        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
         System.out.println(resp);
     }
 
@@ -55,7 +55,7 @@ public class GoogleTest {
         final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
         params.setOxdId(oxdId);
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params).dataAsResponse(GetAuthorizationUrlResponse.class);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         System.out.println("Authorization url: " + resp.getAuthorizationUrl());
@@ -70,7 +70,7 @@ public class GoogleTest {
         params.setClientId(CLIENT_ID);
         params.setClientSecret(CLIENT_SECRET);
 
-        final RegisterSiteResponse resp = client.registerSite(params).dataAsResponse(RegisterSiteResponse.class);
+        final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;

@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * UmaRpGetRptParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class UmaRpGetRptParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -49,7 +49,7 @@ public class UmaRpGetRptParams {
   private String rpt = null;
 
   @SerializedName("scope")
-  private List<String> scope = new ArrayList<>();
+  private List<String> scope = new ArrayList<String>();
 
   @SerializedName("state")
   private String state = null;

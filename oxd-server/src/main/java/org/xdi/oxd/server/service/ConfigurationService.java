@@ -2,7 +2,6 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
@@ -16,10 +15,6 @@ import java.io.IOException;
 
 public class ConfigurationService implements Provider<OxdServerConfiguration> {
 
-    public static final String DOC_URL = "https://www.gluu.org/docs/oxd";
-
-    public static final String APP_VERSION = "3.2.0";
-
     /**
      * Logger
      */
@@ -29,11 +24,6 @@ public class ConfigurationService implements Provider<OxdServerConfiguration> {
 
     public void setConfiguration(OxdServerConfiguration configuration) {
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
-
-        if (StringUtils.isBlank(configuration.getServerName())) {
-            LOG.error("'server_name' configuration property is mandatory. Please provide value for it in configuration file.");
-            throw new AssertionError("'server_name' configuration property is mandatory. Please provide value for it in configuration file.");
-        }
         this.configuration = configuration;
     }
 

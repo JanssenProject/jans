@@ -54,6 +54,10 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
     private List<String> contacts;
     @JsonProperty(value = "protection_access_token")
     private String protection_access_token;
+    @JsonProperty(value = "access_token_as_jwt")
+    private Boolean access_token_as_jwt = false;
+    @JsonProperty(value = "access_token_signing_alg")
+    private String access_token_signing_alg;
 
     public UpdateSiteParams() {
     }
@@ -210,6 +214,22 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         this.contacts = contacts;
     }
 
+    public Boolean getAccessTokenAsJwt() {
+        return access_token_as_jwt;
+    }
+
+    public void setAccessTokenAsJwt(Boolean access_token_as_jwt) {
+        this.access_token_as_jwt = access_token_as_jwt;
+    }
+
+    public String getAccessTokenSigningAlg() {
+        return access_token_signing_alg;
+    }
+
+    public void setAccessTokenSigningAlg(String access_token_signing_alg) {
+        this.access_token_signing_alg = access_token_signing_alg;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -228,6 +248,8 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         sb.append(", grant_types=").append(grant_types);
         sb.append(", contacts=").append(contacts);
         sb.append(", protection_access_token=").append(protection_access_token);
+        sb.append(", access_token_as_jwt=").append(access_token_as_jwt);
+        sb.append(", access_token_signing_alg=").append(access_token_signing_alg);
         sb.append('}');
         return sb.toString();
     }

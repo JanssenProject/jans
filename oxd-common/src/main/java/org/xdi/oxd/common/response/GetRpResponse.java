@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetRpResponse implements IOpResponse {
 
     @JsonProperty(value = "node")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "node")
     private JsonNode node;
 
     public GetRpResponse() {

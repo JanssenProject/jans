@@ -39,7 +39,7 @@ public class UmaFullTest {
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
 
-        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), params).dataAsResponse(RpGetRptResponse.class);
+        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getRpt()));

@@ -14,10 +14,13 @@ import java.util.Map;
 public class GetUserInfoResponse implements IOpResponse {
 
     @JsonProperty("claims")
+    @com.fasterxml.jackson.annotation.JsonProperty("claims")
     private Map<String, List<String>> claims = Maps.newHashMap();
     @JsonProperty("refresh_token")
+    @com.fasterxml.jackson.annotation.JsonProperty("refresh_token")
     private String refreshToken;
     @JsonProperty("access_token")
+    @com.fasterxml.jackson.annotation.JsonProperty("access_token")
     private String accessToken;
 
     public GetUserInfoResponse() {

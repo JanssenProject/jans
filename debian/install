@@ -1,2 +1,1 @@
-debian/oxd-https-extension.init.d /etc/init.d/
-#debian/oxd-server-default /etc/default/
+# Nothing to install here

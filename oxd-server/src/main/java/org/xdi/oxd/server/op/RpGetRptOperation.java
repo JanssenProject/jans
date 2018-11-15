@@ -1,19 +1,22 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.codehaus.jackson.node.POJONode;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.params.RpGetRptParams;
+import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.rs.protect.Jackson;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -29,17 +32,19 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
     }
 
     @Override
-    public CommandResponse execute(RpGetRptParams params) throws Exception {
+    public IOpResponse execute(RpGetRptParams params) throws Exception {
         try {
-            return okResponse(getUmaTokenService().getRpt(params));
+            return getUmaTokenService().getRpt(params);
         } catch (ClientResponseFailure ex) {
             LOG.trace(ex.getMessage(), ex);
             String entity = (String) ex.getResponse().getEntity(String.class);
             final UmaNeedInfoResponse needInfo = parseNeedInfoSilently(entity);
             if (needInfo != null) {
-                ErrorResponse errorResponse = new ErrorResponse(ErrorResponseCode.UMA_NEED_INFO);
-                errorResponse.setDetails(new POJONode(needInfo));
-                return CommandResponse.createErrorResponse(errorResponse);
+                throw new WebApplicationException(Response
+                        .status(Response.Status.FORBIDDEN)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .entity(Jackson.asJson(needInfo))
+                        .build());
             } else {
                 LOG.trace("No need_info error, re-throw exception ...", ex);
                 throw new WebApplicationException(entity, ex.getResponse().getStatus());
