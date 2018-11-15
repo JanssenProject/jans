@@ -6,9 +6,10 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.JWEObject;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSAEncrypter;
-import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -29,14 +30,12 @@ import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.crypto.*;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
 import java.util.Arrays;
 
 /**
@@ -68,7 +67,7 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
 
             JWEObject jweObject = new JWEObject(
                     JWEHeader.parse(jwe.getHeader().toJsonObject().toString()),
-                    new Payload(jwe.toString()));
+                    new Payload(Base64Util.base64urlencode(jwe.getClaims().toJsonString().getBytes("UTF-8"))));
 
             jweObject.encrypt(encrypter);
             String encryptedJwe = jweObject.serialize();
@@ -89,13 +88,10 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
             jwe.setEncodedInitializationVector(encodedInitializationVector);
             jwe.setEncodedCiphertext(encodedCipherText);
             jwe.setEncodedIntegrityValue(encodedIntegrityValue);
+            jwe.setHeader(new JwtHeader(encodedHeader));
 
             return jwe;
-        } catch (JOSEException e) {
-            throw new InvalidJweException(e);
-        } catch (InvalidJwtException e) {
-            throw new InvalidJweException(e);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             throw new InvalidJweException(e);
         }
     }
