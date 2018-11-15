@@ -672,17 +672,20 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             authz_state = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
 
-        if self.isJwt(authz_state):
+        if self.isInboundJwt(authz_state):
             return True
 
         return False
 
-    def isJwt(self, value):
+    def isInboundJwt(self, value):
         if value == None:
             return False
         
         try:
             jwt = Jwt.parse(value)
+            user_profile_json = jwt_claims.getClaimAsString("data")
+            if StringHelper.isEmpty(user_profile_json):
+                return False
         except:
             return False
 
