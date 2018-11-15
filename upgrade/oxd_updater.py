@@ -169,9 +169,10 @@ if os.path.exists(oxd_default_site_config_json_fn):
 
 if update_required:
 
-    print "A previous version of oxd-server detected. If you cintinue,"
-    print "previous version will be uninstalled, latest version will be installed,"
-    print "and your config/data will be migrated to latest version"
+    print """A previous version of oxd-server detected. If you continue,
+the current version will be replaced by the latest version available,
+and your config/data will be migrated to the new version.
+"""
     ask = "Do you want to migrate data to oxd-server-{0}? [y|N]: ".format(current_version)
 
     answer = raw_input(ask)
@@ -235,6 +236,13 @@ if update_required:
 
     oxd_default_site_config_json = json_load_byteified(oxd_default_site_config_json_back_fn)
 
+
+    if not oxd_default_site_config_json['contacts']:
+        oxd_default_site_config_json['contacts'] = []
+    else:
+        if not type(oxd_default_site_config_json['contacts']) == type([]):
+            oxd_default_site_config_json['contacts'] = [oxd_default_site_config_json['contacts']]
+
     log4j_xml_tree = tree = ET.parse(log4j_xml_back_fn)
     log4j_xml_root = log4j_xml_tree.getroot()
 
@@ -297,7 +305,8 @@ if update_required:
 
         if type(True) == type(m):
             m = str(m).lower()
-        if not m:
+        
+        if (type(m) != type([]) and not m):
             m="''"
         k = '{{'+sv+'}}'
         #print sv, m
