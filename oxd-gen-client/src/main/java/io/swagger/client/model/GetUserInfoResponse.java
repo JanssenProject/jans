@@ -21,19 +21,26 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.client.model.GetUserInfoResponseClaims;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * GetUserInfoResponse
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-25T10:27:43.455Z")
 public class GetUserInfoResponse {
   @SerializedName("claims")
-  private GetUserInfoResponseClaims claims = null;
+  private Map<String, List<String>> claims = new HashMap<>();
 
-  public GetUserInfoResponse claims(GetUserInfoResponseClaims claims) {
+  public GetUserInfoResponse claims(Map<String, List<String>> claims) {
     this.claims = claims;
+    return this;
+  }
+
+  public GetUserInfoResponse putClaimsItem(String key, List<String> claimsItem) {
+    this.claims.put(key, claimsItem);
     return this;
   }
 
@@ -42,17 +49,17 @@ public class GetUserInfoResponse {
    * @return claims
   **/
   @ApiModelProperty(required = true, value = "")
-  public GetUserInfoResponseClaims getClaims() {
+  public Map<String, List<String>> getClaims() {
     return claims;
   }
 
-  public void setClaims(GetUserInfoResponseClaims claims) {
+  public void setClaims(Map<String, List<String>> claims) {
     this.claims = claims;
   }
 
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -83,7 +90,7 @@ public class GetUserInfoResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(java.lang.Object o) {
+  private String toIndentedString(Object o) {
     if (o == null) {
       return "null";
     }

@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * GetAuthorizationUrlParams
  */
-
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-10-10T07:48:52.952Z")
 public class GetAuthorizationUrlParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -71,7 +71,7 @@ public class GetAuthorizationUrlParams {
 
   public GetAuthorizationUrlParams addScopeItem(String scopeItem) {
     if (this.scope == null) {
-      this.scope = new ArrayList<>();
+      this.scope = new ArrayList<String>();
     }
     this.scope.add(scopeItem);
     return this;
@@ -97,7 +97,7 @@ public class GetAuthorizationUrlParams {
 
   public GetAuthorizationUrlParams addAcrValuesItem(String acrValuesItem) {
     if (this.acrValues == null) {
-      this.acrValues = new ArrayList<>();
+      this.acrValues = new ArrayList<String>();
     }
     this.acrValues.add(acrValuesItem);
     return this;

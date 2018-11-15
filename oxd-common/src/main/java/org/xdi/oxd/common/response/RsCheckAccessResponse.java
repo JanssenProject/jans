@@ -10,10 +10,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RsCheckAccessResponse implements IOpResponse {
 
     @JsonProperty(value = "access")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "access")
     private String access;
     @JsonProperty(value = "www-authenticate_header")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "www-authenticate_header")
     private String wwwAuthenticateHeader;
     @JsonProperty(value = "ticket")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "ticket")
     private String ticket;
 
     public RsCheckAccessResponse() {

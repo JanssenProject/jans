@@ -3,13 +3,7 @@ package io.swagger.client.api;
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiException;
 import io.swagger.client.ApiResponse;
-import io.swagger.client.model.GetClientTokenParams;
-import io.swagger.client.model.GetClientTokenResponse;
-import io.swagger.client.model.GetClientTokenResponseData;
-import io.swagger.client.model.IntrospectAccessTokenParams;
-import io.swagger.client.model.IntrospectAccessTokenResponse;
-import io.swagger.client.model.IntrospectAccessTokenResponseData;
-import io.swagger.client.model.RegisterSiteResponseData;
+import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -25,8 +19,8 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
     @Test
     public void introspectAccessToken(String opHost, String redirectUrl) throws Exception {
         DevelopersApi client = Tester.api();
-        RegisterSiteResponseData setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-        GetClientTokenResponseData tokenResponse = getGetClientTokenResponseData(opHost, client, setupResponse);
+        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        GetClientTokenResponse tokenResponse = getGetClientTokenResponseData(opHost, client, setupResponse);
         assertNotNull(tokenResponse);
         final String accessToken = tokenResponse.getAccessToken();
         Tester.notEmpty(accessToken);
@@ -36,15 +30,15 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         //
         final String authorization = "Bearer " + accessToken;
         final IntrospectAccessTokenResponse iaTokenResponse = client.introspectAccessToken(authorization, introspectParams);
-        assertNotNull(iaTokenResponse.getData());
-        assertTrue(iaTokenResponse.getData().isActive());
-        assertNotNull(iaTokenResponse.getData().getIat());
-        assertNotNull(iaTokenResponse.getData().getExp());
-        assertTrue(iaTokenResponse.getData().getExp() >= iaTokenResponse.getData().getIat());
-        final Long nbf = iaTokenResponse.getData().getNbf();
+        assertNotNull(iaTokenResponse);
+        assertTrue(iaTokenResponse.isActive());
+        assertNotNull(iaTokenResponse.getIat());
+        assertNotNull(iaTokenResponse.getExp());
+        assertTrue(iaTokenResponse.getExp() >= iaTokenResponse.getIat());
+        final Long nbf = iaTokenResponse.getNbf();
         if (nbf != null) {
-            assertTrue(nbf > iaTokenResponse.getData().getIat());
-            assertTrue(nbf < iaTokenResponse.getData().getExp());
+            assertTrue(nbf > iaTokenResponse.getIat());
+            assertTrue(nbf < iaTokenResponse.getExp());
         }
     }
 
@@ -54,11 +48,12 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
      */
     @Parameters({"opHost", "redirectUrl"})
     @Test
+    @ProtectionAccessTokenRequired
     public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
         DevelopersApi client = Tester.api();
-        RegisterSiteResponseData setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-        GetClientTokenResponseData tokenResponse = getGetClientTokenResponseData(opHost, client, setupData);
+        GetClientTokenResponse tokenResponse = getGetClientTokenResponseData(opHost, client, setupData);
         assertNotNull(tokenResponse);
         final String accessToken = tokenResponse.getAccessToken();
         final String validHeader = "Bearer " + accessToken;
@@ -68,15 +63,20 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         iatParams.setAccessToken(invalidToken);
         iatParams.setOxdId(setupData.getOxdId());
 
-        ApiResponse<IntrospectAccessTokenResponse>
-                apiIatResponse = client.introspectAccessTokenWithHttpInfo(validHeader, iatParams);
-        assertEquals(apiIatResponse.getStatusCode(), 200);
-        assertNotNull(apiIatResponse.getData());
+        try {
+            client.introspectAccessToken(validHeader, iatParams);
+        } catch (ApiException e) {
+            assertEquals(400, e.getCode());
+            return;
+        }
+        throw new AssertionError("Got response while we expect failure because there is not such token on the server.");
 
-        IntrospectAccessTokenResponseData responseData = apiIatResponse.getData().getData();
-        assertNotNull(responseData);
-        // verify client is NOT active
-        assertFalse(responseData.isActive());
+        // return back to it after oxd is switched to oxauth 3.1.5 or later, see https://github.com/GluuFederation/oxAuth/issues/929
+//        ApiResponse<IntrospectAccessTokenResponse> apiIatResponse = client.introspectAccessTokenWithHttpInfo(validHeader, iatParams);
+//        assertEquals(apiIatResponse.getStatusCode(), 200);
+//        assertNotNull(apiIatResponse.getData());
+//        // verify client is NOT active
+//        assertFalse(apiIatResponse.getData().isActive());
     }
 
     @Parameters({"opHost", "redirectUrl"})
@@ -85,38 +85,31 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
     public void testWithInvalidAuthorization(String opHost, String redirectUrl) throws Exception {
 
         DevelopersApi client = Tester.api();
-        RegisterSiteResponseData setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-        GetClientTokenResponseData tokenResponseData = this.getGetClientTokenResponseData(opHost, client, setupResponse);
+        GetClientTokenResponse tokenResponseData = this.getGetClientTokenResponseData(opHost, client, setupResponse);
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());
 
-        final String invalidAuthString = "Bearer " + "NotAuthorized";
-        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse =
-                client.introspectAccessTokenWithHttpInfo(invalidAuthString, introspectParams);
+        final String invalidAuthString = "Bearer NotAuthorized";
+        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse = client.introspectAccessTokenWithHttpInfo(invalidAuthString, introspectParams);
 
-        //Fixme: Status code should be 401
-        assertTrue(introApiResponse.getStatusCode() == 200);
-
-        IntrospectAccessTokenResponseData responseData = introApiResponse.getData().getData();
-        assertNotNull(responseData);
-        assertNull(responseData.getClientId());
-
+        assertEquals(403, introApiResponse.getStatusCode());
+        assertNotNull(introApiResponse.getData());
+        assertNull(introApiResponse.getData().getClientId());
     }
 
-    private static GetClientTokenResponseData getGetClientTokenResponseData(String opHost, DevelopersApi client,
-                                                                            RegisterSiteResponseData setupResponse) throws ApiException {
+    private static GetClientTokenResponse getGetClientTokenResponseData(String opHost, DevelopersApi client,
+                                                                        RegisterSiteResponse setupResponse) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid","oxd"));
+        params.setScope(Lists.newArrayList("openid", "oxd"));
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 
         final GetClientTokenResponse clientTokenResponse = client.getClientToken(params);
         assertNotNull(clientTokenResponse);
-        return clientTokenResponse.getData();
+        return clientTokenResponse;
     }
-
-
 }

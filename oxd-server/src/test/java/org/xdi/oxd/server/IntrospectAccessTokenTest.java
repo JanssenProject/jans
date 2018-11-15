@@ -1,14 +1,13 @@
 package org.xdi.oxd.server;
 
 import com.google.common.collect.Lists;
-import junit.framework.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.params.IntrospectAccessTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
+import org.xdi.oxd.common.response.IntrospectAccessTokenResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import static junit.framework.Assert.assertNotNull;
@@ -34,7 +33,7 @@ public class IntrospectAccessTokenTest {
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 
-        GetClientTokenResponse tokenResponse = client.getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+        GetClientTokenResponse tokenResponse = client.getClientToken(params);
 
         assertNotNull(tokenResponse);
         notEmpty(tokenResponse.getAccessToken());
@@ -43,16 +42,12 @@ public class IntrospectAccessTokenTest {
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectionResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams).dataAsResponse(IntrospectionResponse.class);
+        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams);
+
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());
-
-        final Integer issuedAt = introspectionResponse.getIssuedAt();
-        assertNotNull(issuedAt);
-        Integer expiresAt = introspectionResponse.getExpiresAt();
-        assertNotNull(expiresAt);
-        assertTrue(expiresAt >= issuedAt);
-        //todo : add check for nbf when ready
-
+        assertNotNull(introspectionResponse.getIssuedAt());
+        assertNotNull(introspectionResponse.getExpiresAt());
+        assertTrue(introspectionResponse.getExpiresAt() >= introspectionResponse.getIssuedAt());
     }
 }

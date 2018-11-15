@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
@@ -15,9 +15,9 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.CheckAccessTokenParams;
 import org.xdi.oxd.common.response.CheckAccessTokenResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 
 import java.util.Date;
 
@@ -35,7 +35,7 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
     }
 
     @Override
-    public CommandResponse execute(CheckAccessTokenParams params) throws Exception {
+    public IOpResponse execute(CheckAccessTokenParams params) throws Exception {
         final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();
@@ -49,7 +49,7 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
         opResponse.setActive(isAccessTokenValid(accessToken, jwt, discoveryResponse));
         opResponse.setIssuedAt(issuedAt);
         opResponse.setExpiresAt(expiresAt);
-        return okResponse(opResponse);
+        return opResponse;
     }
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {

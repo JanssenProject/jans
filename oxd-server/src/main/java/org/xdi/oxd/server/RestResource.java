@@ -1,11 +1,15 @@
 package org.xdi.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.*;
+import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.common.response.POJOResponse;
+import org.xdi.oxd.server.service.ConfigurationService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -187,6 +191,15 @@ public class RestResource {
         return process(CommandType.GET_RP, params, GetRpParams.class, authorization);
     }
 
+    @POST
+    @Path("/get-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getJwks(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization);
+    }
+
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return CoreUtils.createJsonMapper().readValue(params, clazz);
@@ -196,18 +209,24 @@ public class RestResource {
         }
     }
 
-    public static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
+    private static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
+        LOG.trace("Command: {}", paramsAsString);
         T params = read(paramsAsString, paramsClass);
         if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
             ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
         }
         Command command = new Command(commandType, params);
-        final String json = CoreUtils.asJsonSilently(ServerLauncher.getInjector().getInstance(Processor.class).process(command));
+        final IOpResponse response = ServerLauncher.getInjector().getInstance(Processor.class).process(command);
+        Object forJsonConversion = response;
+        if (response instanceof POJOResponse) {
+            forJsonConversion = ((POJOResponse) response).getNode();
+        }
+        final String json = CoreUtils.asJsonSilently(forJsonConversion);
         LOG.trace("Send back response: {}", json);
         return json;
     }
 
-    public static String validateAccessToken(String authorization) {
+    private static String validateAccessToken(String authorization) {
         final String prefix = "Bearer ";
         if (StringUtils.isNotEmpty(authorization) && authorization.startsWith(prefix)) {
             String accessToken = authorization.substring(prefix.length());
@@ -215,15 +234,12 @@ public class RestResource {
                 return accessToken;
             }
         }
+        final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
+            LOG.debug("Skip protection because protect_commands_with_access_token: false in configuration file.");
+            return "";
+        }
         LOG.debug("No access token provided in Authorization header. Forbidden.");
-        throw new WebApplicationException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
-    }
-
-    public static String forbiddenErrorResponse() {
-        final ErrorResponse error = new ErrorResponse("403");
-        error.setErrorDescription("Forbidden Access");
-
-        CommandResponse commandResponse = CommandResponse.error().setData(new POJONode(error));
-        return CoreUtils.asJsonSilently(commandResponse);
+        throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).build());
     }
 }
