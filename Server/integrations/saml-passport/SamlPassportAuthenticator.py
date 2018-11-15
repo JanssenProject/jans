@@ -683,7 +683,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         try:
             jwt = Jwt.parse(value)
-            user_profile_json = jwt_claims.getClaimAsString("data")
+            user_profile_json = jwt.getClaimAsString("data")
             if StringHelper.isEmpty(user_profile_json):
                 return False
         except:
