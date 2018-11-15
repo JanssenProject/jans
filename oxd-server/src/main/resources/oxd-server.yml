@@ -1,7 +1,7 @@
 
 # server configuration
 use_client_authentication_for_pat: true
-trust_all_certs: true
+trust_all_certs: false
 trust_store_path: ''
 trust_store_password: ''
 crypt_provider_key_store_path: ''
