@@ -3,6 +3,7 @@ package org.xdi.service.cache;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
