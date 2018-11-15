@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.xdi.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -113,6 +114,10 @@ public class Rp implements Serializable {
     private Date rptCreatedAt;
     @JsonProperty(value = "oxd_rp_programming_language")
     private String oxdRpProgrammingLanguage;
+    @JsonProperty(value = "access_token_as_jwt")
+    private Boolean accessTokenAsJwt = false;
+    @JsonProperty(value = "access_token_signing_alg")
+    private String accessTokenSigningAlg;
 
     public Rp() {
     }
@@ -172,6 +177,24 @@ public class Rp implements Serializable {
 
         this.umaProtectedResources = conf.umaProtectedResources;
         this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
+        this.accessTokenAsJwt = conf.accessTokenAsJwt;
+        this.accessTokenSigningAlg = conf.accessTokenSigningAlg;
+    }
+
+    public Boolean getAccessTokenAsJwt() {
+        return accessTokenAsJwt;
+    }
+
+    public void setAccessTokenAsJwt(Boolean accessTokenAsJwt) {
+        this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public String getAccessTokenSigningAlg() {
+        return accessTokenSigningAlg;
+    }
+
+    public void setAccessTokenSigningAlg(String accessTokenSigningAlg) {
+        this.accessTokenSigningAlg = accessTokenSigningAlg;
     }
 
     public List<String> getFrontChannelLogoutUri() {
@@ -188,6 +211,10 @@ public class Rp implements Serializable {
 
     public void setTokenEndpointAuthSigningAlg(String tokenEndpointAuthSigningAlg) {
         this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
+    }
+
+    public MinimumRp asMinimumRp() {
+        return new MinimumRp(oxdId, clientName);
     }
 
     public String getTokenEndpointAuthMethod() {
@@ -343,6 +370,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getContacts() {
+        if (contacts == null) {
+            contacts = new ArrayList<>();
+        }
         return contacts;
     }
 
@@ -351,6 +381,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getAcrValues() {
+        if (acrValues == null) {
+            acrValues = new ArrayList<>();
+        }
         return acrValues;
     }
 
@@ -359,6 +392,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getClaimsLocales() {
+        if (claimsLocales == null) {
+            claimsLocales = new ArrayList<>();
+        }
         return claimsLocales;
     }
 
@@ -383,6 +419,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getGrantType() {
+        if (grantType == null) {
+            grantType = new ArrayList<>();
+        }
         return grantType;
     }
 
@@ -422,6 +461,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getClaimsRedirectUri() {
+        if (claimsRedirectUri == null) {
+            claimsRedirectUri = new ArrayList<>();
+        }
         return claimsRedirectUri;
     }
 
@@ -430,6 +472,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getRedirectUris() {
+        if (redirectUris == null) {
+            redirectUris = new ArrayList<>();
+        }
         return redirectUris;
     }
 
@@ -438,6 +483,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getResponseTypes() {
+        if (responseTypes == null) {
+            responseTypes = new ArrayList<>();
+        }
         return responseTypes;
     }
 
@@ -446,6 +494,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getScope() {
+        if (scope == null) {
+            scope = new ArrayList<>();
+        }
         return scope;
     }
 
@@ -454,6 +505,9 @@ public class Rp implements Serializable {
     }
 
     public List<String> getUiLocales() {
+        if (uiLocales == null) {
+            uiLocales = new ArrayList<>();
+        }
         return uiLocales;
     }
 
@@ -589,6 +643,8 @@ public class Rp implements Serializable {
                 ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
                 ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
+                ", accessTokenAsJwt=" + accessTokenAsJwt +
+                ", accessTokenSigningAlg=" + accessTokenSigningAlg +
                 '}';
     }
 }

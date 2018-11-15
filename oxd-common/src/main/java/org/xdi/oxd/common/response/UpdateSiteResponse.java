@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class UpdateSiteResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "oxd_id")
     private String oxdId;
 
     public UpdateSiteResponse() {

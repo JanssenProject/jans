@@ -11,12 +11,13 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.UpdateSiteParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
 import javax.ws.rs.HttpMethod;
@@ -44,7 +45,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     }
 
     @Override
-    public CommandResponse execute(UpdateSiteParams params) {
+    public IOpResponse execute(UpdateSiteParams params) {
         final Rp rp = getRp();
 
         LOG.info("Updating rp ... rp: " + rp);
@@ -52,7 +53,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         UpdateSiteResponse response = new UpdateSiteResponse();
         response.setOxdId(rp.getOxdId());
-        return okResponse(response);
+        return response;
     }
 
     private void persistRp(Rp rp, UpdateSiteParams params) {
@@ -70,7 +71,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     private void updateRegisteredClient(Rp rp, UpdateSiteParams params) {
         if (StringUtils.isBlank(rp.getClientRegistrationClientUri())) {
             LOG.error("Registration client url is blank.");
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
+            throw new HttpException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
         }
 
         final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());
@@ -136,6 +137,20 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
             request.setRedirectUris(Lists.newArrayList(redirectUris));
             rp.setRedirectUris(Lists.newArrayList(redirectUris));
+        }
+
+        if (params.getAccessTokenAsJwt() != null) {
+            rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+            request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+        } else {
+            request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
+        }
+
+        if (params.getAccessTokenSigningAlg() != null) {
+            rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
+            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
+        } else {
+            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(rp.getAccessTokenSigningAlg()));
         }
 
         if (!Strings.isNullOrEmpty(params.getClientJwksUri())) {

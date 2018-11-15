@@ -1,4 +1,4 @@
-/**
+/*
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
 package org.xdi.oxd.server.op;
@@ -68,6 +68,8 @@ public class OperationFactory {
                     return new RemoveSiteOperation(command, injector);
                 case GET_RP:
                     return new GetRpOperation(command, injector);
+                case GET_JWKS:
+                    return new GetJwksOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {

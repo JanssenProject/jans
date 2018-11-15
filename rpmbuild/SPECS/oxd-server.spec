@@ -1,7 +1,7 @@
 %define name1 oxd-server
 Name:           oxd-server
 Version:        4.0.0
-Release:        1.centos6
+Release:        Beta.centos6
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
 License:        MIT
@@ -45,7 +45,7 @@ install -m 644 oxd-server/src/main/resources/log4j.xml %{buildroot}/opt/oxd-serv
 install -m 644 oxd-server/src/main/resources/oxd-conf.json %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/src/main/resources/oxd-default-site-config.json %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/target/oxd-server-jar-with-dependencies.jar %{buildroot}/opt/oxd-server/lib/
-install -m 644 oxd-https-extension/target/oxd-https-extension-4.0.0.Final.jar %{buildroot}/opt/oxd-https-extension/lib/
+install -m 644 oxd-https-extension/target/oxd-https-extension-4.0.0.Beta.jar %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 oxd-https-extension/oxd-https.keystore %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 oxd-https-extension/oxd-https.yml %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 README.md %{buildroot}/opt/oxd-server/
@@ -116,5 +116,5 @@ chkconfig --del oxd-https-extension
 /var/log/oxd-server
 
 %changelog
-* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0.0-1
-- Release 4.0.0
+* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0.0-Beta
+- Release 4.0.0-Beta

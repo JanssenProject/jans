@@ -8,10 +8,10 @@ import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
+import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
@@ -35,7 +35,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
     }
 
     @Override
-    public CommandResponse execute(GetAccessTokenByRefreshTokenParams params) throws Exception {
+    public IOpResponse execute(GetAccessTokenByRefreshTokenParams params) throws Exception {
         try {
 
             final Rp rp = getRp();
@@ -50,7 +50,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
                     response.setRefreshToken(tokenResponse.getRefreshToken());
                     response.setScope(Utils.stringToList(tokenResponse.getScope()));
 
-                    return okResponse(response);
+                    return response;
                 } else {
                     LOG.error("access_token is blank in response, params: " + params + ", response: " + tokenResponse);
                     LOG.error("Please check AS logs for more details (oxauth.log for CE).");
@@ -58,12 +58,12 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
             } else {
                 LOG.error("No response from TokenClient");
             }
-        } catch (ErrorResponseException e) {
+        } catch (HttpException e) {
             throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        throw HttpException.internalError();
     }
 
     private String scopeAsString(GetAccessTokenByRefreshTokenParams params) throws UnsupportedEncodingException {

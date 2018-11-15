@@ -30,7 +30,7 @@ public class IntrospectRptTest {
         params.setOxdId(site.getOxdId());
         params.setRpt(rptResponse.getRpt());
 
-        final CorrectRptIntrospectionResponse response = client.introspectRpt(Tester.getAuthorization(), params).dataAsResponse(CorrectRptIntrospectionResponse.class);
+        final CorrectRptIntrospectionResponse response = client.introspectRpt(Tester.getAuthorization(), params);
 
         assertNotNull(response);
         assertTrue(response.getActive());

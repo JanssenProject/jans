@@ -1,7 +1,7 @@
 package io.swagger.client.api;
 
 import com.google.common.base.Preconditions;
-import io.swagger.client.model.RegisterSiteResponseData;
+import io.swagger.client.model.RegisterSiteResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeSuite;
@@ -26,7 +26,7 @@ public class SetUpTest {
             Tester.setHost(host);
             Tester.setOpHost(opHost);
 
-            RegisterSiteResponseData clientSetupInfo = RegisterSiteTest.registerSite(Tester.api(), opHost, redirectUrl);
+            RegisterSiteResponse clientSetupInfo = RegisterSiteTest.registerSite(Tester.api(), opHost, redirectUrl);
             Tester.setSetupData(clientSetupInfo);
 
             Preconditions.checkNotNull(Tester.getAuthorization());

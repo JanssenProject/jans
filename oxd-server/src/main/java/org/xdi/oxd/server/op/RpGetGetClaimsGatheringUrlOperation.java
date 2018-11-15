@@ -4,11 +4,11 @@ import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RpGetClaimsGatheringUrlParams;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.RpGetClaimsGatheringUrlResponse;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.Rp;
 
 /**
@@ -25,7 +25,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
     }
 
     @Override
-    public CommandResponse execute(RpGetClaimsGatheringUrlParams params) {
+    public IOpResponse execute(RpGetClaimsGatheringUrlParams params) {
         validate(params);
 
         final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
@@ -41,15 +41,15 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
         final RpGetClaimsGatheringUrlResponse r = new RpGetClaimsGatheringUrlResponse();
         r.setUrl(url);
         r.setState(state);
-        return okResponse(r);
+        return r;
     }
 
     private void validate(RpGetClaimsGatheringUrlParams params) {
         if (StringUtils.isBlank(params.getTicket())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_TICKET_PARAMETER);
+            throw new HttpException(ErrorResponseCode.NO_UMA_TICKET_PARAMETER);
         }
         if (StringUtils.isBlank(params.getClaimsRedirectUri())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER);
+            throw new HttpException(ErrorResponseCode.NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER);
         }
     }
 }

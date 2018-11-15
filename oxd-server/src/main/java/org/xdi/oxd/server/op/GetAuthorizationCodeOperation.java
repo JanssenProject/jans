@@ -12,9 +12,9 @@ import org.xdi.oxauth.client.ClientUtils;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
 import org.xdi.oxd.common.response.GetAuthorizationCodeResponse;
+import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.service.Rp;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
     }
 
     @Override
-    public CommandResponse execute(GetAuthorizationCodeParams params) {
+    public IOpResponse execute(GetAuthorizationCodeParams params) {
         final Rp site = getRp();
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
@@ -64,7 +64,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         ClientUtils.showClient(authorizeClient);
         if (response != null) {
             getStateService().putState(params.getState());
-            return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
+            return new GetAuthorizationCodeResponse(response.getCode());
         } else {
             LOG.error("Failed to get response from oxauth client.");
         }

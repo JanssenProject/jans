@@ -32,6 +32,9 @@ public class Tester {
         if (StringUtils.countMatches(targetHost, ":") < 2 && "http://localhost".equalsIgnoreCase(targetHost) || "http://127.0.0.1".equalsIgnoreCase(targetHost) ) {
             targetHost = targetHost + ":" + SetUpTest.SUPPORT.getLocalPort();
         }
+        if ("localhost".equalsIgnoreCase(targetHost)) {
+            targetHost = "http://localhost:" + SetUpTest.SUPPORT.getLocalPort();
+        }
         return OxdClient.newClient(targetHost);
     }
 
@@ -44,7 +47,7 @@ public class Tester {
             params.setClientId(Tester.getSetupClient().getClientId());
             params.setClientSecret(Tester.getSetupClient().getClientSecret());
 
-            GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params).dataAsResponse(GetClientTokenResponse.class);
+            GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params);
             assertNotNull(resp);
             assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 

@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.*;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.OxdServerConfiguration;
 import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.util.Pair;
@@ -20,21 +20,21 @@ public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
 
-    public void notNull(IParams params) {
+    private void notNull(IParams params) {
         if (params == null) {
-            throw new ErrorResponseException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
+            throw new HttpException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
         }
     }
 
     public void notBlankOxdId(String oxdId) {
         if (Strings.isNullOrEmpty(oxdId)) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
         }
     }
 
     public void notBlankOpHost(String opHost) {
         if (Strings.isNullOrEmpty(opHost)) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
+            throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
         }
     }
 
@@ -57,7 +57,7 @@ public class ValidationService {
                         return new Pair<>(rp, false);
                     }
                 }
-            } catch (ErrorResponseException e) {
+            } catch (HttpException e) {
                 // ignore
             } catch (Exception e) {
                 LOG.error("Failed to identify RP. Message: " + e.getMessage(), e);
@@ -101,7 +101,7 @@ public class ValidationService {
         final String accessToken = params.getProtectionAccessToken();
 
         if (StringUtils.isBlank(accessToken)) {
-            throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
         if (params instanceof RegisterSiteParams) {
             return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
@@ -115,21 +115,21 @@ public class ValidationService {
 
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", clientId: " + rp.getClientId());
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
+            throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
         if (!IntrospectionService.getScopes(introspectionResponse).contains("oxd")) {
-            throw new ErrorResponseException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
+            throw new HttpException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
         if (introspectionResponse.getClientId().equals(rp.getClientId())) {
             return true;
         }
-        throw new ErrorResponseException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
+        throw new HttpException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
     }
 
     public IntrospectionResponse introspect(String accessToken, String oxdId) {
         if (StringUtils.isBlank(accessToken)) {
-            throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
@@ -142,7 +142,7 @@ public class ValidationService {
 
         if (!response.isActive()) {
             LOG.debug("access_token is not active.");
-            throw new ErrorResponseException(ErrorResponseCode.INACTIVE_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.INACTIVE_PROTECTION_ACCESS_TOKEN);
         }
         return response;
     }
@@ -154,7 +154,7 @@ public class ValidationService {
 
     public Rp validate(Rp rp) {
         if (rp == null) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_OXD_ID);
+            throw new HttpException(ErrorResponseCode.INVALID_OXD_ID);
         }
 
         notBlankOxdId(rp.getOxdId());

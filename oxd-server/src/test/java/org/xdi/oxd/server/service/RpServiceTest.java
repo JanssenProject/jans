@@ -3,7 +3,7 @@ package org.xdi.oxd.server.service;
 import com.google.inject.Inject;
 import org.testng.annotations.*;
 import org.xdi.oxd.common.ErrorResponseCode;
-import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.PersistenceService;
 
@@ -86,8 +86,8 @@ public class RpServiceTest {
         try {
             service.getRp(rp.getOxdId());
             throw new AssertionError("RP is not removed.");
-        } catch (ErrorResponseException e) {
-            assertEquals(e.getErrorResponseCode(), ErrorResponseCode.INVALID_OXD_ID);
+        } catch (HttpException e) {
+            assertEquals(e.getCode(), ErrorResponseCode.INVALID_OXD_ID);
         }
     }
 
