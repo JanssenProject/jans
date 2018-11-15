@@ -10,7 +10,6 @@ import org.xdi.oxauth.client.JwkClient;
 import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxd.common.CoreUtils;
 import org.xdi.util.Pair;
 
 import java.util.concurrent.TimeUnit;
@@ -24,12 +23,14 @@ public class PublicOpKeyService {
     private static final Logger LOG = LoggerFactory.getLogger(PublicOpKeyService.class);
 
     private final Cache<Pair<String, String>, RSAPublicKey> cache;
+    private final HttpService httpService;
 
     @Inject
-    public PublicOpKeyService(ConfigurationService configurationService) {
+    public PublicOpKeyService(ConfigurationService configurationService, HttpService httpService) {
         this.cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(configurationService.get().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
                 .build();
+        this.httpService = httpService;
     }
 
 
@@ -46,7 +47,7 @@ public class PublicOpKeyService {
             RSAPublicKey publicKey = null;
 
             JwkClient jwkClient = new JwkClient(jwkSetUri);
-            jwkClient.setExecutor(new ApacheHttpClient4Executor(CoreUtils.createHttpClientTrustAll()));
+            jwkClient.setExecutor(new ApacheHttpClient4Executor(httpService.getHttpClient()));
             JwkResponse jwkResponse = jwkClient.exec();
             if (jwkResponse != null && jwkResponse.getStatus() == 200) {
                 PublicKey pk = jwkResponse.getPublicKey(keyId);
