@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.crypto.RSADecrypter;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jwt.EncryptedJWT;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -25,7 +18,6 @@ import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
-import org.jose4j.lang.JoseException;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
@@ -38,19 +30,13 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.crypto.*;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.*;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
-import java.text.ParseException;
 import java.util.Arrays;
 
 /**
@@ -103,10 +89,10 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             JsonWebEncryption receiverJwe = new JsonWebEncryption();
 
-//            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
-//            receiverJwe.setAlgorithmConstraints(algConstraints);
-//            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "A256CBC+HS512", "RSA1_5");
-//            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
+            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
+            receiverJwe.setAlgorithmConstraints(algConstraints);
+            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "A256CBC+HS512", "RSA1_5");
+            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
 
             receiverJwe.setKey(privateKey);
 
