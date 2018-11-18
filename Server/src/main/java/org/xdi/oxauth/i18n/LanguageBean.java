@@ -27,70 +27,73 @@ import org.apache.logging.log4j.util.Strings;
 @RequestScoped
 public class LanguageBean implements Serializable {
 
-    private static final long serialVersionUID = -6723715664277907737L;
+	private static final long serialVersionUID = -6723715664277907737L;
 
-    private static final String COOKIE_NAME = "org.gluu.i18n.Locale";
-    private static final int DEFAULT_MAX_AGE = 31536000; // 1 year in seconds
-    private static final String COOKIE_PATH = "/";
+	private static final String COOKIE_NAME = "org.gluu.i18n.Locale";
+	private static final int DEFAULT_MAX_AGE = 31536000; // 1 year in seconds
+	private static final String COOKIE_PATH = "/";
 
-    private String localeCode = Locale.ENGLISH.getLanguage();
+	private String localeCode = Locale.ENGLISH.getLanguage();
 
-    public String getLocaleCode() {
-        String localeCode = getCookieValue();
-        if (localeCode != null)
-            setLocaleCode(localeCode);
+	public String getLocaleCode() {
+		try {
+			String localeCode = getCookieValue();
+			if (localeCode != null)
+				setLocaleCode(localeCode);
+			return this.localeCode;
+		} catch (Exception e) {
+			return localeCode;
+		}
+	}
 
-        return this.localeCode;
-    }
+	public void setLocaleCode(String localeCode) {
+		Iterator<Locale> locales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
+		while (locales.hasNext()) {
+			Locale locale = locales.next();
+			if (!Strings.isEmpty(locale.getLanguage()) && locale.getLanguage().equals(localeCode)) {
+				this.localeCode = localeCode;
+				FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
+				setCookieValue(localeCode);
+				break;
+			}
+		}
+	}
 
-    public void setLocaleCode(String localeCode) {
-        Iterator<Locale> locales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
-        while (locales.hasNext()) {
-            Locale locale = locales.next();
-            if (!Strings.isEmpty(locale.getLanguage()) && locale.getLanguage().equals(localeCode)) {
-                this.localeCode = localeCode;
-                FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
-                setCookieValue(localeCode);
-                break;
-            }
-        }
-    }
+	public String getMessage(String key) {
+		FacesContext context = FacesContext.getCurrentInstance();
+		ResourceBundle bundle = context.getApplication().getResourceBundle(context, "msgs");
+		String result;
+		try {
+			result = bundle.getString(key);
+		} catch (MissingResourceException e) {
+			result = "???" + key + "??? not found";
+		}
+		return result;
+	}
 
-    public String getMessage(String key) {
-        FacesContext context = FacesContext.getCurrentInstance();
-        ResourceBundle bundle = context.getApplication().getResourceBundle(context, "msgs");
-        String result;
-        try {
-            result = bundle.getString(key);
-        } catch (MissingResourceException e) {
-            result = "???" + key + "??? not found";
-        }
-        return result;
-    }
+	private void setCookieValue(String value) {
+		FacesContext ctx = FacesContext.getCurrentInstance();
 
-    private void setCookieValue(String value) {
-        FacesContext ctx = FacesContext.getCurrentInstance();
+		if (ctx == null)
+			return;
+		HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
+		Cookie cookie = new Cookie(COOKIE_NAME, value);
+		cookie.setMaxAge(DEFAULT_MAX_AGE);
+		cookie.setPath(COOKIE_PATH);
+		response.addCookie(cookie);
+	}
 
-        if (ctx == null)
-            return;
-        HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
-        Cookie cookie = new Cookie(COOKIE_NAME, value);
-        cookie.setMaxAge(DEFAULT_MAX_AGE);
-        cookie.setPath(COOKIE_PATH);
-        response.addCookie(cookie);
-    }
+	private String getCookieValue() {
+		Cookie cookie = getCookie();
+		return cookie == null ? null : cookie.getValue();
+	}
 
-    private String getCookieValue() {
-        Cookie cookie = getCookie();
-        return cookie == null ? null : cookie.getValue();
-    }
-
-    private Cookie getCookie() {
-        FacesContext ctx = FacesContext.getCurrentInstance();
-        if (ctx != null) {
-            return (Cookie) ctx.getExternalContext().getRequestCookieMap().get(COOKIE_NAME);
-        } else {
-            return null;
-        }
-    }
+	private Cookie getCookie() {
+		FacesContext ctx = FacesContext.getCurrentInstance();
+		if (ctx != null) {
+			return (Cookie) ctx.getExternalContext().getRequestCookieMap().get(COOKIE_NAME);
+		} else {
+			return null;
+		}
+	}
 }
