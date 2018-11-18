@@ -130,9 +130,11 @@ input.btn.btn-done {
 						<h4>#{msgs['twilio.verificationcode']}</h4>
 						<p>
 							<h:outputText value="#{msgs['twilio.codesent']} " escape="false" />
-							<h:outputText value="#{authenticator.getMaskMobilenumber(identity.getWorkingParameter('mobile_number'))}" />
+							<h:outputText
+								value="#{authenticator.getTwilioNumber()}" />
 						</p>
-						<h:messages style = "color:red;margin:8px; margin-left:0px;" id="messages" globalOnly="true" styleClass="message text-center"
+						<h:messages style="margin-left:-35px;text-align: center;color:red;" id="messages"
+							globalOnly="true" styleClass="message text-center"
 							errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
 							rendered="#{showGlobalMessages != 'false'}" />
 						<input name="passcode" type="text" class="form-control"
