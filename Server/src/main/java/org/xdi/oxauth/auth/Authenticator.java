@@ -278,7 +278,7 @@ public class Authenticator {
 			logger.info("#########################################################################");
 			logger.info("#########################################################################");
 			logger.info("++++++++++++++++++++++++++++++++++++++++++CURRENT ACR:" + this.authAcr);
-			logger.info("++++++++++++++++++++++++++++++++++++++++++CURRENT STEO:" + this.authStep);
+			logger.info("++++++++++++++++++++++++++++++++++++++++++CURRENT STEP:" + this.authStep);
 			int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 			if (apiVersion > 1) {
 				logger.trace("According to API version script supports steps overriding");
@@ -709,7 +709,7 @@ public class Authenticator {
 	private boolean authenticationFailed() {
 		if (!this.addedErrorMessage) {
 			if (this.authAcr.equalsIgnoreCase("twilio_sms") && this.authStep == 2) {
-				facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect twilio code,Please try again");
+				facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.");
 			} else {
 				addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
 			}
@@ -758,10 +758,25 @@ public class Authenticator {
 		facesMessages.add(severity, message);
 	}
 
-	public String getMaskMobilenumber(String mobile_number) {
-		String phone = (String) identity.getWorkingParameter("receiver");
+	public String getTwilioNumber() {
+		String result = getFullNumber();
+		if (result != null && result.length() > 7) {
+			String sub = result.substring(4, 6);
+			result = result.replace(sub, "XX");
+		}
+		return result;
+	}
+
+	private String getFullNumber() {
+		String phone = (String) identity.getWorkingParameter("mobile_number");
 		if (phone == null || phone.isEmpty()) {
-			phone = identity.getSessionId().getSessionAttributes().get("receiver");
+			phone = (String) identity.getWorkingParameter("mobile");
+		}
+		if (phone == null || phone.isEmpty()) {
+			phone = identity.getSessionId().getSessionAttributes().get("mobile_number");
+		}
+		if (phone == null || phone.isEmpty()) {
+			phone = identity.getSessionId().getSessionAttributes().get("mobile");
 		}
 		return phone == null ? "you." : phone;
 	}
