@@ -7,8 +7,8 @@
 package org.xdi.oxauth.model.jwe;
 
 import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import com.nimbusds.jwt.EncryptedJWT;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -44,6 +44,8 @@ import java.util.Arrays;
  * @version July 31, 2016
  */
 public class JweDecrypterImpl extends AbstractJweDecrypter {
+
+    private static final DefaultJWEDecrypterFactory DECRYPTER_FACTORY = new DefaultJWEDecrypterFactory();
 
     private PrivateKey privateKey;
     private RSAPrivateKey rsaPrivateKey;
@@ -87,7 +89,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
 
-            JWEDecrypter decrypter = new RSADecrypter(privateKey);
+            JWEDecrypter decrypter = DECRYPTER_FACTORY.createJWEDecrypter(encryptedJwt.getHeader(), privateKey);
             decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
             encryptedJwt.decrypt(decrypter);
             final String base64encodedPayload = encryptedJwt.getPayload().toString();
