@@ -6,9 +6,8 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.AESEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.bouncycastle.crypto.BlockCipher;
@@ -59,11 +58,21 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         this.publicKey = publicKey;
     }
 
+    public JWEEncrypter createJweEncrypter() throws JOSEException, InvalidJweException {
+        final KeyEncryptionAlgorithm keyEncryptionAlgorithm = getKeyEncryptionAlgorithm();
+        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP) {
+            return new RSAEncrypter(new RSAKey.Builder((RSAPublicKey) publicKey).build());
+        } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+            return new AESEncrypter(sharedSymmetricKey);
+        } else {
+            throw new InvalidJweException("The key encryption algorithm is not supported");
+        }
+    }
+
     @Override
     public Jwe encrypt(Jwe jwe) throws InvalidJweException {
         try {
-            RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) publicKey).build();
-            RSAEncrypter encrypter = new RSAEncrypter(rsaKey);
+            JWEEncrypter encrypter = createJweEncrypter();
 
             JWEObject jweObject = new JWEObject(
                     JWEHeader.parse(jwe.getHeader().toJsonObject().toString()),
