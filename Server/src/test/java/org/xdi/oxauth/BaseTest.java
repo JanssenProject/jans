@@ -6,12 +6,11 @@
 
 package org.xdi.oxauth;
 
-import java.util.List;
-import java.util.Map.Entry;
+import org.testng.Assert;
 
 import javax.ws.rs.core.Response;
-
-import org.testng.Assert;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author Javier Rojas
@@ -19,7 +18,7 @@ import org.testng.Assert;
  */
 public abstract class BaseTest extends ConfigurableTest {
 
-	public void showTitle(String title) {
+	public static void showTitle(String title) {
 		title = "TEST: " + title;
 
 		System.out.println("#######################################################");
