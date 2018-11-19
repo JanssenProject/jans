@@ -26,6 +26,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.exception.InvalidParameterException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
+import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
@@ -88,8 +89,26 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             jwe.setHeader(new JwtHeader(encodedHeader));
 
             EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
+            
+            Key encriptionKey = privateKey;
+            if (privateKey != null) {
+                encriptionKey = privateKey;
+            } else if (encodedEncryptedKey != null) {
+                setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(
+                        jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM)));
+                setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(
+                        jwe.getHeader().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD)));
 
-            JWEDecrypter decrypter = DECRYPTER_FACTORY.createJWEDecrypter(encryptedJwt.getHeader(), privateKey);
+                byte[] contentMasterKey = decryptEncryptionKey(encodedEncryptedKey);
+//                SecretKeySpec keySpec = new SecretKeySpec(contentMasterKey, "AES");
+//                SecretKeyFactory keyFactory = SecretKeyFactory
+//                        .getInstance("PBKDF2WithHmacSHA1");
+//                keyFactory.generateSecret(keySpec);
+            } else {
+                throw new InvalidJweException("The encription key is null");
+            }
+
+            JWEDecrypter decrypter = DECRYPTER_FACTORY.createJWEDecrypter(encryptedJwt.getHeader(), encriptionKey);
             decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
             encryptedJwt.decrypt(decrypter);
             final String base64encodedPayload = encryptedJwt.getPayload().toString();
