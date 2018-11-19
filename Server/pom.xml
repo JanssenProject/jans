@@ -715,6 +715,14 @@
 					<artifactId>jetty-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
+                <dependency>
+                    <groupId>com.nimbusds</groupId>
+                    <artifactId>nimbus-jose-jwt</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.bitbucket.b_c</groupId>
+                    <artifactId>jose4j</artifactId>
+                </dependency>
 			</dependencies>
 
 			<build>

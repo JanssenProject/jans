@@ -6,6 +6,10 @@
 
 package org.xdi.oxauth.model.jwe;
 
+import com.nimbusds.jose.JWEDecrypter;
+import com.nimbusds.jose.crypto.RSADecrypter;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jwt.EncryptedJWT;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -14,7 +18,6 @@ import org.bouncycastle.crypto.engines.AESWrapEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
-import org.jose4j.jwe.JsonWebEncryption;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
@@ -82,43 +85,16 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             jwe.setEncodedIntegrityValue(encodedIntegrityValue);
             jwe.setHeader(new JwtHeader(encodedHeader));
 
-            // jose4j
-
-            JsonWebEncryption receiverJwe = new JsonWebEncryption();
-
-//            org.jose4j.jwa.AlgorithmConstraints algConstraints = new org.jose4j.jwa.AlgorithmConstraints(org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP);
-//            receiverJwe.setAlgorithmConstraints(algConstraints);
-//            org.jose4j.jwa.AlgorithmConstraints encConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.RSA_OAEP, ContentEncryptionAlgorithmIdentifiers.AES_128_GCM, "A128KW", "A256KW", "A256GCM", "A256CBC+HS512", "RSA1_5");
-//            receiverJwe.setContentEncryptionAlgorithmConstraints(encConstraints);
-
-            receiverJwe.setKey(privateKey);
-
-            receiverJwe.setCompactSerialization(encryptedJwe);
-            String payload = new String(receiverJwe.getPlaintextBytes());
-            jwe.setClaims(new JwtClaims(payload));
-
-            // joseJwt
-
-            /*EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
+            EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
 
             JWEDecrypter decrypter = new RSADecrypter(privateKey);
             decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-
             encryptedJwt.decrypt(decrypter);
-
-            String payload = encryptedJwt.getPayload().toString();
-            jwe.setClaims(new JwtClaims(payload));*/
+            final String base64encodedPayload = encryptedJwt.getPayload().toString();
+            jwe.setClaims(new JwtClaims(base64encodedPayload));
 
             return jwe;
-        } /*catch (ParseException e) {
-            throw new InvalidJweException(e);
-        } catch (JOSEException e) {
-            throw new InvalidJweException(e);
-        } catch (InvalidJwtException e) {
-            throw new InvalidJweException(e);
-        } catch (JoseException e) {
-            throw new InvalidJweException(e);
-        }*/ catch (Exception e) {
+        } catch (Exception e) {
             throw new InvalidJweException(e);
         }
     }
