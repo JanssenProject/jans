@@ -14,7 +14,7 @@ info:
     url: https://github.com/GluuFederation/oxd/blob/master/LICENSE
 
 host: gluu.org
-basePath: /oxd/4.0.beta
+basePath: /
 schemes:
  - https
 
