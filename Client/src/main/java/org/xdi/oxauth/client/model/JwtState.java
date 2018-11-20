@@ -15,23 +15,23 @@ import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
+import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 
 import static org.xdi.oxauth.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 3, 2017
+ * @version November 20, 2018
  */
 public class JwtState {
 
@@ -411,30 +411,12 @@ public class JwtState {
             String claims = payloadToJSONObject().toString();
             String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
-            byte[] contentMasterKey = new byte[blockEncryptionAlgorithm.getCmkLength() / 8];
-            SecureRandom random = new SecureRandom();
-            random.nextBytes(contentMasterKey);
-            String encodedEncryptedKey = jweEncrypter.generateEncryptedKey(contentMasterKey);
+            Jwe jwe = new Jwe();
+            jwe.setHeader(new JwtHeader(encodedHeader));
+            jwe.setClaims(new JwtClaims(encodedClaims));
+            jweEncrypter.encrypt(jwe);
 
-            byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
-            random.nextBytes(initializationVector);
-            String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
-
-            String additionalAuthenticatedData = encodedHeader + "."
-                    + encodedEncryptedKey + "."
-                    + encodedInitializationVector;
-
-            Pair<String, String> result = jweEncrypter.generateCipherTextAndIntegrityValue(contentMasterKey, initializationVector,
-                    additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING),
-                    encodedClaims.getBytes(Util.UTF8_STRING_ENCODING));
-            String encodedCipherText = result.getFirst();
-            String encodedIntegrityValue = result.getSecond();
-
-            encodedJwt = encodedHeader + "."
-                    + encodedEncryptedKey + "."
-                    + encodedInitializationVector + "."
-                    + encodedCipherText + "."
-                    + encodedIntegrityValue;
+            encodedJwt = jwe.toString();
         } else {
             if (cryptoProvider == null) {
                 throw new Exception("The Crypto Provider cannot be null.");
