@@ -18,6 +18,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
@@ -75,12 +76,11 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             EncryptedJWT encryptedJwt = EncryptedJWT.parse(encryptedJwe);
 
-            Key encriptionKey = null;
-            setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(
-                    jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM)));
-            setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(
-                    jwe.getHeader().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD)));
+            setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM)));
+            setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(jwe.getHeader().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD)));
+
             final KeyEncryptionAlgorithm keyEncryptionAlgorithm = getKeyEncryptionAlgorithm();
+            Key encriptionKey = null;
             if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP) {
                 encriptionKey = privateKey;
             } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
@@ -98,7 +98,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             }
 
             JWEDecrypter decrypter = DECRYPTER_FACTORY.createJWEDecrypter(encryptedJwt.getHeader(), encriptionKey);
-            decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+            decrypter.getJCAContext().setProvider(SecurityProviderUtility.getInstance());
             encryptedJwt.decrypt(decrypter);
             final String base64encodedPayload = encryptedJwt.getPayload().toString();
             jwe.setClaims(new JwtClaims(base64encodedPayload));
