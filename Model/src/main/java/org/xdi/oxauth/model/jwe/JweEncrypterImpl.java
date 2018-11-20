@@ -58,11 +58,17 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         this.publicKey = publicKey;
     }
 
-    public JWEEncrypter createJweEncrypter() throws JOSEException, InvalidJweException {
+    public JWEEncrypter createJweEncrypter() throws JOSEException, InvalidJweException, NoSuchAlgorithmException {
         final KeyEncryptionAlgorithm keyEncryptionAlgorithm = getKeyEncryptionAlgorithm();
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP) {
             return new RSAEncrypter(new RSAKey.Builder((RSAPublicKey) publicKey).build());
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+            if (sharedSymmetricKey.length != 16) { // 128 bit padding
+                MessageDigest sha = MessageDigest.getInstance("SHA-256");
+                sharedSymmetricKey = sha.digest(sharedSymmetricKey);
+                sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, 16);
+            }
+
             return new AESEncrypter(sharedSymmetricKey);
         } else {
             throw new InvalidJweException("The key encryption algorithm is not supported");
