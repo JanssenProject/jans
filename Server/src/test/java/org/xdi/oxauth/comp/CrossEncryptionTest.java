@@ -20,7 +20,6 @@ import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.testng.Assert;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -342,7 +341,6 @@ public class CrossEncryptionTest {
         decryptAndValidateSignatureWithGluu(jweString);
     }
 
-    @Ignore
     @Test
     public void nestedJWTProducedByGluu() throws Exception {
         AppConfiguration appConfiguration = new AppConfiguration();
