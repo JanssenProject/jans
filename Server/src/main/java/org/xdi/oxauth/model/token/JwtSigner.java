@@ -95,4 +95,8 @@ public class JwtSigner {
     public SignatureAlgorithm getSignatureAlgorithm() {
         return signatureAlgorithm;
     }
+
+    public void setCryptoProvider(AbstractCryptoProvider cryptoProvider) {
+        this.cryptoProvider = cryptoProvider;
+    }
 }
