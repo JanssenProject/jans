@@ -10,6 +10,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.AESEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.SignedJWT;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
@@ -17,13 +18,13 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.util.Base64Util;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.Arrays;
-
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author Javier Rojas Blum
@@ -72,14 +73,19 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         }
     }
 
+    public static Payload createPayload(Jwe jwe) throws ParseException, InvalidJwtException, UnsupportedEncodingException {
+        if (jwe.getSignedJWTPayload() != null) {
+            return new Payload(SignedJWT.parse(jwe.getSignedJWTPayload().toString()));
+        }
+        return new Payload(Base64Util.base64urlencode(jwe.getClaims().toJsonString().getBytes("UTF-8")));
+    }
+
     @Override
     public Jwe encrypt(Jwe jwe) throws InvalidJweException {
         try {
             JWEEncrypter encrypter = createJweEncrypter();
 
-            JWEObject jweObject = new JWEObject(
-                    JWEHeader.parse(jwe.getHeader().toJsonObject().toString()),
-                    new Payload(Base64Util.base64urlencode(jwe.getClaims().toJsonString().getBytes("UTF-8"))));
+            JWEObject jweObject = new JWEObject(JWEHeader.parse(jwe.getHeader().toJsonObject().toString()), createPayload(jwe));
 
             jweObject.encrypt(encrypter);
             String encryptedJwe = jweObject.serialize();
