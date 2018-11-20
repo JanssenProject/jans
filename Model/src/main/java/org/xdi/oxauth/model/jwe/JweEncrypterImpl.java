@@ -23,6 +23,8 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * @author Javier Rojas Blum
  * @version November 20, 2018
@@ -49,10 +51,19 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP) {
             return new RSAEncrypter(new RSAKey.Builder((RSAPublicKey) publicKey).build());
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            if (sharedSymmetricKey.length != 16) { // 128 bit padding
+            if (sharedSymmetricKey == null) {
+                throw new InvalidJweException("The shared symmetric key is null");
+            }
+
+            int keyLength = 16;
+            if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+                keyLength = 32;
+            }
+
+            if (sharedSymmetricKey.length != keyLength) {
                 MessageDigest sha = MessageDigest.getInstance("SHA-256");
                 sharedSymmetricKey = sha.digest(sharedSymmetricKey);
-                sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, 16);
+                sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, keyLength);
             }
 
             return new AESEncrypter(sharedSymmetricKey);
