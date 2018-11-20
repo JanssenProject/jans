@@ -23,7 +23,7 @@ import org.xdi.util.ArrayHelper;
  */
 public class FileConfiguration {
 
-    private static final Logger LOG = Logger.getLogger(FileConfiguration.class);
+    private static final Logger log = Logger.getLogger(FileConfiguration.class);
 
     private String fileName;
     private boolean isResource;
@@ -32,8 +32,8 @@ public class FileConfiguration {
     private PropertiesConfiguration propertiesConfiguration;
     private Properties properties;
 
-    private final ReentrantLock reloadLock = new ReentrantLock();
-    private boolean isReload = false;
+	private final ReentrantLock reloadLock = new ReentrantLock();
+	private boolean isReload = false;
 
     public FileConfiguration(String fileName) {
         this(fileName, false);
@@ -51,24 +51,30 @@ public class FileConfiguration {
         }
     }
 
-    protected void loadProperties() {
-        try {
-            this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
-            this.loaded = true;
-        } catch (ConfigurationException ex) {
-            LOG.debug(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
-        }
-    }
+	protected void loadProperties() {
+		try {
+			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
+			this.loaded = true;
+		} catch (ConfigurationException ex) {
+			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+		} catch (Exception e) {
+			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			log.error(e.getMessage(), e);
+		}
+	}
 
-    protected void loadResourceProperties() {
-        LOG.debug(String.format("Loading '%s' configuration file from resources", this.fileName));
-        try {
-            this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
-            this.loaded = true;
-        } catch (ConfigurationException ex) {
-            LOG.debug(String.format("Failed to load '%s' configuration file from resources", this.fileName));
-        }
-    }
+	protected void loadResourceProperties() {
+		log.debug(String.format("Loading '%s' configuration file from resources", this.fileName));
+		try {
+			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
+			this.loaded = true;
+		} catch (ConfigurationException ex) {
+			log.error(String.format("Failed to load '%s' configuration file from resources", this.fileName));
+		} catch (Exception e) {
+			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			log.error(e.getMessage(), e);
+		}
+	}
 
     public void reload() {
         this.isReload = true;
@@ -105,7 +111,7 @@ public class FileConfiguration {
         try {
             this.propertiesConfiguration.save();
         } catch (ConfigurationException ex) {
-            LOG.debug(String.format("Failed to save '%s' configuration file to tomcat config folder", this.fileName));
+            log.debug(String.format("Failed to save '%s' configuration file to tomcat config folder", this.fileName));
         }
     }
 
@@ -226,7 +232,6 @@ public class FileConfiguration {
     }
 
     public boolean isKeyExist(String key) {
-        @SuppressWarnings("unchecked")
         Iterator<String> keyIterator = propertiesConfiguration.getKeys();
         while (keyIterator.hasNext()) {
             String k = keyIterator.next();
@@ -239,7 +244,6 @@ public class FileConfiguration {
     }
 
     public String getKey(String value) {
-        @SuppressWarnings("unchecked")
         Iterator<String> keyIterator = propertiesConfiguration.getKeys();
         while (keyIterator.hasNext()) {
             String k = keyIterator.next();
