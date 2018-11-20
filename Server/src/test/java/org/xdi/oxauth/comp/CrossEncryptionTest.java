@@ -362,8 +362,7 @@ public class CrossEncryptionTest {
 
             @Override
             public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
-                JWK jwk = JWK.parse(recipientJwkJson);
-                RSAPrivateKey privateKey = ((RSAKey) jwk).toRSAPrivateKey();
+                RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
 
                 Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 signature.initSign(privateKey);
