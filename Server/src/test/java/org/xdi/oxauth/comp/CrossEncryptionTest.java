@@ -3,12 +3,16 @@ package org.xdi.oxauth.comp;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.EncryptedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.codec.Charsets;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.codehaus.jettison.json.JSONObject;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -16,11 +20,18 @@ import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.junit.Test;
+import org.testng.Assert;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
+import org.xdi.oxauth.model.jws.RSASigner;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
 
@@ -283,5 +294,51 @@ public class CrossEncryptionTest {
             System.out.println("Error encryption with Nimbus: " + e.getMessage());
             return null;
         }
+    }
+
+
+    @Test
+    public void nestedJWT() throws Exception {
+
+        RSAKey senderJWK = (RSAKey) JWK.parse(senderJwkJson);
+
+        RSAKey recipientPublicJWK = (RSAKey) (JWK.parse(recipientJwkJson));
+
+        // Create JWT
+        SignedJWT signedJWT = new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(senderJWK.getKeyID()).build(),
+                new JWTClaimsSet.Builder()
+                        .subject("testi")
+                        .issuer("https:devgluu.saminet.local")
+                        .build());
+
+        signedJWT.sign(new RSASSASigner(senderJWK));
+
+        JWEObject jweObject = new JWEObject(
+                new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A128GCM)
+                        .contentType("JWT") // required to indicate nested JWT
+                        .build(),
+                new Payload(signedJWT));
+
+        // Encrypt with the recipient's public key
+        RSAEncrypter encrypter = new RSAEncrypter(recipientPublicJWK);
+        jweObject.encrypt(encrypter);
+
+        final String jweString = jweObject.serialize();
+
+        JWK jwk = JWK.parse(recipientJwkJson);
+        java.security.interfaces.RSAPrivateKey rsaPrivateKey = ((RSAKey) jwk).toRSAPrivateKey();
+
+        JweDecrypterImpl decrypter = new JweDecrypterImpl(rsaPrivateKey);
+
+        decrypter.setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.RSA_OAEP);
+        decrypter.setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.A128GCM);
+
+        final Jwt jwt = decrypter.decrypt(jweString).getSignedJWTPayload();
+
+        final RSAPublicKey senderPublicKey = RSAKeyFactory.valueOf(JSONWebKey.fromJSONObject(new JSONObject(senderJwkJson))).getPublicKey();
+        Assert.assertTrue(new RSASigner(SignatureAlgorithm.RS256, senderPublicKey).validate(jwt));
+
+        System.out.println("Gluu decrypt and nested jwt signature verification succeed: " + jwt.getClaims().toJsonString());
     }
 }
