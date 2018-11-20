@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.util;
 
-import java.security.Provider;
 import java.security.Security;
 
 import org.apache.log4j.Logger;
@@ -16,14 +15,17 @@ public class SecurityProviderUtility {
 
 	private static final Logger log = Logger.getLogger(JwtUtil.class);
 
+	private static BouncyCastleProvider bouncyCastleProvider;
+
 	public static void installBCProvider(boolean silent) {
-		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-		if (provider == null) {
+		bouncyCastleProvider = (BouncyCastleProvider) Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+		if (bouncyCastleProvider == null) {
 			if (!silent) {
 				log.info("Adding Bouncy Castle Provider");
 			}
 
-			Security.addProvider(new BouncyCastleProvider());
+			bouncyCastleProvider = new BouncyCastleProvider();
+			Security.addProvider(bouncyCastleProvider);
 		} else {
 			if (!silent) {
 				log.info("Bouncy Castle Provider was added already");
@@ -33,6 +35,11 @@ public class SecurityProviderUtility {
 
 	public static void installBCProvider() {
 		installBCProvider(false);
+	}
+	
+	public static BouncyCastleProvider getInstance() {
+	    return bouncyCastleProvider;
+	    
 	}
 
 }
