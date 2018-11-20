@@ -18,6 +18,9 @@ public class CryptoProviderFactory {
     public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
         WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
+        if (webKeyStorage == null) {
+            return null;
+        }
 
         switch (webKeyStorage) {
             case KEYSTORE:
