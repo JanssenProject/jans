@@ -23,6 +23,7 @@ public class CacheProviderFactory {
     private CacheConfiguration cacheConfiguration;
 
     @Inject
+    @Any
     private Instance<CacheProvider> instance;
 
     @Produces
