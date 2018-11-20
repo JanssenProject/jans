@@ -6,12 +6,7 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -28,6 +23,7 @@ import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
@@ -39,11 +35,15 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.base.Strings;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version November 20, 2018
  */
 public class JwtAuthorizationRequest {
 
@@ -66,15 +66,15 @@ public class JwtAuthorizationRequest {
     private IdTokenMember idTokenMember;
 
     private String encodedJwt;
-    
+
     private AppConfiguration appConfiguration;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
         try {
-        	this.appConfiguration = appConfiguration;
-        	this.responseTypes = new ArrayList<ResponseType>();
-        	this.scopes = new ArrayList<String>();
-        	this.prompts = new ArrayList<Prompt>();
+            this.appConfiguration = appConfiguration;
+            this.responseTypes = new ArrayList<ResponseType>();
+            this.scopes = new ArrayList<String>();
+            this.prompts = new ArrayList<Prompt>();
             this.encodedJwt = encodedJwt;
 
             if (encodedJwt != null && !encodedJwt.isEmpty()) {
@@ -98,31 +98,20 @@ public class JwtAuthorizationRequest {
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
                         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(appConfiguration.getKeyStoreFile(),
-                        		appConfiguration.getKeyStoreSecret(), appConfiguration.getDnName());
+                                appConfiguration.getKeyStoreSecret(), appConfiguration.getDnName());
                         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
                         jweDecrypter = new JweDecrypterImpl(privateKey);
                     } else {
-                        ClientService clientService = CdiUtil.bean(ClientService.class); 
+                        ClientService clientService = CdiUtil.bean(ClientService.class);
                         jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING));
                     }
                     jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
                     jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
 
-                    byte[] contentMasterKey = jweDecrypter.decryptEncryptionKey(encodedEncryptedKey);
-                    byte[] initializationVector = Base64Util.base64urldecode(encodedInitializationVector);
-                    byte[] authenticationTag = Base64Util.base64urldecode(encodedIntegrityValue);
-                    String additionalAuthenticatedData = encodedHeader + "."
-                            + encodedEncryptedKey + "."
-                            + encodedInitializationVector;
+                    Jwe jwe = jweDecrypter.decrypt(encodedJwt);
 
-                    String encodedClaim = jweDecrypter.decryptCipherText(encodedCipherText, contentMasterKey, initializationVector,
-                            authenticationTag, additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
-                    String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-                    String payload = new String(Base64Util.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
-                    payload = payload.replace("\\", "");
-
-                    loadHeader(header);
-                    loadPayload(payload);
+                    loadHeader(jwe.getHeader().toJsonString());
+                    loadPayload(jwe.getClaims().toJsonString());
                 } else if (parts.length == 2 || parts.length == 3) {
                     String encodedHeader = parts[0];
                     String encodedClaim = parts[1];
@@ -321,13 +310,13 @@ public class JwtAuthorizationRequest {
     }
 
     private boolean validateSignature(SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
-        ClientService clientService = CdiUtil.bean(ClientService.class); 
+        ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-        		appConfiguration);
+                appConfiguration);
         boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
 
         return validSignature;
