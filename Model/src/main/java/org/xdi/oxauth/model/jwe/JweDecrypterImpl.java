@@ -87,10 +87,16 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
                 if (sharedSymmetricKey == null) {
                     throw new InvalidJweException("The shared symmetric key is null");
                 }
-                if (sharedSymmetricKey.length != 16) { // 128 bit padding
+
+                int keyLength = 16;
+                if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+                    keyLength = 32;
+                }
+
+                if (sharedSymmetricKey.length != keyLength) {
                     MessageDigest sha = MessageDigest.getInstance("SHA-256");
                     sharedSymmetricKey = sha.digest(sharedSymmetricKey);
-                    sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, 16);
+                    sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, keyLength);
                 }
                 encriptionKey = new SecretKeySpec(sharedSymmetricKey, 0, sharedSymmetricKey.length, "AES");
             } else {
