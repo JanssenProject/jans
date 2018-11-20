@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.jwe;
 
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 
 import java.security.PrivateKey;
@@ -23,6 +24,8 @@ public class Jwe extends JsonWebResponse {
     private String encodedInitializationVector;
     private String encodedCiphertext;
     private String encodedIntegrityValue;
+
+    private Jwt signedJWTPayload;
 
     public Jwe() {
         encodedHeader = null;
@@ -92,6 +95,14 @@ public class Jwe extends JsonWebResponse {
         }
 
         return jwe;
+    }
+
+    public Jwt getSignedJWTPayload() {
+        return signedJWTPayload;
+    }
+
+    public void setSignedJWTPayload(Jwt signedJWTPayload) {
+        this.signedJWTPayload = signedJWTPayload;
     }
 
     @Override

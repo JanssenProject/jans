@@ -7,14 +7,15 @@
 package org.xdi.oxauth.model.jwe;
 
 import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import com.nimbusds.jwt.EncryptedJWT;
+import com.nimbusds.jwt.SignedJWT;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
@@ -106,6 +107,12 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             JWEDecrypter decrypter = DECRYPTER_FACTORY.createJWEDecrypter(encryptedJwt.getHeader(), encriptionKey);
             decrypter.getJCAContext().setProvider(SecurityProviderUtility.getInstance());
             encryptedJwt.decrypt(decrypter);
+
+            final SignedJWT signedJWT = encryptedJwt.getPayload().toSignedJWT();
+            if (signedJWT != null) {
+                jwe.setSignedJWTPayload(Jwt.parse(signedJWT.serialize()));
+            }
+
             final String base64encodedPayload = encryptedJwt.getPayload().toString();
             jwe.setClaims(new JwtClaims(base64encodedPayload));
 
