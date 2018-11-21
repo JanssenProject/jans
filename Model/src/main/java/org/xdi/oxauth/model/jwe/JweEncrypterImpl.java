@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtHeader;
+import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
 
 import java.io.UnsupportedEncodingException;
@@ -85,6 +86,9 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         try {
             JWEEncrypter encrypter = createJweEncrypter();
 
+            if (jwe.getSignedJWTPayload() != null) {
+                jwe.getHeader().setContentType(JwtType.JWT);
+            }
             JWEObject jweObject = new JWEObject(JWEHeader.parse(jwe.getHeader().toJsonObject().toString()), createPayload(jwe));
 
             jweObject.encrypt(encrypter);
