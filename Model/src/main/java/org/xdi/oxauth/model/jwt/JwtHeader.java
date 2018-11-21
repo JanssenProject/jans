@@ -112,6 +112,10 @@ public class JwtHeader extends JwtClaimSet {
         }
     }
 
+    public JwtType getContentType() {
+        return JwtType.fromString(getClaimAsString(CONTENT_TYPE));
+    }
+
     /**
      * Identifies the block encryption algorithm used to encrypt the Plaintext to produce the Cipher Text.
      *
