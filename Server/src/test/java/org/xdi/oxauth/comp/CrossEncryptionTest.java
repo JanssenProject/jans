@@ -424,7 +424,10 @@ public class CrossEncryptionTest {
         decrypter.setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.RSA_OAEP);
         decrypter.setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.A128GCM);
 
-        final Jwt jwt = decrypter.decrypt(jweString).getSignedJWTPayload();
+        final Jwe jwe = decrypter.decrypt(jweString);
+        assertEquals(JwtType.JWT, jwe.getHeader().getContentType());
+
+        final Jwt jwt = jwe.getSignedJWTPayload();
 
         final RSAPublicKey senderPublicKey = RSAKeyFactory.valueOf(getSenderWebKey()).getPublicKey();
         Assert.assertTrue(new RSASigner(SignatureAlgorithm.RS256, senderPublicKey).validate(jwt));
