@@ -55,6 +55,12 @@ os_commands = {
 
     }
 
+
+
+
+
+
+
 def detect_os_type():
     try:
         p = platform.linux_distribution()
@@ -70,6 +76,18 @@ try:
     commands = os_commands[os_type[0]][os_type[1]]
 except:
     sys.exit('Unsupported Operating System, exiting.')
+
+
+detected_oxd = 'oxd-server'
+
+
+stop_gluu_command = {
+        'ubuntu16': 'service {0} stop',
+    }
+
+os_type_str = ''.join(os_type)
+
+commands.insert(0, stop_gluu_command[os_type_str].format(detected_oxd))
 
 
 if os_type[0] in ('ubuntu','debian'):
@@ -181,9 +199,9 @@ and your config/data will be migrated to the new version.
         sys.exit("Migration cancelled, exiting.")
 
     if os_type[0] in ('ubuntu','debian'):
-        commands.insert(0,'apt-get purge -y oxd-server')
+        commands.insert(1,'apt-get purge -y oxd-server')
     elif os_type[0] in ('centos','red'):
-        commands.insert(0,'yum remove -y oxd-server')
+        commands.insert(1,'yum remove -y oxd-server')
 
 if update_required:
 
