@@ -102,7 +102,7 @@ public class LdapStatusTimer {
             if (ldapConnectionProvider.getConnectionPool() == null) {
             	log.error("{} is empty", connectionProviderName);
             } else {
-            	log.debug("{} statistics: {}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 
@@ -112,7 +112,7 @@ public class LdapStatusTimer {
             if (bindLdapConnectionProvider.getConnectionPool() == null) {
             	log.error("{} is empty", bindConnectionProviderName);
             } else {
-            	log.debug("{} statistics: {}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 	}
