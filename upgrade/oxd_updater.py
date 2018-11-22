@@ -205,14 +205,26 @@ and your config/data will be migrated to the new version.
 
 if update_required:
 
+
+    oxd_conf_json = json_load_byteified(oxd_conf_json_fn)
+    
+
+    current_dbFileLocation = '/opt/oxd-server/data/oxd_db'
+    
+    if oxd_conf_json.get('storage_configuration') and oxd_conf_json['storage_configuration'].get('dbFileLocation'):
+        current_dbFileLocation = oxd_conf_json['storage_configuration']['dbFileLocation']
+
+    current_dbFile = current_dbFileLocation+'.mv.db'
+
     commands.append('wget https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.beta/upgrade/oxd-server.yml.temp  -O oxd-server.yml.temp')
+
 
     for b_file in ( 
                     oxd_conf_json_fn,
                     oxd_default_site_config_json_fn,
                     log4j_xml_fn,
                     oxd4_server_yaml_fn,
-                    '/opt/oxd-server/data/oxd_db.mv.db',
+                    current_dbFile,
                     ):
 
         if os.path.exists(b_file):
@@ -247,9 +259,6 @@ if update_required:
     oxd_conf_json_back_fn = os.path.join(oxd_backup_dir, 'oxd-conf.json')
     oxd_default_site_config_json_back_fn = os.path.join(oxd_backup_dir, 'oxd-default-site-config.json')
     log4j_xml_back_fn = os.path.join(oxd_backup_dir, 'log4j.xml')
-
-
-    oxd_conf_json = json_load_byteified(oxd_conf_json_back_fn)
 
     oxd_default_site_config_json = json_load_byteified(oxd_default_site_config_json_back_fn)
 
