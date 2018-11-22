@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import sys
 import time
 import glob
 import shutil
@@ -177,14 +178,12 @@ and your config/data will be migrated to the new version.
 
     answer = raw_input(ask)
     if not answer or answer.lower()[0] != 'y':
-        sys.exit("Migrating cancelled, exiting.")
+        sys.exit("Migration cancelled, exiting.")
 
     if os_type[0] in ('ubuntu','debian'):
         commands.insert(0,'apt-get purge -y oxd-server')
     elif os_type[0] in ('centos','red'):
         commands.insert(0,'yum remove -y oxd-server')
-
-
 
 if update_required:
 
@@ -212,12 +211,12 @@ if update_required:
 
 print "About to execute following commands:"
 print '\n'.join(commands)
-print "You can interrupt by pressing Ctr+C in 10 seconds"
-print
-for i in range(10,-1,-1):
-    print "Execution will start in {0} seconds".format(i)
-    time.sleep(1)
-print
+
+ask = "Do you want to continue [y|N]: "
+
+answer = raw_input(ask)
+if not answer or answer.lower()[0] != 'y':
+    sys.exit("Migration cancelled, exiting.")
 
 for cmd in commands:
     print "Executing", cmd
