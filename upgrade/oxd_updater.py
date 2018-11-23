@@ -57,10 +57,6 @@ os_commands = {
 
 
 
-
-
-
-
 def detect_os_type():
     try:
         p = platform.linux_distribution()
@@ -83,7 +79,10 @@ detected_oxd = 'oxd-server'
 
 stop_gluu_command = {
         'ubuntu16': 'service {0} stop',
+        'ubuntu14': 'service {0} stop',
+        'centos7': 'service {0} stop',
     }
+
 
 os_type_str = ''.join(os_type)
 
@@ -102,8 +101,10 @@ elif os_type[0] in ('centos','red'):
             'wget https://repo.gluu.org/rhel/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'yum clean all',
-            'yum install -y oxd-server-4.0.beta'
+            'yum install -y oxd-server-4.0.beta',
         ]
+
+add_commands = []
 
 try:
     import pip
@@ -113,7 +114,6 @@ except:
                 ]
 try:
     import yaml
-    add_commands = []
 except:
     add_commands.append('pip install pyyaml')
 
