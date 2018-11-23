@@ -184,16 +184,11 @@ public class MdsTocService {
             while (iter.hasNext()) {
                 JsonNode tocEntry = iter.next();
 
-                String aaguid = null;
-                if (tocEntry.get("aaguid") != null) {
-                    aaguid = tocEntry.get("aaguid").asText();
-                } else if (tocEntry.get("aaid") != null) {
-                    aaguid = tocEntry.get("aaid").asText();
-                } else {
-                    log.info("Ignoring TOC entry without either aaid or aaguid");
+                if (tocEntry.get("aaguid") == null) {
                     continue;
                 }
 
+                String aaguid = tocEntry.get("aaguid").asText();
                 log.info("Added TOC entry {} from {} with status {}", aaguid, path, tocEntry.get("statusReports").findValue("status"));
                 tocEntries.put(aaguid, tocEntry);
             }
