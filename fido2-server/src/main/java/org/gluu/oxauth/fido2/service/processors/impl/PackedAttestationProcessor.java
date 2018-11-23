@@ -31,7 +31,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
+import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
@@ -59,7 +60,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     private CertificateValidator certificateValidator;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private Base64Service base64Service;
@@ -68,7 +69,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     private CertificationKeyStoreUtils utils;
 
     @Inject
-    private CryptoUtilsBouncyCastle cryptoUtils;
+    private CryptoUtils cryptoUtils;
 
     @Override
     public AttestationFormat getAttestationFormat() {
@@ -112,7 +113,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
             throw new UnsupportedOperationException("TODO");
         } else {
-            PublicKey publicKey = uncompressedECPointHelper.getPublicKeyFromUncompressedECPoint(authData.getCOSEPublicKey());
+            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCOSEPublicKey());
             commonVerifiers.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
         }
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());

@@ -9,10 +9,10 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2Configuration {
-    
+
     private String certFilesFolder;
 
-    private String mdsTocRootFileLocation;
+    private String mdsTocRootCertFile;
     private String mdsTocFilesFolder;
 
     private String certificationServerMetadataFolder;
@@ -33,12 +33,12 @@ public class Fido2Configuration {
         this.certFilesFolder = certFilesFolder;
     }
 
-    public String getMdsTocRootFileLocation() {
-        return mdsTocRootFileLocation;
+    public String getMdsTocRootCertFile() {
+        return mdsTocRootCertFile;
     }
 
-    public void setMdsTocRootFileLocation(String mdsTocRootFileLocation) {
-        this.mdsTocRootFileLocation = mdsTocRootFileLocation;
+    public void setMdsTocRootCertFile(String mdsTocRootCertFile) {
+        this.mdsTocRootCertFile = mdsTocRootCertFile;
     }
 
     public String getMdsTocFilesFolder() {
