@@ -33,7 +33,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
@@ -76,7 +76,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
     private DataMapperService dataMapperService;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private Base64Service base64Service;

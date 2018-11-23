@@ -25,7 +25,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.google.safetynet.AttestationStatement;
@@ -61,7 +61,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     private CertificateValidator certificateValidator;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private CertificationKeyStoreUtils utils;

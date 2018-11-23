@@ -30,7 +30,7 @@ import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.cert.PublicKeyCredentialDescriptor;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
-import org.gluu.oxauth.fido2.model.entry.RegistrationStatus;
+import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationStatus;
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.fido2.service.AuthenticatorAttestationVerifier;
@@ -113,15 +113,15 @@ public class AttestationService {
         log.info("Challenge {}", clientDataChallenge);
         // String clientDataOrigin = clientDataJSONNode.get("origin").asText();
 
-        List<Fido2RegistrationEntry> registrationEntries = registrationsRepository.findAllByChallenge(clientDataChallenge);
+        List<Fido2RegistrationData> registrationEntries = registrationsRepository.findAllByChallenge(clientDataChallenge);
         Fido2RegistrationData credentialFound = registrationEntries.parallelStream().findAny()
-                .orElseThrow(() -> new Fido2RPRuntimeException("Can't find request with matching challenge and domain")).getRegistrationData();
+                .orElseThrow(() -> new Fido2RPRuntimeException("Can't find request with matching challenge and domain"));
 
         domainVerifier.verifyDomain(credentialFound.getDomain(), clientDataJSONNode.get("origin").asText());
         CredAndCounterData attestationData = authenticatorAttestationVerifier.verifyAuthenticatorAttestationResponse(response, credentialFound);
 
         credentialFound.setUncompressedECPoint(attestationData.getUncompressedEcPoint());
-        credentialFound.setStatus(RegistrationStatus.REGISTERED);
+        credentialFound.setStatus(Fido2RegistrationStatus.REGISTERED);
         credentialFound.setW3cAuthenticatorAttenstationResponse(response.toString());
         credentialFound.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
         credentialFound.setCounter(attestationData.getCounters());
@@ -200,10 +200,10 @@ public class AttestationService {
         }
         credentialCreationOptionsNode.set("authenticatorSelection", params.get("authenticatorSelection"));
 
-        List<Fido2RegistrationEntry> existingRegistrationEntries = registrationsRepository.findAllByUsername(username);
-        List<JsonNode> excludedKeys = existingRegistrationEntries.parallelStream()
+        List<Fido2RegistrationData> existingRegistrations = registrationsRepository.findAllByUsername(username);
+        List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
                 .map(f -> dataMapperService.convertValue(
-                        new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(), f.getRegistrationData().getPublicKeyId()),
+                        new PublicKeyCredentialDescriptor(f.getType(), f.getPublicKeyId()),
                         JsonNode.class))
                 .collect(Collectors.toList());
 

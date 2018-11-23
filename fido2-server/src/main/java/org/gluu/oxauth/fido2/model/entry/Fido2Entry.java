@@ -14,14 +14,14 @@ import org.xdi.ldap.model.BaseEntry;
  * @version 11/02/2018
  */
 @LdapEntry(sortBy = "creationDate")
-@LdapObjectClass(values = { "top", "oxFido2fRequest" })
+@LdapObjectClass(values = { "top", "oxFido2Entry" })
 public class Fido2Entry extends BaseEntry {
 
     @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
     protected String id;
 
-    @LdapAttribute(name = "oxRequestId")
-    protected String requestId;
+    @LdapAttribute(name = "oxCodeChallenge")
+    protected String challange;
 
     @LdapAttribute(name = "creationDate")
     protected Date creationDate;
@@ -39,13 +39,13 @@ public class Fido2Entry extends BaseEntry {
         super(dn);
     }
 
-    public Fido2Entry(String dn, String id, String requestId, Date creationDate, String sessionId, String userInum) {
+    public Fido2Entry(String dn, String id, Date creationDate, String sessionId, String userInum, String challange) {
         super(dn);
         this.id = id;
-        this.requestId = requestId;
         this.creationDate = creationDate;
         this.sessionId = sessionId;
         this.userInum = userInum;
+        this.challange = challange;
     }
 
     public String getId() {
@@ -56,12 +56,12 @@ public class Fido2Entry extends BaseEntry {
         this.id = id;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getChallange() {
+        return challange;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setChallange(String challange) {
+        this.challange = challange;
     }
 
     public Date getCreationDate() {
