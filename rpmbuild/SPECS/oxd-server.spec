@@ -1,7 +1,7 @@
 %define name1 oxd-server-4.0.beta
 Name:           oxd-server-4.0.beta
 Version:        1
-Release:        centos6
+Release:        1.centos6
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
 License:        MIT
