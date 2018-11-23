@@ -2285,8 +2285,14 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.390 NAME 'oxAccessTokenSigningAlg'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.394 NAME 'oxAccessTokenLifetime'
-  DESC 'Lifetime of access token'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.391 NAME 'oxAttestationData'
+  DESC 'oxAttestationData'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.392 NAME 'oxAssertionData'
+  DESC 'oxAssertionData'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2596,5 +2602,17 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.51 NAME 'oxCacheEntity'
   STRUCTURAL
   MUST ( objectclass )
   MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxData )
+  X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.52 NAME 'oxFido2AssertionEntry'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( oxId $ creationDate $ oxSessionStateId $ oxCodeChallenge $ personInum $ oxAssertionData )
+  X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.53 NAME 'oxFido2AttestationEntry'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( oxId $ creationDate $ oxSessionStateId $ oxCodeChallenge $ personInum $ oxAttestationData )
   X-ORIGIN 'Gluu created objectclass' )
 
