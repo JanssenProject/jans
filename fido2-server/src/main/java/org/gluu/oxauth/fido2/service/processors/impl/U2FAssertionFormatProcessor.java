@@ -20,7 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
@@ -41,7 +41,7 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
     private Logger log;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private CommonVerifiers commonVerifiers;
@@ -69,8 +69,8 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
 
         try {
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
-            PublicKey publicKey = uncompressedECPointHelper.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
-            int coseCurveCode = uncompressedECPointHelper.getCodeCurve(uncompressedECPointNode);
+            PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
+            int coseCurveCode = coseService.getCodeCurve(uncompressedECPointNode);
             log.info("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
             log.info("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
             commonVerifiers.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());

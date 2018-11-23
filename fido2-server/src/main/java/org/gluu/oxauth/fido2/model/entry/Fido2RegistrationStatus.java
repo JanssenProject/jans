@@ -11,23 +11,8 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.mds;
+package org.gluu.oxauth.fido2.model.entry;
 
-import java.security.MessageDigest;
-
-import javax.enterprise.context.ApplicationScoped;
-
-@ApplicationScoped
-public class TOCEntryDigester {
-
-    private MessageDigest digester;
-
-    public MessageDigest getDigester() {
-        return digester;
-    }
-
-    public TOCEntryDigester setDigester(MessageDigest digester) {
-        this.digester = digester;
-        return this;
-    }
+public enum Fido2RegistrationStatus {
+    PENDING, REGISTERED
 }

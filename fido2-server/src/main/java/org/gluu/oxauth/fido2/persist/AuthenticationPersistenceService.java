@@ -22,10 +22,10 @@ import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 @ApplicationScoped
 public class AuthenticationPersistenceService {
 
-    public Optional<Fido2AuthenticationData> findByChallenge(String username) {
+    public Optional<Fido2AuthenticationData> findByChallenge(String challenge) {
         return null;
     }
 
-    public void save(Fido2AuthenticationData authenticationEntity) {
+    public void save(Fido2AuthenticationData authenticationData) {
     }
 }

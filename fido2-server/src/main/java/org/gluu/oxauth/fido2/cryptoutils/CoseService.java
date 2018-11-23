@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class COSEHelper {
+public class CoseService {
 
     private static final byte UNCOMPRESSED_POINT_INDICATOR = 0x04;
 

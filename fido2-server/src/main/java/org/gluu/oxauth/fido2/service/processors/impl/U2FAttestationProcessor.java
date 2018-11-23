@@ -23,7 +23,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
@@ -57,7 +57,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     private CertificateValidator certificateValidator;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private Base64Service base64Service;
@@ -99,7 +99,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
             throw new UnsupportedOperationException("TODO");
         } else {
-            PublicKey publicKey = uncompressedECPointHelper.getPublicKeyFromUncompressedECPoint(authData.getCOSEPublicKey());
+            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCOSEPublicKey());
             commonVerifiers.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
         }
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());

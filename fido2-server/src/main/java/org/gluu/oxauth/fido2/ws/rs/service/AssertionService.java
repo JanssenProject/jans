@@ -122,10 +122,9 @@ public class AssertionService {
         // challenge, clientDataChallenge);
         domainVerifier.verifyDomain(authenticationEntity.getDomain(), clientDataOrigin);
 
-        Fido2RegistrationEntry registrationEntry = registrationsRepository.findByPublicKeyId(keyId)
+        Fido2RegistrationData registration = registrationsRepository.findByPublicKeyId(keyId)
                 .orElseThrow(() -> new Fido2RPRuntimeException("Couldn't find the key"));
 
-        Fido2RegistrationData registration = registrationEntry.getRegistrationData();
         authenticatorAuthorizationVerifier.verifyAuthenticatorAssertionResponse(response, registration, authenticationEntity);
 
         authenticationEntity.setW3cAuthenticatorAssertionResponse(response.toString());
@@ -151,8 +150,8 @@ public class AssertionService {
         log.info("Options {} ", username);
 
         ObjectNode assertionOptionsResponseNode = dataMapperService.createObjectNode();
-        List<Fido2RegistrationEntry> registrationEntries = registrationsRepository.findAllByUsername(username);
-        if (registrationEntries.isEmpty()) {
+        List<Fido2RegistrationData> registrations = registrationsRepository.findAllByUsername(username);
+        if (registrations.isEmpty()) {
             throw new Fido2RPRuntimeException("No record of registration. Have you registered");
         }
 
@@ -167,8 +166,7 @@ public class AssertionService {
         publicKeyCredentialRpEntityNode.put("id", appConfiguration.getIssuer());
         ArrayNode publicKeyCredentialDescriptors = assertionOptionsResponseNode.putArray("allowCredentials");
 
-        for (Fido2RegistrationEntry registrationEntry : registrationEntries) {
-            Fido2RegistrationData registration = registrationEntry.getRegistrationData();
+        for (Fido2RegistrationData registration : registrations) {
             if (StringUtils.isEmpty(registration.getPublicKeyId())) {
                 throw new Fido2RPRuntimeException("Can't find associated key. Have you registered");
             }
