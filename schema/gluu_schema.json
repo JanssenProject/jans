@@ -5707,7 +5707,7 @@
                 "objectclass"
             ],
             "names": [
-                "oxFido2AssertionEntry"
+                "oxFido2AuthenticationEntry"
             ],
             "oid": "oxObjectClass:52",
             "sup": [
@@ -5729,7 +5729,7 @@
                 "objectclass"
             ],
             "names": [
-                "oxFido2AttestationEntry"
+                "oxFido2RegistrationEntry"
             ],
             "oid": "oxObjectClass:53",
             "sup": [

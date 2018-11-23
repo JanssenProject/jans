@@ -3049,14 +3049,14 @@ objectclass ( oxObjectClass:51 NAME 'oxCacheEntity'
 	MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxData )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:52 NAME 'oxFido2AssertionEntry'
+objectclass ( oxObjectClass:52 NAME 'oxFido2AuthenticationEntry'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
 	MAY ( oxId $ creationDate $ oxSessionStateId $ oxCodeChallenge $ personInum $ oxAssertionData )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:53 NAME 'oxFido2AttestationEntry'
+objectclass ( oxObjectClass:53 NAME 'oxFido2RegistrationEntry'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
