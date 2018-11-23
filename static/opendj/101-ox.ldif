@@ -2603,13 +2603,13 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.51 NAME 'oxCacheEntity'
   MUST ( objectclass )
   MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxData )
   X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.52 NAME 'oxFido2AssertionEntry'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.52 NAME 'oxFido2AuthenticationEntry'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
   MAY ( oxId $ creationDate $ oxSessionStateId $ oxCodeChallenge $ personInum $ oxAssertionData )
   X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.53 NAME 'oxFido2AttestationEntry'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.53 NAME 'oxFido2RegistrationEntry'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
