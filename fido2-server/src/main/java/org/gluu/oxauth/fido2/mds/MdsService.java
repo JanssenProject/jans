@@ -41,7 +41,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class MDSService {
+public class MdsService {
 
     @Inject
     private Logger log;
@@ -50,16 +50,13 @@ public class MDSService {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private MDSTOCHandler mDSTOCHandler;
+    private MdsTocService mdsTocService;
 
     @Inject
     private DataMapperService dataMapperService;
 
     @Inject
     private Base64Service base64Service;
-
-    @Inject
-    private TOCEntryDigester tocEntryDigester;
 
     @Inject
     private ResteasyClientFactory resteasyClientFactory;
@@ -70,7 +67,7 @@ public class MDSService {
     public JsonNode fetchMetadata(byte[] aaguidBuffer) {
         String aaguid = deconvert(aaguidBuffer);
 
-        JsonNode tocEntry = mDSTOCHandler.getAuthenticatorsMetadata(aaguid);
+        JsonNode tocEntry = mdsTocService.getAuthenticatorsMetadata(aaguid);
         if (tocEntry == null) {
             throw new Fido2RPRuntimeException("Authenticator not in TOC aaguid " + aaguid);
         }
@@ -101,7 +98,7 @@ public class MDSService {
             } catch (UnsupportedEncodingException e) {
                 throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + deconvert(aaguidBuffer));
             }
-            byte[] digest = tocEntryDigester.getDigester().digest(bodyBuffer);
+            byte[] digest = mdsTocService.getDigester().digest(bodyBuffer);
             if (!Arrays.equals(digest, base64Service.urlDecode(metadataHash))) {
                 throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + deconvert(aaguidBuffer));
             }
@@ -118,7 +115,6 @@ public class MDSService {
     }
 
     private void verifyTocEntryStatus(String aaguid, JsonNode tocEntry) {
-
         JsonNode statusReports = tocEntry.get("statusReports");
 
         Iterator<JsonNode> iter = statusReports.elements();

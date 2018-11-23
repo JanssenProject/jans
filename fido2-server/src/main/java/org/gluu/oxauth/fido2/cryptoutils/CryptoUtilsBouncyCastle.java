@@ -21,16 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
+@Deprecated
 @ApplicationScoped
 public class CryptoUtilsBouncyCastle {
 
@@ -39,13 +38,6 @@ public class CryptoUtilsBouncyCastle {
 
     @Inject
     private Base64Service base64Service;
-
-    private BouncyCastleProvider bouncyCastleProvider;
-
-    @PostConstruct
-    public void init() {
-        this.bouncyCastleProvider = new BouncyCastleProvider();
-    }
 
     public X509Certificate getCertificate(String x5c) {
         try {
@@ -66,10 +58,6 @@ public class CryptoUtilsBouncyCastle {
                 throw new Fido2RPRuntimeException("Certificate not valid ");
             }
         }).collect(Collectors.toList());
-    }
-
-    public BouncyCastleProvider getBouncyCastleProvider() {
-        return bouncyCastleProvider;
     }
 
 }

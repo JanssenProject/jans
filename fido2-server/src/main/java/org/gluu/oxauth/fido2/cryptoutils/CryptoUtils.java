@@ -15,9 +15,11 @@ package org.gluu.oxauth.fido2.cryptoutils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,5 +76,18 @@ public class CryptoUtils {
             }
         }).collect(Collectors.toList());
 
+    }
+
+    public List<X509Certificate> getCertificates(ArrayList<String> certificatePath) {
+        return certificatePath.parallelStream().map(f -> getCertificate(f)).filter(c -> {
+            try {
+                c.checkValidity();
+                PublicKey key = c.getPublicKey();
+                return true;
+            } catch (CertificateException e) {
+                log.warn("Certificate not valid {}", c.getIssuerDN().getName());
+                throw new Fido2RPRuntimeException("Certificate not valid ");
+            }
+        }).collect(Collectors.toList());
     }
 }

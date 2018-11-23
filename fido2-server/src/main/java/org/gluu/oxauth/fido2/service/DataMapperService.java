@@ -36,7 +36,7 @@ public class DataMapperService {
     public void init() {
         this.objectMapper = new ObjectMapper();
         this.cborFactory = new CBORFactory();
-        this.objectMapper = new ObjectMapper(cborFactory);
+        this.cborObjectMapper = new ObjectMapper(cborFactory);
     }
 
     public JsonNode readTree(byte[] content) throws IOException {

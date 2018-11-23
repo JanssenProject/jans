@@ -10,6 +10,7 @@ import java.util.Date;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 /**
  * Fido2 registration entry
@@ -17,6 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
+@LdapObjectClass(values = { "top", "oxFido2AuthenticationEntry" })
 public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
@@ -28,17 +30,9 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     public Fido2AuthenticationEntry() {
     }
 
-    public Fido2AuthenticationEntry(Fido2AuthenticationData authenticationData) {
-        this.authenticationData = authenticationData;
-        // TODO: Fix
-        // this.requestId = authenticationData.getRequestId();
-    }
-
     public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
             Fido2AuthenticationData authenticationData) {
-        // TODO: Fix
-        // super(dn, id, authenticationData.getRequestId(), creationDate, sessionId,
-        // userInum);
+        super(dn, id, creationDate, sessionId, userInum, authenticationData.getChallenge());
         this.authenticationData = authenticationData;
     }
 

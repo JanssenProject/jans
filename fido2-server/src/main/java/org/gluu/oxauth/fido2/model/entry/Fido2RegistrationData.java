@@ -32,7 +32,7 @@ public class Fido2RegistrationData extends Fido2Data {
 
     private String type;
 
-    private RegistrationStatus status;
+    private Fido2RegistrationStatus status;
 
     private int counter;
 
@@ -114,11 +114,11 @@ public class Fido2RegistrationData extends Fido2Data {
         this.type = type;
     }
 
-    public RegistrationStatus getStatus() {
+    public Fido2RegistrationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(RegistrationStatus status) {
+    public void setStatus(Fido2RegistrationStatus status) {
         this.status = status;
     }
 
