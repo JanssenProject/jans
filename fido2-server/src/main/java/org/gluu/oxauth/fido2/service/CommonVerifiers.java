@@ -43,6 +43,7 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.slf4j.Logger;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -62,9 +63,6 @@ public class CommonVerifiers {
 
     @Inject
     private DataMapperService dataMapperService;
-
-    @Inject
-    private CryptoUtilsBouncyCastle cryptoUtilsBouncyCastle;
 
     @Inject
     private Instance<AttestationFormatProcessor> supportedAttestationFormats;
@@ -218,7 +216,7 @@ public class CommonVerifiers {
     }
 
     private Signature getSignatureChecker(int signatureAlgorithm) {
-        Provider provider = cryptoUtilsBouncyCastle.getBouncyCastleProvider();
+        Provider provider = SecurityProviderUtility.getInstance();
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {

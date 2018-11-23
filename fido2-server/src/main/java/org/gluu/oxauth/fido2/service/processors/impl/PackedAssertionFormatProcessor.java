@@ -20,7 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.cryptoutils.COSEHelper;
+import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
@@ -42,7 +42,7 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
     private Logger log;
 
     @Inject
-    private COSEHelper uncompressedECPointHelper;
+    private CoseService coseService;
 
     @Inject
     private CommonVerifiers commonVerifiers;
@@ -83,7 +83,7 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         try {
 
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
-            PublicKey publicKey = uncompressedECPointHelper.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
+            PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
             log.info("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
             log.info("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));

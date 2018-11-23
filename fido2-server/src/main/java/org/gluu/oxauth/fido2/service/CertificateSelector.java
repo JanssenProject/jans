@@ -30,6 +30,7 @@ import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
 
 @ApplicationScoped
@@ -41,9 +42,6 @@ public class CertificateSelector {
     @Inject
     private AppConfiguration appConfiguration;
 
-    @Inject
-    private CryptoUtilsBouncyCastle cryptoUtilsBouncyCastle;
-
     public List<X509Certificate> selectRootCertificate(X509Certificate certificate) {
         ArrayList<X509Certificate> certs = new ArrayList<>();
 
@@ -53,7 +51,7 @@ public class CertificateSelector {
             return certs;
         }
 
-        Provider provider = cryptoUtilsBouncyCastle.getBouncyCastleProvider();
+        Provider provider = SecurityProviderUtility.getInstance();
 
         try {
             switch (certificate.getIssuerDN().getName()) {

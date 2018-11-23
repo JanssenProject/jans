@@ -19,22 +19,22 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
 
 @ApplicationScoped
 public class RegistrationPersistenceService {
-    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
+
+    public Optional<Fido2RegistrationData> findByPublicKeyId(String publicKeyId) {
         return null;
     }
 
-    public List<Fido2RegistrationEntry> findAllByUsername(String username) {
+    public List<Fido2RegistrationData> findAllByUsername(String username) {
         return null;
     }
 
-    public List<Fido2RegistrationEntry> findAllByChallenge(String username) {
+    public List<Fido2RegistrationData> findAllByChallenge(String challenge) {
         return null;
     }
 
-    public void save(Fido2RegistrationData credentialFound) {
+    public void save(Fido2RegistrationData registrationData) {
     }
 }

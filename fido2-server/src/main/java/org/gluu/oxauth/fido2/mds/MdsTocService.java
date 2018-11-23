@@ -61,16 +61,13 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 
 @ApplicationScoped
-public class MDSTOCHandler {
+public class MdsTocService {
 
     @Inject
     private Logger log;
 
     @Inject
     private DataMapperService dataMapperService;
-
-    @Inject
-    private TOCEntryDigester tocEntryDigester;
 
     @Inject
     private CertificateValidator certificateValidator;
@@ -85,6 +82,7 @@ public class MDSTOCHandler {
     private AppConfiguration appConfiguration;
 
     private Map<String, JsonNode> tocEntries;
+    private MessageDigest digester;
 
     @PostConstruct
     public void create() {
@@ -102,15 +100,12 @@ public class MDSTOCHandler {
             return new HashMap<String, JsonNode>();
         }
 
-        String mdsTocRootFileLocation = fido2Configuration.getMdsTocRootFileLocation();
+        String mdsTocRootCertFile = fido2Configuration.getMdsTocRootCertFile();
         String mdsTocFilesFolder = fido2Configuration.getMdsTocFilesFolder();
-        // String mdsTocFileLocation =
-        // fido2Configuration.getMdsTocFileLocation();
-        if (StringHelper.isEmpty(mdsTocRootFileLocation) || StringHelper.isEmpty(mdsTocFilesFolder)) {
+        if (StringHelper.isEmpty(mdsTocRootCertFile) || StringHelper.isEmpty(mdsTocFilesFolder)) {
             log.warn("Fido2 MDS properties should be set");
             return new HashMap<String, JsonNode>();
         }
-
         log.info("Populating TOC entries from {}", mdsTocFilesFolder);
 
         Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
@@ -122,14 +117,14 @@ public class MDSTOCHandler {
             while (iter.hasNext()) {
                 Path filePath = iter.next();
                 try {
-                    maps.add(parseTOC(mdsTocRootFileLocation, filePath));
+                    maps.add(parseTOC(mdsTocRootCertFile, filePath));
                 } catch (IOException e) {
                     log.warn("Can't access or open path " + path);
                 } catch (ParseException e) {
                     log.warn("Can't parse path " + path);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Something wrong with path ", e);
         } finally {
             if (directoryStream != null) {
@@ -144,9 +139,9 @@ public class MDSTOCHandler {
 
     }
 
-    private Map<String, JsonNode> parseTOC(String mdsTocRootFileLocation, String mdsTocFileLocation) {
+    private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, String mdsTocFileLocation) {
         try {
-            return parseTOC(mdsTocRootFileLocation, FileSystems.getDefault().getPath(mdsTocFileLocation));
+            return parseTOC(mdsTocRootCertFile, FileSystems.getDefault().getPath(mdsTocFileLocation));
         } catch (IOException e) {
             throw new Fido2RPRuntimeException("Unable to read TOC at " + mdsTocFileLocation);
         } catch (ParseException e) {
@@ -154,7 +149,7 @@ public class MDSTOCHandler {
         }
     }
 
-    private Map<String, JsonNode> parseTOC(String mdsTocRootFileLocation, Path path) throws IOException, ParseException {
+    private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, Path path) throws IOException, ParseException {
         BufferedReader reader = null;
         try {
             reader = Files.newBufferedReader(path);
@@ -165,7 +160,7 @@ public class MDSTOCHandler {
             JWSAlgorithm algorithm = jwsObject.getHeader().getAlgorithm();
 
             try {
-                JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootFileLocation, certificateChain);
+                JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootCertFile, certificateChain);
                 if (!jwsObject.verify(verifier)) {
                     log.warn("Unable to verify JWS object using algorithm {} for file {}", algorithm, path);
                     return Collections.emptyMap();
@@ -177,7 +172,7 @@ public class MDSTOCHandler {
                 log.warn("Unable to verify JWS object using algorithm {} for file {} {}", algorithm, path, ex.getMessage());
                 return Collections.emptyMap();
             }
-            tocEntryDigester.setDigester(resolveDigester(algorithm));
+            this.digester = resolveDigester(algorithm);
             String jwtPayload = jwsObject.getPayload().toString();
             JsonNode toc = dataMapperService.readTree(jwtPayload);
             log.info("Legal header {}", toc.get("legalHeader"));
@@ -188,8 +183,19 @@ public class MDSTOCHandler {
             Map<String, JsonNode> tocEntries = new HashMap<>();
             while (iter.hasNext()) {
                 JsonNode tocEntry = iter.next();
-                log.info("{} {}", path, tocEntry.get("aaguid").asText());
-                tocEntries.put(tocEntry.get("aaguid").asText(), tocEntry);
+
+                String aaguid = null;
+                if (tocEntry.get("aaguid") != null) {
+                    aaguid = tocEntry.get("aaguid").asText();
+                } else if (tocEntry.get("aaid") != null) {
+                    aaguid = tocEntry.get("aaid").asText();
+                } else {
+                    log.info("Ignoring TOC entry without either aaid or aaguid");
+                    continue;
+                }
+
+                log.info("Added TOC entry {} from {} with status {}", aaguid, path, tocEntry.get("statusReports").findValue("status"));
+                tocEntries.put(aaguid, tocEntry);
             }
             return tocEntries;
         } finally {
@@ -201,11 +207,10 @@ public class MDSTOCHandler {
                 }
             }
         }
-
     }
 
-    private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootFileLocation, List<String> certificateChain) {
-        Path path = FileSystems.getDefault().getPath(mdsTocRootFileLocation);
+    private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertFile, List<String> certificateChain) {
+        Path path = FileSystems.getDefault().getPath(mdsTocRootCertFile);
 
         List<X509Certificate> x509CertificateChain = cryptoUtils.getCertificates(certificateChain);
         List<X509Certificate> x509TrustedCertificates = new ArrayList<>();
@@ -274,4 +279,9 @@ public class MDSTOCHandler {
     public JsonNode getAuthenticatorsMetadata(String aaguid) {
         return tocEntries.get(aaguid);
     }
+
+    public MessageDigest getDigester() {
+        return digester;
+    }
+
 }
