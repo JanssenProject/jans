@@ -8,6 +8,7 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
@@ -22,7 +23,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version November 23, 2018
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -167,8 +168,13 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                     getResponse().setOpTosUri(jsonObj.getString(OP_TOS_URI));
                 }
             }
+        } catch (JSONException e) {
+            LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
+            e.printStackTrace();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e); // Unexpected exception.
+            e.printStackTrace();
         } finally {
             closeConnection();
         }
