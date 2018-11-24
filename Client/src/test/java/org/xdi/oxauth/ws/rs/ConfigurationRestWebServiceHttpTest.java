@@ -16,13 +16,16 @@ import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version November 23, 2018
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
@@ -92,5 +95,18 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertFalse(response.getRequireRequestUriRegistration(), "The requireRequestUriRegistration is true");
         assertNotNull(response.getOpPolicyUri(), "The opPolicyUri is null");
         assertNotNull(response.getOpTosUri(), "The opTosUri is null");
+
+        // oxAuth #917: Add dynamic scopes and claims to discovery
+        Map<String, List<String>> scopeToClaims = response.getScopeToClaimsMapping();
+        List<String> scopesSupported = response.getScopesSupported();
+        List<String> claimsSupported = response.getClaimsSupported();
+        for (Map.Entry<String, List<String>> scopeEntry : scopeToClaims.entrySet()) {
+            assertTrue(scopesSupported.contains(scopeEntry.getKey()),
+                    "The scopes supported list does not contain the scope: " + scopeEntry.getKey());
+            for (String claimEntry : scopeEntry.getValue()) {
+                assertTrue(claimsSupported.contains(claimEntry),
+                        "The claims supported list does not contain the claim: " + claimEntry);
+            }
+        }
     }
 }
