@@ -6,15 +6,21 @@
 
 package org.xdi.oxauth.servlet;
 
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.xdi.model.GluuAttribute;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.ScopeType;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -22,29 +28,17 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.xdi.model.GluuAttribute;
-import org.xdi.model.GluuStatus;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.ScopeType;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version July 18, 2017
+ * @version November 23, 2018
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration")
 public class OpenIdConfiguration extends HttpServlet {
@@ -100,17 +94,6 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
-
-            JSONArray scopesSupported = new JSONArray();
-            for (Scope scope : scopeService.getAllScopesList()) {
-                if (UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName())) {
-                    continue;
-                }
-                scopesSupported.put(scope.getDisplayName());
-            }
-            if (scopesSupported.length() > 0) {
-                jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
-            }
 
             JSONArray responseTypesSupported = new JSONArray();
             for (Set<ResponseType> responseTypes : appConfiguration.getResponseTypesSupported()) {
@@ -254,33 +237,6 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(CLAIM_TYPES_SUPPORTED, claimTypesSupported);
             }
 
-            JSONArray claimsSupported = new JSONArray();
-            List<GluuAttribute> gluuAttributes = attributeService.getAllAttributes();
-
-            // Preload all scopes to avoid sending request to LDAP per
-            // claim
-            List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
-
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    if (StringUtils.isNotBlank(claimName)) {
-                        List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService
-                                .getScopesByClaim(scopes, gluuAttribute.getDn());
-                        for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
-                            if (ScopeType.OPENID.equals(scope.getScopeType())) {
-                                claimsSupported.put(claimName);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (claimsSupported.length() > 0) {
-                jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
-            }
-
             jsonObj.put(SERVICE_DOCUMENTATION, appConfiguration.getServiceDocumentation());
 
             JSONArray idTokenTokenBindingCnfValuesSupported = new JSONArray();
@@ -305,7 +261,16 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(UI_LOCALES_SUPPORTED, uiLocalesSupported);
             }
 
-            jsonObj.put(SCOPE_TO_CLAIMS_MAPPING, createScopeToClaimsMapping());
+            JSONArray scopesSupported = new JSONArray();
+            JSONArray claimsSupported = new JSONArray();
+            JSONArray scopeToClaimsMapping = createScopeToClaimsMapping(scopesSupported, claimsSupported);
+            if (scopesSupported.length() > 0) {
+                jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
+            }
+            if (claimsSupported.length() > 0) {
+                jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
+            }
+            jsonObj.put(SCOPE_TO_CLAIMS_MAPPING, scopeToClaimsMapping);
 
             jsonObj.put(CLAIMS_PARAMETER_SUPPORTED, appConfiguration.getClaimsParameterSupported());
             jsonObj.put(REQUEST_PARAMETER_SUPPORTED, appConfiguration.getRequestParameterSupported());
@@ -339,21 +304,26 @@ public class OpenIdConfiguration extends HttpServlet {
      * to /.well-known/gluu-configuration
      */
     @Deprecated
-    private JSONArray createScopeToClaimsMapping() {
-        final JSONArray result = new JSONArray();
+    private JSONArray createScopeToClaimsMapping(JSONArray scopesSupported, JSONArray claimsSupported) {
+        final JSONArray scopeToClaimMapping = new JSONArray();
+        Set<String> scopes = new HashSet<String>();
+        Set<String> claims = new HashSet<String>();
+
         try {
             for (Scope scope : scopeService.getAllScopesList()) {
                 final JSONArray claimsList = new JSONArray();
                 final JSONObject mapping = new JSONObject();
                 mapping.put(scope.getDisplayName(), claimsList);
+                scopes.add(scope.getDisplayName());
 
-                result.put(mapping);
+                scopeToClaimMapping.put(mapping);
 
                 if (ScopeType.DYNAMIC.equals(scope.getScopeType())) {
                     List<String> claimNames = externalDynamicScopeService.executeExternalGetSupportedClaimsMethods(Arrays.asList(scope));
                     for (String claimName : claimNames) {
                         if (StringUtils.isNotBlank(claimName)) {
                             claimsList.put(claimName);
+                            claims.add(claimName);
                         }
                     }
                 } else {
@@ -364,15 +334,23 @@ public class OpenIdConfiguration extends HttpServlet {
                             final String claimName = attribute.getOxAuthClaimName();
                             if (StringUtils.isNotBlank(claimName)) {
                                 claimsList.put(claimName);
+                                claims.add(claimName);
                             }
                         }
                     }
                 }
             }
+
+            for (String scope : scopes) {
+                scopesSupported.put(scope);
+            }
+            for (String claim : claims) {
+                claimsSupported.put(claim);
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return result;
+        return scopeToClaimMapping;
     }
 
     /**
