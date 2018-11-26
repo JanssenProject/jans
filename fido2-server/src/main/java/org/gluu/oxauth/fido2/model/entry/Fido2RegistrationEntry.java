@@ -23,6 +23,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
+    @LdapAttribute(name = "oxPublicKeyId")
+    protected String publicKeyId;
+
     @LdapJsonObject
     @LdapAttribute(name = "oxRegistrationData")
     private Fido2RegistrationData registrationData;
@@ -30,10 +33,19 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     public Fido2RegistrationEntry() {
     }
 
-    public Fido2RegistrationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
+    public Fido2RegistrationEntry(String dn, String id, Date creationDate, String sessionId, String userInum, String publicKeyId,
             Fido2RegistrationData registrationData) {
         super(dn, id, creationDate, sessionId, userInum, registrationData.getChallenge());
+        this.publicKeyId = publicKeyId;
         this.registrationData = registrationData;
+    }
+
+    public String getPublicKeyId() {
+        return publicKeyId;
+    }
+
+    public void setPublicKeyId(String publicKeyId) {
+        this.publicKeyId = publicKeyId;
     }
 
     public Fido2RegistrationData getRegistrationData() {
@@ -47,7 +59,7 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Fido2RegistrationEntry [registrationData=").append(registrationData).append("]");
+        builder.append("Fido2RegistrationEntry [publicKeyId=").append(publicKeyId).append(", registrationData=").append(registrationData).append("]");
         return builder.toString();
     }
 }

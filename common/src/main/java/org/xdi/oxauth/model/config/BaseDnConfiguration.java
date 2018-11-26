@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.config;
 
+import javax.enterprise.inject.Vetoed;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

@@ -7,29 +7,30 @@
 package org.xdi.oxauth.service;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.slf4j.Logger;
-import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.Pair;
+import org.xdi.oxauth.service.api.IdGenerator;
 
 /**
  * Provides operations with clients.
  *
  * @author Javier Rojas Date: 01.12.2012
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class InumService {
 
     @Inject
     private Logger log;
 
-    @Inject
-    private IdGenService idGenService;
+    @Inject @Any
+    private IdGenerator idGenService;
 
     @Inject
     private AppConfiguration appConfiguration;
