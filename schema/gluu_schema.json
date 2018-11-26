@@ -4241,10 +4241,10 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "oxAttestationData",
+            "desc": "oxRegistrationData",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAttestationData"
+                "oxRegistrationData"
             ],
             "oid": "oxAttribute:391",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4252,10 +4252,10 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "oxAssertionData",
+            "desc": "oxAuthenticationData",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAssertionData"
+                "oxAuthenticationData"
             ],
             "oid": "oxAttribute:392",
             "substr": "caseIgnoreSubstringsMatch",
@@ -5701,7 +5701,7 @@
                 "oxSessionStateId",
                 "oxCodeChallenge",
                 "personInum",
-                "oxAssertionData"
+                "oxAuthenticationData"
             ],
             "must": [
                 "objectclass"
@@ -5722,8 +5722,9 @@
                 "creationDate",
                 "oxSessionStateId",
                 "oxCodeChallenge",
+                "oxPublicKeyId",
                 "personInum",
-                "oxAttestationData"
+                "oxRegistrationData"
             ],
             "must": [
                 "objectclass"
