@@ -14,6 +14,7 @@ from org.xdi.oxauth.model.crypto import CryptoProviderFactory
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
 from org.xdi.oxauth.model.util import Base64Util
 from org.xdi.oxauth.service import AppInitializer, AuthenticationService, UserService
+from org.xdi.oxauth.model.authorize import AuthorizeRequestParam
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.util import ServerUtil
@@ -41,13 +42,16 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        self.behaveAs = self.readBehaviour(configurationAttributes)
         self.attributesMapping = self.prepareAttributesMapping(configurationAttributes)
-        success = self.behaveAs != None and self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
+        success = self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
 
-        print "Passport. init. Behaviour is %s" % self.behaveAs
+        print "Passport. init. Behaviour is inbound SAML"
         self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
         print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
+
+        # Re-read the strategies config
+        self.parseProviderConfigs()
+
         return success
 
 
@@ -74,12 +78,18 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        print "Passport. authenticate called %s" % str(step)
+        print "Passport. authenticate for step %s called" % str(step)
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
-            # Get JWT token
-            jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+            jwt_param = None
+            if self.isInboundFlow(identity):
+                print "Passport. authenticate for step 1. Detected inbound Saml flow"
+                jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
+
+            if jwt_param == None:
+                jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+                
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
@@ -139,7 +149,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-
         extensionResult = self.extensionPrepareForStep(configurationAttributes, requestParameters, step)
         if extensionResult != None:
             return extensionResult
@@ -149,7 +158,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             # This param is needed in passportlogin.xhtml
-            identity.setWorkingParameter("behaviour", self.behaveAs)
+            identity.setWorkingParameter("behaviour", "saml")
 
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)
             self.parseProviderConfigs()
@@ -204,18 +213,24 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getPageForStep(self, configurationAttributes, step):
+        print "Passport. getPageForStep called"
 
         extensionResult = self.extensionGetPageForStep(configurationAttributes, step)
         if extensionResult != None:
             return extensionResult
 
         if (step == 1):
+            identity = CdiUtil.bean(Identity)
+            if self.isInboundFlow(identity):
+                print "Passport. getPageForStep for step 1. Detected inbound Saml flow"
+                return "/postlogin.xhtml"
+
             return "/auth/passport/passportlogin.xhtml"
+
         return "/auth/passport/passportpostlogin.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
-
         if step == 1:
             identity = CdiUtil.bean(Identity)
             provider = identity.getWorkingParameter("selectedProvider")
@@ -272,24 +287,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Exception: ", sys.exc_info()[1]
                 print "Passport. loadExternalModule. Flow will be driven entirely by routines of main passport script"
         return None
-
-
-    def readBehaviour(self, configurationAttributes):
-
-        behave = configurationAttributes.get("behaviour")
-        if behave != None:
-            behave = behave.getValue2()
-
-            if behave != None:
-                if StringHelper.equalsIgnoreCase(behave, "saml") or StringHelper.equalsIgnoreCase(behave, "social"):
-                    behave = behave.lower()
-                else:
-                    behave = None
-
-        if behave == None:
-            print "readBehaviour. Failure to determine behaviour. Check script config properties (valid values are 'social' or 'saml')"
-
-        return behave
 
 
     def prepareAttributesMapping(self, attrs):
@@ -364,36 +361,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registeredProviders = {}
         try:
-            if self.behaveAs == "social":
-                print "Passport. parseProviderConfigs. Adding social providers"
-                passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-                entryManager = CdiUtil.bean(AppInitializer).getLdapEntryManager()
-                config = LdapOxPassportConfiguration()
-                config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
+            print "Passport. parseProviderConfigs. Adding SAML IDPs"
+            f = open("/etc/gluu/conf/passport-saml-config.json", 'r')
+            config = json.loads(f.read())
 
-                if config != None:
-                    for strategy in config:
-                        provider = strategy.getStrategy()
-                        self.registeredProviders[provider] = { "emailLinkingSafe" : False, "requestForEmail" : False }
-                        for field in strategy.getFieldset():
-                            for property in self.registeredProviders[provider]:
-                                if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                    self.registeredProviders[provider][property] = True
-
-                        self.registeredProviders[provider]["saml"] = False
-
-            if self.behaveAs == "saml":
-                print "Passport. parseProviderConfigs. Adding SAML IDPs"
-                f = open("/etc/gluu/conf/passport-saml-config.json", 'r')
-                config = json.loads(f.read())
-
-                for provider in config:
-                    providerCfg = config[provider]
-                    if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
-                        self.registeredProviders[provider] = {
-                            "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
-                            "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
-                            "saml" : True }
+            for provider in config:
+                providerCfg = config[provider]
+                if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
+                    self.registeredProviders[provider] = {
+                        "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
+                        "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
+                        "saml" : True }
 
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
@@ -490,7 +468,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # "uid" is always present in mapping, see prepareAttributesMapping
         uidRemoteAttr = self.getRemoteAttr("uid")
-        providerKey = "provider" if self.behaveAs == "social" else "providerkey"
+        providerKey = "providerkey"
         if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, providerKey]):
             return False
 
@@ -500,11 +478,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         uidRemoteAttr = user_profile[uidRemoteAttr]
-        if self.behaveAs == "social":
-            externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
-        else:
-            # This is for backwards compat. Should it be passport-saml-provider:...??
-            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
+        # This is for backwards compat. Should it be passport-saml-provider:...??
+        externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
 
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
@@ -642,6 +617,36 @@ class PersonAuthentication(PersonAuthenticationType):
                 localAttr = mapping[remoteAttr]
                 print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
                 foundUser.setAttribute(localAttr, values)
+
+    def isInboundFlow(self, identity):
+        sessionId = identity.getSessionId()
+        if sessionId == None:
+            # Detect mode if there is no session yet. It's needed for getPageForStep method
+            facesContext = CdiUtil.bean(FacesContext)
+            requestParameters = facesContext.getExternalContext().getRequestParameterMap()
+
+            authz_state = requestParameters.get(AuthorizeRequestParam.STATE)
+        else:
+            authz_state = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
+
+        if self.isInboundJwt(authz_state):
+            return True
+
+        return False
+
+    def isInboundJwt(self, value):
+        if value == None:
+            return False
+        
+        try:
+            jwt = Jwt.parse(value)
+            user_profile_json = jwt.getClaims().getClaimAsString("data")
+            if StringHelper.isEmpty(user_profile_json):
+                return False
+        except:
+            return False
+
+        return True
 
     # This routine converts a value into an array of flat string values. Examples:
     # "" --> []
