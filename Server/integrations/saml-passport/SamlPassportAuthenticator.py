@@ -42,11 +42,10 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        self.behaveAs = self.readBehaviour(configurationAttributes)
         self.attributesMapping = self.prepareAttributesMapping(configurationAttributes)
-        success = self.behaveAs != None and self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
+        success = self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
 
-        print "Passport. init. Behaviour is %s" % self.behaveAs
+        print "Passport. init. Behaviour is inbound SAML"
         self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
         print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
 
@@ -159,7 +158,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             # This param is needed in passportlogin.xhtml
-            identity.setWorkingParameter("behaviour", self.behaveAs)
+            identity.setWorkingParameter("behaviour", "saml")
 
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)
             self.parseProviderConfigs()
@@ -290,24 +289,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
 
-    def readBehaviour(self, configurationAttributes):
-
-        behave = configurationAttributes.get("behaviour")
-        if behave != None:
-            behave = behave.getValue2()
-
-            if behave != None:
-                if StringHelper.equalsIgnoreCase(behave, "saml") or StringHelper.equalsIgnoreCase(behave, "social"):
-                    behave = behave.lower()
-                else:
-                    behave = None
-
-        if behave == None:
-            print "readBehaviour. Failure to determine behaviour. Check script config properties (valid values are 'social' or 'saml')"
-
-        return behave
-
-
     def prepareAttributesMapping(self, attrs):
 
         remote = attrs.get("generic_remote_attributes_list")
@@ -380,36 +361,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registeredProviders = {}
         try:
-            if self.behaveAs == "social":
-                print "Passport. parseProviderConfigs. Adding social providers"
-                passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-                entryManager = CdiUtil.bean(AppInitializer).getLdapEntryManager()
-                config = LdapOxPassportConfiguration()
-                config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
+            print "Passport. parseProviderConfigs. Adding SAML IDPs"
+            f = open("/etc/gluu/conf/passport-saml-config.json", 'r')
+            config = json.loads(f.read())
 
-                if config != None:
-                    for strategy in config:
-                        provider = strategy.getStrategy()
-                        self.registeredProviders[provider] = { "emailLinkingSafe" : False, "requestForEmail" : False }
-                        for field in strategy.getFieldset():
-                            for property in self.registeredProviders[provider]:
-                                if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                    self.registeredProviders[provider][property] = True
-
-                        self.registeredProviders[provider]["saml"] = False
-
-            if self.behaveAs == "saml":
-                print "Passport. parseProviderConfigs. Adding SAML IDPs"
-                f = open("/etc/gluu/conf/passport-saml-config.json", 'r')
-                config = json.loads(f.read())
-
-                for provider in config:
-                    providerCfg = config[provider]
-                    if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
-                        self.registeredProviders[provider] = {
-                            "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
-                            "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
-                            "saml" : True }
+            for provider in config:
+                providerCfg = config[provider]
+                if "enable" in providerCfg and StringHelper.equalsIgnoreCase(providerCfg["enable"], "true"):
+                    self.registeredProviders[provider] = {
+                        "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
+                        "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
+                        "saml" : True }
 
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
@@ -506,23 +468,18 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # "uid" is always present in mapping, see prepareAttributesMapping
         uidRemoteAttr = self.getRemoteAttr("uid")
-        providerKey = "provider" if self.behaveAs == "social" else "providerkey"
+        providerKey = "providerkey"
         if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, providerKey]):
             return False
 
         provider = user_profile[providerKey]
-        print provider
-        print self.registeredProviders
         if not provider in self.registeredProviders:
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
         uidRemoteAttr = user_profile[uidRemoteAttr]
-        if self.behaveAs == "social":
-            externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
-        else:
-            # This is for backwards compat. Should it be passport-saml-provider:...??
-            externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
+        # This is for backwards compat. Should it be passport-saml-provider:...??
+        externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
 
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
