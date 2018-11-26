@@ -13,6 +13,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.IdType;
+import org.xdi.oxauth.service.api.IdGenerator;
 import org.xdi.oxauth.service.external.ExternalIdGeneratorService;
 import org.xdi.util.StringHelper;
 
@@ -20,7 +21,6 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 24/06/2013
  */
-
 @Stateless
 @Named("idGenService")
 public class IdGenService implements IdGenerator {

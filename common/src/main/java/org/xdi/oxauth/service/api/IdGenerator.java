@@ -4,7 +4,9 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.idgen.ws.rs;
+package org.xdi.oxauth.service.api;
+
+import org.xdi.oxauth.model.common.IdType;
 
 /**
  * Id generator interface. Base interface for id generation. It must be implemented by
@@ -24,4 +26,6 @@ public interface IdGenerator {
      * @return generated id as string
      */
     public String generateId(String p_idType, String p_idPrefix);
+
+    public String generateId(IdType p_idType, String p_idPrefix);
 }
