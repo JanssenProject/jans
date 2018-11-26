@@ -30,7 +30,6 @@ gluuStatus: false
 inum: %(inumOrg)s!2FDB.CF02
 oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
 oxConfigurationProperty: {"value1":"generic_local_attributes_list","value2":"uid, mail, cn, displayName, givenName, sn, provider","description":""}
-oxConfigurationProperty: {"value1":"behaviour","value2":"social","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
 oxLevel: 60
@@ -416,7 +415,6 @@ gluuStatus: false
 inum: %(inumOrg)s!D40C.1CA4
 oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
 oxConfigurationProperty: {"value1":"generic_local_attributes_list","value2":"uid, mail, cn, displayName, givenName, sn, provider","description":""}
-oxConfigurationProperty: {"value1":"behaviour","value2":"saml","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
 oxLevel: 50
