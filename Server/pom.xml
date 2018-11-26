@@ -245,6 +245,11 @@
 
 		<dependency>
 			<groupId>org.xdi</groupId>
+			<artifactId>oxauth-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-fido2</artifactId>
 		</dependency>
 
