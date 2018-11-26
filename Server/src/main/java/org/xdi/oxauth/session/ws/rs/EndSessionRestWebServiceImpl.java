@@ -34,6 +34,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
+import org.xdi.oxauth.model.util.URLPatternList;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
@@ -103,7 +104,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
         // yuriyz : we have to re-visit this since it doesn't look safe to redirect error to uri which is not validated.
-        if (pair.getFirst() == null && pair.getSecond() == null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
+        if (pair.getFirst() == null && pair.getSecond() == null && StringUtils.isNotBlank(postLogoutRedirectUri) && allowPostLogoutRedirect(postLogoutRedirectUri)) {
             try {
             	String error = errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
                 return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(error).build();
@@ -113,6 +114,20 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         return httpBased(postLogoutRedirectUri, state, pair);
+    }
+
+    /**
+     * Allow post logout redirect without validation only if:
+     * 1. allowPostLogoutRedirectWithoutValidation = true
+     * 2. or if post_logout_redirect_uri is white listed
+     */
+    private boolean allowPostLogoutRedirect(String postLogoutRedirectUri) {
+        final Boolean allowPostLogoutRedirectWithoutValidation = appConfiguration.getAllowPostLogoutRedirectWithoutValidation();
+        if (allowPostLogoutRedirectWithoutValidation != null && allowPostLogoutRedirectWithoutValidation) {
+            return true;
+        }
+
+        return new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
     }
 
     private void validateSessionIdRequestParameter(String sessionId) {
