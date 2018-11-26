@@ -108,6 +108,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean persistIdTokenInLdap = false;
     private Boolean persistRefreshTokenInLdap = true;
+    private Boolean allowPostLogoutRedirectWithoutValidation = false;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -947,6 +948,14 @@ public class AppConfiguration implements Configuration {
 
     public void setPersistRefreshTokenInLdap(Boolean persistRefreshTokenInLdap) {
         this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
+    }
+
+    public Boolean getAllowPostLogoutRedirectWithoutValidation() {
+        return allowPostLogoutRedirectWithoutValidation;
+    }
+
+    public void setAllowPostLogoutRedirectWithoutValidation(Boolean allowPostLogoutRedirectWithoutValidation) {
+        this.allowPostLogoutRedirectWithoutValidation = allowPostLogoutRedirectWithoutValidation;
     }
 
     public Boolean getUseCacheForAllImplicitFlowObjects() {
