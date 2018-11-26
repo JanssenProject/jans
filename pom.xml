@@ -96,6 +96,7 @@
 		<module>oxAuthStatic</module>
 		<module>RP</module>
 		<module>RP-Demo</module>
+		<module>common</module>
 		<module>fido2-server</module>
 		<module>Server</module>
 	</modules>
@@ -119,6 +120,11 @@
 				<artifactId>oxauth-model</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxauth-common</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -26,7 +27,6 @@ import org.xdi.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
@@ -36,7 +36,7 @@ import org.xdi.util.StringHelper;
  *
  * @author Javier Rojas Blum Date: 11.30.2011
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class UserService {
 
@@ -354,34 +354,34 @@ public class UserService {
 		
 		customAttribute.setValue(attributeValue);
 	}
-
-    // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
-    public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
-        log.debug("Saving long-lived access token: userId = {}", userId);
-        boolean succeed = false;
-
-        User user = getUser(userId);
-        if (user != null) {
-            int nTokens = 0;
-            if (user.getOxAuthPersistentJwt() != null) {
-                nTokens = user.getOxAuthPersistentJwt().length;
-            }
-            nTokens++;
-            String[] persistentJwts = new String[nTokens];
-            if (user.getOxAuthPersistentJwt() != null) {
-                for (int i = 0; i < user.getOxAuthPersistentJwt().length; i++) {
-                    persistentJwts[i] = user.getOxAuthPersistentJwt()[i];
-                }
-            }
-            persistentJwts[nTokens - 1] = longLivedToken.toString();
-
-            user.setOxAuthPersistentJwt(persistentJwts);
-            ldapEntryManager.merge(user);
-            succeed = true;
-        }
-
-        return succeed;
-    }
+//
+//    // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
+//    public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
+//        log.debug("Saving long-lived access token: userId = {}", userId);
+//        boolean succeed = false;
+//
+//        User user = getUser(userId);
+//        if (user != null) {
+//            int nTokens = 0;
+//            if (user.getOxAuthPersistentJwt() != null) {
+//                nTokens = user.getOxAuthPersistentJwt().length;
+//            }
+//            nTokens++;
+//            String[] persistentJwts = new String[nTokens];
+//            if (user.getOxAuthPersistentJwt() != null) {
+//                for (int i = 0; i < user.getOxAuthPersistentJwt().length; i++) {
+//                    persistentJwts[i] = user.getOxAuthPersistentJwt()[i];
+//                }
+//            }
+//            persistentJwts[nTokens - 1] = longLivedToken.toString();
+//
+//            user.setOxAuthPersistentJwt(persistentJwts);
+//            ldapEntryManager.merge(user);
+//            succeed = true;
+//        }
+//
+//        return succeed;
+//    }
 
     public List<User> getUsersWithPersistentJwts() {
         String baseDN = staticConfiguration.getBaseDn().getPeople();
