@@ -19,7 +19,7 @@ dn: inum=%(inumOrg)s!0011!DAA9.F7F8,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Gluu Casa Client Registration script
-displayName: client_registration
+displayName: casa_client_registration
 gluuStatus: true
 inum: %(inumOrg)s!0011!DAA9.F7F8
 oxLevel: 1
