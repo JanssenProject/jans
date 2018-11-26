@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.service.api.IdGenerator;
 import org.xdi.util.INumGenerator;
 
 /**
@@ -32,7 +33,7 @@ import org.xdi.util.INumGenerator;
  */
 @Stateless
 @Named("inumGenerator")
-public class InumGenerator implements IdGenerator {
+public class InumGenerator {
 
     public static final String SEPARATOR = "!";
 
@@ -48,7 +49,6 @@ public class InumGenerator implements IdGenerator {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    @Override
     public String generateId(String p_idType, String p_idPrefix) {
         final IdType idType = IdType.fromString(p_idType);
         if (idType != null) {
