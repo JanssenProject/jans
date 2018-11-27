@@ -50,6 +50,7 @@ import org.xdi.oxauth.service.status.ldap.LdapStatusTimer;
 import org.xdi.service.JsonService;
 import org.xdi.service.PythonService;
 import org.xdi.service.cdi.async.Asynchronous;
+import org.xdi.service.cdi.event.ApplicationInitialized;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 import org.xdi.service.cdi.event.LdapConfigurationReload;
 import org.xdi.service.cdi.event.LoggerUpdateEvent;
@@ -183,6 +184,9 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
+
+        // Notify plugins about finish application intialization
+        event.select(ApplicationInitialized.Literal.APPLICATION).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 	}
 
     protected void initSchedulerService() {
