@@ -150,35 +150,35 @@
 		"attribute": "creationDate",
 		"type": "date",
 		"index": ["ordering"],
-		"backend": ["userRoot"]
+		"backend": ["userRoot", "metric"]
 	},
 
 	{
 		"attribute": "oxStartDate",
 		"type": "date",
 		"index": ["ordering"],
-		"backend": ["userRoot"]
+		"backend": ["userRoot", "metric"]
 	},
 
 	{
 		"attribute": "oxEndDate",
 		"type": "date",
 		"index": ["ordering"],
-		"backend": ["userRoot"]
+		"backend": ["userRoot", "metric"]
 	},
 
 	{
 		"attribute": "oxApplicationType",
 		"type": "string",
 		"index": ["equality"],
-		"backend": ["userRoot"]
+		"backend": ["userRoot", "metric"]
 	},
 
 	{
 		"attribute": "oxMetricType",
 		"type": "string",
 		"index": ["equality"],
-		"backend": ["userRoot"]
+		"backend": ["userRoot", "metric"]
 	},
 
 	{
