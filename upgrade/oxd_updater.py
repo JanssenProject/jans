@@ -37,7 +37,8 @@ os_commands = {
 
     'centos': {
             '6': [
-                'wget https://repo.gluu.org/centos/Gluu-centos6.repo -O /etc/yum.repos.d/Gluu.repo'
+                'wget https://repo.gluu.org/centos/Gluu-centos-testing.repo -O /etc/yum.repos.d/Gluu.repo'
+                #change this
                 ],
 
             '7': [
@@ -80,6 +81,7 @@ detected_oxd = 'oxd-server'
 stop_gluu_command = {
         'ubuntu16': 'service {0} stop',
         'ubuntu14': 'service {0} stop',
+        'centos6': 'service {0} stop',
         'centos7': 'service {0} stop',
     }
 
@@ -146,10 +148,12 @@ def _byteify(data, ignore_dicts = False):
     # if this is a dictionary, return dictionary of byteified keys and values
     # but only if we haven't already byteified it
     if isinstance(data, dict) and not ignore_dicts:
-        return {
-            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
-            for key, value in data.iteritems()
-        }
+        tmp_ = {}
+        for key, value in data.iteritems():
+            tmp_[_byteify(key, ignore_dicts=True)] = _byteify(value, ignore_dicts=True)
+
+        return tmp_
+
     # if it's anything else, return it in its original form
     return data
 
