@@ -45,8 +45,7 @@ public @interface ApplicationInitialized {
 
         @Override
         public Class<? extends Annotation> value() {
-            // TODO Auto-generated method stub
-            return null;
+            return value;
         }
     }
 
