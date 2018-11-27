@@ -598,16 +598,16 @@ class PersonAuthentication(PersonAuthenticationType):
             
         if ios_creds["enabled"]:
             p12_file_path = ios_creds["p12_file_path"]
-            p12_passowrd = ios_creds["p12_password"]
+            p12_password = ios_creds["p12_password"]
 
             try:
                 encryptionService = CdiUtil.bean(EncryptionService)
-                p12_passowrd = encryptionService.decrypt(p12_passowrd)
+                p12_password = encryptionService.decrypt(p12_password)
             except:
                 # Ignore exception. Password is not encrypted
-                print "Super-Gluu. Initialize native notification services. Assuming that 'p12_passowrd' password in not encrypted"
+                print "Super-Gluu. Initialize native notification services. Assuming that 'p12_password' password in not encrypted"
 
-            apnsServiceBuilder =  APNS.newService().withCert(p12_file_path, p12_passowrd)
+            apnsServiceBuilder =  APNS.newService().withCert(p12_file_path, p12_password)
             if ios_creds["production"]:
                 self.pushAppleService = apnsServiceBuilder.withProductionDestination().build()
             else:
