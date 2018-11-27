@@ -41,6 +41,7 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.event.ApplicationInitializedEvent;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
@@ -87,6 +88,9 @@ public class AppInitializer {
 
 	@Inject
 	private Event<String> event;
+
+    @Inject
+    private Event<ApplicationInitializedEvent> eventApplicationInitialized;
 
 	@Inject
 	private Event<TimerEvent> timerEvent;
@@ -185,8 +189,8 @@ public class AppInitializer {
         keyGeneratorTimer.initTimer();
         initTimer();
 
-        // Notify plugins about finish application intialization
-        event.select(ApplicationInitialized.Literal.APPLICATION).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
+        // Notify plugins about finish application initialization
+        eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION).fire(new ApplicationInitializedEvent());
 	}
 
     protected void initSchedulerService() {
