@@ -28,8 +28,20 @@ public class Fido2RPRuntimeException extends RuntimeException {
         this.errorMessage = errorMessage;
     }
 
+    public Fido2RPRuntimeException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+        this.status = "failed";
+        this.errorMessage = errorMessage;
+    }
+
     public Fido2RPRuntimeException(String status, String errorMessage) {
         super(errorMessage);
+        this.status = status;
+        this.errorMessage = errorMessage;
+    }
+
+    public Fido2RPRuntimeException(String status, String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
         this.status = status;
         this.errorMessage = errorMessage;
     }
