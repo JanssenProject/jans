@@ -6,7 +6,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
 @RequestScoped
-@Named
 public class AuthenticationAttempt implements Serializable {
 
     private static final long serialVersionUID = -1841823297081861148L;
@@ -14,6 +13,9 @@ public class AuthenticationAttempt implements Serializable {
     private long time;
     private long expiration;
     private boolean success;
+
+    public AuthenticationAttempt() {
+    }
 
     public AuthenticationAttempt(long time, long expiration, boolean success) {
         this.time = time;
