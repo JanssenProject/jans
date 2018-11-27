@@ -133,7 +133,7 @@ class Migration(object):
         self.ldapHost = "127.0.0.1"
         self.ldapPort = "1636"
         self.baseDn = "cn=directory manager,o=gluu"
-        self.ldappassowrd = None
+        self.ldapPassword = None
         self.key = None
         self.oxAuthClientSecret = None
         self.idpDN = None
@@ -1187,7 +1187,7 @@ class Migration(object):
             with open('/etc/gluu/conf/ox-ldap.properties') as f:
                 for line in f:
                     if line.startswith("bindPassword:"):
-                        self.ldappassowrd = line.split(":")[1].split("\n")[0].strip()
+                        self.ldapPassword = line.split(":")[1].split("\n")[0].strip()
 
         except:
             logging.error("ox-ldap.properties file not Found")
@@ -1200,8 +1200,8 @@ class Migration(object):
             salt_property = f.read()
             f.close()
             self.key = salt_property.split("=")[1].strip()
-            self.ldappassowrd = self.unobscure(self.ldappassowrd)
-            #print self.ldappassowrd
+            self.ldapPassword = self.unobscure(self.ldapPassword)
+            #print self.ldapPassword
 
         except:
             logging.error("Salt key Access Error")
@@ -1228,7 +1228,7 @@ class Migration(object):
                     '/install/community-edition-setup/setup.properties.last')
         
         con = ldap.initialize('ldaps://{}:{}'.format(self.ldapHost, self.ldapPort))
-        con.simple_bind_s(self.baseDn, self.ldappassowrd)
+        con.simple_bind_s(self.baseDn, self.ldapPassword)
 
         dn = 'inum={},ou=clients,o={},o=gluu'.format(oxauth_client_id, inumOrg)
         
