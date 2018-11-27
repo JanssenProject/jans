@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
@@ -45,14 +46,14 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         return HttpMethod.GET;
     }
 
-    public OpenIdConfigurationResponse execOpenIdConfiguration() {
+    public OpenIdConfigurationResponse execOpenIdConfiguration() throws IOException {
         initClientRequest();
 
         return _execOpenIdConfiguration();
     }
 
     @Deprecated
-    public OpenIdConfigurationResponse execOpenIdConfiguration(ClientExecutor executor) {
+    public OpenIdConfigurationResponse execOpenIdConfiguration(ClientExecutor executor) throws IOException {
         this.clientRequest = new ClientRequest(getUrl(), executor);
 
         return _execOpenIdConfiguration();
@@ -63,7 +64,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
      *
      * @return The service response.
      */
-    private OpenIdConfigurationResponse _execOpenIdConfiguration() {
+    private OpenIdConfigurationResponse _execOpenIdConfiguration() throws IOException {
         setRequest(new OpenIdConfigurationRequest());
 
         // Prepare request parameters
@@ -170,11 +171,12 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             }
         } catch (JSONException e) {
             LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             LOG.error(e.getMessage(), e); // Unexpected exception.
-            e.printStackTrace();
         } finally {
             closeConnection();
         }
