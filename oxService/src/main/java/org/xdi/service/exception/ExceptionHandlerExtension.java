@@ -37,7 +37,7 @@ public class ExceptionHandlerExtension implements Extension {
             final AnnotatedMethod<?> method = methodConfiguration.getAnnotated();
 
             if (method.getJavaMember().getExceptionTypes().length != 0) {
-                log.error("Handler method '{}' must not throw exceptions. Ignoring it.", method.getJavaMember());
+                log.trace("Handler method '{}' must not throw exceptions. Ignoring it.", method.getJavaMember());
                 continue;
             }
 
