@@ -34,6 +34,7 @@ import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.configuration.Fido2Configuration;
+import org.xdi.service.cdi.event.ApplicationInitialized;
 import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,7 +58,7 @@ public class DirectoryBasedMetadataLoader {
         this.authenticatorsMetadata = Collections.synchronizedMap(new HashMap());
     }
 
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
         if (fido2Configuration == null) {
             return;
