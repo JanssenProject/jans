@@ -240,17 +240,17 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp,ext,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp,ext,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
             'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,console-capture,jsp'},
+                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
@@ -260,7 +260,7 @@ class Setup(object):
                         'installed' : False
                         },
             'oxauth-rp' : {'name' : 'oxauth-rp',
-                           'jetty' : {'modules' : 'server,deploy,annotations,resources,http,console-capture,jsp,websocket'},
+                           'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
                            },
@@ -476,7 +476,8 @@ class Setup(object):
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.network = "/etc/sysconfig/network"
-        self.system_profile_update = '%s/system_profile' % self.outputFolder
+        self.system_profile_update_init = '%s/system_profile_init' % self.outputFolder
+        self.system_profile_update_systemd = '%s/system_profile_systemd' % self.outputFolder
 
         self.asimba_conf_folder = '%s/asimba' % self.configFolder
         self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
@@ -2308,21 +2309,25 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def customiseSystem(self):
-        # Render customized part
         if self.os_initdaemon == 'init':
-            self.renderTemplate(self.system_profile_update)
-            renderedSystemProfile = self.readFile(self.system_profile_update)
+            system_profile_update = self.system_profile_update_init
+        else:
+            system_profile_update = self.system_profile_update_systemd
 
-            # Read source file
-            currentSystemProfile = self.readFile(self.sysemProfile)
+        # Render customized part
+        self.renderTemplate(system_profile_update)
+        renderedSystemProfile = self.readFile(system_profile_update)
 
-            # Write merged file
-            self.backupFile(self.sysemProfile)
-            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-            self.writeFile(self.sysemProfile, resultSystemProfile)
+        # Read source file
+        currentSystemProfile = self.readFile(self.sysemProfile)
 
-            # Fix new file permissions
-            self.run([self.cmd_chmod, '644', self.sysemProfile])
+        # Write merged file
+        self.backupFile(self.sysemProfile)
+        resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+        self.writeFile(self.sysemProfile, resultSystemProfile)
+
+        # Fix new file permissions
+        self.run([self.cmd_chmod, '644', self.sysemProfile])
 
     def configureSystem(self):
         self.customiseSystem()
@@ -2855,6 +2860,7 @@ class Setup(object):
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                           ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
                           ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
+                          ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'],
                           ['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'],
