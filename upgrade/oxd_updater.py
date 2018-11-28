@@ -57,7 +57,6 @@ os_commands = {
     }
 
 
-
 def detect_os_type():
     try:
         p = platform.linux_distribution()
@@ -69,11 +68,20 @@ def detect_os_type():
 
 os_type = detect_os_type()
 
+print "Detected OS Type", " ".join(os_type)
+
 try:
     commands = os_commands[os_type[0]][os_type[1]]
 except:
     sys.exit('Unsupported Operating System, exiting.')
 
+
+if os_type[0] in ('ubuntu', 'debian'):
+    package_type = 'deb'
+    install_command = 'apt-get install -y {0}'
+elif os_type[0] in ('centos', 'red'):
+    package_type = 'rpm'
+    install_command = 'yum install -y {0}'
 
 detected_oxd = 'oxd-server'
 
@@ -91,15 +99,16 @@ os_type_str = ''.join(os_type)
 commands.insert(0, stop_gluu_command[os_type_str].format(detected_oxd))
 
 
-if os_type[0] in ('ubuntu','debian'):
+if package_type == 'deb':
     commands += [
             'curl https://repo.gluu.org/debian/gluu-apt.key | apt-key add -',
             'apt-get update',
             'apt-get install -y oxd-server-4.0.beta',
         ]
 
-elif os_type[0] in ('centos','red'):
+elif package_type == 'rpm':
     commands += [
+            'yum install -y epel-release',
             'wget https://repo.gluu.org/rhel/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'yum clean all',
@@ -111,13 +120,12 @@ add_commands = []
 try:
     import pip
 except:
-    add_commands = ['curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"',
-                'python get-pip.py'
-                ]
+    
+    add_commands.append(install_command.format('python-pip'))
 try:
     import yaml
 except:
-    add_commands.append('pip install pyyaml')
+    add_commands.append(install_command.format('python-yaml'))
 
 if add_commands:
     commands += add_commands
@@ -209,9 +217,7 @@ and your config/data will be migrated to the new version.
 
 if update_required:
 
-
     oxd_conf_json = json_load_byteified(oxd_conf_json_fn)
-    
 
     current_dbFileLocation = '/opt/oxd-server/data/oxd_db'
     
