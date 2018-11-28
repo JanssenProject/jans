@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -30,7 +29,6 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
-import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -39,6 +37,13 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -71,16 +76,10 @@ public class UmaPermissionRegistrationWS {
     private UmaPermissionService permissionService;
 
     @Inject
-    private UmaRptService rptService;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
     private UmaValidationService umaValidationService;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -107,6 +106,7 @@ public class UmaPermissionRegistrationWS {
             String ticket = permissionService.addPermission(permissionList, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
+                    type(MediaType.APPLICATION_JSON_TYPE).
                     entity(new PermissionTicket(ticket)).
                     build();
         } catch (Exception ex) {
