@@ -43,7 +43,7 @@ public class RequestWrapper extends HttpServletRequestWrapper {
         super(request);
         this.delegate = request;
         if (isFormPost()) {
-            this.parameterMap = request.getParameterMap();
+            this.parameterMap = request.getParameterMap() != null ? new HashMap<String, String[]>(request.getParameterMap()) : Collections.<String, String[]>emptyMap();
         } else {
             this.parameterMap = Collections.emptyMap();
         }

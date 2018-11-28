@@ -76,8 +76,11 @@ public class ServletLoggingFilter implements Filter {
         RequestWrapper requestWrapper = new RequestWrapper(httpRequest);
         ResponseWrapper responseWrapper = new ResponseWrapper(httpResponse);
 
-        log.debug(getRequestDescription(requestWrapper));
         chain.doFilter(httpRequest, httpResponse);
+
+        // yuriyz: log request and response only after filter handling.
+        // #914 - we don't want to effect server functionality due to logging. Currently content can be messed if it is InputStream.
+        log.debug(getRequestDescription(requestWrapper));
         log.debug(getResponseDescription(responseWrapper));
     }
 
@@ -87,16 +90,16 @@ public class ServletLoggingFilter implements Filter {
     }
 
     protected String getRequestDescription(RequestWrapper requestWrapper) {
-        HttpRequest httpRequest = new HttpRequest();
-        httpRequest.setSenderIP(requestWrapper.getLocalAddr());
-        httpRequest.setMethod(requestWrapper.getMethod());
-        httpRequest.setPath(requestWrapper.getRequestURI());
-        httpRequest.setParams(requestWrapper.isFormPost() ? null : requestWrapper.getParameters());
-        httpRequest.setHeaders(requestWrapper.getHeaders());
-        httpRequest.setBody(requestWrapper.getContent());
         try {
+            HttpRequest httpRequest = new HttpRequest();
+            httpRequest.setSenderIP(requestWrapper.getLocalAddr());
+            httpRequest.setMethod(requestWrapper.getMethod());
+            httpRequest.setPath(requestWrapper.getRequestURI());
+            httpRequest.setParams(requestWrapper.isFormPost() ? null : requestWrapper.getParameters());
+            httpRequest.setHeaders(requestWrapper.getHeaders());
+            httpRequest.setBody(requestWrapper.getContent());
             return OBJECT_MAPPER.writeValueAsString(httpRequest);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.warn("Cannot serialize Request to JSON", e);
             return null;
         }
