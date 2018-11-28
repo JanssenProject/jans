@@ -62,7 +62,7 @@ public enum ErrorResponseCode {
     NO_UMA_RPT_PARAMETER(400, "invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
     UMA_NEED_INFO(403, "need_info", "The authorization server needs additional information in order to determine whether the client is authorized to have these permissions."),
     UMA_HTTP_METHOD_NOT_UNIQUE(400, "http_method_not_unique", "HTTP method defined in JSON must be unique within given PATH (but occurs more then one time)."),
-    UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION(400, "invalid_scope_expressioin", "Scope expression is not valid. Please check documentation and make sure expression is valid JsonLogic expression."),
+    UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION(400, "invalid_scope_expression", "The scope expression is invalid. Please check the documentation and make sure it is a valid JsonLogic expression."),
     UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS(400, "uma_protection_exists", "Server already has UMA Resources registered for this oxd_id. It is possible to overwrite it if provide overwrite=true for uma_rs_protect command (existing resources will be removed and new UMA Resources added)."),
     FAILED_TO_GET_END_SESSION_ENDPOINT(500, "no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_RPT(500, "internal_error", "Failed to get RPT."),
