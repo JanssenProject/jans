@@ -54,6 +54,13 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The API available at the resource registration endpoint enables the resource server to put resources under
@@ -327,6 +334,7 @@ public class UmaResourceRegistrationWS {
         response.setId(ldapUpdatedResource.getId());
 
         return Response.status(status).
+                type(MediaType.APPLICATION_JSON_TYPE).
                 entity(ServerUtil.asJson(response)).
                 build();
     }
