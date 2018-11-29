@@ -10,7 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetRpParams implements IParams {
 
     @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    private String oxd_id;
     @JsonProperty(value = "list")
     private Boolean list;
 
@@ -18,15 +18,15 @@ public class GetRpParams implements IParams {
     }
 
     public GetRpParams(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public String getOxdId() {
-        return oxdId;
+        return oxd_id;
     }
 
     public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+        this.oxd_id = oxdId;
     }
 
     public Boolean getList() {
@@ -40,7 +40,7 @@ public class GetRpParams implements IParams {
     @Override
     public String toString() {
         return "GetRpParams{" +
-                "oxdId='" + oxdId + '\'' +
+                "oxdId='" + oxd_id + '\'' +
                 '}';
     }
 }
