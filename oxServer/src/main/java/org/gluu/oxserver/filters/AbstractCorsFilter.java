@@ -1039,6 +1039,12 @@ public abstract class AbstractCorsFilter implements Filter {
 
     // ----------------------------------------Filter Config Init param-name(s)
     /**
+     * Key to retrieve if filter enabled from {@link FilterConfig}.
+     */
+    public static final String PARAM_CORS_ENABLED =
+            "cors.enabled";
+
+    /**
      * Key to retrieve allowed origins from {@link FilterConfig}.
      */
     public static final String PARAM_CORS_ALLOWED_ORIGINS =
