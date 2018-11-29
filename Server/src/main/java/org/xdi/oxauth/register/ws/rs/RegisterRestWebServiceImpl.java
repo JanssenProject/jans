@@ -172,7 +172,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                         client.setClientIdIssuedAt(calendar.getTime());
 
-                        if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) {
+                        if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
                             calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
                             client.setClientSecretExpiresAt(calendar.getTime());
                         }
@@ -448,11 +448,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (claims != null && !claims.isEmpty()) {
             List<String> claimsDn = attributeService.getAttributesDn(claims);
             p_client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
-        }
-
-        Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
-        if (clientSecretExpiresAt != null) {
-            p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
         if (requestObject.getJsonObject() != null) {
