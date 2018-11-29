@@ -7,30 +7,20 @@
 package org.xdi.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version November 28, 2018
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -184,6 +174,9 @@ public class Client implements Serializable {
 
     @LdapAttribute(name = "oxRefreshTokenLifetime")
     private Integer refreshTokenLifetime;
+
+    @LdapAttribute(name = "oxAccessTokenLifetime")
+    private Integer accessTokenLifetime;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -1093,6 +1086,13 @@ public class Client implements Serializable {
 
     public void setRefreshTokenLifetime(Integer refreshTokenLifetime) {
         this.refreshTokenLifetime = refreshTokenLifetime;
+    }
+
+    public Integer getAccessTokenLifetime() {
+        return accessTokenLifetime;
+    }
+    public void setAccessTokenLifetime(Integer accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
