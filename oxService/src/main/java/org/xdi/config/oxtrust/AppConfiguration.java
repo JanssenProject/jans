@@ -177,6 +177,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private int passwordResetRequestExpirationTime; // in seconds
     private int cleanServiceInterval;
+    private Boolean enforceEmailUniqueness = true;
 
     public ScimProperties getScimProperties() {
         return scimProperties;
@@ -1044,4 +1045,11 @@ public class AppConfiguration implements Configuration, Serializable {
         this.cleanServiceInterval = cleanServiceInterval;
     }
 
+	public Boolean getEnforceEmailUniqueness() {
+		return enforceEmailUniqueness;
+	}
+
+	public void setEnforceEmailUniqueness(Boolean enforceEmailUniqueness) {
+		this.enforceEmailUniqueness = enforceEmailUniqueness;
+	}
 }
