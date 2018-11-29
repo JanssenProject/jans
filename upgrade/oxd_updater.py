@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import sys
 import time
 import glob
 import shutil
@@ -30,13 +31,14 @@ os_commands = {
                 'echo "deb https://repo.gluu.org/ubuntu/ xenial-devel main" > /etc/apt/sources.list.d/gluu-repo.list',
                 ],
             '14': [
-                'echo "deb https://repo.gluu.org/ubuntu/ trusty main" > /etc/apt/sources.list.d/gluu-repo.list'
+                'echo "deb https://repo.gluu.org/ubuntu/ trusty-devel main" > /etc/apt/sources.list.d/gluu-repo-devel.list'
                 ],
             },
 
     'centos': {
             '6': [
-                'wget https://repo.gluu.org/centos/Gluu-centos6.repo -O /etc/yum.repos.d/Gluu.repo'
+                'wget https://repo.gluu.org/centos/Gluu-centos-testing.repo -O /etc/yum.repos.d/Gluu.repo'
+                #change this
                 ],
 
             '7': [
@@ -54,6 +56,7 @@ os_commands = {
 
     }
 
+
 def detect_os_type():
     try:
         p = platform.linux_distribution()
@@ -65,38 +68,64 @@ def detect_os_type():
 
 os_type = detect_os_type()
 
+print "Detected OS Type", " ".join(os_type)
+
 try:
     commands = os_commands[os_type[0]][os_type[1]]
 except:
     sys.exit('Unsupported Operating System, exiting.')
 
 
-if os_type[0] in ('ubuntu','debian'):
+if os_type[0] in ('ubuntu', 'debian'):
+    package_type = 'deb'
+    install_command = 'apt-get install -y {0}'
+elif os_type[0] in ('centos', 'red'):
+    package_type = 'rpm'
+    install_command = 'yum install -y {0}'
+
+detected_oxd = 'oxd-server'
+
+
+stop_gluu_command = {
+        'ubuntu16': 'service {0} stop',
+        'ubuntu14': 'service {0} stop',
+        'centos6': 'service {0} stop',
+        'centos7': 'service {0} stop',
+    }
+
+
+os_type_str = ''.join(os_type)
+
+commands.insert(0, stop_gluu_command[os_type_str].format(detected_oxd))
+
+
+if package_type == 'deb':
     commands += [
             'curl https://repo.gluu.org/debian/gluu-apt.key | apt-key add -',
             'apt-get update',
             'apt-get install -y oxd-server-4.0.beta',
         ]
 
-elif os_type[0] in ('centos','red'):
+elif package_type == 'rpm':
     commands += [
+            'yum install -y epel-release',
             'wget https://repo.gluu.org/rhel/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'yum clean all',
-            'yum install -y oxd-server-4.0.beta'
+            'yum install -y oxd-server-4.0.beta',
         ]
+
+add_commands = []
 
 try:
     import pip
 except:
-    add_commands = ['curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"',
-                'python get-pip.py'
-                ]
+    
+    add_commands.append(install_command.format('python-pip'))
 try:
     import yaml
-    add_commands = []
 except:
-    add_commands.append('pip install pyyaml')
+    add_commands.append(install_command.format('python-yaml'))
 
 if add_commands:
     commands += add_commands
@@ -127,10 +156,12 @@ def _byteify(data, ignore_dicts = False):
     # if this is a dictionary, return dictionary of byteified keys and values
     # but only if we haven't already byteified it
     if isinstance(data, dict) and not ignore_dicts:
-        return {
-            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
-            for key, value in data.iteritems()
-        }
+        tmp_ = {}
+        for key, value in data.iteritems():
+            tmp_[_byteify(key, ignore_dicts=True)] = _byteify(value, ignore_dicts=True)
+
+        return tmp_
+
     # if it's anything else, return it in its original form
     return data
 
@@ -177,25 +208,33 @@ and your config/data will be migrated to the new version.
 
     answer = raw_input(ask)
     if not answer or answer.lower()[0] != 'y':
-        sys.exit("Migrating cancelled, exiting.")
+        sys.exit("Migration cancelled, exiting.")
 
     if os_type[0] in ('ubuntu','debian'):
-        commands.insert(0,'apt-get purge -y oxd-server')
+        commands.insert(1,'apt-get purge -y oxd-server')
     elif os_type[0] in ('centos','red'):
-        commands.insert(0,'yum remove -y oxd-server')
-
-
+        commands.insert(1,'yum remove -y oxd-server')
 
 if update_required:
 
+    oxd_conf_json = json_load_byteified(oxd_conf_json_fn)
+
+    current_dbFileLocation = '/opt/oxd-server/data/oxd_db'
+    
+    if oxd_conf_json.get('storage_configuration') and oxd_conf_json['storage_configuration'].get('dbFileLocation'):
+        current_dbFileLocation = oxd_conf_json['storage_configuration']['dbFileLocation']
+
+    current_dbFile = current_dbFileLocation+'.mv.db'
+
     commands.append('wget https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.beta/upgrade/oxd-server.yml.temp  -O oxd-server.yml.temp')
+
 
     for b_file in ( 
                     oxd_conf_json_fn,
                     oxd_default_site_config_json_fn,
                     log4j_xml_fn,
                     oxd4_server_yaml_fn,
-                    '/opt/oxd-server/data/oxd_db.mv.db',
+                    current_dbFile,
                     ):
 
         if os.path.exists(b_file):
@@ -212,12 +251,12 @@ if update_required:
 
 print "About to execute following commands:"
 print '\n'.join(commands)
-print "You can interrupt by pressing Ctr+C in 10 seconds"
-print
-for i in range(10,-1,-1):
-    print "Execution will start in {0} seconds".format(i)
-    time.sleep(1)
-print
+
+ask = "Do you want to continue [y|N]: "
+
+answer = raw_input(ask)
+if not answer or answer.lower()[0] != 'y':
+    sys.exit("Migration cancelled, exiting.")
 
 for cmd in commands:
     print "Executing", cmd
@@ -230,9 +269,6 @@ if update_required:
     oxd_conf_json_back_fn = os.path.join(oxd_backup_dir, 'oxd-conf.json')
     oxd_default_site_config_json_back_fn = os.path.join(oxd_backup_dir, 'oxd-default-site-config.json')
     log4j_xml_back_fn = os.path.join(oxd_backup_dir, 'log4j.xml')
-
-
-    oxd_conf_json = json_load_byteified(oxd_conf_json_back_fn)
 
     oxd_default_site_config_json = json_load_byteified(oxd_default_site_config_json_back_fn)
 
