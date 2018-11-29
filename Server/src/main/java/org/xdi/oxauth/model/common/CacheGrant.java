@@ -1,18 +1,23 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.model.common;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Set;
-
-import javax.enterprise.inject.Instance;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 
+import javax.enterprise.inject.Instance;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Set;
+
 /**
  * @author yuriyz
- * @version September 6, 2017
+ * @version November 28, 2018
  */
 public class CacheGrant implements Serializable {
 
@@ -65,6 +70,10 @@ public class CacheGrant implements Serializable {
             expiresIn = grant.getAuthorizationCode().getExpiresIn();
         } else {
             expiresIn = appConfiguration.getAccessTokenLifetime();
+            // oxAuth #830 Client-specific access token expiration
+            if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
+                expiresIn = client.getAccessTokenLifetime();
+            }
         }
     }
 
@@ -193,7 +202,7 @@ public class CacheGrant implements Serializable {
         return cacheKey(client.getClientId(), authorizationCodeString, grantId);
     }
 
-    public static String cacheKey(String clientId, String code, String grantId ) {
+    public static String cacheKey(String clientId, String code, String grantId) {
         if (StringUtils.isBlank(code)) {
             return grantId;
         }

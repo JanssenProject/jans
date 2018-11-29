@@ -6,21 +6,6 @@
 
 package org.xdi.oxauth.service;
 
-import static org.xdi.oxauth.util.ServerUtil.isTrue;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
@@ -42,13 +27,21 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+
+import static org.xdi.oxauth.util.ServerUtil.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version November 11, 2016
+ * @version November 28, 2018
  */
 @Stateless
 @Named
@@ -137,7 +130,13 @@ public class GrantService {
                     expiration = Integer.toString(appConfiguration.getRefreshTokenLifetime());
                     break;
                 case ACCESS_TOKEN:
-                    expiration = Integer.toString(appConfiguration.getAccessTokenLifetime());
+                    int lifetime = appConfiguration.getAccessTokenLifetime();
+                    Client client = clientService.getClient(token.getClientId());
+                    // oxAuth #830 Client-specific access token expiration
+                    if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
+                        lifetime = client.getAccessTokenLifetime();
+                    }
+                    expiration = Integer.toString(lifetime);
                     break;
             }
 
@@ -386,14 +385,14 @@ public class GrantService {
 
     private void cleanUpImpl() {
         // Cleaning oxAuthToken
-    	BatchOperation<TokenLdap> tokenBatchService = new ProcessBatchOperation<TokenLdap>() {
+        BatchOperation<TokenLdap> tokenBatchService = new ProcessBatchOperation<TokenLdap>() {
             @Override
-        	public void performAction(List<TokenLdap> entries) {
+            public void performAction(List<TokenLdap> entries) {
                 auditLogging(entries);
                 remove(entries);
             }
         };
-        ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getExpiredTokenFilter(), SearchScope.SUB, new String[] { "oxAuthTokenCode", "oxAuthClientId", "oxAuthScope", "oxAuthUserId" }, tokenBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getExpiredTokenFilter(), SearchScope.SUB, new String[]{"oxAuthTokenCode", "oxAuthClientId", "oxAuthScope", "oxAuthUserId"}, tokenBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
         BatchOperation<Grant> grantBatchService = new ProcessBatchOperation<Grant>() {
@@ -403,7 +402,7 @@ public class GrantService {
             }
 
         };
-        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredGrantFilter(), SearchScope.SUB, new String[] { "" }, grantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredGrantFilter(), SearchScope.SUB, new String[]{""}, grantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
@@ -413,7 +412,7 @@ public class GrantService {
                 removeGrants(entries);
             }
         };
-        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredOldGrantFilter(), SearchScope.SUB, new String[] { "" }, oldGrantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredOldGrantFilter(), SearchScope.SUB, new String[]{""}, oldGrantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 
     private Filter getExpiredTokenFilter() {
@@ -425,20 +424,20 @@ public class GrantService {
         calendar.add(Calendar.SECOND, 60);
 
         Filter hasSubordinates = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
-    			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-    	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", ldapEntryManager.encodeTime(calendar.getTime()));
-    	Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
-    	
-    	return filter;
+                Filter.createEqualityFilter("hasSubordinates", "FALSE"));
+        Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", ldapEntryManager.encodeTime(calendar.getTime()));
+        Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
+
+        return filter;
     }
 
     private Filter getExpiredOldGrantFilter() {
-    	Filter hasSubordinatesFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
-    			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-    	Filter noCreationDate = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
-    	Filter filter = Filter.createANDFilter(noCreationDate, hasSubordinatesFilter);
-    	
-    	return filter;
+        Filter hasSubordinatesFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+                Filter.createEqualityFilter("hasSubordinates", "FALSE"));
+        Filter noCreationDate = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
+        Filter filter = Filter.createANDFilter(noCreationDate, hasSubordinatesFilter);
+
+        return filter;
     }
 
     private void addGrantBranch(final String p_grantId, final String p_clientId) {

@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 2, 2018
+ * @version November 28, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -459,6 +459,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             // Custom params
             putCustomStuffIntoObject(p_client, requestObject.getJsonObject());
         }
+
+        if (requestObject.getAccessTokenLifetime() != null) {
+            p_client.setAccessTokenLifetime(requestObject.getAccessTokenLifetime());
+        }
     }
 
     @Override
@@ -496,10 +500,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             if (externalDynamicClientRegistrationService.isEnabled()) {
                                 updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(request, client);
                             }
-                            
+
                             if (updateClient) {
                                 clientService.merge(client);
-    
+
                                 oAuth2AuditLog.setScope(clientScopesToString(client));
                                 oAuth2AuditLog.setSuccess(true);
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
@@ -633,6 +637,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, POST_LOGOUT_REDIRECT_URIS.toString(), client.getPostLogoutRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_URIS.toString(), client.getRequestUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZED_ORIGINS.toString(), client.getAuthorizedOrigins());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
         if (!Util.isNullOrEmpty(client.getJwks())) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), new JSONObject(client.getJwks()));
         }

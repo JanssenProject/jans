@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version May 30, 2018
+ * @version November 28, 2018
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -75,6 +75,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
     private List<String> authorizedOrigins;
+    private Integer accessTokenLifetime;
 
     /**
      * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
@@ -904,6 +905,23 @@ public class RegisterRequest extends BaseRequest {
         this.claims = claims;
     }
 
+    /**
+     * Returns the Client-specific access token expiration.
+     *
+     * @return The Client-specific access token expiration.
+     */
+    public Integer getAccessTokenLifetime() {
+        return accessTokenLifetime;
+    }
+    /**
+     * Sets the Client-specific access token expiration (in seconds). Set it to Null or Zero to use the system default value.
+     *
+     * @param accessTokenLifetime The Client-specific access token expiration.
+     */
+    public void setAccessTokenLifetime(Integer accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1064,6 +1082,9 @@ public class RegisterRequest extends BaseRequest {
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
+        if (accessTokenLifetime != null) {
+            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
 
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
@@ -1222,6 +1243,8 @@ public class RegisterRequest extends BaseRequest {
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
         result.setFrontChannelLogoutUris(frontChannelLogoutUris);
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
+                requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
@@ -1400,6 +1423,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());
+        }
+        if (accessTokenLifetime != null) {
+            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);
         }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
