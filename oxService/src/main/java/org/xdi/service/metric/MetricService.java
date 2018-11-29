@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -322,7 +323,7 @@ public abstract class MetricService implements Serializable {
     }
 
     public String getuUiqueIdentifier() {
-        return String.valueOf(INITIAL_ID.incrementAndGet());
+        return UUID.randomUUID().toString();
     }
 
     public Counter getCounter(MetricType metricType) {
