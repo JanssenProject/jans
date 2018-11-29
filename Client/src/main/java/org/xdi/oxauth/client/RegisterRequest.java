@@ -92,7 +92,6 @@ public class RegisterRequest extends BaseRequest {
      */
     private List<String> claims;
 
-    private Date clientSecretExpiresAt;
     private Map<String, String> customAttributes;
 
     // internal state
@@ -180,24 +179,6 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setFrontChannelLogoutUris(List<String> logoutUris) {
         this.frontChannelLogoutUris = logoutUris;
-    }
-
-    /**
-     * Gets client_secret_expires_at
-     *
-     * @return client_secret_expires_at property
-     */
-    public Date getClientSecretExpiresAt() {
-        return clientSecretExpiresAt;
-    }
-
-    /**
-     * Sets client secret expiration date
-     *
-     * @param clientSecretExpiresAt client secret expiration date
-     */
-    public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
-        this.clientSecretExpiresAt = clientSecretExpiresAt;
     }
 
     /**
@@ -1079,9 +1060,6 @@ public class RegisterRequest extends BaseRequest {
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
-        if (clientSecretExpiresAt != null) {
-            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
-        }
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
         }
@@ -1224,16 +1202,8 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        Date clientSecretExpiresAt = null;
-        if (requestObject.has(CLIENT_SECRET_EXPIRES_AT_.getName())) {
-            if (requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()) > 0) {
-                clientSecretExpiresAt = new Date(requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()));
-            }
-        }
-
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
-        result.setClientSecretExpiresAt(clientSecretExpiresAt);
         result.setRequestUris(requestUris);
         result.setAuthorizedOrigins(authorizedOrigins);
         result.setClaimsRedirectUris(claimRedirectUris);
@@ -1420,9 +1390,6 @@ public class RegisterRequest extends BaseRequest {
         }
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
-        }
-        if (clientSecretExpiresAt != null) {
-            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());
         }
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);

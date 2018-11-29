@@ -98,7 +98,7 @@ public class AppConfiguration implements Configuration {
     private String organizationInum;
     private String oxId;
     private Boolean dynamicRegistrationEnabled;
-    private int dynamicRegistrationExpirationTime;
+    private int dynamicRegistrationExpirationTime = -1;
     private Boolean dynamicRegistrationPersistClientAuthorizations;
     private Boolean trustedClientEnabled;
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
