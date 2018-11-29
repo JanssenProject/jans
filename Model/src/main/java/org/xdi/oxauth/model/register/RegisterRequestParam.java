@@ -254,8 +254,6 @@ public enum RegisterRequestParam {
      */
     SCOPE("scope"),
 
-    CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at"),
-
     /**
      * Authorized JavaScript origins.
      */
