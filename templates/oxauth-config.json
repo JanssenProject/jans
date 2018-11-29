@@ -192,7 +192,7 @@
     "organizationInum":"%(inumOrg)s",
     "oxId":"https://%(hostname)s/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
-    "dynamicRegistrationExpirationTime":86400,
+    "dynamicRegistrationExpirationTime":-1,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
