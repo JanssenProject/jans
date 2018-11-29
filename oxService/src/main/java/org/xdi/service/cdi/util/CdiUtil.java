@@ -6,6 +6,7 @@
 
 package org.xdi.service.cdi.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.enterprise.inject.Instance;
@@ -14,6 +15,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +30,20 @@ public final class CdiUtil {
     private CdiUtil() {
     }
 
-    public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName) {
-        Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, NamedLiteral.of(beanName)));
-        if (bean == null) {
-            return null;
+    public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName, Annotation... qualifiers) {
+        NamedLiteral namedLiteral = NamedLiteral.of(beanName);
+
+        Annotation[] allQualifiers = null;
+        if (qualifiers == null) {
+            allQualifiers = new Annotation[] { namedLiteral };
+        } else {
+            allQualifiers = (Annotation[]) ArrayUtils.add(new Annotation[] { namedLiteral}, qualifiers);
         }
+
+        Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, allQualifiers));
+		if (bean == null) {
+			return null;
+		}
 
         T existingInstance = beanManager.getContext(bean.getScope()).get(bean, beanManager.createCreationalContext(bean));
 
