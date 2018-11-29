@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 20, 2018
+ * @version November 28, 2018
  */
 
 public enum RegisterRequestParam {
@@ -259,7 +259,12 @@ public enum RegisterRequestParam {
     /**
      * Authorized JavaScript origins.
      */
-    AUTHORIZED_ORIGINS("authorized_origins");
+    AUTHORIZED_ORIGINS("authorized_origins"),
+
+    /**
+     * Client-specific access token expiration. Set this value to null or zero to use the default value.
+     */
+    ACCESS_TOKEN_LIFETIME("access_token_lifetime");
 
     /**
      * Parameter name
