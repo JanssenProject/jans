@@ -86,6 +86,13 @@
         </classes>
     </test>
 
+    <!-- Client Specific Access Token Expiration -->
+    <test name="Client Specific Access Token Expiration" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientSpecificAccessTokenExpiration"/>
+        </classes>
+    </test>
+
     <!-- Client White List Black List Redirect Uris -->
     <test name="Client White List Black List Redirect Uris" enabled="true">
         <classes>

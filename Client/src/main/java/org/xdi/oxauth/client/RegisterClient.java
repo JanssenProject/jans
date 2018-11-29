@@ -29,7 +29,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version May 30, 2018
+ * @version November 28, 2018
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -207,7 +207,6 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getClientSecretExpiresAt() != null) {
                     requestBody.put(CLIENT_SECRET_EXPIRES_AT_.toString(), getRequest().getClientSecretExpiresAt().getTime());
                 }
-
                 if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
                     requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
                 }
@@ -216,6 +215,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 }
                 if (getRequest().getAuthorizedOrigins() != null && !getRequest().getAuthorizedOrigins().isEmpty()) {
                     requestBody.put(AUTHORIZED_ORIGINS.toString(), new JSONArray(getRequest().getAuthorizedOrigins()));
+                }
+                if (getRequest().getAccessTokenLifetime() != null) {
+                    requestBody.put(ACCESS_TOKEN_LIFETIME.toString(), getRequest().getAccessTokenLifetime());
                 }
 
                 if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {

@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -27,11 +15,17 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.TokenHashUtil;
 
+import javax.inject.Inject;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 6, 2017
+ * @version November 28, 2018
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -278,6 +272,10 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public AccessToken createAccessToken() {
         int lifetime = appConfiguration.getAccessTokenLifetime();
+        // oxAuth #830 Client-specific access token expiration
+        if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
+            lifetime = client.getAccessTokenLifetime();
+        }
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
