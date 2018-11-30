@@ -11,7 +11,7 @@
         "umaBase":"ou=uma,o=%(inumOrg)s,o=gluu",
         "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu",
         "u2fBase":"ou=u2f,o=%(inumOrg)s,o=gluu",
-        "metric":"ou=metric,o=%(inumOrg)s,o=gluu",
+        "metric":"ou=statistic,o=metric",
         "sectorIdentifiers": "ou=sector_identifiers,o=%(inumOrg)s,o=gluu"
     }
 }

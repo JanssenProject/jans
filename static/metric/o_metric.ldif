@@ -1,0 +1,10 @@
+dn: o=metric
+objectClass: top
+objectClass: organization
+o: site
+
+dn: ou=statistic,o=metric
+objectclass: top
+objectclass: organizationalUnit
+ou: statistic
+
