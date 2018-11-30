@@ -156,7 +156,7 @@ public class AuthorizeService {
             sessionIdService.updateSessionId(session);
 
             // OXAUTH-297 - set session_id cookie
-            if (!appConfiguration.getInvalidateSessionAfterAuthorizationFlow()) {
+            if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
                 sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), false);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
@@ -171,7 +171,7 @@ public class AuthorizeService {
             final String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
-            invalidateSessionIfNeeded();
+            invalidateSessionCookiesIfNeeded();
             facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {
             log.trace(e.getMessage(), e);
@@ -180,7 +180,7 @@ public class AuthorizeService {
 
     public void permissionDenied(final SessionId session) {
         log.trace("permissionDenied");
-        invalidateSessionIfNeeded();
+        invalidateSessionCookiesIfNeeded();
 
         if (session == null) {
             authenticationFailedSessionInvalid();
@@ -231,13 +231,13 @@ public class AuthorizeService {
         return result;
     }
 
-    private void invalidateSessionIfNeeded() {
-        if (appConfiguration.getInvalidateSessionAfterAuthorizationFlow()) {
-            invalidateSession();
+    private void invalidateSessionCookiesIfNeeded() {
+        if (appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
+            invalidateSessionCookies();
         }
     }
 
-    private void invalidateSession() {
+    private void invalidateSessionCookies() {
         try {
             if (externalContext.getResponse() instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
