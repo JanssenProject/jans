@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -36,13 +35,9 @@ public class AttestationProcessorFactory {
 
     private Map<AttestationFormat, AttestationFormatProcessor> processorsMap;
 
-    @PostConstruct
-    public void create() {
-        this.processorsMap = new EnumMap<>(AttestationFormat.class);
-    }
-
     @Inject
     public void initCommandProcessors(@Any Instance<AttestationFormatProcessor> attestationFormatProcessors) {
+        this.processorsMap = new EnumMap<>(AttestationFormat.class);
         for (AttestationFormatProcessor app : attestationFormatProcessors) {
             processorsMap.put(app.getAttestationFormat(), app);
         }

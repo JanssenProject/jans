@@ -28,6 +28,11 @@ public class CorsFilterConfig implements FilterConfig {
     private Map<String, String> initParameters;
 
     /**
+     * Key to retrieve if filter enabled from {@link CorsConfigurationFilter}.
+     */
+    public static final String PARAM_CORS_ENABLED = "cors.enabled";
+
+    /**
      * Key to retrieve allowed origins from {@link CorsConfigurationFilter}.
      */
     public static final String PARAM_CORS_ALLOWED_ORIGINS = "cors.allowed.origins";
@@ -74,6 +79,7 @@ public class CorsFilterConfig implements FilterConfig {
         List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
         for (CorsConfigurationFilter corsConfigurationFilter : corsConfigurationFilters) {
             if (filterName.equals(corsConfigurationFilter.getFilterName())) {
+                initParameters.put(PARAM_CORS_ENABLED, corsConfigurationFilter.getCorsEnabled().toString());
                 initParameters.put(PARAM_CORS_ALLOWED_ORIGINS, corsConfigurationFilter.getCorsAllowedOrigins());
                 initParameters.put(PARAM_CORS_ALLOWED_METHODS, corsConfigurationFilter.getCorsAllowedMethods());
                 initParameters.put(PARAM_CORS_ALLOWED_HEADERS, corsConfigurationFilter.getCorsAllowedHeaders());

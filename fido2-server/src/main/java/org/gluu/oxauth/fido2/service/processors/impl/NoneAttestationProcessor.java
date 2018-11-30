@@ -21,8 +21,8 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.service.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
+import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

@@ -30,9 +30,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
-import org.gluu.oxauth.fido2.mds.MdsService;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
-import org.gluu.oxauth.fido2.service.CommonVerifiers;
+import org.gluu.oxauth.fido2.service.mds.MdsService;
+import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
