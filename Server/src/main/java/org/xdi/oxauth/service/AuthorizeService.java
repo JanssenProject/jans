@@ -27,6 +27,7 @@ import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -170,7 +171,7 @@ public class AuthorizeService {
             final String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
-            invalidateSessionIfNeeded(session);
+            invalidateSessionIfNeeded();
             facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {
             log.trace(e.getMessage(), e);
@@ -179,7 +180,7 @@ public class AuthorizeService {
 
     public void permissionDenied(final SessionId session) {
         log.trace("permissionDenied");
-        invalidateSessionIfNeeded(session);
+        invalidateSessionIfNeeded();
 
         if (session == null) {
             authenticationFailedSessionInvalid();
@@ -230,25 +231,25 @@ public class AuthorizeService {
         return result;
     }
 
-    private void invalidateSessionIfNeeded(final SessionId session) {
+    private void invalidateSessionIfNeeded() {
         if (appConfiguration.getInvalidateSessionAfterAuthorizationFlow()) {
-            invalidateSession(session);
+            invalidateSession();
         }
     }
 
-    private void invalidateSession(final SessionId session) {
-        Map<String, Object> cookieProperties = new HashMap<String, Object>();
-        cookieProperties.put("maxAge", 0);
+    private void invalidateSession() {
+        try {
+            if (externalContext.getResponse() instanceof HttpServletResponse) {
+                final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
-        log.trace("Invalidated {} cookie.", SessionIdService.SESSION_ID_COOKIE_NAME);
-        externalContext.addResponseCookie(SessionIdService.SESSION_ID_COOKIE_NAME, null, cookieProperties);
+                log.trace("Invalidated {} cookie.", SessionIdService.SESSION_ID_COOKIE_NAME);
+                httpResponse.addHeader("Set-Cookie", SessionIdService.SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
 
-        log.trace("Invalidated {} cookie.", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
-        externalContext.addResponseCookie(SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME, null, cookieProperties);
-
-        log.trace("Invalidated {} cookie.", SessionIdService.SESSION_STATE_COOKIE_NAME);
-        externalContext.addResponseCookie(SessionIdService.SESSION_STATE_COOKIE_NAME, null, cookieProperties);
-
-        // we do not remove session object from persistence because it's still required by authorization endpoint
+                log.trace("Invalidated {} cookie.", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
+                httpResponse.addHeader("Set-Cookie", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }
