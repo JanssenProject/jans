@@ -248,14 +248,6 @@ public class AuthorizeService {
         log.trace("Invalidated {} cookie.", SessionIdService.SESSION_STATE_COOKIE_NAME);
         externalContext.addResponseCookie(SessionIdService.SESSION_STATE_COOKIE_NAME, null, cookieProperties);
 
-        if (session != null) {
-            boolean result = sessionIdService.remove(session);
-            if (!result) {
-                log.error("Failed to remove session_id '{}'", session.getId());
-            } else {
-                log.error("Removed session_id '{}' from persistence.", session.getId());
-            }
-        }
+        // we do not remove session object from persistence because it's still required by authorization endpoint
     }
-
 }
