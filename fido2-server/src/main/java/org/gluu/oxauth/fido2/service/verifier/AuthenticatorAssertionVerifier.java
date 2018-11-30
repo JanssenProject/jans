@@ -11,13 +11,14 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service;
+package org.gluu.oxauth.fido2.service.verifier;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
+import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.processors.impl.AssertionFormatProcessor;
 import org.gluu.oxauth.fido2.service.processors.impl.AssertionProcessorFactory;
 import org.slf4j.Logger;

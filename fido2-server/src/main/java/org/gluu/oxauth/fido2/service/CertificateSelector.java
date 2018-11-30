@@ -26,7 +26,6 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;

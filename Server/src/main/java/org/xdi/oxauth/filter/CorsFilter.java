@@ -7,6 +7,7 @@
 package org.xdi.oxauth.filter;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +53,8 @@ public class CorsFilter extends AbstractCorsFilter {
     @Inject
     private ClientService clientService;
 
+    private boolean filterEnabled;
+
     public CorsFilter() {
         super();
     }
@@ -70,6 +73,8 @@ public class CorsFilter extends AbstractCorsFilter {
             String filterName = filterConfig.getFilterName();
             CorsFilterConfig corsFilterConfig = new CorsFilterConfig(filterName, appConfiguration);
 
+            String configEnabled = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_ENABLED);
             String configAllowedOrigins = corsFilterConfig
                     .getInitParameter(PARAM_CORS_ALLOWED_ORIGINS);
             String configAllowedHttpMethods = corsFilterConfig
@@ -85,6 +90,10 @@ public class CorsFilter extends AbstractCorsFilter {
             String configDecorateRequest = corsFilterConfig
                     .getInitParameter(PARAM_CORS_REQUEST_DECORATE);
 
+            if (configEnabled != null) {
+                this.filterEnabled = Boolean.parseBoolean(configEnabled);
+            }
+
             parseAndStore(configAllowedOrigins, configAllowedHttpMethods,
                     configAllowedHttpHeaders, configExposedHeaders,
                     configSupportsCredentials, configPreflightMaxAge,
@@ -93,7 +102,20 @@ public class CorsFilter extends AbstractCorsFilter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        Collection<String> globalAllowedOrigins = null;
+        if (this.filterEnabled) {
+            globalAllowedOrigins = doFilterImpl(servletRequest);
+            super.doFilter(servletRequest, servletResponse, filterChain);
+            setAllowedOrigins(globalAllowedOrigins);
+        } else {
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
+    }
+
+    protected Collection<String> doFilterImpl(ServletRequest servletRequest)
+            throws UnsupportedEncodingException, IOException, ServletException {
         Collection<String> globalAllowedOrigins = getAllowedOrigins();
 
         if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {
@@ -134,8 +156,7 @@ public class CorsFilter extends AbstractCorsFilter {
             }
         }
 
-        super.doFilter(servletRequest, servletResponse, filterChain);
-
-        setAllowedOrigins(globalAllowedOrigins);
+        return globalAllowedOrigins;
     }
 }
+

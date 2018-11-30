@@ -13,12 +13,15 @@
 
 package org.gluu.oxauth.fido2.ws.rs.controller;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.ws.rs.service.AssertionService;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,11 +32,15 @@ public class AssertionController {
     @Inject
     private AssertionService assertionService;
 
+    @Inject
+    private DataMapperService dataMapperService;
+
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public JsonNode register(JsonNode params) {
+    public JsonNode register(String content) throws IOException {
+        JsonNode params = dataMapperService.readTree(content);
         return assertionService.options(params);
     }
 

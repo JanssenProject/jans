@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.mds;
+package org.gluu.oxauth.fido2.service.mds;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -31,9 +31,9 @@ import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.service.Base64Service;
-import org.gluu.oxauth.fido2.service.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.processors.impl.ResteasyClientFactory;
+import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
