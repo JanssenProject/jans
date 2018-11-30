@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service;
+package org.gluu.oxauth.fido2.service.verifier;
 
 import java.io.IOException;
 
@@ -23,6 +23,9 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
+import org.gluu.oxauth.fido2.service.AuthenticatorDataParser;
+import org.gluu.oxauth.fido2.service.Base64Service;
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.processors.impl.AttestationProcessorFactory;
 import org.slf4j.Logger;

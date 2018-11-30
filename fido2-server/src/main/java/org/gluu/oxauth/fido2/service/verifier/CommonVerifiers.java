@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service;
+package org.gluu.oxauth.fido2.service.verifier;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,11 +36,12 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtilsBouncyCastle;
 import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.service.Base64Service;
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;

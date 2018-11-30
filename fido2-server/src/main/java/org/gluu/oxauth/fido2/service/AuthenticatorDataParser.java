@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonLocation;
