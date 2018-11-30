@@ -624,6 +624,7 @@ class Setup(object):
                                         'jackson-core-*.jar', 'jackson-core-asl-*.jar', 'jackson-mapper-asl-*.jar', 'jackson-xc-*.jar',
                                         'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
+        # will be removed after all init scripts is fixed
         self.init_fixes = {
                 'opendj' : {'src_pattern' : 'S*opendj',
                             'result_name' : 'S90opendj'
@@ -653,6 +654,16 @@ class Setup(object):
                             'result_name' : 'S98apache2'
                            },
         }
+
+
+        self.service_requirements = {'oxauth': ['opendj', 72],
+                        'identity': ['opendj oxauth', 74],
+                        'idp': ['opendj oxauth', 76],
+                        'casa': ['opendj oxauth', 78],
+                        'oxd-server': ['opendj oxauth', 80],
+                        'passport': ['opendj oxauth', 82],
+                        'oxauth-rp': ['opendj oxauth', 84],
+                        }
 
         self.install_time_ldap = None
 
@@ -1362,6 +1373,28 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.node_base])
         self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
 
+    def jetty_init_scripts(self, serviceName):
+
+        jetty_initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
+
+        jetty_initscript = open(jetty_initscript_fn).readlines()
+        
+        for i,l in enumerate(jetty_initscript):
+            if l.startswith('# Provides:'):
+                jetty_initscript[i] = '# Provides:          {0}\n'.format(serviceName)
+            elif l.startswith('# description:'):
+                jetty_initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
+            elif l.startswith('# Required-Start:'):
+                jetty_initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
+            elif l.startswith('# chkconfig:'):
+                jetty_initscript[i] = '# chkconfig: 3 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
+        
+        service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+        with open(service_init_script_fn, 'w') as W:
+            W.write(''.join(jetty_initscript))
+
+        self.run([self.cmd_chmod, '+x', service_init_script_fn])
+
     def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
@@ -1411,10 +1444,7 @@ class Setup(object):
             self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
             self.setup.logIt(traceback.format_exc(), True)
 
-        self.copyFile('%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName)
-        source_string = '# Provides:          jetty'
-        target_string = '# Provides:          %s' % serviceName
-        self.run(['sed', '-i', 's/^%s/%s/' % (source_string, target_string), '/etc/init.d/%s' % serviceName])
+        self.jetty_init_scripts(serviceName)
 
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'red']:
