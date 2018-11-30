@@ -6,20 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.faces.application.FacesMessage;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
@@ -28,17 +15,20 @@ import org.xdi.model.security.Identity;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.google.common.collect.Sets;
+import javax.ejb.Stateless;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * @author Yuriy Movchan
@@ -103,6 +93,9 @@ public class AuthorizeService {
 
     @Inject
     private FacesMessages facesMessages;
+
+    @Inject
+    private ExternalContext externalContext;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -176,6 +169,7 @@ public class AuthorizeService {
             final String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
+            invalidateSessionIfNeeded(session);
             facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {
             log.trace(e.getMessage(), e);
@@ -184,6 +178,7 @@ public class AuthorizeService {
 
     public void permissionDenied(final SessionId session) {
         log.trace("permissionDenied");
+        invalidateSessionIfNeeded(session);
 
         if (session == null) {
             authenticationFailedSessionInvalid();
@@ -232,6 +227,35 @@ public class AuthorizeService {
         }
 
         return result;
+    }
+
+    private void invalidateSessionIfNeeded(final SessionId session) {
+        if (appConfiguration.getInvalidateSessionAfterAuthorizationFlow()) {
+            invalidateSession(session);
+        }
+    }
+
+    private void invalidateSession(final SessionId session) {
+        Map<String, Object> cookieProperties = new HashMap<String, Object>();
+        cookieProperties.put("maxAge", 0);
+
+        log.trace("Invalidated {} cookie.", SessionIdService.SESSION_ID_COOKIE_NAME);
+        externalContext.addResponseCookie(SessionIdService.SESSION_ID_COOKIE_NAME, null, cookieProperties);
+
+        log.trace("Invalidated {} cookie.", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
+        externalContext.addResponseCookie(SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME, null, cookieProperties);
+
+        log.trace("Invalidated {} cookie.", SessionIdService.SESSION_STATE_COOKIE_NAME);
+        externalContext.addResponseCookie(SessionIdService.SESSION_STATE_COOKIE_NAME, null, cookieProperties);
+
+        if (session != null) {
+            boolean result = sessionIdService.remove(session);
+            if (!result) {
+                log.error("Failed to remove session_id '{}'", session.getId());
+            } else {
+                log.error("Removed session_id '{}' from persistence.", session.getId());
+            }
+        }
     }
 
 }
