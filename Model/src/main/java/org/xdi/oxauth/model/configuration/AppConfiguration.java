@@ -109,7 +109,7 @@ public class AppConfiguration implements Configuration {
     private Boolean persistIdTokenInLdap = false;
     private Boolean persistRefreshTokenInLdap = true;
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
-    private Boolean invalidateSessionAfterAuthorizationFlow = false;
+    private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -959,15 +959,15 @@ public class AppConfiguration implements Configuration {
         this.allowPostLogoutRedirectWithoutValidation = allowPostLogoutRedirectWithoutValidation;
     }
 
-    public Boolean getInvalidateSessionAfterAuthorizationFlow() {
-        if (invalidateSessionAfterAuthorizationFlow == null) {
-            invalidateSessionAfterAuthorizationFlow = false;
+    public Boolean getInvalidateSessionCookiesAfterAuthorizationFlow() {
+        if (invalidateSessionCookiesAfterAuthorizationFlow == null) {
+            invalidateSessionCookiesAfterAuthorizationFlow = false;
         }
-        return invalidateSessionAfterAuthorizationFlow;
+        return invalidateSessionCookiesAfterAuthorizationFlow;
     }
 
-    public void setInvalidateSessionAfterAuthorizationFlow(Boolean invalidateSessionAfterAuthorizationFlow) {
-        this.invalidateSessionAfterAuthorizationFlow = invalidateSessionAfterAuthorizationFlow;
+    public void setInvalidateSessionCookiesAfterAuthorizationFlow(Boolean invalidateSessionCookiesAfterAuthorizationFlow) {
+        this.invalidateSessionCookiesAfterAuthorizationFlow = invalidateSessionCookiesAfterAuthorizationFlow;
     }
 
     public Boolean getUseCacheForAllImplicitFlowObjects() {
