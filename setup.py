@@ -1446,14 +1446,7 @@ class Setup(object):
 
         self.jetty_init_scripts(serviceName)
 
-        # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'red']:
-            if self.os_initdaemon == 'systemd':
-                self.run(["/usr/bin/systemctl", 'enable', serviceName])
-            else:
-                self.run(["/sbin/chkconfig", serviceName, "on"])
-        elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
+        self.enable_service_at_start(serviceName)
 
         tmpfiles_base = '/usr/lib/tmpfiles.d'
         if self.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
