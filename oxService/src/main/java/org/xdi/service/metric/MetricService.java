@@ -66,9 +66,6 @@ public abstract class MetricService implements Serializable {
     @Inject
     private Logger log;
 
-    @Inject
-    private PersistenceEntryManager ldapEntryManager;
-
     public void initTimer(int metricInterval) {
         this.metricRegistry = new MetricRegistry();
         this.registeredMetricTypes = new HashSet<MetricType>();
@@ -92,11 +89,11 @@ public abstract class MetricService implements Serializable {
         branch.setOrganizationalUnitName(ou);
         branch.setDn(branchDn);
 
-        ldapEntryManager.persist(branch);
+        getEntryManager().persist(branch);
     }
 
     public boolean containsBranch(String branchDn) {
-        return ldapEntryManager.contains(SimpleBranch.class, branchDn);
+        return getEntryManager().contains(SimpleBranch.class, branchDn);
     }
 
     public void createBranch(String branchDn, String ou) {
@@ -139,34 +136,34 @@ public abstract class MetricService implements Serializable {
         prepareBranch(creationTime, getApplicationType());
 
         for (MetricEntry metricEntry : metricEntries) {
-            ldapEntryManager.persist(metricEntry);
+            getEntryManager().persist(metricEntry);
         }
     }
 
     public void add(MetricEntry metricEntry) {
         prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-        ldapEntryManager.persist(metricEntry);
+        getEntryManager().persist(metricEntry);
     }
 
     public void update(MetricEntry metricEntry) {
         prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-        ldapEntryManager.merge(metricEntry);
+        getEntryManager().merge(metricEntry);
     }
 
     public void remove(MetricEntry metricEntry) {
         prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-        ldapEntryManager.remove(metricEntry);
+        getEntryManager().remove(metricEntry);
     }
 
     public void removeBranch(String branchDn) {
-        ldapEntryManager.removeRecursively(branchDn);
+        getEntryManager().removeRecursively(branchDn);
     }
 
     public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
-        return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
+        return getEntryManager().find(metricType.getMetricEntryType(), metricEventDn);
     }
 
     public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
@@ -193,8 +190,8 @@ public abstract class MetricService implements Serializable {
 
                 Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
                 Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
-                Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeTime((startDate)));
-                Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeTime(endDate));
+                Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", getEntryManager().encodeTime((startDate)));
+                Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", getEntryManager().encodeTime(endDate));
 
                 metricTypeFilters.add(applicationTypeFilter);
                 metricTypeFilters.add(eventTypeTypeFilter);
@@ -203,12 +200,12 @@ public abstract class MetricService implements Serializable {
 
                 Filter filter = Filter.createANDFilter(metricTypeFilters);
 
-                List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) ldapEntryManager.findEntries(metricDn,
+                List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) getEntryManager().findEntries(metricDn,
                         metricType.getMetricEntryType(), filter, returnAttributes);
                 metricTypeResult.addAll(metricTypeMonthResult);
             }
             // Sort entries to avoid calculation errors
-            ldapEntryManager.sortListByProperties(MetricEntry.class, metricTypeResult, false, "creationDate");
+            getEntryManager().sortListByProperties(MetricEntry.class, metricTypeResult, false, "creationDate");
 
             result.put(metricType, metricTypeResult);
         }
@@ -218,9 +215,9 @@ public abstract class MetricService implements Serializable {
 
     public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
             int count, int chunkSize) {
-        Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeTime(expirationDate));
+        Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", getEntryManager().encodeTime(expirationDate));
 
-        List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
+        List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
                 new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);
 
         return metricEntries;
@@ -231,7 +228,7 @@ public abstract class MetricService implements Serializable {
         String baseDn = buildDn(null, null, applicationType, applianceInum);
 
         Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
-        return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0,
+        return getEntryManager().findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0,
                 count, chunkSize);
     }
 
@@ -395,4 +392,6 @@ public abstract class MetricService implements Serializable {
     public abstract boolean isMetricReporterEnabled();
 
     public abstract ApplicationType getApplicationType();
+
+    public abstract PersistenceEntryManager getEntryManager();
 }
