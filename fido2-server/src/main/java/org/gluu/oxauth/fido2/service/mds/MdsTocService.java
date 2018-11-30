@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.mds;
+package org.gluu.oxauth.fido2.service.mds;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
 
@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -120,13 +119,13 @@ public class MdsTocService {
                 try {
                     maps.add(parseTOC(mdsTocRootCertFile, filePath));
                 } catch (IOException e) {
-                    log.warn("Can't access or open path " + path, e);
+                    log.warn("Can't access or open path: {}", filePath, e);
                 } catch (ParseException e) {
-                    log.warn("Can't parse path " + path, e);
+                    log.warn("Can't parse path: {}", filePath, e);
                 }
             }
         } catch (Exception e) {
-            log.warn("Something wrong with path ", e);
+            log.warn("Something wrong with path", e);
         } finally {
             if (directoryStream != null) {
                 try {
@@ -184,14 +183,11 @@ public class MdsTocService {
             Map<String, JsonNode> tocEntries = new HashMap<>();
             while (iter.hasNext()) {
                 JsonNode tocEntry = iter.next();
-
-                if (tocEntry.get("aaguid") == null) {
-                    continue;
+                if (tocEntry.hasNonNull("aaguid")) {
+                    String aaguid = tocEntry.get("aaguid").asText();
+                    log.info("Added TOC entry {} from {} with status {}", aaguid, path, tocEntry.get("statusReports").findValue("status"));
+                    tocEntries.put(aaguid, tocEntry);
                 }
-
-                String aaguid = tocEntry.get("aaguid").asText();
-                log.info("Added TOC entry {} from {} with status {}", aaguid, path, tocEntry.get("statusReports").findValue("status"));
-                tocEntries.put(aaguid, tocEntry);
             }
             return tocEntries;
         } finally {

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service;
+package org.gluu.oxauth.fido2.service.verifier;
 
 import java.net.MalformedURLException;
 import java.net.URL;
