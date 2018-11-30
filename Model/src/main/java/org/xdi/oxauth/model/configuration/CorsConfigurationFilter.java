@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 public class CorsConfigurationFilter {
 
     private String filterName;
+    private Boolean corsEnabled;
     private String corsAllowedOrigins;
     private String corsAllowedMethods;
     private String corsAllowedHeaders;
@@ -24,6 +25,7 @@ public class CorsConfigurationFilter {
     private Integer corsPreflightMaxAge;
     private Boolean corsRequestDecorate;
 
+    public static final Boolean DEFAULT_CORS_ENABLED = true;
     public static final String DEFAULT_CORS_ALLOWED_ORIGINS = "*";
     public static final String DEFAULT_CORS_ALLOWED_METHODS = "GET,POST,HEAD,OPTIONS";
     public static final String DEFAULT_CORS_ALLOWED_HEADERS = "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers";
@@ -39,6 +41,17 @@ public class CorsConfigurationFilter {
 
     public void setFilterName(String filterName) {
         this.filterName = filterName;
+    }
+
+    public Boolean getCorsEnabled() {
+        if (corsEnabled == null) {
+            corsEnabled = DEFAULT_CORS_ENABLED;
+        }
+        return corsEnabled;
+    }
+
+    public void setCorsEnabled(Boolean corsEnabled) {
+        this.corsEnabled = corsEnabled;
     }
 
     public String getCorsAllowedOrigins() {

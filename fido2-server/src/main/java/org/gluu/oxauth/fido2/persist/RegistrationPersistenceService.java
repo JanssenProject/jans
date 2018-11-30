@@ -23,6 +23,7 @@ import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
@@ -88,7 +89,14 @@ public class RegistrationPersistenceService {
     }
 
     public void save(Fido2RegistrationData registrationData) {
-        String userInum = registrationData.getUserId();
+        String userName = registrationData.getUsername();
+        
+        User user = userService.getUser(userName, "inum");
+        if (user == null) {
+            user = userService.addDefaultUser(userName);
+        }
+        String userInum = userService.getUserInum(user);
+
         prepareBranch(userInum);
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
@@ -131,6 +139,10 @@ public class RegistrationPersistenceService {
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
         final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=@!1111,o=gluu"
+        if (StringHelper.isEmpty(userInum)) {
+            return userBaseDn;
+        }
+
         return String.format("ou=fido2_register,%s", userBaseDn);
     }
 

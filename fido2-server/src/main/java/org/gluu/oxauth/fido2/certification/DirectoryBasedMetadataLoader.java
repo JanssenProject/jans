@@ -26,7 +26,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -98,8 +97,8 @@ public class DirectoryBasedMetadataLoader {
                     } else {
                         log.info("No aaguid for file path {}", filePath);
                     }
-                } catch (IOException ex) {
-                    log.warn("Can't process {} {}", filePath, ex.getMessage());
+                } catch (IOException e) {
+                    log.warn("Can't process {}", filePath, e);
                 }
             }
 
