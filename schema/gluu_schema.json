@@ -4239,6 +4239,28 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxRegistrationData",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxRegistrationData"
+            ],
+            "oid": "oxAttribute:391",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuthenticationData",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAuthenticationData"
+            ],
+            "oid": "oxAttribute:392",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -5670,6 +5692,51 @@
                 "top"
             ],
             "x_origin":"Gluu created objectclass"
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "oxId",
+                "creationDate",
+                "oxSessionStateId",
+                "oxCodeChallenge",
+                "personInum",
+                "oxAuthenticationData"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "oxFido2AuthenticationEntry"
+            ],
+            "oid": "oxObjectClass:52",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "oxId",
+                "creationDate",
+                "oxSessionStateId",
+                "oxCodeChallenge",
+                "oxPublicKeyId",
+                "personInum",
+                "oxRegistrationData"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "oxFido2RegistrationEntry"
+            ],
+            "oid": "oxObjectClass:53",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
         }
     ],
     "oidMacros": {
