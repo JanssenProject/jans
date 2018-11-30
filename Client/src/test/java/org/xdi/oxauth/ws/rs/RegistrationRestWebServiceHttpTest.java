@@ -178,8 +178,6 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setContacts(Arrays.asList(contact1NewValue, contact2NewValue));
         registerRequest.setLogoUri(logoUriNewValue);
 
-        registerRequest.setClientSecretExpiresAt(clientSecretExpiresAt);
-
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
         registerClient.setExecutor(clientExecutor(true));
