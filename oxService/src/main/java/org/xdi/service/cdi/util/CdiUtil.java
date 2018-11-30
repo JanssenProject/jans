@@ -37,10 +37,10 @@ public final class CdiUtil {
         if (qualifiers == null) {
             allQualifiers = new Annotation[] { namedLiteral };
         } else {
-            allQualifiers = (Annotation[]) ArrayUtils.add(new Annotation[] { namedLiteral}, qualifiers);
+            allQualifiers = (Annotation[]) ArrayUtils.add(qualifiers, namedLiteral);
         }
 
-        Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, allQualifiers));
+        Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, qualifiers));
 		if (bean == null) {
 			return null;
 		}

@@ -3,7 +3,6 @@ package org.xdi.service.metric.inject;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -15,11 +14,11 @@ import javax.inject.Qualifier;
 
 @Qualifier
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD, FIELD, PARAMETER })
+@Target({ METHOD, FIELD, PARAMETER })
 @Documented
 public @interface ReportMetric {
 
-    final class Literal extends AnnotationLiteral<ReportMetric> implements ReportMetric {
+    public static final class Literal extends AnnotationLiteral<ReportMetric> implements ReportMetric {
 
         public static final Literal INSTANCE = new Literal();
 
