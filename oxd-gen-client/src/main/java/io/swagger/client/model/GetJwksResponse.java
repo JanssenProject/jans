@@ -21,32 +21,40 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.client.model.JsonWebKey;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GetJwksResponse
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-11-11T15:47:43.225Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2018-12-01T10:15:46.729Z")
 public class GetJwksResponse {
-  @SerializedName("jwks")
-  private String jwks = null;
+  @SerializedName("keys")
+  private List<JsonWebKey> keys = new ArrayList<JsonWebKey>();
 
-  public GetJwksResponse jwks(String jwks) {
-    this.jwks = jwks;
+  public GetJwksResponse keys(List<JsonWebKey> keys) {
+    this.keys = keys;
+    return this;
+  }
+
+  public GetJwksResponse addKeysItem(JsonWebKey keysItem) {
+    this.keys.add(keysItem);
     return this;
   }
 
    /**
-   * Get jwks
-   * @return jwks
+   * Get keys
+   * @return keys
   **/
   @ApiModelProperty(required = true, value = "")
-  public String getJwks() {
-    return jwks;
+  public List<JsonWebKey> getKeys() {
+    return keys;
   }
 
-  public void setJwks(String jwks) {
-    this.jwks = jwks;
+  public void setKeys(List<JsonWebKey> keys) {
+    this.keys = keys;
   }
 
 
@@ -59,12 +67,12 @@ public class GetJwksResponse {
       return false;
     }
     GetJwksResponse getJwksResponse = (GetJwksResponse) o;
-    return Objects.equals(this.jwks, getJwksResponse.jwks);
+    return Objects.equals(this.keys, getJwksResponse.keys);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jwks);
+    return Objects.hash(keys);
   }
 
 
@@ -73,7 +81,7 @@ public class GetJwksResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetJwksResponse {\n");
     
-    sb.append("    jwks: ").append(toIndentedString(jwks)).append("\n");
+    sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("}");
     return sb.toString();
   }
