@@ -1,17 +1,47 @@
 package org.xdi.oxd.server;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.params.*;
+import org.xdi.oxd.common.params.AuthorizationCodeFlowParams;
+import org.xdi.oxd.common.params.CheckAccessTokenParams;
+import org.xdi.oxd.common.params.CheckIdTokenParams;
+import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
+import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
+import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
+import org.xdi.oxd.common.params.GetClientTokenParams;
+import org.xdi.oxd.common.params.GetJwksParams;
+import org.xdi.oxd.common.params.GetLogoutUrlParams;
+import org.xdi.oxd.common.params.GetRpParams;
+import org.xdi.oxd.common.params.GetTokensByCodeParams;
+import org.xdi.oxd.common.params.GetUserInfoParams;
+import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
+import org.xdi.oxd.common.params.IParams;
+import org.xdi.oxd.common.params.IntrospectAccessTokenParams;
+import org.xdi.oxd.common.params.IntrospectRptParams;
+import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.RemoveSiteParams;
+import org.xdi.oxd.common.params.RpGetClaimsGatheringUrlParams;
+import org.xdi.oxd.common.params.RpGetRptParams;
+import org.xdi.oxd.common.params.RsCheckAccessParams;
+import org.xdi.oxd.common.params.RsProtectParams;
+import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.common.response.POJOResponse;
 import org.xdi.oxd.server.service.ConfigurationService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -196,7 +226,8 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getJwks(@HeaderParam("Authorization") String authorization, String params) {
-        return process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization);
+        final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true);
+        return processWithCustomMapper(CommandType.GET_JWKS, params, GetJwksParams.class, authorization, mapper);
     }
 
 
@@ -210,6 +241,29 @@ public class RestResource {
     }
 
     private static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
+        Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization);
+        final String json = CoreUtils.asJsonSilently(forJsonConversion);
+        LOG.trace("Send back response: {}", json);
+        return json;
+    }
+
+    /*
+    Writes JSON using specified object mapper.
+     */
+    private static <T extends IParams> String processWithCustomMapper(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, ObjectMapper objectMapper) {
+        Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization);
+        try {
+            final String json = objectMapper.writeValueAsString(forJsonConversion);
+            LOG.trace("Send back response: {}", json);
+            return json;
+        } catch (IOException e) {
+            LOG.error("Failed to serialize object into json.", e);
+            return "";
+        }
+    }
+
+
+    private static <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(paramsAsString, paramsClass);
         if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
@@ -221,9 +275,7 @@ public class RestResource {
         if (response instanceof POJOResponse) {
             forJsonConversion = ((POJOResponse) response).getNode();
         }
-        final String json = CoreUtils.asJsonSilently(forJsonConversion);
-        LOG.trace("Send back response: {}", json);
-        return json;
+        return forJsonConversion;
     }
 
     private static String validateAccessToken(String authorization) {
