@@ -325,9 +325,7 @@ public class CommonVerifiers {
     public String verifyBase64UrlString(JsonNode node) {
         String value = verifyThatString(node);
         try {
-            base64Service.urlDecode(value.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new Fido2RPRuntimeException("Invalid id");
+            base64Service.urlDecode(value);
         } catch (IllegalArgumentException e) {
             throw new Fido2RPRuntimeException("Invalid id");
         }
