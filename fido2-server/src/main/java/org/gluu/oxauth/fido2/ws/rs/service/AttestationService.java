@@ -131,8 +131,7 @@ public class AttestationService {
         }
         credentialFound.setType("public-key");
         registrationsRepository.save(credentialFound);
-        // ArrayNode excludedCredentials = ((ObjectNode)
-        // params).putArray("excludeCredentials");
+        ArrayNode excludedCredentials = ((ObjectNode)params).putArray("excludeCredentials");
 
         ((ObjectNode) params).put("errorMessage", "");
         ((ObjectNode) params).put("status", "ok");

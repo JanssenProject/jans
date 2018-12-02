@@ -11,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,7 +21,9 @@ import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -33,6 +36,9 @@ public class AuthenticationPersistenceService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private UserService userService;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
@@ -52,12 +58,20 @@ public class AuthenticationPersistenceService {
     }
 
     public void save(Fido2AuthenticationData authenticationData) {
-        String userInum = authenticationData.getUserId();
+        String userName = authenticationData.getUsername();
+        
+        User user = userService.getUser(userName, "inum");
+        if (user == null) {
+            user = userService.addDefaultUser(userName);
+        }
+        String userInum = userService.getUserInum(user);
+
         prepareBranch(userInum);
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+        final String id = UUID.randomUUID().toString();
         
-        String dn = getDnForAuthenticationEntry(userInum, authenticationData.getId());
+        String dn = getDnForAuthenticationEntry(userInum, id);
         Fido2AuthenticationEntry fido2AuthenticationEntry = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, null, userInum, authenticationData);
 
         ldapEntryManager.persist(fido2AuthenticationEntry);
