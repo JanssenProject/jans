@@ -10,13 +10,14 @@ import org.xdi.oxd.client.ClientInterface;
 import org.xdi.oxd.common.params.GetJwksParams;
 import org.xdi.oxd.common.response.GetJwksResponse;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
 /**
  * Test for checking JSON Web Key Set functionality
  *
  * @author Shoeb
- * @version 11/11/2018
+ * @version 12/01/2018
  */
 public class GetJwksTest {
 
@@ -32,7 +33,8 @@ public class GetJwksTest {
 
         final GetJwksResponse response = client.getJwks(Tester.getAuthorization(), params);
         assertNotNull(response);
-        assertNotNull(response.getJwks());
+        assertNotNull(response.getKeys());
+        assertFalse(response.getKeys().isEmpty());
 
     }
 }
