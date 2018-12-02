@@ -3,8 +3,6 @@
 */
 package org.xdi.oxd.server.op;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.client.JwkClient;
@@ -22,8 +20,9 @@ import org.xdi.oxd.server.service.DiscoveryService;
  * Service class for fetching JSON Web Key set
  *
  * @author Shoeb
- * @version 11/10/2018
+ * @version 12/01/2018
  */
+
 public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
     protected GetJwksOperation(Command command, Injector injector) {
@@ -49,11 +48,10 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
             jwkClient.setExecutor(getHttpService().getClientExecutor());
 
             final JwkResponse serverResponse = jwkClient.exec();
-            final String jwksJson = new ObjectMapper().writer(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-                    .writeValueAsString(serverResponse.getJwks());
 
             final GetJwksResponse response = new GetJwksResponse();
-            response.setJwks(jwksJson);
+
+            response.setKeys(serverResponse.getJwks().getKeys());
 
             return response;
 
