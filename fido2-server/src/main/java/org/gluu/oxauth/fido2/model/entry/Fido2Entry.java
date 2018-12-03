@@ -2,10 +2,10 @@ package org.gluu.oxauth.fido2.model.entry;
 
 import java.util.Date;
 
+import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.ldap.model.BaseEntry;
 
 /**
  * Fido2 base persistence entry
