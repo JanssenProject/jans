@@ -6,18 +6,17 @@
 
 package org.xdi.oxauth.service;
 
-import org.gluu.persist.PersistenceEntryManager;
-import org.xdi.model.ApplicationType;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.persist.PersistenceEntryManager;
+import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.service.metric.inject.ReportMetric;
 
 /**
  * Store and retrieve metric
@@ -45,7 +44,9 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@Inject
     private StaticConfiguration staticConfiguration;
 
-	@Inject
+    @Inject
+    @Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
+    @ReportMetric
     private PersistenceEntryManager ldapEntryManager;
 
     public void initTimer() {
