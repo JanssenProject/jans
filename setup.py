@@ -624,38 +624,7 @@ class Setup(object):
                                         'jackson-core-*.jar', 'jackson-core-asl-*.jar', 'jackson-mapper-asl-*.jar', 'jackson-xc-*.jar',
                                         'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
-        # will be removed after all init scripts is fixed
-        self.init_fixes = {
-                'opendj' : {'src_pattern' : 'S*opendj',
-                            'result_name' : 'S90opendj'
-                           },
-                'solserver' : {'src_pattern' : 'S*solserver',
-                            'result_name' : 'S90solserver'
-                           },
-                'oxauth' : {'src_pattern' : 'S*oxauth',
-                            'result_name' : 'S92oxauth'
-                           },
-                'identity' : {'src_pattern' : 'S*identity',
-                            'result_name' : 'S93identity'
-                           },
-                'idp' : {'src_pattern' : 'S*idp',
-                            'result_name' : 'S94idp'
-                           },
-                'oxauth-rp' : {'src_pattern' : 'S*oxauth-rp',
-                            'result_name' : 'S95oxauth-rp'
-                           },
-                'asimba' : {'src_pattern' : 'S*asimba',
-                            'result_name' : 'S96asimba'
-                           },
-                'passport' : {'src_pattern' : 'S*passport',
-                            'result_name' : 'S97passport'
-                           },
-                'apache2' : {'src_pattern' : 'S*apache2',
-                            'result_name' : 'S98apache2'
-                           },
-        }
-
-
+ 
         self.service_requirements = {'oxauth': ['opendj', 72],
                         'identity': ['opendj oxauth', 74],
                         'idp': ['opendj oxauth', 76],
@@ -1373,25 +1342,28 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.node_base])
         self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
 
-    def jetty_init_scripts(self, serviceName):
+    def fix_init_scripts(self, serviceName, initscript_fn):
 
-        jetty_initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
+        if self.ldap_type == 'openldap':
+            for service in self.service_requirements:
+                self.service_requirements[service][0] = self.service_requirements[service][0].replace('opendj','slapd')
 
-        jetty_initscript = open(jetty_initscript_fn).readlines()
+
+        initscript = open(initscript_fn).readlines()
         
-        for i,l in enumerate(jetty_initscript):
+        for i,l in enumerate(initscript):
             if l.startswith('# Provides:'):
-                jetty_initscript[i] = '# Provides:          {0}\n'.format(serviceName)
+                initscript[i] = '# Provides:          {0}\n'.format(serviceName)
             elif l.startswith('# description:'):
-                jetty_initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
+                initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
             elif l.startswith('# Required-Start:'):
-                jetty_initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
+                initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
             elif l.startswith('# chkconfig:'):
-                jetty_initscript[i] = '# chkconfig: 3 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
+                initscript[i] = '# chkconfig: 3 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
         
         service_init_script_fn = os.path.join('/etc/init.d', serviceName)
         with open(service_init_script_fn, 'w') as W:
-            W.write(''.join(jetty_initscript))
+            W.write(''.join(initscript))
 
         self.run([self.cmd_chmod, '+x', service_init_script_fn])
 
@@ -1444,10 +1416,10 @@ class Setup(object):
             self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
             self.setup.logIt(traceback.format_exc(), True)
 
-        self.jetty_init_scripts(serviceName)
-
+        initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
+        self.fix_init_scripts(serviceName, initscript_fn)
         self.enable_service_at_start(serviceName)
-
+        
         tmpfiles_base = '/usr/lib/tmpfiles.d'
         if self.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
             self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
@@ -1467,7 +1439,8 @@ class Setup(object):
         self.run([self.cmd_chown, 'root:root', '/etc/default/%s' % serviceName])
 
         if serviceName == 'passport':
-            self.copyFile('%s/%s' % (self.gluuOptSystemFolder, serviceName), '/etc/init.d/')
+            initscript_fn = os.path.join(self.gluuOptSystemFolder, serviceName)
+            self.fix_init_scripts(serviceName, initscript_fn)
         else:
             self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
@@ -3503,22 +3476,6 @@ class Setup(object):
 
         return result
 
-    ##### Below function is temporary and will serve only 
-    ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
-    def process_rc_links(self, init_fixes):
-        if self.os_type in ['ubuntu', 'debian']:
-            for appName, initFixes in init_fixes.iteritems():
-                src_pattern = initFixes['src_pattern']
-                result_name = initFixes['result_name']
-
-                init_file = self.findFiles(src_pattern, '/etc/rc3.d')
-                if len(init_file) > 0:
-                        self.run(['mv -f %s%s %s%s' % ('/etc/rc3.d/', src_pattern, '/etc/rc3.d/', result_name)], None, None, True, True)
-
-    def change_rc_links(self):
-        self.process_rc_links(self.init_fixes)
-
-
     def run_command(self, cmd):
         
         self.logIt("Running command: "+cmd)
@@ -4212,9 +4169,7 @@ if __name__ == '__main__':
             installObject.set_permissions()
             progress_bar(32, "Starting services")
             installObject.start_services()
-            progress_bar(33, "Changing rc links")
-            installObject.change_rc_links()
-            progress_bar(34, "Saving properties")
+            progress_bar(33, "Saving properties")
             installObject.save_properties()
 
             if setupOptions['loadTestData']:
