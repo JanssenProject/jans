@@ -3096,8 +3096,6 @@ class Setup(object):
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
-        if 'importLDIFDir' in setupOptions.keys():
-            self.import_custom_ldif_opendj(setupOptions['importLDIFDir'])
 
         self.run([self.cmd_chmod, '-R', 'a+rX', self.ldapBaseFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
@@ -3373,37 +3371,6 @@ class Setup(object):
                     self.import_ldif_template_opendj(custom_ldif)
         except:
             self.logIt("Error importing custom ldif file %s" % ldif, True)
-            self.logIt(traceback.format_exc(), True)
-
-    def import_custom_ldif_opendj(self, fullPath):
-        #opendj does not support imorting raw ldif files. ldif files
-        #will be copied directly to config/schema dir
-        
-        try:
-            for ldif in self.get_filepaths(fullPath):
-                c = 102
-                makenew = False
-                target_ldif = ldif
-                if '-' in target_ldif:
-                    la = target_ldif.split('-')
-                    if la[0].isdigit():
-                        if int(la[0]) < 102:
-                            target_ldif = target_ldif.replace(la[0], str(c))
-                            c +=1
-                    else:
-                        makenew = True
-                else:
-                    makenew = True
-                    
-                if makenew:
-                    target_ldif = str(c)+'-'+target_ldif
-                    c +=1
-        
-                custom_ldif = os.path.join(fullPath, ldif)
-                shutil.copy(custom_ldif, os.path.join(self.openDjSchemaFolder, target_ldif))
-                self.logIt("Custom schema file %s was copied as %s" % (ldif, target_ldif))
-        except:
-            self.logIt("Error importing custom ldif files")
             self.logIt(traceback.format_exc(), True)
 
     def install_ldap_server(self):
@@ -4217,14 +4184,12 @@ if __name__ == '__main__':
                 installObject.pbar.progress("Loading test data", False)
                 installObject.loadTestData()
 
-
             if 'importLDIFDir' in setupOptions.keys():
                 installObject.pbar.progress("Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-                installObject.pbar.progress("Completed")
-            else:
-                installObject.pbar.progress("Completed")
+
+            installObject.pbar.progress("Completed")
             print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
