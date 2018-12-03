@@ -1344,9 +1344,22 @@ class Setup(object):
 
     def fix_init_scripts(self, serviceName, initscript_fn):
 
+        changeTo = None
+
         if self.ldap_type == 'openldap':
+            changeTo = 'slapd'
+        elif self.ldap_type == 'couchbase':
+            os_ = self.os_type + self.os_version
+            changeTo = 'couchbase-server'
+
+            #if os_ in ['ubuntu14', 'centos7']:
+            #    changeTo = 'couchbase-server'
+            #else:
+            #    changeTo = ''
+
+        if changeTo != None:
             for service in self.service_requirements:
-                self.service_requirements[service][0] = self.service_requirements[service][0].replace('opendj','slapd')
+                self.service_requirements[service][0] = self.service_requirements[service][0].replace('opendj', changeTo)
 
 
         initscript = open(initscript_fn).readlines()
