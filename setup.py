@@ -58,15 +58,29 @@ except:
     tty_rows = 60
     tty_columns = 120
 
-def progress_bar(i, act=''):
-    time.sleep(0.2)
-    ft = '#' * i
-    ft = ft.ljust(33)
-    act =act.ljust(40)
-    if int(tty_columns) < 88:
-        act = act[:int(tty_columns)-47]
-    sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
-    sys.stdout.flush()
+class ProgressBar:
+
+    def __init__(self, tty_columns, max_steps=33):
+        self.n = 0
+        self.max_steps = max_steps
+        self.tty_columns = tty_columns
+
+    def complete(self, msg):
+        self.n = self.max_steps
+        self.progress(msg, False)
+
+    def progress(self, msg, incr=True):
+        if incr and self.n < self.max_steps:
+            self.n +=1
+
+        time.sleep(0.2)
+        ft = '#' * self.n
+        ft = ft.ljust(self.max_steps)
+        msg =msg.ljust(40)
+        if int(self.tty_columns) < 88:
+            msg = msg[:int(self.tty_columns)-47]
+        sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
+        sys.stdout.flush()
 
 listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
 
@@ -131,6 +145,8 @@ class Setup(object):
 
         self.oxVersion = '4.0.0-SNAPSHOT'
         self.githubBranchName = 'master'
+
+        self.pbar = ProgressBar(tty_columns)
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -1483,39 +1499,39 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            progress_bar(4, "Downloading oxAuth war file")
+            self.pbar.progress("Downloading oxAuth war file")
             
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            progress_bar(4, "Downloading oxTrust war file")
+            self.pbar.progress("Downloading oxTrust war file", False)
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
             distAsimbaPath = '%s/%s' % (self.distGluuFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
-                progress_bar(4, "Downloading Asimba war file")
+                self.pbar.progress("Downloading Asimba war file", False)
                 self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                progress_bar(4, "Downloading oxAuth RP war file")
+                self.pbar.progress("Downloading oxAuth RP war file", False)
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
             
-            progress_bar(4, "Downloading Shibboleth IDP v3 war file")
+            self.pbar.progress("Downloading Shibboleth IDP v3 war file", False)
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            progress_bar(4, "Downloading Shibboleth IDP v3 keygenerator")
+            self.pbar.progress("Downloading Shibboleth IDP v3 keygenerator", False)
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            progress_bar(4, "Downloading Shibboleth IDP v3 binary distributive file")
+            self.pbar.progress("Downloading Shibboleth IDP v3 binary distributive file", False)
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
         jceArchive = 'jce_policy-8.zip'
         jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
         if self.installJce and not os.path.exists(jceArchivePath):
-            progress_bar(4, "Downloading JCE 1.8 zip file")
+            self.pbar.progress("Downloading JCE 1.8 zip file", False)
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
 
 
@@ -2172,39 +2188,39 @@ class Setup(object):
     def install_gluu_components(self):
         if self.installLdap:
             if self.ldap_type in ('openldap', 'opendj'):
-                progress_bar(27, "Installing Gluu components: LDAP")
+                self.pbar.progress("Installing Gluu components: LDAP", False)
                 self.install_ldap_server()
 
         if self.install_couchbase:
-            progress_bar(27, "Installing Gluu components: Couchbase")
+            self.pbar.progress("Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
         if self.installHttpd:
-            progress_bar(27, "Installing Gluu components: HTTPD")
+            self.pbar.progress("Installing Gluu components: HTTPD", False)
             self.configure_httpd()
 
         if self.installOxAuth:
-            progress_bar(27, "Installing Gluu components: oxAuth")
+            self.pbar.progress("Installing Gluu components: oxAuth", False)
             self.install_oxauth()
 
         if self.installOxTrust:
-            progress_bar(27, "Installing Gluu components: oxTrust")
+            self.pbar.progress("Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
         if self.installSaml:
-            progress_bar(27, "Installing Gluu components: SAML")
+            self.pbar.progress("Installing Gluu components: SAML", False)
             self.install_saml()
 
         if self.installAsimba:
-            progress_bar(27, "Installing Gluu components: Asimba")
+            prself.pbar.progress("Installing Gluu components: Asimba", False)
             self.install_asimba()
 
         if self.installOxAuthRP:
-            progress_bar(27, "Installing Gluu components: oxAuthRP")
+            self.pbar.progress("Installing Gluu components: oxAuthRP", False)
             self.install_oxauth_rp()
 
         if self.installPassport:
-            progress_bar(27, "Installing Gluu components: Passport")
+            self.pbar.progress("Installing Gluu components: Passport", False)
             self.install_passport()
 
     def isIP(self, address):
@@ -3392,30 +3408,42 @@ class Setup(object):
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
-
+        
+        self.pbar.progress("Extracting OpenDJ", False)
         self.extractOpenDJ()
         self.opendj_version = self.determineOpenDJVersion()
 
         self.createLdapPw()
         try:
+            self.pbar.progress("OpenDJ: installing", False)
             self.install_opendj()
     
             if self.ldap_type == 'opendj':
+                self.pbar.progress("OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
+                self.pbar.progress("OpenDJ: setting up service", False)
                 self.setup_opendj_service()
+                self.pbar.progress("OpenDJ: configuring", False)
                 self.configure_opendj()
+                self.pbar.progress("OpenDJ:  exporting certificate", False)
                 self.export_opendj_public_cert()
+                self.pbar.progress("OpenDJ: creating indexes", False)
                 self.index_opendj()
+                self.pbar.progress("OpenDJ: importing Ldif files", False)
                 self.import_ldif_opendj()
-    
+                
+            self.pbar.progress("OpenDJ: post installation", False)
             self.post_install_opendj()
         finally:
             self.deleteLdapPw()
 
         if self.ldap_type == 'openldap':
             self.logIt("Running OpenLDAP Setup")
+            self.pbar.progress("OpenLDAP: installingP", False)
             self.install_openldap()
+            self.pbar.progress("OpenLDAP: configuring", False)
             self.configure_openldap()
+            self.pbar.progress("OpenLDAP: importing Ldif files", False)
             self.import_ldif_openldap()
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
@@ -4120,83 +4148,83 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            progress_bar(2, "Initializing")
+            installObject.pbar.progress("Initializing")
             installObject.initialize()
-            progress_bar(3, "Configuring system")
+            installObject.pbar.progress("Configuring system")
             installObject.configureSystem()
-            progress_bar(4, "Downloading War files")
+            installObject.pbar.progress("Downloading War files")
             installObject.downloadWarFiles()
-            progress_bar(5, "Calculating application memory")
+            installObject.pbar.progress("Calculating application memory")
             installObject.calculate_selected_aplications_memory()
-            progress_bar(6, "Downloading and installing JRE")
+            installObject.pbar.progress("Downloading and installing JRE")
             installObject.installJRE()
-            progress_bar(7, "Installing Jetty")
+            installObject.pbar.progress("Installing Jetty")
             installObject.installJetty()
-            progress_bar(8, "Installing Jython")
+            installObject.pbar.progress("Installing Jython")
             installObject.installJython()
-            progress_bar(9, "Installing Node")
+            installObject.pbar.progress("Installing Node")
             installObject.installNode()
-            progress_bar(10, "Making salt")
+            installObject.pbar.progress("Making salt")
             installObject.make_salt()
-            progress_bar(11, "Making oxauth salt")
+            installObject.pbar.progress("Making oxauth salt")
             installObject.make_oxauth_salt()
-            progress_bar(12, "Copying scripts")
+            installObject.pbar.progress("Copying scripts")
             installObject.copy_scripts()
-            progress_bar(13, "Encoding passwords")
+            installObject.pbar.progress("Encoding passwords")
             installObject.encode_passwords()
-            progress_bar(14, "Encoding test passwords")
+            installObject.pbar.progress("Encoding test passwords")
             installObject.encode_test_passwords()
-            progress_bar(15, "Installing Gluu base")
+            installObject.pbar.progress("Installing Gluu base")
             installObject.install_gluu_base()
-            progress_bar(16, "Preparing bas64 extention scripts")
+            installObject.pbar.progress("Preparing bas64 extention scripts")
             installObject.prepare_base64_extension_scripts()
-            progress_bar(17, "Rendering templates")
+            installObject.pbar.progress("Rendering templates")
             installObject.render_templates()
-            progress_bar(18, "Generating crypto")
+            installObject.pbar.progress("Generating crypto")
             installObject.generate_crypto()
-            progress_bar(19, "Generating oxauth openid keys")
+            installObject.pbar.progress("Generating oxauth openid keys")
             installObject.generate_oxauth_openid_keys()
-            progress_bar(20, "Generating base64 configuration")
+            installObject.pbar.progress("Generating base64 configuration")
             installObject.generate_base64_configuration()
-            progress_bar(21, "Rendering configuratipn template")
+            installObject.pbar.progress("Rendering configuratipn template")
             installObject.render_configuration_template()
-            progress_bar(22, "Updating hostname")
+            installObject.pbar.progress("Updating hostname")
             installObject.update_hostname()
-            progress_bar(23, "Setting ulimits")
+            installObject.pbar.progress("Setting ulimits")
             installObject.set_ulimits()
-            progress_bar(24, "Copying output")
+            installObject.pbar.progress("Copying output")
             installObject.copy_output()
-            progress_bar(25, "Setting up init scripts")
+            installObject.pbar.progress("Setting up init scripts")
             installObject.setup_init_scripts()
-            progress_bar(26, "Rendering node templates")
+            installObject.pbar.progress("Rendering node templates")
             installObject.render_node_templates()
-            progress_bar(27, "Installing Gluu components")
+            installObject.pbar.progress("Installing Gluu components")
             installObject.install_gluu_components()
-            progress_bar(28, "Rendering test templates")
+            installObject.pbar.progress("Rendering test templates")
             installObject.render_test_templates()
-            progress_bar(29, "Copying static")
+            installObject.pbar.progress("Copying static")
             installObject.copy_static()
-            progress_bar(30, "Setting ownerships")
+            installObject.pbar.progress("Setting ownerships")
             installObject.set_ownership()
-            progress_bar(31, "Setting permissions")
+            installObject.pbar.progress("Setting permissions")
             installObject.set_permissions()
-            progress_bar(32, "Starting services")
+            installObject.pbar.progress("Starting services")
             installObject.start_services()
-            progress_bar(33, "Saving properties")
+            installObject.pbar.progress("Saving properties")
             installObject.save_properties()
 
             if setupOptions['loadTestData']:
-                progress_bar(34, "Loading test data")
+                installObject.pbar.progress("Loading test data", False)
                 installObject.loadTestData()
 
 
             if 'importLDIFDir' in setupOptions.keys():
-                progress_bar(35, "Importing LDIF files")
+                installObject.pbar.progress("Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-                progress_bar(35, "Completed")
+                installObject.pbar.progress("Completed")
             else:
-                progress_bar(35, "Completed")
+                installObject.pbar.progress("Completed")
             print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
