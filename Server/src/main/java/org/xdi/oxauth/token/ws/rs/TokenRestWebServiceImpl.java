@@ -164,9 +164,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
                         authorizationCodeGrant.save();
 
-                        AccessToken accToken = authorizationCodeGrant.createAccessToken();
-                        log.debug("Issuing access token: {}", accToken.getCode());
-
                         RefreshToken reToken = null;
                         if (client.getGrantTypes() != null
                                 && client.getGrantTypes().length > 0
@@ -177,6 +174,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (scope != null && !scope.isEmpty()) {
                             scope = authorizationCodeGrant.checkScopesPolicy(scope);
                         }
+
+                        AccessToken accToken = authorizationCodeGrant.createAccessToken();
+                        log.debug("Issuing access token: {}", accToken.getCode());
 
                         IdToken idToken = null;
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
