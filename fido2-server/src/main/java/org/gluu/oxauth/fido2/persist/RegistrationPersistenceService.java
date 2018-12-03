@@ -20,15 +20,14 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
 
 @ApplicationScoped
 public class RegistrationPersistenceService {
@@ -43,13 +42,13 @@ public class RegistrationPersistenceService {
     private UserService userService;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public Optional<Fido2RegistrationData> findByPublicKeyId(String publicKeyId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
         Filter publicKeyIdFilter = Filter.createEqualityFilter("oxPublicKeyId", publicKeyId);
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null, publicKeyIdFilter);
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
         
         if (fido2RegistrationnEntries.size() > 0) {
             return Optional.of(fido2RegistrationnEntries.get(0).getRegistrationData());
@@ -79,7 +78,7 @@ public class RegistrationPersistenceService {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null, codeChallengFilter);
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, codeChallengFilter);
         
         if (fido2RegistrationnEntries.size() > 0) {
             return fido2RegistrationnEntries.parallelStream().map(f -> f.getRegistrationData()).collect(Collectors.toList());

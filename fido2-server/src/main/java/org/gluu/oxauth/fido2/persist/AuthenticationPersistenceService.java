@@ -18,15 +18,14 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
 
 @ApplicationScoped
 public class AuthenticationPersistenceService {
@@ -41,14 +40,14 @@ public class AuthenticationPersistenceService {
     private UserService userService;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public Optional<Fido2AuthenticationData> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
 
-        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, null, codeChallengFilter);
+        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
         
         if (fido2AuthenticationEntries.size() > 0) {
             return Optional.of(fido2AuthenticationEntries.get(0).getAuthenticationData());
