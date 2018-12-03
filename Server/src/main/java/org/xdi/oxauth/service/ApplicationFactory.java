@@ -52,8 +52,11 @@ public class ApplicationFactory {
     public static final String PERSISTENCE_AUTH_CONFIG_NAME = "persistenceAuthConfig";
 
     public static final String PERSISTENCE_ENTRY_MANAGER_NAME = "persistenceEntryManager";
+    public static final String PERSISTENCE_METRIC_ENTRY_MANAGER_NAME = "persistenceMetricEntryManager";
 
     public static final String PERSISTENCE_AUTH_ENTRY_MANAGER_NAME = "persistenceAuthEntryManager";
+
+    public static final String PERSISTENCE_METRIC_CONFIG_GROUP_NAME = "metric";
 
 	@Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
