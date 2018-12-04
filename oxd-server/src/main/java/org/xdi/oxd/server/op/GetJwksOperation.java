@@ -13,6 +13,7 @@ import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetJwksParams;
 import org.xdi.oxd.common.response.GetJwksResponse;
 import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.common.response.POJOResponse;
 import org.xdi.oxd.server.HttpException;
 import org.xdi.oxd.server.service.DiscoveryService;
 
@@ -53,7 +54,7 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
             response.setKeys(serverResponse.getJwks().getKeys());
 
-            return response;
+            return new POJOResponse(response);
 
         } catch (Exception ex) {
             throw new RuntimeException(ex);
