@@ -19,9 +19,11 @@ import static org.testng.Assert.assertNotNull;
  * @author Shoeb
  * @version 12/01/2018
  */
+
 public class GetJwksTest {
 
-    @Test
+
+    @Test(enabled = false)
     @Parameters({"host", "opHost", "opDiscoveryPath"})
     public void test(String host, String opHost, @Optional String opDiscoveryPath) {
 
