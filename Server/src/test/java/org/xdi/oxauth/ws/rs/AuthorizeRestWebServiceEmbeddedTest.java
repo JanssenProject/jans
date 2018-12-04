@@ -799,7 +799,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "/authorize.htm");
+                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -842,7 +842,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "/authorize.htm");
+                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -886,7 +886,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "/authorize.htm");
+                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
