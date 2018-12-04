@@ -1236,10 +1236,12 @@ paths:
             type: object
             title: GetJwksResponse
             required:
-            - jwks
+              - keys
             properties:
-              jwks:
-                type: string
+              keys:
+                type: array
+                items:
+                  $ref: "#/definitions/JsonWebKey"
         400:
           description: Invalid parameters are provided to endpoint.
         403:
@@ -1292,3 +1294,42 @@ definitions:
         items:
           $ref: "#/definitions/Condition"
 
+  JsonWebKey:
+    type: object
+    required:
+      - kid
+      - kty
+      - use
+      - key_ops
+      - alg
+      - exp
+      - x5c
+      - x5t
+      - x5u
+    properties:
+      kid:
+        type: string
+      kty:
+        type: string
+      use:
+        type: string
+      key_ops:
+        type: string
+      alg:
+        type: string
+      exp:
+        type: integer
+        format: int64
+        example: 1563964950485
+      x5c:
+        type: array
+        items:
+          type: string
+      x5t:
+        type: array
+        items:
+          type: string
+      x5t#S256:
+        type: string
+      x5u:
+        type: string
