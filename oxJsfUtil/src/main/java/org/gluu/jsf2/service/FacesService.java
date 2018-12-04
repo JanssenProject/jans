@@ -47,8 +47,8 @@ public class FacesService {
         if (viewId == null) {
             throw new RedirectException("Cannot redirect to a null viewId");
         }
-        String url = facesContext.getApplication().getViewHandler().getRedirectURL(facesContext, viewId,
-                Collections.<String, List<String>>emptyMap(), false);
+
+        String url = facesContext.getApplication().getViewHandler().getRedirectURL(facesContext, viewId, Collections.<String, List<String>>emptyMap(), false);
         
         return url;
     }
