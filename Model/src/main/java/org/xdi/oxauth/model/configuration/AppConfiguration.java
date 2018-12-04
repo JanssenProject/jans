@@ -27,8 +27,6 @@ import java.util.Set;
 public class AppConfiguration implements Configuration {
 
     private String issuer;
-    private String loginPage;
-    private String authorizationPage;
     private String baseEndpoint;
     private String authorizationEndpoint;
     private String tokenEndpoint;
@@ -285,42 +283,6 @@ public class AppConfiguration implements Configuration {
      */
     public void setIssuer(String issuer) {
         this.issuer = issuer;
-    }
-
-    /**
-     * Returns the URL od the login page.
-     *
-     * @return The URL of the login page.
-     */
-    public String getLoginPage() {
-        return loginPage;
-    }
-
-    /**
-     * Sets the URL of the login page.
-     *
-     * @param loginPage The URL of the login page.
-     */
-    public void setLoginPage(String loginPage) {
-        this.loginPage = loginPage;
-    }
-
-    /**
-     * Returns the URL of the authorization page.
-     *
-     * @return The URL of the authorization page.
-     */
-    public String getAuthorizationPage() {
-        return authorizationPage;
-    }
-
-    /**
-     * Sets the URL of the authorization page.
-     *
-     * @param authorizationPage The URL of the authorization page.
-     */
-    public void setAuthorizationPage(String authorizationPage) {
-        this.authorizationPage = authorizationPage;
     }
 
     /**

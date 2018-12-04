@@ -20,6 +20,7 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
@@ -120,6 +121,9 @@ public class ConfigurationFactory {
 	private ErrorResponseFactory errorResponseFactory;
 	private String cryptoConfigurationSalt;
 
+    private String contextPath;
+	private String facesMapping;
+
 	private AtomicBoolean isActive;
 
 	private long loadedRevision = -1;
@@ -148,6 +152,18 @@ public class ConfigurationFactory {
 			this.isActive.set(false);
 		}
 	}
+
+	public void onServletContextActivation(@Observes ServletContext context ) {
+        this.contextPath = context.getContextPath();
+
+        this.facesMapping = "";
+        String[] mappings = context.getServletRegistration("Faces Servlet").getMappings().toArray(new String[0]);
+        if (mappings.length == 0) {
+            return;
+        }
+        
+        this.facesMapping = mappings[0].replaceAll("\\*", "");
+     }
 
     protected PersistenceConfiguration loadPersistenceConfiguration() {
         PersistenceConfiguration currentPersistenceConfiguration = null;
@@ -640,8 +656,16 @@ public class ConfigurationFactory {
 
 		return null;
 	}
-	
-	public class PersistenceConfiguration {
+
+	public String getFacesMapping() {
+        return facesMapping;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public class PersistenceConfiguration {
 	    private final String fileName;
 	    private final FileConfiguration configuration;
         private final Class<? extends PersistenceEntryManagerFactory> entryManagerFactoryType;

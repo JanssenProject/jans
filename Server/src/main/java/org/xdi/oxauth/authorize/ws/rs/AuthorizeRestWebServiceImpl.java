@@ -29,16 +29,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.omnifaces.config.WebXml;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -62,6 +66,7 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -142,6 +147,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private AppConfiguration appConfiguration;
+    
+    @Inject
+    private ConfigurationFactory сonfigurationFactory;
+    
+    @Context
+    private HttpServletRequest servletRequest;
 
     @Override
     public Response requestAuthorizationGet(
@@ -770,7 +781,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String sessionId, String claims,
             Map<String, String> customParameters) {
 
-        redirectUriResponse.setBaseRedirectUri(appConfiguration.getAuthorizationPage());
+        final URI contextUri = URI.create(servletRequest.getRequestURL().toString()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
+
+        redirectUriResponse.setBaseRedirectUri(contextUri.toString());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
