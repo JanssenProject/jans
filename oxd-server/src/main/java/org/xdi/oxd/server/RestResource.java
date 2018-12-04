@@ -1,7 +1,5 @@
 package org.xdi.oxd.server;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,8 +224,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getJwks(@HeaderParam("Authorization") String authorization, String params) {
-        final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL,true);
-        return processWithCustomMapper(CommandType.GET_JWKS, params, GetJwksParams.class, authorization, mapper);
+        return process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization);
     }
 
 
@@ -245,21 +242,6 @@ public class RestResource {
         final String json = CoreUtils.asJsonSilently(forJsonConversion);
         LOG.trace("Send back response: {}", json);
         return json;
-    }
-
-    /*
-    Writes JSON using specified object mapper.
-     */
-    private static <T extends IParams> String processWithCustomMapper(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, ObjectMapper objectMapper) {
-        Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization);
-        try {
-            final String json = objectMapper.writeValueAsString(forJsonConversion);
-            LOG.trace("Send back response: {}", json);
-            return json;
-        } catch (IOException e) {
-            LOG.error("Failed to serialize object into json.", e);
-            return "";
-        }
     }
 
 
