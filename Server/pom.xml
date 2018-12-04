@@ -281,6 +281,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-couchbase</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
