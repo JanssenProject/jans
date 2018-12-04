@@ -164,9 +164,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
                         authorizationCodeGrant.save();
 
-                        AccessToken accToken = authorizationCodeGrant.createAccessToken();
-                        log.debug("Issuing access token: {}", accToken.getCode());
-
                         RefreshToken reToken = null;
                         if (client.getGrantTypes() != null
                                 && client.getGrantTypes().length > 0
@@ -177,6 +174,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (scope != null && !scope.isEmpty()) {
                             scope = authorizationCodeGrant.checkScopesPolicy(scope);
                         }
+
+                        AccessToken accToken = authorizationCodeGrant.createAccessToken(); // create token after scopes are checked
+                        log.debug("Issuing access token: {}", accToken.getCode());
 
                         IdToken idToken = null;
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
@@ -221,7 +221,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                     if (authorizationGrant != null) {
-                        AccessToken accToken = authorizationGrant.createAccessToken();
+
 
                         /*
                         The authorization server MAY issue a new refresh token, in which case
@@ -234,6 +234,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (scope != null && !scope.isEmpty()) {
                             scope = authorizationGrant.checkScopesPolicy(scope);
                         }
+
+                        AccessToken accToken = authorizationGrant.createAccessToken(); // create token after scopes are checked
 
                         builder.entity(getJSonResponse(accToken,
                                 accToken.getTokenType(),
@@ -252,11 +254,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
 
-                    AccessToken accessToken = clientCredentialsGrant.createAccessToken();
-
                     if (scope != null && !scope.isEmpty()) {
                         scope = clientCredentialsGrant.checkScopesPolicy(scope);
                     }
+
+                    AccessToken accessToken = clientCredentialsGrant.createAccessToken(); // create token after scopes are checked
 
                     IdToken idToken = null;
                     if (appConfiguration.getOpenidScopeBackwardCompatibility() && clientCredentialsGrant.getScopes().contains("openid")) {
@@ -295,12 +297,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
-                        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken();
+
                         RefreshToken reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
 
                         if (scope != null && !scope.isEmpty()) {
                             scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
                         }
+
+                        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(); // create token after scopes are checked
 
                         IdToken idToken = null;
                         if (appConfiguration.getOpenidScopeBackwardCompatibility() && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
