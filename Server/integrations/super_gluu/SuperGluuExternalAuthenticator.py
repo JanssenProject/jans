@@ -48,6 +48,10 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Initialization. Property authentication_mode is mandatory"
             return False
 
+        self.applicationId = None
+        if configurationAttributes.containsKey("application_id"):
+            self.applicationId = configurationAttributes.get("application_id").getValue2()
+
         self.registrationUri = None
         if configurationAttributes.containsKey("registration_uri"):
             self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
@@ -164,7 +168,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = identity.getSessionId().getSessionAttributes()
 
-        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        client_redirect_uri = self.getApplicationUri(session_attributes)
         if client_redirect_uri == None:
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
@@ -329,7 +333,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         session_attributes = identity.getSessionId().getSessionAttributes()
 
-        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        client_redirect_uri = self.getApplicationUri(session_attributes)
         if client_redirect_uri == None:
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
@@ -951,7 +955,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return targetEndpointArn
 
-    def getClientRedirecUri(self, session_attributes):
+    def getApplicationUri(self, session_attributes):
+        if self.applicationId != None:
+            return self.applicationId
+            
         if not session_attributes.containsKey("redirect_uri"):
             return None
 
