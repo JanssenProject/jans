@@ -4,27 +4,35 @@
 package org.xdi.oxd.common.response;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
+
+import java.util.List;
 
 /**
  * JSON Web Key Set response class
  *
  * @author Shoeb
- * @version 11/10/2018
+ * @version 12/01/2018
  */
+
+
 public class GetJwksResponse implements IOpResponse {
 
-    @JsonProperty(value = "jwks")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "jwks")
-    private String jwks;
+    @JsonProperty(value = "keys" )
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "keys")
+    private List<JSONWebKey> keys;
 
     public GetJwksResponse() {
     }
 
-    public String getJwks() {
-        return jwks;
+    public List<JSONWebKey> getKeys() {
+        return keys;
     }
 
-    public void setJwks(String jwks) {
-        this.jwks = jwks;
+    public void setKeys(List<JSONWebKey> keys) {
+        this.keys = keys;
     }
+
 }
+
+
