@@ -428,6 +428,7 @@ class Setup(object):
         self.openldapConfFolder = '/opt/symas/etc/openldap'
         self.openldapRootUser = "cn=directory manager,o=gluu"
         self.openldapSiteUser = "cn=directory manager,o=site"
+        self.openldapMetricUser = "cn=directory manager,o=metric"
         self.openldapKeyPass = None
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
@@ -480,6 +481,7 @@ class Setup(object):
         self.ldif_clients = '%s/clients.ldif' % self.outputFolder
         self.ldif_people = '%s/people.ldif' % self.outputFolder
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
+        self.ldif_metric = '%s/metric/o_metric.ldif' % self.staticFolder
         self.ldif_site = '%s/static/cache-refresh/o_site.ldif' % self.install_dir
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
@@ -587,6 +589,7 @@ class Setup(object):
                            self.ldif_people,
                            self.ldif_groups,
                            self.ldif_site,
+                           self.ldif_metric,
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
@@ -885,9 +888,14 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
+            
             if startSequence and stopSequence:
                 cmd_list.append(str(startSequence))
                 cmd_list.append(str(stopSequence))
+            elif self.os_type+self.os_version == 'ubuntu14':
+                cmd_list.append(str(self.service_requirements[serviceName][1]))
+                cmd_list.append(str(100 - self.service_requirements[serviceName][1]))
+            
             self.run(cmd_list)
 
 
@@ -1353,22 +1361,16 @@ class Setup(object):
     def fix_init_scripts(self, serviceName, initscript_fn):
 
         changeTo = None
+        os_ = self.os_type + self.os_version
 
         if self.ldap_type == 'openldap':
             changeTo = 'slapd'
         elif self.ldap_type == 'couchbase':
-            os_ = self.os_type + self.os_version
             changeTo = 'couchbase-server'
-
-            #if os_ in ['ubuntu14', 'centos7']:
-            #    changeTo = 'couchbase-server'
-            #else:
-            #    changeTo = ''
 
         if changeTo != None:
             for service in self.service_requirements:
                 self.service_requirements[service][0] = self.service_requirements[service][0].replace('opendj', changeTo)
-
 
         initscript = open(initscript_fn).readlines()
         
@@ -1380,7 +1382,7 @@ class Setup(object):
             elif l.startswith('# Required-Start:'):
                 initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
             elif l.startswith('# chkconfig:'):
-                initscript[i] = '# chkconfig: 3 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
+                initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
         
         service_init_script_fn = os.path.join('/etc/init.d', serviceName)
         with open(service_init_script_fn, 'w') as W:
@@ -1439,6 +1441,7 @@ class Setup(object):
 
         initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
         self.fix_init_scripts(serviceName, initscript_fn)
+        
         self.enable_service_at_start(serviceName)
         
         tmpfiles_base = '/usr/lib/tmpfiles.d'
@@ -1464,15 +1467,6 @@ class Setup(object):
             self.fix_init_scripts(serviceName, initscript_fn)
         else:
             self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
-
-        # Enable service autoload on Gluu-Server startup
-        if self.os_type in ['centos', 'fedora', 'red']:
-            if self.os_initdaemon == 'systemd':
-                self.run(["/usr/bin/systemctl", 'enable', serviceName])
-            else:
-                self.run(["/sbin/chkconfig", serviceName, "on"])
-        elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '70', '30'])
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
@@ -2307,6 +2301,7 @@ class Setup(object):
             if self.installLdap and self.ldap_type == 'openldap':
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
+                self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/metric_db'])
 
             if self.installAsimba:
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
@@ -3107,14 +3102,12 @@ class Setup(object):
                     '### END INIT INFO\n'
                     )
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
+
+            if self.os_type in ['ubuntu', 'debian']:
+                self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
+
+            self.enable_service_at_start('opendj')
             self.fix_init_scripts('opendj', '/etc/init.d/opendj')
-        
-        if self.os_type in ['centos', 'fedora', 'red']:
-            self.run(["/sbin/chkconfig", 'opendj', "on"])
-            self.run([service_path, 'opendj', 'start'])
-        elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", 'opendj', 'defaults', 'start', '40', '30'])
-            self.run(["/usr/sbin/update-rc.d", 'opendj', 'enable'])
             self.run([service_path, 'opendj', 'start'])
 
     def setup_init_scripts(self):
@@ -3329,11 +3322,17 @@ class Setup(object):
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
+
         for ldif in self.ldif_files:
+
             if 'site.ldif' in ldif:
-                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
+                db_base = 'o=site'
+            elif 'metric.ldif' in ldif:
+                db_base = 'o=metric'
             else:
-                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+                db_base = 'o=gluu'
+
+            self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', db_base, '-f', config, '-l', ldif])])
 
     def import_custom_ldif(self, fullPath):
         output_dir = os.path.join(fullPath, '.output')
