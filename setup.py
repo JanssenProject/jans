@@ -538,6 +538,7 @@ class Setup(object):
         self.scim_rp_client_jwks = None
         self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
         self.scim_rp_client_jks_pass = 'secret'
+        self.scim_resource_oxid = None
 
         # oxPassport Configuration
         self.gluu_passport_base = '%s/passport' % self.node_base
@@ -839,6 +840,8 @@ class Setup(object):
         if not self.scim_rp_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.scim_rp_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+        if not self.scim_resource_oxid:
+            self.scim_resource_oxid = str(uuid.uuid4())
         if not self.passport_rs_client_id:
             passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.passport_rs_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)

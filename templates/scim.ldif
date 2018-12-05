@@ -42,7 +42,7 @@ oxRevision: 1
 oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
 
 # SCIM Resource
-dn: oxId=0f13ae5a-135e-4b01-a290-7bbe62e7d40f,ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
+dn: oxId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: SCIM Resource
@@ -50,6 +50,6 @@ owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxFaviconImage: http://www.gluu.org/img/scim_logo.png
 oxAssociatedClient: inum=%(scim_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06D,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
-oxId: 0f13ae5a-135e-4b01-a290-7bbe62e7d40f
+oxId: %(scim_resource_oxid)s
 oxResource: https://%(hostname)s/identity/restv1/scim/v2
 oxRevision: 1
