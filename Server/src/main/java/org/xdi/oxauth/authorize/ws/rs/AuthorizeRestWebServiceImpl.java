@@ -295,7 +295,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         if (validRedirectUri) {
 
-                            if (StringUtils.isNotBlank(accessToken)) {
+                            if (StringUtils.isNotBlank(accessToken) && appConfiguration.getAllowAuthorizationByAccessToken()) {
                                 boolean onlyFromCache = ServerUtil.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects() && ResponseType.isImplicitFlow(responseType));
                                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken, onlyFromCache);
                                 boolean denyAccess = true;
