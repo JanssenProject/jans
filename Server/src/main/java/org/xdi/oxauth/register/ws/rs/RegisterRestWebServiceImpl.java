@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -21,13 +22,18 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.registration.RegisterParamsValidator;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
@@ -59,7 +65,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 28, 2018
+ * @version December 4, 2018
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -113,7 +119,31 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
+            final JSONObject requestObject = new JSONObject(requestParams);
+            if (requestParams != null && requestObject.has(SOFTWARE_STATEMENT.toString())) {
+                Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
+
+                // Validate the crypto segment
+                String keyId = softwareStatement.getHeader().getKeyId();
+                JSONObject jwks = Strings.isNullOrEmpty(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString())) ?
+                        new JSONObject(softwareStatement.getClaims().getClaimAsString(JWKS.toString())) :
+                        JwtUtil.getJSONWebKeys(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString()));
+                AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+                boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
+                        softwareStatement.getEncodedSignature(),
+                        keyId, jwks, null, softwareStatement.getHeader().getAlgorithm());
+
+                if (!validSignature) {
+                    throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
+                }
+
+                requestParams = softwareStatement.getClaims().toJsonObject().toString();
+            }
+
             final RegisterRequest r = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            if (requestObject.has(SOFTWARE_STATEMENT.toString())) {
+                r.setSoftwareStatement(requestObject.getString(SOFTWARE_STATEMENT.toString()));
+            }
 
             log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
@@ -239,6 +269,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } catch (WebApplicationException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (InvalidJwtException e) {
+            builder = badRequestResponse();
+            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = internalErrorResponse();
             log.error(e.getMessage(), e);
@@ -252,6 +285,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     public Response.ResponseBuilder internalErrorResponse() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+    }
+
+    public Response.ResponseBuilder badRequestResponse() {
+        return Response.status(Response.Status.BAD_REQUEST).entity(
                 errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
     }
 
@@ -458,6 +496,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getAccessTokenLifetime() != null) {
             p_client.setAccessTokenLifetime(requestObject.getAccessTokenLifetime());
         }
+
+        if (StringUtils.isNotBlank(requestObject.getSoftwareId())) {
+            p_client.setSoftwareId(requestObject.getSoftwareId());
+        }
+        if (StringUtils.isNotBlank(requestObject.getSoftwareVersion())) {
+            p_client.setSoftwareVersion(requestObject.getSoftwareVersion());
+        }
+        if (StringUtils.isNotBlank(requestObject.getSoftwareStatement())) {
+            p_client.setSoftwareStatement(requestObject.getSoftwareStatement());
+        }
     }
 
     @Override
@@ -633,6 +681,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_URIS.toString(), client.getRequestUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZED_ORIGINS.toString(), client.getAuthorizedOrigins());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ID.toString(), client.getSoftwareId());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_VERSION.toString(), client.getSoftwareVersion());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_STATEMENT.toString(), client.getSoftwareStatement());
+
         if (!Util.isNullOrEmpty(client.getJwks())) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), new JSONObject(client.getJwks()));
         }

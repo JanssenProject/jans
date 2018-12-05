@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version November 28, 2018
+ * @version December 4, 2018
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -76,6 +76,9 @@ public class RegisterRequest extends BaseRequest {
     private List<String> requestUris;
     private List<String> authorizedOrigins;
     private Integer accessTokenLifetime;
+    private String softwareId;
+    private String softwareVersion;
+    private String softwareStatement;
 
     /**
      * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
@@ -99,9 +102,9 @@ public class RegisterRequest extends BaseRequest {
     private String httpMethod;
 
     /**
-     * Private common constructor.
+     * Common constructor.
      */
-    private RegisterRequest() {
+    public RegisterRequest() {
         setContentType(MediaType.APPLICATION_JSON);
         setMediaType(MediaType.APPLICATION_JSON);
 
@@ -894,6 +897,7 @@ public class RegisterRequest extends BaseRequest {
     public Integer getAccessTokenLifetime() {
         return accessTokenLifetime;
     }
+
     /**
      * Sets the Client-specific access token expiration (in seconds). Set it to Null or Zero to use the system default value.
      *
@@ -901,6 +905,68 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setAccessTokenLifetime(Integer accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    /**
+     * Returns a unique identifier string (UUID) assigned by the client developer or software publisher used by
+     * registration endpoints to identify the client software to be dynamically registered.
+     *
+     * @return The software identifier.
+     */
+    public String getSoftwareId() {
+        return softwareId;
+    }
+
+    /**
+     * Sets a unique identifier string (UUID) assigned by the client developer or software publisher used by
+     * registration endpoints to identify the client software to be dynamically registered.
+     *
+     * @param softwareId The software identifier.
+     */
+    public void setSoftwareId(String softwareId) {
+        this.softwareId = softwareId;
+    }
+
+    /**
+     * Returns a version identifier string for the client software identified by "software_id".
+     * The value of the "software_version" should change on any update to the client software identified by the same
+     * "software_id".
+     *
+     * @return The version identifier.
+     */
+    public String getSoftwareVersion() {
+        return softwareVersion;
+    }
+
+    /**
+     * Sets a version identifier string for the client software identified by "software_id".
+     * The value of the "software_version" should change on any update to the client software identified by the same
+     * "software_id".
+     *
+     * @param softwareVersion The version identifier.
+     */
+    public void setSoftwareVersion(String softwareVersion) {
+        this.softwareVersion = softwareVersion;
+    }
+
+    /**
+     * Returns a software statement containing client metadata values about the client software as claims.
+     * This is a string value containing the entire signed JWT.
+     *
+     * @return The software statement.
+     */
+    public String getSoftwareStatement() {
+        return softwareStatement;
+    }
+
+    /**
+     * Sets  a software statement containing client metadata values about the client software as claims.
+     * This is a string value containing the entire signed JWT.
+     *
+     * @param softwareStatement The software statement.
+     */
+    public void setSoftwareStatement(String softwareStatement) {
+        this.softwareStatement = softwareStatement;
     }
 
     public String getHttpMethod() {
@@ -1062,6 +1128,15 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
+        if (StringUtils.isNotBlank(softwareId)) {
+            parameters.put(SOFTWARE_ID.toString(), softwareId);
+        }
+        if (StringUtils.isNotBlank(softwareVersion)) {
+            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
+        }
+        if (StringUtils.isNotBlank(softwareStatement)) {
+            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
 
         // Custom params
@@ -1261,6 +1336,10 @@ public class RegisterRequest extends BaseRequest {
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(requestObject.has(SUBJECT_TYPE.toString()) ?
                 SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : null);
+        result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
+        result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
+        result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
+
         return result;
     }
 
@@ -1393,6 +1472,15 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);
+        }
+        if (StringUtils.isNotBlank(softwareId)) {
+            parameters.put(SOFTWARE_ID.toString(), softwareId);
+        }
+        if (StringUtils.isNotBlank(softwareVersion)) {
+            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
+        }
+        if (StringUtils.isNotBlank(softwareStatement)) {
+            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
