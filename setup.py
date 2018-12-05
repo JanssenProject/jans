@@ -4129,8 +4129,9 @@ if __name__ == '__main__':
             installObject.generate_base64_configuration()
             installObject.pbar.progress("Rendering configuratipn template")
             installObject.render_configuration_template()
-            installObject.pbar.progress("Updating hostname")
-            installObject.update_hostname()
+            # disable chaning hostname 
+            #installObject.pbar.progress("Updating hostname")
+            #installObject.update_hostname()
             installObject.pbar.progress("Setting ulimits")
             installObject.set_ulimits()
             installObject.pbar.progress("Copying output")
