@@ -172,6 +172,13 @@
         </classes>
     </test>
 
+    <!-- Registration test with Software Statement -->
+    <test name="Registration test with Software Statement" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.RegistrationWithSoftwareStatement"/>
+        </classes>
+    </test>
+
     <!-- Sector Identifier URL Verification test -->
     <test name="Sector Identifier URL Verification (HTTP)" enabled="true">
         <classes>

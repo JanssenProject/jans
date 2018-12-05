@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version November 28, 2018
+ * @version December 4, 2018
  */
 
 public enum RegisterRequestParam {
@@ -262,7 +262,26 @@ public enum RegisterRequestParam {
     /**
      * Client-specific access token expiration. Set this value to null or zero to use the default value.
      */
-    ACCESS_TOKEN_LIFETIME("access_token_lifetime");
+    ACCESS_TOKEN_LIFETIME("access_token_lifetime"),
+
+    /**
+     * A unique identifier string (UUID) assigned by the client developer or software publisher used by
+     * registration endpoints to identify the client software to be dynamically registered.
+     */
+    SOFTWARE_ID("software_id"),
+
+    /**
+     * A version identifier string for the client software identified by "software_id".
+     * The value of the "software_version" should change on any update to the client software identified by the same
+     * "software_id".
+     */
+    SOFTWARE_VERSION("software_version"),
+
+    /**
+     * A software statement containing client metadata values about the client software as claims.
+     * This is a string value containing the entire signed JWT.
+     */
+    SOFTWARE_STATEMENT("software_statement");
 
     /**
      * Parameter name
