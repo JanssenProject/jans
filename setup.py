@@ -3117,6 +3117,7 @@ class Setup(object):
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
         else:
+            os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
             self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
             # Make the generated script LSB compliant
             lsb_str=(
