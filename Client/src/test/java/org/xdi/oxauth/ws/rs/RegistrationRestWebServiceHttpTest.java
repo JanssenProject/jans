@@ -25,7 +25,10 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.HttpMethod;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
@@ -35,7 +38,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version December 7, 2017
+ * @version December 4, 2018
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -159,6 +162,32 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         registrationAccessToken1 = response.getRegistrationAccessToken();
         registrationClientUri1 = response.getRegistrationClientUri();
+    }
+
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
+    @Test
+    public void requestClientAssociate3(final String redirectUris, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestClientAssociate3");
+        String softwareId = UUID.randomUUID().toString();
+        String softwareVersion = "version_3.1.5";
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setSoftwareId(softwareId);
+        registerRequest.setSoftwareVersion(softwareVersion);
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+        assertTrue(response.getClaims().containsKey(SOFTWARE_ID.toString()));
+        assertEquals(response.getClaims().get(SOFTWARE_ID.toString()), softwareId);
+        assertTrue(response.getClaims().containsKey(SOFTWARE_VERSION.toString()));
+        assertEquals(response.getClaims().get(SOFTWARE_VERSION.toString()), softwareVersion);
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")

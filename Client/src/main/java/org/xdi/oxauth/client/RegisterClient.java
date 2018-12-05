@@ -29,7 +29,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 28, 2018
+ * @version December 4, 2018
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -215,6 +215,15 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 }
                 if (getRequest().getAccessTokenLifetime() != null) {
                     requestBody.put(ACCESS_TOKEN_LIFETIME.toString(), getRequest().getAccessTokenLifetime());
+                }
+                if (StringUtils.isNotBlank(getRequest().getSoftwareId())) {
+                    requestBody.put(SOFTWARE_ID.toString(), getRequest().getSoftwareId());
+                }
+                if (StringUtils.isNotBlank(getRequest().getSoftwareVersion())) {
+                    requestBody.put(SOFTWARE_VERSION.toString(), getRequest().getSoftwareVersion());
+                }
+                if (StringUtils.isNotBlank(getRequest().getSoftwareStatement())) {
+                    requestBody.put(SOFTWARE_STATEMENT.toString(), getRequest().getSoftwareStatement());
                 }
 
                 if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {
