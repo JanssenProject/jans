@@ -458,7 +458,7 @@ do_start () {
 
 			dip_in_logs
                 	START_STATUS=`tail -n 10 $NODE_INIT_LOG|grep -i 'Server listening on http://localhost'`
-                	ERROR_STATUS=`tail -n 10 $NODE_INIT_LOG|egrep -i "[ERROR] Error in starting the server|Error"`
+                	ERROR_STATUS=`tail -n 10 $NODE_INIT_LOG|egrep -i "[ERROR] Error in starting the server|[Error]"`
                 	if [ "x$START_STATUS" = "x" ]; then
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
                         	if [ "x$ERROR_STATUS" != "x" ]; then
