@@ -2855,12 +2855,14 @@ class Setup(object):
         self.logIt("Configuring OpenDJ")
 
         opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
-        config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
+        config_changes = [
+                          ['set-backend-prop', '--backend-name', 'userRoot', '--set', 'db-cache-percent:70'],
+                          ['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                           ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                           ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                          ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
-                          ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
+                          ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
+                          ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'],
                           ['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'],
