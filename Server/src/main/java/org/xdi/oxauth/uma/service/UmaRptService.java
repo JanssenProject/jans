@@ -24,8 +24,8 @@ import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -273,7 +273,7 @@ public class UmaRptService {
         return jwtSigner.sign().toString();
     }
 
-    public JSONObject buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
+    public JSONArray buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
         List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
 
         for (UmaPermission permission : permissions) {
@@ -290,7 +290,7 @@ public class UmaRptService {
         }
 
         final String json = ServerUtil.asJson(result);
-        return new JSONObject(json);
+        return new JSONArray(json);
     }
 
     public UmaPermission getPermissionFromRPTByResourceId(UmaRPT rpt, String resourceId) {
