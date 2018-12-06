@@ -2396,7 +2396,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         nonce = UUID.randomUUID().toString();
         state = UUID.randomUUID().toString();
-
+/*
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest2.setAccessToken(accessToken);
         authorizationRequest2.setState(state);
@@ -2433,7 +2433,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response3.getAccessToken(), "The access token is null");
         assertNotNull(response3.getExpiresIn(), "The expires in value is null");
         assertNotNull(response3.getTokenType(), "The token type is null");
-        assertNotNull(response3.getRefreshToken(), "The refresh token is null");
+        assertNotNull(response3.getRefreshToken(), "The refresh token is null");*/
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2523,7 +2523,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         nonce = UUID.randomUUID().toString();
         state = UUID.randomUUID().toString();
-
+/*
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest2.setAccessToken(accessToken);
         authorizationRequest2.setState(state);
@@ -2560,7 +2560,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response3.getAccessToken(), "The access token is null");
         assertNotNull(response3.getExpiresIn(), "The expires in value is null");
         assertNotNull(response3.getTokenType(), "The token type is null");
-        assertNotNull(response3.getRefreshToken(), "The refresh token is null");
+        assertNotNull(response3.getRefreshToken(), "The refresh token is null");*/
     }
 
     @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
