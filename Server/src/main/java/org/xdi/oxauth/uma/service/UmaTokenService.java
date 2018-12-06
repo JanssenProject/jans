@@ -122,17 +122,17 @@ public class UmaTokenService {
 
             log.trace("Access granted.");
 
-            final boolean upgraded;
-            if (rpt == null) {
-                rpt = rptService.createRPTAndPersist(client.getClientId());
-                upgraded = false;
-            } else {
-                upgraded = true;
-            }
-
             updatePermissionsWithClientRequestedScope(permissions, scopes);
             addPctToPermissions(permissions, pct);
-            rptService.addPermissionToRPT(rpt, permissions);
+
+            final boolean upgraded;
+            if (rpt == null) {
+                rpt = rptService.createRPTAndPersist(client, permissions);
+                upgraded = false;
+            } else {
+                rptService.addPermissionToRPT(rpt, permissions);
+                upgraded = true;
+            }
 
             UmaTokenResponse response = new UmaTokenResponse();
             response.setAccessToken(rpt.getCode());
