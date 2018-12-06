@@ -1114,7 +1114,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
     }
 
     @Parameters({"authorizePath", "redirectUri"})
-    @Test(dependsOnMethods = "requestAuthorizationAccessTokenStep1")
+    @Test(dependsOnMethods = "requestAuthorizationAccessTokenStep1", enabled = false)
     public void requestAuthorizationAccessTokenStep2(final String authorizePath, final String redirectUri)
             throws Exception {
         final String state = UUID.randomUUID().toString();
@@ -1162,7 +1162,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
     }
 
     @Parameters({"authorizePath", "redirectUri"})
-    @Test(dependsOnMethods = "requestAuthorizationAccessTokenStep1")
+    @Test(dependsOnMethods = "requestAuthorizationAccessTokenStep1", enabled = false)
     public void requestAuthorizationAccessTokenFail(final String authorizePath, final String redirectUri)
             throws Exception {
         final String state = UUID.randomUUID().toString();
