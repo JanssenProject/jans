@@ -4097,7 +4097,7 @@ if __name__ == '__main__':
             installObject.downloadWarFiles()
             installObject.pbar.progress("Calculating application memory")
             installObject.calculate_selected_aplications_memory()
-            installObject.pbar.progress("Downloading and installing JRE")
+            installObject.pbar.progress("Installing JRE")
             installObject.installJRE()
             installObject.pbar.progress("Installing Jetty")
             installObject.installJetty()
