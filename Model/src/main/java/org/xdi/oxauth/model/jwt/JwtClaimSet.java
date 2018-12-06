@@ -243,6 +243,10 @@ public abstract class JwtClaimSet {
         claims.put(key, values);
     }
 
+    public void setClaim(String key, JSONArray values) {
+        claims.put(key, values);
+    }
+
     public void removeClaim(String key) {
         claims.remove(key);
     }
