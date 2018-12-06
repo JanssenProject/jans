@@ -40,8 +40,6 @@ import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
 
-import com.gargoylesoftware.htmlunit.ScriptException;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
@@ -99,8 +97,8 @@ public abstract class BaseTest {
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
-            propertiesFile = "target/test-classes/testng.properties";
-            //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
+//            propertiesFile = "target/test-classes/testng.properties";
+            propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy_ce_dev3.properties";
             //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
