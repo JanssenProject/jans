@@ -69,6 +69,7 @@ public class SessionIdService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_ID_COOKIE_NAME = "session_id";
+    public static final String RP_ORIGIN_ID_COOKIE_NAME = "rp_origin_id";
     public static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
     public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
@@ -235,18 +236,26 @@ public class SessionIdService {
     }
 
     public String getSessionIdFromCookie(HttpServletRequest request) {
-        return getSessionIdFromCookie(request, SESSION_ID_COOKIE_NAME);
+        return getValueFromCookie(request, SESSION_ID_COOKIE_NAME);
     }
 
     public String getUmaSessionIdFromCookie(HttpServletRequest request) {
-        return getSessionIdFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
+        return getValueFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
     }
 
     public String getConsentSessionIdFromCookie(HttpServletRequest request) {
-        return getSessionIdFromCookie(request, CONSENT_SESSION_ID_COOKIE_NAME);
+        return getValueFromCookie(request, CONSENT_SESSION_ID_COOKIE_NAME);
     }
 
-    public String getSessionIdFromCookie(HttpServletRequest request, String cookieName) {
+    public String getSessionStateFromCookie(HttpServletRequest request) {
+        return getValueFromCookie(request, SESSION_STATE_COOKIE_NAME);
+    }
+
+    public String getRpOriginIdCookie(HttpServletRequest request) {
+        return getValueFromCookie(request, RP_ORIGIN_ID_COOKIE_NAME);
+    }
+
+    public String getValueFromCookie(HttpServletRequest request, String cookieName) {
         try {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
@@ -281,21 +290,35 @@ public class SessionIdService {
         return null;
     }
 
+    public void creatRpOriginIdCookie(String rpOriginId) {
+        try {
+            final Object response = externalContext.getResponse();
+            if (response instanceof HttpServletResponse) {
+                final HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+                creatRpOriginIdCookie(rpOriginId, httpResponse);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void creatRpOriginIdCookie(String rpOriginId, HttpServletResponse httpResponse) {
+        String header = RP_ORIGIN_ID_COOKIE_NAME + "=" + rpOriginId;
+        header += "; Path=/";
+        header += "; Secure";
+        header += "; HttpOnly";
+
+        createCookie(header, httpResponse);
+    }
+
     public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, String  cookieName) {
         String header = cookieName + "=" + sessionId;
         header += "; Path=/";
         header += "; Secure";
         header += "; HttpOnly";
 
-        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
-        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
-            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
-            Calendar expirationDate = Calendar.getInstance();
-            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
-            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
-        }
-
-        httpResponse.addHeader("Set-Cookie", header);
+        createCookie(header, httpResponse);
 
         createSessionStateCookie(sessionState, httpResponse);
     }
@@ -324,7 +347,11 @@ public class SessionIdService {
         String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
         header += "; Path=/";
         header += "; Secure";
+        
+        createCookie(header, httpResponse);
+    }
 
+    protected void createCookie(String header, HttpServletResponse httpResponse) {
         Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
         if (sessionStateLifetime != null && sessionStateLifetime > 0) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");

@@ -6,31 +6,10 @@
 
 package org.xdi.oxauth.auth;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.gluu.jsf2.message.FacesMessages;
-import org.gluu.jsf2.service.FacesService;
-import org.slf4j.Logger;
-import org.xdi.model.AuthenticationScriptUsageType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.security.Credentials;
-import org.xdi.oxauth.i18n.LanguageBean;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.security.Identity;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.RequestParameterService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.util.Pair;
-import org.xdi.util.StringHelper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -40,10 +19,36 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
+import org.gluu.jsf2.message.FacesMessages;
+import org.gluu.jsf2.service.FacesService;
+import org.python.jline.internal.Log;
+import org.slf4j.Logger;
+import org.xdi.model.AuthenticationScriptUsageType;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.security.Credentials;
+import org.xdi.oxauth.i18n.LanguageBean;
+import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RequestParameterService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.util.RedirectUri;
+import org.xdi.util.Pair;
+import org.xdi.util.StringHelper;
 
 /**
  * Authenticator component
@@ -101,6 +106,9 @@ public class Authenticator {
 
 	@Inject
 	private RequestParameterService requestParameterService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
 	private String authAcr;
 
@@ -719,9 +727,31 @@ public class Authenticator {
 	}
 
 	private void authenticationFailedSessionInvalid() {
-		this.addedErrorMessage = true;
-		addMessage(FacesMessage.SEVERITY_ERROR, INVALID_SESSION_MESSAGE);
-		facesService.redirect("/error.xhtml");
+	    sendRemoteSessionInvalidError();
+	}
+
+	private void sendLocalSessionInvalidError() {
+        this.addedErrorMessage = true;
+        addMessage(FacesMessage.SEVERITY_ERROR, INVALID_SESSION_MESSAGE);
+        facesService.redirect("/error.xhtml");
+	}
+	
+	private void sendRemoteSessionInvalidError() {
+	    HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+	    String redirectUri = sessionIdService.getRpOriginIdCookie(httpRequest);
+        
+        if (StringHelper.isEmpty(redirectUri)) {
+            Log.error("Failed to get either redirect_uri from cookies");
+            authenticationFailedSessionInvalid();
+            return;
+        }
+        
+        RedirectUri redirectUriResponse = new RedirectUri(redirectUri, null, null);
+        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, null));
+        redirectUriResponse.addResponseParameter("hint", "Create authorization request to start new authentication session.");
+        facesService.redirectToExternalURL(redirectUriResponse.toString());
+
 	}
 
 	private void markAuthStepAsPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
