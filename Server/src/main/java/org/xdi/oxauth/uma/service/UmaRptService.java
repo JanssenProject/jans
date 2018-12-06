@@ -24,18 +24,28 @@ import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.BatchOperation;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
+import org.xdi.util.StringHelper;
 
 import com.google.common.base.Preconditions;
 
@@ -61,10 +71,13 @@ public class UmaRptService {
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    private TokenService tokenService;
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
-    private AuthorizationGrantList authorizationGrantList;
+    private UmaPctService pctService;
+
+    @Inject
+    private UmaScopeService umaScopeService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -155,13 +168,9 @@ public class UmaRptService {
             return;
         }
 
-        final List<String> permissions = new ArrayList<String>();
+        final List<String> permissions = getPermissionDns(Arrays.asList(permission));
         if (rpt.getPermissions() != null) {
             permissions.addAll(rpt.getPermissions());
-        }
-
-        for (UmaPermission p : permission) {
-            permissions.add(p.getDn());
         }
 
         rpt.setPermissions(permissions);
@@ -172,6 +181,16 @@ public class UmaRptService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public static List<String> getPermissionDns(Collection<UmaPermission> permissions) {
+        final List<String> result = new ArrayList<String>();
+        if (permissions != null) {
+            for (UmaPermission p : permissions) {
+                result.add(p.getDn());
+            }
+        }
+        return result;
     }
 
     public List<UmaPermission> getRptPermissions(UmaRPT p_rpt) {
@@ -192,16 +211,6 @@ public class UmaRptService {
         return result;
     }
 
-    public UmaRPT createRPT(String clientId) {
-        try {
-            String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
-            return new UmaRPT(code, new Date(), rptExpirationDate(), null, clientId);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("Failed to generate RPT, clientId: " + clientId, e);
-        }
-    }
-
     public Date rptExpirationDate() {
         int lifeTime = appConfiguration.getUmaRptLifetime();
         if (lifeTime <= 0) {
@@ -213,16 +222,81 @@ public class UmaRptService {
         return calendar.getTime();
     }
 
-    public UmaRPT createRPTAndPersist(String clientId) {
-        UmaRPT rpt = createRPT(clientId);
-        persist(rpt);
-        return rpt;
+    public UmaRPT createRPTAndPersist(Client client, List<UmaPermission> permissions) {
+        try {
+            final Date creationDate = new Date();
+            final Date expirationDate = rptExpirationDate();
+
+            final String code;
+            if (client.isRptAsJwt()) {
+                code = createRptJwt(client, permissions, creationDate, expirationDate);
+            } else {
+                code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
+            }
+
+            UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
+            rpt.setPermissions(getPermissionDns(permissions));
+            persist(rpt);
+            return rpt;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Failed to generate RPT, clientId: " + client.getClientId(), e);
+        }
+    }
+
+    private String createRptJwt(Client client, List<UmaPermission> permissions, Date creationDate, Date expirationDate) throws Exception {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
+        if (client.getAccessTokenSigningAlg() != null && SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg()) != null) {
+            signatureAlgorithm = SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg());
+        }
+
+        final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
+        final Jwt jwt = jwtSigner.newJwt();
+        jwt.getClaims().setClaim("client_id", client.getClientId());
+        jwt.getClaims().setExpirationTime(expirationDate);
+        jwt.getClaims().setIssuedAt(creationDate);
+        jwt.getClaims().setAudience(client.getClientId());
+
+        if (permissions != null && !permissions.isEmpty()) {
+            String pctCode = permissions.iterator().next().getAttributes().get(UmaPermission.PCT);
+            if (StringHelper.isNotEmpty(pctCode)) {
+                UmaPCT pct = pctService.getByCode(pctCode);
+                if (pct != null) {
+                    jwt.getClaims().setClaim("pct_claims", pct.getClaims().toJsonObject());
+                } else {
+                    log.error("Failed to find PCT with code: " + pctCode + " which is taken from permission object: " + permissions.iterator().next().getDn());
+                }
+            }
+
+            jwt.getClaims().setClaim("permissions", buildPermissionsJSONObject(permissions));
+        }
+        return jwtSigner.sign().toString();
+    }
+
+    public JSONObject buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
+        List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
+
+        for (UmaPermission permission : permissions) {
+            permission.checkExpired();
+            permission.isValid();
+            if (permission.isValid()) {
+                final org.xdi.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
+                if (toAdd != null) {
+                    result.add(toAdd);
+                }
+            } else {
+                log.debug("Ignore permission, skip it in response because permission is not valid. Permission dn: {}", permission.getDn());
+            }
+        }
+
+        final String json = ServerUtil.asJson(result);
+        return new JSONObject(json);
     }
 
     public UmaPermission getPermissionFromRPTByResourceId(UmaRPT rpt, String resourceId) {
         try {
             if (Util.allNotBlank(resourceId)) {
-                 for (UmaPermission permission : getRptPermissions(rpt)) {
+                for (UmaPermission permission : getRptPermissions(rpt)) {
                     if (resourceId.equals(permission.getResourceId())) {
                         return permission;
                     }

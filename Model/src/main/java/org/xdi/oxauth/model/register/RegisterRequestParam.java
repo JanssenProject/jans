@@ -122,6 +122,11 @@ public enum RegisterRequestParam {
     SUBJECT_TYPE("subject_type"),
 
     /**
+     * Whether to return RPT as signed JWT
+     */
+    RPT_AS_JWT("rpt_as_jwt"),
+
+    /**
      * Whether to return access token as signed JWT
      */
     ACCESS_TOKEN_AS_JWT("access_token_as_jwt"),
