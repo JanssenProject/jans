@@ -3723,9 +3723,6 @@ class Setup(object):
         couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
         couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
 
-        if os.path.exists(couchebaseDatConfigFile):
-            os.remove(couchebaseDatConfigFile)
-
         conf = open(couchebaseStaticConfigFile).readlines()
 
         for i in range(len(conf)):
@@ -3739,7 +3736,6 @@ class Setup(object):
         with open(couchebaseStaticConfigFile, 'w') as w:
             w.write(''.join(conf))
 
-
         capi_conf = os.path.join(self.couchebaseInstallDir, 'etc/couchdb/default.d/capi.ini')
 
         f = open(capi_conf).readlines()
@@ -3751,10 +3747,17 @@ class Setup(object):
         with open(capi_conf, 'w') as w:
             w.write(''.join(f))
 
+        if os.path.exists(couchebaseDatConfigFile):
+            self.run(['rm', '-f', couchebaseDatConfigFile])
 
-    def isCouchbaseStarted(self):
+
+    def isCouchbaseStarted(self, port=None):
+
+        if not port:
+            port = self.couchebaseBucketClusterPort
+
         # check couchbase in every 5 secs for 12 times.
-        cmd = "netstat -lnp | grep {0}".format(self.couchebaseBucketClusterPort)
+        cmd = "netstat -lnp | grep {0}".format(port)
         for i in range(12):
             self.logIt("Checking if couchbase was started. Try {0} with command {1}".format(i+1, cmd))
             result = os.popen(cmd).read()
@@ -3795,20 +3798,6 @@ class Setup(object):
                 time.sleep(5)
 
         sys.exit("Couchbase server was not ready. Giving up")
-
-
-    def restartCouchebase(self):
-        self.logIt("Restarting Couchbase")
-        service_path = self.detect_service_path()
-
-        if self.os_type == 'ubuntu' and self.os_version == '16':
-            self.run((service_path, 'couchbase-server', 'stop'), useWait=True)
-            self.run((service_path, 'couchbase-server', 'start'), useWait=True)
-        else:
-            self.run((service_path, 'stop', 'couchbase-server'), useWait=True)
-            self.run((service_path, 'start', 'couchbase-server'), useWait=True)
-
-
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -3863,9 +3852,11 @@ class Setup(object):
 
     def install_couchbase_server(self):
         self.couchbaseInstall()
+        self.isCouchbaseStarted(18091)
+        self.run_service_command('couchbase-server', 'stop')
         self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-        self.restartCouchebase()
-        
+        self.run_service_command('couchbase-server', 'start')
+
         #wait for couchbase start successfully
         if not self.isCouchbaseStarted():
             log_line = "Couchbase was not started in a minute. Terminating installation."
@@ -4129,9 +4120,8 @@ if __name__ == '__main__':
             installObject.generate_base64_configuration()
             installObject.pbar.progress("Rendering configuratipn template")
             installObject.render_configuration_template()
-            # disable chaning hostname 
-            #installObject.pbar.progress("Updating hostname")
-            #installObject.update_hostname()
+            installObject.pbar.progress("Updating hostname")
+            installObject.update_hostname()
             installObject.pbar.progress("Setting ulimits")
             installObject.set_ulimits()
             installObject.pbar.progress("Copying output")
