@@ -97,8 +97,8 @@ public abstract class BaseTest {
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
-//            propertiesFile = "target/test-classes/testng.properties";
-            propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy_ce_dev3.properties";
+            propertiesFile = "target/test-classes/testng.properties";
+            //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy_ce_dev3.properties";
             //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
