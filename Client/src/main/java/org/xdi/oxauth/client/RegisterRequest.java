@@ -55,6 +55,7 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private SubjectType subjectType;
+    private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
     private SignatureAlgorithm accessTokenSigningAlg;
     private SignatureAlgorithm idTokenSignedResponseAlg;
@@ -506,6 +507,14 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
+    }
+
+    public Boolean getRptAsJwt() {
+        return rptAsJwt;
+    }
+
+    public void setRptAsJwt(Boolean rptAsJwt) {
+        this.rptAsJwt = rptAsJwt;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -1048,6 +1057,9 @@ public class RegisterRequest extends BaseRequest {
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
         }
+        if (rptAsJwt != null) {
+            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
+        }
         if (accessTokenAsJwt != null) {
             parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
         }
@@ -1394,6 +1406,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
+        }
+        if (rptAsJwt != null) {
+            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
         }
         if (accessTokenAsJwt != null) {
             parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
