@@ -251,8 +251,26 @@ public class SessionIdService {
         return getValueFromCookie(request, SESSION_STATE_COOKIE_NAME);
     }
 
-    public String getRpOriginIdCookie(HttpServletRequest request) {
-        return getValueFromCookie(request, RP_ORIGIN_ID_COOKIE_NAME);
+    public String getRpOriginIdCookie() {
+        return getValueFromCookie(RP_ORIGIN_ID_COOKIE_NAME);
+    }
+
+    public String getValueFromCookie(String cookieName) {
+        try {
+            if (facesContext == null) {
+                return null;
+            }
+            final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
+            if (request != null) {
+                return getValueFromCookie(request, cookieName);
+            } else {
+                log.error("Faces context returns null for http request object.");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return null;
     }
 
     public String getValueFromCookie(HttpServletRequest request, String cookieName) {
