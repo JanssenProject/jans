@@ -15,6 +15,7 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.authorize.*;
@@ -129,6 +130,9 @@ public class AuthorizeAction {
 
     @Inject
     private ScopeChecker scopeChecker;
+
+    @Inject
+    private ErrorHandlerService errorHandlerService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -833,6 +837,15 @@ public class AuthorizeAction {
 
     private boolean hasOnlyOpenidScope() {
         return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getDisplayName().equals("openid");
+    }
+
+    protected void handleSessionInvalid() {
+        errorHandlerService.handleError(Authenticator.INVALID_SESSION_MESSAGE, AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID, "Create authorization request to start new authentication session.");
+    }
+
+
+    protected void handleScriptError(String facesMessageId) {
+        errorHandlerService.handleError(Authenticator.AUTHENTICATION_ERROR_MESSAGE, AuthorizeErrorResponseType.INVALID_AUTHENTICATION_METHOD, "Contact administrator to fix specific ACR method issue.");
     }
 
 }
