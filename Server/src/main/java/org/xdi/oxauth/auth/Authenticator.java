@@ -59,8 +59,8 @@ import org.xdi.util.StringHelper;
 @Named
 public class Authenticator {
 
-	private static final String INVALID_SESSION_MESSAGE = "login.errorSessionInvalidMessage";
-    private static final String AUTHENTICATION_ERROR_MESSAGE = "login.failedToAuthenticate";
+	public static final String INVALID_SESSION_MESSAGE = "login.errorSessionInvalidMessage";
+	public static final String AUTHENTICATION_ERROR_MESSAGE = "login.failedToAuthenticate";
 
 	private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
 
@@ -105,7 +105,7 @@ public class Authenticator {
 
 	@Inject
 	private RequestParameterService requestParameterService;
-	
+
 	@Inject
 	private ErrorHandlerService errorHandlerService;
 
@@ -132,7 +132,7 @@ public class Authenticator {
         } else if (Constants.RESULT_EXPIRED.equals(result)) {
             handleSessionInvalid();
         }
-		
+
 		return false;
 	}
 
