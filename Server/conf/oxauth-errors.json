@@ -74,6 +74,16 @@
             "id":"invalid_openid_request_object",
             "description":"The request parameter contains an invalid OpenID Request Object.",
             "uri":null
+        },
+        {
+            "id":"authentication_session_invalid",
+            "description":"The authorization server can't handle user authentication due to session expiration",
+            "uri":null
+        },
+        {
+            "id":"invalid_authentication_method",
+            "description":"The authorization server can't handle user authentication due to error caused by ACR",
+            "uri":null
         }
     ],
     "clientInfo":[
