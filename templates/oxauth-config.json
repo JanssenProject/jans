@@ -1,7 +1,5 @@
 {
     "issuer":"https://%(hostname)s",
-    "loginPage":"https://%(hostname)s/oxauth/login.htm",
-    "authorizationPage":"https://%(hostname)s/oxauth/authorize.htm",
     "baseEndpoint":"https://%(hostname)s/oxauth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/oxauth/restv1/authorize",
     "tokenEndpoint":"https://%(hostname)s/oxauth/restv1/token",
@@ -289,5 +287,13 @@
 		"maximumAllowedAttemptsWithoutDelay": 4,
 		"delayTime": 2,
 		"bruteForceProtectionEnabled": false
-	}    
+	},
+   "fido2Configuration":{
+      "certFilesFolder":"",
+      "mdsTocRootCertFile":"",
+      "mdsTocFilesFolder":"",
+      "certificationServerMetadataFolder":"",
+      "disable":true
+   },
+   "errorHandlingMethod":"internal",
 }
