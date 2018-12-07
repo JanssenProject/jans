@@ -115,7 +115,17 @@ public enum AuthorizeErrorResponseType implements IErrorType {
     /**
      * The request parameter contains an invalid OpenID Request Object.
      */
-    INVALID_OPENID_REQUEST_OBJECT("invalid_openid_request_object");
+    INVALID_OPENID_REQUEST_OBJECT("invalid_openid_request_object"),
+
+    /**
+     * The authorization server can't handle user authentication due to session expiration
+     */
+    AUTHENTICATION_SESSION_INVALID("authentication_session_invalid"),
+
+    /**
+     * The authorization server can't handle user authentication due to error caused by ACR
+     */
+    INVALID_AUTHENTICATION_METHOD("invalid_authentication_method");
 
     private final String paramName;
 
