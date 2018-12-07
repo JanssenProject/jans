@@ -8,7 +8,7 @@ objectClass: top
 displayName: oxTrust Admin GUI
 inum: %(oxauth_client_id)s
 oxAuthClientSecret: %(oxauthClient_encoded_pw)s
-oxAuthAppType: web
+oxAuthAppType: web 
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
@@ -16,6 +16,7 @@ oxAuthGrantType: refresh_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthLogoutURI: https://%(hostname)s/identity/logout
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/getauthcode
