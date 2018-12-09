@@ -20,9 +20,13 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.ws.rs.service.AssertionService;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -35,11 +39,18 @@ public class AssertionController {
     @Inject
     private DataMapperService dataMapperService;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public JsonNode register(String content) throws IOException {
+    public Response register(String content) throws IOException {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
         JsonNode params = dataMapperService.readTree(content);
         return assertionService.options(params);
     }
@@ -48,7 +59,15 @@ public class AssertionController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/result")
-    public JsonNode verify(JsonNode params) {
-        return assertionService.verify(params);
+    public Response verify(String content) throws IOException {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
+        JsonNode params = dataMapperService.readTree(content);
+        JsonNode result = assertionService.verify(params);
+
+        ResponseBuilder builder = Response.ok().entity(result.toString());
+        return builder.build();
     }
 }
