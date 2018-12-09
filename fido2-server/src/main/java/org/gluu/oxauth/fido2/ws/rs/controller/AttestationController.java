@@ -23,9 +23,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.ws.rs.service.AttestationService;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -39,11 +41,18 @@ public class AttestationController {
     @Inject
     private DataMapperService dataMapperService;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
     public Response register(String content) throws IOException {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
         JsonNode params = dataMapperService.readTree(content);
         JsonNode result = attestationService.options(params);
 
@@ -56,6 +65,10 @@ public class AttestationController {
     @Produces({ "application/json" })
     @Path("/result")
     public Response verify(String content) throws IOException {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
         JsonNode params = dataMapperService.readTree(content);
         JsonNode result = attestationService.verify(params);
 
