@@ -34,13 +34,13 @@ import java.util.*;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version January 17, 2018
+ * @version December 8, 2018
  */
 @Stateless
 @Named
 public class AuthorizeService {
 
-	// use only "acr" instead of "acr_values" #334
+    // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
@@ -103,7 +103,7 @@ public class AuthorizeService {
 
     @Inject
     private ScopeService scopeService;
-    
+
     @Inject
     private RequestParameterService requestParameterService;
 
@@ -157,7 +157,7 @@ public class AuthorizeService {
 
             // OXAUTH-297 - set session_id cookie
             if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
-                sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), false);
+                sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), false);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 

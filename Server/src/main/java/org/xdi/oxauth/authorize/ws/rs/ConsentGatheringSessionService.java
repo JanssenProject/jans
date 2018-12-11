@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
@@ -22,8 +16,15 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
- * @author Yuriy Movchan Date: 10/30/2017
+ * @author Yuriy Movchan
+ * @version December 8, 2018
  */
 @Stateless
 @Named
@@ -66,23 +67,23 @@ public class ConsentGatheringSessionService {
         } else {
             log.error("consent_session_id cookie is not set.");
         }
-        
+
         if (!create) {
-        	return null;
+            return null;
         }
 
         log.trace("Generating new consent_session_id ...");
         SessionId session = sessionIdService.generateUnauthenticatedSessionId(userDn);
 
-        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
+        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
         log.trace("consent_session_id cookie created.");
 
         return session;
     }
 
     public void setAuthenticatedSessionState(HttpServletRequest httpRequest, SessionId sessionId) {
-    	SessionId connectSession = getConnectSession(httpRequest);
-    	sessionIdService.setSessionIdStateAuthenticated(httpRequest, sessionId, connectSession.getDn());
+        SessionId connectSession = getConnectSession(httpRequest);
+        sessionIdService.setSessionIdStateAuthenticated(httpRequest, sessionId, connectSession.getDn());
     }
 
     public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
