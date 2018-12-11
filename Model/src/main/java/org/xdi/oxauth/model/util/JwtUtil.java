@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 8, 2016
+ * @version December 8, 2018
  */
 public class JwtUtil {
 
@@ -64,6 +64,17 @@ public class JwtUtil {
         for (Provider provider : providers) {
             log.trace("Provider: " + provider.getName());
         }
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = "0123456789abcdef".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 
     public static byte[] getMessageDigestSHA256(String data)

@@ -5,66 +5,63 @@
 	<title>
 		oxAuth - RP iFrame
 	</title>
-	<script type="text/javascript" src="js/crypto-js-3.1.9-1/crypto-js.js"></script>
 	<script>
-        //<![CDATA[
-        var rpOrigin = window.location.origin;
-        var opOrigin = null;
-        var clientId = null;
-        var op_browser_state = null;
-        var mes = null;
-        var timerId = null;
+		//<![CDATA[
+		var opOrigin = null;
+		var clientId = null;
+		var sessionState = null;
+		var mes = null;
+		var timerId = null;
 
-        function loadParams() {
-            opOrigin = document.getElementById("opOrigin").value;
-            clientId = document.getElementById("clientId").value;
-            op_browser_state = document.getElementById("sessionState").value;
-        }
+		function loadParams() {
+			opOrigin = document.getElementById("opOrigin").value;
+			clientId = document.getElementById("clientId").value;
+			sessionState = document.getElementById("sessionState").value;
+		}
 
-        function updateMes() {
-            var salt = CryptoJS.lib.WordArray.random(128 / 8);
-            mes = clientId + ' ' + CryptoJS.SHA256(clientId + ' ' + rpOrigin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
-        }
+		function updateMes() {
+			mes = clientId + ' ' + sessionState;
+		}
 
-        function checkSession() {
-            var win = window.parent.document.getElementById("op").contentWindow;
-            win.postMessage(mes, opOrigin);
-        }
+		function checkSession() {
+			var win = window.parent.document.getElementById("op").contentWindow;
+			win.postMessage(mes, opOrigin);
+		}
 
-        function setTimer() {
-            clearTimer();
-            checkSession();
-            timerId = setInterval("checkSession()", 3 * 1000);
-        }
+		function setTimer() {
+			clearTimer();
+			checkSession();
+			timerId = setInterval("checkSession()", 3 * 1000);
+		}
 
-        function clearTimer() {
-            if (timerId) {
-                window.clearInterval(timerId);
-                timerId = null;
-            }
-        }
+		function clearTimer() {
+			if (timerId) {
+				window.clearInterval(timerId);
+				timerId = null;
+			}
+		}
 
-        window.addEventListener("message", receiveMessage, false);
+		window.addEventListener("message", receiveMessage, false);
 
-        function receiveMessage(e) {
-            if (e.origin !== opOrigin) {
-                return;
-            }
+		function receiveMessage(e) {
+			if (e.origin !== opOrigin) {
+				return;
+			}
 
-            console.log("Session State: " + e.data);
-            if (e.data == "changed") {
-                clearTimer();
-                alert("Session State has changed");
-            }
-        }
-        //]]>
+			console.log("Session State: " + e.data);
+			if (e.data == "changed") {
+				clearTimer();
+				alert("Session State has changed");
+			}
+		}
+		//]]>
 	</script>
 </head>
 
 <body onload="loadParams(); updateMes(); setTimer()">
-	<input id="sessionState" type="hidden" value='#{request.getParameter("session_state")}' />
-	<input id="clientId" type="hidden" value='#{request.getParameter("client_id")}' />
-	<input id="opOrigin" type="hidden" value='#{request.getParameter("op_origin")}' />
+<input id="sessionState" type="hidden" value='#{request.getParameter("session_state")}' />
+<input id="clientId" type="hidden" value='#{request.getParameter("client_id")}' />
+<input id="opOrigin" type="hidden" value='#{request.getParameter("op_origin")}' />
 </body>
 
 </html>
