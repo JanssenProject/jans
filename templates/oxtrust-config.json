@@ -52,8 +52,6 @@
 
     "shibboleth3FederationRootDir":"/opt/shibboleth-federation",
 
-    "velocityLog":"%(jetty_base)s/identity/logs/velocity.log",
-
     "spMetadataPath":"",
 
     "logoLocation":"/var/ox/photos",
@@ -140,5 +138,6 @@
         "maxCount": 200
     },
     "cleanServiceInterval":300,
+    "loggingLevel": "INFO",
     "passwordResetRequestExpirationTime":600
 }
