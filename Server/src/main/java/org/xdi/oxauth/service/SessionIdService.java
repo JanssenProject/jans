@@ -6,27 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.persist.exception.EntryPersistenceException;
@@ -48,6 +29,7 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -55,20 +37,35 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version December 8, 2018
  */
 @RequestScoped
 @Named
 public class SessionIdService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+    public static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_ID_COOKIE_NAME = "session_id";
     public static final String RP_ORIGIN_ID_COOKIE_NAME = "rp_origin_id";
     public static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
@@ -80,7 +77,7 @@ public class SessionIdService {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
-    
+
     @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
 
@@ -147,19 +144,19 @@ public class SessionIdService {
                 Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
 
                 for (String acrValue : acrValuesList) {
-	                Integer currentAcrLevel = acrToLevel.get(acrValue);
-	
-	                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
-	                        "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
+                    Integer currentAcrLevel = acrToLevel.get(acrValue);
 
-	                // Requested acr method not enabled
-	                if (currentAcrLevel == null) {
-	                    throw new AcrChangedException(false);
-	                }
+                    log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
+                            "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
 
-	                if (sessionAcrLevel < currentAcrLevel) {
-	                    throw new AcrChangedException();
-	                }
+                    // Requested acr method not enabled
+                    if (currentAcrLevel == null) {
+                        throw new AcrChangedException(false);
+                    }
+
+                    if (sessionAcrLevel < currentAcrLevel) {
+                        throw new AcrChangedException();
+                    }
                 }
                 // https://github.com/GluuFederation/oxAuth/issues/291
                 return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
@@ -334,7 +331,7 @@ public class SessionIdService {
         createCookie(header, httpResponse);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, String  cookieName) {
+    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, String cookieName) {
         String header = cookieName + "=" + sessionId;
         header += "; Path=/";
         header += "; Secure";
@@ -343,20 +340,21 @@ public class SessionIdService {
         createCookie(header, httpResponse);
 
         createSessionStateCookie(sessionState, httpResponse);
+        createOPBrowserStateCookie(opbs, httpResponse);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
+    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, boolean isUma) {
         String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
-        createSessionIdCookie(sessionId, sessionState, httpResponse, cookieName);
+        createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, cookieName);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, boolean isUma) {
+    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, boolean isUma) {
         try {
             final Object response = externalContext.getResponse();
             if (response instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-                createSessionIdCookie(sessionId, sessionState, httpResponse, isUma);
+                createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, isUma);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -369,8 +367,24 @@ public class SessionIdService {
         String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
         header += "; Path=/";
         header += "; Secure";
-        
+
         createCookie(header, httpResponse);
+    }
+
+    public void createOPBrowserStateCookie(String opbs, HttpServletResponse httpResponse) {
+        // Create the special cookie header with secure flag but not HttpOnly because the opbs
+        // needs to be read from the OP iframe using JavaScript
+        String header = OP_BROWSER_STATE + "=" + opbs;
+        header += "; Path=/";
+        header += "; Secure";
+        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
+        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
+            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
+            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
+        }
+        httpResponse.addHeader("Set-Cookie", header);
     }
 
     protected void createCookie(String header, HttpServletResponse httpResponse) {
@@ -387,6 +401,13 @@ public class SessionIdService {
 
     public void removeSessionIdCookie(HttpServletResponse httpResponse) {
         final Cookie cookie = new Cookie(SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
+        httpResponse.addCookie(cookie);
+    }
+
+    public void removeOPBrowserStateCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(OP_BROWSER_STATE, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
         httpResponse.addCookie(cookie);
@@ -447,7 +468,7 @@ public class SessionIdService {
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
             log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
         }
-        
+
         return sessionId;
     }
 
@@ -461,54 +482,71 @@ public class SessionIdService {
     }
 
     private SessionId generateSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
-        final String sid = UUID.randomUUID().toString();
-        final String sessionState = UUID.randomUUID().toString();
-        final String dn = dn(sid);
+        try {
+            final String sid = UUID.randomUUID().toString();
+            final String salt = UUID.randomUUID().toString();
+            final String clientId = sessionIdAttributes.get("client_id");
+            final String opbs = UUID.randomUUID().toString();
+            final String sessionState = JwtUtil.bytesToHex(JwtUtil.getMessageDigestSHA256(
+                    clientId + " " + appConfiguration.getIssuer() + " " + opbs + " " + salt)) + "." + salt;
+            final String dn = dn(sid);
+            sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
 
-        if (StringUtils.isBlank(dn)) {
-            return null;
-        }
-
-        if (SessionIdState.AUTHENTICATED == state) {
-            if (StringUtils.isBlank(userDn)) {
+            if (StringUtils.isBlank(dn)) {
                 return null;
             }
+
+            if (SessionIdState.AUTHENTICATED == state) {
+                if (StringUtils.isBlank(userDn)) {
+                    return null;
+                }
+            }
+
+            final SessionId sessionId = new SessionId();
+            sessionId.setId(sid);
+            sessionId.setDn(dn);
+            sessionId.setUserDn(userDn);
+            sessionId.setSessionState(sessionState);
+
+            Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
+            sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
+
+            if (authenticationDate != null) {
+                sessionId.setAuthenticationTime(authenticationDate);
+            }
+
+            if (state != null) {
+                sessionId.setState(state);
+            }
+
+            sessionId.setSessionAttributes(sessionIdAttributes);
+            sessionId.setLastUsedAt(new Date());
+
+            if (sessionId.getIsJwt()) {
+                sessionId.setJwt(generateJwt(sessionId, userDn).asString());
+            }
+
+            boolean persisted = false;
+            if (persist) {
+                persisted = persistSessionId(sessionId);
+            }
+
+            auditLogging(sessionId);
+
+            log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
+            return sessionId;
+        } catch (NoSuchProviderException e) {
+            log.error("Failed generating session state! " + e.getMessage(), e);
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed generating session state! " + e.getMessage(), e);
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed generating session state! " + e.getMessage(), e);
+            throw new RuntimeException(e);
         }
-
-        final SessionId sessionId = new SessionId();
-        sessionId.setId(sid);
-        sessionId.setDn(dn);
-        sessionId.setUserDn(userDn);
-        sessionId.setSessionState(sessionState);
-
-        Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
-        sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
-
-        if (authenticationDate != null) {
-            sessionId.setAuthenticationTime(authenticationDate);
-        }
-
-        if (state != null) {
-            sessionId.setState(state);
-        }
-
-        sessionId.setSessionAttributes(sessionIdAttributes);
-        sessionId.setLastUsedAt(new Date());
-
-        if (sessionId.getIsJwt()) {
-            sessionId.setJwt(generateJwt(sessionId, userDn).asString());
-        }
-
-        boolean persisted = false;
-        if (persist) {
-            persisted = persistSessionId(sessionId);
-        }
-
-        auditLogging(sessionId);
-
-        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
-        return sessionId;
     }
+
 
     private Jwt generateJwt(SessionId sessionId, String audience) {
         try {
@@ -552,7 +590,7 @@ public class SessionIdService {
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
             log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
         }
-        
+
         return sessionId;
     }
 
@@ -781,8 +819,8 @@ public class SessionIdService {
         return isSessionIdAuthenticated(sessionId);
     }
 
-	public boolean isSessionIdAuthenticated(SessionId sessionId) {
-		if (sessionId == null) {
+    public boolean isSessionIdAuthenticated(SessionId sessionId) {
+        if (sessionId == null) {
             return false;
         }
 
@@ -793,7 +831,7 @@ public class SessionIdService {
         }
 
         return false;
-	}
+    }
 
     public boolean isNotSessionIdAuthenticated() {
         return !isSessionIdAuthenticated();

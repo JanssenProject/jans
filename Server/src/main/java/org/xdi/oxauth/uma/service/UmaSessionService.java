@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
@@ -25,9 +17,16 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
 /**
  * @author yuriyz
- * @version August 9, 2017
+ * @version December 8, 2018
  */
 @Stateless
 @Named
@@ -70,7 +69,7 @@ public class UmaSessionService {
         log.trace("Generating new uma_session_id ...");
         SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "no");
 
-        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, true);
+        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, true);
         log.trace("uma_session_id cookie created.");
         return session;
     }
