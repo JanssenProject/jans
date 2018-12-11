@@ -8,7 +8,7 @@ objectClass: top
 displayName: oxTrust Admin GUI
 inum: %(oxauth_client_id)s
 oxAuthClientSecret: %(oxauthClient_encoded_pw)s
-oxAuthAppType: web 
+oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
