@@ -131,6 +131,11 @@ public class Authenticator {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(result)) {
             handleSessionInvalid();
+        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(result)) {
+            // Do nothing to keep compatibility with older versions
+            if (facesMessages.getMessages().size() == 0) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+            }
         }
 
 		return false;
@@ -147,6 +152,11 @@ public class Authenticator {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(result)) {
             handleSessionInvalid();
+        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(result)) {
+            // Do nothing to keep compatibility with older versions
+            if (facesMessages.getMessages().size() == 0) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+            }
         }
 		
 		return result;
@@ -313,7 +323,7 @@ public class Authenticator {
 			if (!result && (overridenNextStep == -1)) {
 				// Force session lastUsedAt update if authentication attempt is failed
 				sessionIdService.updateSessionId(sessionId);
-				return Constants.RESULT_NO_PERMISSIONS;
+				return Constants.RESULT_AUTHENTICATION_FAILED;
 			}
 
 			boolean overrideCurrentStep = false;
