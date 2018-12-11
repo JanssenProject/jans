@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
@@ -49,6 +50,7 @@ import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;
+
 
 /**
  * Provides actual versions of scripts
@@ -446,8 +448,11 @@ public class CustomScriptManager implements Serializable {
 		// Save error into script entry
 		StringBuilder builder = new StringBuilder();
 		builder.append(ExceptionUtils.getStackTrace(exception));
-		builder.append("\n\n==================Exception message============================\n\n");
-		builder.append(exception.getMessage());
+		String message = exception.getMessage();
+		if(!StringUtils.isEmpty(message)) {
+			builder.append("\n==================Further details============================\n");
+			builder.append(message);
+		}
 		loadedCustomScript.setScriptError(new ScriptError(new Date(), builder.toString()));
 		customScriptService.update(loadedCustomScript);
 	}
