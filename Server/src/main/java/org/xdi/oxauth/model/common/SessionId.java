@@ -6,26 +6,22 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+import com.google.common.collect.Maps;
+import org.gluu.site.ldap.persistence.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-
-import com.google.common.collect.Maps;
+import static org.xdi.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version December 8, 2018
  */
 @Named("sessionUser")
 @LdapEntry
@@ -131,6 +127,10 @@ public class SessionId implements Serializable {
 
     public void setSessionState(String sessionState) {
         this.sessionState = sessionState;
+    }
+
+    public String getOPBrowserState() {
+        return sessionAttributes.get(OP_BROWSER_STATE);
     }
 
     public String getId() {

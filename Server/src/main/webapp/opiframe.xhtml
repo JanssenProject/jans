@@ -12,15 +12,15 @@
 
         function receiveMessage(e) {
             var message = e.data;
-            var client_id = message.split(' ')[0];
-            var session_state = message.split(' ')[1];
+            var clientId = message.split(' ')[0];
+            var sessionState = message.split(' ')[1];
 
-            var salt = session_state.split('.')[1];
-            var op_browser_state = getCookie("session_state");
+            var salt = sessionState.split('.')[1];
+            var opbs = getOpBrowserState();
 
-            var ss = CryptoJS.SHA256(client_id + ' ' + e.origin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
+            var ss = CryptoJS.SHA256(clientId + ' ' + e.origin + ' ' + opbs + ' ' + salt) + "." + salt;
 
-            if (session_state == ss) {
+            if (sessionState == ss) {
                 stat = "unchanged";
             } else {
                 stat = "changed";
@@ -29,13 +29,13 @@
             e.source.postMessage(stat, e.origin);
         }
 
-        function getCookie(cookieName) {
+        function getOpBrowserState() {
             var x, y, cookies = document.cookie.split(";");
             for (var i = 0; i < cookies.length; i++) {
                 x = cookies[i].substr(0, cookies[i].indexOf("="));
                 y = cookies[i].substr(cookies[i].indexOf("=") + 1);
                 x = x.replace(/^\s+|\s+$/g, "");
-                if (x == cookieName) {
+                if (x == "opbs") {
                     return decodeURI(y);
                 }
             }
