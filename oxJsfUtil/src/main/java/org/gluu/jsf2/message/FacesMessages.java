@@ -1,9 +1,11 @@
 package org.gluu.jsf2.message;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
@@ -33,6 +35,13 @@ public class FacesMessages implements Serializable {
 
     @Inject
     private ExpressionEvaluator expressionEvaluator;
+    
+    private HashMap<String, FacesMessage> messages;
+
+    @PostConstruct
+    private void init() {
+        this.messages = new HashMap<String, FacesMessage>();
+    }
 
     public void add(Severity severity, String message) {
         add(null, severity, message);
@@ -44,7 +53,10 @@ public class FacesMessages implements Serializable {
         }
 
         String evaluatedMessage = evalAsString(message);
-        facesContext.addMessage(clientId, new FacesMessage(severity, evaluatedMessage, evaluatedMessage));
+        FacesMessage facesMessage = new FacesMessage(severity, evaluatedMessage, evaluatedMessage);
+        facesContext.addMessage(clientId, facesMessage);
+        
+        messages.put(clientId, facesMessage);
         setKeepMessages();
     }
 
@@ -64,6 +76,8 @@ public class FacesMessages implements Serializable {
     }
 
     public void clear() {
+        messages.clear();
+
         if (facesContext == null) {
             return;
         }
@@ -100,6 +114,10 @@ public class FacesMessages implements Serializable {
 
     public String evalAsString(String expression, Map<String, Object> parameters) {
         return expressionEvaluator.evaluateValueExpression(expression, String.class, parameters);
+    }
+
+    public HashMap<String, FacesMessage> getMessages() {
+        return messages;
     }
 
 }
