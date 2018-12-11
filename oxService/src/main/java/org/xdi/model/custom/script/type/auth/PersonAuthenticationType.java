@@ -6,12 +6,12 @@
 
 package org.xdi.model.custom.script.type.auth;
 
-import java.util.List;
-import java.util.Map;
-
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.BaseExternalType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base interface for external authentication python script
@@ -42,5 +42,9 @@ public interface PersonAuthenticationType extends BaseExternalType {
     String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
     Map<String, String> getAuthenticationMethodClaims();
+     
+    public String getErrorMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
+	
+    public String getSuccessMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
 
 }
