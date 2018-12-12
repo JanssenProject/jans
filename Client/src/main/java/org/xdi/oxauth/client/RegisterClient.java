@@ -153,6 +153,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getAccessTokenSigningAlg() != null) {
                     requestBody.put(ACCESS_TOKEN_SIGNING_ALG.toString(), getRequest().getAccessTokenSigningAlg().toString());
                 }
+                if (getRequest().getRptAsJwt() != null) {
+                    requestBody.put(RPT_AS_JWT.toString(), getRequest().getRptAsJwt().toString());
+                }
                 if (getRequest().getIdTokenSignedResponseAlg() != null) {
                     requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
                 }
