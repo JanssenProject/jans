@@ -41,8 +41,5 @@ public interface PersonAuthenticationType extends BaseExternalType {
 
     String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
-    Map<String, String> getAuthenticationMethodClaims();
-     
-    public String getErrorMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
-	
+    Map<String, String> getAuthenticationMethodClaims();	
 }
