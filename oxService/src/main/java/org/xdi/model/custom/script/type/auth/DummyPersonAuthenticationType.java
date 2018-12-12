@@ -89,14 +89,4 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 		return null;
 	}
 
-	@Override
-	public String getErrorMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step) {
-		return null;
-	}
-
-	@Override
-	public String getSuccessMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step) {
-		return null;
-	}
-
 }

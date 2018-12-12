@@ -45,6 +45,4 @@ public interface PersonAuthenticationType extends BaseExternalType {
      
     public String getErrorMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
 	
-    public String getSuccessMessageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
-
 }
