@@ -832,7 +832,7 @@ class Setup(object):
         if not self.oxauth_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.oxauth_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
-
+        if not self.idp_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.idp_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
         if not self.scim_rs_client_id:
