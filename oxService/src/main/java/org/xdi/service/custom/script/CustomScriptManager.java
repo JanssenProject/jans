@@ -51,7 +51,6 @@ import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;
 
-
 /**
  * Provides actual versions of scripts
  *
@@ -449,7 +448,7 @@ public class CustomScriptManager implements Serializable {
 		StringBuilder builder = new StringBuilder();
 		builder.append(ExceptionUtils.getStackTrace(exception));
 		String message = exception.getMessage();
-		if(!StringUtils.isEmpty(message)) {
+		if (message != null && !StringUtils.isEmpty(message)) {
 			builder.append("\n==================Further details============================\n");
 			builder.append(message);
 		}
