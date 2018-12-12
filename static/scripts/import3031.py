@@ -965,6 +965,15 @@ class Migration(object):
             con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  jsons)])
 
 
+        # Delete inum=None IDP client if exists
+        dn = 'ou=clients,o={0},o=gluu'.format(self.inumOrg)
+        result = con.search_s(dn, ldap.SCOPE_SUBTREE,'(&(objectClass=oxAuthClient)(displayName=IDP client))',['inum'])
+        if result:
+            if result[0][1]['inum'][0] == 'None':
+                dn = result[0][0]
+                con.delete_s(dn)
+                logging.info('Idp Client with inum=None deleted.')
+
         #Create Client for IDP
 
         clientTwoQuads = '%s.%s' % (getQuad(), getQuad())
