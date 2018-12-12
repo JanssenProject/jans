@@ -746,13 +746,8 @@ public class Authenticator {
 	}
 
 	private boolean authenticationFailed() {
-		if (this.authAcr.equalsIgnoreCase("twilio_sms") && this.authStep == 2) {
-			facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.");
-		} else {
-			addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
-		}
+	    addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
         handleScriptError(null);
-
         return false;
 	}
 
