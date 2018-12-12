@@ -47,6 +47,10 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
     @LdapAttribute(name = "oxDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
+    @LdapJsonObject
+    @LdapAttribute(name = "oxDeviceNotificationConf")
+    private String deviceNotificationConf;
+
     @LdapAttribute(name = "oxCounter")
 	private long counter;
 
@@ -137,7 +141,15 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.deviceRegistrationConfiguration = deviceRegistrationConfiguration;
 	}
 
-	public long getCounter() {
+	public String getDeviceNotificationConf() {
+        return deviceNotificationConf;
+    }
+
+	public void setDeviceNotificationConf(String deviceNotificationConf) {
+        this.deviceNotificationConf = deviceNotificationConf;
+    }
+
+    public long getCounter() {
 		return counter;
 	}
 
