@@ -1,1 +1,1 @@
-https://github.com/GluuFederation/oxd/blob/master/LICENSE
+https://github.com/GluuFederation/oxd/blob/master/license.md
