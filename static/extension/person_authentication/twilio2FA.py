@@ -2,6 +2,7 @@
 # Copyright (c) 2018, Gluu
 #
 # Author: Jose Gonzalez
+# Author: Gasmyr Mougang
 
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
@@ -10,11 +11,14 @@ from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays
+from javax.faces.application import FacesMessage
+from org.gluu.jsf2.message import FacesMessages
 
 import com.twilio.Twilio as Twilio
 import com.twilio.rest.api.v2010.account.Message as Message
 import com.twilio.type.PhoneNumber as PhoneNumber
 import org.codehaus.jettison.json.JSONArray as JSONArray
+
 
 import java
 import random
@@ -28,7 +32,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, configurationAttributes):
         print "Twilio SMS. Initialization"
-
         self.ACCOUNT_SID = None
         self.AUTH_TOKEN = None
         self.FROM_NUMBER = None
@@ -144,6 +147,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return False
         elif step == 2:
+
+            facesMessages = CdiUtil.bean(FacesMessages)
+            facesMessages.setKeepMessages()
             # Retrieve the session attribute
             print "TwilioSMS. Step 2 SMS/OTP Authentication"
             code = session_attributes.get("code")
@@ -167,7 +173,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "TiwlioSMS, SUCCESS! User entered the same code!"
                 return True
 
+            print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
+            print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
+            facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
 
             return False
 
@@ -182,7 +191,6 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 2:
             print "TwilioSMS. Prepare for Step 2"
             return True
-
         return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
