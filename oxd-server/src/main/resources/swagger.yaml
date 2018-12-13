@@ -142,6 +142,10 @@ paths:
               access_token_signing_alg:
                 type: string
                 description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
+              rpt_as_jwt:
+                type: boolean
+                description: specifies whether RPT should be return as JWT or not. Default value is false.
+
 
       responses:
         200:
@@ -452,6 +456,9 @@ paths:
               access_token_signing_alg:
                 type: string
                 description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
+              rpt_as_jwt:
+                type: boolean
+                description: specifies whether RPT should be return as JWT or not. Default value is false.
 
       responses:
         200:

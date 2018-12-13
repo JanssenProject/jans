@@ -1,9 +1,16 @@
 package org.xdi.oxd.server;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxd.client.ClientInterface;
+import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RpGetRptResponse;
@@ -11,19 +18,17 @@ import org.xdi.oxd.common.response.RsCheckAccessResponse;
 
 import java.io.IOException;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/01/2014
  */
 
 public class RpGetRptTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
+    public void simple(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
 
         ClientInterface client = Tester.newClient(host);
 
@@ -31,16 +36,38 @@ public class RpGetRptTest {
         final RpGetRptResponse response = requestRpt(client, site, rsProtect);
 
         assertNotNull(response);
+    }
 
-//            ErrorResponse errorResponse = commandResponse.dataAsResponse(ErrorResponse.class);
-//            assertNotNull(errorResponse);
-//
-//            // expecting need_info error
-//            UmaNeedInfoResponse needInfo = errorResponse.detailsAs(UmaNeedInfoResponse.class);
-//            assertNotNull(needInfo);
-//            assertTrue(StringUtils.isNotBlank(needInfo.getTicket()));
-//            assertTrue(StringUtils.isNotBlank(needInfo.getRedirectUser()));
+    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Test
+    public void rptAsJwt(String host, String opHost, String redirectUrl, String rsProtect) throws IOException, InvalidJwtException {
 
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(redirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrl));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setTrustedClient(true);
+        params.setRptAsJwt(true);
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+
+        final RegisterSiteResponse site = client.registerSite(params);
+        Assert.assertNotNull(site);
+        Assert.assertTrue(!Strings.isNullOrEmpty(site.getOxdId()));
+
+        final RpGetRptResponse response = requestRpt(client, site, rsProtect);
+        assertNotNull(response);
+
+        Jwt jwt = Jwt.parse(response.getRpt());
+        assertNotNull(jwt);
+        assertEquals(site.getClientId(), jwt.getClaims().getClaimAsString("client_id"));
+        assertTrue(jwt.getClaims().getClaimAsString("permissions").startsWith("[{\"resource_id\":\""));
     }
 
     public static RpGetRptResponse requestRpt(ClientInterface client, RegisterSiteResponse site, String rsProtect) throws IOException {

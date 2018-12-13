@@ -8,7 +8,6 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 24/09/2015
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -71,8 +70,18 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private Boolean access_token_as_jwt = false;
     @JsonProperty(value = "access_token_signing_alg")
     private String access_token_signing_alg;
+    @JsonProperty(value = "rpt_as_jwt")
+    private Boolean rpt_as_jwt;
 
     public RegisterSiteParams() {
+    }
+
+    public Boolean getRptAsJwt() {
+        return rpt_as_jwt;
+    }
+
+    public void setRptAsJwt(Boolean rpt_as_jwt) {
+        this.rpt_as_jwt = rpt_as_jwt;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -321,6 +330,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
                 ", trusted_client=" + trusted_client +
                 ", access_token_as_jwt=" + access_token_as_jwt +
                 ", access_token_signing_alg=" + access_token_signing_alg +
+                ", rpt_as_jwt=" + rpt_as_jwt +
                 '}';
     }
 

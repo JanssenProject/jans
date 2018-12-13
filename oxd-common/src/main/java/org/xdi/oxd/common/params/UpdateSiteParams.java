@@ -58,8 +58,18 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
     private Boolean access_token_as_jwt = false;
     @JsonProperty(value = "access_token_signing_alg")
     private String access_token_signing_alg;
+    @JsonProperty(value = "rpt_as_jwt")
+    private Boolean rpt_as_jwt;
 
     public UpdateSiteParams() {
+    }
+
+    public Boolean getRptAsJwt() {
+        return rpt_as_jwt;
+    }
+
+    public void setRptAsJwt(Boolean rpt_as_jwt) {
+        this.rpt_as_jwt = rpt_as_jwt;
     }
 
     public String getProtectionAccessToken() {
@@ -250,6 +260,7 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         sb.append(", protection_access_token=").append(protection_access_token);
         sb.append(", access_token_as_jwt=").append(access_token_as_jwt);
         sb.append(", access_token_signing_alg=").append(access_token_signing_alg);
+        sb.append(", rpt_as_jwt=").append(rpt_as_jwt);
         sb.append('}');
         return sb.toString();
     }
