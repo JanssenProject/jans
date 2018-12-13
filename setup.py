@@ -459,6 +459,7 @@ class Setup(object):
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.passport_saml_config = '%s/passport-saml-config.json' % self.configFolder
+        self.passport_inbound_idp_initiated_json = '%s/passport-inbound-idp-initiated.json' % self.configFolder
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
@@ -636,6 +637,7 @@ class Setup(object):
                              self.network: False,
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
+                             self.passport_inbound_idp_initiated_json: True,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
