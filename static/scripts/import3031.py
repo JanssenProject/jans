@@ -300,10 +300,9 @@ class Migration(object):
             keys.remove('openldap')
 
 
-        hostname = self.getOutput(['hostname']).strip()
         # import all the keys into the keystore
         for key in keys:
-            alias = "{0}_{1}".format(hostname, key)
+            alias = "{0}_{1}".format(self.hostname, key)
             filename = os.path.join(self.certsDir, key + ".crt")
             if not os.path.isfile(filename):
                 logging.debug("Missing file: %s", filename)
@@ -620,8 +619,16 @@ class Migration(object):
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
-                        
+                
             
+            if '314' >= self.oxVersion:
+                if 'ou=oxauth,ou=configuration' in dn:
+                    oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
+                    oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
+                    oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
+                    oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
+                    new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
+
             ldif_writer.unparse(dn, new_entry)
         
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -636,6 +643,7 @@ class Migration(object):
         
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
+            
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
             if dn in currentDNs:
@@ -684,7 +692,7 @@ class Migration(object):
                         entry['oxId'] = oxId
                         del entry['inum']
             
-            ldif_writer.unparse(dn, entry)
+
 
         # Finally
         processed_fp.close()
@@ -942,14 +950,12 @@ class Migration(object):
         logging.info('Idp Configuration Setting...')
         self.getLdapPassword()
 
-        setup_properties_last = '/install/community-edition-setup/setup.properties.last'
-
         if self.ldap_type == 'opendj':
             bindDn = 'cn=directory manager'
         else:
             bindDn = 'cn=directory manager,o=gluu'
 
-        inumAppliance = self.getProp('inumAppliance', setup_properties_last)
+        inumAppliance = self.getProp('inumAppliance', self.setup_properties_last)
 
         con = ldap.initialize('ldaps://localhost:1636')
         con.simple_bind_s(bindDn, self.ldapPassword)
@@ -989,8 +995,7 @@ class Migration(object):
             
             idpClient_pw = getPW()
             
-            encode_salt = self.getProp('encode_salt', setup_properties_last)
-            hostname = self.getProp('hostname', setup_properties_last)
+            encode_salt = self.getProp('encode_salt', self.setup_properties_last)
             idpClient_encoded_pw = obscure(idpClient_pw, encode_salt)
 
             attrs = { 'objectClass': ['oxAuthClient', 'top'],
@@ -1004,10 +1009,10 @@ class Migration(object):
                                        'inum={0}!0009!10B2,ou=scopes,o={0},o=gluu'.format(self.inumOrg),
                                        'inum={0}!0009!764C,ou=scopes,o={0},o=gluu'.format(self.inumOrg),
                                     ],
-                      'oxAuthRedirectURI': ['https://{0}/idp/Authn/oxAuth'.format(hostname)],
-                      'oxAuthPostLogoutRedirectURI': ['https://{0}/idp/profile/Logout'.format(hostname)],
-                      'oxAuthPostLogoutRedirectURI': ['https://{0}/identity/authentication/finishlogout'.format(hostname)],
-                      'oxAuthLogoutURI': ['https://{0}/identity/logout'.format(hostname)],
+                      'oxAuthRedirectURI': ['https://{0}/idp/Authn/oxAuth'.format(self.hostname)],
+                      'oxAuthPostLogoutRedirectURI': ['https://{0}/idp/profile/Logout'.format(self.hostname)],
+                      'oxAuthPostLogoutRedirectURI': ['https://{0}/identity/authentication/finishlogout'.format(self.hostname)],
+                      'oxAuthLogoutURI': ['https://{0}/identity/logout'.format(self.hostname)],
                       'oxAuthTokenEndpointAuthMethod': ['client_secret_basic'],
                       'oxAuthIdTokenSignedResponseAlg': ['HS256'],
                       'oxAuthTrustedClient': ['true'],
@@ -1032,8 +1037,9 @@ class Migration(object):
             result = con.search_s(dn, ldap.SCOPE_BASE,'(objectClass=*)')
             idpClient_encoded_pw = result[0][1]['oxAuthClientSecret'][0]
             if not 'oxAuthLogoutURI' in result[0][1]:
-                con.modify_s(dn, [( ldap.MOD_ADD, 'oxAuthLogoutURI', ['https://{0}/identity/logout'.format(hostname)])])
+                con.modify_s(dn, [( ldap.MOD_ADD, 'oxAuthLogoutURI', ['https://{0}/identity/logout'.format(self.hostname)])])
                 logging.info('oxAuthLogoutURI was added for Idp client') 
+
 
         #Fix oxIDP for SAML
         dn = 'ou=oxidp,ou=configuration,inum={0},ou=appliances,o=gluu'.format(inumAppliance)        
@@ -1042,12 +1048,13 @@ class Migration(object):
         oxConfApplication['openIdClientId'] = idp_client_id
         oxConfApplication['openIdClientPassword'] = idpClient_encoded_pw
         
-        oxConfApplication['openIdRedirectUrl'] = 'https://{0}/idp/Authn/oxAuth'.format(hostname)
-        oxConfApplication['openIdPostLogoutRedirectUri'] = 'https://{0}/idp/profile/Logout'.format(hostname)
+        oxConfApplication['openIdRedirectUrl'] = 'https://{0}/idp/Authn/oxAuth'.format(self.hostname)
+        oxConfApplication['openIdPostLogoutRedirectUri'] = 'https://{0}/idp/profile/Logout'.format(self.hostname)
         oxConfApplication_js = json.dumps(oxConfApplication)
         con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxConfApplication',  oxConfApplication_js)])
         logging.info('oxConfApplication was fixed for SAML') 
 
+        
     def migrate(self):
         """Main function for the migration of backup data
         """
@@ -1055,11 +1062,13 @@ class Migration(object):
         print("------------------------------------------------------------")
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
+        
+        self.setup_properties_last = '/install/community-edition-setup/setup.properties.last'
         self.version = int(self.getProp('version').replace('.', '')[0:3])
-        self.inumOrg = self.getProp('inumOrg', 
-                    '/install/community-edition-setup/setup.properties.last')
-        self.oxVersion = self.getProp('oxVersion', 
-                    '/install/community-edition-setup/setup.properties.last')
+        self.inumOrg = self.getProp('inumOrg', self.setup_properties_last)
+        self.oxVersion = self.getProp('oxVersion', self.setup_properties_last)
+        self.oxVersion_number = self.oxVersion.replace('.', '').replace('Final','')
+        self.hostname = self.getProp('hostname', self.setup_properties_last)
         
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
@@ -1077,7 +1086,7 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         self.idpResolved()
-        # self.startWebapps()
+
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
         print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
