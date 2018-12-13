@@ -35,7 +35,6 @@ import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 24/09/2015
  */
 
 public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
@@ -328,7 +327,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
         request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
+        request.setRptAsJwt(params.getRptAsJwt());
 
+        rp.setRptAsJwt(params.getRptAsJwt());
         rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
         rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
         rp.setResponseTypes(params.getResponseTypes());
