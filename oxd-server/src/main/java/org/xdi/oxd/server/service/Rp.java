@@ -118,6 +118,8 @@ public class Rp implements Serializable {
     private Boolean accessTokenAsJwt = false;
     @JsonProperty(value = "access_token_signing_alg")
     private String accessTokenSigningAlg;
+    @JsonProperty(value = "rpt_as_jwt")
+    private Boolean rptAsJwt = false;
 
     public Rp() {
     }
@@ -174,6 +176,7 @@ public class Rp implements Serializable {
         this.rptUpgraded = conf.rptUpgraded;
         this.rptExpiresAt = conf.rptExpiresAt;
         this.rptCreatedAt = conf.rptCreatedAt;
+        this.rptAsJwt = conf.rptAsJwt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
         this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
@@ -187,6 +190,14 @@ public class Rp implements Serializable {
 
     public void setAccessTokenAsJwt(Boolean accessTokenAsJwt) {
         this.accessTokenAsJwt = accessTokenAsJwt;
+    }
+
+    public Boolean getRptAsJwt() {
+        return rptAsJwt;
+    }
+
+    public void setRptAsJwt(Boolean rptAsJwt) {
+        this.rptAsJwt = rptAsJwt;
     }
 
     public String getAccessTokenSigningAlg() {
@@ -640,6 +651,7 @@ public class Rp implements Serializable {
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
                 ", rptUpgraded=" + rptUpgraded +
+                ", rptAsJwt=" + rptAsJwt +
                 ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
                 ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +

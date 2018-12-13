@@ -110,6 +110,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             }
         }
 
+        if (params.getRptAsJwt() != null) {
+            request.setRptAsJwt(params.getRptAsJwt());
+        }
+
         List<GrantType> grantTypes = Lists.newArrayList();
         for (String grantType : params.getGrantType() != null ? params.getGrantType() : rp.getGrantType()) {
             GrantType t = GrantType.fromString(grantType);
