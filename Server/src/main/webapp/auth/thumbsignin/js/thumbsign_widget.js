@@ -97,7 +97,7 @@
         config: {},
         module: {},
         store: {},
-        rootURL: 'https://stage.thumbsignin.com',
+        rootURL: 'https://thumbsignin.com',
     }
 
     var api = {
