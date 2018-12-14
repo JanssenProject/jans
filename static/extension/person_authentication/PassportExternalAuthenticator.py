@@ -347,7 +347,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             print "Passport. parseProviderConfigs. Adding social providers"
             passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-            entryManager = CdiUtil.bean(AppInitializer).createLdapEntryManager()
+            entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
             config = LdapOxPassportConfiguration()
             config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
 
