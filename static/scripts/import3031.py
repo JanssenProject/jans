@@ -93,7 +93,7 @@ class DBLDIF(LDIFParser):
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
-        self.sdb[dn] = entry
+        self.sdb[str(dn)] = entry
 
 
 class MyLDIF(LDIFParser):
@@ -628,6 +628,10 @@ class Migration(object):
                     oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
                     oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
                     new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
+                    
+                    oxAuthConfStatic = json.loads(new_entry['oxAuthConfStatic'][0])
+                    oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
+                    new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
 
             ldif_writer.unparse(dn, new_entry)
         
@@ -655,7 +659,7 @@ class Migration(object):
                 sdb.parse()
                 ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
-            entry = ldif_shelve_dict[cur_ldif_file][dn]
+            entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
 
 
             for attr in entry.keys():
