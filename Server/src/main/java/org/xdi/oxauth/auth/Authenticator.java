@@ -278,7 +278,7 @@ public class Authenticator {
 			initCustomAuthenticatorVariables(sessionIdAttributes);
 			if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
 				logger.error("Failed to determine authentication mode");
-				return Constants.RESULT_FAILURE;
+				return Constants.RESULT_EXPIRED;
 			}
 
 			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
