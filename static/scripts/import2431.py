@@ -857,7 +857,7 @@ class Migration(object):
                 oxIDPAuthentication["config"] = json.dumps(oxIDPAuthentication_config)
                 new_entry['oxIDPAuthentication'] = [ json.dumps(oxIDPAuthentication) ]
 
-            ldif_writer.unparse(dn, new_entry)
+            
 
             if '314' >= self.oxVersion:
                 if 'ou=oxauth,ou=configuration' in dn:
@@ -866,6 +866,12 @@ class Migration(object):
                     oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
                     oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
                     new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
+
+                    oxAuthConfStatic = json.loads(new_entry['oxAuthConfStatic'][0])
+                    oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
+                    new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
+
+            ldif_writer.unparse(dn, new_entry)
 
         progress_bar(0, 0, 'Rewriting DNs', True)
 
