@@ -36,7 +36,7 @@ public class AttestationProcessorFactory {
     private Map<AttestationFormat, AttestationFormatProcessor> processorsMap;
 
     @Inject
-    public void initCommandProcessors(@Any Instance<AttestationFormatProcessor> attestationFormatProcessors) {
+    private void initCommandProcessors(@Any Instance<AttestationFormatProcessor> attestationFormatProcessors) {
         this.processorsMap = new EnumMap<>(AttestationFormat.class);
         for (AttestationFormatProcessor app : attestationFormatProcessors) {
             processorsMap.put(app.getAttestationFormat(), app);
