@@ -89,12 +89,12 @@ public class AssertionService {
         JsonNode response = params.get("response");
 
         commonVerifiers.verifyBasicPayload(params);
-        String keyId = commonVerifiers.verifyThatString(params.get("id"));
+        String keyId = commonVerifiers.verifyThatString(params, "id");
         commonVerifiers.verifyAssertionType(params.get("type"));
-        commonVerifiers.verifyThatString(params.get("rawId"));
+        commonVerifiers.verifyThatString(params, "rawId");
         JsonNode userHandle = params.get("response").get("userHandle");
         if (userHandle != null && params.get("response").hasNonNull("userHandle")) {
-            // this can be null for U2F authenticators
+            // This can be null for U2F authenticators
             commonVerifiers.verifyThatString(userHandle);
         }
 
@@ -160,9 +160,6 @@ public class AssertionService {
         ObjectNode credentialUserEntityNode = assertionOptionsResponseNode.putObject("user");
         credentialUserEntityNode.put("name", username);
 
-        ObjectNode publicKeyCredentialRpEntityNode = assertionOptionsResponseNode.putObject("rp");
-        publicKeyCredentialRpEntityNode.put("name", "ACME Dawid");
-        publicKeyCredentialRpEntityNode.put("id", appConfiguration.getIssuer());
         ArrayNode publicKeyCredentialDescriptors = assertionOptionsResponseNode.putArray("allowCredentials");
 
         for (Fido2RegistrationData registration : registrations) {
