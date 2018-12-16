@@ -16,6 +16,7 @@ package org.gluu.oxauth.fido2.service.verifier;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
@@ -39,6 +40,10 @@ public class AuthenticatorAssertionVerifier {
 
     public void verifyAuthenticatorAssertionResponse(JsonNode response, Fido2RegistrationData registration,
             Fido2AuthenticationData authenticationEntity) {
+        if (!(response.hasNonNull("authenticatorData") && response.hasNonNull("clientDataJSON") && response.hasNonNull("signature"))) {
+            throw new Fido2RPRuntimeException("Authenticator data is invalid");
+        }
+
         JsonNode authenticatorResponse = response;
         String base64AuthenticatorData = authenticatorResponse.get("authenticatorData").asText();
         String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();

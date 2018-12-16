@@ -322,12 +322,12 @@ public class CommonVerifiers {
         }
     }
 
-    public String verifyBase64UrlString(JsonNode node) {
-        String value = verifyThatString(node);
+    public String verifyBase64UrlString(JsonNode node, String fieldName) {
+        String value = verifyThatString(node, fieldName);
         try {
             base64Service.urlDecode(value);
         } catch (IllegalArgumentException e) {
-            throw new Fido2RPRuntimeException("Invalid id");
+            throw new Fido2RPRuntimeException("Invalid \"" + fieldName + "\"");
         }
 
         return value;
@@ -335,9 +335,23 @@ public class CommonVerifiers {
 
     public String verifyThatString(JsonNode node) {
         if (!node.isTextual()) {
-            throw new Fido2RPRuntimeException("Invalid field " + node.fieldNames().next());
+            if (node.fieldNames().hasNext()) {
+                throw new Fido2RPRuntimeException("Invalid field " + node.fieldNames().next());
+            } else {
+                throw new Fido2RPRuntimeException("Field hasn't sub fields");
+            }
         }
+
         return node.asText();
+    }
+
+    public String verifyThatString(JsonNode node, String fieldName) {
+        JsonNode fieldNode = node.get(fieldName);
+        if (fieldNode == null) {
+            throw new Fido2RPRuntimeException("Invalid \"" + fieldName + "\"");
+        }
+
+        return verifyThatString(fieldNode);
     }
 
     public String verifyThatNonEmptyString(JsonNode node) {
@@ -437,8 +451,8 @@ public class CommonVerifiers {
         verifySignature(signatureBytes, signatureBase, publicKey, signatureAlgorithm);
     }
 
-    public String verifyFmt(JsonNode fmtNode) {
-        String fmt = verifyThatString(fmtNode);
+    public String verifyFmt(JsonNode fmtNode, String fieldName) {
+        String fmt = verifyThatString(fmtNode, fieldName);
         supportedAttestationFormats.stream().filter(f -> f.getAttestationFormat().getFmt().equals(fmt)).findAny()
                 .orElseThrow(() -> new Fido2RPRuntimeException("Unsupported attestation format " + fmt));
         return fmt;
@@ -491,7 +505,7 @@ public class CommonVerifiers {
         if (count != 0) {
             throw new Fido2RPRuntimeException("Invalid client json parameters");
         }
-        verifyBase64UrlString(clientJsonNode.get("challenge"));
+        verifyBase64UrlString(clientJsonNode, "challenge");
 
         if (clientJsonNode.hasNonNull("tokenBinding")) {
             verifyThatString(clientJsonNode.get("tokenBinding"));
