@@ -92,20 +92,25 @@ public class AttestationService {
         // JsonNode request = params.get("request");
 
         commonVerifiers.verifyBasicPayload(params);
-        commonVerifiers.verifyBase64UrlString(params.get("type"));
+        commonVerifiers.verifyBase64UrlString(params, "type");
         JsonNode response = params.get("response");
         JsonNode clientDataJSONNode = null;
         try {
+            if (!params.get("response").hasNonNull("clientDataJSON")) {
+                throw new Fido2RPRuntimeException("Client data JSON is missing");
+            }
             clientDataJSONNode = dataMapperService
                     .readTree(new String(base64Service.urlDecode(params.get("response").get("clientDataJSON").asText()), Charset.forName("UTF-8")));
+            if (clientDataJSONNode == null) {
+                throw new Fido2RPRuntimeException("Client data JSON is empty");
+            }
         } catch (IOException e) {
-            new Fido2RPRuntimeException("Can't parse message");
+            throw new Fido2RPRuntimeException("Can't parse message");
         }
 
         commonVerifiers.verifyClientJSON(clientDataJSONNode);
         commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
-        JsonNode keyIdNode = params.get("id");
-        String keyId = commonVerifiers.verifyBase64UrlString(keyIdNode);
+        String keyId = commonVerifiers.verifyBase64UrlString(params, "id");
 
         String clientDataChallenge = base64Service
                 .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
@@ -131,7 +136,6 @@ public class AttestationService {
         }
         credentialFound.setType("public-key");
         registrationsRepository.save(credentialFound);
-        ArrayNode excludedCredentials = ((ObjectNode)params).putArray("excludeCredentials");
 
         ((ObjectNode) params).put("errorMessage", "");
         ((ObjectNode) params).put("status", "ok");
@@ -200,6 +204,7 @@ public class AttestationService {
 
         List<Fido2RegistrationData> existingRegistrations = registrationsRepository.findAllByUsername(username);
         List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
+                .filter(f -> ((f.getType() != null) && (f.getPublicKeyId() != null)))
                 .map(f -> dataMapperService.convertValue(
                         new PublicKeyCredentialDescriptor(f.getType(), f.getPublicKeyId()),
                         JsonNode.class))

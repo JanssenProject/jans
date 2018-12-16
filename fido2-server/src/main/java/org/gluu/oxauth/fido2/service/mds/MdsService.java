@@ -81,7 +81,7 @@ public class MdsService {
         }
 
         verifyTocEntryStatus(aaguid, tocEntry);
-        String metadataHash = commonVerifiers.verifyThatString(tocEntry.get("hash"));
+        String metadataHash = commonVerifiers.verifyThatString(tocEntry, "hash");
 
         log.info("Reaching MDS at {}", metadataUrl.toString());
 
