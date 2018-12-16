@@ -30,13 +30,9 @@ public class AssertionProcessorFactory {
 
     private Map<AttestationFormat, AssertionFormatProcessor> processorsMap;
 
-    @PostConstruct
-    public void create() {
-        this.processorsMap = new EnumMap<>(AttestationFormat.class);
-    }
-
     @Inject
-    public void setCommandProcessors(@Any Instance<AssertionFormatProcessor> assertionFormatProcessors) {
+    private void initCommandProcessors(@Any Instance<AssertionFormatProcessor> assertionFormatProcessors) {
+        this.processorsMap = new EnumMap<>(AttestationFormat.class);
         for (AssertionFormatProcessor app : assertionFormatProcessors) {
             processorsMap.put(app.getAttestationFormat(), app);
         }
