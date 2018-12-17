@@ -192,7 +192,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 											</span>
 											<div class="col-md-6">
 												<h:inputText id="username" value="#{credentials.username}"
-													autocomplete="off" class="form-control" />
+													autocomplete="off" class="form-control usernameField" />
 											</div>
 										</div>
 
@@ -202,7 +202,7 @@ input[type="text"]:focus, input[type="password"]:focus {
 											</span>
 											<div class="col-md-6">
 												<h:inputSecret id="password" value="#{credentials.password}"
-													autocomplete="off" class="form-control" />
+													autocomplete="off" class="form-control passwordField" />
 
 											</div>
 										</div>
@@ -210,16 +210,15 @@ input[type="text"]:focus, input[type="password"]:focus {
 											<h:outputLabel styleClass="col-sm-3 control-label"
 												for="rememberme" value="#{msgs['login.rememberMe']}" />
 											<div class="col-sm-6">
-												<input type="checkbox" value="rememberme" id="rememberme" />
+												<input type="checkbox" value="rememberme" id="rememberme"
+													class="rememberField" />
 											</div>
 										</div>
 
 										<div class="row form-group">
 											<div id="submit_block" class="col-md-offset-3 col-md-3">
 												<h:commandButton id="loginButton"
-													value="#{msgs['login.login']}"
-													onclick="checkRemembeMe()"
-													action="#{authenticator.authenticate}"
+													value="#{msgs['login.login']}" onclick="checkRememberMe();"
 													class="btn btn-login" />
 											</div>
 										</div>
@@ -397,15 +396,28 @@ input[type="text"]:focus, input[type="password"]:focus {
 						}
 
 					});
-			
-			function checkRemembeMe() {
-                if ($('#rememberme').is(':checked')) {
-                    localStorage.usrname = document.getElementById("loginForm:username").value;
-                    localStorage.chkbx = $('#rememberme').val();
-                } else {
-                    localStorage.usrname = '';
-                    localStorage.chkbx = '';
-                }
+		</script>
+		<script type="text/javascript">
+			window.onload = function() {
+			  setTimeout(fillCredential, 1000);
+			}
+			function fillCredential() {
+				var username = window.localStorage.getItem('form-username');
+				var password = window.localStorage.getItem('form-password');
+				$(".usernameField").val(username);
+				$(".passwordField").val(password);
+			}
+
+			function storeCrendential() {
+				var username = $(".usernameField").val();
+				var password = $(".passwordField").val();
+				window.localStorage.setItem('form-username', username);
+				window.localStorage.setItem('form-password', password);
+			}
+			function checkRememberMe() {
+				if ($('.rememberField:checked').val()) {
+					storeCrendential();
+				}
 			}
 		</script>
 
