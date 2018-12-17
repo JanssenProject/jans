@@ -173,8 +173,15 @@ public class AssertionService {
             publicKeyCredentialDescriptorNode.put("id", registration.getPublicKeyId());
         }
 
-        assertionOptionsResponseNode.put("status", "ok");
+        if (!foundPublicKeys) {
+            throw new Fido2RPRuntimeException("Can't find associated key. Have you registered");
+        }
+
         assertionOptionsResponseNode.put("userVerification", userVerification);
+        
+        if (params.hasNonNull("extensions")) {
+            assertionOptionsResponseNode.set("extensions", params.get("extensions"));
+        }
 
         String host;
         try {
