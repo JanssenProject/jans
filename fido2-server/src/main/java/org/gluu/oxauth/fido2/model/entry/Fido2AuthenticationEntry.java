@@ -27,6 +27,10 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     @LdapAttribute(name = "oxAuthenticationData")
     private Fido2AuthenticationData authenticationData;
 
+    @LdapJsonObject
+    @LdapAttribute(name = "oxStatus")
+    private Fido2AuthenticationStatus authenticationStatus;
+
     public Fido2AuthenticationEntry() {
     }
 
@@ -42,6 +46,14 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
 
     public void setAuthenticationData(Fido2AuthenticationData authenticationData) {
         this.authenticationData = authenticationData;
+    }
+
+    public Fido2AuthenticationStatus getAuthenticationStatus() {
+        return authenticationStatus;
+    }
+
+    public void setAuthenticationStatus(Fido2AuthenticationStatus authenticationStatus) {
+        this.authenticationStatus = authenticationStatus;
     }
 
     @Override

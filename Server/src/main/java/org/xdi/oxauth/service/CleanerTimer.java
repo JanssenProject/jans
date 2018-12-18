@@ -20,6 +20,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
+import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
@@ -94,6 +96,12 @@ public class CleanerTimer {
     @Inject
     @Named("u2fRequestService")
     private RequestService u2fRequestService;
+    
+    @Inject
+    private AuthenticationPersistenceService authenticationPersistenceService;
+    
+    @Inject
+    private RegistrationPersistenceService registrationPersistenceService;
 
     @Inject
     private MetricService metricService;
@@ -145,6 +153,9 @@ public class CleanerTimer {
 
             processU2fRequests();
             processU2fDeviceRegistrations();
+
+            this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
+            this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
 
             processMetricEntries();
         } finally {
