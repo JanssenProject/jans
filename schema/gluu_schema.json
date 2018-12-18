@@ -4293,6 +4293,17 @@
             "oid": "oxAttribute:399",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Passport - IDP to which the oxExternalUid value is refering to",
+            "equality": "caseIgnoreMatch",
+            "names": [
+               "oxUidIDP"
+            ],
+            "oid": "oxAttribute:400",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4397,7 +4408,8 @@
                 "oxMobileDevices",
                 "oxStrongAuthPolicy",
                 "oxTrustedDevicesInfo",
-                "oxUnlinkedExternalUids"
+                "oxUnlinkedExternalUids",
+                "oxUidIDP"
             ],
             "must": [
                 "objectclass"
