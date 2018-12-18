@@ -30,7 +30,6 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 
 @ApplicationScoped
