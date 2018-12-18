@@ -21,6 +21,8 @@ import org.xdi.model.custom.script.type.client.ClientRegistrationType;
 import org.xdi.model.custom.script.type.client.DummyClientRegistrationType;
 import org.xdi.model.custom.script.type.id.DummyIdGeneratorType;
 import org.xdi.model.custom.script.type.id.IdGeneratorType;
+import org.xdi.model.custom.script.type.introspection.DummyIntrospectionType;
+import org.xdi.model.custom.script.type.introspection.IntrospectionType;
 import org.xdi.model.custom.script.type.scim.DummyScimType;
 import org.xdi.model.custom.script.type.scim.ScimType;
 import org.xdi.model.custom.script.type.scope.DummyDynamicScopeType;
@@ -31,12 +33,10 @@ import org.xdi.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.xdi.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.xdi.model.custom.script.type.uma.UmaDummyRptPolicyType;
 import org.xdi.model.custom.script.type.uma.UmaRptPolicyType;
-import org.xdi.model.custom.script.type.user.CacheRefreshType;
-import org.xdi.model.custom.script.type.user.DummyCacheRefreshType;
-import org.xdi.model.custom.script.type.user.DummyUpdateUserType;
-import org.xdi.model.custom.script.type.user.DummyUserRegistrationType;
-import org.xdi.model.custom.script.type.user.UpdateUserType;
-import org.xdi.model.custom.script.type.user.UserRegistrationType;
+import org.xdi.model.custom.script.type.user.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -47,6 +47,7 @@ public enum CustomScriptType implements LdapEnum {
 
     PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
             "PersonAuthentication", new DummyPersonAuthenticationType()),
+    INTROSPECTION("introspection", "Introspection", IntrospectionType.class, CustomScript.class, "Introspection", new DummyIntrospectionType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
             new DummyApplicationSessionType()),
     CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
