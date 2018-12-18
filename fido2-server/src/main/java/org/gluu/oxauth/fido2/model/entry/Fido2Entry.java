@@ -18,19 +18,22 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 public class Fido2Entry extends BaseEntry {
 
     @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
-    protected String id;
+    private String id;
 
     @LdapAttribute(name = "oxCodeChallenge")
-    protected String challange;
+    private String challange;
+
+    @LdapAttribute(name = "oxCodeChallengeHash")
+    private String challangeHash;
 
     @LdapAttribute(name = "creationDate")
-    protected Date creationDate;
+    private Date creationDate;
 
     @LdapAttribute(name = "oxSessionStateId")
-    protected String sessionId;
+    private String sessionId;
 
     @LdapAttribute(name = "personInum")
-    protected String userInum;
+    private String userInum;
 
     public Fido2Entry() {
     }
@@ -62,6 +65,14 @@ public class Fido2Entry extends BaseEntry {
 
     public void setChallange(String challange) {
         this.challange = challange;
+    }
+
+    public String getChallangeHash() {
+        return challangeHash;
+    }
+
+    public void setChallangeHash(String challangeHash) {
+        this.challangeHash = challangeHash;
     }
 
     public Date getCreationDate() {
