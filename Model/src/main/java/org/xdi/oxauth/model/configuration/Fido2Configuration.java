@@ -15,6 +15,11 @@ public class Fido2Configuration {
     private String mdsTocRootCertFile;
     private String mdsTocFilesFolder;
 
+    private boolean userAutoEnrollment = false;
+
+    private int unfinishedRequestExpiration = 120; // 120 seconds
+    private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
+
     private String certificationServerMetadataFolder;
 
     private boolean disable;
@@ -49,6 +54,30 @@ public class Fido2Configuration {
 
     public void setMdsTocFilesFolder(String mdsTocFilesFolder) {
         this.mdsTocFilesFolder = mdsTocFilesFolder;
+    }
+
+    public boolean isUserAutoEnrollment() {
+        return userAutoEnrollment;
+    }
+
+    public void setUserAutoEnrollment(boolean userAutoEnrollment) {
+        this.userAutoEnrollment = userAutoEnrollment;
+    }
+
+    public int getUnfinishedRequestExpiration() {
+        return unfinishedRequestExpiration;
+    }
+
+    public void setUnfinishedRequestExpiration(int unfinishedRequestExpiration) {
+        this.unfinishedRequestExpiration = unfinishedRequestExpiration;
+    }
+
+    public int getAuthenticationHistoryExpiration() {
+        return authenticationHistoryExpiration;
+    }
+
+    public void setAuthenticationHistoryExpiration(int authenticationHistoryExpiration) {
+        this.authenticationHistoryExpiration = authenticationHistoryExpiration;
     }
 
     public boolean isDisable() {
