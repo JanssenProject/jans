@@ -14,13 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
-import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.persist.PersistenceEntryManager;
@@ -111,7 +109,7 @@ public class RegistrationPersistenceService {
         registrationData.setCreatedBy(userName);
 
         String dn = getDnForRegistrationEntry(userInum, id);
-        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, null, userInum, registrationData.getPublicKeyId(), registrationData);
+        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, null, registrationData);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         updateRegistrationAttributes(registrationEntry);
 
@@ -130,7 +128,8 @@ public class RegistrationPersistenceService {
         Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
         registrationData.setUpdatedDate(now);
         registrationData.setUpdatedBy(registrationData.getUsername());
-
+        
+        registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
     }
 

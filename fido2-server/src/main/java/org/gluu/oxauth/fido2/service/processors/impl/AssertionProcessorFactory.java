@@ -16,7 +16,6 @@ package org.gluu.oxauth.fido2.service.processors.impl;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
