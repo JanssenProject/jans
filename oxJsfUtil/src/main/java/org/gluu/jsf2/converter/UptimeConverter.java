@@ -23,39 +23,39 @@ import org.apache.commons.lang.time.DateUtils;
 @FacesConverter("uptimeConverter")
 public class UptimeConverter implements Converter {
 
-    private static final String[] DATE_FORMATS = { "D 'days' HH 'hours' mm 'mins' ss 'seconds'" };
+	private static final String[] dateFormats = { "D 'd' HH 'h' mm 'm' ss 's'" };
 
-    public Object getAsObject(FacesContext context, UIComponent comp, String value) throws ConverterException {
-        if ((value == null) || value.trim().length() == 0) {
-            return null;
-        }
+	public Object getAsObject(FacesContext context, UIComponent comp, String value) throws ConverterException {
+		if ((value == null) || value.trim().length() == 0) {
+			return null;
+		}
 
-        try {
-            return DateUtils.parseDate(value, DATE_FORMATS);
-        } catch (ParseException e) {
-            throw new ConverterException("Unable to convert " + value + " to seconds!");
-        }
-    }
+		try {
+			return DateUtils.parseDate(value, dateFormats);
+		} catch (ParseException e) {
+			throw new ConverterException("Unable to convert " + value + " to seconds!");
+		}
+	}
 
-    public String getAsString(FacesContext context, UIComponent component, Object object) throws ConverterException {
-        if (object instanceof String) {
-            try {
-                return getSecondsAsString(Long.valueOf((String) object));
-            } catch (NumberFormatException ex) {
-                throw new ConverterException("Unable to convert " + object + " to date!");
-            }
-        }
+	public String getAsString(FacesContext context, UIComponent component, Object object) throws ConverterException {
+		if (object instanceof String) {
+			try {
+				return getSecondsAsString(Long.valueOf((String) object));
+			} catch (NumberFormatException ex) {
+				throw new ConverterException("Unable to convert " + object + " to date!");
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
+	
+	private String getSecondsAsString(long seconds) {
+		int days = (int) TimeUnit.SECONDS.toDays(seconds);
+		long hours = TimeUnit.SECONDS.toHours(seconds) - (days * 24);
+		long mins = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds) * 60);
+		long secondsInMinute = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) * 60);
 
-    private String getSecondsAsString(long seconds) {
-        int days = (int) TimeUnit.SECONDS.toDays(seconds);
-        long hours = TimeUnit.SECONDS.toHours(seconds) - (days * 24);
-        long mins = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds) * 60);
-        long secondsInMinute = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) * 60);
-
-        return days + " days " + hours + " hours " + mins + " mins " + secondsInMinute + " seconds";
-    }
+		return days + " d " + hours + " h " + mins + " m " + secondsInMinute + " s";
+	}
 
 }

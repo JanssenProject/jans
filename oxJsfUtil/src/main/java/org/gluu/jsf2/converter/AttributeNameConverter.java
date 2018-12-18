@@ -18,28 +18,25 @@ import org.xdi.service.AttributeService;
 @FacesConverter("org.gluu.jsf2.converter.AttributeNameConverter")
 public class AttributeNameConverter implements Converter {
 
-    @Inject
-    private AttributeService attributeService;
+	@Inject
+	private AttributeService attributeService;
 
-    @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
-        if (value == null) {
-            return null;
-        }
+	@Override
+	public Object getAsObject(FacesContext context, UIComponent component, String value) {
+		if (value == null) {
+			return null;
+		}
+		return attributeService.getAttributeByName(value);
+	}
 
-        GluuAttribute attribute = attributeService.getAttributeByName(value);
+	@Override
+	public String getAsString(FacesContext context, UIComponent component, Object value) {
+		String string = null;
+		if (value instanceof GluuAttribute) {
+			string = ((GluuAttribute) value).getName();
+		}
 
-        return attribute;
-    }
-
-    @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
-        String string = null;
-        if (value instanceof GluuAttribute) {
-            string = ((GluuAttribute) value).getName();
-        }
-
-        return string;
-    }
+		return string;
+	}
 
 }
