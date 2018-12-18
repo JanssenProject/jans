@@ -116,16 +116,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     /**
      * Allow post logout redirect without validation only if:
-     * 1. allowPostLogoutRedirectWithoutValidation = true
-     * 2. or if post_logout_redirect_uri is white listed
+     * allowPostLogoutRedirectWithoutValidation = true and post_logout_redirect_uri is white listed
      */
     private boolean allowPostLogoutRedirect(String postLogoutRedirectUri) {
         final Boolean allowPostLogoutRedirectWithoutValidation = appConfiguration.getAllowPostLogoutRedirectWithoutValidation();
-        if (allowPostLogoutRedirectWithoutValidation != null && allowPostLogoutRedirectWithoutValidation) {
-            return true;
-        }
-
-        return new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
+        return allowPostLogoutRedirectWithoutValidation != null &&
+                allowPostLogoutRedirectWithoutValidation &&
+                new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
     }
 
     private void validateSessionIdRequestParameter(String sessionId) {
