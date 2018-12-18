@@ -120,7 +120,7 @@ public class AttestationService {
 
         List<Fido2RegistrationEntry> registrationEntries = registrationsRepository.findAllByChallenge(clientDataChallenge);
         Fido2RegistrationEntry credentialEntryFound = registrationEntries.parallelStream().findAny()
-                .orElseThrow(() -> new Fido2RPRuntimeException("Can't find request with matching challenge and domain"));
+                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find request with matching challenge '%s' and domain", clientDataChallenge)));
         
         Fido2RegistrationData credentialFound = credentialEntryFound.getRegistrationData();
 
