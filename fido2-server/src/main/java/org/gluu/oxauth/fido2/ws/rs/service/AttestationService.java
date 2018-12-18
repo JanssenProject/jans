@@ -128,7 +128,6 @@ public class AttestationService {
         CredAndCounterData attestationData = authenticatorAttestationVerifier.verifyAuthenticatorAttestationResponse(response, credentialFound);
 
         credentialFound.setUncompressedECPoint(attestationData.getUncompressedEcPoint());
-        credentialFound.setStatus(Fido2RegistrationStatus.registered);
         credentialFound.setW3cAuthenticatorAttenstationResponse(response.toString());
         credentialFound.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
         credentialFound.setCounter(attestationData.getCounters());
@@ -138,6 +137,8 @@ public class AttestationService {
             credentialFound.setPublicKeyId(keyId);
         }
         credentialFound.setType("public-key");
+        credentialFound.setStatus(Fido2RegistrationStatus.registered);
+
         registrationsRepository.update(credentialEntryFound);
 
         ((ObjectNode) params).put("errorMessage", "");
@@ -182,7 +183,7 @@ public class AttestationService {
         credentialCreationOptionsNode.put("challenge", challenge);
         log.info("Challenge {}", challenge);
         ObjectNode credentialRpEntityNode = credentialCreationOptionsNode.putObject("rp");
-        credentialRpEntityNode.put("name", "Mastercard RP");
+        credentialRpEntityNode.put("name", "oxAuth RP");
         credentialRpEntityNode.put("id", documentDomain);
 
         ObjectNode credentialUserEntityNode = credentialCreationOptionsNode.putObject("user");
@@ -222,10 +223,12 @@ public class AttestationService {
         entity.setUserId(userId);
         entity.setChallenge(challenge);
         entity.setDomain(host);
-        entity.setStatus(Fido2RegistrationStatus.registered);
         entity.setW3cCredentialCreationOptions(credentialCreationOptionsNode.toString());
         entity.setAttestationConveyancePreferenceType(attestationConveyancePreference);
+        entity.setStatus(Fido2RegistrationStatus.pending);
+
         registrationsRepository.save(entity);
+
         return credentialCreationOptionsNode;
     }
 }

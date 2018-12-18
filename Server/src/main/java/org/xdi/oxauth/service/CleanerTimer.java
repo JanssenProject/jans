@@ -154,8 +154,8 @@ public class CleanerTimer {
             processU2fRequests();
             processU2fDeviceRegistrations();
 
-            this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
             this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
+            this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
 
             processMetricEntries();
         } finally {
