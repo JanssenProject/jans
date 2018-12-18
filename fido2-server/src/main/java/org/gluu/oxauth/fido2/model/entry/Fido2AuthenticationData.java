@@ -29,6 +29,8 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     private String userVerificationOption;
 
+    private Fido2AuthenticationStatus status;
+
     public String getId() {
         return id;
     }
@@ -100,4 +102,13 @@ public class Fido2AuthenticationData extends Fido2Data {
     public void setUserVerificationOption(String userVerificationOption) {
         this.userVerificationOption = userVerificationOption;
     }
+
+    public Fido2AuthenticationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(Fido2AuthenticationStatus status) {
+        this.status = status;
+    }
+
 }

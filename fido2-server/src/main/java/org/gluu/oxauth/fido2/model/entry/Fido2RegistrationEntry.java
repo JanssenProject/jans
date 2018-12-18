@@ -30,6 +30,13 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @LdapAttribute(name = "oxRegistrationData")
     private Fido2RegistrationData registrationData;
 
+    @LdapJsonObject
+    @LdapAttribute(name = "oxStatus")
+    private Fido2RegistrationStatus registrationStatus;
+
+    @LdapAttribute(name = "oxDeviceNotificationConf")
+    private String deviceNotificationConf;
+
     public Fido2RegistrationEntry() {
     }
 
@@ -54,6 +61,22 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     public void setRegistrationData(Fido2RegistrationData registrationData) {
         this.registrationData = registrationData;
+    }
+
+    public Fido2RegistrationStatus getRegistrationStatus() {
+        return registrationStatus;
+    }
+
+    public void setRegistrationStatus(Fido2RegistrationStatus registrationStatus) {
+        this.registrationStatus = registrationStatus;
+    }
+
+    public String getDeviceNotificationConf() {
+        return deviceNotificationConf;
+    }
+
+    public void setDeviceNotificationConf(String deviceNotificationConf) {
+        this.deviceNotificationConf = deviceNotificationConf;
     }
 
     @Override

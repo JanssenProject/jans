@@ -73,7 +73,7 @@ public class CertificateSelector {
                 throw new Fido2RPRuntimeException("Can't find certificate");
             }
         } catch (CertificateException | FileNotFoundException e) {
-            log.info("Problem {} ", e.getMessage());
+            log.info("Problem {} ", e.getMessage(), e);
             throw new Fido2RPRuntimeException("Can't validate certificate");
         }
 
