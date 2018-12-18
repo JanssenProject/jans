@@ -209,8 +209,7 @@ public class RegistrationPersistenceService {
 
             private Filter getFilter() {
                 // Build unfinished request expiration filter
-                Filter authenticationStatusFilter = Filter.createORFilter(Filter.createNOTFilter(Filter.createPresenceFilter("oxStatus")),
-                        Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", "registerted")));
+                Filter authenticationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
 
                 Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                         StaticUtils.encodeGeneralizedTime(unfinishedRequestExpirationDate));
