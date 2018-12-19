@@ -5745,7 +5745,6 @@
                 "creationDate",
                 "oxSessionStateId",
                 "oxCodeChallenge",
-                "oxCodeChallengeHash",
                 "personInum",
                 "oxAuthenticationData",
                 "oxStatus"
