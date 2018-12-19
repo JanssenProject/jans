@@ -31,8 +31,8 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@Path("/fido2/attestation")
 @ApplicationScoped
+@Path("/fido2/attestation")
 public class AttestationController {
 
     @Inject
