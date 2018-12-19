@@ -207,6 +207,34 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxCodeChallenge",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxCodeChallengeHash",
+		"type": "integer",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxPublicKeyId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxStatus",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	}
 
 ]
