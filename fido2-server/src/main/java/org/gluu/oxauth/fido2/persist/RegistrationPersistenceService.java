@@ -21,7 +21,11 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
-import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationStatus;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -30,9 +34,6 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
 
 @ApplicationScoped
 public class RegistrationPersistenceService {
@@ -50,7 +51,7 @@ public class RegistrationPersistenceService {
     private UserService userService;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private LdapEntryManager ldapEntryManager;
 
     public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
@@ -85,7 +86,7 @@ public class RegistrationPersistenceService {
         Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("oxCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null, filter);
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
 
         return fido2RegistrationnEntries;
     }
@@ -121,12 +122,6 @@ public class RegistrationPersistenceService {
     }
 
     public void update(Fido2RegistrationEntry registrationEntry) {
-        updateRegistrationAttributes(registrationEntry);
-
-        ldapEntryManager.merge(registrationEntry);
-    }
-
-    private void updateRegistrationAttributes(Fido2RegistrationEntry registrationEntry) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 
         Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
@@ -135,6 +130,8 @@ public class RegistrationPersistenceService {
         
         registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
+
+        ldapEntryManager.merge(registrationEntry);
     }
 
     public void addBranch(final String baseDn) {
@@ -186,22 +183,10 @@ public class RegistrationPersistenceService {
 
 
     public void cleanup(Date now, int batchSize) {
-        int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-        unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
-
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.SECOND, -unfinishedRequestExpiration);
-        final Date unfinishedRequestExpirationDate = calendar.getTime();
-
         // Cleaning expired entries
-        BatchOperation<Fido2RegistrationEntry> cleanerBatchService = new BatchOperation<Fido2RegistrationEntry>(ldapEntryManager) {
+        BatchOperation<Fido2RegistrationEntry> cleanerRegistrationBatchService = new ProcessBatchOperation<Fido2RegistrationEntry>() {
             @Override
-            protected List<Fido2RegistrationEntry> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), Fido2RegistrationEntry.class, getFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<Fido2RegistrationEntry> entries) {
+            public void performAction(List<Fido2RegistrationEntry> entries) {
                 for (Fido2RegistrationEntry p : entries) {
                     log.debug("Removing Fido2 registration entry: {}, Creation date: {}", p.getChallange(), p.getCreationDate());
                     try {
@@ -211,31 +196,14 @@ public class RegistrationPersistenceService {
                     }
                 }
             }
-
-            private Filter getFilter() {
-                // Build unfinished request expiration filter
-                Filter authenticationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
-
-                Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
-                        StaticUtils.encodeGeneralizedTime(unfinishedRequestExpirationDate));
-                
-                Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter, exirationDateFilter);
-
-                return unfinishedRequestFilter;
-            }
         };
-        cleanerBatchService.iterateAllByChunks(batchSize);
+        ldapEntryManager.findEntries(getDnForUser(null), Fido2RegistrationEntry.class, getExpiredRegistrationFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         // Cleaning empty branches
-        BatchOperation<SimpleBranch> cleanerBranchService = new BatchOperation<SimpleBranch>(ldapEntryManager) {
+        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
             @Override
-            protected List<SimpleBranch> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getFilter(), SearchScope.SUB, new String[] {"ou"}, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<SimpleBranch> objects) {
-                for (SimpleBranch p : objects) {
+            public void performAction(List<SimpleBranch> entries) {
+                for (SimpleBranch p : entries) {
                     try {
                         ldapEntryManager.remove(p);
                     } catch (Exception e) {
@@ -243,13 +211,32 @@ public class RegistrationPersistenceService {
                     }
                 }
             }
-
-            private Filter getFilter() {
-                return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_register"), Filter.createORFilter(
-                        Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
-            }
         };
-        cleanerBranchService.iterateAllByChunks(batchSize);
+        ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyRegistrationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
+    }
+
+    private Filter getExpiredRegistrationFilter() {
+        int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+        unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
+
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.add(Calendar.SECOND, -unfinishedRequestExpiration);
+        final Date unfinishedRequestExpirationDate = calendar.getTime();
+
+        // Build unfinished request expiration filter
+        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
+
+        Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
+                ldapEntryManager.encodeTime(unfinishedRequestExpirationDate));
+        
+        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, exirationDateFilter);
+
+        return unfinishedRequestFilter;
+    }
+
+    private Filter getEmptyRegistrationBranchFilter() {
+        return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_register"), Filter.createORFilter(
+                Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
     }
 
     public int getChallengeHashCode(String challenge) {
