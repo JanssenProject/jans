@@ -169,10 +169,11 @@ public class AuthenticationPersistenceService {
         calendar2.add(Calendar.SECOND, -authenticationHistoryExpiration);
         final Date authenticationHistoryExpirationDate = calendar2.getTime();
 
+        // Cleaning expired entries
         BatchOperation<Fido2AuthenticationEntry> cleanerBatchService = new BatchOperation<Fido2AuthenticationEntry>(ldapEntryManager) {
             @Override
             protected List<Fido2AuthenticationEntry> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), Fido2AuthenticationEntry.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
+                return ldapEntryManager.findEntries(getDnForUser(null), Fido2AuthenticationEntry.class, getFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, this, 0, chunkSize, chunkSize);
             }
 
             @Override
@@ -208,6 +209,31 @@ public class AuthenticationPersistenceService {
             }
         };
         cleanerBatchService.iterateAllByChunks(batchSize);
+
+        // Cleaning empty branches
+        BatchOperation<SimpleBranch> cleanerBranchService = new BatchOperation<SimpleBranch>(ldapEntryManager) {
+            @Override
+            protected List<SimpleBranch> getChunkOrNull(int chunkSize) {
+                return ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getFilter(), SearchScope.SUB, new String[] {"ou"}, this, 0, chunkSize, chunkSize);
+            }
+
+            @Override
+            protected void performAction(List<SimpleBranch> objects) {
+                for (SimpleBranch p : objects) {
+                    try {
+                        ldapEntryManager.remove(p);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
+                }
+            }
+
+            private Filter getFilter() {
+                return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_auth"), Filter.createORFilter(
+                        Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
+            }
+        };
+        cleanerBranchService.iterateAllByChunks(batchSize);
     }
 
 }
