@@ -15,6 +15,7 @@ package org.gluu.oxauth.fido2.ws.rs.controller;
 
 import java.io.IOException;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -30,6 +31,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+@ApplicationScoped
 @Path("/fido2/assertion")
 public class AssertionController {
 
@@ -52,7 +54,10 @@ public class AssertionController {
         }
 
         JsonNode params = dataMapperService.readTree(content);
-        return assertionService.options(params);
+        JsonNode result = assertionService.options(params);
+
+        ResponseBuilder builder = Response.ok().entity(result.toString());
+        return builder.build();
     }
 
     @POST

@@ -19,7 +19,11 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
-import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationStatus;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -28,9 +32,6 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
 
 @ApplicationScoped
 public class AuthenticationPersistenceService {
@@ -48,14 +49,14 @@ public class AuthenticationPersistenceService {
     private UserService userService;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private LdapEntryManager ldapEntryManager;
 
     public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
 
-        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, null, codeChallengFilter);
+        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
 
         return fido2AuthenticationEntries;
     }
@@ -78,23 +79,18 @@ public class AuthenticationPersistenceService {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
 
+        String dn = getDnForAuthenticationEntry(userInum, id);
+        Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, null, userInum, authenticationData);
+        authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
+
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);
 
-        String dn = getDnForAuthenticationEntry(userInum, id);
-        Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, null, userInum, authenticationData);
-        updateAuthenticationAttributes(authenticationEntity);
 
         ldapEntryManager.persist(authenticationEntity);
     }
 
     public void update(Fido2AuthenticationEntry authenticationEntity) {
-        updateAuthenticationAttributes(authenticationEntity);
-
-        ldapEntryManager.merge(authenticationEntity);
-    }
-
-    private void updateAuthenticationAttributes(Fido2AuthenticationEntry authenticationEntity) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 
         Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
@@ -155,6 +151,39 @@ public class AuthenticationPersistenceService {
     }
 
     public void cleanup(Date now, int batchSize) {
+        // Cleaning expired entries
+        BatchOperation<Fido2AuthenticationEntry> cleanerAuthenticationBatchService = new ProcessBatchOperation<Fido2AuthenticationEntry>() {
+            @Override
+            public void performAction(List<Fido2AuthenticationEntry> entries) {
+                for (Fido2AuthenticationEntry p : entries) {
+                    log.debug("Removing Fido2 authentication entry: {}, Creation date: {}", p.getChallange(), p.getCreationDate());
+                    try {
+                        ldapEntryManager.remove(p);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
+                }
+            }
+        };
+        ldapEntryManager.findEntries(getDnForUser(null), Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
+
+        // Cleaning empty branches
+        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
+            @Override
+            public void performAction(List<SimpleBranch> entries) {
+                for (SimpleBranch p : entries) {
+                    try {
+                        ldapEntryManager.remove(p);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
+                }
+            }
+        };
+        ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyAuthenticationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
+    }
+
+    private Filter getExpiredAuthenticationFilter() {
         int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
         unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
 
@@ -169,71 +198,28 @@ public class AuthenticationPersistenceService {
         calendar2.add(Calendar.SECOND, -authenticationHistoryExpiration);
         final Date authenticationHistoryExpirationDate = calendar2.getTime();
 
-        // Cleaning expired entries
-        BatchOperation<Fido2AuthenticationEntry> cleanerBatchService = new BatchOperation<Fido2AuthenticationEntry>(ldapEntryManager) {
-            @Override
-            protected List<Fido2AuthenticationEntry> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), Fido2AuthenticationEntry.class, getFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, this, 0, chunkSize, chunkSize);
-            }
+        // Build unfinished request expiration filter
+        Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue()));
 
-            @Override
-            protected void performAction(List<Fido2AuthenticationEntry> entries) {
-                for (Fido2AuthenticationEntry p : entries) {
-                    try {
-                        log.debug("Removing Fido2 authentication entry: {}, Creation date: {}", p.getChallange(), p.getCreationDate());
-                        ldapEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
+        Filter exirationDateFilter1 = Filter.createLessOrEqualFilter("creationDate",
+                ldapEntryManager.encodeTime(unfinishedRequestExpirationDate));
+        
+        Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter1, exirationDateFilter1);
 
-            private Filter getFilter() {
-                // Build unfinished request expiration filter
-                Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue()));
+        // Build authentication history expiration filter
+        Filter authenticationStatusFilter2 = Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue());
 
-                Filter exirationDateFilter1 = Filter.createLessOrEqualFilter("creationDate",
-                        StaticUtils.encodeGeneralizedTime(unfinishedRequestExpirationDate));
-                
-                Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter1, exirationDateFilter1);
+        Filter exirationDateFilter2 = Filter.createLessOrEqualFilter("creationDate",
+                ldapEntryManager.encodeTime(authenticationHistoryExpirationDate));
+        
+        Filter authenticationHistoryFilter = Filter.createANDFilter(authenticationStatusFilter2, exirationDateFilter2);
 
-                // Build authentication history expiration filter
-                Filter authenticationStatusFilter2 = Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue());
+        return Filter.createORFilter(unfinishedRequestFilter, authenticationHistoryFilter);
+    }
 
-                Filter exirationDateFilter2 = Filter.createLessOrEqualFilter("creationDate",
-                        StaticUtils.encodeGeneralizedTime(authenticationHistoryExpirationDate));
-                
-                Filter authenticationHistoryFilter = Filter.createANDFilter(authenticationStatusFilter2, exirationDateFilter2);
-
-                return Filter.createORFilter(unfinishedRequestFilter, authenticationHistoryFilter);
-            }
-        };
-        cleanerBatchService.iterateAllByChunks(batchSize);
-
-        // Cleaning empty branches
-        BatchOperation<SimpleBranch> cleanerBranchService = new BatchOperation<SimpleBranch>(ldapEntryManager) {
-            @Override
-            protected List<SimpleBranch> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getFilter(), SearchScope.SUB, new String[] {"ou"}, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<SimpleBranch> objects) {
-                for (SimpleBranch p : objects) {
-                    try {
-                        ldapEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-
-            private Filter getFilter() {
-                return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_auth"), Filter.createORFilter(
-                        Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
-            }
-        };
-        cleanerBranchService.iterateAllByChunks(batchSize);
+    private Filter getEmptyAuthenticationBranchFilter() {
+        return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_auth"), Filter.createORFilter(
+                Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
     }
 
 }
