@@ -293,6 +293,9 @@
       "mdsTocRootCertFile":"",
       "mdsTocFilesFolder":"",
       "certificationServerMetadataFolder":"",
+      "userAutoEnrollment":false,
+      "unfinishedRequestExpiration":120,
+      "authenticationHistoryExpiration":1296000,
       "disable":true
    },
    "loggingLevel": "INFO",
