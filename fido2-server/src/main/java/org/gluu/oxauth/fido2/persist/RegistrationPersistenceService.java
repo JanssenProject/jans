@@ -82,7 +82,10 @@ public class RegistrationPersistenceService {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null, codeChallengFilter);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("oxCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null, filter);
 
         return fido2RegistrationnEntries;
     }
@@ -104,14 +107,15 @@ public class RegistrationPersistenceService {
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
+        final String challenge = registrationData.getChallenge();
+
+        String dn = getDnForRegistrationEntry(userInum, id);
+        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, null, registrationData, challenge);
+        registrationEntry.setRegistrationStatus(registrationData.getStatus());
+        registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
         
         registrationData.setCreatedDate(now);
         registrationData.setCreatedBy(userName);
-
-        String dn = getDnForRegistrationEntry(userInum, id);
-        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, null, registrationData);
-        registrationEntry.setRegistrationStatus(registrationData.getStatus());
-        updateRegistrationAttributes(registrationEntry);
 
         ldapEntryManager.persist(registrationEntry);
     }
@@ -189,10 +193,11 @@ public class RegistrationPersistenceService {
         calendar.add(Calendar.SECOND, -unfinishedRequestExpiration);
         final Date unfinishedRequestExpirationDate = calendar.getTime();
 
+        // Cleaning expired entries
         BatchOperation<Fido2RegistrationEntry> cleanerBatchService = new BatchOperation<Fido2RegistrationEntry>(ldapEntryManager) {
             @Override
             protected List<Fido2RegistrationEntry> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getDnForUser(null), Fido2RegistrationEntry.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
+                return ldapEntryManager.findEntries(getDnForUser(null), Fido2RegistrationEntry.class, getFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, this, 0, chunkSize, chunkSize);
             }
 
             @Override
@@ -220,7 +225,41 @@ public class RegistrationPersistenceService {
             }
         };
         cleanerBatchService.iterateAllByChunks(batchSize);
+
+        // Cleaning empty branches
+        BatchOperation<SimpleBranch> cleanerBranchService = new BatchOperation<SimpleBranch>(ldapEntryManager) {
+            @Override
+            protected List<SimpleBranch> getChunkOrNull(int chunkSize) {
+                return ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getFilter(), SearchScope.SUB, new String[] {"ou"}, this, 0, chunkSize, chunkSize);
+            }
+
+            @Override
+            protected void performAction(List<SimpleBranch> objects) {
+                for (SimpleBranch p : objects) {
+                    try {
+                        ldapEntryManager.remove(p);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
+                }
+            }
+
+            private Filter getFilter() {
+                return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_register"), Filter.createORFilter(
+                        Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
+            }
+        };
+        cleanerBranchService.iterateAllByChunks(batchSize);
     }
 
+    public int getChallengeHashCode(String challenge) {
+        int hash = 0;
+        byte[] challengeBytes = challenge.getBytes();
+        for (int j = 0; j < challengeBytes.length; j++) {
+            hash += challengeBytes[j]*j;
+        }
+
+        return hash;
+    }
 
 }
