@@ -147,6 +147,22 @@
         {
             "attribute": "oxTicket",
             "index": "eq"
+        },
+        {
+            "attribute": "oxCodeChallenge",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxCodeChallengeHash",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxPublicKeyId",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxStatus",
+            "index": "eq"
         }
     ]
 }
