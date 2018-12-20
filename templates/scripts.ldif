@@ -172,6 +172,20 @@ oxScript::%(uma_claims_gathering_uma_claims_gathering)s
 oxScriptType: uma_claims_gathering
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!0011!2DAF.AA90,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Introspection sample script
+displayName: introspection_sample
+gluuStatus: true
+inum: %(inumOrg)s!0011!2DAF.AA90
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(introspection_introspection)s
+oxScriptType: introspection
+programmingLanguage: python
+
 dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
