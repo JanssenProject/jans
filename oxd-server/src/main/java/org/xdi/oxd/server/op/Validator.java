@@ -154,6 +154,8 @@ public class Validator {
                     this.rsaSigner = signerWithRefreshedKey;
                 }
             }
+        } catch (HttpException hEx) {
+            throw hEx;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_UNKNOWN);
