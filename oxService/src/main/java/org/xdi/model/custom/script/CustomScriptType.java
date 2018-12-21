@@ -23,6 +23,8 @@ import org.xdi.model.custom.script.type.id.DummyIdGeneratorType;
 import org.xdi.model.custom.script.type.id.IdGeneratorType;
 import org.xdi.model.custom.script.type.introspection.DummyIntrospectionType;
 import org.xdi.model.custom.script.type.introspection.IntrospectionType;
+import org.xdi.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
+import org.xdi.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
 import org.xdi.model.custom.script.type.scim.DummyScimType;
 import org.xdi.model.custom.script.type.scim.ScimType;
 import org.xdi.model.custom.script.type.scope.DummyDynamicScopeType;
@@ -48,6 +50,7 @@ public enum CustomScriptType implements LdapEnum {
     PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
             "PersonAuthentication", new DummyPersonAuthenticationType()),
     INTROSPECTION("introspection", "Introspection", IntrospectionType.class, CustomScript.class, "Introspection", new DummyIntrospectionType()),
+    RESOURCE_OWNER_PASSWORD_CREDENTIALS("resource_owner_password_credentials", "Resource Owner Password Credentials", ResourceOwnerPasswordCredentialsType.class, CustomScript.class, "ResourceOwnerPasswordCredentials", new DummyResourceOwnerPasswordCredentialsType()),
     APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession",
             new DummyApplicationSessionType()),
     CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
