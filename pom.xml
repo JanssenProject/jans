@@ -98,6 +98,7 @@
 		<module>RP-Demo</module>
 		<module>common</module>
 		<module>fido2-server</module>
+		<module>fido2-client</module>
 		<module>Server</module>
 	</modules>
 
@@ -128,7 +129,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>
-				<artifactId>oxauth-fido2</artifactId>
+				<artifactId>oxauth-fido2-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxauth-fido2-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
