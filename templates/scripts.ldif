@@ -186,6 +186,20 @@ oxScript::%(introspection_introspection)s
 oxScriptType: introspection
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!0011!2DAF.AA91,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Resource Owner Password Credentials Example
+displayName: Resource Owner Password Credentials Example
+gluuStatus: true
+inum: %(inumOrg)s!0011!2DAF.AA91
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(resource_owner_password_credentials_resource_owner_password_credentials)s
+oxScriptType: resource_owner_password_credentials
+programmingLanguage: python
+
 dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
