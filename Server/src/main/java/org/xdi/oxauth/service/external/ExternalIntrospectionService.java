@@ -54,8 +54,8 @@ public class ExternalIntrospectionService extends ExternalScriptService {
             IntrospectionType script = (IntrospectionType) customScriptConfiguration.getExternalType();
             context.setScript(customScriptConfiguration);
             final boolean result = script.modifyResponse(responseAsJsonObject, context);
-            log.debug("Finished external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}",
-                    customScriptConfiguration.getName(), responseAsJsonObject, context);
+            log.debug("Finished external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}, result: {}",
+                    customScriptConfiguration.getName(), responseAsJsonObject, context, result);
             return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
