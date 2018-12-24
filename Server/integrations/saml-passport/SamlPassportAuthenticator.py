@@ -22,7 +22,7 @@ from org.xdi.config.oxtrust import LdapOxPassportConfiguration
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper
-from java.util import ArrayList, Arrays, Collections
+from java.util import ArrayList, Arrays, Collections, HashSet
 
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
@@ -89,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if jwt_param == None:
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
-                
+
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
@@ -478,11 +478,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         uidRemoteAttr = user_profile[uidRemoteAttr]
-        # This is for backwards compat. Should it be passport-saml-provider:...??
-        externalUid = "passport-%s:%s" % ("saml", uidRemoteAttr)
+        externalUid = "passport-%s:%s:%s" % ("saml", provider, uidRemoteAttr)
 
         userService = CdiUtil.bean(UserService)
-        userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
+        userByUid = self.getUserByExternalUid(uidRemoteAttr, provider, userService)
 
         mailRemoteAttr = self.getRemoteAttr("mail")
         email = None
@@ -564,6 +563,26 @@ class PersonAuthentication(PersonAuthenticationType):
             return logged_in
 
 
+    def getUserByExternalUid(self, uidRemoteAttr, provider, userService):
+        newFormat = "passport-%s:%s:%s" % ("saml", provider, uidRemoteAttr)
+        user = userService.getUserByAttribute("oxExternalUid", newFormat)
+
+        if user == None:
+            oldFormat = "passport-%s:%s" % ("saml", uidRemoteAttr)
+            user = userService.getUserByAttribute("oxExternalUid", oldFormat)
+
+            if user != None:
+                # Migrate to newer format
+                list = HashSet(user.getAttributeValues("oxExternalUid"))
+                list.remove(oldFormat)
+                list.add(newFormat)
+                user.setAttribute("oxExternalUid", ArrayList(list))
+                print "Migrating user's oxExternalUid to newer format 'passport-saml:provider:uid'"
+                userService.updateUser(user)
+
+        return user
+
+
     def setEmailMessageError(self):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
@@ -618,6 +637,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
                 foundUser.setAttribute(localAttr, values)
 
+
     def isInboundFlow(self, identity):
         sessionId = identity.getSessionId()
         if sessionId == None:
@@ -634,10 +654,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return False
 
+
     def isInboundJwt(self, value):
         if value == None:
             return False
-        
+
         try:
             jwt = Jwt.parse(value)
             user_profile_json = jwt.getClaims().getClaimAsString("data")
@@ -647,6 +668,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         return True
+
 
     # This routine converts a value into an array of flat string values. Examples:
     # "" --> []
