@@ -28,10 +28,9 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
 import org.xdi.oxauth.security.Identity;
-import org.xdi.oxauth.service.AuthenticationFilterService;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.GrantService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.external.ExternalResourceOwnerPasswordCredentialsService;
+import org.xdi.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.xdi.oxauth.uma.service.UmaTokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
@@ -39,6 +38,7 @@ import org.xdi.util.security.StringEncrypter;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
@@ -91,13 +91,19 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private UmaTokenService umaTokenService;
 
+    @Inject
+    private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
+
+    @Inject
+    private AttributeService attributeService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
                                        String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
-                                       HttpServletRequest request, SecurityContext sec) {
+                                       HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
                         "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}",
@@ -292,6 +298,18 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         boolean authenticated = authenticationService.authenticate(username, password);
                         if (authenticated) {
                             user = authenticationService.getAuthenticatedUser();
+                        }
+                    }
+
+                    if (externalResourceOwnerPasswordCredentialsService.getCustomScriptConfigurations() != null && !externalResourceOwnerPasswordCredentialsService.getCustomScriptConfigurations().isEmpty()) {
+                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
+                        context.setUser(user);
+                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+                            log.trace("RO PC - User is authenticated successfully by external script.");
+                            user = context.getUser();
+                            if (user == null) {
+                                user = new User();
+                            }
                         }
                     }
 
