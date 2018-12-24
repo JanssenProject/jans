@@ -176,7 +176,7 @@ public class AppInitializer {
 		// Initialize script manager
         List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING,
         		CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
-				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
+				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.INTROSPECTION, CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
 
         // Start timer
         initSchedulerService();
@@ -314,8 +314,8 @@ public class AppInitializer {
     @Produces @ApplicationScoped @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     public PersistenceEntryManager createPersistenceEntryManager() {
         Properties connectionProperties = preparePersistanceProperties();
-        
-        PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(connectionProperties); 
+
+        PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(connectionProperties);
         log.info("Created {}: {} with operation service: {}",
                 new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager, persistenceEntryManager.getOperationService() });
 
@@ -354,7 +354,7 @@ public class AppInitializer {
 		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
 			PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory().createEntryManager(persistenceAuthProperties.get(i));
 	        log.debug("Created {}#{}: {}", new Object[] { ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i, persistenceAuthEntryManager });
-	        
+
 	        persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
 		}
 
@@ -555,8 +555,8 @@ public class AppInitializer {
 				persistenceAuthConfigs.add(persistenceAuthConfig);
 			}
 		}
-		
-		return persistenceAuthConfigs; 
+
+		return persistenceAuthConfigs;
 	}
 
 	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
@@ -602,7 +602,7 @@ public class AppInitializer {
     	log.info("Closing LDAP connection at server shutdown...");
         PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
-        
+
     	List<PersistenceEntryManager> persistenceAuthEntryManagers = persistenceAuthEntryManagerInstance.get();
         closePersistenceEntryManagers(persistenceAuthEntryManagers);
     }
