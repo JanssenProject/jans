@@ -22,14 +22,8 @@
 		<script src="./scripts/u2f-api.js" />
 
 		<script>
-			var auth_request = $
-			{
-				identity.getWorkingParameter('fido_u2f_authentication_request')
-			};
-			var register_request = $
-			{
-				identity.getWorkingParameter('fido_u2f_registration_request')
-			};
+			var auth_request = ${identity.getWorkingParameter('fido_u2f_authentication_request')};
+			var register_request = ${identity.getWorkingParameter('fido_u2f_registration_request')};
 
 			function startRegistration() {
 				u2f
