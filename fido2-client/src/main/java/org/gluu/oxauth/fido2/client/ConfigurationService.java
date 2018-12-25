@@ -6,8 +6,9 @@
 
 package org.gluu.oxauth.fido2.client;
 
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -20,8 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public interface ConfigurationService {
 
-    @POST
+    @GET
     @Produces({ "application/json" })
-	public JsonNode getMetadataConfiguration();
+	public Response getMetadataConfiguration();
 
 }

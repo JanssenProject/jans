@@ -54,7 +54,7 @@ public class Fido2ClientFactory {
 
     public AttestationService createAttestationService(String metadata) throws IOException {
         JsonNode metadataJson = objectMapper.readTree(metadata);
-        String basePath = metadataJson.get("attestation").get("base_uri").asText();
+        String basePath = metadataJson.get("attestation").get("base_path").asText();
 
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(basePath));
@@ -65,7 +65,7 @@ public class Fido2ClientFactory {
 
     public AssertionService createAssertionService(String metadata) throws IOException {
         JsonNode metadataJson = objectMapper.readTree(metadata);
-        String basePath = metadataJson.get("assertion").get("base_uri").asText();
+        String basePath = metadataJson.get("assertion").get("base_path").asText();
 
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(basePath));
