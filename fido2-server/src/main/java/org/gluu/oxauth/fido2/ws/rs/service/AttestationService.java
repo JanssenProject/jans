@@ -25,6 +25,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
+import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.cert.PublicKeyCredentialDescriptor;
@@ -42,6 +43,7 @@ import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.verifier.DomainVerifier;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.service.net.NetworkService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -79,6 +81,9 @@ public class AttestationService {
 
     @Inject
     private Base64Service base64Service;
+
+    @Inject
+    private NetworkService networkService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -152,32 +157,32 @@ public class AttestationService {
         String displayName = params.get("displayName").asText();
 
         String documentDomain;
-        String host;
         if (params.hasNonNull("documentDomain")) {
             documentDomain = params.get("documentDomain").asText();
         } else {
             documentDomain = appConfiguration.getIssuer();
         }
-
-        try {
-            host = new URL(documentDomain).getHost();
-        } catch (MalformedURLException e) {
-            host = documentDomain;
-            // throw new Fido2RPRuntimeException(e.getMessage());
-        }
-
-        String authenticatorSelection;
-        if (params.hasNonNull("authenticatorSelection")) {
-            authenticatorSelection = params.get("authenticatorSelection").asText();
-        } else {
-            authenticatorSelection = "";
-        }
+        
+        documentDomain = networkService.getHost(documentDomain);
 
         log.info("Options {} {} {}", username, displayName, documentDomain);
+
         AttestationConveyancePreference attestationConveyancePreference = commonVerifiers.verifyAttestationConveyanceType(params);
 
-        String credentialType = params.hasNonNull("credentialType") ? params.get("credentialType").asText("public-key") : "public-key";
         ObjectNode credentialCreationOptionsNode = dataMapperService.createObjectNode();
+
+        String credentialType = params.hasNonNull("credentialType") ? params.get("credentialType").asText("public-key") : "public-key";
+
+        JsonNode authenticatorSelectionNode;
+        if (params.hasNonNull("authenticatorSelection")) {
+            authenticatorSelectionNode = params.get("authenticatorSelection");
+        } else {
+            ObjectNode authenticatorSelectionObjectNode = dataMapperService.createObjectNode();
+            authenticatorSelectionNode = authenticatorSelectionObjectNode;
+
+            authenticatorSelectionObjectNode.put("requireResidentKey", false);
+            authenticatorSelectionObjectNode.put("userVerification", UserVerification.preferred.toString());
+        }
 
         String challenge = challengeGenerator.getChallenge();
         credentialCreationOptionsNode.put("challenge", challenge);
@@ -204,7 +209,7 @@ public class AttestationService {
             credentialParametersNode.put("type", "FIDO");
             credentialParametersNode.put("alg", -7);
         }
-        credentialCreationOptionsNode.set("authenticatorSelection", params.get("authenticatorSelection"));
+        credentialCreationOptionsNode.set("authenticatorSelection", authenticatorSelectionNode);
 
         List<Fido2RegistrationEntry> existingRegistrations = registrationsRepository.findAllByUsername(username);
         List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
@@ -216,13 +221,21 @@ public class AttestationService {
 
         ArrayNode excludedCredentials = credentialCreationOptionsNode.putArray("excludeCredentials");
         excludedCredentials.addAll(excludedKeys);
+
+        if (params.hasNonNull("extensions")) {
+            credentialCreationOptionsNode.set("extensions", params.get("extensions"));
+        } else {
+//            credentialCreationOptionsNode.putObject("extensions");
+        }
+
         credentialCreationOptionsNode.put("status", "ok");
         credentialCreationOptionsNode.put("errorMessage", "");
+
         Fido2RegistrationData entity = new Fido2RegistrationData();
         entity.setUsername(username);
         entity.setUserId(userId);
         entity.setChallenge(challenge);
-        entity.setDomain(host);
+        entity.setDomain(documentDomain);
         entity.setW3cCredentialCreationOptions(credentialCreationOptionsNode.toString());
         entity.setAttestationConveyancePreferenceType(attestationConveyancePreference);
         entity.setStatus(Fido2RegistrationStatus.pending);

@@ -41,6 +41,7 @@ import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.verifier.DomainVerifier;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.service.net.NetworkService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -80,6 +81,9 @@ public class AssertionService {
     private CommonVerifiers commonVerifiers;
 
     @Inject
+    private NetworkService networkService;
+
+    @Inject
     private AppConfiguration appConfiguration;
 
     public JsonNode options(JsonNode params) {
@@ -95,7 +99,7 @@ public class AssertionService {
         commonVerifiers.verifyBasicPayload(params);
         String keyId = commonVerifiers.verifyThatString(params, "id");
         commonVerifiers.verifyAssertionType(params.get("type"));
-        commonVerifiers.verifyThatString(params, "rawId");
+//        commonVerifiers.verifyThatString(params, "rawId");
         JsonNode userHandle = params.get("response").get("userHandle");
         if (userHandle != null && params.get("response").hasNonNull("userHandle")) {
             // This can be null for U2F authenticators
@@ -155,12 +159,26 @@ public class AssertionService {
             }
         }
 
+        String documentDomain;
+        if (params.hasNonNull("documentDomain")) {
+            documentDomain = params.get("documentDomain").asText();
+        } else {
+            documentDomain = appConfiguration.getIssuer();
+        }
+        
+        documentDomain = networkService.getHost(documentDomain);
+
         log.info("Options {} ", username);
 
         ObjectNode assertionOptionsResponseNode = dataMapperService.createObjectNode();
+
+//        ObjectNode credentialRpEntityNode = assertionOptionsResponseNode.putObject("rp");
+//        credentialRpEntityNode.put("name", "oxAuth RP");
+//        credentialRpEntityNode.put("id", documentDomain);
+
         List<Fido2RegistrationEntry> registrationEntries = registrationsRepository.findAllByUsername(username);
         if (registrationEntries.isEmpty()) {
-            throw new Fido2RPRuntimeException("No record of registration. Have you registered");
+            throw new Fido2RPRuntimeException("No record of registration. Have you registered?");
         }
         
         List<Fido2RegistrationData> registrations = registrationEntries.parallelStream().map(f -> f.getRegistrationData()).collect(Collectors.toList());
@@ -192,22 +210,17 @@ public class AssertionService {
         }
 
         assertionOptionsResponseNode.put("userVerification", userVerification);
-        
+
         if (params.hasNonNull("extensions")) {
             assertionOptionsResponseNode.set("extensions", params.get("extensions"));
-        }
-
-        String host;
-        try {
-            host = new URL(appConfiguration.getIssuer()).getHost();
-        } catch (MalformedURLException e) {
-            host = appConfiguration.getIssuer();
+        } else {
+//            assertionOptionsResponseNode.putObject("extensions");
         }
 
         Fido2AuthenticationData authenticationData = new Fido2AuthenticationData();
         authenticationData.setUsername(username);
         authenticationData.setChallenge(challenge);
-        authenticationData.setDomain(host);
+        authenticationData.setDomain(documentDomain);
         authenticationData.setW3cCredentialRequestOptions(assertionOptionsResponseNode.toString());
         authenticationData.setUserVerificationOption(userVerification);
         authenticationData.setStatus(Fido2AuthenticationStatus.pending);
