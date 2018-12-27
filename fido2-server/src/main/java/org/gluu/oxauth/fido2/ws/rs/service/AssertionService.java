@@ -99,7 +99,7 @@ public class AssertionService {
         commonVerifiers.verifyBasicPayload(params);
         String keyId = commonVerifiers.verifyThatString(params, "id");
         commonVerifiers.verifyAssertionType(params.get("type"));
-//        commonVerifiers.verifyThatString(params, "rawId");
+        commonVerifiers.verifyThatString(params, "rawId");
         JsonNode userHandle = params.get("response").get("userHandle");
         if (userHandle != null && params.get("response").hasNonNull("userHandle")) {
             // This can be null for U2F authenticators

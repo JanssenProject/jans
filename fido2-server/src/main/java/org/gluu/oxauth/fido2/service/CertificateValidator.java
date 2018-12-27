@@ -13,8 +13,12 @@
 
 package org.gluu.oxauth.fido2.service;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -40,6 +44,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 
@@ -52,8 +59,19 @@ public class CertificateValidator {
     @Inject
     private Base64Service base64Service;
 
-    public void saveCertificate(X509Certificate certificate) throws IOException {
-        FileUtils.writeStringToFile(new File("c:/tmp/cert-" + certificate.getSerialNumber() + ".crt"), certificate.toString());
+    public void saveCertificate(X509Certificate certificate) {
+        try {
+            Writer writer = IOUtils.buffer(new FileWriter(new File("/tmp/cert-" + certificate.getSerialNumber() + ".crt")));
+            JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
+            try {
+                pemWriter.writeObject(certificate);
+                pemWriter.flush();
+            } finally {
+                IOUtils.closeQuietly(pemWriter);
+            }
+        } catch (IOException e) {
+            throw new Fido2RPRuntimeException("Failed to write root certificate");
+        }
     }
 
     public void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
@@ -62,7 +80,7 @@ public class CertificateValidator {
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .filter(sig -> trustedSignatures.contains(sig)).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
-            throw new Fido2RPRuntimeException("Root certificate in the attestation ");
+            throw new Fido2RPRuntimeException("Root certificate in the attestation");
         }
     }
 
