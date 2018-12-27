@@ -63,7 +63,7 @@ public class DirectoryBasedMetadataLoader {
             return;
         }
 
-        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
+        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getServerMetadataFolder();
 
         log.info("Populating metadata from {}", certificationServerMetadataFolder);
         authenticatorsMetadata.putAll(getAAGUIDMapOfMetadata());
@@ -72,7 +72,7 @@ public class DirectoryBasedMetadataLoader {
     private Map<String, JsonNode> getAAGUIDMapOfMetadata() {
         Map<String, JsonNode> nodes = Collections.synchronizedMap(new HashMap<>());
 
-        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getCertificationServerMetadataFolder();
+        String certificationServerMetadataFolder = appConfiguration.getFido2Configuration().getServerMetadataFolder();
         if (StringHelper.isEmpty(certificationServerMetadataFolder)) {
             log.debug("Property certificationServerMetadataFolder is empty");
             return nodes;

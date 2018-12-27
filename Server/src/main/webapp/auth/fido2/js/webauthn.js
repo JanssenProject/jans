@@ -146,6 +146,7 @@
       return {
         type: response.type,
         id: response.id,
+        rawId: base64url.fromByteArray(response.rawId),
         response: {
           authenticatorData: base64url.fromByteArray(response.response.authenticatorData),
           clientDataJSON: base64url.fromByteArray(response.response.clientDataJSON),

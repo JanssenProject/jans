@@ -224,8 +224,6 @@ public class AttestationService {
 
         if (params.hasNonNull("extensions")) {
             credentialCreationOptionsNode.set("extensions", params.get("extensions"));
-        } else {
-//            credentialCreationOptionsNode.putObject("extensions");
         }
 
         credentialCreationOptionsNode.put("status", "ok");
