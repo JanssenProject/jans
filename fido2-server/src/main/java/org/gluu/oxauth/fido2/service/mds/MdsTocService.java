@@ -100,9 +100,9 @@ public class MdsTocService {
             return new HashMap<String, JsonNode>();
         }
 
-        String mdsTocRootCertFile = fido2Configuration.getMdsTocRootCertFile();
-        String mdsTocFilesFolder = fido2Configuration.getMdsTocFilesFolder();
-        if (StringHelper.isEmpty(mdsTocRootCertFile) || StringHelper.isEmpty(mdsTocFilesFolder)) {
+        String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
+        String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+        if (StringHelper.isEmpty(mdsTocRootCertsFolder) || StringHelper.isEmpty(mdsTocFilesFolder)) {
             log.warn("Fido2 MDS properties should be set");
             return new HashMap<String, JsonNode>();
         }
@@ -117,7 +117,7 @@ public class MdsTocService {
             while (iter.hasNext()) {
                 Path filePath = iter.next();
                 try {
-                    maps.add(parseTOC(mdsTocRootCertFile, filePath));
+                    maps.add(parseTOC(mdsTocRootCertsFolder, filePath));
                 } catch (IOException e) {
                     log.warn("Can't access or open path: {}", filePath, e);
                 } catch (ParseException e) {
@@ -149,7 +149,7 @@ public class MdsTocService {
         }
     }
 
-    private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, Path path) throws IOException, ParseException {
+    private Map<String, JsonNode> parseTOC(String mdsTocRootCertsFolder, Path path) throws IOException, ParseException {
         BufferedReader reader = null;
         try {
             reader = Files.newBufferedReader(path);
@@ -160,7 +160,7 @@ public class MdsTocService {
             JWSAlgorithm algorithm = jwsObject.getHeader().getAlgorithm();
 
             try {
-                JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootCertFile, certificateChain);
+                JWSVerifier verifier = resolveVerifier(algorithm, mdsTocRootCertsFolder, certificateChain);
                 if (!jwsObject.verify(verifier)) {
                     log.warn("Unable to verify JWS object using algorithm {} for file {}", algorithm, path);
                     return Collections.emptyMap();
@@ -201,8 +201,8 @@ public class MdsTocService {
         }
     }
 
-    private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertFile, List<String> certificateChain) {
-        Path path = FileSystems.getDefault().getPath(mdsTocRootCertFile);
+    private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder, List<String> certificateChain) {
+        Path path = FileSystems.getDefault().getPath(mdsTocRootCertsFolder);
 
         List<X509Certificate> x509CertificateChain = cryptoUtils.getCertificates(certificateChain);
         List<X509Certificate> x509TrustedCertificates = new ArrayList<>();
