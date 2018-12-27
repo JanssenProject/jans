@@ -48,7 +48,7 @@ public class CryptoUtils {
         try {
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         } catch (CertificateException e) {
-            throw new Fido2RPRuntimeException(e.getMessage());
+            throw new Fido2RPRuntimeException(e.getMessage(), e);
         }
     }
 
@@ -57,14 +57,14 @@ public class CryptoUtils {
         try {
             cf = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {
-            throw new Fido2RPRuntimeException(e.getMessage());
+            throw new Fido2RPRuntimeException(e.getMessage(), e);
         }
 
         return certificatePath.parallelStream().map(x509certificate -> {
             try {
                 return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
             } catch (CertificateException e) {
-                throw new Fido2RPRuntimeException(e.getMessage());
+                throw new Fido2RPRuntimeException(e.getMessage(), e);
             }
         }).filter(c -> {
             try {
@@ -72,7 +72,7 @@ public class CryptoUtils {
                 return true;
             } catch (CertificateException e) {
                 log.warn("Certificate not valid {}", c.getIssuerDN().getName());
-                throw new Fido2RPRuntimeException("Certificate not valid ");
+                throw new Fido2RPRuntimeException("Certificate not valid", e);
             }
         }).collect(Collectors.toList());
 
@@ -86,7 +86,7 @@ public class CryptoUtils {
                 return true;
             } catch (CertificateException e) {
                 log.warn("Certificate not valid {}", c.getIssuerDN().getName());
-                throw new Fido2RPRuntimeException("Certificate not valid ");
+                throw new Fido2RPRuntimeException("Certificate not valid", e);
             }
         }).collect(Collectors.toList());
     }
