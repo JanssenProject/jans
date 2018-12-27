@@ -102,7 +102,7 @@
 
     "scimUmaClientId":"%(scim_rs_client_id)s",
     "scimUmaClientKeyId":"",
-    "scimUmaResourceId":"0f13ae5a-135e-4b01-a290-7bbe62e7d40f",
+    "scimUmaResourceId":"%(scim_resource_oxid)s",
     "scimUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/scim_access",
     "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
     "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
