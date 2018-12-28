@@ -29,6 +29,7 @@ import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Fido2Configuration;
 import org.xdi.service.cdi.event.ApplicationInitialized;
 import org.xdi.util.StringHelper;
 
@@ -63,7 +64,13 @@ public class CertificateSelector {
     public List<X509Certificate> selectRootCertificate(X509Certificate certificate) {
         ArrayList<X509Certificate> certs = new ArrayList<>();
 
-        String certsFolder = appConfiguration.getFido2Configuration().getAuthenticatorCertsFolder();
+        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+        if (fido2Configuration == null) {
+            log.warn("Fido2 authenticator folder with certificates is not specified");
+            return certs;
+        }
+
+        String certsFolder = fido2Configuration.getAuthenticatorCertsFolder();
         if (StringHelper.isEmpty(certsFolder)) {
             log.warn("Fido2 authenticator folder with certificates is not specified");
             return certs;
@@ -85,6 +92,12 @@ public class CertificateSelector {
 
     private Map<String, List<X509Certificate>> parseMapping() {
         Map<String, List<X509Certificate>> mappings = new HashMap<String, List<X509Certificate>>();
+
+        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+        if (fido2Configuration == null) {
+            log.warn("Fido2 authenticator folder with certificates is not specified");
+            return mappings;
+        }
 
         String certsFolder = appConfiguration.getFido2Configuration().getAuthenticatorCertsFolder();
         if (StringHelper.isEmpty(certsFolder)) {
