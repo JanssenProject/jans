@@ -48,9 +48,6 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AttestationProcessorFactory attestationProcessorFactory;
-
-    @Inject
     private CertificateSelector certificateSelector;
 
     @Inject
