@@ -102,8 +102,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
                 assertionStatus = assertionService.verify(token_response)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
-                print authenticationStatusEntity
-                print assertionStatus.getStatus()
 
                 if (assertionStatus.getStatus() != Response.Status.OK.getStatusCode()):
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
@@ -218,7 +216,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             print "Fido2. Initialization. Downloading Fido2 metadata"
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
-            self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
+            #self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
 
             metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
     
