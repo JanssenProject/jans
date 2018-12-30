@@ -5,10 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
 
 import javax.annotation.PreDestroy;
 import javax.net.ssl.SSLParameters;
@@ -42,14 +39,26 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
 
             if (redisConfiguration.getUseSSL()) {
                 if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
-                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
-                            RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())),
-                            new SSLParameters(), new DefaultHostnameVerifier());
+                    if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
+                                RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
+                    } else {
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), Protocol.DEFAULT_TIMEOUT, redisConfiguration.getDecryptedPassword(), true,
+                                RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
+                    }
                 } else {
-                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true);
+                    if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true);
+                    } else {
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), Protocol.DEFAULT_TIMEOUT, redisConfiguration.getDecryptedPassword(), true);
+                    }
                 }
             } else {
-                pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
+                if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
+                } else {
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), Protocol.DEFAULT_TIMEOUT, redisConfiguration.getDecryptedPassword());
+                }
             }
 
             testConnection();
@@ -76,7 +85,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     @Override
     public Object get(String key) {
         Jedis jedis = pool.getResource();
-        setAuthIfNeeded(jedis);
+
         try {
             byte[] value = jedis.get(key.getBytes());
             Object deserialized = null;
@@ -92,7 +101,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
         Jedis jedis = pool.getResource();
-        setAuthIfNeeded(jedis);
+
         try {
             String status = jedis.setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
             LOG.trace("put - key: " + key + ", status: " + status);
@@ -104,7 +113,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     @Override
     public void put(String key, Object object) {
         Jedis jedis = pool.getResource();
-        setAuthIfNeeded(jedis);
+
         try {
             String status = jedis.set(key.getBytes(), SerializationUtils.serialize((Serializable) object));
             LOG.trace("put - key: " + key + ", status: " + status);
@@ -116,7 +125,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     @Override
     public void remove(String key) {
         Jedis jedis = pool.getResource();
-        setAuthIfNeeded(jedis);
+
         try {
             Long entriesRemoved = jedis.del(key.getBytes());
             LOG.trace("remove - key: " + key + ", entriesRemoved: " + entriesRemoved);
@@ -128,7 +137,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     @Override
     public void clear() {
         Jedis jedis = pool.getResource();
-        setAuthIfNeeded(jedis);
+
         try {
             jedis.flushAll();
             LOG.trace("clear");

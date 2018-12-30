@@ -26,7 +26,8 @@ public class RedisProviderTest {
     public void beforeClass() {
         RedisConfiguration config = new RedisConfiguration();
 //        config.setServers("localhost:7000,localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005");
-        config.setServers("c4.gluu.org:22121");
+        config.setServers("localhost:6379");
+        //config.setDecryptedPassword("foobared");
 
         standaloneProvider = new RedisStandaloneProvider(config);
         clusterProvider = new RedisClusterProvider(config);
@@ -40,8 +41,9 @@ public class RedisProviderTest {
         RedisProviderFactory.destroySilently(shardedProvider);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void standaloneSimpleTest() throws InterruptedException {
+        standaloneProvider.create();
         simpleTest(standaloneProvider);
     }
 

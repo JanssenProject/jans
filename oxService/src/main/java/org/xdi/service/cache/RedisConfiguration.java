@@ -20,6 +20,8 @@ public class RedisConfiguration implements Serializable {
 
     private String password;
 
+    private String decryptedPassword;
+
     private Boolean useSSL = false;
 
     private String sslTrustStoreFilePath = "";
@@ -70,6 +72,14 @@ public class RedisConfiguration implements Serializable {
 
     public void setSslTrustStoreFilePath(String sslTrustStoreFilePath) {
         this.sslTrustStoreFilePath = sslTrustStoreFilePath;
+    }
+
+    public String getDecryptedPassword() {
+        return decryptedPassword;
+    }
+
+    public void setDecryptedPassword(String decryptedPassword) {
+        this.decryptedPassword = decryptedPassword;
     }
 
     @Override
