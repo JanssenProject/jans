@@ -190,7 +190,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.AA91,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Example
-displayName: Resource Owner Password Credentials Example
+displayName: resource_owner_password_credentials_example
 gluuStatus: true
 inum: %(inumOrg)s!0011!2DAF.AA91
 oxLevel: 1
