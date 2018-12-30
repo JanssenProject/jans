@@ -1,5 +1,9 @@
 package org.xdi.service.cache;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.xdi.util.security.StringEncrypter;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -21,6 +25,9 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     @Inject
     private CacheConfiguration cacheConfiguration;
 
+    @Inject
+    private StringEncrypter stringEncrypter;
+
     private AbstractRedisProvider redisProvider;
     private int defaultPutExpiration = DEFAULT_PUT_EXPIRATION_IN_SECONDS;
 
@@ -34,6 +41,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     public void create() {
         try {
             RedisConfiguration redisConfiguration = cacheConfiguration.getRedisConfiguration();
+            decryptPassword(redisConfiguration);
             log.debug("Starting RedisProvider ... configuration:" + redisConfiguration);
 
             defaultPutExpiration = redisConfiguration.getDefaultPutExpiration() > 0 ? redisConfiguration.getDefaultPutExpiration()
@@ -48,6 +56,19 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             throw new IllegalStateException("Error starting RedisProvider", e);
         }
     }
+
+    private void decryptPassword(RedisConfiguration redisConfiguration) {
+        try {
+            String encryptedPassword = redisConfiguration.getPassword();
+            if (StringUtils.isNotBlank(encryptedPassword)) {
+                redisConfiguration.setDecryptedPassword(stringEncrypter.decrypt(encryptedPassword));
+                log.trace("Decrypted redis password successfully.");
+            }
+        } catch (StringEncrypter.EncryptionException e) {
+            log.error("Error during redis password decryption", e);
+        }
+    }
+
 
     @PreDestroy
     public void destroy() {
