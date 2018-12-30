@@ -192,7 +192,14 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
-        if ((authorizationGrant == null) && (ldapSessionId == null)) {
+        if (ldapSessionId == null) {
+            final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
+            log.debug(reason);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
+                    errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, reason)).build());
+        }
+
+        if (authorizationGrant == null) {
             log.info("Failed to find out authorization grant for id_token_hint '{}' and session_id '{}'", idTokenHint, sessionId);
 
             //see https://github.com/GluuFederation/oxAuth/issues/575
