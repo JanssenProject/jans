@@ -41,7 +41,7 @@ public class RedisProviderTest {
         RedisProviderFactory.destroySilently(shardedProvider);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void standaloneSimpleTest() throws InterruptedException {
         standaloneProvider.create();
         simpleTest(standaloneProvider);
