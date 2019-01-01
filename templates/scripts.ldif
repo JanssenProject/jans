@@ -191,7 +191,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Example
 displayName: resource_owner_password_credentials_example
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.AA91
 oxLevel: 1
 oxRevision: 1
