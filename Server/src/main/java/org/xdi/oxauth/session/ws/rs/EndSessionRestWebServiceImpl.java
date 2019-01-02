@@ -199,13 +199,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, reason)).build());
         }
 
-        if (authorizationGrant == null) {
-            log.info("Failed to find out authorization grant for id_token_hint '{}' and session_id '{}'", idTokenHint, sessionId);
-
-            //see https://github.com/GluuFederation/oxAuth/issues/575
-            return new Pair<SessionId, AuthorizationGrant>(null, null);
-        }
-
         // Clean up authorization session
         removeConsentSessionId(httpRequest, httpResponse);
 
