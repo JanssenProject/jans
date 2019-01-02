@@ -308,7 +308,10 @@ public class Authenticator {
 			if (logger.isDebugEnabled()) {
 			    String userId = credentials.getUsername();
 			    if (StringHelper.isEmpty(userId)) {
-    			    userId = identity.getUser().getUserId();
+			        User user = identity.getUser(); 
+			        if (user != null) {
+			            userId = user.getUserId();
+			        }
         			logger.debug("Authentication result for user '{}'. auth_step: '{}', result: '{}', credentials: '{}'",
         					userId, this.authStep, result, System.identityHashCode(credentials));
 			    }
