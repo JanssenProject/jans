@@ -181,7 +181,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
             identity.setWorkingParameter("fido2_attestation_request", ServerUtil.asJson(attestationResponse))
-            print "Fido2. Prepare for step 2. Failed to start attestation flow.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % ( assertionResponse, attestationResponse )
+            print "Fido2. Prepare for step 2. Successfully start flow with next requests.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % ( assertionResponse, attestationResponse )
 
             return True
         elif (step == 3):
