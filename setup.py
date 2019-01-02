@@ -718,6 +718,8 @@ class Setup(object):
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
+            self.run([self.cmd_chmod, '660', self.oxauth_openid_jwks_fn])
+            self.run([self.cmd_chmod, '660', self.oxauth_openid_jks_fn])
 
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
