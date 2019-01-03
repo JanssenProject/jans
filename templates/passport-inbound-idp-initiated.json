@@ -1,5 +1,5 @@
 {
-	"your_idp_name1": {
+	"your_idp_name": {
 			"openidclient": {
 				"server_uri": "",
 				"client_id": ""
