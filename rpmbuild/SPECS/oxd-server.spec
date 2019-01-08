@@ -49,7 +49,7 @@ install -m 644 oxd-https-extension/target/oxd-https-extension-4.0.0.Beta.jar %{b
 install -m 644 oxd-https-extension/oxd-https.keystore %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 oxd-https-extension/oxd-https.yml %{buildroot}/opt/oxd-https-extension/lib/
 install -m 644 README.md %{buildroot}/opt/oxd-server/
-install -m 644 LICENSE %{buildroot}/opt/oxd-server/
+install -m 644 license.md %{buildroot}/opt/oxd-server/
 install -m 644 bcprov-jdk15on-1.54.jar %{buildroot}/opt/oxd-server/lib/
 mkdir -p %{buildroot}/var/log/oxd-server
 mkdir -p %{buildroot}/etc/oxd/oxd-server
