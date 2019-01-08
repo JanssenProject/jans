@@ -4286,12 +4286,11 @@
         },
         {
             "desc": "OX code challenge hash",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxCodeChallengeHash"
             ],
             "oid": "oxAttribute:399",
-            "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         }
