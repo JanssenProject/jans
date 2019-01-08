@@ -44,7 +44,7 @@ install -m 644 oxd-server/src/main/resources/swagger.yaml %{buildroot}/opt/oxd-s
 install -m 644 bcprov-jdk15on-1.54.jar %{buildroot}/opt/oxd-server/lib/
 install -m 644 oxd-server/target/oxd-server.jar %{buildroot}/opt/oxd-server/lib/
 install -m 644 README.md %{buildroot}/opt/oxd-server/
-install -m 644 LICENSE %{buildroot}/opt/oxd-server/
+install -m 644 license.md %{buildroot}/opt/oxd-server/
 mkdir -p %{buildroot}/var/log/oxd-server
 mkdir -p %{buildroot}/etc/default
 
