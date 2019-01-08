@@ -3179,7 +3179,7 @@ class Setup(object):
             if self.ldap_type == 'openldap':
                 if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
                     self.run([service_path, 'restart', 'rsyslog.service'])
-                    self.run([service_path, 'start', 'solserver.service'])
+                    self.run([service_path, 'restart', 'solserver.service'])
                 else:
                     # Below two lines are specifically for Ubuntu 14.04
                     if self.os_type == 'ubuntu':
@@ -3189,7 +3189,7 @@ class Setup(object):
                         self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
     
                     self.run([service_path, 'rsyslog', 'restart'])
-                    self.run([service_path, 'solserver', 'start'])
+                    self.run([service_path, 'solserver', 'restart'])
             elif self.ldap_type == 'opendj':
                 self.run_service_command('opendj', 'restart')
 
