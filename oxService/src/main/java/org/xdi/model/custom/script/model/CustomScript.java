@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -41,7 +40,7 @@ public class CustomScript extends BaseEntry {
 
     @LdapAttribute(name = "displayName")
     @Pattern(regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$", message = "Name should contain only letters, digits and underscores")
-    @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
+    @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
 
     @LdapAttribute(name = "description")
