@@ -126,7 +126,7 @@ public class Validator {
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
             if (now.after(expiresAt)) {
-                LOG.error("ID Token is expired. (It is after " + now + ").");
+                LOG.error("ID Token is expired. (" + expiresAt + " is before " + now + ").");
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_EXPIRED);
             }
 
