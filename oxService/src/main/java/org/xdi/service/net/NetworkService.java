@@ -2,18 +2,20 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.service.net;
+ */
+package org.xdi.service.net;
 
-import java.io.Serializable;
+import org.slf4j.Logger;
+import org.xdi.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.xdi.util.StringHelper;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Network service
@@ -52,4 +54,15 @@ public class NetworkService implements Serializable {
         return remoteIp;
     }
 
+    public String getHost(String serverUri) {
+        URI uri;
+        try {
+            uri = new URI(serverUri);
+            return uri.getHost();
+        } catch (URISyntaxException ex) {
+            log.error("Failed to get remote IP", ex);
+        }
+
+        return serverUri;
+    }
 }
