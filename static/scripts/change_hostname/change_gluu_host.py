@@ -159,7 +159,7 @@ class ChangeGluuHostname:
             ldap_server = self.server
 
         ldap_bind_dn = "cn=directory manager"
-        if ldap_type == 'openldap':
+        if self.ldap_type == 'openldap':
             ldap_bind_dn += ' ,o=gluu'
 
         ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
