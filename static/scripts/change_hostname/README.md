@@ -12,10 +12,21 @@ Requirements:
 - change_config.py
 - change_gluu_host.py
 
+Ubuntu Users
+-------------
 Install python-pip and ldap3
 
 ```
 apt install python-pip
+pip install ldap3
+```
+
+CentOS7 Users
+--------------
+
+```
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+python get-pip.py
 pip install ldap3
 ```
 
