@@ -193,21 +193,8 @@ class Migration(object):
                 if not os.path.exists(targetFn):
                     os.mkdir(targetFn)
             else:
-                try:
-                    # if targetFn == '/etc/gluu/conf/passport-config.json':
-                    #     logging.debug("Skipping %s", targetFn)
-                    # elif targetFn == '/etc/certs/passport-rp.jks':
-                    #     logging.debug("Skipping %s", targetFn)
-                    # elif targetFn == '/etc/certs/passport-rp.pem':
-                    #     logging.debug("Skipping %s", targetFn)
-                    # elif targetFn == '/etc/certs/passport-rs.jkss':
-                    #     logging.debug("Skipping %s", targetFn)
-                    # else:
-                    logging.debug("copying %s", targetFn)
-                    self.getOutput(['cp', fn, targetFn])
-                    #shutil.copyfile(fn, targetFn)
-                except:
-                    logging.error("Error copying %s", targetFn)
+                self.getOutput(['cp', fn, targetFn])
+
 
     def detect_os_type(self):
         distro_info = self.readFile('/etc/redhat-release')
@@ -393,10 +380,9 @@ class Migration(object):
             ]
 
         for pair in folder_map:
-            #copy_tree(pair[0], pair[1])
             if pair[1] == '/opt':
                 continue
-            logging.debug("Copying tree", pair[0], "to", pair[1])
+            logging.debug("Copying tree %s to %s ", pair[0], pair[1])
             copy_tree(pair[0], pair[1])
 
     def stopWebapps(self):

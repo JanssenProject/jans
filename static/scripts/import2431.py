@@ -210,11 +210,7 @@ class Migration(object):
                 if not os.path.exists(targetFn):
                     os.mkdir(targetFn)
             else:
-                try:
-                    logging.debug("copying %s", targetFn)
-                    shutil.copyfile(fn, targetFn)
-                except:
-                    logging.error("Error copying %s", targetFn)
+                self.getOutput(['cp', fn, targetFn])
 
     def detect_os_type(self):
         distro_info = self.readFile('/etc/redhat-release')
@@ -338,6 +334,9 @@ class Migration(object):
             ]
 
         for pair in folder_map:
+            if pair[1] == '/opt':
+                continue
+            logging.debug("Copying tree %s to %s", pair[0],  pair[1])
             copy_tree(pair[0], pair[1])
 
     def stopWebapps(self):
@@ -927,10 +926,7 @@ class Migration(object):
                         entry['gluuEntityType'] = ['Single SP']    
                         entry['gluuSpecificRelyingPartyConfig']=['true']
                         LONGBASE64ENCODEDSTRING = '<rp:ProfileConfiguration xsi:type="saml:SAML2SSOProfile" \n\tincludeAttributeStatement="true"\n\tassertionLifetime="300000"\n\tassertionProxyCount="0"\n\tsignResponses="conditional"\n\tsignAssertions="never"\n\tsignRequests="conditional"\n\tencryptAssertions="conditional"\n\tencryptNameIds="never"\n/>'
-                        if not 'gluuProfileConfiguration' in entry:
-                            entry['gluuProfileConfiguration']=[LONGBASE64ENCODEDSTRING]
-                        else:
-                            entry['gluuProfileConfiguration'].append(LONGBASE64ENCODEDSTRING)
+                        entry['gluuProfileConfiguration']=[LONGBASE64ENCODEDSTRING]
 
 
             for attr in entry.keys():
@@ -1149,20 +1145,29 @@ class Migration(object):
             self.startOpenDJ()
 
     def copyIDPFiles(self):
-        idp_dir = os.path.join(self.backupDir, 'opt', 'idp')
-        if os.path.isdir(idp_dir):
-            logging.info('Copying Shibboleth IDP files...')
-            if os.path.isdir(os.path.join(idp_dir, 'metadata')):
-                copy_tree(
-                    os.path.join(self.backupDir, 'opt', 'idp', 'metadata'),
-                    '/opt/shibboleth-idp/metadata')
-            if os.path.isdir(os.path.join(idp_dir, 'ssl')):
-                copy_tree(
-                    os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
-                    '/opt/shibboleth-idp/ssl')
+        logging.info('Copying Shibboleth IDP files...')
+
+        dst = '/opt/shibboleth-idp'
+        if os.path.isdir(dst):
+            src = os.path.join(self.backupDir, 'opt', 'shibboleth-idp', 'metadata')
+            if os.path.isdir(src):
+                self.getOutput(['cp', '-r', src, dst])
+            src = os.path.join(self.backupDir, 'opt', 'idp', 'metadata')
+            if os.path.isdir(src):
+                self.getOutput(['cp', '-r', src, dst])
+
+        dst = '/opt/shibboleth-idp'
+        src = os.path.join(self.backupDir, 'opt', 'idp', 'ssl')
+        if os.path.isdir(dst) and os.path.isdir(src):
+            self.getOutput(['cp', '-r', src, dst])
+
+
+        ldap_properties_fn = '/opt/shibboleth-idp/conf/ldap.properties'
+        
+        if os.path.exists(ldap_properties_fn):
 
             if self.ldap_type == 'opendj':
-                ldap_properties_fn = '/opt/shibboleth-idp/conf/ldap.properties'
+                
                 if os.path.exists(ldap_properties_fn):
                     tmp_fn = '/tmp/ldap.properties_file~'
                     out_file = open(tmp_fn,'w')
@@ -1295,12 +1300,13 @@ class Migration(object):
 
         #Create Client for IDP
 
-        clientTwoQuads = '%s.%s' % (getQuad(), getQuad())
+        
 
         
-        idp_client_id = self.getProp('idp_client_id')
+        idp_client_id = self.getProp('idp_client_id', self.setup_properties_last)
 
         if not idp_client_id:
+            clientTwoQuads = '%s.%s' % (getQuad(), getQuad())
             logging.info('Idp Client does not exist. Creating ...')
             idp_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
 
@@ -1346,7 +1352,6 @@ class Migration(object):
 
         else:
             dn = "inum={0},ou=clients,o={1},o=gluu".format(idp_client_id, self.inumOrg)
-            idp_client_id = '{0}!0008!%{1}'.format(self.inumOrg, idp_client_id)
             result = con.search_s(dn, ldap.SCOPE_BASE,'(objectClass=*)')
             idpClient_encoded_pw = result[0][1]['oxAuthClientSecret'][0]
             if not 'oxAuthLogoutURI' in result[0][1]:
