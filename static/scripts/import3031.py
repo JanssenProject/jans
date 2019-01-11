@@ -697,6 +697,7 @@ class Migration(object):
                         del entry['inum']
             
 
+            ldif_writer.unparse(dn, entry)
 
         # Finally
         processed_fp.close()
@@ -729,19 +730,8 @@ class Migration(object):
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
 
-
-                    # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
-                    # atr = parser.parse()
                     base64Types = [""]
-                    # for idx, val in enumerate(parser.entries):
-                    # if 'displayName' in val:
-                    #     if val['displayName'][0] == 'SCIM Resource Set':
-                    #         out = CreateLDIF(parser.getDNs()[idx], val,
-                    #                          base64_attrs=base64Types)
-                    #         f = open(self.o_gluu, "a")
-                    #         f.write('\n')
-                    #         f.write(out)
-        
+
         progress_bar(0, 0, 'converting Dns', True)
         
         data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
@@ -989,7 +979,7 @@ class Migration(object):
         clientTwoQuads = '%s.%s' % (getQuad(), getQuad())
 
         
-        idp_client_id = self.getProp('idp_client_id')
+        idp_client_id = self.getProp('idp_client_id', self.setup_properties_last)
 
         if not idp_client_id:
             logging.info('Idp Client does not exist. Creating ...')
