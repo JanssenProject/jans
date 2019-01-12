@@ -624,6 +624,31 @@ class Migration(object):
                     oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
                     new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
 
+
+                if 'gluuPassportConfiguration' in new_entry:
+                    gluuPassportConfiguration = new_entry['gluuPassportConfiguration']
+
+                    new_strategies = {}
+                    strategies = []
+                    change = False
+                    for pp_conf in gluuPassportConfiguration:
+                        pp_conf_js = json.loads(pp_conf)
+                        strategies.append(pp_conf_js['strategy'])
+                        if not pp_conf_js['strategy'] in new_strategies:
+                            if pp_conf_js['fieldset'][0].has_key('value'):
+                                
+                                if not '_client_' in pp_conf_js['fieldset'][0]['value']:
+                                    strategy={'strategy':pp_conf_js['strategy'], 'fieldset':[]}
+                                    for st_comp in pp_conf_js['fieldset']:
+                                        strategy['fieldset'].append({'value1':st_comp['key'], 'value2':st_comp['value'], "hide":False,"description":""})        
+                                    new_strategies[pp_conf_js['strategy'] ] = json.dumps(strategy)
+                                    change = True
+                            else:
+                                new_strategies[pp_conf_js['strategy'] ] = pp_conf
+
+                    new_entry['gluuPassportConfiguration'] = new_strategies.values()
+
+
             ldif_writer.unparse(dn, new_entry)
         
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -668,7 +693,6 @@ class Migration(object):
                         logging.debug('Cannot parse multival %s in DN %s', attr, dn)
                         attr_values.append(val)
                 entry[attr] = attr_values
-                
 
 
             if '3.1.3' in self.oxVersion:
@@ -686,7 +710,7 @@ class Migration(object):
                         oxId = entry['inum'][:]
                         entry['oxId'] = oxId
                         del entry['inum']
-            
+
 
             ldif_writer.unparse(dn, entry)
 
