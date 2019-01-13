@@ -83,13 +83,19 @@ def obscure(data, encode_salt):
     return base64.b64encode(en_data)
 
 class DBLDIF(LDIFParser):
-    def __init__(self, ldif_file):
+    def __init__(self, ldif_file, workingDir):
+        logging.info("Dumping %s to shelve database", ldif_file)
+        sdb_dir = os.path.join(workingDir,'sdb')
+        if not os.path.exists(sdb_dir):
+            os.mkdir(sdb_dir)
+        
         LDIFParser.__init__(self, open(ldif_file,'rb'))
         db_file =  os.path.basename(ldif_file)
-        sdb_file = os.path.join('/tmp', db_file+'.sdb')
+        sdb_file = os.path.join(sdb_dir, db_file+'.sdb')
+
         if os.path.exists(sdb_file):
             os.remove(sdb_file)
-        #logging.info("\nDumping %s to shelve database" % ldif_file)
+        
         self.sdb = shelve.open(sdb_file)
 
     def handle(self, dn, entry):
@@ -548,8 +554,39 @@ class Migration(object):
             pass
         return "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
 
+
+    def ldif2shelve(self):
+        
+        # convert ldif to shelve database
+        ldif_shelve_dict = {}
+        for ldif_file in os.listdir(self.ldifDir):
+            
+            sdb=DBLDIF(os.path.join(self.ldifDir, ldif_file), self.workingDir)
+            sdb.parse()
+            ldif_shelve_dict[ldif_file]=sdb.sdb
+    
+        return ldif_shelve_dict
+
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
+
+        # convert ldif to shelve database
+        ldif_shelve_dict = self.ldif2shelve()
+
+        enabled_scripts = []
+        
+        for script_dn in ldif_shelve_dict['scripts.ldif']:
+            if 'gluuStatus' in ldif_shelve_dict['scripts.ldif'][script_dn] and\
+                ldif_shelve_dict['scripts.ldif'][script_dn]['gluuStatus'][0] == 'true':
+
+                inum = ldif_shelve_dict['scripts.ldif'][script_dn]['inum'][0]
+                
+                if inum.endswith('!0011!2DAF.F995'):
+                    inum = inum.replace('!0011!2DAF.F995','!0011!2DAF.F9A5')
+                elif inum.endswith('!0011!2DAF.F9A5'):
+                    inum = inum.replace('!0011!2DAF.F9A5','!0011!2DAF.F995')
+                
+                enabled_scripts.append(inum)
 
         attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
 
@@ -578,14 +615,26 @@ class Migration(object):
 
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
+
+            #If it is custom script, we won't get any attribue form old entry except gluuStatus
+            if 'oxScript' in new_entry:
+                if new_entry['inum'][0] in enabled_scripts:
+                    new_entry['gluuStatus'] = ['true']
+                ldif_writer.unparse(dn, new_entry)
+                continue
+            
+            # we don't want to change scope SCIM Access
+            if 'oxPolicyScriptDn' in new_entry:
+                if new_entry['inum'][0].endswith('!0010!8CAD.B06E'):
+                    ldif_writer.unparse(dn, new_entry)
+                    continue
+
             if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
                 continue
 
             old_entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
-
-
 
             for attr in old_entry.keys():
                 if attr in ignoreList:
@@ -648,7 +697,6 @@ class Migration(object):
 
                     new_entry['gluuPassportConfiguration'] = new_strategies.values()
 
-
             ldif_writer.unparse(dn, new_entry)
         
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -656,11 +704,8 @@ class Migration(object):
         # Pick all the left out DNs from the old DN map and write them to the LDIF
         nodn = len(old_dn_map)
         
-        ldif_shelve_dict = {}
-        
         sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
 
-        
         for cnt, dn in enumerate(sorted(old_dn_map, key=len)):
             progress_bar(cnt, nodn, 'Perapring DNs for ' + self.oxVersion)
             
@@ -670,13 +715,8 @@ class Migration(object):
                 continue  # Already processed
 
             cur_ldif_file = old_dn_map[dn]
-            if not cur_ldif_file in ldif_shelve_dict:
-                sdb=DBLDIF(os.path.join(self.ldifDir, cur_ldif_file))
-                sdb.parse()
-                ldif_shelve_dict[cur_ldif_file]=sdb.sdb
 
             entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
-
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -1083,20 +1123,20 @@ class Migration(object):
         
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
-        self.verifyBackupData()
-        self.setupWorkDirectory()
-        self.stopWebapps()
-        self.stopLDAPServer()
-        self.copyCertificates()
-        self.copyCustomFiles()
-        self.copyIDPFiles()
-        self.copyCustomSchema()
-        self.exportInstallData()
+        #self.verifyBackupData()
+        #self.setupWorkDirectory()
+        #self.stopWebapps()
+        #self.stopLDAPServer()
+        #self.copyCertificates()
+        #self.copyCustomFiles()
+        #self.copyIDPFiles()
+        #self.copyCustomSchema()
+        #self.exportInstallData()
         self.processBackupData()
-        self.importProcessedData()
-        self.fixPermissions()
-        self.startLDAPServer()
-        self.idpResolved()
+        #self.importProcessedData()
+        #self.fixPermissions()
+        #self.startLDAPServer()
+        #self.idpResolved()
 
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
