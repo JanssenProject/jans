@@ -623,9 +623,9 @@ class Migration(object):
                 ldif_writer.unparse(dn, new_entry)
                 continue
             
-            # we don't want to change scope SCIM Access
+            # we don't want to change uma SCIM Access and Passport Access scopes
             if 'oxPolicyScriptDn' in new_entry:
-                if new_entry['inum'][0].endswith('!0010!8CAD.B06E'):
+                if new_entry['inum'][0].endswith('!0010!8CAD.B06E') or new_entry['inum'][0].endswith('!0010!8CAD.B06D'):
                     ldif_writer.unparse(dn, new_entry)
                     continue
 
@@ -697,6 +697,7 @@ class Migration(object):
 
                     new_entry['gluuPassportConfiguration'] = new_strategies.values()
 
+
             ldif_writer.unparse(dn, new_entry)
         
         progress_bar(0, 0, 'Rewriting DNs', True)
@@ -752,6 +753,15 @@ class Migration(object):
                         del entry['inum']
 
 
+            if '315' >= self.oxVersion:
+                if 'oxExternalUid' in entry:
+                    oxExternalUid = entry['oxExternalUid'][0]
+                    if not (oxExternalUid.startswith('hotp:') or oxExternalUid.startswith('totp:') or oxExternalUid.startswith('passport-')):
+                        entry['oxExternalUid'] = [ 'passport-' +  oxExternalUid]
+                    
+
+
+
             ldif_writer.unparse(dn, entry)
 
         # Finally
@@ -774,14 +784,16 @@ class Migration(object):
                          line = 'oxAuthenticationMode: auth_ldap_server\n'
                     elif line.startswith('oxTrustAuthenticationMode'):
                          line = 'oxTrustAuthenticationMode: auth_ldap_server\n'
+
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
+
                     if line.startswith('oxMemcachedConfiguration:') or line.startswith('oxCacheConfiguration:'):
                         line = 'oxCacheConfiguration: {"cacheProviderType":"IN_MEMORY","memcachedConfiguration":{"servers":"localhost:11211","maxOperationQueueLength":100000,"bufferSize":32768,"defaultPutExpiration":60,"connectionFactoryType":"DEFAULT"},"inMemoryConfiguration":{"defaultPutExpiration":60},"redisConfiguration":{"redisProviderType":"STANDALONE","servers":"localhost:6379","defaultPutExpiration":60}}'
 
-
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
+
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
 
@@ -797,6 +809,8 @@ class Migration(object):
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
+
+
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
@@ -1105,6 +1119,17 @@ class Migration(object):
         con.modify_s(dn, [( ldap.MOD_REPLACE, 'oxConfApplication',  oxConfApplication_js)])
         logging.info('oxConfApplication was fixed for SAML') 
 
+    def fixPassportConfig(self):
+        passport_config_fn = '/etc/gluu/conf/passport-config.json'
+        if os.path.exists(passport_config_fn):
+            self.getOutput(['cp', passport_config_fn, passport_config_fn +'_back_' + time.ctime()])
+            passport_config = json.load(open(passport_config_fn))
+            passport_config['applicationEndpoint'] = 'https://{0}/oxauth/postlogin.htm'.format(self.hostname)
+            passport_config['logLevel'] = 'info'
+            passport_config['consoleLogOnly'] = False
+            
+            json.dump(passport_config, open(passport_config_fn, 'w'), indent=2)
+
         
     def migrate(self):
         """Main function for the migration of backup data
@@ -1120,7 +1145,7 @@ class Migration(object):
         self.oxVersion = self.getProp('oxVersion', self.setup_properties_last)
         self.oxVersion_number = self.oxVersion.replace('.', '').replace('Final','')
         self.hostname = self.getProp('hostname', self.setup_properties_last)
-        
+
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
         self.verifyBackupData()
@@ -1137,6 +1162,7 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         self.idpResolved()
+        self.fixPassportConfig()
 
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
