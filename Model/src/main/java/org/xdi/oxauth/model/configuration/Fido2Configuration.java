@@ -22,7 +22,7 @@ public class Fido2Configuration {
 
     private String serverMetadataFolder;
 
-    private boolean disable;
+    private boolean disableFido2;
 
     public String getServerMetadataFolder() {
         return serverMetadataFolder;
@@ -81,11 +81,11 @@ public class Fido2Configuration {
     }
 
     public boolean isDisable() {
-        return disable;
+        return disableFido2;
     }
 
     public void setDisable(boolean disable) {
-        this.disable = disable;
+        this.disableFido2 = disable;
     }
 
 }
