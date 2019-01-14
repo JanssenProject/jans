@@ -755,9 +755,9 @@ class Migration(object):
 
             if '315' >= self.oxVersion:
                 if 'oxExternalUid' in entry:
-                    oxExternalUid = entry['oxExternalUid'][0]
-                    if not (oxExternalUid.startswith('hotp:') or oxExternalUid.startswith('totp:') or oxExternalUid.startswith('passport-')):
-                        entry['oxExternalUid'] = [ 'passport-' +  oxExternalUid]
+                    for i, oxExternalUid in enumerate(entry['oxExternalUid']):
+                        if not (oxExternalUid.startswith('hotp:') or oxExternalUid.startswith('totp:') or oxExternalUid.startswith('passport-')):
+                            entry['oxExternalUid'][i] = 'passport-' +  oxExternalUid
                     
 
 
@@ -1145,7 +1145,7 @@ class Migration(object):
         self.oxVersion = self.getProp('oxVersion', self.setup_properties_last)
         self.oxVersion_number = self.oxVersion.replace('.', '').replace('Final','')
         self.hostname = self.getProp('hostname', self.setup_properties_last)
-
+        
         self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
         self.verifyBackupData()
