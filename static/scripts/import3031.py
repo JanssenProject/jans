@@ -1164,11 +1164,18 @@ class Migration(object):
         self.idpResolved()
         self.fixPassportConfig()
 
-        print("============================================================")
-        print("The migration is complete. Gluu Server needs to be restarted.")
-        print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
-        print("------------------------------------------------------------")
-        print("\n")
+        print "============================================================"
+        print "The migration is complete. Gluu Server needs to be restarted."
+        
+        print ('\033[;1mPlease Note:\033[0;0m oxAuthenticationMode and oxTrustAuthenticationMode was'
+                'set to auth_ldap_server in case custom authentication script fails.'
+                'Please review your scripts and adjust default authentication method')
+
+        
+        
+        print "\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n"
+        print "------------------------------------------------------------"
+        print "\n"
 
 
 if __name__ == "__main__":
