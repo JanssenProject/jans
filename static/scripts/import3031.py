@@ -385,12 +385,17 @@ class Migration(object):
                 (custom + 'oxtrust/libs', self.jettyDir + 'identity/lib/ext'),
             ]
 
+        folder_map.append((os.path.join(self.backupDir, 'var', 'ox'), "/var/ox"))
+        
+
         for pair in folder_map:
             if pair[1] == '/opt':
                 continue
             logging.debug("Copying tree %s to %s ", pair[0], pair[1])
             copy_tree(pair[0], pair[1])
 
+        self.getOutput(['chown', '-R', 'jetty:jetty', pair[1]])
+        
     def stopWebapps(self):
         logging.info("Stopping Webapps oxAuth and Identity.")
         stop_msg = self.getOutput([self.service, 'oxauth', 'stop'])
@@ -1167,11 +1172,9 @@ class Migration(object):
         print "============================================================"
         print "The migration is complete. Gluu Server needs to be restarted."
         
-        print ('\033[;1mPlease Note:\033[0;0m oxAuthenticationMode and oxTrustAuthenticationMode was'
-                'set to auth_ldap_server in case custom authentication script fails.'
-                'Please review your scripts and adjust default authentication method')
-
-        
+        print '\033[;1mPlease Note:\033[0;0m oxAuthenticationMode and oxTrustAuthenticationMode was'
+        print 'set to auth_ldap_server in case custom authentication script fails.'
+        print  'Please review your scripts and adjust default authentication method'
         
         print "\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n"
         print "------------------------------------------------------------"

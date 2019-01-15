@@ -910,7 +910,6 @@ class Exporter(object):
         for dn, entry in parser.dn_entry:
             if 'oxIDPAuthentication' in entry:
                 tmp_json = json.loads(entry['oxIDPAuthentication'][0])
-                tmp_json['bindDN'] = 'cn=Directory Manager'
                 tmp_config = json.loads(tmp_json['config'])
                 tmp_config['bindDN'] = 'cn=Directory Manager'
                 tmp_json['config'] = json.dumps(tmp_config)
