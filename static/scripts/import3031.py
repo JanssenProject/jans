@@ -674,23 +674,40 @@ class Migration(object):
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
                 
-            
-            if '314' >= self.oxVersion:
+            if self.oxVersion[:5] >='3.1.4':
                 if 'ou=oxauth,ou=configuration' in dn:
                     oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
                     oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
 
-                    if '314' == self.oxVersion:
+                    if self.oxVersion[:5] == '3.1.4':
                         oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
                         oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
-                        
+
+                    if self.oxVersion[:5] == '3.1.5':
+                        for ox_attr in (
+                                        'loginPage',
+                                        'authorizationPage',
+                                        'umaRequesterPermissionTokenLifetime', 
+                                        'validateTokenEndpoint',
+                                        'shortLivedAccessTokenLifetime',
+                                        'longLivedAccessTokenLifetime',
+                                        'sessionStateHttpOnly',
+                                        'velocityLog',
+                                        ):
+
+                            if ox_attr in oxAuthConfDynamic:
+                                del oxAuthConfDynamic[ox_attr]
+
+                        oxAuthConfDynamic['dynamicRegistrationExpirationTime'] = -1
+
+                        if not ['code', 'token'] in oxAuthConfDynamic['responseTypesSupported']:
+                            oxAuthConfDynamic['responseTypesSupported'].insert(4, ['code', 'token'])
 
                     new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
-                    
+
                     oxAuthConfStatic = json.loads(new_entry['oxAuthConfStatic'][0])
                     oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
                     new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
-
 
                 if 'gluuPassportConfiguration' in new_entry:
                     gluuPassportConfiguration = new_entry['gluuPassportConfiguration']
