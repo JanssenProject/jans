@@ -235,6 +235,34 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAttributes",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxConfigurationCode",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxResourceSetId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthUmaScope",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	}
 
 ]
