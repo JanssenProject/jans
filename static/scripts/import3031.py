@@ -593,8 +593,17 @@ class Migration(object):
                 
                 enabled_scripts.append(inum)
 
-        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
 
+        inumAppliance = self.getProp('inumAppliance')
+        appliances_dn = 'inum={0},ou=appliances,o=gluu'.format(inumAppliance)
+
+
+        oxauth_client_id = self.getProp('oxauth_client_id', self.setup_properties_last)
+        
+        oxauth_client_dn = 'inum={0},ou=clients,o={1},o=gluu'.format(oxauth_client_id, self.inumOrg)
+
+        attrib_dn = "inum={0}!0005!D2E0,ou=attributes,o={0},o=gluu".format(self.inumOrg)
+        
         processed_fp = open(self.processTempFile, 'w')
 
         ldif_writer = LDIFWriter(processed_fp)
@@ -702,6 +711,26 @@ class Migration(object):
 
                     new_entry['gluuPassportConfiguration'] = new_strategies.values()
 
+                if dn == appliances_dn:
+                    
+                    if 'gluuSmtpHost' in old_entry:
+                    
+                        oxSmtpConfiguration = {
+                              "host": old_entry.get('gluuSmtpHost',[''])[0],
+                              "port": old_entry.get('gluuSmtpPort',[0])[0],
+                              "password": old_entry.get('gluuSmtpPassword',[''])[0],
+                              "requires-ssl": old_entry.get('gluuSmtpRequiresSsl',[False])[0],
+                              "trust-host": True,
+                              "from-name": old_entry.get('gluuSmtpFromName',[''])[0],
+                              "from-email-address": old_entry.get('gluuSmtpUserName',[''])[0],
+                              "requires-authentication": old_entry.get('gluuSmtpRequiresAuthentication',[False])[0],
+                              "user-name": old_entry.get('gluuSmtpUserName',[False])[0],
+                            }
+                
+                    new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
+                
+                elif dn == oxauth_client_dn:
+                    new_entry['oxAuthLogoutURI'] = ['https://{0}/identity/logout'.format(self.hostname)]
 
             ldif_writer.unparse(dn, new_entry)
         
@@ -720,9 +749,12 @@ class Migration(object):
             if dn in currentDNs:
                 continue  # Already processed
 
+    
+
             cur_ldif_file = old_dn_map[dn]
 
             entry = ldif_shelve_dict[cur_ldif_file][str(dn)]
+
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -764,7 +796,7 @@ class Migration(object):
                         if not (oxExternalUid.startswith('hotp:') or oxExternalUid.startswith('totp:') or oxExternalUid.startswith('passport-')):
                             entry['oxExternalUid'][i] = 'passport-' +  oxExternalUid
                     
-
+            
 
 
             ldif_writer.unparse(dn, entry)
