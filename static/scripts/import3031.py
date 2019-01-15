@@ -709,6 +709,24 @@ class Migration(object):
                     oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
                     new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
 
+                if 'oxTrustConfImportPerson' in new_entry:
+                    oxTrustConfImportPerson = json.loads(new_entry['oxTrustConfImportPerson'][0])
+                    
+                    for ox_map in oxTrustConfImportPerson['mappings']:
+                        if ox_map['ldapName'] == 'gluuStatus':
+                            break
+                    else:
+                        oxTrustConfImportPerson['mappings'].append(
+                                                {
+                                                "ldapName": "gluuStatus", 
+                                                "displayName": "User Status", 
+                                                "dataType": "string", 
+                                                "required": False
+                                                }
+                                                )
+                        oxTrustConfImportPerson_str = json.dumps(oxTrustConfImportPerson, indent=2)
+                        new_entry['oxTrustConfImportPerson']=[ oxTrustConfImportPerson_str ]
+
                 if 'gluuPassportConfiguration' in new_entry:
                     gluuPassportConfiguration = new_entry['gluuPassportConfiguration']
 
@@ -731,6 +749,9 @@ class Migration(object):
                                 new_strategies[pp_conf_js['strategy'] ] = pp_conf
 
                     new_entry['gluuPassportConfiguration'] = new_strategies.values()
+
+
+
 
                 if dn == appliances_dn:
                     
