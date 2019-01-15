@@ -1,0 +1,7 @@
+[
+	{
+		"issuer": "CN=Yubico U2F Root CA Serial 457200631",
+		"cert_file": "yubico-u2f-ca-certs.crt"
+	}
+]
+	

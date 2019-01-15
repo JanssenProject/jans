@@ -163,6 +163,22 @@
         {
             "attribute": "oxStatus",
             "index": "eq"
+        },
+        {
+            "attribute": "oxAttributes",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxConfigurationCode",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxResourceSetId",
+            "index": "eq"
+        },
+        {
+            "attribute": "oxAuthUmaScope",
+            "index": "eq"
         }
     ]
 }
