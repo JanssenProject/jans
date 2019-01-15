@@ -484,6 +484,7 @@ class Exporter(object):
                                 '/opt/gluu/jetty/identity/lib',
                                 '/opt/gluu/jetty/oxauth/custom',
                                 '/opt/gluu/jetty/oxauth/lib',
+                                '/var/ox/photos',
                                 ]
         self.passwordFile = tempfile.mkstemp()[1]
 
