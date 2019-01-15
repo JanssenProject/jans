@@ -296,7 +296,7 @@
 		"userAutoEnrollment":false,
 		"unfinishedRequestExpiration":120,
 		"authenticationHistoryExpiration":1296000,
-		"disable":true
+		"disableFido2":true
 	},
    "loggingLevel": "INFO",
    "errorHandlingMethod":"internal"

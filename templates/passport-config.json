@@ -10,6 +10,7 @@
   "applicationStartpoint": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
   "applicationEndpoint": "https://%(hostname)s/oxauth/postlogin.htm",
   "logLevel": "info",
+  "consoleLogOnly" : false,
   "activeMQConf": {
     "isEnabled": false,
     "host": "",
