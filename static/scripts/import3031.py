@@ -678,11 +678,12 @@ class Migration(object):
             if '314' >= self.oxVersion:
                 if 'ou=oxauth,ou=configuration' in dn:
                     oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
-                    oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
+                    oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
 
                     if '314' == self.oxVersion:
                         oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
-                        oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
+                        oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
+                        
 
                     new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
                     
