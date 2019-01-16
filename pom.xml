@@ -19,8 +19,8 @@
 		<oxnotify.version>4.0.0-SNAPSHOT</oxnotify.version>
 		<oxlicense.version>4.0.0-SNAPSHOT</oxlicense.version>
 
-		<jackson.version>2.9.5</jackson.version>
-		<jackson.databind.version>2.9.5</jackson.databind.version>
+		<jackson.version>2.9.8</jackson.version>
+		<jackson.databind.version>2.9.8</jackson.databind.version>
 		<jackson.prev.version>1.9.11</jackson.prev.version>
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
@@ -98,6 +98,7 @@
 		<module>RP-Demo</module>
 		<module>common</module>
 		<module>fido2-server</module>
+		<module>fido2-client</module>
 		<module>Server</module>
 	</modules>
 
@@ -128,7 +129,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>
-				<artifactId>oxauth-fido2</artifactId>
+				<artifactId>oxauth-fido2-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxauth-fido2-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

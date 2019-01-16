@@ -39,7 +39,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version September 10, 2018
+ * @version January 1, 2019
  */
 public abstract class AbstractCryptoProvider {
 
@@ -97,31 +97,37 @@ public abstract class AbstractCryptoProvider {
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS384, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS512, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES256, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES384, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES512, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
         }
 
         JSONObject jsonObject = new JSONObject();

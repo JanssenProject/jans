@@ -25,8 +25,8 @@ public class FidoU2fClientFactory {
         return instance;
     }
 
-    public U2fConfigurationService createMetaDataConfigurationService(String umaMetaDataUri) {
-        return ProxyFactory.create(U2fConfigurationService.class, umaMetaDataUri);
+    public U2fConfigurationService createMetaDataConfigurationService(String u2fMetaDataUri) {
+        return ProxyFactory.create(U2fConfigurationService.class, u2fMetaDataUri);
     }
 
     public AuthenticationRequestService createAuthenticationRequestService(U2fConfiguration metadataConfiguration) {

@@ -1,0 +1,87 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2018, Gluu
+ */
+
+package org.gluu.oxauth.fido2.client;
+
+import java.io.IOException;
+
+import javax.ws.rs.core.UriBuilder;
+
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+/**
+ * Helper class which creates proxy Fido2 services
+ *
+ * @author Yuriy Movchan
+ * @version 12/21/2018
+ */
+public class Fido2ClientFactory {
+
+    private final static Fido2ClientFactory instance = new Fido2ClientFactory();
+
+    private ApacheHttpClient4Engine engine;
+    private ObjectMapper objectMapper;
+    
+
+    private Fido2ClientFactory() {
+        this.engine = createEngine();
+        this.objectMapper = new ObjectMapper();
+    }
+
+    public static Fido2ClientFactory instance() {
+        return instance;
+    }
+
+    public ConfigurationService createMetaDataConfigurationService(String metadataUri) {
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataUri));
+        ConfigurationService proxy = target.proxy(ConfigurationService.class);
+        
+        return proxy;
+    }
+
+    public AttestationService createAttestationService(String metadata) throws IOException {
+        JsonNode metadataJson = objectMapper.readTree(metadata);
+        String basePath = metadataJson.get("attestation").get("base_path").asText();
+
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(basePath));
+        AttestationService proxy = target.proxy(AttestationService.class);
+        
+        return proxy;
+    }
+
+    public AssertionService createAssertionService(String metadata) throws IOException {
+        JsonNode metadataJson = objectMapper.readTree(metadata);
+        String basePath = metadataJson.get("assertion").get("base_path").asText();
+
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(basePath));
+        AssertionService proxy = target.proxy(AssertionService.class);
+        
+        return proxy;
+    }
+
+    private ApacheHttpClient4Engine createEngine() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+        ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        
+        return engine;
+    }
+
+}
