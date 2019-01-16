@@ -501,7 +501,9 @@ class Exporter(object):
                                 '/etc/certs',
                                 '/opt/idp/conf',
                                 '/opt/idp/metadata',
-                                '/var/gluu/webapps']
+                                '/var/gluu/webapps',
+                                '/var/ox/photos',
+                                ]
         self.passwordFile = tempfile.mkstemp()[1]
 
         self.ldapsearch = '/opt/opendj/bin/ldapsearch'
