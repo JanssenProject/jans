@@ -191,16 +191,16 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
         }
 
+        // Clean up authorization session
+        removeConsentSessionId(httpRequest, httpResponse);
+
         SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
         if (ldapSessionId == null) {
             final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
             log.debug(reason);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
-                    errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, reason)).build());
+                    errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
         }
-
-        // Clean up authorization session
-        removeConsentSessionId(httpRequest, httpResponse);
 
         boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;

@@ -48,7 +48,7 @@ public class AssertionController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public Response register(String content) throws IOException {
+    public Response authenticate(String content) throws IOException {
         if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
             return Response.status(Status.FORBIDDEN).build();
         }

@@ -1,7 +1,7 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2015, Gluu
+ * Copyright (c) 2018, Gluu
  */
 
 package org.gluu.oxauth.fido2.ws.rs.controller;
@@ -60,11 +60,13 @@ public class ConfigurationController {
 
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);
+        attestation.put("base_path", baseEndpointUri + "/fido2/attestation");
         attestation.put("options_enpoint", baseEndpointUri + "/fido2/attestation/options");
         attestation.put("result_enpoint", baseEndpointUri + "/fido2/attestation/result");
 
         ObjectNode assertion = dataMapperService.createObjectNode();
         response.set("assertion", assertion);
+        assertion.put("base_path", baseEndpointUri + "/fido2/assertion");
         assertion.put("options_enpoint", baseEndpointUri + "/fido2/assertion/options");
         assertion.put("result_enpoint", baseEndpointUri + "/fido2/assertion/result");
 
