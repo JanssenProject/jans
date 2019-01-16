@@ -19,57 +19,95 @@
 			href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600"
 			rel="stylesheet" />
 
-		<script src="./scripts/u2f-api.js" />
+		<script src="js/base64js.js" />
+		<script src="js/base64url.js" />
+		<script src="js/webauthn.js" />
 
 		<script>
-			var auth_request = ${identity.getWorkingParameter('fido_u2f_authentication_request')};
-			var register_request = ${identity.getWorkingParameter('fido_u2f_registration_request')};
+			var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
+			var attestation_request = ${identity.getWorkingParameter('fido2_attestation_request')};
 
-			function startRegistration() {
-				u2f
-						.register(
-								register_request.registerRequests,
-								register_request.authenticateRequests,
-								function(data) {
-									if (data.errorCode) {
-										alert("U2F failed with error: "
-												+ data.errorCode);
-										return;
-									}
-
-									document.getElementById('tokenResponse').value = JSON
-											.stringify(data);
-									document.getElementById('authMethod').value = 'enroll';
-
-									document.getElementById('u2f_form')
-											.submit();
-								});
+			function setStatus(statusText) {
+				  document.getElementById('status').textContent = statusText;
 			}
 
-			function startAuthentication() {
-				u2f
-						.sign(
-								auth_request.authenticateRequests,
-								function(data) {
-									if (data.errorCode) {
-										alert("U2F failed with error code: "
-												+ data.errorCode);
-										return;
-									}
-
-									document.getElementById('tokenResponse').value = JSON
-											.stringify(data);
-									document.getElementById('authMethod').value = 'authenticate';
-
-									document.getElementById('u2f_form')
-											.submit();
-								});
+			function addMessage(message) {
+			  const el = document.getElementById('messages');
+			  const p = document.createElement('p');
+			  p.appendChild(document.createTextNode(message));
+			  el.appendChild(p);
 			}
 
-			if (auth_request != null) {
-				setTimeout(startAuthentication(), 1000);
+			function addMessages(messages) {
+			  messages.forEach(addMessage);
+			}
+
+			function startAttestation() {
+				console.log('Executing get attestation Fido2 request', attestation_request);
+
+				request = JSON.parse(attestation_request);
+				webauthn.createCredential(request).then(data => {
+					setStatus('Get attestation key data.');
+					document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+					document.getElementById('authMethod').value = 'enroll';
+
+					document.getElementById('fido2_form').submit();
+				}).catch((err) => {
+					setStatus('Registration failed.');
+					console.error('Registration failed', err);
+					
+					if (err.name === 'NotAllowedError') {
+						if (request.excludeCredentials &amp;&amp; (request.excludeCredentials.length > 0)) {
+							addMessage('Credential creation failed, probably because an already registered credential is avaiable.');
+						} else {
+							addMessage('Credential creation failed for an unknown reason.');
+						}
+					} else if (err.name === 'InvalidStateError') {
+						addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+					} else if (err.name === 'AbortError') {
+						addMessage('This operation is canceled by user.');
+					} else if (err.message) {
+						addMessage(`${err.name}: ${err.message}`);
+					} else if (err.messages) {
+						addMessages(err.messages);
+					}
+
+					return false;
+				});
+			}
+
+			function startAssertion() {
+				console.log('Executing get assertion Fido2 request', assertion_request);
+
+				request = JSON.parse(assertion_request);
+				webauthn.getAssertion(request).then(data => {
+					setStatus('Get assertion key data.');
+					document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+					document.getElementById('authMethod').value = 'authenticate';
+
+					document.getElementById('fido2_form').submit();
+				}).catch((err) => {
+					setStatus('Authentication failed.');
+					console.error('Authentication failed', err);
+					
+					if (err.name === 'InvalidStateError') {
+						addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+					} else if (err.name === 'AbortError') {
+						addMessage('This operation is canceled by user.');
+				    } else if (err.message) {
+						addMessage(`${err.name}: ${err.message}`);
+				    } else if (err.messages) {
+						addMessages(err.messages);
+				    }
+
+					return false;
+				});
+			}
+
+			if (assertion_request != null) {
+				setTimeout(startAssertion(), 1000);
 			} else {
-				setTimeout(startRegistration(), 1000);
+				setTimeout(startAttestation(), 1000);
 			}
 		</script>
 
@@ -108,7 +146,7 @@ body {
 </style>
 	</ui:define>
 
-	<ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
+	<ui:define name="pageTitle">oxAuth - Fido2 Login</ui:define>
 	<ui:define name="body">
 		<header class="bs-docs-nav navbar navbar-static-top" id="top">
 		<div class="container-fluid">
@@ -130,11 +168,9 @@ body {
 			style="border-top: 2px solid #1ab26b !important;"></div>
 
 		</header>
-		<form method="post" action="#{request.contextPath}/postlogin.htm"
-			id="u2f_form" onsubmit="return false;">
-			<input type="hidden" name="username" value="${credentials.username}" />
-			<input type="hidden" name="authMethod" id="authMethod" /> <input
-				type="hidden" name="tokenResponse" id="tokenResponse" />
+		<form method="post"	id="fido2_form" action="#{request.contextPath}/postlogin.htm" onsubmit="return false;">
+			<input type="hidden" name="authMethod" id="authMethod" />
+			<input type="hidden" name="tokenResponse" id="tokenResponse" />
 		</form>
 		<h:form id="loginForm">
 			<h:panelGroup rendered="#{not identity.loggedIn}">
@@ -153,6 +189,10 @@ body {
 							alt="step_ver" />
 						<h4>#{msgs['u2f.verification.insertkey']}</h4>
 						<p>#{msgs['u2f.verification.useit']}</p>
+						<h:panelGroup>
+						    <p id="status"></p>
+						    <div id="messages"></div>
+						</h:panelGroup>
 					</div>
 				</div>
 				<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
@@ -174,7 +214,7 @@ body {
 				</h:panelGroup>
 				<div class="login-panel">
 					<h:panelGroup
-						rendered="#{fido_u2f_authentication_request != 'null'}">
+						rendered="fido2_assertion_request != 'null'}">
 					</h:panelGroup>
 				</div>
 			</h:panelGroup>
