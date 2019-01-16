@@ -20,7 +20,7 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationStatus;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -49,7 +49,7 @@ public class AuthenticationPersistenceService {
     private UserService userService;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private PersistenceEntryManager ldapEntryManager;
 
     public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2AuthenticationEntries(null);
