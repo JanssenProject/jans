@@ -73,10 +73,30 @@ public class RegistrationPersistenceService {
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        if (containsBranch(baseDn)) {
+            List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null);
+    
+            return fido2RegistrationnEntries;
+        }
+        
+        return Collections.emptyList();
+    }
 
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null);
+    public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
+        String userInum = userService.getUserInum(username);
+        if (userInum == null) {
+            return Collections.emptyList();
+        }
 
-        return fido2RegistrationnEntries;
+        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        if (containsBranch(baseDn)) {
+            Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
+            List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
+    
+            return fido2RegistrationnEntries;
+        }
+        
+        return Collections.emptyList();
     }
 
     public List<Fido2RegistrationEntry> findAllByChallenge(String challenge) {
