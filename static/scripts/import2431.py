@@ -333,6 +333,8 @@ class Migration(object):
                 (custom + 'oxtrust/libs', self.jettyDir + 'identity/lib/ext'),
             ]
 
+        folder_map.append((os.path.join(self.backupDir, 'var', 'ox'), "/var/ox"))
+
         for pair in folder_map:
             if pair[1] == '/opt':
                 continue
@@ -725,6 +727,11 @@ class Migration(object):
         ldif_shelve_dict = {}
         oxScripts = []
         
+        inumAppliance = self.getProp('inumAppliance')
+        appliances_dn = 'inum={0},ou=appliances,o=gluu'.format(inumAppliance)
+        oxauth_client_id = self.getProp('oxauth_client_id', self.setup_properties_last)
+        oxauth_client_dn = 'inum={0},ou=clients,o={1},o=gluu'.format(oxauth_client_id, self.inumOrg)
+        
         # Determine current primary key
         
         appliences = MyLDIF(open(os.path.join(self.backupDir, 'ldif','appliance.ldif'), 'rb'), None)
@@ -773,14 +780,14 @@ class Migration(object):
                 enabled_scripts.append(script_replacements.get(inum, inum))
 
 
+
         # Rewriting all the new DNs in the new installation to ldif file
+
         nodn=len(currentDNs)
         for cnt, dn in enumerate(currentDNs):
-            
             progress_bar(cnt, nodn, 'Rewriting DNs')
             new_entry = self.getEntry(self.currentData, dn)
     
-
             #If the script was previously enabled, eneble now
             if 'oxCustomScript' in new_entry['objectClass']:
                 oxScripts.append(dn)
@@ -858,7 +865,7 @@ class Migration(object):
 
             
 
-            if '314' >= self.oxVersion:
+            if self.oxVersion[:5] >='3.1.4':
                 if 'ou=oxauth,ou=configuration' in dn:
                     oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
                     oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
@@ -869,6 +876,105 @@ class Migration(object):
                     oxAuthConfStatic = json.loads(new_entry['oxAuthConfStatic'][0])
                     oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
                     new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
+
+
+                if 'ou=oxauth,ou=configuration' in dn:
+                    oxAuthConfDynamic = json.loads(new_entry['oxAuthConfDynamic'][0])
+                    oxAuthConfDynamic['checkSessionIFrame'] = 'https://{0}/oxauth/opiframe.htm'.format(self.hostname)
+
+                    if self.oxVersion[:5] == '3.1.4':
+                        oxAuthConfDynamic['loginPage'] = 'https://{0}/oxauth/login.htm'.format(self.hostname)
+                        oxAuthConfDynamic['authorizationPage'] = 'https://{0}/oxauth/authorize.htm'.format(self.hostname)
+
+                    if self.oxVersion[:5] == '3.1.5':
+                        for ox_attr in (
+                                        'loginPage',
+                                        'authorizationPage',
+                                        'umaRequesterPermissionTokenLifetime', 
+                                        'validateTokenEndpoint',
+                                        'shortLivedAccessTokenLifetime',
+                                        'longLivedAccessTokenLifetime',
+                                        'sessionStateHttpOnly',
+                                        'velocityLog',
+                                        ):
+
+                            if ox_attr in oxAuthConfDynamic:
+                                del oxAuthConfDynamic[ox_attr]
+
+                        oxAuthConfDynamic['dynamicRegistrationExpirationTime'] = -1
+
+                        if not ['code', 'token'] in oxAuthConfDynamic['responseTypesSupported']:
+                            oxAuthConfDynamic['responseTypesSupported'].insert(4, ['code', 'token'])
+
+                    new_entry['oxAuthConfDynamic'] = [json.dumps(oxAuthConfDynamic, indent=2)]
+
+                    oxAuthConfStatic = json.loads(new_entry['oxAuthConfStatic'][0])
+                    oxAuthConfStatic['baseDn']['metric'] = 'ou=statistic,o=metric'
+                    new_entry['oxAuthConfStatic'] = [json.dumps(oxAuthConfStatic, indent=2)]
+
+                if 'oxTrustConfImportPerson' in new_entry:
+                    oxTrustConfImportPerson = json.loads(new_entry['oxTrustConfImportPerson'][0])
+                    
+                    for ox_map in oxTrustConfImportPerson['mappings']:
+                        if ox_map['ldapName'] == 'gluuStatus':
+                            break
+                    else:
+                        oxTrustConfImportPerson['mappings'].append(
+                                                {
+                                                "ldapName": "gluuStatus", 
+                                                "displayName": "User Status", 
+                                                "dataType": "string", 
+                                                "required": False
+                                                }
+                                                )
+                        oxTrustConfImportPerson_str = json.dumps(oxTrustConfImportPerson, indent=2)
+                        new_entry['oxTrustConfImportPerson']=[ oxTrustConfImportPerson_str ]
+
+                if 'gluuPassportConfiguration' in new_entry:
+                    gluuPassportConfiguration = new_entry['gluuPassportConfiguration']
+
+                    new_strategies = {}
+                    strategies = []
+                    change = False
+                    for pp_conf in gluuPassportConfiguration:
+                        pp_conf_js = json.loads(pp_conf)
+                        strategies.append(pp_conf_js['strategy'])
+                        if not pp_conf_js['strategy'] in new_strategies:
+                            if pp_conf_js['fieldset'][0].has_key('value'):
+                                
+                                if not '_client_' in pp_conf_js['fieldset'][0]['value']:
+                                    strategy={'strategy':pp_conf_js['strategy'], 'fieldset':[]}
+                                    for st_comp in pp_conf_js['fieldset']:
+                                        strategy['fieldset'].append({'value1':st_comp['key'], 'value2':st_comp['value'], "hide":False,"description":""})        
+                                    new_strategies[pp_conf_js['strategy'] ] = json.dumps(strategy)
+                                    change = True
+                            else:
+                                new_strategies[pp_conf_js['strategy'] ] = pp_conf
+
+                    new_entry['gluuPassportConfiguration'] = new_strategies.values()
+
+
+                if dn == appliances_dn:
+                    
+                    if 'gluuSmtpHost' in old_entry:
+                    
+                        oxSmtpConfiguration = {
+                              "host": old_entry.get('gluuSmtpHost',[''])[0],
+                              "port": old_entry.get('gluuSmtpPort',[0])[0],
+                              "password": old_entry.get('gluuSmtpPassword',[''])[0],
+                              "requires-ssl": old_entry.get('gluuSmtpRequiresSsl',[False])[0],
+                              "trust-host": True,
+                              "from-name": old_entry.get('gluuSmtpFromName',[''])[0],
+                              "from-email-address": old_entry.get('gluuSmtpUserName',[''])[0],
+                              "requires-authentication": old_entry.get('gluuSmtpRequiresAuthentication',[False])[0],
+                              "user-name": old_entry.get('gluuSmtpUserName',[False])[0],
+                            }
+                
+                    new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
+                
+                elif dn == oxauth_client_dn:
+                    new_entry['oxAuthLogoutURI'] = ['https://{0}/identity/logout'.format(self.hostname)]
+
 
             ldif_writer.unparse(dn, new_entry)
 
@@ -950,7 +1056,7 @@ class Migration(object):
             if 'oxAuthClientCustomAttributes' in entry['objectClass']:
                 entry['objectClass'].remove('oxAuthClientCustomAttributes')
 
-            if self.oxVersion >='3.1.3':
+            if self.oxVersion[:5] >='3.1.3':
                 sector_identifiers = 'ou=sector_identifiers,o={},o=gluu'.format(self.inumOrg)
                 if dn == attrib_dn:
                     if 'oxAuthClaimName' in entry and not 'member_off' in entry['oxAuthClaimName']:
@@ -1002,33 +1108,13 @@ class Migration(object):
                         line = 'oxAuthenticationMode: auth_ldap_server' + '\n'
                     if 'oxTrustAuthenticationMode' in line:
                         line = 'oxTrustAuthenticationMode: auth_ldap_server'+ '\n'
-                    #MB: See (1) how we implement this
-                    #if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
-                    #    line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
+
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
-                    # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
-                    # atr = parser.parse()
+
                     base64Types = [""]
-                    # for idx, val in enumerate(parser.entries):
-                    # if 'displayName' in val:
-                    #     if val['displayName'][0] == 'SCIM Resource Set':
-                    #         out = CreateLDIF(parser.getDNs()[idx], val,
-                    #                          base64_attrs=base64Types)
-                    #         f = open(self.o_gluu, "a")
-                    #         f.write('\n')
-                    #         f.write(out)
-        #data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
-        #open(os.path.join(self.backupDir, 'ldif','sitetmp.ldif'),"wb").write(data)
-        #filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','sitetmp.ldif')]
-        #with open(self.o_site, 'w') as outfile:
-        #    for fname in filenames:
-        #        with open(fname) as infile:
-        #            for line in infile:
-        #                outfile.write(line)
-        #os.remove(os.path.join(self.backupDir, 'ldif','sitetmp.ldif'))
-        
-        progress_bar(0, 0, 'converting Dns', True)
+
+        progress_bar(0, 0, 'Converting Dns', True)
         
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
@@ -1393,16 +1479,16 @@ class Migration(object):
 
         self.getLDAPServerType()
         self.verifyBackupData()
-        self.setupWorkDirectory()
-        self.stopWebapps()
-        self.copyCertificates()
-        self.copyCustomFiles()
-        self.copyIDPFiles()
+        #self.setupWorkDirectory()
+        #self.stopWebapps()
+        #self.copyCertificates()
+        #self.copyCustomFiles()
+        #self.copyIDPFiles()
         
-        if self.version < 300 or self.ldap_type == 'opendj':
-            self.copyCustomSchema()
+        #if self.version < 300 or self.ldap_type == 'opendj':
+        #    self.copyCustomSchema()
             
-        self.exportInstallData()
+        #self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
         self.fixPermissions()
