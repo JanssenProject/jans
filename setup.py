@@ -3128,8 +3128,8 @@ class Setup(object):
             if self.os_type in ['ubuntu', 'debian']:
                 self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
 
-            self.enable_service_at_start('opendj')
             self.fix_init_scripts('opendj', '/etc/init.d/opendj')
+            self.enable_service_at_start('opendj')
             self.run([service_path, 'opendj', 'start'])
 
     def setup_init_scripts(self):
