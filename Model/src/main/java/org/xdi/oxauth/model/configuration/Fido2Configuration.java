@@ -10,50 +10,50 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2Configuration {
 
-    private String certFilesFolder;
+    private String authenticatorCertsFolder;
 
-    private String mdsTocRootCertFile;
-    private String mdsTocFilesFolder;
+    private String mdsCertsFolder;
+    private String mdsTocsFolder;
 
     private boolean userAutoEnrollment = false;
 
     private int unfinishedRequestExpiration = 120; // 120 seconds
     private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
 
-    private String certificationServerMetadataFolder;
+    private String serverMetadataFolder;
 
-    private boolean disable;
+    private boolean disableFido2;
 
-    public String getCertificationServerMetadataFolder() {
-        return certificationServerMetadataFolder;
+    public String getServerMetadataFolder() {
+        return serverMetadataFolder;
     }
 
-    public void setCertificationServerMetadataFolder(String certificationServerMetadataFolder) {
-        this.certificationServerMetadataFolder = certificationServerMetadataFolder;
+    public void setServerMetadataFolder(String serverMetadataFolder) {
+        this.serverMetadataFolder = serverMetadataFolder;
     }
 
-    public String getCertFilesFolder() {
-        return certFilesFolder;
+    public String getAuthenticatorCertsFolder() {
+        return authenticatorCertsFolder;
     }
 
-    public void setCertFilesFolder(String certFilesFolder) {
-        this.certFilesFolder = certFilesFolder;
+    public void setAuthenticatorCertsFolder(String authenticatorCertsFolder) {
+        this.authenticatorCertsFolder = authenticatorCertsFolder;
     }
 
-    public String getMdsTocRootCertFile() {
-        return mdsTocRootCertFile;
+    public String getMdsCertsFolder() {
+        return mdsCertsFolder;
     }
 
-    public void setMdsTocRootCertFile(String mdsTocRootCertFile) {
-        this.mdsTocRootCertFile = mdsTocRootCertFile;
+    public void setMdsCertsFolder(String mdsCertsFolder) {
+        this.mdsCertsFolder = mdsCertsFolder;
     }
 
-    public String getMdsTocFilesFolder() {
-        return mdsTocFilesFolder;
+    public String getMdsTocsFolder() {
+        return mdsTocsFolder;
     }
 
-    public void setMdsTocFilesFolder(String mdsTocFilesFolder) {
-        this.mdsTocFilesFolder = mdsTocFilesFolder;
+    public void setMdsTocsFolder(String mdsTocsFolder) {
+        this.mdsTocsFolder = mdsTocsFolder;
     }
 
     public boolean isUserAutoEnrollment() {
@@ -81,11 +81,11 @@ public class Fido2Configuration {
     }
 
     public boolean isDisable() {
-        return disable;
+        return disableFido2;
     }
 
     public void setDisable(boolean disable) {
-        this.disable = disable;
+        this.disableFido2 = disable;
     }
 
 }

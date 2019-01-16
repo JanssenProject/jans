@@ -112,6 +112,8 @@ public class Authenticator {
 	private String authAcr;
 
 	private Integer authStep;
+	
+	private String lastResult;
 
 	/**
 	 * Tries to authenticate an user, returns <code>true</code> if the
@@ -121,17 +123,17 @@ public class Authenticator {
 	 */
 	public boolean authenticate() {
 		HttpServletRequest servletRequest = (HttpServletRequest) facesContext.getExternalContext().getRequest();
-        String result = authenticateImpl(servletRequest, true, false);
+		lastResult = authenticateImpl(servletRequest, true, false);
 
-		if (Constants.RESULT_SUCCESS.equals(result)) {
+		if (Constants.RESULT_SUCCESS.equals(lastResult)) {
 		    return true;
-        } else if (Constants.RESULT_FAILURE.equals(result)) {
+        } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
             authenticationFailed();
-        } else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+        } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
-        } else if (Constants.RESULT_EXPIRED.equals(result)) {
+        } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
             handleSessionInvalid();
-        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(result)) {
+        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
             // Do nothing to keep compatibility with older versions
             if (facesMessages.getMessages().size() == 0) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
@@ -143,23 +145,24 @@ public class Authenticator {
 
 	public String authenticateWithOutcome() {
 		HttpServletRequest servletRequest = (HttpServletRequest) facesContext.getExternalContext().getRequest();
-		String result = authenticateImpl(servletRequest, true, false);
+		lastResult = authenticateImpl(servletRequest, true, false);
 
-		if (Constants.RESULT_SUCCESS.equals(result)) {
-        } else if (Constants.RESULT_FAILURE.equals(result)) {
+		if (Constants.RESULT_SUCCESS.equals(lastResult)) {
+        } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
             authenticationFailed();
-        } else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+        } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
-        } else if (Constants.RESULT_EXPIRED.equals(result)) {
+        } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
             handleSessionInvalid();
-        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(result)) {
+        } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
             // Do nothing to keep compatibility with older versions
             if (facesMessages.getMessages().size() == 0) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
             }
+            handleLoginError(null);
         }
 		
-		return result;
+		return lastResult;
 	}
 
 	public boolean authenticateWebService(HttpServletRequest servletRequest, boolean skipPassword) {
@@ -302,8 +305,17 @@ public class Authenticator {
 
 			boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration,
 					externalContext.getRequestParameterValuesMap(), this.authStep);
-			logger.debug("Authentication result for user '{}'. auth_step: '{}', result: '{}', credentials: '{}'",
-					credentials.getUsername(), this.authStep, result, System.identityHashCode(credentials));
+			if (logger.isDebugEnabled()) {
+			    String userId = credentials.getUsername();
+			    if (StringHelper.isEmpty(userId)) {
+			        User user = identity.getUser(); 
+			        if (user != null) {
+			            userId = user.getUserId();
+			        }
+        			logger.debug("Authentication result for user '{}'. auth_step: '{}', result: '{}', credentials: '{}'",
+        					userId, this.authStep, result, System.identityHashCode(credentials));
+			    }
+			}
 
 			int overridenNextStep = -1;
 			logger.info("#########################################################################");
@@ -443,6 +455,10 @@ public class Authenticator {
         errorHandlerService.handleError("login.youDontHavePermission", AuthorizeErrorResponseType.ACCESS_DENIED, "Contact administrator to grant access to resource.");
     }
 
+    protected void handleLoginError(String facesMessageId) {
+        errorHandlerService.handleError(facesMessageId, AuthorizeErrorResponseType.LOGIN_REQUIRED, "User should log into into system.");
+    }
+
 	private boolean updateSession(SessionId sessionId, Map<String, String> sessionIdAttributes) {
 		sessionId.setSessionAttributes(sessionIdAttributes);
 		boolean updateResult = sessionIdService.updateSessionId(sessionId, true, true, true);
@@ -577,18 +593,18 @@ public class Authenticator {
 	}
 
 	public String prepareAuthenticationForStep() {
-		String result = prepareAuthenticationForStepImpl();
+		lastResult = prepareAuthenticationForStepImpl();
 
-		if (Constants.RESULT_SUCCESS.equals(result)) {
-		} else if (Constants.RESULT_FAILURE.equals(result)) {
+		if (Constants.RESULT_SUCCESS.equals(lastResult)) {
+		} else if (Constants.RESULT_FAILURE.equals(lastResult)) {
 	        handleScriptError();
-		} else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+		} else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
-		} else if (Constants.RESULT_EXPIRED.equals(result)) {
+		} else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
 		    handleSessionInvalid();
 		}
 
-		return result;
+		return lastResult;
 	}
 
 	private String prepareAuthenticationForStepImpl() {

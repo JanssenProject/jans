@@ -48,9 +48,6 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AttestationProcessorFactory attestationProcessorFactory;
-
-    @Inject
     private CertificateSelector certificateSelector;
 
     @Inject
@@ -88,10 +85,10 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             }
             List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
 
-            // certificateValidator.saveCertificate(certificate);
 
             credIdAndCounters.setSignatureAlgorithm(alg);
             List<X509Certificate> trustAnchorCertificates = certificateSelector.selectRootCertificate(certificates.get(0));
+//            certificateValidator.saveCertificate(certificates.get(0));
             Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
             commonVerifiers.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
 
