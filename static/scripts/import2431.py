@@ -1479,16 +1479,16 @@ class Migration(object):
 
         self.getLDAPServerType()
         self.verifyBackupData()
-        #self.setupWorkDirectory()
-        #self.stopWebapps()
-        #self.copyCertificates()
-        #self.copyCustomFiles()
-        #self.copyIDPFiles()
+        self.setupWorkDirectory()
+        self.stopWebapps()
+        self.copyCertificates()
+        self.copyCustomFiles()
+        self.copyIDPFiles()
         
-        #if self.version < 300 or self.ldap_type == 'opendj':
-        #    self.copyCustomSchema()
+        if self.version < 300 or self.ldap_type == 'opendj':
+            self.copyCustomSchema()
             
-        #self.exportInstallData()
+        self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
         self.fixPermissions()
