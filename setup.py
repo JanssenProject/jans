@@ -228,6 +228,7 @@ class Setup(object):
         self.gluuOptPythonFolder = '%s/python' % self.gluuOptFolder
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = '%s/conf' % self.gluuBaseFolder
+        self.fido2ConfigFolder = '%s/fido2' % self.configFolder
         self.certFolder = '/etc/certs'
 
         self.oxBaseDataFolder = "/var/ox"
@@ -2190,7 +2191,7 @@ class Setup(object):
             self.configure_httpd()
 
         if self.installOxAuth:
-            self.pbar.progress("Installing Gluu components: oxAuth", False)
+            self.pbar.progress("Installing Gluu components: OxAuth", False)
             self.install_oxauth()
 
         if self.installOxTrust:
@@ -2198,7 +2199,7 @@ class Setup(object):
             self.install_oxtrust()
 
         if self.installSaml:
-            self.pbar.progress("Installing Gluu components: SAML", False)
+            self.pbar.progress("Installing Gluu components: saml", False)
             self.install_saml()
 
         if self.installAsimba:
@@ -2206,7 +2207,7 @@ class Setup(object):
             self.install_asimba()
 
         if self.installOxAuthRP:
-            self.pbar.progress("Installing Gluu components: oxAuthRP", False)
+            self.pbar.progress("Installing Gluu components: OxAuthRP", False)
             self.install_oxauth_rp()
 
         if self.installPassport:
@@ -2877,8 +2878,6 @@ class Setup(object):
                           ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                           ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
-                          ['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'],
-                          ['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'],
                           ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                           ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
@@ -2886,6 +2885,11 @@ class Setup(object):
                           ['create-plugin', '--plugin-name', '"Unique mail address"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:mail'],
                           ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
                           ]
+                          
+        if not self.listenAllInterfaces:
+            config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
+            config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
+                          
         for changes in config_changes:
             dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                     self.ldapDsconfigCommand,
@@ -3204,7 +3208,8 @@ class Setup(object):
                     self.run([service_path, 'rsyslog', 'restart'])
                     self.run([service_path, 'solserver', 'restart'])
             elif self.ldap_type == 'opendj':
-                self.run_service_command('opendj', 'restart')
+                self.run_service_command('opendj', 'stop')
+                self.run_service_command('opendj', 'start')
 
         # Jetty services
         # Iterate through all components and start installed
@@ -3327,6 +3332,12 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
+
+        #Fix me: for some reason broken startup links are created for opendj.
+        #Remove them.
+        if self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
+
 
     def import_ldif_template_openldap(self, ldif):
         self.logIt("Importing LDIF file '%s' into OpenLDAP" % ldif)
@@ -3939,10 +3950,11 @@ def print_help():
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
-
+    print "    --listen_all_interfaces"
+    
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif','listen_all_interfaces'])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -3987,6 +3999,8 @@ def getOpts(argv, setupOptions):
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
             setupOptions['allowDeprecatedApplications'] = True
+        elif opt == '--listen_all_interfaces':
+            setupOptions['listenAllInterfaces'] = True
         elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
@@ -4014,6 +4028,7 @@ if __name__ == '__main__':
         'loadTestData': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
+        'listenAllInterfaces': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -4036,6 +4051,7 @@ if __name__ == '__main__':
     installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
+    installObject.listenAllInterfaces = setupOptions['listenAllInterfaces']
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
