@@ -3,6 +3,7 @@
     "baseEndpoint":"https://%(hostname)s/oxauth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/oxauth/restv1/authorize",
     "tokenEndpoint":"https://%(hostname)s/oxauth/restv1/token",
+    "tokenRevocationEndpoint": "https://%(hostname)s/oxauth/restv1/revoke",
     "userInfoEndpoint":"https://%(hostname)s/oxauth/restv1/userinfo",
     "clientInfoEndpoint":"https://%(hostname)s/oxauth/restv1/clientinfo",
     "checkSessionIFrame":"https://%(hostname)s/oxauth/opiframe.htm",
