@@ -6,6 +6,7 @@
     "baseEndpoint":"${config.oxauth.contextPath}/restv1",
     "authorizationEndpoint":"${config.oxauth.contextPath}/restv1/authorize",
     "tokenEndpoint":"${config.oxauth.contextPath}/restv1/token",
+    "tokenRevocationEndpoint": "${config.oxauth.contextPath}/restv1/revoke",
     "userInfoEndpoint":"${config.oxauth.contextPath}/restv1/userinfo",
     "clientInfoEndpoint":"${config.oxauth.contextPath}/restv1/clientinfo",
     "checkSessionIFrame":"${config.oxauth.contextPath}/opiframe.htm",
