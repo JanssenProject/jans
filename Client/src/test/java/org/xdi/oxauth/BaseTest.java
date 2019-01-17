@@ -61,7 +61,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version September 17, 2018
+ * @version January 16, 2019
  */
 public abstract class BaseTest {
 
@@ -71,6 +71,7 @@ public abstract class BaseTest {
     protected String authorizationPageEndpoint;
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
+    protected String tokenRevocationEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
@@ -143,6 +144,14 @@ public abstract class BaseTest {
 
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
+    }
+
+    public String getTokenRevocationEndpoint() {
+        return tokenRevocationEndpoint;
+    }
+
+    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
+        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
     }
 
     public String getUserInfoEndpoint() {
@@ -564,7 +573,7 @@ public abstract class BaseTest {
             deleteAllCookies();
         }
 //        try {
-            driver.navigate().to(authorizationRequestUrl);
+        driver.navigate().to(authorizationRequestUrl);
 //        } catch (WebDriverException ex) {
 //            if (ex.getCause() instanceof ScriptException) {
 //                System.out.println("authenticateResourceOwner: Script error: " + ex.getMessage());
@@ -701,6 +710,7 @@ public abstract class BaseTest {
             assertNotNull(response.getIssuer(), "The issuer is null");
             assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
             assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
+            assertNotNull(response.getTokenRevocationEndpoint(), "The tokenRevocationEndpoint is null");
             assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");
             assertNotNull(response.getJwksUri(), "The jwksUri is null");
             assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
@@ -718,6 +728,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
+            tokenRevocationEndpoint = response.getTokenRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
             clientInfoEndpoint = response.getClientInfoEndpoint();
             checkSessionIFrame = response.getCheckSessionIFrame();
@@ -733,6 +744,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
+            tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");
             clientInfoEndpoint = context.getCurrentXmlTest().getParameter("clientInfoEndpoint");
             checkSessionIFrame = context.getCurrentXmlTest().getParameter("checkSessionIFrame");

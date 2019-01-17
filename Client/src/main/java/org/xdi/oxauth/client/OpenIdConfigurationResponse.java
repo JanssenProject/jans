@@ -21,13 +21,14 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version January 16, 2019
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
     private String issuer;
     private String authorizationEndpoint;
     private String tokenEndpoint;
+    private String tokenRevocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -200,6 +201,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
+    }
+
+    /**
+     * Returns the URL of the Token Revocation endpoint.
+     *
+     * @return The URL of the Token Revocation endpoint.
+     */
+    public String getTokenRevocationEndpoint() {
+        return tokenRevocationEndpoint;
+    }
+
+    /**
+     * Sets the URL of the Token Revocation endpoint.
+     *
+     * @param tokenRevocationEndpoint The URL of the Token Revocation endpoint.
+     */
+    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
+        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
     }
 
     /**
@@ -980,6 +999,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
+                ", tokenRevocationEndpoint='" + tokenRevocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
                 ", clientInfoEndpoint='" + clientInfoEndpoint + '\'' +
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +

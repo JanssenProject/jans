@@ -214,6 +214,13 @@
         </classes>
     </test>
 
+    <!-- Token revocation -->
+    <test name="Token revocation test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.TokenRevocationTest"/>
+        </classes>
+    </test>
+
     <!-- Token Signatures test -->
     <test name="Token Signatures test (HTTP)" enabled="true">
         <classes>
