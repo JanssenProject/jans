@@ -38,7 +38,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version November 23, 2018
+ * @version January 16, 2019
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration")
 public class OpenIdConfiguration extends HttpServlet {
@@ -59,7 +59,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
-    
+
     @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
 
@@ -86,6 +86,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
+            jsonObj.put(TOKEN_REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
             jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
             jsonObj.put(CLIENT_INFO_ENDPOINT, appConfiguration.getClientInfoEndpoint());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
