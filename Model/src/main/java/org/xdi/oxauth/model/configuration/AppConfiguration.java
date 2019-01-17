@@ -22,7 +22,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 3, 2018
+ * @version January 16, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -31,6 +31,7 @@ public class AppConfiguration implements Configuration {
     private String baseEndpoint;
     private String authorizationEndpoint;
     private String tokenEndpoint;
+    private String tokenRevocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -178,7 +179,7 @@ public class AppConfiguration implements Configuration {
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
-    private AuthenticationProtectionConfiguration authenticationProtectionConfiguration; 
+    private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
@@ -341,6 +342,24 @@ public class AppConfiguration implements Configuration {
      */
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
+    }
+
+    /**
+     * Returns the URL of the Token Revocation endpoint.
+     *
+     * @return The URL of the Token Revocation endpoint.
+     */
+    public String getTokenRevocationEndpoint() {
+        return tokenRevocationEndpoint;
+    }
+
+    /**
+     * Sets the URL of the Token Revocation endpoint.
+     *
+     * @param tokenRevocationEndpoint The URL of the Token Revocation endpoint.
+     */
+    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
+        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
     }
 
     /**
@@ -1338,7 +1357,6 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
-     *
      * @return session_id lifetime. If null or value is zero or less then session_id lifetime is not set and will expire when browser session ends.
      */
     public Integer getSessionIdLifetime() {

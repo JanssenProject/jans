@@ -39,9 +39,9 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 23, 2018
+ * @version January 16, 2019
  */
-@WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo"}, displayName = "oxAuth")
+@WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo", "/restv1/revoke"}, displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
     public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
@@ -91,6 +91,7 @@ public class AuthenticationFilter implements Filter {
             log.trace("Get request to: '{}'", requestUrl);
 
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
+            boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
@@ -114,6 +115,14 @@ public class AuthenticationFilter implements Filter {
                     log.debug("Starting POST Auth token endpoint authentication");
                     processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse,
                             filterChain, tokenEndpoint);
+                }
+            } else if (tokenRevocationEndpoint) {
+                if (authorizationHeader.startsWith("Basic ")) {
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+                } else {
+                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+
+                    httpResponse.sendError(401, "Not authorized");
                 }
             } else if (authorizationHeader != null) {
                 if (authorizationHeader.startsWith("Bearer ")) {
@@ -222,7 +231,8 @@ public class AuthenticationFilter implements Filter {
                 // and user isn't authenticated
                 if (requireAuth) {
                     if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                        if (servletRequest.getRequestURI().endsWith("/token")) {
+                        if (servletRequest.getRequestURI().endsWith("/token")
+                                || servletRequest.getRequestURI().endsWith("/revoke")) {
                             Client client = clientService.getClient(username);
                             if (client == null
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {

@@ -6,20 +6,15 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version January 16, 2019
  */
 @XmlRootElement(name = "errors")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -41,6 +36,9 @@ public class ErrorMessages {
     @XmlElementWrapper(name = "token")
     @XmlElement(name = "error")
     private List<ErrorMessage> token;
+    @XmlElementWrapper(name = "revoke")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> revoke;
     @XmlElementWrapper(name = "uma")
     @XmlElement(name = "error")
     private List<ErrorMessage> uma;
@@ -90,6 +88,14 @@ public class ErrorMessages {
 
     public void setToken(List<ErrorMessage> p_token) {
         token = p_token;
+    }
+
+    public List<ErrorMessage> getRevoke() {
+        return revoke;
+    }
+
+    public void setRevoke(List<ErrorMessage> p_revoke) {
+        revoke = p_revoke;
     }
 
     public List<ErrorMessage> getUma() {

@@ -194,6 +194,23 @@
             "uri":null
         }
     ],
+    "revoke":[
+        {
+            "id":"unsupported_token_type",
+            "description":"The authorization server does not support the revocation of the presented token type. That is, the client tried to revoke an access token on a server not supporting this feature.",
+            "uri":null
+        },
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_client",
+            "description":"Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method). The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported. If the client attempted to authenticate via the Authorization request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code, and include the WWW-Authenticate response header field matching the authentication scheme used by the client.",
+            "uri":null
+        }
+    ],
     "uma":[
         {
             "id":"invalid_request",
