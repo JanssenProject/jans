@@ -193,6 +193,8 @@ class Migration(object):
 
     def walk_function(self, a, directory, files):
         for f in files:
+            if f.endswith('.json'):
+                continue
             fn = "%s/%s" % (directory, f)
             targetFn = fn.replace(self.backupDir, '')
             if os.path.isdir(fn):
