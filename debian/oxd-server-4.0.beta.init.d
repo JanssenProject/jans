@@ -418,14 +418,14 @@ do_start () {
 
 			#dip_in_logs
 			sleep 4
-			for i in 1 2 3 4 5 
+			for i in `seq 1 24`;
                         do
                 	        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
                 	        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1			        
 			        if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	        break
 		         	fi
-				sleep 4
+				sleep 5
                         done
                 	if [ "x$START_STATUS" = "x" ]; then
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
@@ -471,14 +471,14 @@ do_start () {
           			echo \$! > '$OXD_PID_FILE'"
 				#dip_in_logs
 			        sleep 4
-			        for i in 1 2 3 4 5 
+			        for i in `seq 1 24`;
                                 do
                 		        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
                 		        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1                	                		        
 			                if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	                break
 		                 	fi
-				        sleep 4
+				        sleep 5
                                 done					
                 		if [ "x$START_STATUS" = "x" ]; then
 	                        	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
