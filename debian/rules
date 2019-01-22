@@ -34,6 +34,7 @@ override_dh_auto_install:
 		mkdir -p debian/oxd-server-4.0.beta/etc/default/
 		cp -a debian/oxd-server-default debian/oxd-server-4.0.beta/etc/default/oxd-server-4.0.beta
 
+override_dh_strip_nondeterminism:
 override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/oxd-server-4.0.beta/opt/oxd-server/bin/oxd-start.sh
