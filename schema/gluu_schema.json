@@ -4933,7 +4933,8 @@
                 "oxIdTokenTokenBindingCnf",
                 "oxAccessTokenAsJwt",
                 "oxAccessTokenSigningAlg",
-                "oxRptAsJwt"
+                "oxRptAsJwt",
+                "oxAttributes"
             ],
             "must": [
                 "objectclass"
