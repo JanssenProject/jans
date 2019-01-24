@@ -51,6 +51,11 @@ public class ConsentGatheringSessionService {
 
         return null;
     }
+    public boolean hasSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+
+        return StringUtils.isNotBlank(cookieId);
+    }
 
     public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String userDn, boolean create) {
         String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
@@ -64,8 +69,10 @@ public class ConsentGatheringSessionService {
             } else {
                 log.error("Failed to load consent_session_id from cookie: ", cookieId);
             }
-        } else {
-            log.error("consent_session_id cookie is not set.");
+        } else { 
+            if (!create) {
+                log.error("consent_session_id cookie is not set.");
+            }
         }
 
         if (!create) {
@@ -87,9 +94,14 @@ public class ConsentGatheringSessionService {
     }
 
     public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
-        final SessionId session = getSession(httpRequest, null, null, false);
-
-        return sessionIdService.isSessionIdAuthenticated(session);
+        boolean hasSession = hasSession(httpRequest, null);
+        
+        if (hasSession) {
+            final SessionId session = getSession(httpRequest, null, null, false);
+            return sessionIdService.isSessionIdAuthenticated(session);
+        } else {
+            return false;
+        }
     }
 
     public boolean persist(SessionId session) {
