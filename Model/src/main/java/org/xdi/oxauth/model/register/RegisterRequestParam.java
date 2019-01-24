@@ -255,6 +255,13 @@ public enum RegisterRequestParam {
     ID_TOKEN_TOKEN_BINDING_CNF("id_token_token_binding_cnf"),
 
     /**
+     * string representation of the expected subject
+     * distinguished name of the certificate, which the OAuth client will
+     * use in mutual TLS authentication.
+     */
+    TLS_CLIENT_AUTH_SUBJECT_DN("tls_client_auth_subject_dn"),
+
+    /**
      * String containing a space-separated list of scope values.
      */
     SCOPE("scope"),
