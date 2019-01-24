@@ -54,6 +54,7 @@ public class RegisterRequest extends BaseRequest {
     private String jwks;
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
+    private String tlsClientAuthSubjectDn;
     private SubjectType subjectType;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
@@ -147,6 +148,14 @@ public class RegisterRequest extends BaseRequest {
     public RegisterRequest(String registrationAccessToken) {
         this();
         this.registrationAccessToken = registrationAccessToken;
+    }
+
+    public String getTlsClientAuthSubjectDn() {
+        return tlsClientAuthSubjectDn;
+    }
+
+    public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
+        this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
     }
 
     /**
@@ -1135,6 +1144,9 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
             parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
         }
+        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
+            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
@@ -1383,6 +1395,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
             parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
+        }
+        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
+            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
         }
         if (StringUtils.isNotBlank(logoUri)) {
             parameters.put(LOGO_URI.toString(), logoUri);

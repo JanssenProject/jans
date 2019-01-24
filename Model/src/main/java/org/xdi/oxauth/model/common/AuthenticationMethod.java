@@ -42,6 +42,20 @@ public enum AuthenticationMethod {
     ACCESS_TOKEN("access_token"),
 
     /**
+     * Indicates that client authentication to the authorization server
+     * will occur with mutual TLS utilizing the PKI method of associating
+     * a certificate to a client.
+     */
+    TLS_CLIENT_AUTH("tls_client_auth"),
+
+    /**
+     * Indicates that client authentication to the authorization server
+     * will occur using mutual TLS with the client utilizing a self-
+     * signed certificate.
+     */
+    SELF_SIGNED_TLS_CLIENT_AUTH("self_signed_tls_client_auth"),
+
+    /**
      * The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow
      * (and so does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other
      * authentication mechanism.

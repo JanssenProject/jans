@@ -208,6 +208,21 @@ public class Client implements Serializable {
     @LdapAttribute(name = "oxSoftwareStatement")
     private String softwareStatement;
 
+    @LdapAttribute(name = "oxAttributes")
+    @LdapJsonObject
+    private ClientAttributes attributes;
+
+    public ClientAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new ClientAttributes();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(ClientAttributes attributes) {
+        this.attributes = attributes;
+    }
+
     public boolean isRptAsJwt() {
         return rptAsJwt;
     }

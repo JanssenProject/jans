@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.util.CertUtil;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -35,6 +36,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
@@ -94,6 +97,10 @@ public class AuthenticationFilter implements Filter {
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             String authorizationHeader = httpRequest.getHeader("Authorization");
+
+            if (processMTLS(httpRequest, httpResponse, filterChain)) {
+                return;
+            }
 
             if (tokenEndpoint || umaTokenEndpoint) {
                 log.debug("Starting token endpoint authentication");
@@ -159,6 +166,62 @@ public class AuthenticationFilter implements Filter {
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * @return whether successful or not
+     */
+    private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws IOException, ServletException {
+        final String clientId = httpRequest.getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            Client client = clientService.getClient(clientId);
+            if (client != null &&
+                    (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
+                            client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
+                log.debug("Trying to authenticate client {} via {} ...", clientId, client.getAuthenticationMethod());
+
+                final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+                if (StringUtils.isBlank(clientCertAsPem)) {
+                    log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", clientId);
+                    return false;
+                }
+
+                X509Certificate cert = CertUtil.x509CertificateFromPem(clientCertAsPem);
+                if (cert == null) {
+                    log.debug("Failed to parse client certificate, client_id: {}.", clientId);
+                    return false;
+                }
+
+                if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
+
+                    final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
+                    if (StringUtils.isBlank(subjectDn)) {
+                        log.debug("SubjectDN is not set for client {} which is required to authenticate it via `tls_client_auth`.", clientId);
+                        return false;
+                    }
+
+                    // we check only `subjectDn`, the PKI certificate validation is performed by apache/httpd
+                    if (subjectDn.equals(cert.getSubjectDN().getName())) {
+                        log.debug("Client {} authenticated via `tls_client_auth`.", clientId);
+                        authenticator.configureSessionClient(client);
+
+                        filterChain.doFilter(httpRequest, httpResponse);
+                        return true;
+                    }
+                }
+
+                if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH && false) { // disable it temporarily
+                    final PublicKey publicKey = cert.getPublicKey();
+
+                    log.debug("Client {} authenticated via `self_signed_tls_client_auth`.", clientId);
+                    authenticator.configureSessionClient(client);
+
+                    filterChain.doFilter(httpRequest, httpResponse);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
