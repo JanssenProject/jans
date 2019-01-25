@@ -165,6 +165,9 @@ class PersonAuthentication(PersonAuthenticationType):
             providerParam = self.customAuthzParameter
             url = None
 
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
+            self.skipProfileUpdate = StringHelper.equalsIgnoreCase(sessionAttributes.get("skipPassportProfileUpdate"), "true")
+
             #this param could have been set previously in authenticate step if current step is being retried
             provider = identity.getWorkingParameter("selectedProvider")
             if provider != None:
@@ -172,7 +175,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 identity.setWorkingParameter("selectedProvider", None)
 
             elif providerParam != None:
-                sessionAttributes = identity.getSessionId().getSessionAttributes()
                 paramValue = sessionAttributes.get(providerParam)
 
                 if paramValue != None:
@@ -620,7 +622,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def updateUser(self, foundUser, profile, userService):
-        self.fillUser(foundUser, profile)
+        # when this is false, there might still some updates taking place (e.g. not related to profile attrs released by external provider)
+        if (not self.skipProfileUpdate):
+            self.fillUser(foundUser, profile)
         userService.updateUser(foundUser)
 
 
