@@ -5,7 +5,7 @@
 #
 
 # Requires the following custom properties and values:
-#   otp_type: totp/htop
+#   otp_type: totp/hotp
 #   issuer: Gluu Inc
 #   otp_conf_file: /etc/certs/otp_configuration.json
 #
@@ -294,7 +294,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         # Check configuration file settings
         try:
-            self.hotpConfiguration = otpConfiguration["htop"]
+            self.hotpConfiguration = otpConfiguration["hotp"]
             self.totpConfiguration = otpConfiguration["totp"]
             
             hmacShaAlgorithm = self.totpConfiguration["hmacShaAlgorithm"]
