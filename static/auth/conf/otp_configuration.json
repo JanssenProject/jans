@@ -1,5 +1,5 @@
 {
-    "htop":{
+    "hotp":{
         "keyLength":20,
         "digits":6,
         "lookAheadWindow":10
