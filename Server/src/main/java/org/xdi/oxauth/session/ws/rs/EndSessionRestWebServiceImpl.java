@@ -328,7 +328,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private String constructPage(Set<String> logoutUris, String postLogoutUrl, String state) {
         String iframes = "";
         for (String logoutUri : logoutUris) {
-            iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\"></iframe>", logoutUri);
+            iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\"></iframe>", logoutUri);
         }
 
         String html = "<!DOCTYPE html>" +
