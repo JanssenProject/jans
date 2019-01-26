@@ -39,8 +39,7 @@ import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
-import org.xdi.service.CacheService;
-import org.xdi.service.cache.NativePersistenceCacheProvider;
+import org.xdi.service.cache.CacheProvider;
 import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.CleanerEvent;
 import org.xdi.service.cdi.event.Scheduled;
@@ -91,7 +90,7 @@ public class CleanerTimer {
     private SessionIdService sessionIdService;
 
     @Inject
-    private CacheService cacheService;
+    private CacheProvider cacheProvider;
 
     @Inject
     @Named("u2fRequestService")
@@ -165,9 +164,7 @@ public class CleanerTimer {
 
     private void processCache(Date now) {
         try {
-            if (cacheService.getCacheProvider() instanceof NativePersistenceCacheProvider) {
-                ((NativePersistenceCacheProvider) cacheService.getCacheProvider()).cleanup(now, BATCH_SIZE);
-            }
+            cacheProvider.cleanup(now);
         } catch (Exception e) {
             log.error("Failed to clean up cache.", e);
         }
