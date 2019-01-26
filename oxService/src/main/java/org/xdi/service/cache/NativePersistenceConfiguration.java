@@ -12,6 +12,9 @@ public class NativePersistenceConfiguration implements Serializable {
     @XmlElement(name = "defaultPutExpiration")
     private int defaultPutExpiration = 60; // in seconds
 
+    @XmlElement(name = "defaultCleanupBatchSize")
+    private int defaultCleanupBatchSize = 25; // 25 objects per iteration
+
     @JsonIgnore
     private String baseDn;
 
@@ -21,6 +24,14 @@ public class NativePersistenceConfiguration implements Serializable {
 
     public void setDefaultPutExpiration(int defaultPutExpiration) {
         this.defaultPutExpiration = defaultPutExpiration;
+    }
+
+    public int getDefaultCleanupBatchSize() {
+        return defaultCleanupBatchSize;
+    }
+
+    public void setDefaultCleanupBatchSize(int defaultCleanupBatchSize) {
+        this.defaultCleanupBatchSize = defaultCleanupBatchSize;
     }
 
     public String getBaseDn() {
@@ -33,9 +44,9 @@ public class NativePersistenceConfiguration implements Serializable {
 
     @Override
     public String toString() {
-        return "NativePersistenceConfiguration{" +
-                "defaultPutExpiration=" + defaultPutExpiration +
-                ", baseDn=" + baseDn +
-                '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("NativePersistenceConfiguration [defaultPutExpiration=").append(defaultPutExpiration).append(", defaultCleanupBatchSize=")
+                .append(defaultCleanupBatchSize).append(", baseDn=").append(baseDn).append("]");
+        return builder.toString();
     }
 }

@@ -134,4 +134,10 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         client.flush();
         log.trace("cleared");
     }
+
+    @Override
+    public CacheProviderType getProviderType() {
+        return CacheProviderType.MEMCACHED;
+    }
+
 }

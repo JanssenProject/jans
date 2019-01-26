@@ -11,6 +11,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.xdi.service.cache.CacheProvider;
+import org.xdi.service.cache.CacheProviderType;
 import org.xdi.service.cache.NativePersistenceCacheProvider;
 
 /**
@@ -38,7 +39,7 @@ public class CacheService {
     }
 
 	public void put(String region, String key, Object object, boolean skipPutOnNativePersistence) {
-		if (skipPutOnNativePersistence && isNativePersistenceCacheProvider()) {
+		if (skipPutOnNativePersistence && (CacheProviderType.NATIVE_PERSISTENCE == cacheProvider.getProviderType())) {
 			return;
 		}
 		if (cacheProvider != null) {
@@ -67,14 +68,6 @@ public class CacheService {
 		if (cacheProvider != null) {
 			cacheProvider.clear();
 		}
-	}
-
-	public CacheProvider<?> getCacheProvider() {
-		return cacheProvider;
-	}
-
-	public boolean isNativePersistenceCacheProvider() {
-		return cacheProvider instanceof NativePersistenceCacheProvider;
 	}
 
 }
