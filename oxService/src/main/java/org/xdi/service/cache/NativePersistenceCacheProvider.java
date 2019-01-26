@@ -1,5 +1,17 @@
 package org.xdi.service.cache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -13,19 +25,15 @@ import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.*;
-
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
 
     private final static Logger log = LoggerFactory.getLogger(NativePersistenceCacheProvider.class);
 
+    public final static int BATCH_SIZE = 25;
+
     @Inject
-    CacheConfiguration cacheConfiguration;
+    private CacheConfiguration cacheConfiguration;
+
     @Inject
     PersistenceEntryManager ldapEntryManager;
 
@@ -158,6 +166,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Override
     public void clear() {
+        // TODO: Implement all specific application objects removal
     }
 
     private static Object fromString(String s) {
@@ -193,6 +202,11 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         }
     }
 
+    @Override
+    public void cleanup(final Date now) {
+        cleanup(now, cacheConfiguration.getNativePersistenceConfiguration().getDefaultCleanupBatchSize());
+    }
+
     public void cleanup(final Date now, int batchSize) {
         log.debug("Start NATIVE_PERSISTENCE clean up");
         try {
@@ -222,4 +236,10 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         }
 
     }
+
+    @Override
+    public CacheProviderType getProviderType() {
+        return CacheProviderType.NATIVE_PERSISTENCE;
+    }
+
 }

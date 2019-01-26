@@ -1,5 +1,7 @@
 package org.xdi.service.cache;
 
+import java.util.Date;
+
 public abstract class CacheProvider<T> {
 
     /**
@@ -125,6 +127,11 @@ public abstract class CacheProvider<T> {
      */
     public abstract void clear();
 
+    /**
+     * Clean objects from cache regions till specified date
+     */
+    public abstract void cleanup(final Date now);
+
     public String getDefaultRegion() {
         return defaultRegion;
     }
@@ -132,5 +139,7 @@ public abstract class CacheProvider<T> {
     public void setDefaultRegion(String defaultRegion) {
         this.defaultRegion = defaultRegion;
     }
+	
+	public abstract CacheProviderType getProviderType();
 
 }
