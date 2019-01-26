@@ -10,6 +10,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
@@ -25,11 +26,10 @@ import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
 
     private final static Logger log = LoggerFactory.getLogger(NativePersistenceCacheProvider.class);
-
-    public final static int BATCH_SIZE = 25;
 
     @Inject
     private CacheConfiguration cacheConfiguration;
