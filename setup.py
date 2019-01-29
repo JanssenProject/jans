@@ -249,6 +249,10 @@ class Setup(object):
         self.node_user_home = '/home/node'
         self.passport_initd_script = '%s/static/system/initd/passport' % self.install_dir
 
+        self.open_jdk_archive = 'OpenJDK11U-jdk_x64_linux_hotspot_11.0.2_7.tar.gz'
+        self.java_type = 'jre'
+
+
         self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '%s/jetty' % self.gluuOptFolder
@@ -676,6 +680,8 @@ class Setup(object):
             
             if self.installLdap:
                 txt += 'Backend Type'.ljust(30) + self.ldap_type.title().rjust(35) + "\n"
+
+            txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
             
@@ -1280,7 +1286,10 @@ class Setup(object):
     def installJRE(self):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
-        jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
+        if self.java_type == 'jre':
+            jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
+        else:
+            jreArchive = self.open_jdk_archive
 
         try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
@@ -1293,7 +1302,9 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % self.jreDestinationPath])
         self.run([self.cmd_chown, '-R', 'root:root', self.jreDestinationPath])
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
-        self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
+        
+        if self.java_type == 'jre':
+            self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
 
     def extractOpenDJ(self):
         openDJArchive = 'opendj-server-%s.zip' % self.opendj_version_number
@@ -2441,6 +2452,25 @@ class Setup(object):
         randomPW = self.getPW()
         self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
+        if setupOptions['allowPreReleasedApplications'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
+            while True:
+                java_type = self.getPrompt("Select Java type: 1.Jre-1.8   2.OpenJDK-11", '1')
+                if not java_type:
+                    java_type = 1
+                    break
+                if java_type in '12':
+                    break
+                else:
+                    print "Please enter 1 or 2"
+
+            if java_type == '1':
+                self.java_type = 'jre'
+            else:
+                self.java_type = 'jdk'
+                self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
+                self.jreDestinationPath = '/opt/jdk-11.0.2+7'
+                self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
+                
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
         if promptForOxAuth == 'y':
             self.installOxAuth = True
