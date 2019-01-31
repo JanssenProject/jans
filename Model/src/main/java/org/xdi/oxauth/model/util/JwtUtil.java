@@ -212,7 +212,7 @@ public class JwtUtil {
     }
 
     public static JSONObject getJSONWebKeys(String jwksUri) {
-        log.debug("Retrieving jwks...");
+        log.debug("Retrieving jwks " + jwksUri + "...");
 
         JSONObject jwks = null;
         try {
