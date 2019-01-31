@@ -37,6 +37,8 @@ import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Fido2Configuration;
+import org.xdi.util.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -72,10 +74,20 @@ public class MdsService {
             throw new Fido2RPRuntimeException("Authenticator not in TOC aaguid " + aaguid);
         }
 
+        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+        if (fido2Configuration == null) {
+            throw new Fido2RPRuntimeException("Fido2 configuration not exists");
+        }
+
+        String mdsAccessToken = fido2Configuration.getMdsAccessToken();
+        if (StringHelper.isEmpty(mdsAccessToken)) {
+            throw new Fido2RPRuntimeException("Fido2 MDS access token should be set");
+        }
+
         URI metadataUrl;
         try {
-            metadataUrl = new URI(tocEntry.get("url").asText());
-            log.info("Authenticator AAGUI {} url metadataUrl {} ", aaguid, metadataUrl);
+            metadataUrl = new URI(String.format("%s/?token=%s", tocEntry.get("url").asText(), mdsAccessToken));
+            log.info("Authenticator AAGUI {} url metadataUrl {} downloaded", aaguid, metadataUrl);
         } catch (URISyntaxException e) {
             throw new Fido2RPRuntimeException("Invalid URI in TOC aaguid " + aaguid);
         }
