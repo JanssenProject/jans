@@ -7,18 +7,25 @@
 package org.xdi.oxauth.auth;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
@@ -171,7 +178,7 @@ public class AuthenticationFilter implements Filter {
     /**
      * @return whether successful or not
      */
-    private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws IOException, ServletException {
+    private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws Exception {
         final String clientId = httpRequest.getParameter("client_id");
         if (StringUtils.isNotBlank(clientId)) {
             Client client = clientService.getClient(clientId);
@@ -210,14 +217,27 @@ public class AuthenticationFilter implements Filter {
                     }
                 }
 
-                if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH && false) { // disable it temporarily
+                if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it temporarily
                     final PublicKey publicKey = cert.getPublicKey();
+                    final byte[] encodedKey = publicKey.getEncoded();
 
-                    log.debug("Client {} authenticated via `self_signed_tls_client_auth`.", clientId);
-                    authenticator.configureSessionClient(client);
+                    JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                    if (jsonWebKeys == null) {
+                        log.debug("Unable to load json web keys for client: {}, jwks_uri: {}", clientId, client.getJwksUri());
+                        return false;
+                    }
 
-                    filterChain.doFilter(httpRequest, httpResponse);
-                    return true;
+                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+                    final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
+                    for (JSONWebKey key : keySet.getKeys()) {
+                        if (ArrayUtils.isEquals(encodedKey, cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
+                            log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.", clientId, key.getKid());
+                            authenticator.configureSessionClient(client);
+
+                            filterChain.doFilter(httpRequest, httpResponse);
+                            return true;
+                        }
+                    }
                 }
             }
         }
