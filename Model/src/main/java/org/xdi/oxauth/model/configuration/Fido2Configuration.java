@@ -12,6 +12,7 @@ public class Fido2Configuration {
 
     private String authenticatorCertsFolder;
 
+    private String mdsAccessToken;
     private String mdsCertsFolder;
     private String mdsTocsFolder;
 
@@ -24,20 +25,20 @@ public class Fido2Configuration {
 
     private boolean disableFido2;
 
-    public String getServerMetadataFolder() {
-        return serverMetadataFolder;
-    }
-
-    public void setServerMetadataFolder(String serverMetadataFolder) {
-        this.serverMetadataFolder = serverMetadataFolder;
-    }
-
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
     }
 
     public void setAuthenticatorCertsFolder(String authenticatorCertsFolder) {
         this.authenticatorCertsFolder = authenticatorCertsFolder;
+    }
+
+    public String getMdsAccessToken() {
+        return mdsAccessToken;
+    }
+
+    public void setMdsAccessToken(String mdsAccessToken) {
+        this.mdsAccessToken = mdsAccessToken;
     }
 
     public String getMdsCertsFolder() {
@@ -78,6 +79,14 @@ public class Fido2Configuration {
 
     public void setAuthenticationHistoryExpiration(int authenticationHistoryExpiration) {
         this.authenticationHistoryExpiration = authenticationHistoryExpiration;
+    }
+
+    public String getServerMetadataFolder() {
+        return serverMetadataFolder;
+    }
+
+    public void setServerMetadataFolder(String serverMetadataFolder) {
+        this.serverMetadataFolder = serverMetadataFolder;
     }
 
     public boolean isDisable() {
