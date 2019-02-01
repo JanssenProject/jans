@@ -4,6 +4,7 @@
     "host" : "%(oxd_hostname)s",
     "port" : %(oxd_port)s,
     "use_https_extension" : false,
+    "frontchannel_logout_uri" : "https://%(hostname)s/casa/autologout",
     "authz_redirect_uri" : "https://%(hostname)s/casa"
   },
   "ldap_settings" : {
