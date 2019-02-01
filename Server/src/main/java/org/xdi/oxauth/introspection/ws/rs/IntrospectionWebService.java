@@ -140,7 +140,7 @@ public class IntrospectionWebService {
                         ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
                         if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
                             log.trace("Successfully run extenal introspection scripts.");
-                            return Response.status(Response.Status.OK).entity(responseAsJsonObject).build();
+                            return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).build();
                         }
 
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
