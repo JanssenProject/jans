@@ -43,7 +43,7 @@ public class ExternalIntrospectionService extends ExternalScriptService {
             }
         }
 
-        return false;
+        return true;
     }
 
     private boolean executeExternalModifyResponse(CustomScriptConfiguration customScriptConfiguration, JSONObject responseAsJsonObject, ExternalIntrospectionContext context) {
