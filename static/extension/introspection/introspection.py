@@ -32,6 +32,6 @@ class Introspection(IntrospectionType):
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
     # context is reference of org.xdi.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/GluuFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
-        responseAsJsonObject.put("key_from_script", "value_from_script")
+        responseAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True
 
