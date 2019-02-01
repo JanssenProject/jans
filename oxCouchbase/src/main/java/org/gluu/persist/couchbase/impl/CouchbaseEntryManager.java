@@ -493,6 +493,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter) {
+        return countEntries(baseDN, entryClass, filter, SearchScope.SUB);
+    }
+
+    @Override
+    public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -514,7 +519,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         try {
             CouchbaseBatchOperationWraper<T> batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation);
-            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, ldapReturnAttributes, null,
+            operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), scope, ldapReturnAttributes, null,
                     batchOperationWraper, false, 0, 0, 100);
         } catch (Exception ex) {
             throw new EntryPersistenceException(

@@ -676,14 +676,18 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter) {
+        return countEntries(baseDN, entryClass, filter, null);
+    }
+
+    @Override
+    public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope) {
         if (StringHelper.isEmptyString(baseDN)) {
-            throw new MappingException("Base DN to find entries is null");
+            throw new MappingException("Base DN to count entries is null");
         }
 
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
-        String[] ldapReturnAttributes = new String[] {""}; // Don't load attributes
 
         // Find entries
         Filter searchFilter;
@@ -693,18 +697,48 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             searchFilter = filter;
         }
 
-        CountBatchOperation<T> batchOperation = new CountBatchOperation<T>();
+        SearchScope searchScope = scope;
+        if (searchScope == null) {
+            searchScope = SearchScope.SUB;
+        }
 
+        String[] ldapReturnAttributes;
+        CountBatchOperation<T> batchOperation;
+        if (SearchScope.BASE == searchScope) {
+            ldapReturnAttributes = new String[] { "numsubordinates" }; // Don't load attributes
+            batchOperation = null;
+        } else {
+            ldapReturnAttributes = new String[] { "" }; // Don't load attributes
+            batchOperation = new CountBatchOperation<T>();
+        }
+
+        SearchResult searchResult;
         try {
-            LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
-            operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper, 0, 100, 0, null,
+            LdapBatchOperationWraper<T> batchOperationWraper = null;
+            if (batchOperation != null) {
+                batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
+            }
+            searchResult = operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(searchScope), batchOperationWraper, 0, 100, 0, null,
                     ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
                     String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        return batchOperation.getCountEntries();
+        if (SearchScope.BASE != searchScope) {
+            return batchOperation.getCountEntries();
+        }
+
+        if (searchResult.getEntryCount() != 1) {
+            throw new EntryPersistenceException(String.format("Failed to calucalte count of entries due to missing result entry with baseDN: %s, filter: %s", baseDN, searchFilter));
+        }
+
+        Long result = searchResult.getSearchEntries().get(0).getAttributeValueAsLong("numsubordinates");
+        if (result == null) {
+            throw new EntryPersistenceException(String.format("Failed to calucalte count of entries due to missing attribute 'numsubordinates' with baseDN: %s, filter: %s", baseDN, searchFilter));
+        }
+
+        return result.intValue();
     }
 
     @Override
