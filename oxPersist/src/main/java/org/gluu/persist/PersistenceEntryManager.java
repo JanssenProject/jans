@@ -83,6 +83,8 @@ public interface PersistenceEntryManager {
 
     <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter);
 
+    <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter,  SearchScope scope);
+
     int getHashCode(Object entry);
 
     String[] getObjectClasses(Object entry, Class<?> entryClass);
