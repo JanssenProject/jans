@@ -45,7 +45,7 @@ oxAuthGrantType: refresh_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/logout
+oxAuthLogoutURI: https://%(hostname)s/idp/profile/Logout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finishlogout
