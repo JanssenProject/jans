@@ -146,12 +146,11 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. prepareForStep called %s"  % str(step)
         identity = CdiUtil.bean(Identity)
 
-        if step == 1:
-            # This param is needed in passportlogin.xhtml
-            identity.setWorkingParameter("behaviour", "social")
-
+        if step == 1:        
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)
             self.parseProviderConfigs()
+            identity.setWorkingParameter("externalProviders", json.dumps(self.registeredProviders))
+            
             providerParam = self.customAuthzParameter
             url = None
 
@@ -190,7 +189,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getExtraParametersForStep(self, configurationAttributes, step):
         print "Passport. getExtraParametersForStep called"
         if step == 1:
-            return Arrays.asList("selectedProvider")
+            return Arrays.asList("selectedProvider", "externalProviders")
         elif step == 2:
             return Arrays.asList("passport_user_profile")
         return None
