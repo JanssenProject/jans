@@ -16,7 +16,7 @@ oxAuthGrantType: refresh_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/identity/logout
+oxAuthLogoutURI: https://%(hostname)s/identity/ssologout
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/getauthcode
@@ -45,10 +45,9 @@ oxAuthGrantType: refresh_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/idp/profile/Logout
+oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
-oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finishlogout
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthTrustedClient: true
