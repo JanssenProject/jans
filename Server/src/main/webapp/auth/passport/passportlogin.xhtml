@@ -319,18 +319,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 		</div>
 
 		<script type="text/javascript">
-			var behaviour = "${identity.getWorkingParameter('behaviour')}";
-
-			try {
-				if (behaviour == "") {
-					behaviour = localStorage.behaviour ? localStorage.behaviour
-							: "";
-				} else {
-					localStorage.behaviour = behaviour;
-				}
-			} catch (e) {
-			}
-
 			function idp_redirect(provider) {
 				var form = document.forms.loginForm;
 				form["loginForm:provider"].value = provider;
@@ -354,37 +342,15 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 			jQuery(document).ready(
 					function() {
+                        var jsonProviders = '${identity.getWorkingParameter('externalProviders')}'
+                        try {
+                            var providers = JSON.parse(jsonProviders)
 
-						var APIURL = window.location.origin;
-
-						if (behaviour == "social") {
-							//social provider
-							$.get(APIURL + "/passport/passportstrategies",
-									function(data) {
-
-										var providers = JSON.parse(data);
-										for ( var name in providers) {
-											dynamic_link(name,
-													providers[name].logo_img);
-										}
-
-									});
-						}
-						if (behaviour == "saml") {
-							//saml provider
-							$.get(APIURL + "/passport/saml_config", function(
-									data) {
-
-								var providers = JSON.parse(data);
-								for ( var name in providers) {
-									if (providers[name].enable == "true") {
-										dynamic_link(name,
-												providers[name].logo_img);
-									}
-								}
-
-							});
-						}
+                            for (var idprv in providers) {
+                                dynamic_link(idprv, providers[idprv].logo_img)
+                            }
+                        } catch (e) {
+                        }
 
 						//error message display
 						var errormsg = window.location.href.split("=");
