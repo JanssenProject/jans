@@ -2,6 +2,7 @@
   "enable_pass_reset" : true,
   "oxd_config" : {
     "frontchannel_logout_uri" : "https://%(hostname)s/casa/autologout",
+    "post_logout_uri" : "https://%(hostname)s/casa/bye.zul",
     "authz_redirect_uri" : "https://%(hostname)s/casa"
   },
   "ldap_settings" : {
