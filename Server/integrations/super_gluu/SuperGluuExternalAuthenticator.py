@@ -355,7 +355,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                    'issuer': issuer,
                                    'state': session_id,
                                    'licensed': self.valid_license,
-                                   'created': ZonedDateTime.now().withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)}
+                                   'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
                 self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
 
@@ -403,7 +403,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'method': auth_method,
                                'state': session_id,
                                'licensed': self.valid_license,
-                               'created': ZonedDateTime.now().withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)}
+                               'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
             self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
 
