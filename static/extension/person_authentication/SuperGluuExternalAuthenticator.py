@@ -22,6 +22,8 @@ from org.xdi.service import MailService
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService 
 from org.gluu.oxnotify.client import NotifyClientFactory 
 from java.util import Arrays, HashMap, IdentityHashMap, Date
+from java.time import ZonedDateTime
+from java.time.format import DateTimeFormatter
 
 try:
     from org.xdi.oxd.license.client.js import Product
@@ -353,7 +355,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                    'issuer': issuer,
                                    'state': session_id,
                                    'licensed': self.valid_license,
-                                   'created': datetime.datetime.now().isoformat()}
+                                   'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
                 self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
 
@@ -401,7 +403,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'method': auth_method,
                                'state': session_id,
                                'licensed': self.valid_license,
-                               'created': datetime.datetime.now().isoformat()}
+                               'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
             self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
 
