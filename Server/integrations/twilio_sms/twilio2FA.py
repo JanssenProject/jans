@@ -116,6 +116,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "TwilioSMS, Error finding mobile number for user '%'" % user_name    
                     
             except:
+                facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
                 print 'TwilioSMS, Error finding mobile number for' % (user_name)
                 return False
 
@@ -142,6 +143,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
                 return True
             except Exception, ex:
+                facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to send message to mobile phone")
                 print "TwilioSMS. Error sending message to Twilio"
                 print "TwilioSMS. Unexpected error:", ex
 
