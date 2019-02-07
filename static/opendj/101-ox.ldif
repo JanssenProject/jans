@@ -2504,7 +2504,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.27 NAME 'oxAuthToken'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthClaims $ oxAuthSessionDn $ oxIdTokenTokenBindingCnf )
+  MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthClaims $ oxAuthSessionDn $ oxAttributes $ oxIdTokenTokenBindingCnf )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.28 NAME 'oxAuthUmaRPT'
   SUP ( top )
