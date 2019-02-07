@@ -24,14 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.ldap.TokenLdap;
-import org.xdi.oxauth.model.registration.Client;
-import org.xdi.util.security.StringEncrypter;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
@@ -52,7 +44,7 @@ public interface IAuthorizationGrant {
 
     public void setNonce(String nonce);
 
-    public AccessToken createAccessToken();
+    public AccessToken createAccessToken(String certAsPem);
 
     public RefreshToken createRefreshToken();
 

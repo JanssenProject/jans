@@ -586,7 +586,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification!!!
                                     }
-                                    newAccessToken = authorizationGrant.createAccessToken();
+                                    newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"));
 
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());

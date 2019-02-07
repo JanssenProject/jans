@@ -6,18 +6,18 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.token.HandleTokenFactory;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.util.JwtUtil;
+
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
 
 /**
  * <p>
@@ -49,6 +49,7 @@ public abstract class AbstractToken implements Serializable {
     private String authMode;
 
     private String sessionDn;
+    private String x5ts256;
 
     /**
      * Creates and initializes the values of an abstract token.
@@ -212,6 +213,14 @@ public abstract class AbstractToken implements Serializable {
      */
     public void setAuthMode(String authMode) {
         this.authMode = authMode;
+    }
+
+    public String getX5ts256() {
+        return x5ts256;
+    }
+
+    public void setX5ts256(String x5ts256) {
+        this.x5ts256 = x5ts256;
     }
 
     public String getSessionDn() {

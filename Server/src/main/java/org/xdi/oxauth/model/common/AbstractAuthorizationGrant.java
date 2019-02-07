@@ -13,6 +13,7 @@ import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.util.CertUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 
 import javax.inject.Inject;
@@ -51,6 +52,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private IdToken idToken;
     private AuthorizationCode authorizationCode;
     private String tokenBindingHash;
+    private String x5cs256;
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
@@ -116,6 +118,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setTokenBindingHash(String tokenBindingHash) {
         this.tokenBindingHash = tokenBindingHash;
+    }
+
+    public String getX5cs256() {
+        return x5cs256;
+    }
+
+    public void setX5cs256(String x5cs256) {
+        this.x5cs256 = x5cs256;
     }
 
     @Override
@@ -270,7 +280,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public AccessToken createAccessToken() {
+    public AccessToken createAccessToken(String certAsPem) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // oxAuth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
@@ -280,6 +290,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         accessToken.setAuthMode(getAcrValues());
         accessToken.setSessionDn(getSessionDn());
+        accessToken.setX5ts256(CertUtil.confirmationMethodHashS256(certAsPem));
 
         return accessToken;
     }
@@ -468,6 +479,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
                 + '\'' + ", sessionDn='" + sessionDn + '\'' + ", codeChallenge='" + codeChallenge + '\''
                 + ", codeChallengeMethod='" + codeChallengeMethod + '\'' + ", authenticationTime=" + authenticationTime
                 + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType + ", tokenBindingHash=" + tokenBindingHash
-                + ", claims=" + claims + '}';
+                + ", x5cs256=" + x5cs256 + ", claims=" + claims + '}';
     }
 }
