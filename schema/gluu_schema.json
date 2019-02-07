@@ -5183,6 +5183,7 @@
                 "oxCodeChallengeMethod",
                 "oxAuthClaims",
                 "oxAuthSessionDn",
+                "oxAttributes",
                 "oxIdTokenTokenBindingCnf"
             ],
             "must": [
