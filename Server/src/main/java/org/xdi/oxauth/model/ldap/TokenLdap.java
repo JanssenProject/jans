@@ -6,15 +6,12 @@
 
 package org.xdi.oxauth.model.ldap;
 
+import org.apache.commons.lang.StringUtils;
+import org.gluu.site.ldap.persistence.annotation.*;
+import org.xdi.oxauth.model.common.GrantType;
+
 import java.io.Serializable;
 import java.util.Date;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.oxauth.model.common.GrantType;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -71,9 +68,20 @@ public class TokenLdap implements Serializable {
     @LdapAttribute(name = "oxAuthSessionDn")
     private String sessionDn;
 
+    @LdapAttribute(name = "oxAttributes")
+    @LdapJsonObject
+    private TokenAttributes attributes;
+
     private boolean isFromCache;
 
     public TokenLdap() {
+    }
+
+    public TokenAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new TokenAttributes();
+        }
+        return attributes;
     }
 
     public String getId() {

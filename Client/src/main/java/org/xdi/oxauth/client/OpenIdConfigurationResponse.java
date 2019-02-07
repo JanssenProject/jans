@@ -64,6 +64,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private Boolean requestParameterSupported;
     private Boolean requestUriParameterSupported;
     private Boolean requireRequestUriRegistration;
+    private Boolean tlsClientCertificateBoundAccessTokens;
     private Boolean frontChannelLogoutSupported;
     private Boolean frontChannelLogoutSessionSupported;
     private String opPolicyUri;
@@ -985,6 +986,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.frontChannelLogoutSupported = frontChannelLogoutSupported;
     }
 
+    public Boolean getTlsClientCertificateBoundAccessTokens() {
+        return tlsClientCertificateBoundAccessTokens;
+    }
+
+    public void setTlsClientCertificateBoundAccessTokens(Boolean tlsClientCertificateBoundAccessTokens) {
+        this.tlsClientCertificateBoundAccessTokens = tlsClientCertificateBoundAccessTokens;
+    }
+
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
     }
@@ -1034,6 +1043,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", claimsParameterSupported=" + claimsParameterSupported +
                 ", requestParameterSupported=" + requestParameterSupported +
                 ", requestUriParameterSupported=" + requestUriParameterSupported +
+                ", tlsClientCertificateBoundAccessTokens=" + tlsClientCertificateBoundAccessTokens +
                 ", frontChannelLogoutSupported=" + frontChannelLogoutSupported +
                 ", frontChannelLogoutSessionSupported=" + frontChannelLogoutSessionSupported +
                 ", requireRequestUriRegistration=" + requireRequestUriRegistration +

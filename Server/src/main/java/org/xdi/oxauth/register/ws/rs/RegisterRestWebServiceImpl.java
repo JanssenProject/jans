@@ -391,6 +391,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getAccessTokenAsJwt() != null) {
             p_client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
         }
+        if (requestObject.getTlsClientAuthSubjectDn() != null) {
+            p_client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
+        }
         if (requestObject.getAccessTokenSigningAlg() != null) {
             p_client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
         }
@@ -684,6 +687,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_URIS.toString(), client.getRequestUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZED_ORIGINS.toString(), client.getAuthorizedOrigins());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RPT_AS_JWT.toString(), client.isRptAsJwt());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TLS_CLIENT_AUTH_SUBJECT_DN.toString(), client.getAttributes().getTlsClientAuthSubjectDn());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
