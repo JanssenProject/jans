@@ -56,6 +56,7 @@ public interface ConfigurationResponseClaim {
     String SCOPE_KEY = "scope";
     String CLAIMS_KEY = "claims";
     String ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED = "id_token_token_binding_cnf_values_supported";
+    String TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS = "tls_client_certificate_bound_access_tokens";
     String FRONTCHANNEL_LOGOUT_SUPPORTED = "frontchannel_logout_supported";
     String FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     String AUTH_LEVEL_MAPPING = "auth_level_mapping";

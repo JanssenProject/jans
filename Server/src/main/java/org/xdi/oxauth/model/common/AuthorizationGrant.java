@@ -155,9 +155,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public AccessToken createAccessToken() {
+    public AccessToken createAccessToken(String certAsPem) {
         try {
-            final AccessToken accessToken = super.createAccessToken();
+            final AccessToken accessToken = super.createAccessToken(certAsPem);
             if (getClient().isAccessTokenAsJwt()) {
                 accessToken.setCode(createAccessTokenAsJwt(accessToken));
             }
@@ -190,6 +190,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
+        jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
         return jwtSigner.sign().toString();
     }
 
@@ -290,6 +291,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setAuthMode(p_token.getAuthMode());
         result.setSessionDn(p_token.getSessionDn());
         result.setAuthenticationTime(getAuthenticationTime());
+        result.getAttributes().setX5cs256(p_token.getX5ts256());
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();
         if (grantType != null) {

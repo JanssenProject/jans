@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.auth;
 
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -221,13 +222,21 @@ public class AuthenticationFilter implements Filter {
                     final PublicKey publicKey = cert.getPublicKey();
                     final byte[] encodedKey = publicKey.getEncoded();
 
-                    JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                    JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks()) ?
+                            JwtUtil.getJSONWebKeys(client.getJwksUri()) :
+                            new JSONObject(client.getJwks());
+
                     if (jsonWebKeys == null) {
-                        log.debug("Unable to load json web keys for client: {}, jwks_uri: {}", clientId, client.getJwksUri());
+                        log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", clientId, client.getJwksUri(), client.getJwks());
                         return false;
                     }
 
                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+                    if (cryptoProvider == null) {
+                        log.debug("Unable to create cryptoProvider.");
+                        return false;
+                    }
+
                     final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
                     for (JSONWebKey key : keySet.getKeys()) {
                         if (ArrayUtils.isEquals(encodedKey, cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {

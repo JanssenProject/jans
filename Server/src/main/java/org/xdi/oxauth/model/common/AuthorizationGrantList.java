@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -31,6 +20,16 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -244,6 +243,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 result.setTokenBindingHash(tokenLdap.getTokenBindingHash());
                 result.setNonce(nonce);
+                result.setX5cs256(tokenLdap.getAttributes().getX5cs256());
                 result.setTokenLdap(tokenLdap);
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);
