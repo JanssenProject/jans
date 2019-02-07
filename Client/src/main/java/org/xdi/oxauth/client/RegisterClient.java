@@ -9,7 +9,6 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
@@ -156,6 +155,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getRptAsJwt() != null) {
                     requestBody.put(RPT_AS_JWT.toString(), getRequest().getRptAsJwt().toString());
                 }
+                if (getRequest().getTlsClientAuthSubjectDn() != null) {
+                    requestBody.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), getRequest().getTlsClientAuthSubjectDn());
+                }
                 if (getRequest().getIdTokenSignedResponseAlg() != null) {
                     requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
                 }
@@ -271,8 +273,6 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 clientResponse = clientRequest.get(String.class);
             }
             setResponse(new RegisterResponse(clientResponse));
-        } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {

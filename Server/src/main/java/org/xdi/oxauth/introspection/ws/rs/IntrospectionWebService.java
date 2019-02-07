@@ -11,6 +11,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -34,6 +35,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ import java.util.ArrayList;
         "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
-    private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<AuthorizationGrant, Boolean>(null, false);
+    private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<>(null, false);
 
     @Inject
     private Logger log;
@@ -113,8 +115,9 @@ public class IntrospectionWebService {
                         final IntrospectionResponse response = new IntrospectionResponse(false);
 
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
+                        AbstractToken tokenToIntrospect = null;
                         if (grantOfIntrospectionToken != null) {
-                            final AbstractToken tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
+                            tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
                             final User user = grantOfIntrospectionToken.getUser();
 
                             response.setActive(tokenToIntrospect.isValid());
@@ -135,15 +138,17 @@ public class IntrospectionWebService {
                         } else {
                             log.error("Failed to find grant for access_token: " + p_token + ". Return 200 with active=false.");
                         }
-                        JSONObject responseAsJsonObject = new JSONObject(ServerUtil.asJson(response));
+                        JSONObject responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
 
                         ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
                         if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
                             log.trace("Successfully run extenal introspection scripts.");
-                            return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).build();
+                        } else {
+                            responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
+                            log.trace("Canceled changes made by external introspection script since method returned `false`.");
                         }
 
-                        return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
+                        return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).build();
                     } else {
                         log.error("Access token is not valid. Valid: " + (authorizationAccessToken != null && authorizationAccessToken.isValid()));
                         return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
@@ -159,6 +164,17 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+    }
+
+    private static JSONObject createResponseAsJsonObject(IntrospectionResponse response, AbstractToken tokenToIntrospect) throws JSONException, IOException {
+        final JSONObject result = new JSONObject(ServerUtil.asJson(response));
+        if (tokenToIntrospect != null && StringUtils.isNotBlank(tokenToIntrospect.getX5ts256())) {
+            final JSONObject cnf = new JSONObject();
+            cnf.put("x5t#S256", tokenToIntrospect.getX5ts256());
+            result.put("cnf", cnf);
+        }
+
+        return result;
     }
 
     private Pair<AuthorizationGrant, Boolean> getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {

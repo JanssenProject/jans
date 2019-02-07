@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.util;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -13,6 +14,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.util.StringHelper;
 
 import java.io.ByteArrayInputStream;
@@ -96,5 +98,15 @@ public class CertUtil {
 		
 		return null;
 	}
+
+	public static String confirmationMethodHashS256(String certificateAsPem) {
+	    if (StringUtils.isBlank(certificateAsPem)) {
+	        return "";
+        }
+	    certificateAsPem = StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
+	    certificateAsPem = StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
+	    certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
+        return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+    }
 
 }
