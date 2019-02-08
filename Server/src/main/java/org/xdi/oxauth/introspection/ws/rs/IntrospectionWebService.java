@@ -51,7 +51,7 @@ import java.util.ArrayList;
         "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
-    private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<>(null, false);
+    private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<AuthorizationGrant, Boolean>(null, false);
 
     @Inject
     private Logger log;
