@@ -7,6 +7,8 @@
 package org.gluu.persist.ldap.operation.impl;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
+import org.gluu.persist.watch.DurationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
@@ -213,6 +216,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     private boolean authenticateImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
+        Instant startTime = DurationUtil.now();
+
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
         if (!additionalPasswordMethods.isEmpty()) {
@@ -230,11 +235,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             }
         }
 
+        boolean result = false;
+
         if (this.bindConnectionProvider == null) {
-            return authenticateConnectionPoolImpl(bindDn, password);
+            result = authenticateConnectionPoolImpl(bindDn, password);
         } else {
-            return authenticateBindConnectionPoolImpl(bindDn, password);
+            result = authenticateBindConnectionPoolImpl(bindDn, password);
         }
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: bind, duration: {}, dn: {}", duration, bindDn);
+
+        return result;
     }
 
     private boolean authenticateConnectionPoolImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
@@ -324,6 +336,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
+        Instant startTime = DurationUtil.now();
+        
+        SearchResult result = searchImpl(dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: search, duration: {}, dn: {}, filter: {}, scope: {}, batchOperationWraper: {}, start: {}, searchLimit: {}, count: {}, controls: {}, attributes: {}", duration, dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
+
+        return result;
+    }
+
+    private <T> SearchResult searchImpl(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
             int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
         SearchRequest searchRequest;
 
@@ -483,7 +507,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     public List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
                                                                int count, int pageSize, String sortBy, SortOrder sortOrder,
                                                                PagedResult vlvResponse, String... attributes) throws Exception {
+        Instant startTime = DurationUtil.now();
+        
+        List<SearchResultEntry> result = searchSearchResultEntryListImpl(dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
 
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
+
+        return result;
+}
+
+    private List<SearchResultEntry> searchSearchResultEntryListImpl(String dn, Filter filter, SearchScope scope, int startIndex, int count,
+            int pageSize, String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPException, Exception {
         //This method does not assume that count <= pageSize as occurs in SCIM, but it's more general
 
         //Why this?
@@ -553,7 +588,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
         releaseConnection(conn);
         return searchResultEntryList;
-
     }
 
     private ASN1OctetString getSearchResultCookie(SearchResult searchResult) throws Exception {
@@ -588,7 +622,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     @Deprecated
     public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
             SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws Exception {
+        Instant startTime = DurationUtil.now();
 
+        SearchResult result = searchVirtualListViewImpl(dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: search_virtual_list_view, duration: {}, dn: {}, filter: {}, scope: {}, start: {}, count: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
+
+        return result;
+    }
+
+    private SearchResult searchVirtualListViewImpl(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
+            SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPSearchException, LDAPException {
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
         }
@@ -667,6 +712,17 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException {
+        Instant startTime = DurationUtil.now();
+        
+        SearchResultEntry result = lookupImpl(dn, attributes);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: lookup, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
+
+        return result;
+    }
+
+    private SearchResultEntry lookupImpl(String dn, String... attributes) {
         if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
         }
@@ -689,9 +745,20 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * java.util.Collection)
      */
     @Override
-    public boolean addEntry(String dn, Collection<Attribute> atts) throws DuplicateEntryException, ConnectionException {
+    public boolean addEntry(String dn, Collection<Attribute> attributes) throws DuplicateEntryException, ConnectionException {
+        Instant startTime = DurationUtil.now();
+        
+        boolean result = addEntryImpl(dn, attributes);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: add, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
+        
+        return result;
+    }
+
+    private boolean addEntryImpl(String dn, Collection<Attribute> attributes) throws DuplicateEntryException {
         try {
-            LDAPResult result = getConnectionPool().add(dn, atts);
+            LDAPResult result = getConnectionPool().add(dn, attributes);
             if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationsServiceImpl.SUCCESS)) {
                 return true;
             }
@@ -751,6 +818,17 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException {
+        Instant startTime = DurationUtil.now();
+        
+        boolean result = updateEntryImpl(dn, modifications);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: modify, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
+
+        return result;
+    }
+
+    private boolean updateEntryImpl(String dn, List<Modification> modifications) throws DuplicateEntryException {
         ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
         return modifyEntry(modifyRequest);
     }
@@ -791,6 +869,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public void delete(String dn) throws ConnectionException {
+        Instant startTime = DurationUtil.now();
+
+        deleteImpl(dn);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: delete, duration: {}, dn: {}", duration, dn);
+    }
+
+    private void deleteImpl(String dn) {
         try {
             getConnectionPool().delete(dn);
         } catch (Exception ex) {
@@ -806,6 +893,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public void deleteWithSubtree(String dn) throws ConnectionException {
+        Instant startTime = DurationUtil.now();
+
+        deleteWithSubtreeImpl(dn);
+
+        Duration duration = DurationUtil.duration(startTime);
+        DurationUtil.logDebug("LDAP operation: delete_tree, duration: {}, dn: {}", duration, dn);
+    }
+
+    protected void deleteWithSubtreeImpl(String dn) {
         try {
             final DeleteRequest deleteRequest = new DeleteRequest(dn);
             deleteRequest.addControl(new SubtreeDeleteRequestControl());
