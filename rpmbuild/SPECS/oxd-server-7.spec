@@ -30,9 +30,7 @@ install -d %{buildroot}/opt/oxd-server/bin
 install -d %{buildroot}/opt/oxd-server/data
 install -d %{buildroot}/opt/oxd-server/conf
 install -d %{buildroot}/opt/oxd-server/lib
-install -d %{buildroot}/etc/init.d
-install -d %{buildroot}/%{_initddir}
-install -d %{buildroot}/etc/default/
+install -d %{buildroot}/lib/systemd/system
 install -m 755 %SOURCE1 %{buildroot}/lib/systemd/system/oxd-server-4.0.beta.service
 install -m 755 %SOURCE2 %{buildroot}/opt/oxd-server/bin/oxd-server.sh
 install -m 755 oxd-server/src/main/bin/oxd-start.sh %{buildroot}/opt/oxd-server/bin/
