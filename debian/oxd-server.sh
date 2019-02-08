@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # Startup script for oxd-server under *nix systems (it works under NT/cygwin too).
-
+JAVA_HOME=/opt/jre
+JAVA=$JAVA_HOME/bin/java
+OXD_LOGS=/var/log/oxd-server
+OXD_HOME=/opt/oxd-server
+CONF=/opt/oxd-server/conf
+LIB=$OXD_HOME/lib
+JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml"
+OXD_USER=jetty
 ##################################################
 # Set the name which is used by other variables.
 # Defaults to the file name without extension.
