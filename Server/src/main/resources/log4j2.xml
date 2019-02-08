@@ -39,6 +39,17 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
+		<RollingFile name="OX_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/oxauth_persistence_duration.log" filePattern="${sys:log.base}/logs/oxauth_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
 		<RollingFile name="OX_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/oxauth_persistence_ldap_statistics.log"
 			filePattern="${sys:log.base}/logs/oxauth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
 
@@ -104,6 +115,10 @@
 
 		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		</Logger>
+
+		<Logger name="org.gluu.persist.watch" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
 		<Logger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
