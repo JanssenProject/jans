@@ -18,9 +18,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
@@ -66,8 +70,21 @@ public class MdsService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    private Map<String, JsonNode> mdsEntries;
+
+    @PostConstruct
+    public void create() {
+        this.mdsEntries = Collections.synchronizedMap(new HashMap());
+    }
+
     public JsonNode fetchMetadata(byte[] aaguidBuffer) {
         String aaguid = deconvert(aaguidBuffer);
+        
+        JsonNode mdsEntry = mdsEntries.get(aaguid);
+        if (mdsEntry != null) {
+            log.debug("Get MDS by aaguid {} from cache", aaguid);
+            return mdsEntry;
+        }
 
         JsonNode tocEntry = mdsTocService.getAuthenticatorsMetadata(aaguid);
         if (tocEntry == null) {
@@ -84,9 +101,10 @@ public class MdsService {
             throw new Fido2RPRuntimeException("Fido2 MDS access token should be set");
         }
 
+        String tocEntryUrl = tocEntry.get("url").asText();
         URI metadataUrl;
         try {
-            metadataUrl = new URI(String.format("%s/?token=%s", tocEntry.get("url").asText(), mdsAccessToken));
+            metadataUrl = new URI(String.format("%s/?token=%s", tocEntryUrl, mdsAccessToken));
             log.info("Authenticator AAGUI {} url metadataUrl {} downloaded", aaguid, metadataUrl);
         } catch (URISyntaxException e) {
             throw new Fido2RPRuntimeException("Invalid URI in TOC aaguid " + aaguid);
@@ -95,7 +113,7 @@ public class MdsService {
         verifyTocEntryStatus(aaguid, tocEntry);
         String metadataHash = commonVerifiers.verifyThatString(tocEntry, "hash");
 
-        log.info("Reaching MDS at {}", metadataUrl.toString());
+        log.info("Reaching MDS at {}", tocEntryUrl);
 
         ResteasyClient resteasyClient = resteasyClientFactory.buildResteasyClient();
         Response response = resteasyClient.target(metadataUrl).request().header("Content-Type", MediaType.APPLICATION_JSON).get();
@@ -116,7 +134,10 @@ public class MdsService {
             }
 
             try {
-                return dataMapperService.readTree(base64Service.urlDecode(body));
+                mdsEntry = dataMapperService.readTree(base64Service.urlDecode(body));
+                mdsEntries.put(aaguid, mdsEntry);
+                
+                return mdsEntry;
             } catch (IOException e) {
                 log.warn("Can't parse payload from the server ");
                 throw new Fido2RPRuntimeException("Unable to parse payload from server for aaguid " + deconvert(aaguidBuffer));
@@ -154,4 +175,9 @@ public class MdsService {
         }
 
     }
+    
+    public void clear() {
+        this.mdsEntries.clear();
+    }
+
 }
