@@ -3,14 +3,10 @@ Description=oxd-server daemon
 After=network.target
 
 [Service]
-Type=simple
-PIDFile=/var/run/oxd-server-4.0.beta.pid
+Type=forking
 ExecStart=/opt/oxd-server/bin/oxd-server.sh start
 ExecStop=/opt/oxd-server/bin/oxd-server.sh stop
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=process
-Restart=on-failure
-RestartSec=10s
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
