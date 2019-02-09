@@ -508,9 +508,16 @@ do_start () {
         	echo "PID: [`get_pid`]"
         	echo "OK `date`"
        	else
-               	echo "$SERVICE_NAME is already running ..."
-        	echo "PID: [$PID_NUM]"
-		exit 1
+                if netstat -tulpn | grep "$PID_NUM/java"; then
+                        echo "$SERVICE_NAME is already running ..."
+                        echo "PID: [$PID_NUM]"
+                        exit 1
+                else
+                        kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
+                        rm -f  $OXD_PID_FILE
+                        do_start
+                        exit 0
+                fi
 	fi
 }
 
