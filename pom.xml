@@ -5,7 +5,7 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.beta-SNAPSHOT</version>
+    <version>4.0-SNAPSHOT</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
