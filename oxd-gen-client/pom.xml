@@ -4,14 +4,14 @@
     <artifactId>oxd-gen-client</artifactId>
     <packaging>jar</packaging>
     <name>oxd-gen-client</name>
-    <version>4.0.beta-SNAPSHOT</version>
+    <version>4.0-SNAPSHOT</version>
     <url>https://github.com/swagger-api/swagger-codegen</url>
     <description>Swagger Java</description>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>4.0.beta-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <scm>

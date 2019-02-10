@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-client</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.beta-SNAPSHOT</version>
+    <version>4.0-SNAPSHOT</version>
     <name>oxD Client</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>4.0.beta-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <properties>

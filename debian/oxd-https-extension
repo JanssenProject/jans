@@ -9,7 +9,7 @@
 ### END INIT INFO
 
 CONF=/opt/oxd-https-extension/lib/oxd-https.yml
-OXD_HTTPS_EXTENSION_VERSION="4.0.beta-SNAPSHOT"
+OXD_HTTPS_EXTENSION_VERSION="4.0-SNAPSHOT"
 SERVICE_NAME=oxd-https-extension
 PID_PATH_NAME=/var/run/oxd-https-extension.pid
 LIB=/opt/oxd-https-extension/lib/oxd-https-extension-${OXD_HTTPS_EXTENSION_VERSION}.jar
