@@ -25,6 +25,7 @@ public class ParamsSecurityTest {
             GetClientTokenParams.class,
             GetRpParams.class,
             RegisterSiteParams.class,
+            GetJwksParams.class,
             EmptyParams.class,
             HasOxdIdParams.class,
             HasProtectionAccessTokenParams.class,
