@@ -1,8 +1,8 @@
 #!/bin/sh -e
 
 # Stopping oxd-server
-if [ -x /etc/init.d/oxd-server-4.0.beta ]; then
-/etc/init.d/oxd-server-4.0.beta stop > /dev/null 2>&1 &
+if [ -x /etc/init.d/oxd-server ]; then
+/etc/init.d/oxd-server stop > /dev/null 2>&1 &
 fi
 
 exit 0
