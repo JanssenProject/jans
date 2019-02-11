@@ -155,7 +155,6 @@ class Setup(object):
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
         self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
-        self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
@@ -194,7 +193,6 @@ class Setup(object):
         self.installLdap = True
         self.installHttpd = True
         self.installSaml = False
-        self.installAsimba = False
         self.installOxAuthRP = False
         self.installPassport = False
 
@@ -273,11 +271,7 @@ class Setup(object):
                      'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                      'installed' : False
                      },
-            'asimba' : {'name' : 'asimba',
-                        'jetty' : {'modules' : 'server,deploy,http,resources,console-capture,jsp'},
-                        'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
-                        'installed' : False
-                        },
+
             'oxauth-rp' : {'name' : 'oxauth-rp',
                            'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
@@ -376,8 +370,6 @@ class Setup(object):
         self.httpdCertFn = '%s/httpd.crt' % self.certFolder
         self.shibJksPass = None
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
-        self.asimbaJksPass = None
-        self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
 
         self.ldapTrustStoreFn = None
         self.encoded_ldapTrustStorePass = None
@@ -469,7 +461,6 @@ class Setup(object):
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
-        self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.gluu_python_base = '%s/python' % self.gluuOptFolder
         self.gluu_python_readme = '%s/libs/python.txt' % self.gluuOptPythonFolder
         self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
@@ -491,7 +482,6 @@ class Setup(object):
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
-        self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
         self.ldif_scripts_casa = '%s/scripts_casa.ldif' % self.outputFolder
@@ -500,13 +490,6 @@ class Setup(object):
         self.network = "/etc/sysconfig/network"
         self.system_profile_update_init = '%s/system_profile_init' % self.outputFolder
         self.system_profile_update_systemd = '%s/system_profile_systemd' % self.outputFolder
-
-        self.asimba_conf_folder = '%s/asimba' % self.configFolder
-        self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
-        self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
-        self.asimba_selector_configuration = '%s/asimba-selector.xml' % self.outputFolder
-        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
-        self.asimba_selector_configuration_xml = '%s/asimba-selector.xml' % self.asimba_conf_folder
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
@@ -598,7 +581,6 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
-                           self.ldif_asimba,
                            self.ldif_passport,
                            self.ldif_passport_config,
                            self.ldif_idp
@@ -611,7 +593,6 @@ class Setup(object):
                              self.oxtrust_cache_refresh_json: False,
                              self.oxtrust_import_person_json: False,
                              self.oxidp_config_json: False,
-                             self.oxasimba_config_json: False,
                              self.ox_ldap_properties: True,
                              self.oxauth_static_conf_json: False,
                              self.oxTrust_log_rotation_configuration: True,
@@ -631,13 +612,9 @@ class Setup(object):
                              self.ldif_groups: False,
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
-                             self.ldif_asimba: False,
                              self.ldif_passport: False,
                              self.ldif_passport_config: False,
                              self.ldif_idp: False,
-                             self.asimba_configuration: False,
-                             self.asimba_properties: False,
-                             self.asimba_selector_configuration: False,
                              self.network: False,
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
@@ -659,7 +636,6 @@ class Setup(object):
                         'oxd-server': ['opendj oxauth', 80],
                         'passport': ['opendj oxauth', 82],
                         'oxauth-rp': ['opendj oxauth', 84],
-                        'asimba': ['opendj oxauth', 86],
                         }
 
         self.install_time_ldap = None
@@ -687,8 +663,7 @@ class Setup(object):
             if self.ldap_type != 'couchbase':
                 txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
 
-            if self.allowDeprecatedApplications:       
-                txt += 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n"
+
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
                     + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
 
@@ -708,7 +683,6 @@ class Setup(object):
         realCertFolder = os.path.realpath(self.certFolder)
         realConfigFolder = os.path.realpath(self.configFolder)
         realOptPythonFolderFolder = os.path.realpath(self.gluuOptPythonFolder)
-        realAsimbaJks = os.path.realpath(self.asimbaJksFn)
 
         self.run([self.cmd_chown, '-R', 'root:gluu', realCertFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', realConfigFolder])
@@ -719,8 +693,6 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '440', realCertFolder])
         self.run([self.cmd_chmod, 'a+X', realCertFolder])
 
-        # Set write permission for Asimba's keystore (oxTrust can change it)
-        self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
@@ -820,8 +792,6 @@ class Setup(object):
             self.shibJksPass = self.getPW()
         if not self.oxauth_openid_jks_pass:
             self.oxauth_openid_jks_pass = self.getPW()
-        if not self.asimbaJksPass:
-            self.asimbaJksPass = self.getPW()
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
             self.openldapJksPass = self.getPW()
@@ -1512,13 +1482,6 @@ class Setup(object):
             self.pbar.progress("Downloading oxTrust war file", False)
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
-        if self.installAsimba:
-            # Asimba is not part of CE package. We need to download it if needed
-            distAsimbaPath = '%s/%s' % (self.distGluuFolder, "asimba.war")
-            if not os.path.exists(distAsimbaPath):
-                self.pbar.progress("Downloading Asimba war file", False)
-                self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distGluuFolder])
-
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
@@ -1638,24 +1601,17 @@ class Setup(object):
             self.gen_cert('shibIDP', self.shibJksPass, 'jetty')
             self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
-            self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
 
             if self.installLdap and self.ldap_type == 'openldap':
                 self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
 
             self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
-            # Shibboleth IDP and Asimba will be added soon...
+
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
                               self.shibJksPass,
                               '%s/shibIDP.key' % self.certFolder,
                               '%s/shibIDP.crt' % self.certFolder,
-                              'jetty')
-            self.gen_keystore('asimba',
-                              self.asimbaJksFn,
-                              self.asimbaJksPass,
-                              '%s/asimba.key' % self.certFolder,
-                              '%s/asimba.crt' % self.certFolder,
                               'jetty')
             if self.installLdap and self.ldap_type == 'openldap':
                 self.gen_keystore('openldap',
@@ -1664,23 +1620,11 @@ class Setup(object):
                                   '%s/openldap.key' % self.certFolder,
                                   '%s/openldap.crt' % self.certFolder,
                                   'jetty')
-            # samp.pem from asimba.crt for asimba scrypt input
-            self.run([self.opensslCommand,
-                      'x509',
-                      '-inform',
-                      'pem',
-                      '-outform',
-                      'pem',
-                      '-in',
-                      '%s/asimba.crt' % self.certFolder,
-                      '-out',
-                      '%s/saml.pem' % self.certFolder
-                      ])
+
             # permissions
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
-            # oxTrust UI can add key to asimba's keystore
-            self.run([self.cmd_chmod, 'u+w', self.asimbaJksFn])
+
         except:
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
@@ -2094,25 +2038,6 @@ class Setup(object):
 
         self.removeDirs(tmpIdpDir)
 
-    def install_asimba(self):
-        asimbaWar = 'asimba.war'
-        distAsimbaPath = '%s/%s' % (self.distGluuFolder, asimbaWar)
-
-        self.logIt("Configuring Asimba...")
-        self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
-        self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
-        self.run([self.cmd_chmod, '-R', 'uga+x', self.asimba_conf_folder])
-        self.run([self.cmd_chmod, '-R', 'ug+w', self.asimba_conf_folder])
-        self.run([self.cmd_chmod, '-R', 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
-
-        self.logIt("Copying asimba.war into jetty webapps folder...")
-        jettyServiceName = 'asimba'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
-
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile(distAsimbaPath, jettyServiceWebapps)
-
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
         distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, oxAuthRPWar)
@@ -2211,10 +2136,6 @@ class Setup(object):
         if self.installSaml:
             self.pbar.progress("Installing Gluu components: saml", False)
             self.install_saml()
-
-        if self.installAsimba:
-            prself.pbar.progress("Installing Gluu components: Asimba", False)
-            self.install_asimba()
 
         if self.installOxAuthRP:
             self.pbar.progress("Installing Gluu components: OxAuthRP", False)
@@ -2332,12 +2253,6 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/metric_db'])
 
-            if self.installAsimba:
-                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
-                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata'])
-                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/idp'])
-                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/sp'])
-                self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
 
         except:
             self.logIt("Error making folders", True)
@@ -2566,13 +2481,6 @@ class Setup(object):
         else:
             self.installPassport = False
 
-        if self.allowDeprecatedApplications:
-            promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
-            if promptForAsimba == 'y':
-                self.installAsimba = True
-            else:
-                self.installAsimba = False
-
 
     def get_filepaths(self, directory):
         file_paths = []
@@ -2749,7 +2657,6 @@ class Setup(object):
         self.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
 
         self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
-        self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     def get_clean_args(self, args):
         argsc = args[:]
@@ -3503,8 +3410,6 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['identity'])
         if self.installSaml:
             installedComponents.append(self.jetty_app_configuration['idp'])
-        if self.installAsimba:
-            installedComponents.append(self.jetty_app_configuration['asimba'])
         if self.installOxAuthRP:
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
 
@@ -3964,7 +3869,6 @@ def print_help():
     print "properties will automatically be used instead of the interactive setup."
     print "Options:"
     print ""
-    print "    -a   Install Asimba"
     print "    -r   Install oxAuth RP"
     print "    -p   Install Passport"
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
@@ -3988,9 +3892,7 @@ def getOpts(argv, setupOptions):
         print_help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-a':
-            setupOptions['installAsimba'] = True
-        elif opt == '-d':
+        if opt == '-d':
             if os.path.exists(arg):
                 setupOptions['install_dir'] = arg
             else:
@@ -4051,7 +3953,6 @@ if __name__ == '__main__':
         'installLDAP': True,
         'installHTTPD': True,
         'installSaml': False,
-        'installAsimba': False,
         'installOxAuthRP': False,
         'installPassport': False,
         'loadTestData': False,
@@ -4075,7 +3976,6 @@ if __name__ == '__main__':
     installObject.installLdap = setupOptions['installLDAP']
     installObject.installHttpd = setupOptions['installHTTPD']
     installObject.installSaml = setupOptions['installSaml']
-    installObject.installAsimba = setupOptions['installAsimba']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
     installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
