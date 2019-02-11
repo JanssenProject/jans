@@ -23,10 +23,3 @@ objectClass: oxApplicationConfiguration
 ou: oxidp
 oxConfApplication::%(oxidp_config_base64)s
 oxRevision: 1
-
-dn: ou=oxasimba,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectClass: top
-objectClass: oxAsimbaConfiguration
-ou: oxasimba
-oxConfApplication::%(oxasimba_config_base64)s
-oxRevision: 1
