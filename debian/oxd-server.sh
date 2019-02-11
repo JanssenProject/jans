@@ -69,7 +69,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   have shell access, e.g. /bin/false
 #
 # OXD_INIT_LOG
-SERVICE_NAME="oxd-server-4.0.beta"
+SERVICE_NAME="oxd-server"
 OXD_INIT_LOG=/var/log/oxd-server/oxd-server.log
 
 usage()
