@@ -143,10 +143,17 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         if (StringUtils.isNotBlank(idTokenHint)) {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
             if (authorizationGrant == null) {
-                final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
-                log.error(reason);
-                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
-                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+                Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
+                if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+                    authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+                }
+
+                if (authorizationGrant == null) {
+                    final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
+                    log.error(reason);
+                    throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
+                            errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+                }
             }
         }
     }
