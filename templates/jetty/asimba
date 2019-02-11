@@ -1,9 +1,0 @@
-JAVA_HOME=%(jre_home)s
-JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms%(asimba_min_heap_mem)sm -Xmx%(asimba_max_heap_mem)sm -XX:MaxMetaspaceSize=%(asimba_max_meta_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/asimba"
-
-JETTY_HOME=%(jetty_home)s
-JETTY_BASE=%(jetty_base)s/asimba
-JETTY_USER=jetty
-JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8084"
-TMPDIR=%(jetty_dist)s/temp
