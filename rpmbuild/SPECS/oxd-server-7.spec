@@ -1,16 +1,16 @@
-%define name1 oxd-server-4.0.beta
-Name:           oxd-server-4.0.beta
-Version:        1
+%define name1 oxd-server
+Name:           oxd-server
+Version:        4.0
 Release:        1.centos7
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://www.gluu.org
 Source0:        %{name}.tar.gz
-Source1:        oxd-server-4.0.beta.service
+Source1:        oxd-server.service.file
 Source2:        oxd-server.sh
 BuildArch:      noarch
-Conflicts:      oxd-server-4.0.beta
+Conflicts:      oxd-server
 
 %description
 oxd - OpenID Connect and UMA plugins for
@@ -31,7 +31,7 @@ install -d %{buildroot}/opt/oxd-server/data
 install -d %{buildroot}/opt/oxd-server/conf
 install -d %{buildroot}/opt/oxd-server/lib
 install -d %{buildroot}/lib/systemd/system
-install -m 755 %SOURCE1 %{buildroot}/lib/systemd/system/oxd-server-4.0.beta.service
+install -m 755 %SOURCE1 %{buildroot}/lib/systemd/system/oxd-server.service
 install -m 755 %SOURCE2 %{buildroot}/opt/oxd-server/bin/oxd-server.sh
 install -m 755 oxd-server/src/main/bin/oxd-start.sh %{buildroot}/opt/oxd-server/bin/
 install -m 755 oxd-server/src/main/bin/lsox.sh %{buildroot}/opt/oxd-server/bin/
@@ -51,13 +51,13 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 # Stopping oxd-server
 # This will stop oxd-server before upgrade|install 
-if [ -e /var/run/oxd-server-4.0.beta.pid ]; then
-    kill -9 `cat /var/run/oxd-server-4.0.beta.pid` > /dev/null 2>&1
-    rm -rf /var/run/oxd-server-4.0.beta.pid > /dev/null 2>&1
+if [ -e /var/run/oxd-server.pid ]; then
+    kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+    rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
 fi
 
 %post
-chkconfig --add oxd-server-4.0.beta > /dev/null 2>&1
+chkconfig --add oxd-server > /dev/null 2>&1
 getent passwd jetty > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     /usr/sbin/useradd --system --create-home --user-group --shell /bin/bash --home-dir /home/jetty jetty
@@ -68,7 +68,7 @@ if [ $? -ne 0 ]; then
     /usr/sbin/usermod -a -G gluu jetty
 fi
 
-chown root:root /lib/systemd/system/oxd-server-4.0.beta.service 2>&1
+chown root:root /lib/systemd/system/oxd-server.service 2>&1
 chown jetty:jetty -R /opt/oxd-server 2>&1
 chmod 755 /opt/oxd-server/bin/oxd-server.sh 2>&1
 mkdir -p /var/log/oxd-server 2>&1
@@ -78,15 +78,15 @@ chown -R jetty:jetty /opt/oxd-server/data 2>&1
 chmod 764 /opt/oxd-server/data 2>&1
 
 %preun
-systemctl stop oxd-server-4.0.beta.service > /dev/null 2>&1
-chkconfig --del oxd-server-4.0.beta > /dev/null 2>&1
+systemctl stop oxd-server.service > /dev/null 2>&1
+chkconfig --del oxd-server > /dev/null 2>&1
 
 %files
 %defattr(-,root,root,-)
 /opt/oxd-server/*
 /var/log/oxd-server
-/lib/systemd/system/oxd-server-4.0.beta.service
+/lib/systemd/system/oxd-server.service
 
 %changelog
-* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0.0-Beta
-- Release 4.0.0-Beta
+* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0
+- Release 4.0
