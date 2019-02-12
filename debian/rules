@@ -32,6 +32,7 @@ override_dh_auto_install:
 		mkdir -p debian/oxd-server/var/log/oxd-server/
 		touch debian/oxd-server/var/log/oxd-server/oxd-server.log
 		mkdir -p debian/oxd-server/etc/default/
+		mkdir -p debian/oxd-server/lib/systemd/system/
 		cp -a debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
 
 override_dh_strip_nondeterminism:
@@ -39,7 +40,6 @@ override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
 		chmod 755 debian/oxd-server/opt/oxd-server/bin/lsox.sh
-		chmod 644 debian/oxd-server/etc/default/oxd-server
 		chown -R jetty:jetty debian/oxd-server/opt/oxd-server/data
 		chown -R jetty:jetty debian/oxd-server/var/log/oxd-server/
 		chmod 764 debian/oxd-server/opt/oxd-server/data
