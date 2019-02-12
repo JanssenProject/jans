@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if [ -e /etc/default/oxd-server ]; then
+    chown root:root /etc/default/oxd-server > /dev/null 2>&1
+    chmod 644 /etc/default/oxd-server > /dev/null 2>&1
+fi
+
+if [ -e /etc/init.d/oxd-server ]; then
+    chown root:root /etc/init.d/oxd-server > /dev/null 2>&1
+    chmod 755 /etc/init.d/oxd-server > /dev/null 2>&1
+fi
+
 if [ -x /etc/init.d/oxd-server ]; then
     /etc/init.d/oxd-server stop > /dev/null 2>&1 
 fi
@@ -18,13 +28,8 @@ if [ $? -ne 0 ]; then
     /usr/sbin/usermod -a -G gluu jetty
 fi
 
-if [ -e /etc/default/oxd-server ]; then
-    chown root:root /etc/default/oxd-server 2>&1
-    chmod 644 /etc/default/oxd-server 2>&1
-fi
-
-chown jetty:jetty -R /opt/oxd-server 2>&1
-mkdir -p /var/log/oxd-server 2>&1
-touch /var/log/oxd-server/oxd-server.log 2>&1
-chown -R jetty:jetty /var/log/oxd-server 2>&1
+chown jetty:jetty -R /opt/oxd-server > /dev/null 2>&1
+mkdir -p /var/log/oxd-server > /dev/null 2>&1
+touch /var/log/oxd-server/oxd-server.log > /dev/null 2>&1
+chown -R jetty:jetty /var/log/oxd-server > /dev/null 2>&1
 exit 0
