@@ -63,6 +63,7 @@ if [ $? -ne 0 ]; then
     /usr/sbin/groupadd gluu
     /usr/sbin/usermod -a -G gluu jetty
 fi
+systemctl enable oxd-server > /dev/null 2>&1
 
 chown root:root /lib/systemd/system/oxd-server.service 2>&1
 chown jetty:jetty -R /opt/oxd-server 2>&1
@@ -74,7 +75,10 @@ chown -R jetty:jetty /opt/oxd-server/data 2>&1
 chmod 764 /opt/oxd-server/data 2>&1
 
 %preun
-systemctl stop oxd-server > /dev/null 2>&1
+systemctl disable oxd-server > /dev/null 2>&1
+if [ -e /var/run/oxd-server.pid ]; then
+    systemctl stop oxd-server > /dev/null 2>&1
+fi
 
 %files
 %defattr(-,root,root,-)
