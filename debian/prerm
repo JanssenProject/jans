@@ -6,4 +6,12 @@ if [ -e /var/run/oxd-server.pid ]; then
     rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
 fi
 
+if [ -e /etc/init.d/oxd-server ]; then
+    update-rc.d oxd-server remove > /dev/null 2>&1
+fi
+
+if [ -e /lib/systemd/system/oxd-server.service ]; then
+    systemctl disable oxd-server > /dev/null 2>&1 
+fi
+
 exit 0
