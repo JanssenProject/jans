@@ -10,7 +10,6 @@ Source0:        %{name}.tar.gz
 Source1:        oxd-server.service.file
 Source2:        oxd-server.sh
 BuildArch:      noarch
-Conflicts:      oxd-server
 
 %description
 oxd - OpenID Connect and UMA plugins for
@@ -21,7 +20,6 @@ Apache and nginx web containers
 
 %build
 #mvn clean package -U -Dmaven.test.skip=true
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -43,7 +41,6 @@ install -m 644 oxd-server/target/oxd-server.jar %{buildroot}/opt/oxd-server/lib/
 install -m 644 README.md %{buildroot}/opt/oxd-server/
 install -m 644 license.md %{buildroot}/opt/oxd-server/
 mkdir -p %{buildroot}/var/log/oxd-server
-mkdir -p %{buildroot}/etc/default
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -57,7 +54,6 @@ if [ -e /var/run/oxd-server.pid ]; then
 fi
 
 %post
-chkconfig --add oxd-server > /dev/null 2>&1
 getent passwd jetty > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     /usr/sbin/useradd --system --create-home --user-group --shell /bin/bash --home-dir /home/jetty jetty
@@ -78,8 +74,7 @@ chown -R jetty:jetty /opt/oxd-server/data 2>&1
 chmod 764 /opt/oxd-server/data 2>&1
 
 %preun
-systemctl stop oxd-server.service > /dev/null 2>&1
-chkconfig --del oxd-server > /dev/null 2>&1
+systemctl stop oxd-server > /dev/null 2>&1
 
 %files
 %defattr(-,root,root,-)
