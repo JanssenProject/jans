@@ -33,7 +33,9 @@ override_dh_auto_install:
 		touch debian/oxd-server/var/log/oxd-server/oxd-server.log
 		mkdir -p debian/oxd-server/etc/default/
 		mkdir -p debian/oxd-server/lib/systemd/system/
-		cp -a debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
+		cp debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
+		cp debian/oxd-server.service.file debian/oxd-server/lib/systemd/system/oxd-server.service
+		cp debian/oxd-server.sh debian/oxd-server/opt/oxd-server/bin/oxd-server.sh
 
 override_dh_strip_nondeterminism:
 override_dh_fixperms:
