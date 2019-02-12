@@ -2,7 +2,11 @@
 
 # Stopping oxd-server
 if [ -x /etc/init.d/oxd-server ]; then
-/etc/init.d/oxd-server stop > /dev/null 2>&1 &
+/etc/init.d/oxd-server stop > /dev/null 2>&1 
+fi
+
+if [ -x /lib/systemd/system/oxd-server.service ]; then
+systemctl stop oxd-server > /dev/null 2>&1 
 fi
 
 exit 0
