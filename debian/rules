@@ -31,8 +31,10 @@ override_dh_auto_install:
 		cp oxd-server/target/oxd-server.jar debian/oxd-server/opt/oxd-server/lib/
 		mkdir -p debian/oxd-server/var/log/oxd-server/
 		touch debian/oxd-server/var/log/oxd-server/oxd-server.log
+		mkdir -d debian/oxd-server/etc/init.d/
 		mkdir -p debian/oxd-server/etc/default/
 		mkdir -p debian/oxd-server/lib/systemd/system/
+		cp debian/oxd-server.init.d.file debian/oxd-server/etc/init.d/oxd-server
 		cp debian/oxd-server-default debian/oxd-server/etc/default/oxd-server
 		cp debian/oxd-server.service.file debian/oxd-server/lib/systemd/system/oxd-server.service
 		cp debian/oxd-server.sh debian/oxd-server/opt/oxd-server/bin/oxd-server.sh
