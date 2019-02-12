@@ -10,12 +10,9 @@ if [ -e /etc/init.d/oxd-server ]; then
     chmod 755 /etc/init.d/oxd-server > /dev/null 2>&1
 fi
 
-if [ -x /etc/init.d/oxd-server ]; then
-    /etc/init.d/oxd-server stop > /dev/null 2>&1 
-fi
-
-if [ -x /lib/systemd/system/oxd-server.service ]; then
-    systemctl stop oxd-server > /dev/null 2>&1 
+if [ -e /lib/systemd/system/oxd-server.service ]; then
+    chown root:root /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
+    chmod 755 /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
 fi
 
 getent passwd jetty > /dev/null 2>&1
