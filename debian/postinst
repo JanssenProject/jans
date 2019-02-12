@@ -8,11 +8,13 @@ fi
 if [ -e /etc/init.d/oxd-server ]; then
     chown root:root /etc/init.d/oxd-server > /dev/null 2>&1
     chmod 755 /etc/init.d/oxd-server > /dev/null 2>&1
+    update-rc.d oxd-server defaults > /dev/null 2>&1
 fi
 
 if [ -e /lib/systemd/system/oxd-server.service ]; then
     chown root:root /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
     chmod 755 /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
+    systemctl enable oxd-server > /dev/null 2>&1 
 fi
 
 getent passwd jetty > /dev/null 2>&1
