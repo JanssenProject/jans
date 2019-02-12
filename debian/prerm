@@ -1,12 +1,9 @@
 #!/bin/sh -e
 
 # Stopping oxd-server
-if [ -x /etc/init.d/oxd-server ]; then
-/etc/init.d/oxd-server stop > /dev/null 2>&1 
-fi
-
-if [ -x /lib/systemd/system/oxd-server.service ]; then
-systemctl stop oxd-server > /dev/null 2>&1 
+if [ -e /var/run/oxd-server.pid ]; then
+    kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+    rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
 fi
 
 exit 0
