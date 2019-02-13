@@ -1,10 +1,10 @@
 # raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.beta/oxd-server/src/main/resources/swagger.yaml
-# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.beta/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
+# https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/oxd-server/src/main/resources/swagger.yaml
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
 swagger: "2.0"
 info:
   description: oxd-server
-  version: "4.0.beta"
+  version: "4.0"
   title: oxd-server
   contact:
     email: yuriyz@gluu.org
