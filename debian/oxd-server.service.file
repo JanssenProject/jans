@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 ExecStart=/opt/oxd-server/bin/oxd-server.sh start
-ExecStop=/opt/oxd-server/bin/oxd-server.sh stop
+ExecStop=/bin/bash -c '/opt/oxd-server/bin/oxd-server.sh stop || /bin/kill -9 `cat /var/run/oxd-server.pid`'
 RemainAfterExit=yes
 
 [Install]
