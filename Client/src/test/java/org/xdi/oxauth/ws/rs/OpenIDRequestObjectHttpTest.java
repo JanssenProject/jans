@@ -21,6 +21,7 @@ import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.Algorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.Base64Util;
@@ -44,7 +45,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version February 12, 2019
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
@@ -388,8 +389,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setClaims(Arrays.asList(
-                JwtClaimName.NAME));
+        registerRequest.setClaims(Arrays.asList(JwtClaimName.NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -932,6 +932,270 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.getPrompts().add(Prompt.NONE);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
+        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+        request.setRequest(authJwt);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(request);
+        AuthorizationResponse response1 = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
+        assertNotNull(response1.getLocation(), "The location is null");
+        assertNotNull(response1.getAccessToken(), "The accessToken is null");
+        assertNotNull(response1.getTokenType(), "The tokenType is null");
+        assertNotNull(response1.getIdToken(), "The idToken is null");
+        assertNotNull(response1.getState(), "The state is null");
+
+        String accessToken = response1.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
+        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(response3.getClaim(JwtClaimName.NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestParameterMethodPS256(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestParameterMethodPS256");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+
+        String clientId = response.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        request.setState(state);
+        request.setAuthUsername(userId);
+        request.setAuthPassword(userSecret);
+        request.getPrompts().add(Prompt.NONE);
+
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS256, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
+        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+        request.setRequest(authJwt);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(request);
+        AuthorizationResponse response1 = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
+        assertNotNull(response1.getLocation(), "The location is null");
+        assertNotNull(response1.getAccessToken(), "The accessToken is null");
+        assertNotNull(response1.getTokenType(), "The tokenType is null");
+        assertNotNull(response1.getIdToken(), "The idToken is null");
+        assertNotNull(response1.getState(), "The state is null");
+
+        String accessToken = response1.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
+        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(response3.getClaim(JwtClaimName.NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestParameterMethodPS384(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestParameterMethodPS384");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+
+        String clientId = response.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        request.setState(state);
+        request.setAuthUsername(userId);
+        request.setAuthPassword(userSecret);
+        request.getPrompts().add(Prompt.NONE);
+
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS384, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
+        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+        request.setRequest(authJwt);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(request);
+        AuthorizationResponse response1 = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
+        assertNotNull(response1.getLocation(), "The location is null");
+        assertNotNull(response1.getAccessToken(), "The accessToken is null");
+        assertNotNull(response1.getTokenType(), "The tokenType is null");
+        assertNotNull(response1.getIdToken(), "The idToken is null");
+        assertNotNull(response1.getState(), "The state is null");
+
+        String accessToken = response1.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
+        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(response3.getClaim(JwtClaimName.NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestParameterMethodPS512(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestParameterMethodPS512");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setJwksUri(jwksUri);
+        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+
+        String clientId = response.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        request.setState(state);
+        request.setAuthUsername(userId);
+        request.setAuthPassword(userSecret);
+        request.getPrompts().add(Prompt.NONE);
+
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS512, cryptoProvider);
         jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
@@ -2187,7 +2451,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             // 2. Choose encryption key
             JwkClient jwkClient = new JwkClient(jwksUri);
             JwkResponse jwkResponse = jwkClient.exec();
-            String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+            String keyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
             assertNotNull(keyId);
 
             // 3. Request authorization
@@ -2284,7 +2548,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             // 2. Choose encryption key
             JwkClient jwkClient = new JwkClient(jwksUri);
             JwkResponse jwkResponse = jwkClient.exec();
-            String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+            String keyId = jwkResponse.getKeyId(Algorithm.RSA1_5);
             assertNotNull(keyId);
 
             // 3. Request authorization
@@ -2381,7 +2645,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             // 2. Choose encryption key
             JwkClient jwkClient = new JwkClient(jwksUri);
             JwkResponse jwkResponse = jwkClient.exec();
-            String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+            String keyId = jwkResponse.getKeyId(Algorithm.RSA1_5);
             assertNotNull(keyId);
 
             // 3. Request authorization

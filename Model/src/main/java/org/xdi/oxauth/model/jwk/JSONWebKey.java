@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.jwk;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
@@ -19,14 +18,14 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version September 30, 2016
+ * @version February 12, 2019
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
     private String kid;
     private KeyType kty;
     private Use use;
-    private SignatureAlgorithm alg;
+    private Algorithm alg;
     private Long exp;
     private ECEllipticCurve crv;
     private List<String> x5c;
@@ -92,11 +91,11 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         this.use = use;
     }
 
-    public SignatureAlgorithm getAlg() {
+    public Algorithm getAlg() {
         return alg;
     }
 
-    public void setAlg(SignatureAlgorithm alg) {
+    public void setAlg(Algorithm alg) {
         this.alg = alg;
     }
 
@@ -252,7 +251,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         jwk.setKid(jwkJSONObject.optString(KEY_ID));
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(KEY_USE)));
-        jwk.setAlg(SignatureAlgorithm.fromString(jwkJSONObject.optString(ALGORITHM)));
+        jwk.setAlg(Algorithm.fromString(jwkJSONObject.optString(ALGORITHM)));
         if (jwkJSONObject.has(EXPIRATION_TIME)) {
             jwk.setExp(jwkJSONObject.optLong(EXPIRATION_TIME));
         }

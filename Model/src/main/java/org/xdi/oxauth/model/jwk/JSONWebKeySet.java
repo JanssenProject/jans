@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
- * @version February 25, 2017
+ * @version February 12, 2019
  */
 public class JSONWebKeySet {
 
@@ -55,13 +55,13 @@ public class JSONWebKeySet {
     public List<JSONWebKey> getKeys(SignatureAlgorithm algorithm) {
         List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
 
-        if (SignatureAlgorithmFamily.RSA.equals(algorithm.getFamily())) {
+        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
             for (JSONWebKey jsonWebKey : keys) {
                 if (jsonWebKey.getAlg().equals(algorithm.getName())) {
                     jsonWebKeys.add(jsonWebKey);
                 }
             }
-        } else if (SignatureAlgorithmFamily.EC.equals(algorithm.getFamily())) {
+        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
             for (JSONWebKey jsonWebKey : keys) {
                 if (jsonWebKey.getAlg().equals(algorithm.getName())) {
                     jsonWebKeys.add(jsonWebKey);
