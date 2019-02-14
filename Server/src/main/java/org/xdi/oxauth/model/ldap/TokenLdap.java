@@ -84,6 +84,10 @@ public class TokenLdap implements Serializable {
         return attributes;
     }
 
+    public final void setAttributes(TokenAttributes attributes) {
+        this.attributes = attributes;
+    }
+
     public String getId() {
         return id;
     }
@@ -267,6 +271,10 @@ public class TokenLdap implements Serializable {
     }
 
     public void setIsFromCache(boolean isFromCache) {
+        this.isFromCache = isFromCache;
+    }
+
+    public final void setFromCache(boolean isFromCache) {
         this.isFromCache = isFromCache;
     }
 
