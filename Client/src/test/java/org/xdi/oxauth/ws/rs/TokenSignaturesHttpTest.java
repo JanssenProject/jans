@@ -22,14 +22,10 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +34,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 29, 2017
+ * @version February 8, 2019
  */
 public class TokenSignaturesHttpTest extends BaseTest {
 
@@ -731,6 +727,216 @@ public class TokenSignaturesHttpTest extends BaseTest {
         assertTrue(validJwt);
     }
 
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationIdTokenPS256(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationIdTokenPS256");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS256);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS256);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationIdTokenPRS384(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationIdTokenPS384");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS384);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS384);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationIdTokenPS512(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationIdTokenPS512");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS512);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS512);
+        assertTrue(validJwt);
+    }
+
     @Test
     public void printAlgorithmsAndProviders() {
         showTitle("printAlgorithmsAndProviders");
@@ -739,7 +945,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
     }
 
     @Test
-    public void hs256() throws InvalidKeyException, NoSuchAlgorithmException {
+    public void hs256() {
         try {
             showTitle("hs256");
 
@@ -757,7 +963,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
     }
 
     @Test
-    public void hs384() throws InvalidKeyException, NoSuchAlgorithmException {
+    public void hs384() {
         try {
             showTitle("hs384");
 
@@ -775,7 +981,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
     }
 
     @Test
-    public void hs512() throws InvalidKeyException, NoSuchAlgorithmException {
+    public void hs512() {
         try {
             showTitle("hs512");
 
@@ -794,9 +1000,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS256(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
-            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+    public void testRS256(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test RS256");
 
@@ -821,9 +1026,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS384(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
-            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+    public void testRS384(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test RS384");
 
@@ -848,9 +1052,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS512(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
-            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+    public void testRS512(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test RS512");
 
@@ -875,10 +1078,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES256(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
-            NoSuchPaddingException, BadPaddingException {
+    public void testES256(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test ES256");
 
@@ -903,10 +1104,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES384(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
-            NoSuchPaddingException, BadPaddingException {
+    public void testES384(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test ES384");
 
@@ -931,10 +1130,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES512(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
-            NoSuchPaddingException, BadPaddingException {
+    public void testES512(final String clientJwksUri, final String keyId, final String dnName,
+                          final String keyStoreFile, final String keyStoreSecret) {
         try {
             showTitle("Test ES512");
 

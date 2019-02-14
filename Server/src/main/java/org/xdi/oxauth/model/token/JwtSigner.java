@@ -11,6 +11,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.Algorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -22,7 +23,7 @@ import org.xdi.service.cdi.util.CdiUtil;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 5, 2017
+ * @version February 12, 2019
  */
 
 public class JwtSigner {
@@ -67,7 +68,7 @@ public class JwtSigner {
         jwt = new Jwt();
 
         // Header
-        String keyId = cryptoProvider.getKeyId(webKeys, signatureAlgorithm, Use.SIGNATURE);
+        String keyId = cryptoProvider.getKeyId(webKeys, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
