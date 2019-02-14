@@ -6,15 +6,7 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.File;
-import java.security.PrivateKey;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -22,9 +14,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.bouncycastle.util.encoders.Base64;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.xdi.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+
+import java.io.File;
+import java.security.PrivateKey;
 
 /**
  * Export private key from JKS Command example: java -cp
@@ -36,7 +31,7 @@ import org.xdi.oxauth.model.util.SecurityProviderUtility;
  * <p/>
  *
  * @author Yuriy Movchan
- * @version 11/23/2016
+ * @version February 12, 2019
  */
 public class KeyExporter {
 
@@ -99,7 +94,7 @@ public class KeyExporter {
 
 						StringBuilder sb = new StringBuilder();
 						SignatureAlgorithm signatureAlgorithm = cryptoProvider.getSignatureAlgorithm(keyAlias);
-						if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
+						if (AlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
 							sb.append("-----BEGIN RSA PRIVATE KEY-----\n");
 							sb.append(base64EncodedKey);
 							sb.append("\n");

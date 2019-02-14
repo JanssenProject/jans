@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Provide Encrypted UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version December 5, 2017
+ * @version February 12, 2019
  */
 public class CanProvideEncryptedUserInfoResponse extends BaseTest {
 
@@ -182,7 +182,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA128CBCPLUSHS256(
@@ -266,7 +266,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA256CBCPLUSHS512(
@@ -350,7 +350,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "clientJwksUri", "RSA_OAEP_keyId", "keyStoreFile", "keyStoreSecret",
             "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSAOAEPEncA256GCM(

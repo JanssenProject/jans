@@ -12,9 +12,10 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
+import org.xdi.oxauth.model.jwk.Algorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwk.Use;
@@ -39,13 +40,13 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 1, 2019
+ * @version February 12, 2019
  */
 public abstract class AbstractCryptoProvider {
 
     protected static final Logger LOG = Logger.getLogger(AbstractCryptoProvider.class);
 
-    public abstract JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception;
+    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception;
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
@@ -53,9 +54,9 @@ public abstract class AbstractCryptoProvider {
 
     public abstract boolean deleteKey(String keyId) throws Exception;
 
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm, Use use) throws Exception {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
-            if (signatureAlgorithm == key.getAlg() && (use == null || use == key.getUse())) {
+            if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 return key.getKid();
             }
         }
@@ -95,37 +96,67 @@ public abstract class AbstractCryptoProvider {
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.RS256, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS384, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.RS384, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS512, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.RS512, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES256, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.ES256, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES384, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.ES384, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
         try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES512, expirationTime.getTimeInMillis()));
+            keys.put(cryptoProvider.generateKey(Algorithm.ES512, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(Algorithm.PS256, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(Algorithm.PS384, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(Algorithm.PS512, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(Algorithm.RSA1_5, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(Algorithm.RSA_OAEP, expirationTime.getTimeInMillis()));
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -143,25 +174,25 @@ public abstract class AbstractCryptoProvider {
         for (int i = 0; i < webKeys.length(); i++) {
             JSONObject key = webKeys.getJSONObject(i);
             if (alias.equals(key.getString(KEY_ID))) {
-                SignatureAlgorithmFamily family = null;
+                AlgorithmFamily family = null;
                 if (key.has(ALGORITHM)) {
-                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(key.optString(ALGORITHM));
-                    family = signatureAlgorithm.getFamily();
+                    Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
+                    family = algorithm.getFamily();
                 } else if (key.has(KEY_TYPE)) {
-                    family = SignatureAlgorithmFamily.fromString(key.getString(KEY_TYPE));
+                    family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
                 }
 
-                if (SignatureAlgorithmFamily.RSA.equals(family)) {
+                if (AlgorithmFamily.RSA.equals(family)) {
                     publicKey = new RSAPublicKeyImpl(
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
-                } else if (SignatureAlgorithmFamily.EC.equals(family)) {
+                } else if (AlgorithmFamily.EC.equals(family)) {
                     ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
-                    AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC.toString());
+                    AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
                     parameters.init(new ECGenParameterSpec(curve.getAlias()));
                     ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
 
-                    publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
+                    publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
                             new ECPoint(
                                     new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
                                     new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))

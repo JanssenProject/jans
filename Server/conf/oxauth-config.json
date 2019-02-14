@@ -55,7 +55,11 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "userInfoEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -79,7 +83,11 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "idTokenEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -103,7 +111,11 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "requestObjectEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -132,7 +144,11 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "dynamicRegistrationCustomAttributes":[
         "oxAuthTrustedClient",
