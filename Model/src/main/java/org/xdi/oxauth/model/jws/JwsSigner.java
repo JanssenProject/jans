@@ -6,20 +6,21 @@
 
 package org.xdi.oxauth.model.jws;
 
-import java.security.SignatureException;
-
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.Jwt;
 
+import java.security.SignatureException;
+
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version February 8, 2019
  */
 public interface JwsSigner {
 
-    public SignatureAlgorithm getSignatureAlgorithm();
+    SignatureAlgorithm getSignatureAlgorithm();
 
-    public Jwt sign(Jwt jwt) throws InvalidJwtException, SignatureException;
+    Jwt sign(Jwt jwt) throws InvalidJwtException, SignatureException;
 
-    public boolean validate(Jwt jwt);
+    boolean validate(Jwt jwt);
 }

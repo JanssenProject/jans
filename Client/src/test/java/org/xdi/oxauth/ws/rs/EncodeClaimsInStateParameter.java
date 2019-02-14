@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 3, 2017
+ * @version February 8, 2019
  */
 public class EncodeClaimsInStateParameter extends BaseTest {
 
@@ -651,6 +651,213 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         Jwt jwt = Jwt.parse(state);
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 null, null, SignatureAlgorithm.ES512);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "PS256_keyId"})
+    @Test
+    public void encodeClaimsInStateParameterPS256(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId) throws Exception {
+        showTitle("encodeClaimsInStateParameterPS256");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS256, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Validate state
+        Jwt jwt = Jwt.parse(state);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS256);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "PS384_keyId"})
+    @Test
+    public void encodeClaimsInStateParameterPS384(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId) throws Exception {
+        showTitle("encodeClaimsInStateParameterPS384");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS384, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Validate state
+        Jwt jwt = Jwt.parse(state);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS384);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "PS512_keyId"})
+    @Test
+    public void encodeClaimsInStateParameterPS512(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId) throws Exception {
+        showTitle("encodeClaimsInStateParameterPS512");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS512, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Validate state
+        Jwt jwt = Jwt.parse(state);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS512);
         assertTrue(validJwt);
     }
 
@@ -1293,6 +1500,87 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         Jwt jwt = Jwt.parse(encodedState);
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 null, null, SignatureAlgorithm.ES512);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"keyStoreFile", "keyStoreSecret", "dnName", "PS256_keyId"})
+    @Test
+    public void jwtStatePS256Test(final String keyStoreFile, final String keyStoreSecret,
+                                  final String dnName, final String keyId) throws Exception {
+        showTitle("jwtStatePS256Test");
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS256, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+
+        String encodedState = jwtState.getEncodedJwt();
+        assertNotNull(encodedState);
+        System.out.println("Signed JWS State: " + encodedState);
+
+        Jwt jwt = Jwt.parse(encodedState);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS256);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"keyStoreFile", "keyStoreSecret", "dnName", "PS384_keyId"})
+    @Test
+    public void jwtStatePS384Test(final String keyStoreFile, final String keyStoreSecret,
+                                  final String dnName, final String keyId) throws Exception {
+        showTitle("jwtStatePS384Test");
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS384, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+
+        String encodedState = jwtState.getEncodedJwt();
+        assertNotNull(encodedState);
+        System.out.println("Signed JWS State: " + encodedState);
+
+        Jwt jwt = Jwt.parse(encodedState);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS384);
+        assertTrue(validJwt);
+    }
+
+    @Parameters({"keyStoreFile", "keyStoreSecret", "dnName", "PS512_keyId"})
+    @Test
+    public void jwtStatePS512Test(final String keyStoreFile, final String keyStoreSecret,
+                                  final String dnName, final String keyId) throws Exception {
+        showTitle("jwtStatePS512Test");
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(SignatureAlgorithm.PS512, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+
+        String encodedState = jwtState.getEncodedJwt();
+        assertNotNull(encodedState);
+        System.out.println("Signed JWS State: " + encodedState);
+
+        Jwt jwt = Jwt.parse(encodedState);
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                null, null, SignatureAlgorithm.PS512);
         assertTrue(validJwt);
     }
 

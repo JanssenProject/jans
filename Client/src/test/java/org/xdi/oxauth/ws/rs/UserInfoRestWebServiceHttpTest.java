@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version September 3, 2018
+ * @version February 12, 2019
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -44,7 +44,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoImplicitFlow(final String userId, final String userSecret,
                                             final String redirectUris, final String redirectUri,
-                                            final String sectorIdentifierUri) throws Exception {
+                                            final String sectorIdentifierUri) {
         showTitle("requestUserInfoImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -86,7 +86,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoWithNotAllowedScopeImplicitFlow(final String userId, final String userSecret,
                                                                final String redirectUris, final String redirectUri,
-                                                               final String sectorIdentifierUri) throws Exception {
+                                                               final String sectorIdentifierUri) {
         showTitle("requestUserInfoWithNotAllowedScopeImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -128,7 +128,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoDynamicScopesImplicitFlow(final String userId, final String userSecret,
                                                          final String redirectUris, final String redirectUri,
-                                                         final String sectorIdentifierUri) throws Exception {
+                                                         final String sectorIdentifierUri) {
         showTitle("requestUserInfoDynamicScopesImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -170,7 +170,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoPasswordFlow(final String userId, final String userSecret,
-                                            final String redirectUris, final String sectorIdentifierUri) throws Exception {
+                                            final String redirectUris, final String sectorIdentifierUri) {
         showTitle("requestUserInfoPasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
@@ -221,7 +221,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoWithNotAllowedScopePasswordFlow(final String userId, final String userSecret,
-                                                               final String redirectUris, final String sectorIdentifierUri) throws Exception {
+                                                               final String redirectUris, final String sectorIdentifierUri) {
         showTitle("requestUserInfoWithNotAllowedScopePasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
@@ -271,7 +271,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoDynamicScopesPasswordFlow(final String userId, final String userSecret,
-                                                         final String redirectUris, final String sectorIdentifierUri) throws Exception {
+                                                         final String redirectUris, final String sectorIdentifierUri) {
         showTitle("requestUserInfoDynamicScopesPasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
@@ -320,7 +320,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestUserInfoInvalidRequest() throws Exception {
+    public void requestUserInfoInvalidRequest() {
         showTitle("requestUserInfoInvalidRequest");
 
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -333,7 +333,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestUserInfoInvalidToken() throws Exception {
+    public void requestUserInfoInvalidToken() {
         showTitle("requestUserInfoInvalidToken");
 
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -349,7 +349,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoInsufficientScope(final String userId, final String userSecret,
                                                  final String redirectUris, final String redirectUri,
-                                                 final String sectorIdentifierUri) throws Exception {
+                                                 final String sectorIdentifierUri) {
         showTitle("requestUserInfoInsufficientScope");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -627,7 +627,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoHS256(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoHS256");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -683,7 +683,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoHS384(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoHS384");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -739,7 +739,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoHS512(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoHS512");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -795,7 +795,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoRS256(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoRS256");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -850,7 +850,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoRS384(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoRS384");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -905,7 +905,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoRS512(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoRS512");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -960,7 +960,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoES256(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoES256");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1015,7 +1015,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoES384(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoES384");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1070,7 +1070,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoES512(final String redirectUris, final String redirectUri,
                                      final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) throws Exception {
+                                     final String sectorIdentifierUri) {
         showTitle("requestUserInfoES512");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1121,8 +1121,173 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestUserInfoPS256(final String redirectUris, final String redirectUri,
+                                     final String userId, final String userSecret,
+                                     final String sectorIdentifierUri) {
+        showTitle("requestUserInfoPS256");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId);
+
+        String accessToken = authorizationResponse.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setJwksUri(jwksUri);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestUserInfoPS384(final String redirectUris, final String redirectUri,
+                                     final String userId, final String userSecret,
+                                     final String sectorIdentifierUri) {
+        showTitle("requestUserInfoRS384");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId);
+
+        String accessToken = authorizationResponse.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setJwksUri(jwksUri);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
+    @Test
+    public void requestUserInfoPS512(final String redirectUris, final String redirectUri,
+                                     final String userId, final String userSecret,
+                                     final String sectorIdentifierUri) {
+        showTitle("requestUserInfoPS512");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Dynamic Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId);
+
+        String accessToken = authorizationResponse.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setJwksUri(jwksUri);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+    }
+
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "clientJwksUri", "sectorIdentifierUri", "RSA_OAEP_keyId", "keyStoreFile",
             "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSAOAEPEncA256GCM(
@@ -1190,7 +1355,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "clientJwksUri", "sectorIdentifierUri", "RSA1_5_keyId", "keyStoreFile",
             "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSA15EncA128CBCPLUSHS256(
@@ -1258,7 +1423,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "clientJwksUri", "sectorIdentifierUri", "RSA1_5_keyId", "keyStoreFile",
             "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSA15EncA256CBCPLUSHS512(
@@ -1329,7 +1494,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoAlgA128KWEncA128GCM(final String redirectUris, final String redirectUri,
                                                    final String userId, final String userSecret,
-                                                   final String sectorIdentifierUri) throws Exception {
+                                                   final String sectorIdentifierUri) {
         showTitle("requestUserInfoAlgA128KWEncA128GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1387,7 +1552,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoAlgA256KWEncA256GCM(final String redirectUris, final String redirectUri,
                                                    final String userId, final String userSecret,
-                                                   final String sectorIdentifierUri) throws Exception {
+                                                   final String sectorIdentifierUri) {
         showTitle("requestUserInfoAlgA256KWEncA256GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1498,21 +1663,25 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestUserInfoWithoutOpenidScope(final String userId, final String userSecret,
                                                   final String redirectUris, final String redirectUri,
-                                                  final String sectorIdentifierUri) throws Exception {
+                                                  final String sectorIdentifierUri) {
         showTitle("requestUserInfoWithoutOpenidScope");
+
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN
         );
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
+
         showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
@@ -1520,16 +1689,22 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(registerResponse.getRegistrationAccessToken());
         assertNotNull(registerResponse.getClientIdIssuedAt());
         assertNotNull(registerResponse.getClientSecretExpiresAt());
+
         String clientId = registerResponse.getClientId();
+
         // 2. Request authorization
         List<String> scopes = Arrays.asList("profile", "address", "email");
+
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
+
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                 responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
+
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
+
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
@@ -1537,10 +1712,13 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
+
         String accessToken = authorizationResponse.getAccessToken();
+
         // 3. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 403, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getErrorType(), "Unexpected result: errorType not found");
