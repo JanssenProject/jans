@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwe.Jwe;
+import org.xdi.oxauth.model.jwk.Algorithm;
 import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.PlainTextSignature;
@@ -43,7 +44,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 30, 2018
+ * @version February 12, 2019
  */
 public class IndividualClaimsRequestsTest extends BaseTest {
 
@@ -1935,7 +1936,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
-            "keyStoreSecret", "RS256_enc_keyId", "clientJwksUri"})
+            "keyStoreSecret", "RSA1_5_keyId", "clientJwksUri"})
     @Test
     public void requestClaimsIndividuallyRequestObjectEncryptionAlgRSA1_5EncA128CBC_PLUS_HS256UserInfoEncryptedResponseAlgRSA1_5EncA128CBC_PLUS_HS256(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
@@ -1991,7 +1992,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        String serverKeyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA1_5);
         assertNotNull(serverKeyId);
 
         // 3. Request authorization
@@ -2090,7 +2091,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
-            "keyStoreSecret", "RS256_enc_keyId", "clientJwksUri"})
+            "keyStoreSecret", "RSA1_5_keyId", "clientJwksUri"})
     @Test
     public void requestClaimsIndividuallyRequestObjectEncryptionAlgRSA1_5EncA256CBC_PLUS_HS512UserInfoEncryptedResponseAlgRSA1_5EncA256CBC_PLUS_HS512(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
@@ -2146,7 +2147,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        String serverKeyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA1_5);
         assertNotNull(serverKeyId);
 
         // 3. Request authorization
@@ -2245,7 +2246,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
-            "keyStoreSecret", "RS256_enc_keyId", "clientJwksUri"})
+            "keyStoreSecret", "RSA_OAEP_keyId", "clientJwksUri"})
     @Test
     public void requestClaimsIndividuallyRequestObjectEncryptionAlgRSA_OAEPEncA256GCMUserInfoEncryptedResponseAlgRSA_OAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
@@ -2301,7 +2302,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        String serverKeyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
         assertNotNull(serverKeyId);
 
         // 3. Request authorization

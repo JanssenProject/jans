@@ -10,10 +10,11 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.client.*;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.Algorithm;
 
 /**
  * @author Javier Rojas Blum
- * @version December 4, 2017
+ * @version February 12, 2019
  */
 public class OxElevenCryptoProvider extends AbstractCryptoProvider {
 
@@ -33,9 +34,9 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
         GenerateKeyRequest request = new GenerateKeyRequest();
-        request.setSignatureAlgorithm(signatureAlgorithm.getName());
+        request.setSignatureAlgorithm(algorithm.toString());
         request.setExpirationTime(expirationTime);
         request.setAccessToken(accessToken);
 

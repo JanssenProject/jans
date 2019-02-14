@@ -26,7 +26,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 29, 2017
+ * @version February 8, 2019
  */
 public class ClientCredentialsGrantHttpTest extends BaseTest {
 
@@ -1555,6 +1555,381 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setKeyId("ES512SIG_INVALID_KEYID");
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType());
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
+        assertNotNull(tokenResponse.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS256(
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS256");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.CLIENT_CREDENTIALS
+        );
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getScope());
+        assertNull(tokenResponse.getRefreshToken());
+
+        String accessToken = tokenResponse.getAccessToken();
+
+        // 3. Request client info
+        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
+        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
+
+        showClient(clientInfoClient);
+        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
+        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS256Fail(
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS256Fail");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("PS256SIG_INVALID_KEYID");
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType());
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
+        assertNotNull(tokenResponse.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS384(
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS384");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.CLIENT_CREDENTIALS
+        );
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getScope());
+        assertNull(tokenResponse.getRefreshToken());
+
+        String accessToken = tokenResponse.getAccessToken();
+
+        // 3. Request client info
+        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
+        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
+
+        showClient(clientInfoClient);
+        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
+        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS384Fail(
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS384Fail");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("PS384SIG_INVALID_KEYID");
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType());
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
+        assertNotNull(tokenResponse.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS512(
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS512");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.CLIENT_CREDENTIALS
+        );
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getScope());
+        assertNull(tokenResponse.getRefreshToken());
+
+        String accessToken = tokenResponse.getAccessToken();
+
+        // 3. Request client info
+        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
+        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
+
+        showClient(clientInfoClient);
+        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
+        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+    }
+
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS512Fail(
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS512Fail");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("PS512SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
