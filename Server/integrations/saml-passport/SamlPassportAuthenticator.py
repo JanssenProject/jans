@@ -372,7 +372,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     self.registeredProviders[provider] = {
                         "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
                         "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
-                        "saml" : True }
+                        "saml" : True,
+                        "logo_img": providerCfg["logo_img"] if "logo_img" in providerCfg else ""
+                    }
 
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
