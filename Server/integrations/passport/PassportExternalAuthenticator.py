@@ -354,15 +354,22 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if config != None:
                 for strategy in config:
-                    provider = strategy.getStrategy()
-                    self.registeredProviders[provider] = { "emailLinkingSafe" : False, "requestForEmail" : False }
+                    idProvider = strategy.getStrategy()
+                    provider = { "emailLinkingSafe" : False, "requestForEmail" : False }
+
                     for field in strategy.getFieldset():
-                        for property in self.registeredProviders[provider]:
+                        for property in provider:
                             if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                self.registeredProviders[provider][property] = True
+                                provider[property] = True
 
-                    self.registeredProviders[provider]["saml"] = False
+                        if (field.getValue1() == "logo_img"):
+                            provider["logo_img"] = field.getValue2()
 
+                    provider["saml"] = False
+                    if not "logo_img" in provider:
+                        provider["logo_img"] = "img/%s.png" % idProvider
+
+                    self.registeredProviders[idProvider] = provider
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
 
