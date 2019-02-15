@@ -89,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if jwt_param == None:
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
-                
+
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
@@ -372,7 +372,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     self.registeredProviders[provider] = {
                         "emailLinkingSafe" : "emailLinkingSafe" in providerCfg and providerCfg["emailLinkingSafe"],
                         "requestForEmail" : "requestForEmail" in providerCfg and providerCfg["requestForEmail"],
-                        "saml" : True }
+                        "saml" : True,
+                        "logo_img": providerCfg["logo_img"] if "logo_img" in providerCfg else ""
+                    }
 
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
@@ -661,7 +663,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def isInboundJwt(self, value):
         if value == None:
             return False
-        
+
         try:
             jwt = Jwt.parse(value)
             user_profile_json = jwt.getClaims().getClaimAsString("data")

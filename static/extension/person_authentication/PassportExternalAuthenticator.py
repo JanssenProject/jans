@@ -146,17 +146,17 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. prepareForStep called %s"  % str(step)
         identity = CdiUtil.bean(Identity)
 
-        if step == 1:        
+        if step == 1:
             #re-read the strategies config (for instance to know which strategies have enabled the email account linking)
             self.parseProviderConfigs()
             identity.setWorkingParameter("externalProviders", json.dumps(self.registeredProviders))
-            
+
             providerParam = self.customAuthzParameter
             url = None
 
             sessionAttributes = identity.getSessionId().getSessionAttributes()
             self.skipProfileUpdate = StringHelper.equalsIgnoreCase(sessionAttributes.get("skipPassportProfileUpdate"), "true")
-            
+
             #this param could have been set previously in authenticate step if current step is being retried
             provider = identity.getWorkingParameter("selectedProvider")
             if provider != None:
@@ -348,21 +348,28 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             print "Passport. parseProviderConfigs. Adding social providers"
             passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-            entryManager = CdiUtil.bean(AppInitializer).createLdapEntryManager()
+            entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
             config = LdapOxPassportConfiguration()
             config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
 
             if config != None:
                 for strategy in config:
-                    provider = strategy.getStrategy()
-                    self.registeredProviders[provider] = { "emailLinkingSafe" : False, "requestForEmail" : False }
+                    idProvider = strategy.getStrategy()
+                    provider = { "emailLinkingSafe" : False, "requestForEmail" : False }
+
                     for field in strategy.getFieldset():
-                        for property in self.registeredProviders[provider]:
+                        for property in provider:
                             if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                self.registeredProviders[provider][property] = True
+                                provider[property] = True
 
-                    self.registeredProviders[provider]["saml"] = False
+                        if (field.getValue1() == "logo_img"):
+                            provider["logo_img"] = field.getValue2()
 
+                    provider["saml"] = False
+                    if not "logo_img" in provider:
+                        provider["logo_img"] = "img/%s.png" % idProvider
+
+                    self.registeredProviders[idProvider] = provider
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
 
