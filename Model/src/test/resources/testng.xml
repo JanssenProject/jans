@@ -17,5 +17,10 @@
             <class name="org.xdi.oxauth.model.uma.JsonLogicNodeParserTest" />
         </classes>
     </test>
+    <test name="CertUtils Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.util.CertUtilsTest"/>
+        </classes>
+    </test>
 
 </suite>

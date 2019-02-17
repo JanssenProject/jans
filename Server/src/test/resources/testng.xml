@@ -2,12 +2,6 @@
 
 <suite name="oxAuthServer" parallel="false">
 
-    <test name="CertUtil Test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.util.CertUtilTest"/>
-        </classes>
-    </test>
-
 	<!-- Application Type Restriction (embedded) -->
 	<test name="Application Type Restriction (embedded)" enabled="true">
 		<classes>
