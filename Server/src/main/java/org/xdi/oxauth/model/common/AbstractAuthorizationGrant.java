@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.util.CertUtil;
+import org.xdi.oxauth.model.util.CertUtils;
 import org.xdi.oxauth.util.TokenHashUtil;
 
 import javax.inject.Inject;
@@ -290,7 +290,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         accessToken.setAuthMode(getAcrValues());
         accessToken.setSessionDn(getSessionDn());
-        accessToken.setX5ts256(CertUtil.confirmationMethodHashS256(certAsPem));
+        accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(certAsPem));
 
         return accessToken;
     }
