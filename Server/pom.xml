@@ -232,6 +232,10 @@
 	</build>
 
 	<dependencies>
+        <dependency>
+            <groupId>javax.interceptor</groupId>
+            <artifactId>javax.interceptor-api</artifactId>
+        </dependency>
 		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 		<dependency>
 			<groupId>com.wywy</groupId>
