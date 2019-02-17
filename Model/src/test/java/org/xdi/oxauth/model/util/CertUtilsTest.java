@@ -1,4 +1,4 @@
-package org.xdi.oxauth.util;
+package org.xdi.oxauth.model.util;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class CertUtilTest {
+public class CertUtilsTest {
 
     public static final String TEST_PEM_1 = "-----BEGIN CERTIFICATE-----\n" +
             "MIIBBjCBrAIBAjAKBggqhkjOPQQDAjAPMQ0wCwYDVQQDDARtdGxzMB4XDTE4MTAx\n" +
@@ -22,8 +22,8 @@ public class CertUtilTest {
 
     @Test
     public void s256() {
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtil.confirmationMethodHashS256(TEST_PEM_1));
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtil.confirmationMethodHashS256(TEST_PEM_2));
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtil.confirmationMethodHashS256(TEST_PEM_3));
+        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_1));
+        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_2));
+        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_3));
     }
 }

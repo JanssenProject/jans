@@ -10,8 +10,10 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.ClientAttributes;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.ref.ClientReference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import java.util.List;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
-public class Client implements Serializable {
+public class Client implements Serializable, ClientReference {
 
     private static final long serialVersionUID = -6832496019942067969L;
 

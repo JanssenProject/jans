@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.registration;
+package org.xdi.oxauth.model.common;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
