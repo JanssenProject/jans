@@ -6,13 +6,11 @@
 
 package org.xdi.oxauth.auth;
 
-import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
+import org.xdi.oxauth.interception.MTLSInterception;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -20,18 +18,15 @@ import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.ref.AuthenticatorReference;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
-import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.util.CertUtil;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -44,8 +39,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
@@ -180,76 +173,32 @@ public class AuthenticationFilter implements Filter {
      * @return whether successful or not
      */
     private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws Exception {
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        if (cryptoProvider == null) {
+            log.debug("Unable to create cryptoProvider.");
+            return false;
+        }
+
         final String clientId = httpRequest.getParameter("client_id");
         if (StringUtils.isNotBlank(clientId)) {
-            Client client = clientService.getClient(clientId);
+            final Client client = clientService.getClient(clientId);
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                log.debug("Trying to authenticate client {} via {} ...", clientId, client.getAuthenticationMethod());
-
-                final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
-                if (StringUtils.isBlank(clientCertAsPem)) {
-                    log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", clientId);
-                    return false;
-                }
-
-                X509Certificate cert = CertUtil.x509CertificateFromPem(clientCertAsPem);
-                if (cert == null) {
-                    log.debug("Failed to parse client certificate, client_id: {}.", clientId);
-                    return false;
-                }
-
-                if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
-
-                    final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
-                    if (StringUtils.isBlank(subjectDn)) {
-                        log.debug("SubjectDN is not set for client {} which is required to authenticate it via `tls_client_auth`.", clientId);
-                        return false;
-                    }
-
-                    // we check only `subjectDn`, the PKI certificate validation is performed by apache/httpd
-                    if (subjectDn.equals(cert.getSubjectDN().getName())) {
-                        log.debug("Client {} authenticated via `tls_client_auth`.", clientId);
+                return processMTLSInterceptable(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
+                    @Override
+                    public void configureSessionClient() {
                         authenticator.configureSessionClient(client);
-
-                        filterChain.doFilter(httpRequest, httpResponse);
-                        return true;
                     }
-                }
-
-                if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it temporarily
-                    final PublicKey publicKey = cert.getPublicKey();
-                    final byte[] encodedKey = publicKey.getEncoded();
-
-                    JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks()) ?
-                            JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                            new JSONObject(client.getJwks());
-
-                    if (jsonWebKeys == null) {
-                        log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", clientId, client.getJwksUri(), client.getJwks());
-                        return false;
-                    }
-
-                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
-                    if (cryptoProvider == null) {
-                        log.debug("Unable to create cryptoProvider.");
-                        return false;
-                    }
-
-                    final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
-                    for (JSONWebKey key : keySet.getKeys()) {
-                        if (ArrayUtils.isEquals(encodedKey, cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
-                            log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.", clientId, key.getKid());
-                            authenticator.configureSessionClient(client);
-
-                            filterChain.doFilter(httpRequest, httpResponse);
-                            return true;
-                        }
-                    }
-                }
+                }, cryptoProvider);
             }
         }
+        return false;
+    }
+
+    @MTLSInterception
+    private boolean processMTLSInterceptable(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
+                                             Client client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
         return false;
     }
 

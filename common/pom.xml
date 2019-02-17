@@ -63,6 +63,10 @@
 	</build>
 
 	<dependencies>
+        <dependency>
+            <groupId>javax.interceptor</groupId>
+            <artifactId>javax.interceptor-api</artifactId>
+        </dependency>
 		<!-- Gluu -->
 		<dependency>
 			<groupId>org.xdi</groupId>
