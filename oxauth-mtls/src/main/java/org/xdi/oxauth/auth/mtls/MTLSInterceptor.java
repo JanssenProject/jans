@@ -32,7 +32,7 @@ import java.security.cert.X509Certificate;
  */
 @Interceptor
 @MTLSInterception
-@Priority(1)
+@Priority(Interceptor.Priority.LIBRARY_BEFORE)
 public class MTLSInterceptor implements MTLSInterceptionInterface {
 
     @Inject
@@ -49,9 +49,9 @@ public class MTLSInterceptor implements MTLSInterceptionInterface {
             HttpServletRequest httpRequest = (HttpServletRequest) ctx.getParameters()[0];
             HttpServletResponse httpResponse = (HttpServletResponse) ctx.getParameters()[1];
             FilterChain filterChain = (FilterChain) ctx.getParameters()[2];
-            ClientReference client = (ClientReference) ctx.getParameters()[2];
-            AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[2];
-            AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[2];
+            ClientReference client = (ClientReference) ctx.getParameters()[3];
+            AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[4];
+            AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[5];
             final boolean result = processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
             ctx.proceed();
             return result;

@@ -63,10 +63,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>javax.interceptor</groupId>
-            <artifactId>javax.interceptor-api</artifactId>
-        </dependency>
         <!-- Gluu -->
         <dependency>
             <groupId>org.xdi</groupId>
@@ -98,6 +94,10 @@
         </dependency>
 
         <!-- CDI -->
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core-impl</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
