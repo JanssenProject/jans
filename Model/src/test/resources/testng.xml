@@ -19,7 +19,7 @@
     </test>
     <test name="CertUtils Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.util.CertUtilsTest"/>
+            <class name="org.xdi.oxauth.model.util.CertUtilsTest"/>
         </classes>
     </test>
 
