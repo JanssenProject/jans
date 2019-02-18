@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
 import org.xdi.oxauth.interception.MTLSInterception;
+import org.xdi.oxauth.interception.MTLSInterceptionInterface;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -19,6 +20,7 @@ import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ref.AuthenticatorReference;
+import org.xdi.oxauth.model.ref.ClientReference;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
@@ -46,7 +48,7 @@ import java.util.List;
  * @version January 16, 2019
  */
 @WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo", "/restv1/revoke"}, displayName = "oxAuth")
-public class AuthenticationFilter implements Filter {
+public class AuthenticationFilter implements Filter, MTLSInterceptionInterface {
 
     public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
 
@@ -162,8 +164,6 @@ public class AuthenticationFilter implements Filter {
                     filterChain.doFilter(httpRequest, httpResponse);
                 }
             }
-        } catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -185,7 +185,7 @@ public class AuthenticationFilter implements Filter {
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                return processMTLSInterceptable(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
+                return processMTLS(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
                     @Override
                     public void configureSessionClient() {
                         authenticator.configureSessionClient(client);
@@ -197,8 +197,8 @@ public class AuthenticationFilter implements Filter {
     }
 
     @MTLSInterception
-    private boolean processMTLSInterceptable(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                                             Client client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
+    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
+                               ClientReference client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) {
         return false;
     }
 
