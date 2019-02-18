@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -28,7 +27,7 @@ public class CertUtils {
             InputStream bais = new ByteArrayInputStream(cert);
 
             return (X509Certificate) certFactory.generateCertificate(bais);
-        } catch (CertificateException ex) {
+        } catch (Exception ex) {
             log.error("Failed to parse X.509 certificates from bytes", ex);
         }
 
