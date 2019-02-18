@@ -97,6 +97,7 @@
         <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-core-impl</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>
