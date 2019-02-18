@@ -1,5 +1,5 @@
-oxd-server (4.0-1~trusty+Ub14.04) trusty; urgency=low
+oxd-server (4.0-1~trusty+Ub14.04) unstable; urgency=low
 
-  * Initial release (Closes: #1232)
+  * New version 4.0
 
  -- Adrian Alves <adrian@gluu.org>  Wed, 24 Feb 2016 23:36:36 -0500
