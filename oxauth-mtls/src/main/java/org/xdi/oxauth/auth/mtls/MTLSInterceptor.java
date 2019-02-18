@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.oxauth.interception.MTLSInterception;
+import org.xdi.oxauth.interception.MTLSInterceptionInterface;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
@@ -31,27 +32,36 @@ import java.security.cert.X509Certificate;
  */
 @Interceptor
 @MTLSInterception
-@Priority(2)
-public class MTLSInterceptor {
+@Priority(1)
+public class MTLSInterceptor implements MTLSInterceptionInterface {
 
     @Inject
     private Logger log;
 
-    @AroundInvoke
-    public Object processMTLS(InvocationContext ctx) throws Exception {
-        log.debug("processMTLS...");
-        HttpServletRequest httpRequest = (HttpServletRequest) ctx.getParameters()[0];
-        HttpServletResponse httpResponse = (HttpServletResponse) ctx.getParameters()[1];
-        FilterChain filterChain = (FilterChain) ctx.getParameters()[2];
-        ClientReference client = (ClientReference) ctx.getParameters()[2];
-        AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[2];
-        AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[2];
-        final boolean result = processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
-        ctx.proceed();
-        return result;
+    public MTLSInterceptor() {
+        log.info("MTLS Interceptor loaded.");
     }
 
-    private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
+    @AroundInvoke
+    public Object processMTLS(InvocationContext ctx) {
+        log.debug("processMTLS...");
+        try {
+            HttpServletRequest httpRequest = (HttpServletRequest) ctx.getParameters()[0];
+            HttpServletResponse httpResponse = (HttpServletResponse) ctx.getParameters()[1];
+            FilterChain filterChain = (FilterChain) ctx.getParameters()[2];
+            ClientReference client = (ClientReference) ctx.getParameters()[2];
+            AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[2];
+            AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[2];
+            final boolean result = processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
+            ctx.proceed();
+            return result;
+        } catch (Exception e) {
+            log.error("Failed to process MTLS.", e);
+            return false;
+        }
+    }
+
+    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
                                 ClientReference client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
 
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(), client.getAuthenticationMethod());
