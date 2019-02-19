@@ -6,11 +6,13 @@
 
 package org.xdi.oxauth.model.common;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import com.wordnik.swagger.annotations.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.List;
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 @ApiModel(value = "RPT introspection endpoint")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IntrospectionResponse {
 
     @JsonProperty(value = "active")
