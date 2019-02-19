@@ -253,6 +253,7 @@ class ChangeGluuHostname:
                                                 'oxAuthPostLogoutRedirectURI',
                                                 'oxAuthRedirectURI',
                                                 'oxClaimRedirectURI',
+                                                'oxAuthLogoutURI',
                                                 ])
 
         result = self.conn.response[0]['attributes']
@@ -288,6 +289,40 @@ class ChangeGluuHostname:
                     if self.old_host in r['attributes'][cattr][i]:
                         r['attributes'][cattr][i] = r['attributes'][cattr][i].replace(self.old_host, self.new_host)
                         self.conn.modify(r['dn'], {cattr: [MODIFY_REPLACE, r['attributes'][cattr]]})
+
+    def change_custom_scripts(self):
+        print "Changing Custom Scripts"
+
+        dn = "ou=scripts,o={0},o=gluu".format(self.base_inum)
+
+        self.conn.search(search_base=dn, search_filter='(objectClass=oxCustomScript)', search_scope=SUBTREE, attributes=['oxConfigurationProperty'])
+
+        result = self.conn.response
+
+        for r in result:
+            scdn = r['dn']
+            change_attr = False
+            new_list = []
+            
+            for oxConfigurationProperty in r['attributes']['oxConfigurationProperty']:
+                if self.old_host in oxConfigurationProperty:
+                    change_attr = True
+                    oxConfigurationProperty = oxConfigurationProperty.replace(self.old_host, self.new_host)
+
+                new_list.append(oxConfigurationProperty)
+
+            if change_attr:
+                p = self.conn.modify(scdn, {'oxConfigurationProperty': [MODIFY_REPLACE, new_list]})
+
+    def change_casa(self):
+        casa_json = os.path.join(self.installer.container, 'install/community-edition-setup/output/casa.json')
+        if self.installer.c.exists(casa_json):
+            result = self.installer.c.get_file(casa_json)
+            if result[0]:
+                print "Conifguring CASA json for further use"
+                casa = result[1].read()
+                casa = casa.replace(self.old_host, self.new_host)
+                self.installer.c.put_file(casa_json, casa)
 
 
     def change_httpd_conf(self):
@@ -346,10 +381,6 @@ class ChangeGluuHostname:
 
 
                 r = self.installer.run(del_key)
-                #if r[1]:
-                #    print "Info:", r[1]
-                #if r[2]:
-                #    print "** ERROR:", r[2]
 
                 add_key = ('/opt/jre/bin/keytool -import -trustcacerts -alias '
                       '{0}_{1} -file /etc/certs/{2}.crt -keystore '
@@ -427,3 +458,5 @@ if __name__ == "__main__":
     name_changer.create_new_certs()
     name_changer.change_host_name()
     name_changer.modify_saml_passport()
+    name_changer.change_custom_scripts()
+    name_changer.change_casa()
