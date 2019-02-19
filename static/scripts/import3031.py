@@ -771,7 +771,7 @@ class Migration(object):
                               "user-name": old_entry.get('gluuSmtpUserName',[False])[0],
                             }
                 
-                    new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
+                        new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
                 
                 elif dn == oxauth_client_dn:
                     new_entry['oxAuthLogoutURI'] = ['https://{0}/identity/logout'.format(self.hostname)]
