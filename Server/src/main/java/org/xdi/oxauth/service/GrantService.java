@@ -154,7 +154,20 @@ public class GrantService {
         }
 
         prepareGrantBranch(token.getGrantId(), token.getClientId());
-        ldapEntryManager.persist(token);
+        try {
+            ldapEntryManager.persist(token);
+        } catch (EntryPersistenceException ex) {
+            // Cover case when cleaner removed sub-entry in parallel with this
+            if (ex.getCause() instanceof LDAPException) {
+                LDAPException ldapException = (LDAPException) ex.getCause();
+                if (com.unboundid.ldap.sdk.ResultCode.NO_SUCH_OBJECT.equals(ldapException.getResultCode())) {
+                    prepareGrantBranch(token.getGrantId(), token.getClientId());
+                    ldapEntryManager.persist(token);
+                }
+            } else {
+                throw ex;
+            }
+        }
     }
 
     public ClientTokens getCacheClientTokens(String clientId) {
