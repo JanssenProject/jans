@@ -257,11 +257,6 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-fido2-client</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.xdi</groupId>
-            <artifactId>oxauth-mtls</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-client</artifactId>
