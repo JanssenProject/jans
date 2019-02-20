@@ -10,8 +10,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
-import org.xdi.oxauth.interception.MTLSInterception;
-import org.xdi.oxauth.interception.MTLSInterceptionInterface;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -20,7 +18,6 @@ import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ref.AuthenticatorReference;
-import org.xdi.oxauth.model.ref.ClientReference;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
@@ -48,7 +45,7 @@ import java.util.List;
  * @version January 16, 2019
  */
 @WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo", "/restv1/revoke"}, displayName = "oxAuth")
-public class AuthenticationFilter implements Filter, MTLSInterceptionInterface {
+public class AuthenticationFilter implements Filter {
 
     public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
 
@@ -78,6 +75,9 @@ public class AuthenticationFilter implements Filter, MTLSInterceptionInterface {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private MTLSProxy mtlsProxy;
 
     private String realm;
     public static final String REALM = "oxAuth";
@@ -185,7 +185,7 @@ public class AuthenticationFilter implements Filter, MTLSInterceptionInterface {
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                return processMTLS(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
+                return mtlsProxy.processMTLS(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
                     @Override
                     public void configureSessionClient() {
                         authenticator.configureSessionClient(client);
@@ -193,12 +193,6 @@ public class AuthenticationFilter implements Filter, MTLSInterceptionInterface {
                 }, cryptoProvider);
             }
         }
-        return false;
-    }
-
-    @MTLSInterception
-    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                               ClientReference client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) {
         return false;
     }
 
