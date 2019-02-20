@@ -5,6 +5,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.interception.MTLSInterception;
 import org.xdi.oxauth.interception.MTLSInterceptionInterface;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -17,13 +18,13 @@ import org.xdi.oxauth.model.util.CertUtils;
 import org.xdi.oxauth.model.util.JwtUtil;
 
 import javax.annotation.Priority;
-import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Serializable;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
@@ -33,10 +34,9 @@ import java.security.cert.X509Certificate;
 @Interceptor
 @MTLSInterception
 @Priority(Interceptor.Priority.LIBRARY_BEFORE)
-public class MTLSInterceptor implements MTLSInterceptionInterface {
+public class MTLSInterceptor implements MTLSInterceptionInterface, Serializable {
 
-    @Inject
-    private Logger log;
+    private final static Logger log = LoggerFactory.getLogger(MTLSInterceptor.class);
 
     public MTLSInterceptor() {
         log.info("MTLS Interceptor loaded.");
