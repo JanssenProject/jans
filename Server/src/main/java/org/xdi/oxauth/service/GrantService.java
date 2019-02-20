@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service;
 
+import com.unboundid.ldap.sdk.LDAPException;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
