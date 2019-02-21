@@ -2740,12 +2740,6 @@ attributetype ( oxAttribute:399 NAME 'oxCodeChallengeHash'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( oxAttribute:400 NAME 'oxUidIDP'
-	DESC 'Passport - IDP to which the oxExternalUid value is refering to'
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-	X-ORIGIN 'Gluu created attribute' )
-
 objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier'
 	SUP ( top )
 	STRUCTURAL
@@ -2757,7 +2751,7 @@ objectclass ( oxObjectClass:2 NAME 'gluuPerson'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ oxGuid $ userRandomKey $ oxPreferredMethod $ userCertificate $ oxOTPDevices $ oxMobileDevices $ oxStrongAuthPolicy $ oxTrustedDevicesInfo $ oxUnlinkedExternalUids $ oxUidIDP )
+	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ oxGuid $ userRandomKey $ oxPreferredMethod $ userCertificate $ oxOTPDevices $ oxMobileDevices $ oxStrongAuthPolicy $ oxTrustedDevicesInfo $ oxUnlinkedExternalUids )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:3 NAME 'gluuGroup'
