@@ -7,8 +7,8 @@
 package org.xdi.model.passport;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.xdi.model.SimpleExtendedCustomProperty;
+import org.xdi.model.passport.config.Configuration;
+import org.xdi.model.passport.idpinitiated.IIConfiguration;
 
 import java.util.List;
 
@@ -16,26 +16,35 @@ import java.util.List;
  * @author Shekhar L.
  * @Date 07/17/2016
  */
-@JsonPropertyOrder({"strategy", "fieldset"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PassportConfiguration {
-    private String strategy;
-    private List<SimpleExtendedCustomProperty> fieldset;
 
-    public String getStrategy() {
-        return strategy;
+    private Configuration conf;
+    private IIConfiguration idpInitiated;
+    private List<ProviderDetails> providers;
+
+    public Configuration getConf() {
+        return conf;
     }
 
-    public void setStrategy(String strategy) {
-        this.strategy = strategy;
+    public void setConf(Configuration conf) {
+        this.conf = conf;
     }
 
-    public List<SimpleExtendedCustomProperty> getFieldset() {
-        return fieldset;
+    public IIConfiguration getIdpInitiated() {
+        return idpInitiated;
     }
 
-    public void setFieldset(List<SimpleExtendedCustomProperty> fieldset) {
-        this.fieldset = fieldset;
+    public void setIdpInitiated(IIConfiguration idpInitiated) {
+        this.idpInitiated = idpInitiated;
+    }
+
+    public List<ProviderDetails> getProviders() {
+        return providers;
+    }
+
+    public void setProviders(List<ProviderDetails> providers) {
+        this.providers = providers;
     }
 
 }
