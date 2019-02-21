@@ -1,5 +1,5 @@
-oxd-server (4.0-1~trusty+Ub14.04) unstable; urgency=low
+oxd-server %VERSION% %DIST%; urgency=low
 
-  * New version 4.0
+  * New version %VERSION%
 
  -- Adrian Alves <adrian@gluu.org>  Wed, 24 Feb 2016 23:36:36 -0500
