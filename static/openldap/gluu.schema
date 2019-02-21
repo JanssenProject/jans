@@ -2723,7 +2723,7 @@ objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxId $ oxSectorIdentifier $ oxAuthClientId )
+	MAY ( oxId $ description  $ oxSectorIdentifier $ oxAuthClientId )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:2 NAME 'gluuPerson'
