@@ -4,7 +4,7 @@ Version:        4.0.0
 Release:        Beta.centos6
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
-License:        MIT
+License:        GNU Affero General Public License
 URL:            http://www.gluu.org
 Source0:        %{name}.tar.gz
 Source1:        oxd-server.init.d
