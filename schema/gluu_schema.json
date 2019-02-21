@@ -4311,6 +4311,7 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxId",
+                "description ",
                 "oxSectorIdentifier",
                 "oxAuthClientId"
             ],
