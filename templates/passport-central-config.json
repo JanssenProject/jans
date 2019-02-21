@@ -1,0 +1,39 @@
+{
+	"conf": {
+		"serverURI": "https://%(hostname)s",
+		"serverWebPort": 8090,
+		"postProfileEndpoint": "https://%(hostname)s/oxauth/postlogin.htm",
+		"spTLSCert": "%(passportSpTLSCert)s",
+		"spTLSKey": "%(passportSpTLSKey)s",
+		"logging": {
+			"level": "info",
+			"consoleLogOnly" : false,
+			"activeMQConf": {
+				"enabled": false,
+				"host": "",
+				"username": "",
+				"password": "",
+				"port": ""
+			}
+		}
+	},
+
+	"idp_initiated": {
+		"openidclient": {
+			"authorization_endpoint": "https://%(hostname)s/oxauth/restv1/authorize",
+			"client_id": "%(passport_rp_ii_client_id)",
+			"acr_values": "passport_saml"
+		},
+		"authorization_params": [
+			{
+				"provider" : "IPD id",
+				"redirect_uri": "",
+				"response_type": "code",
+				"scope": ["openid", "user_name", "email"]
+			}
+		]
+	},
+
+	"providers": []
+	
+}
