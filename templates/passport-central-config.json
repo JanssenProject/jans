@@ -18,13 +18,13 @@
 		}
 	},
 
-	"idp_initiated": {
+	"idpinitiated": {
 		"openidclient": {
-			"authorization_endpoint": "https://%(hostname)s/oxauth/restv1/authorize",
-			"client_id": "%(passport_rp_ii_client_id)",
-			"acr_values": "passport_saml"
+			"authorizationEndpoint": "https://%(hostname)s/oxauth/restv1/authorize",
+			"clientId": "%(passport_rp_ii_client_id)",
+			"acrValues": "passport_saml"
 		},
-		"authorization_params": [
+		"authorizationParams": [
 			{
 				"provider" : "IPD id",
 				"redirect_uri": "",
