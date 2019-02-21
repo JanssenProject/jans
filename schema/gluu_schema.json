@@ -4241,6 +4241,50 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "Lifetime of access token",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAccessTokenLifetime"
+            ],
+            "oid": "oxAttribute:394",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Software Identifier",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxSoftwareId"
+            ],
+            "oid": "oxAttribute:395",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Software Version",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxSoftwareVersion"
+            ],
+            "oid": "oxAttribute:396",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Software Statement",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxSoftwareStatement"
+            ],
+            "oid": "oxAttribute:397",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "oxRptAsJwt",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -4259,6 +4303,16 @@
             ],
             "oid": "oxAttribute:399",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Passport - IDP to which the oxExternalUid value is refering to",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxUidIDP"
+            ],
+            "oid": "oxAttribute:400",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
         }
     ],
@@ -4364,7 +4418,8 @@
                 "oxMobileDevices",
                 "oxStrongAuthPolicy",
                 "oxTrustedDevicesInfo",
-                "oxUnlinkedExternalUids"
+                "oxUnlinkedExternalUids",
+                "oxUidIDP"
             ],
             "must": [
                 "objectclass"
@@ -4900,6 +4955,10 @@
                 "oxIdTokenTokenBindingCnf",
                 "oxAccessTokenAsJwt",
                 "oxAccessTokenSigningAlg",
+                "oxAccessTokenLifetime",
+                "oxSoftwareId",
+                "oxSoftwareVersion",
+                "oxSoftwareStatement",
                 "oxRptAsJwt",
                 "oxAttributes"
             ],
