@@ -1,24 +1,31 @@
-# Gluu Server 3.x Migration from OpenLDAP to OpenDj
+# Gluu Server 3.x Migration from OpenLDAP to OpenDJ
 
-Inorder to make migration, you need `setup.properties.last`, If you don't have this
-file don't try this manual. Login to gluu container and copy `setup.properties.last` as `setup.properties`:
+## Overview
+
+This guide covers migrating the database for the Gluu Server from OpenLDAP to OpenDJ in Ubuntu or Centos 7 using a [migration script](https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/openldap2opendj_migration/openldap2opendj.py).
+
+## Update setup.properties
+
+First, copy `setup.properties.last` as `setup.properties` inside the Gluu container with the following command:
 
 ```
 # cp /install/community-edition-setup/setup.properties.last /install/community-edition-setup/setup.properties
 ```
 
-## Export data to ldif
+If `setup-properties.last` has been deleted, the script will not complete the migration successfully.
 
-Use the following commands to export data from openldap to ldif
+## Export data to LDIF
+
+Use the following commands to export data from OpenLDAP to LDIF
 
 ``` 
-# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <admiPassword> -h localhost -p 1636 -b "o=gluu" "Objectclass=*" > /root/gluu.ldif
-# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <admiPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
+# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=gluu" "Objectclass=*" > /root/gluu.ldif
+# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
 ```
 
-replace `<admiPassword>` with your Gluu admin password.
+Replace `<adminPassword>` with your Gluu admin password.
 
-## Stop servers
+## Stop the servers
 
 ```
 # /etc/init.d/identity stop
@@ -26,11 +33,11 @@ replace `<admiPassword>` with your Gluu admin password.
 # /etc/init.d/solserver stop
 ```
 
-If you have other Gluu servers, also stop them.
+If you have other Gluu Servers, also stop them.
 
-## Obtain migration script
+## Obtain the migration script
 
-Get migration script from repo:
+Get the migration script from the Gluu repo with the following command:
 
 ```
 # wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/openldap2opendj_migration/openldap2opendj.py -O /install/community-edition-setup/openldap2opendj.py
@@ -51,7 +58,7 @@ Ubuntu Users:
 # apt-get install -y python-ldap
 ```
 
-## Run migration script:
+## Run the migration script:
 
 ```
 # cd /install/community-edition-setup/
@@ -60,42 +67,43 @@ Ubuntu Users:
 
 If you have custom OpenLDAP schema, convert them to OpenDJ schema files with 
 https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/openldap2opendj.py
-and copy converted schema file(s) to `/opt/opendj/config/schema` directory
+and copy the converted schema file(s) to `/opt/opendj/config/schema` directory
 
 ## Import data
 
-First stop opendj server:
+First, stop the OpenDJ server:
 
 ```
 # /etc/init.d/opendj stop
 ```
 
-Then import data to OpenDJ
+Then, import the data to OpenDJ:
 
 ```
 # /opt/opendj/bin/import-ldif  -b "o=gluu" -n userRoot -l /root/gluu.ldif  -R /root/gluu.ldif.rejects
 # /opt/opendj/bin/import-ldif  -b "o=site" -n site -l /root/site.ldif  -R /root/site.ldif.rejects
 ```
 
-Now start OpenDJ:
+Now, start OpenDJ:
 
 ```
 # /etc/init.d/opendj start
 ```
 
-Re-run migration script with `-p` argument to do post migrations
+Re-run the migration script with the `-p` argument to do post-migration finalization:
 
 ```
 # python openldap2opendj.py -p
 ```
 
-## Start Servers
+## Start the servers
+
 ```
 # /etc/init.d/oxauth start
 # /etc/init.d/identity start
 ```
 
-Try login to Gluu UI, if everything is well remove OpenLDAP:
+Try to log in to Gluu UI. If it's working as expected, remove OpenLDAP:
 
 CentOS7:
 
