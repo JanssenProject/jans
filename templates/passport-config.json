@@ -1,21 +1,9 @@
 {
-  "serverURI": "%(hostname)s",
-  "serverWebPort": 8090,
-  "clientId": "%(passport_rp_client_id)s",
-  "keyPath": "%(passport_rp_client_cert_fn)s",
-  "keyId": "%(passport_rp_client_cert_alias)s",
-  "keyAlg": "%(passport_rp_client_cert_alg)s",
-  "umaScope": "https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
-  "passportConfigAPI": "https://%(hostname)s/identity/restv1/passport/config",
-  "applicationStartpoint": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
-  "applicationEndpoint": "https://%(hostname)s/oxauth/postlogin.htm",
-  "logLevel": "info",
-  "consoleLogOnly" : false,
-  "activeMQConf": {
-    "isEnabled": false,
-    "host": "",
-    "username": "",
-    "password": "",
-    "port": ""
-  }
+	"configurationEndpoint": "https://%(hostname)s/identity/restv1/passport/config",
+	"failureRedirectUrl": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
+	"logLevel" : "info",
+	"clientId": "%(passport_rp_client_id)s",
+	"keyPath": "%(passport_rp_client_cert_fn)s",
+	"keyId": "%(passport_rp_client_cert_alias)s",
+	"keyAlg": "%(passport_rp_client_cert_alg)s"
 }

@@ -1,3 +1,16 @@
+# Passport IDP-Initated flow Client
+dn: inum=%(passport_rp_ii_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+inum: %(passport_rp_ii_client_id)s
+displayName: Passport IDP-initiated flow Client
+oxAuthGrantType: authorization_code
+oxAuthGrantType: implicit
+oxAuthResponseType: code
+oxAuthResponseType: token
+oxAuthResponseType: id_token
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
+
 # Passport Resource Server Client
 dn: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
