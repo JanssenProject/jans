@@ -33,7 +33,7 @@ If you have other Gluu servers, also stop them.
 Get migration script from repo:
 
 ```
-# wget https://raw.githubusercontent.com/mbaser/gluu/master/openldap2opendj_migration/openldap2opendj.py -O /install/community-edition-setup/openldap2opendj.py
+# wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/static/scripts/openldap2opendj_migration/openldap2opendj.py -O /install/community-edition-setup/openldap2opendj.py
 
 ```
 
