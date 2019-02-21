@@ -1,4 +1,4 @@
-# Gluu Server 3.1.x Migration from OpenLDAP to OpenDj
+# Gluu Server 3.x Migration from OpenLDAP to OpenDj
 
 Inorder to make migration, you need `setup.properties.last`, If you don't have this
 file don't try this manual. Login to gluu container and copy `setup.properties.last` as `setup.properties`:
