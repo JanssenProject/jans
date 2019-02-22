@@ -2719,6 +2719,12 @@ attributetype ( oxAttribute:399 NAME 'oxCodeChallengeHash'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
 	X-ORIGIN 'Gluu created attribute' )
 
+attributetype ( oxAttribute:400 NAME 'oxDeletable'
+	DESC 'oxDeletable'
+	EQUALITY caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
 objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier'
 	SUP ( top )
 	STRUCTURAL
@@ -2835,7 +2841,7 @@ objectclass ( oxObjectClass:17 NAME 'oxAuthClient'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( associatedPerson $ displayName $ description $ inum $ oxAuthAppType $ oxAuthClientIdIssuedAt $ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthClientURI $ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg $ oxAuthIdTokenEncryptedResponseEnc $ oxAuthIdTokenSignedResponseAlg $ oxAuthInitiateLoginURI $ oxAuthJwksURI $ oxAuthJwks $ oxAuthLogoURI $ oxAuthPolicyURI $ oxAuthPostLogoutRedirectURI $ oxAuthRedirectURI $ oxAuthRegistrationAccessToken $ oxAuthRequestObjectSigningAlg $ oxAuthRequestObjectEncryptionAlg $ oxAuthRequestObjectEncryptionEnc $ oxAuthRequestURI $ oxAuthRequireAuthTime $ oxAuthResponseType $ oxAuthScope $ oxAuthClaim $ oxAuthSectorIdentifierURI $ oxAuthSignedResponseAlg $ oxAuthSubjectType $ oxAuthTokenEndpointAuthMethod $ oxAuthTokenEndpointAuthSigningAlg $ oxAuthTosURI $ oxAuthTrustedClient $ oxAuthUserInfoEncryptedResponseAlg $ oxAuthUserInfoEncryptedResponseEnc $ oxAuthExtraConf $ oxClaimRedirectURI $ oxLastAccessTime $ oxLastLogonTime $ oxPersistClientAuthorizations $ oxIncludeClaimsInIdToken $ oxRefreshTokenLifetime $ oxDisabled $ oxAuthLogoutURI $ oxAuthLogoutSessionRequired $ oxdId $ oxAuthAuthorizedOrigins $ oxIdTokenTokenBindingCnf $ oxAccessTokenAsJwt $ oxAccessTokenSigningAlg $ oxAccessTokenLifetime $ oxSoftwareId $ oxSoftwareVersion $ oxSoftwareStatement $ oxRptAsJwt $ oxAttributes )
+	MAY ( associatedPerson $ displayName $ description $ inum $ oxAuthAppType $ oxAuthClientIdIssuedAt $ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthExpiration $ oxDeletable $ oxAuthClientURI $ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg $ oxAuthIdTokenEncryptedResponseEnc $ oxAuthIdTokenSignedResponseAlg $ oxAuthInitiateLoginURI $ oxAuthJwksURI $ oxAuthJwks $ oxAuthLogoURI $ oxAuthPolicyURI $ oxAuthPostLogoutRedirectURI $ oxAuthRedirectURI $ oxAuthRegistrationAccessToken $ oxAuthRequestObjectSigningAlg $ oxAuthRequestObjectEncryptionAlg $ oxAuthRequestObjectEncryptionEnc $ oxAuthRequestURI $ oxAuthRequireAuthTime $ oxAuthResponseType $ oxAuthScope $ oxAuthClaim $ oxAuthSectorIdentifierURI $ oxAuthSignedResponseAlg $ oxAuthSubjectType $ oxAuthTokenEndpointAuthMethod $ oxAuthTokenEndpointAuthSigningAlg $ oxAuthTosURI $ oxAuthTrustedClient $ oxAuthUserInfoEncryptedResponseAlg $ oxAuthUserInfoEncryptedResponseEnc $ oxAuthExtraConf $ oxClaimRedirectURI $ oxLastAccessTime $ oxLastLogonTime $ oxPersistClientAuthorizations $ oxIncludeClaimsInIdToken $ oxRefreshTokenLifetime $ oxDisabled $ oxAuthLogoutURI $ oxAuthLogoutSessionRequired $ oxdId $ oxAuthAuthorizedOrigins $ oxIdTokenTokenBindingCnf $ oxAccessTokenAsJwt $ oxAccessTokenSigningAlg $ oxAccessTokenLifetime $ oxSoftwareId $ oxSoftwareVersion $ oxSoftwareStatement $ oxRptAsJwt $ oxAttributes )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:18 NAME 'oxAuthCustomScope'
@@ -2877,7 +2883,7 @@ objectclass ( oxObjectClass:23 NAME 'oxUmaResource'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxScopeExpression $ oxAuthCreation $ oxAuthExpiration $ description )
+	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxScopeExpression $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ description )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
@@ -2891,7 +2897,7 @@ objectclass ( oxObjectClass:25 NAME 'oxUmaResourcePermission'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxAttributes $ oxTicket $ oxStatus )
+	MAY ( oxAuthExpiration $ oxDeletable $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxAttributes $ oxTicket $ oxStatus )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:26 NAME 'oxAuthGrant'
@@ -2905,14 +2911,14 @@ objectclass ( oxObjectClass:27 NAME 'oxAuthToken'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthClaims $ oxAuthSessionDn $ oxAttributes $ oxIdTokenTokenBindingCnf )
+	MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthClaims $ oxAuthSessionDn $ oxAttributes $ oxIdTokenTokenBindingCnf )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:28 NAME 'oxAuthUmaRPT'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
+	MAY ( oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:29 NAME 'oxLiteralNode'
@@ -2947,7 +2953,7 @@ objectclass ( oxObjectClass:33 NAME 'oxProxAccessToken'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthCreation $ oxAuthExpiration $ oxProxyAccessToken $ oxProxyClientId )
+	MAY ( oxAuthCreation $ oxAuthExpiration $ oxDeletable $ oxProxyAccessToken $ oxProxyClientId )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:34 NAME 'oxScript'
@@ -3031,14 +3037,14 @@ objectclass ( oxObjectClass:50 NAME 'oxAuthUmaPCT'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
+	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ oxAuthTokenCode $ oxClaimValues )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:51 NAME 'oxCacheEntity'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxData )
+	MAY ( uniqueIdentifier $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ oxData )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:52 NAME 'oxFido2AuthenticationEntry'
