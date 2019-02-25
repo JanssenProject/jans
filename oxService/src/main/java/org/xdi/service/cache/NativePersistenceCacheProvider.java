@@ -1,18 +1,5 @@
 package org.xdi.service.cache;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +12,14 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.*;
 
 @ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
@@ -83,7 +78,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             key = hashKey(key);
             NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
             if (entity != null && entity.getData() != null) {
-                if (isExpired(entity.getExpirationDate())) {
+                if (isExpired(entity.getExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
                     remove("", key);
                     return null;
@@ -125,6 +120,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setDn(createDn(key));
             entity.setCreationDate(creationDate);
             entity.setExpirationDate(expirationDate.getTime());
+            entity.setDeletable(true);
 
             silentlyRemoveEntityIfExists(entity.getDn());
             ldapEntryManager.persist(entity);
