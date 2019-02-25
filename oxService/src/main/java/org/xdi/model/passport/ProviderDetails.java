@@ -14,6 +14,7 @@ public class ProviderDetails {
     private String type;
     private String mapping;
     private String passportStrategyId;
+    private boolean enabled;
 
     @JsonProperty("logo_img")
     private String logoImg;
@@ -62,6 +63,14 @@ public class ProviderDetails {
 
     public void setPassportStrategyId(String passportStrategyId) {
         this.passportStrategyId = passportStrategyId;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getLogoImg() {
