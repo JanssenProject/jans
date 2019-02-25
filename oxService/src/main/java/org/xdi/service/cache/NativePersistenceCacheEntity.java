@@ -1,5 +1,6 @@
 package org.xdi.service.cache;
 
+import org.gluu.persist.model.base.Deletable;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -10,7 +11,7 @@ import java.util.Date;
 
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxCacheEntity"})
-public class NativePersistenceCacheEntity implements Serializable {
+public class NativePersistenceCacheEntity implements Serializable, Deletable {
 
     @LdapDN
     private String dn;
@@ -20,6 +21,8 @@ public class NativePersistenceCacheEntity implements Serializable {
     private Date creationDate;
     @LdapAttribute(name = "oxAuthExpiration")
     private Date expirationDate;
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
     @LdapAttribute(name = "oxData")
     private String data;
 
@@ -63,6 +66,14 @@ public class NativePersistenceCacheEntity implements Serializable {
         this.data = data;
     }
 
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
+
     @Override
     public String toString() {
         return "NativePersistenceCacheEntity{" +
@@ -70,6 +81,7 @@ public class NativePersistenceCacheEntity implements Serializable {
                 ", id='" + id + '\'' +
                 ", creationDate=" + creationDate +
                 ", expirationDate=" + expirationDate +
+                ", deletable=" + deletable +
                 ", data='" + data + '\'' +
                 '}';
     }
