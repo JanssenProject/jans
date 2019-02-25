@@ -6,25 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Stopwatch;
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.DeletableEntity;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -45,6 +35,16 @@ import org.xdi.service.cdi.event.CleanerEvent;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -140,6 +140,34 @@ public class CleanerTimer {
 
         try {
             Date now = new Date();
+            final int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+
+            for (String baseDn : appConfiguration.getCleanServiceBaseDns()) {
+                log.debug("Start clean up for baseDn: " + baseDn);
+                final Stopwatch started = Stopwatch.createStarted();
+
+                BatchOperation<DeletableEntity> batchOperation = new ProcessBatchOperation<DeletableEntity>() {
+                    @Override
+                    public void performAction(List<DeletableEntity> entries) {
+                        for (DeletableEntity entity : entries) {
+                            try {
+                                ldapEntryManager.remove(entity);
+                            } catch (Exception e) {
+                                log.error("Failed to remove entry, dn: " + entity.getDn(), e);
+                            }
+                        }
+                    }
+                };
+
+                Filter filter = Filter.createANDFilter(
+                        Filter.createEqualityFilter("oxDeletable", "true"),
+                        Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now))
+                );
+
+                ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB, new String[]{"oxAuthExpiration", "oxDeletable"}, batchOperation, 0, chunkSize, chunkSize);
+
+                log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
+            }
 
             processCache(now);
             processAuthorizationGrantList();
@@ -157,6 +185,8 @@ public class CleanerTimer {
             this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
 
             processMetricEntries();
+        } catch (Exception e) {
+            log.error("Failed to process clean up.", e);
         } finally {
             this.isActive.set(false);
         }
