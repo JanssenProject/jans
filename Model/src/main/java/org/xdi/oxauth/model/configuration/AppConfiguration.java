@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.configuration;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -91,6 +92,9 @@ public class AppConfiguration implements Configuration {
     private int accessTokenLifetime;
 
     private int cleanServiceInterval;
+    private int cleanServiceBatchChunkSize = 100;
+    private List<String> cleanServiceBaseDns = Lists.newArrayList();
+
     private Boolean keyRegenerationEnabled;
     private int keyRegenerationInterval;
     private String defaultSignatureAlgorithm;
@@ -823,6 +827,25 @@ public class AppConfiguration implements Configuration {
 
     public void setCleanServiceInterval(int p_cleanServiceInterval) {
         cleanServiceInterval = p_cleanServiceInterval;
+    }
+
+    public int getCleanServiceBatchChunkSize() {
+        return cleanServiceBatchChunkSize;
+    }
+
+    public void setCleanServiceBatchChunkSize(int cleanServiceBatchChunkSize) {
+        this.cleanServiceBatchChunkSize = cleanServiceBatchChunkSize;
+    }
+
+    public List<String> getCleanServiceBaseDns() {
+        if (cleanServiceBaseDns == null) {
+            cleanServiceBaseDns = Lists.newArrayList();
+        }
+        return cleanServiceBaseDns;
+    }
+
+    public void setCleanServiceBaseDns(List<String> cleanServiceBaseDns) {
+        this.cleanServiceBaseDns = cleanServiceBaseDns;
     }
 
     public Boolean getKeyRegenerationEnabled() {
