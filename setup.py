@@ -44,7 +44,6 @@ import platform
 from ldif import LDIFParser
 import copy
 
-
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
 if file_max < 64000:
@@ -454,8 +453,7 @@ class Setup(object):
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        self.passport_saml_config = '%s/passport-saml-config.json' % self.configFolder
-        self.passport_inbound_idp_initiated_json = '%s/passport-inbound-idp-initiated.json' % self.configFolder
+        self.passport_central_config_json = '%s/passport-central-config.json' % self.outputFolder
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
@@ -484,6 +482,8 @@ class Setup(object):
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
+        self.oxpassport_ldif = '%s/oxidp.ldif' % self.outputFolder
+        
         self.ldif_scripts_casa = '%s/scripts_casa.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
@@ -539,6 +539,7 @@ class Setup(object):
         self.passport_rs_client_jks_pass = None
         self.passport_rs_client_jks_pass_encoded = None
 
+        self.passport_rp_ii_client_id = None
         self.passport_rp_client_id = None
         self.passport_rp_client_jwks = None
         self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
@@ -582,12 +583,11 @@ class Setup(object):
                            self.ldif_configuration,
                            self.ldif_scim,
                            self.ldif_passport,
-                           self.ldif_passport_config,
-                           self.ldif_idp
+                           self.ldif_idp,
+                           self.oxpassport_ldif,
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
-                             self.passport_saml_config:True,
                              self.gluu_python_readme: True,
                              self.oxtrust_config_json: False,
                              self.oxtrust_cache_refresh_json: False,
@@ -613,12 +613,10 @@ class Setup(object):
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
                              self.ldif_passport: False,
-                             self.ldif_passport_config: False,
                              self.ldif_idp: False,
                              self.network: False,
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
-                             self.passport_inbound_idp_initiated_json: True,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -829,7 +827,10 @@ class Setup(object):
             self.passport_rs_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
         if not self.passport_rp_client_id:
             passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rp_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
+            self.passport_rp_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)            
+        if not self.passport_rp_ii_client_id:
+            passportRpIIClientTwoQuads  = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.passport_rp_ii_client_id = '%s!0008!%s' % (self.inumOrg, passportRpIIClientTwoQuads)
         if not self.inumApplianceFN:
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
@@ -2053,6 +2054,13 @@ class Setup(object):
     def install_passport(self):
         self.logIt("Installing Passport...")
 
+        self.logIt("Rendering Passport templates")
+        self.renderTemplate(self.passport_central_config_json)
+        self.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
+        self.renderTemplate(self.ldif_passport_config)
+        self.import_ldif_opendj([self.ldif_passport_config])
+
+
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
 
@@ -2658,6 +2666,7 @@ class Setup(object):
 
         self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
 
+
     def get_clean_args(self, args):
         argsc = args[:]
 
@@ -2938,10 +2947,16 @@ class Setup(object):
         if createPwFile:
             self.deleteLdapPw()
 
-    def import_ldif_opendj(self):
-        self.logIt("Importing userRoot LDIF data")
-        realInstallDir = os.path.realpath(self.outputFolder)
-        for ldif_file_fn in self.ldif_files:
+    def import_ldif_opendj(self, ldif_file_list=[]):
+        if not ldif_file_list:
+            self.logIt("Importing userRoot LDIF data")
+        else:
+            self.logIt("Importing LDIF File(s): " + ' '.join(ldif_file_list))
+
+        if not ldif_file_list:
+            ldif_file_list = self.ldif_files
+        
+        for ldif_file_fn in ldif_file_list:
             ldif_file_fullpath = os.path.realpath(ldif_file_fn)
 
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
@@ -3345,8 +3360,8 @@ class Setup(object):
                 
             self.pbar.progress("OpenDJ: post installation", False)
             self.post_install_opendj()
-        finally:
-            self.deleteLdapPw()
+        except:
+            pass
 
         if self.ldap_type == 'openldap':
             self.logIt("Running OpenLDAP Setup")
@@ -4116,6 +4131,8 @@ if __name__ == '__main__':
                 installObject.pbar.progress("Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif(setupOptions['importLDIFDir'])
+
+            installObject.deleteLdapPw()
 
             installObject.pbar.progress("Completed")
             print
