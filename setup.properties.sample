@@ -26,6 +26,11 @@ ip=
 ### The hostname of the server
 hostname=
 
+
+### Backend type. For opendj, both will be opendj
+ldap_type=
+opendj_type=
+
 ### This information is needed for self signed certificate
 orgName=
 countryCode=
