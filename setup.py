@@ -482,7 +482,6 @@ class Setup(object):
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
-        self.oxpassport_ldif = '%s/oxidp.ldif' % self.outputFolder
         
         self.ldif_scripts_casa = '%s/scripts_casa.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
@@ -584,7 +583,6 @@ class Setup(object):
                            self.ldif_scim,
                            self.ldif_passport,
                            self.ldif_idp,
-                           self.oxpassport_ldif,
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
