@@ -478,7 +478,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
                                 GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                                 GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                                userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
+                                if (sessionUser.getAuthenticationTime() != null) {
+                                    userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
+                                }
                                 if (authenticationMaxAge != null) {
                                     userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
                                     validAuthenticationMaxAge = userAuthenticationTime.after(now);
