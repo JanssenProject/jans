@@ -121,7 +121,13 @@ public class CleanerTimer {
         this.isActive = new AtomicBoolean(false);
 
         int interval = appConfiguration.getCleanServiceInterval();
-        if (interval <= 0) {
+        if (interval < 0) {
+            log.info("Cleaner Timer is disabled.");
+            log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+            return;
+        }
+
+        if (interval == 0) {
             interval = DEFAULT_INTERVAL;
         }
 
