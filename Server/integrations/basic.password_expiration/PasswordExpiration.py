@@ -68,7 +68,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if now.compareTo(dt) > 0:
                 # Add 90 Days to current date
                 calendar.setTime(now)
-                calendar.add(calendar.DATE, 90)
+                calendar.add(calendar.DATE, 1)
                 dt_plus_90 = calendar.getTime()
                 expDate = StaticUtils.encodeGeneralizedTime(dt_plus_90)
                 identity.setWorkingParameter("expDate", expDate)
@@ -76,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif step == 2:
             print "Basic (with password update). Authenticate for step 2"
-            user = authenticationService.getAuthenticatedUser()
+            user = authenticationService.getAuthenticatedUser()            
             if user == None:
                 print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
                 return False
@@ -84,11 +84,9 @@ class PersonAuthentication(PersonAuthenticationType):
             user_name = user.getUserId()
             find_user_by_uid = userService.getUser(user_name)
             newExpDate = identity.getWorkingParameter("expDate")
-
             if find_user_by_uid == None:
                 print "Basic (with password update). Authenticate for step 2. Failed to find user"
                 return False
-
             print "Basic (with password update). Authenticate for step 2"
             update_button = requestParameters.get("loginForm:updateButton")
 
@@ -96,7 +94,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
 
             find_user_by_uid.setAttribute("oxPasswordExpirationDate", newExpDate)
-            new_password_array = requestParameters.get("new_password")
+            new_password_array = requestParameters.get("loginForm:password")
             if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
                 print "Basic (with password update). Authenticate for step 2. New password is empty"
                 return False
