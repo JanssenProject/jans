@@ -275,6 +275,13 @@ public class AuthorizeAction {
             SessionId unauthenticatedSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             unauthenticatedSession.addPermission(clientId, false);
+
+            if (session != null) { // #1474, fix for flow 4
+                for (Map.Entry<String, Boolean> entity : session.getPermissionGrantedMap().getPermissionGranted().entrySet()) {
+                    unauthenticatedSession.addPermission(entity.getKey(), entity.getValue());
+                }
+            }
+
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
                 log.trace("Session '{}' persisted to LDAP", unauthenticatedSession.getId());
