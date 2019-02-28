@@ -206,8 +206,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (!prompts.contains(Prompt.LOGIN)) {
                         log.info("ACR is changed, adding prompt=login to prompts");
                         prompts.add(Prompt.LOGIN);
-                        //Override prompt in session
+
+                        sessionUser.setState(SessionIdState.UNAUTHENTICATED);
                         sessionUser.getSessionAttributes().put("prompt", org.xdi.oxauth.model.util.StringUtils.implode(prompts, " "));
+                        sessionIdService.persistSessionId(sessionUser);
                     }
                 } else {
                     throw e;
@@ -526,7 +528,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
 
                                 if (prompts.contains(Prompt.LOGIN)) {
-                                    endSession(sessionId, httpRequest, httpResponse);
+
+                                    //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
+                                    if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
+                                        endSession(sessionId, httpRequest, httpResponse);
+                                    }
                                     sessionId = null;
                                     prompts.remove(Prompt.LOGIN);
 

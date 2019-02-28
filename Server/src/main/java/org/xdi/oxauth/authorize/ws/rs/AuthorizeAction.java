@@ -276,10 +276,12 @@ public class AuthorizeAction {
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             unauthenticatedSession.addPermission(clientId, false);
 
-            if (session != null) { // #1474, fix for flow 4
+            // #1030, fix for flow 4 - transfer previous session permissions to new session
+            if (session != null && session.getPermissionGrantedMap() != null && session.getPermissionGrantedMap().getPermissionGranted() != null) {
                 for (Map.Entry<String, Boolean> entity : session.getPermissionGrantedMap().getPermissionGranted().entrySet()) {
                     unauthenticatedSession.addPermission(entity.getKey(), entity.getValue());
                 }
+                sessionIdService.remove(session); // #1030, remove previous session
             }
 
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
