@@ -76,6 +76,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
+
+        facesMessages = CdiUtil.bean(FacesMessages)
+        facesMessages.setKeepMessages()
+
         session_attributes = self.identity.getSessionId().getSessionAttributes()
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
@@ -149,9 +153,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return False
         elif step == 2:
-
-            facesMessages = CdiUtil.bean(FacesMessages)
-            facesMessages.setKeepMessages()
             # Retrieve the session attribute
             print "TwilioSMS. Step 2 SMS/OTP Authentication"
             code = session_attributes.get("code")
