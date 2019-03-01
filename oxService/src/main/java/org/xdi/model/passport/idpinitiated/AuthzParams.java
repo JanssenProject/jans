@@ -2,8 +2,6 @@ package org.xdi.model.passport.idpinitiated;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
-
 /**
  * Created by jgomer on 2019-02-21.
  */
@@ -18,7 +16,7 @@ public class AuthzParams {
     private String responseType;
 
     @JsonProperty("scope")
-    private List<String> scopes;
+    private String scopes;
 
     public String getProvider() {
         return provider;
@@ -44,11 +42,11 @@ public class AuthzParams {
         this.responseType = responseType;
     }
 
-    public List<String> getScopes() {
+    public String getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
+    public void setScopes(String scopes) {
         this.scopes = scopes;
     }
 
