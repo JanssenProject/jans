@@ -13,8 +13,7 @@ import org.xdi.model.passport.idpinitiated.IIConfiguration;
 import java.util.List;
 
 /**
- * @author Shekhar L.
- * @Date 07/17/2016
+ * Created by jgomer on 2019-02-21.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PassportConfiguration {

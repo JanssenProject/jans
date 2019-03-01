@@ -1,10 +1,13 @@
 package org.xdi.model.passport.idpinitiated;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.List;
 
 /**
  * Created by jgomer on 2019-02-21.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IIConfiguration {
 
     private OIDCDetails openidclient;

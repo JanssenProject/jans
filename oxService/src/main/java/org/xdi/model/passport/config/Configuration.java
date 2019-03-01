@@ -1,10 +1,12 @@
 package org.xdi.model.passport.config;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.model.passport.config.logging.LoggingConfig;
 
 /**
  * Created by jgomer on 2019-02-21.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
 
     private String serverURI;

@@ -1,8 +1,13 @@
 package org.xdi.model.passport.config.logging;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 /**
  * Created by jgomer on 2019-02-21.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class LoggingConfig {
 
     private String level;
