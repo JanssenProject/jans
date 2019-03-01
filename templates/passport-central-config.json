@@ -13,7 +13,7 @@
                 "host": "",
                 "username": "",
                 "password": "",
-                "port": ""
+                "port": 0
             }
         }
     },
