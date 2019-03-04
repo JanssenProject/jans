@@ -1,7 +1,8 @@
 package org.xdi.oxauth.util;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.xdi.model.attribute.AttributeValidation;
+import org.xdi.oxauth.i18n.LanguageBean;
+import org.xdi.service.AttributeService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;
@@ -11,10 +12,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
-
-import org.xdi.model.AttributeValidation;
-import org.xdi.oxauth.i18n.LanguageBean;
-import org.xdi.service.AttributeService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @FacesValidator("gluuPasswordValidator")
