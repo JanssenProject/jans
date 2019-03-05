@@ -4307,7 +4307,7 @@
         },
         {
             "desc": "oxDeletable",
-            "equality": "caseIgnoreSubstringsMatch",
+            "equality": "caseIgnoreMatch",
             "names": [
                 "oxDeletable"
             ],
