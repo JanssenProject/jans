@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ClientAttributes;
@@ -26,9 +27,9 @@ import java.util.List;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
-public class Client implements Serializable, ClientReference {
+public class Client extends DeletableEntity implements Serializable, ClientReference {
 
-    private static final long serialVersionUID = -6832496019942067969L;
+    private static final long serialVersionUID = -6832496019942067970L;
 
     @LdapDN
     private String dn;
