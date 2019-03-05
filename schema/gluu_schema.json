@@ -5590,7 +5590,6 @@
             "kind": "STRUCTURAL",
             "may": [
                 "ou",
-                "friendlyName",
                 "uniqueIdentifier",
                 "inum",
                 "oxConfApplication",
