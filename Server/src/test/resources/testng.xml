@@ -249,6 +249,12 @@
 		</classes>
 	</test>
 
+    <test name="Cleaner timer test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.comp.CleanerTimerTest" />
+        </classes>
+    </test>
+
 	<test name="Remove unused clients test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.comp.CleanUpClientTest" />
