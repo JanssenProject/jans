@@ -15,6 +15,7 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 import java.io.IOException;
 
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.xdi.oxd.server.TestUtils.notEmpty;
 
 /**
@@ -31,6 +32,7 @@ public class GetTokensByCodeTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
         GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
         refreshToken(tokensResponse, client, site.getOxdId());
+        tokenByInvalidCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
     }
 
     public static GetClientTokenResponse refreshToken(GetTokensByCodeResponse resp, ClientInterface client, String oxdId) {
@@ -81,5 +83,30 @@ public class GetTokensByCodeTest {
         params.setNonce(nonce);
 
         return client.getAuthorizationCode(Tester.getAuthorization(), params).getCode();
+    }
+
+    public static GetTokensByCodeResponse tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site,
+                                                             String userId, String userSecret, String nonce) {
+
+        final String state = CoreUtils.secureRandomString();
+        final String code = CoreUtils.secureRandomString();
+
+        String testOxdId = site.getOxdId();
+
+        final GetTokensByCodeParams params = new GetTokensByCodeParams();
+        params.setOxdId(testOxdId);
+        params.setCode(code);
+        params.setState(state);
+
+        GetTokensByCodeResponse resp = null;
+
+        try {
+            resp = client.getTokenByCode(Tester.getAuthorization(), params);
+            assertTrue(false);
+        } catch (Exception ex) {
+            assertTrue(true);
+        }
+
+        return resp;
     }
 }
