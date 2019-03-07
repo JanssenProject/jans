@@ -508,7 +508,13 @@ public class CommonVerifiers {
         verifyBase64UrlString(clientJsonNode, "challenge");
 
         if (clientJsonNode.hasNonNull("tokenBinding")) {
-            verifyThatString(clientJsonNode.get("tokenBinding"));
+        	JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
+            if (tokenBindingNode.hasNonNull("status")) {
+            	verifyThatString(clientJsonNode.get("status"));
+            }
+            if (tokenBindingNode.hasNonNull("id")) {
+            	verifyThatString(clientJsonNode.get("id"));
+            }
         }
 
         String origin = verifyThatString(clientJsonNode.get("origin"));
