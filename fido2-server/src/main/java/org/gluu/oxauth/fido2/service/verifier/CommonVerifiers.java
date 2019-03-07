@@ -510,10 +510,10 @@ public class CommonVerifiers {
         if (clientJsonNode.hasNonNull("tokenBinding")) {
         	JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
             if (tokenBindingNode.hasNonNull("status")) {
-            	verifyThatString(clientJsonNode.get("status"));
+            	verifyThatString(tokenBindingNode.get("status"));
             }
             if (tokenBindingNode.hasNonNull("id")) {
-            	verifyThatString(clientJsonNode.get("id"));
+            	verifyThatString(tokenBindingNode.get("id"));
             }
         }
 
