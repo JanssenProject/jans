@@ -27,6 +27,11 @@
     </test>
 
     <!-- Connect -->
+    <test name="HealthCheckTest" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.HealthCheckTest"></class>
+        </classes>
+    </test>
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.RegisterSiteTest"/>
