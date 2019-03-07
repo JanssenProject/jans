@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxD Suite" parallel="false">
+<suite name="oxD Suite" parallel="true">
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
@@ -47,6 +47,11 @@
             <class name="org.xdi.oxd.server.GetTokensByCodeTest"/>
         </classes>
     </test>
+    <test name="Get tokens by code" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.GetTokensByInvalidCodeTest"/>
+        </classes>
+    </test>
     <test name="Get user info" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.GetUserInfoTest"/>
@@ -67,12 +72,12 @@
             <class name="org.xdi.oxd.server.CheckAccessTokenTest"/>
         </classes>
     </test>
-    <test name="Authorization code flow prompt=none" enabled="false">
+    <test name="Authorization code flow prompt=none" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
-    <test name="Migration Service Test" enabled="false">
+    <test name="Migration Service Test" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
         </classes>
