@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.GluuAttributeDataType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -72,6 +73,9 @@ import java.util.*;
 @Stateless
 @Named
 public class IdTokenFactory {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
@@ -220,7 +224,8 @@ public class IdTokenFactory {
 
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
+                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
             String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
@@ -242,6 +247,10 @@ public class IdTokenFactory {
             }
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
+            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
+            }
+
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
@@ -410,7 +419,8 @@ public class IdTokenFactory {
 
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
+                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
             String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
@@ -432,6 +442,10 @@ public class IdTokenFactory {
             }
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
+            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
+            }
+
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
