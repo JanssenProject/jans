@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.model.GluuAttribute;
+import org.xdi.model.GluuAttributeDataType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
@@ -22,6 +23,7 @@ import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
@@ -51,6 +53,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -63,7 +67,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version February 12, 2019
+ * @version March 8, 2019
  */
 @Stateless
 @Named
@@ -133,7 +137,8 @@ public class IdTokenFactory {
         }
         jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
-        List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
+        User user = authorizationGrant.getUser();
+        List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
@@ -142,80 +147,41 @@ public class IdTokenFactory {
                     continue;
                 }
 
-                if (scope != null && scope.getOxAuthClaims() != null) {
-                    if (scope.getIsOxAuthGroupClaims()) {
-                        JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                        groupClaim.setName(scope.getDisplayName());
+                Map<String, Object> claims = getClaims(user, scope);
 
-                        for (String claimDn : scope.getOxAuthClaims()) {
-                            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+                if (scope.getIsOxAuthGroupClaims()) {
+                    JwtSubClaimObject groupClaim = new JwtSubClaimObject();
+                    groupClaim.setName(scope.getDisplayName());
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
 
-                            String claimName = gluuAttribute.getOxAuthClaimName();
-                            String ldapName = gluuAttribute.getName();
-                            Object attributeValue;
-
-                            if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                                if (ldapName.equals("uid")) {
-                                    attributeValue = authorizationGrant.getUser().getUserId();
-                                } else {
-                                    attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName(), true);
-                                }
-
-                                if (attributeValue != null) {
-                                    if (attributeValue instanceof JSONArray) {
-                                        JSONArray jsonArray = (JSONArray) attributeValue;
-                                        List<String> values = new ArrayList<String>();
-                                        for (int i = 0; i < jsonArray.length(); i++) {
-                                            String value = jsonArray.optString(i);
-                                            if (value != null) {
-                                                values.add(value);
-                                            }
-                                        }
-                                        jwt.getClaims().setClaim(claimName, values);
-                                    } else {
-                                        String value = attributeValue.toString();
-                                        jwt.getClaims().setClaim(claimName, value);
-                                    }
-                                }
-                            }
+                        if (value instanceof List) {
+                            groupClaim.setClaim(key, (List<String>) value);
+                        } else {
+                            groupClaim.setClaim(key, (String) value);
                         }
+                    }
 
-                        jwt.getClaims().setClaim(scope.getDisplayName(), groupClaim);
-                    } else {
-                        for (String claimDn : scope.getOxAuthClaims()) {
-                            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+                    jwt.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                } else {
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
 
-                            String claimName = gluuAttribute.getOxAuthClaimName();
-                            String ldapName = gluuAttribute.getName();
-                            Object attributeValue;
-
-                            if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                                if (ldapName.equals("uid")) {
-                                    attributeValue = authorizationGrant.getUser().getUserId();
-                                } else {
-                                    attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName(), true);
-                                }
-
-                                if (attributeValue != null) {
-                                    if (attributeValue instanceof JSONArray) {
-                                        JSONArray jsonArray = (JSONArray) attributeValue;
-                                        List<String> values = new ArrayList<String>();
-                                        for (int i = 0; i < jsonArray.length(); i++) {
-                                            String value = jsonArray.optString(i);
-                                            if (value != null) {
-                                                values.add(value);
-                                            }
-                                        }
-                                        jwt.getClaims().setClaim(claimName, values);
-                                    } else {
-                                        String value = attributeValue.toString();
-                                        jwt.getClaims().setClaim(claimName, value);
-                                    }
-                                }
-                            }
+                        if (value instanceof List) {
+                            jwt.getClaims().setClaim(key, (List<String>) value);
+                        } else if (value instanceof Boolean) {
+                            jwt.getClaims().setClaim(key, (Boolean) value);
+                        } else if (value instanceof Date) {
+                            jwt.getClaims().setClaim(key, ((Date) value).getTime());
+                        } else {
+                            jwt.getClaims().setClaim(key, (String) value);
                         }
                     }
                 }
+
+                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
             }
         }
 
@@ -277,12 +243,7 @@ public class IdTokenFactory {
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-
-            if (openidSubAttribute.equals("uid")) {
-                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());
-            } else {
-                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
-            }
+            jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -366,49 +327,51 @@ public class IdTokenFactory {
         }
         jwe.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
-        List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
+        User user = authorizationGrant.getUser();
+        List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-                if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+                if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
                 }
 
-                if (scope != null && scope.getOxAuthClaims() != null) {
-                    for (String claimDn : scope.getOxAuthClaims()) {
-                        GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+                Map<String, Object> claims = getClaims(user, scope);
 
-                        String claimName = gluuAttribute.getOxAuthClaimName();
-                        String ldapName = gluuAttribute.getName();
-                        Object attributeValue;
+                if (scope.getIsOxAuthGroupClaims()) {
+                    JwtSubClaimObject groupClaim = new JwtSubClaimObject();
+                    groupClaim.setName(scope.getDisplayName());
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
 
-                        if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                            if (ldapName.equals("uid")) {
-                                attributeValue = authorizationGrant.getUser().getUserId();
-                            } else {
-                                attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName(), true);
-                            }
+                        if (value instanceof List) {
+                            groupClaim.setClaim(key, (List<String>) value);
+                        } else {
+                            groupClaim.setClaim(key, (String) value);
+                        }
+                    }
 
-                            if (attributeValue != null) {
-                                if (attributeValue instanceof JSONArray) {
-                                    JSONArray jsonArray = (JSONArray) attributeValue;
-                                    List<String> values = new ArrayList<String>();
-                                    for (int i = 0; i < jsonArray.length(); i++) {
-                                        String value = jsonArray.optString(i);
-                                        if (value != null) {
-                                            values.add(value);
-                                        }
-                                    }
-                                    jwe.getClaims().setClaim(claimName, values);
-                                } else {
-                                    String value = attributeValue.toString();
-                                    jwe.getClaims().setClaim(claimName, value);
-                                }
-                            }
+                    jwe.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                } else {
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+
+                        if (value instanceof List) {
+                            jwe.getClaims().setClaim(key, (List<String>) value);
+                        } else if (value instanceof Boolean) {
+                            jwe.getClaims().setClaim(key, (Boolean) value);
+                        } else if (value instanceof Date) {
+                            jwe.getClaims().setClaim(key, ((Date) value).getTime());
+                        } else {
+                            jwe.getClaims().setClaim(key, (String) value);
                         }
                     }
                 }
+
+                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
             }
         }
 
@@ -436,7 +399,7 @@ public class IdTokenFactory {
                                 }
                                 jwe.getClaims().setClaim(claim.getName(), values);
                             } else {
-                                String value = attribute.toString();
+                                String value = (String) attribute;
                                 jwe.getClaims().setClaim(claim.getName(), value);
                             }
                         }
@@ -448,7 +411,7 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifierUri;
+            String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -470,12 +433,7 @@ public class IdTokenFactory {
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-
-            if (openidSubAttribute.equals("uid")) {
-                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());
-            } else {
-                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
-            }
+            jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -560,4 +518,51 @@ public class IdTokenFactory {
         return false;
     }
 
+    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
+        Map<String, Object> claims = new HashMap<String, Object>();
+
+        if (scope != null && scope.getOxAuthClaims() != null) {
+            for (String claimDn : scope.getOxAuthClaims()) {
+                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+
+                String claimName = gluuAttribute.getOxAuthClaimName();
+                String ldapName = gluuAttribute.getName();
+                Object attribute = null;
+
+                if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                    if (ldapName.equals("uid")) {
+                        attribute = user.getUserId();
+                    } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                        attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
+                    } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        if (attributeValue != null) {
+                            attribute = format.parse(attributeValue.toString());
+                        }
+                    } else {
+                        attribute = user.getAttribute(gluuAttribute.getName(), true);
+                    }
+
+                    if (attribute != null) {
+                        if (attribute instanceof JSONArray) {
+                            JSONArray jsonArray = (JSONArray) attribute;
+                            List<String> values = new ArrayList<String>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String value = jsonArray.optString(i);
+                                if (value != null) {
+                                    values.add(value);
+                                }
+                            }
+                            claims.put(claimName, values);
+                        } else {
+                            claims.put(claimName, attribute);
+                        }
+                    }
+                }
+            }
+        }
+
+        return claims;
+    }
 }
