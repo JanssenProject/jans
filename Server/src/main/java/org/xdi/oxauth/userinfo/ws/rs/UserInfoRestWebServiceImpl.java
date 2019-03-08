@@ -35,6 +35,7 @@ import org.xdi.oxauth.model.jwk.Algorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
@@ -67,7 +68,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @version March 8, 2019
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -233,120 +234,15 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Claims
-        List<Scope> dynamicScopes = new ArrayList<Scope>();
-        for (String scopeName : scopes) {
-            Scope scope = scopeService.getScopeByDisplayName(scopeName);
-            if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-                dynamicScopes.add(scope);
-                continue;
-            }
+        String claimsString = getJSonResponse(user, authorizationGrant, scopes);
+        JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
+        jwt.setClaims(claims);
 
-            if (scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
-
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getName();
-                    Object attributeValue = null;
-
-                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                        if (ldapName.equals("uid")) {
-                            attributeValue = user.getUserId();
-                        } else {
-                            attributeValue = user.getAttribute(gluuAttribute.getName(), true);
-                        }
-
-                        if (attributeValue != null) {
-                            if (attributeValue instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attributeValue;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwt.getClaims().setClaim(claimName, values);
-                            } else {
-                                String value = attributeValue.toString();
-                                jwt.getClaims().setClaim(claimName, value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
-                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
-
-                if (gluuAttribute != null) {
-                    Client client = authorizationGrant.getClient();
-
-                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                        String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = user.getAttribute(ldapClaimName, optional);
-                        if (attribute != null) {
-                            if (attribute instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attribute;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwt.getClaims().setClaim(claim.getName(), values);
-                            } else {
-                                String value = attribute.toString();
-                                jwt.getClaims().setClaim(claim.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else {
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
-        }
-
-        // If signed, the UserInfo Response SHOULD contain the Claims iss (issuer) and aud (audience) as members. The iss value should be the OP's Issuer Identifier URL. The aud value should be or include the RP's Client ID value.
+        // If signed, the UserInfo Response SHOULD contain the Claims iss (issuer) and aud (audience) as members.
+        // The iss value should be the OP's Issuer Identifier URL.
+        // The aud value should be or include the RP's Client ID value.
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
         jwt.getClaims().setAudience(authorizationGrant.getClientId());
-
-        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
-        }
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -367,115 +263,15 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        List<Scope> dynamicScopes = new ArrayList<Scope>();
-        for (String scopeName : scopes) {
-            Scope scope = scopeService.getScopeByDisplayName(scopeName);
-            if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-                dynamicScopes.add(scope);
-                continue;
-            }
+        String claimsString = getJSonResponse(user, authorizationGrant, scopes);
+        JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
+        jwe.setClaims(claims);
 
-            if (scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
-
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getName();
-                    Object attributeValue = null;
-
-                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                        if (ldapName.equals("uid")) {
-                            attributeValue = user.getUserId();
-                        } else {
-                            attributeValue = user.getAttribute(gluuAttribute.getName(), true);
-                        }
-
-                        if (attributeValue != null) {
-                            if (attributeValue instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attributeValue;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwe.getClaims().setClaim(claimName, values);
-                            } else {
-                                String value = attributeValue.toString();
-                                jwe.getClaims().setClaim(claimName, value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
-                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
-
-                if (gluuAttribute != null) {
-                    Client client = authorizationGrant.getClient();
-
-                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                        String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = user.getAttribute(ldapClaimName, optional);
-                        if (attribute != null) {
-                            if (attribute instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attribute;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwe.getClaims().setClaim(claim.getName(), values);
-                            } else {
-                                String value = attribute.toString();
-                                jwe.getClaims().setClaim(claim.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else {
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
-        }
-
-        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
-        }
+        // If encrypted, the UserInfo Response SHOULD contain the Claims iss (issuer) and aud (audience) as members.
+        // The iss value should be the OP's Issuer Identifier URL.
+        // The aud value should be or include the RP's Client ID value.
+        jwe.getClaims().setIssuer(appConfiguration.getIssuer());
+        jwe.getClaims().setAudience(authorizationGrant.getClientId());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
