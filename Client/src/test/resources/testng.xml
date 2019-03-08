@@ -2,6 +2,13 @@
 
 <suite name="oxAuthClient" parallel="false">
 
+    <!-- Address claims test -->
+    <test name="Address claims test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AddressClaimsTest"/>
+        </classes>
+    </test>
+
     <!-- Application Type Restriction test -->
     <test name="Application Type Restriction (HTTP)" enabled="true">
         <classes>
