@@ -27,7 +27,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Can Provide Signed UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version March 8, 2019
  */
 public class CanProvideSignedUserInfoResponse extends BaseTest {
 
@@ -99,9 +99,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -172,9 +175,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -245,9 +251,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -317,9 +326,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -389,9 +401,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -461,9 +476,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -533,9 +551,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -605,9 +626,12 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -677,8 +701,11 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 }
