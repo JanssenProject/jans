@@ -43,8 +43,10 @@ import java.util.UUID;
 import static org.testng.Assert.*;
 
 /**
+ * Note: In order to run this tests, set legacyIdTokenClaims to true.
+ *
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @version March 8, 2019
  */
 public class MultivaluedClaims extends BaseTest {
 
