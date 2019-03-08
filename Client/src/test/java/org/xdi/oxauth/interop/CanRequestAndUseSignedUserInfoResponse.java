@@ -27,7 +27,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Can Request and Use Signed UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version March 8, 2019
  */
 public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
 
@@ -99,8 +99,11 @@ public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_REGION,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_COUNTRY)));
     }
 }
