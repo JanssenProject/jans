@@ -429,7 +429,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
+                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
             String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
@@ -451,6 +452,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
+            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
+            }
+
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
