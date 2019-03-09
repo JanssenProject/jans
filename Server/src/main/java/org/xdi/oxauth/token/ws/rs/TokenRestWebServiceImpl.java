@@ -53,7 +53,7 @@ import java.util.Arrays;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 3, 2018
+ * @version March 9, 2019
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -316,7 +316,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
 
-                        RefreshToken reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
+                        RefreshToken reToken = null;
+                        if (client.getGrantTypes() != null
+                                && client.getGrantTypes().length > 0
+                                && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                            reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
+                        }
 
                         if (scope != null && !scope.isEmpty()) {
                             scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
