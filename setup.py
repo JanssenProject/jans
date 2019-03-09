@@ -557,7 +557,7 @@ class Setup(object):
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchebaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchbaseClusterRamsize = 1024 #in MB
+        self.couchbaseClusterRamsize = 2048 #in MB
         
         self.couchebaseBucketClusterPort = 28091
 
@@ -3804,10 +3804,10 @@ class Setup(object):
                     'couchbase_servers': 'localhost',
                     'couchbase_server_user': 'admin',
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
-                    'couchbase_buckets': ' '.join(self.couchbaseBuckets),
+                    'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'user_mapping': 'people, groups',
-                    'session_mapping': 'sessions',
+                    'session_mapping': 'sessions', "cache",
                     'static_mapping': 'statistic',
                     'site_mapping': 'site',
                     'encryption_method': 'SSHA-256',
@@ -3844,11 +3844,12 @@ class Setup(object):
         self.couchbaseSSL()
 
         #TO DO: calculations of bucketRamsize is neaded
-        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize)
-        #self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
-        #self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
-        #self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
-        #self.couchebaseCreateBucket('gluu_session', bucketType='memcached', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_session', bucketRamsize=self.couchbaseClusterRamsize/5)
+#        self.couchebaseCreateBucket('gluu_session', bucketType='memcached', bucketRamsize=self.couchbaseClusterRamsize/5)
 
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
