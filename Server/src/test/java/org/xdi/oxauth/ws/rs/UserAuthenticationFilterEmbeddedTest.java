@@ -6,30 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -37,11 +13,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -51,6 +23,18 @@ import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Functional tests for the Use Authentication Filter (embedded)
@@ -196,7 +180,6 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
             assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
             assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -283,7 +266,6 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
             assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
             assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -369,7 +351,6 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
             assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
             assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -462,7 +443,6 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
             assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
             assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
         } catch (Exception e) {
             fail(e.getMessage(), e);
