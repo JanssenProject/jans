@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version September 3, 2018
+ * @version March 9, 2019
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
@@ -75,7 +75,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
@@ -125,7 +124,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "userInum", "userEmail", "sectorIdentifierUri"})
@@ -175,7 +173,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -229,7 +226,6 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "sectorIdentifierUri"})
@@ -309,6 +305,5 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response2.getAccessToken(), "The access token is null");
         assertNotNull(response2.getExpiresIn(), "The expires in value is null");
         assertNotNull(response2.getTokenType(), "The token type is null");
-        assertNotNull(response2.getRefreshToken(), "The refresh token is null");
     }
 }
