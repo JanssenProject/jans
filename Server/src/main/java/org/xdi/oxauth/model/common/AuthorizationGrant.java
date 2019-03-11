@@ -279,7 +279,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         final TokenLdap result = new TokenLdap();
 
-        result.setDn(grantService.buildDn(id, getGrantId(), getClientId()));
+        result.setDn(grantService.buildDn(id, getClientId()));
         result.setId(id);
         result.setGrantId(getGrantId());
         result.setCreationDate(p_token.getCreationDate());
