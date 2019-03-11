@@ -1,0 +1,61 @@
+# server configuration
+use_client_authentication_for_pat: $USE_CLIENT_AUTHENTICATION_FOR_PAT
+trust_all_certs: $TRUST_ALL_CERTS
+trust_store_path: $TRUST_STORE_PATH
+trust_store_password: $TRUST_STORE_PASSWORD
+crypt_provider_key_store_path: $CRYPT_PROVIDER_KEY_STORE_PATH
+crypt_provider_key_store_password: $CRYPT_PROVIDER_KEY_STORE_PASSWORD
+crypt_provider_dn_name: $CRYPT_PROVIDER_DN_NAME
+support-google-logout: $SUPPORT_GOOGLE_LOGOUT
+state_expiration_in_minutes: $STATE_EXPIRATION_IN_MINUTES
+nonce_expiration_in_minutes: $NONCE_EXPIRATION_IN_MINUTES
+public_op_key_cache_expiration_in_minutes: $PUBLIC_OP_KEY_CACHE_EXPIRATION_IN_MINUTES
+protect_commands_with_access_token: $PROTECT_COMMANDS_WITH_ACCESS_TOKEN
+uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: $UMA2_AUTO_REGISTER_CLAIMS_GATHERING_ENDPOINT_AS_REDIRECT_URI_OF_CLIENT
+migration_source_folder_path: $MIGRATION_SOURCE_FOLDER_PATH
+storage: $STORAGE
+storage_configuration:
+  dbFileLocation: $DB_FILE_LOCATION
+
+# Connectors
+server:
+  applicationConnectors:
+    - type: https
+      port: $APPLICATION_CONNECTOR_HTTPS_PORT
+      keyStorePath: $APPLICATION_KEYSTORE_PATH
+      keyStorePassword: $APPLICATION_KEYSTORE_PASSWORD
+      validateCerts: $APPLICATION_KEYSTORE_VALIDATE_CERTS
+  adminConnectors:
+    - type: https
+      port: $ADMIN_CONNECTOR_HTTPS_PORT
+      keyStorePath: $ADMIN_KEYSTORE_PATH
+      keyStorePassword: $ADMIN_KEYSTORE_PASSWORD
+      validateCerts: $ADMIN_KEYSTORE_VALIDATE_CERTS
+
+logging:
+
+  loggers:
+    org.gluu: $GLUU_LOG_LEVEL
+    org.xdi: $XDI_LOG_LEVEL
+
+  appenders:
+    - type: console
+    - type: file
+      threshold: $THRESHOLD
+      logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
+      currentLogFilename: $CURRENT_LOG_FILENAME 
+      archivedLogFilenamePattern: /var/log/oxd-server/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+      archivedFileCount: $ARCHIVED_FILE_COUNT
+      timeZone: $TIME_ZONE
+      maxFileSize: $MAX_FILE_SIZE      
+
+defaultSiteConfig:
+  op_host: '$DEFAULT_SITE_CONFIG_OP_HOST'
+  op_discovery_path: '$DEFAULT_SITE_CONFIG_OP_DISCOVERY_PATH'
+  response_types: $DEFAULT_SITE_CONFIG_RESPONSE_TYPES
+  grant_type: $DEFAULT_SITE_CONFIG_GRANT_TYPES
+  acr_values: $DEFAULT_SITE_CONFIG_ACR_VALUES
+  scope: $DEFAULT_SITE_CONFIG_SCOPE
+  ui_locales: $DEFAULT_SITE_CONFIG_UI_LOCALES
+  claims_locales: $DEFAULT_SITE_CONFIG_CLAIMS_LOCALES
+  contacts: $DEFAULT_SITE_CONFIG_CONTACTS
