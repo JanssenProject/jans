@@ -549,7 +549,7 @@ class Setup(object):
         self.passport_rp_client_jks_pass = 'secret'
 
 
-        #definitions for couchebase
+        #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
@@ -557,14 +557,14 @@ class Setup(object):
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
-        self.couchebaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
+        self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
+        self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
         self.couchbaseClusterRamsize = 2048 #in MB
         
         self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
 
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
-        self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
         self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
         self.couchebaseCbq = '/opt/couchbase/bin/cbq'
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
@@ -3563,9 +3563,9 @@ class Setup(object):
         self.couchbaseInstallOutput = self.installPackage(packageName)
 
         if self.os_type == 'ubuntu' and self.os_version == '16':
-            script_name = os.path.basename(self.couchebaseInitScript)
+            script_name = os.path.basename(self.couchbaseInitScript)
             target_file = os.path.join('/etc/init.d', script_name)
-            self.copyFile(self.couchebaseInitScript, target_file)
+            self.copyFile(self.couchbaseInitScript, target_file)
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
@@ -3637,30 +3637,28 @@ class Setup(object):
     def couchebaseCreateIndexes(self, bucket):
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
-        openldap_index = json.load(open(self.opendlapIndexDef))
+        couchbase_index = json.load(open(self.couchbaseIndexJson))
 
         if not os.path.exists(self.n1qlOutputFolder):
-                os.mkdir(self.n1qlOutputFolder)
+            os.mkdir(self.n1qlOutputFolder)
         
         tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
-        W = open(tmp_file, 'w')
+        with open(tmp_file, 'w') as W:
 
-        W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
-        index_list = [ ind['attribute'] for ind in openldap_index['indexes'] ]
+            W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
+            index_list = couchbase_index[bucket]
 
-        if not 'dn' in index_list:
-            index_list.insert(0, 'dn')
+            if not 'dn' in index_list:
+                index_list.insert(0, 'dn')
 
-        index_names = ['def_primary']
-        for ind in index_list:
-            index_name = 'def_' + ind
-            W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
-            index_names.append(index_name)
+            index_names = ['def_primary']
+            for ind in index_list:
+                index_name = 'def_{0}_{1}'.format(bucket, ind)
+                W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
+                index_names.append(index_name)
 
-        W.write('BUILD INDEX ON `gluu` (%s) USING GSI;\n' % (','.join(index_names)))
-
-        W.close()
+            W.write('BUILD INDEX ON `gluu` (%s) USING GSI;\n' % (','.join(index_names)))
 
         self.couchbaseExecQuery(tmp_file)
 
@@ -3689,12 +3687,12 @@ class Setup(object):
                         cur_bucket = bucket
                     elif e[0].startswith('site_@'):
                         cur_bucket = 'gluu_site'
-                    #elif e[0].startswith('group_@') or e[0].startswith('people_@'):
-                    #    cur_bucket = 'gluu_user'
+                    elif e[0].startswith('groups_@') or e[0].startswith('people_@'):
+                        cur_bucket = 'gluu_user'
                     elif e[0].startswith('metric_@'):
                         cur_bucket = 'gluu_statistic'
-                    elif e[0].startswith('sessions_@'):
-                        cur_bucket = 'gluu_session'
+                    elif e[0].startswith('cache_@'):
+                        cur_bucket = 'gluu_cache'
                     else:
                         cur_bucket = 'gluu'
                     
@@ -3807,8 +3805,7 @@ class Setup(object):
     def couchbaseProperties(self):
         prop_file = os.path.basename(self.gluuCouchebaseProperties)
         prop = open(os.path.join(self.templateFolder, prop_file)).read()
-    
-        
+
         prop_dict = {
                     'couchbase_servers': 'localhost',
                     'couchbase_server_user': 'admin',
@@ -3816,7 +3813,7 @@ class Setup(object):
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'user_mapping': 'people, groups',
-                    'session_mapping': 'sessions, cache',
+                    'session_mapping': 'cache',
                     'static_mapping': 'statistic',
                     'site_mapping': 'site',
                     'encryption_method': 'SSHA-256',
@@ -3857,17 +3854,17 @@ class Setup(object):
         self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
-#        self.couchebaseCreateBucket('gluu_session', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_session', bucketType='ephemeral', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
+        #self.couchebaseCreateBucket('gluu_session', bucketType='ephemeral', bucketRamsize=self.couchbaseClusterRamsize/5)
 
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
             
         #TO DO: what indexes should be created in each bucket?
         self.couchebaseCreateIndexes('gluu')
-        #self.couchebaseCreateIndexes('gluu_user')
-        #self.couchebaseCreateIndexes('gluu_statistic')
-        #self.couchebaseCreateIndexes('gluu_site')
+        self.couchebaseCreateIndexes('gluu_user')
+        self.couchebaseCreateIndexes('gluu_statistic')
+        self.couchebaseCreateIndexes('gluu_site')
         
         
         self.import_ldif_couchebase()
@@ -4150,7 +4147,6 @@ if __name__ == '__main__':
                 print "-"*50
                 print installObject.couchbaseInstallOutput
                 print "-"*50
-                print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
