@@ -3807,7 +3807,7 @@ class Setup(object):
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'user_mapping': 'people, groups',
-                    'session_mapping': 'sessions', "cache",
+                    'session_mapping': 'sessions, cache',
                     'static_mapping': 'statistic',
                     'site_mapping': 'site',
                     'encryption_method': 'SSHA-256',
@@ -3848,8 +3848,8 @@ class Setup(object):
         self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_session', bucketRamsize=self.couchbaseClusterRamsize/5)
-#        self.couchebaseCreateBucket('gluu_session', bucketType='memcached', bucketRamsize=self.couchbaseClusterRamsize/5)
+#        self.couchebaseCreateBucket('gluu_session', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_session', bucketType='ephemeral', bucketRamsize=self.couchbaseClusterRamsize/5)
 
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
