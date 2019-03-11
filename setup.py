@@ -561,6 +561,7 @@ class Setup(object):
         self.couchbaseClusterRamsize = 2048 #in MB
         
         self.couchebaseBucketClusterPort = 28091
+        self.couchbaseInstallOutput = ''
 
         self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
         self.couchebaseIndex = '%s/static/couchebase/index.txt' % self.install_dir
@@ -2682,6 +2683,7 @@ class Setup(object):
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None, useWait=False, shell=False):
+        output = ''
         self.logIt('Running: %s' % ' '.join(args))
         
         if args[0] == self.cmd_chown:
@@ -2715,6 +2717,9 @@ class Setup(object):
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
+
+
+        return output
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
@@ -3533,12 +3538,15 @@ class Setup(object):
 
     def installPackage(self, packageName):
         if self.os_type in ['debian', 'ubuntu']:
-            self.run([self.cmd_dpkg, '--install', packageName])
+            output = self.run([self.cmd_dpkg, '--install', packageName])
         else:
-            self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+            output = self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+
+        return output
 
     def couchbaseInstall(self):
         coucbase_package = None
+        
         tmp = []
 
         for f in os.listdir(self.couchbasePackageFolder):
@@ -3552,7 +3560,7 @@ class Setup(object):
 
         packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
         self.logIt("Found package '%s' for install" % packageName)
-        self.installPackage(packageName)
+        self.couchbaseInstallOutput = self.installPackage(packageName)
 
         if self.os_type == 'ubuntu' and self.os_version == '16':
             script_name = os.path.basename(self.couchebaseInitScript)
@@ -4136,6 +4144,13 @@ if __name__ == '__main__':
 
             installObject.pbar.progress("Completed")
             print
+            
+            if installObject.couchbaseInstallOutput:
+                print
+                print "-"*50
+                print installObject.couchbaseInstallOutput
+                print "-"*50
+                print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
