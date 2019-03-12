@@ -267,6 +267,9 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         String[] select = attributes;
         if (select == null) {
             select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN };
+        } else if ((select.length == 1) && StringHelper.isEmpty(select[0])) {
+        	// Compatibility with LDAP persistence layer when application pass filter new String[] { "" }
+            select = new String[] { CouchbaseOperationService.DN };
         } else {
             boolean hasDn = Arrays.asList(select).contains(CouchbaseOperationService.DN);
             if (!hasDn) {

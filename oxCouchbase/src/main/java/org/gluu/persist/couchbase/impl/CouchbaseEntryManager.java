@@ -505,7 +505,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
-        String[] ldapReturnAttributes = new String[] { "" }; // Don't load attributes
+        String[] ldapReturnAttributes = new String[] { CouchbaseOperationService.DN }; // Don't load attributes
 
         // Find entries
         Filter searchFilter;
