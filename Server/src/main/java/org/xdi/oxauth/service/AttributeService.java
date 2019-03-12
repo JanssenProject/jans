@@ -28,7 +28,12 @@ import org.xdi.util.StringHelper;
 @Named
 public class AttributeService extends org.xdi.service.AttributeService {
 
-    private static final String CACHE_ATTRIBUTE = "AttributeCache";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -990409035168814270L;
+
+	private static final String CACHE_ATTRIBUTE = "AttributeCache";
 
     @Inject
     private Logger log;

@@ -22,7 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.Logger;
-import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -46,9 +45,6 @@ public class CheckSessionStatusRestWebServiceImpl {
 
     @Inject
     private SessionIdService sessionIdService;
-
-    @Inject
-    private Identity identity;
 
     @GET
     @Path("/session_status")

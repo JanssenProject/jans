@@ -15,11 +15,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.oxauth.persistence.model.appliance.GluuAppliance;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
-import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.CustomProperty;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.util.StringHelper;
