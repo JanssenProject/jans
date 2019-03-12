@@ -54,7 +54,7 @@ public class ScopeChecker {
         for (String scopeRequested : scopesRequested) {
             if (StringUtils.isNotBlank(scopeRequested)) {
                 for (String scopeAllowedDn : scopesAllowed) {
-                    org.xdi.oxauth.model.common.Scope scopeAllowed = scopeService.getScopeByDnSilently(scopeAllowedDn);
+                    org.oxauth.persistence.model.Scope scopeAllowed = scopeService.getScopeByDnSilently(scopeAllowedDn);
                     if (scopeAllowed != null) {
                         String scopeAllowedName = scopeAllowed.getDisplayName();
                         if (scopeRequested.equals(scopeAllowedName)) {
