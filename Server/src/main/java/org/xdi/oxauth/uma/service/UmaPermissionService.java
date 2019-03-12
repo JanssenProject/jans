@@ -190,7 +190,7 @@ public class UmaPermissionService {
             }
 
         };
-        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getExpiredUmaPermissionFilter(now), SearchScope.SUB, new String[] { "" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getExpiredUmaPermissionFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 
     private Filter getExpiredUmaPermissionFilter(Date date) {

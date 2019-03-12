@@ -152,7 +152,7 @@ public class UmaRptService {
                 }
             }
         };
-        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getExpiredUmaRptFilter(now), SearchScope.SUB, new String[] { "" }, rptBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getExpiredUmaRptFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, rptBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 
     private Filter getExpiredUmaRptFilter(Date date) {
