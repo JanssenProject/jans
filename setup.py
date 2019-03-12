@@ -3855,7 +3855,6 @@ class Setup(object):
         self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
-        #self.couchebaseCreateBucket('  ', bucketType='ephemeral', bucketRamsize=self.couchbaseClusterRamsize/5)
 
         if not self.checkIfGluuBucketReady():
             sys.exit("Couchbase was not ready")
