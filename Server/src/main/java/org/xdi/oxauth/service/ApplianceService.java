@@ -13,9 +13,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManager;
+import org.oxauth.persistence.model.appliance.GluuAppliance;
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
-import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
