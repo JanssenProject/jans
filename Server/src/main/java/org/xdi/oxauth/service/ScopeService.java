@@ -48,18 +48,18 @@ public class ScopeService {
      *
      * @return list of scopes
      */
-    public List<org.xdi.oxauth.model.common.Scope> getAllScopesList() {
+    public List<org.oxauth.persistence.model.Scope> getAllScopesList() {
         String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
         return ldapEntryManager.findEntries(scopesBaseDN,
-                org.xdi.oxauth.model.common.Scope.class,
+                org.oxauth.persistence.model.Scope.class,
                 Filter.createPresenceFilter("inum"));
     }
 
     public List<String> getDefaultScopesDn() {
         List<String> defaultScopes = new ArrayList<String>();
 
-        for (org.xdi.oxauth.model.common.Scope scope : getAllScopesList()) {
+        for (org.oxauth.persistence.model.Scope scope : getAllScopesList()) {
             if (scope.getIsDefault()) {
                 defaultScopes.add(scope.getDn());
             }
@@ -72,7 +72,7 @@ public class ScopeService {
         List<String> scopes = new ArrayList<String>();
 
         for (String scopeName : scopeNames) {
-            org.xdi.oxauth.model.common.Scope scope = getScopeByDisplayName(scopeName);
+            org.oxauth.persistence.model.Scope scope = getScopeByDisplayName(scopeName);
             if (scope != null) {
                 scopes.add(scope.getDn());
             }
@@ -86,10 +86,10 @@ public class ScopeService {
      *
      * @return Scope
      */
-    public org.xdi.oxauth.model.common.Scope getScopeByDn(String dn) {
-        org.xdi.oxauth.model.common.Scope scope = fromCacheByDn(dn);
+    public org.oxauth.persistence.model.Scope getScopeByDn(String dn) {
+        org.oxauth.persistence.model.Scope scope = fromCacheByDn(dn);
         if (scope == null) {
-        	scope = ldapEntryManager.find(org.xdi.oxauth.model.common.Scope.class, dn);
+        	scope = ldapEntryManager.find(org.oxauth.persistence.model.Scope.class, dn);
         	putInCache(scope);
         }
         
@@ -101,7 +101,7 @@ public class ScopeService {
      *
      * @return Scope
      */
-    public org.xdi.oxauth.model.common.Scope getScopeByDnSilently(String dn) {
+    public org.oxauth.persistence.model.Scope getScopeByDnSilently(String dn) {
         try {
             return getScopeByDn(dn);
         } catch (Exception e) {
@@ -116,16 +116,16 @@ public class ScopeService {
      * @param DisplayName
      * @return scope
      */
-    public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String displayName) {
-        org.xdi.oxauth.model.common.Scope scope = fromCacheByName(displayName);
+    public org.oxauth.persistence.model.Scope getScopeByDisplayName(String displayName) {
+        org.oxauth.persistence.model.Scope scope = fromCacheByName(displayName);
         if (scope == null) {
 	        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 	
-	        org.xdi.oxauth.model.common.Scope scopeExample = new org.xdi.oxauth.model.common.Scope();
+	        org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
 	        scopeExample.setDn(scopesBaseDN);
 	        scopeExample.setDisplayName(displayName);
 	
-	        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
+	        List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
 	        if ((scopes != null) && (scopes.size() > 0)) {
 	        	scope = scopes.get(0);
 	        }
@@ -142,13 +142,13 @@ public class ScopeService {
      * @param oxAuthClaim
      * @return List of scope
      */
-    public List<org.xdi.oxauth.model.common.Scope> getScopeByClaim(String claimDn) {
-    	List<org.xdi.oxauth.model.common.Scope> scopes = fromCacheByClaimDn(claimDn);
+    public List<org.oxauth.persistence.model.Scope> getScopeByClaim(String claimDn) {
+    	List<org.oxauth.persistence.model.Scope> scopes = fromCacheByClaimDn(claimDn);
     	if (scopes == null) {
 	        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
 	        
 	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-	        scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
+	        scopes = ldapEntryManager.findEntries(scopesBaseDN, org.oxauth.persistence.model.Scope.class, filter);  
 	
 	        putInCache(claimDn, scopes);
     	}
@@ -156,9 +156,9 @@ public class ScopeService {
         return scopes;
     }
 
-	public List<org.xdi.oxauth.model.common.Scope> getScopesByClaim(List<org.xdi.oxauth.model.common.Scope> scopes, String claimDn) {
-		List<org.xdi.oxauth.model.common.Scope> result = new ArrayList<org.xdi.oxauth.model.common.Scope>();
-		for (org.xdi.oxauth.model.common.Scope scope : scopes) {
+	public List<org.oxauth.persistence.model.Scope> getScopesByClaim(List<org.oxauth.persistence.model.Scope> scopes, String claimDn) {
+		List<org.oxauth.persistence.model.Scope> result = new ArrayList<org.oxauth.persistence.model.Scope>();
+		for (org.oxauth.persistence.model.Scope scope : scopes) {
 			List<String> claims = scope.getOxAuthClaims();
 			if ((claims != null) && claims.contains(claimDn)) {
 				result.add(scope);
@@ -169,7 +169,7 @@ public class ScopeService {
 		return result;
 	}
 
-    private void putInCache(org.xdi.oxauth.model.common.Scope scope) {
+    private void putInCache(org.oxauth.persistence.model.Scope scope) {
     	if (scope == null) {
     		return;
     	}
@@ -181,7 +181,7 @@ public class ScopeService {
             log.error("Failed to put scope in cache, scope: '{}'", scope, ex);
         }
     }
-    private void putInCache(String claimDn, List<org.xdi.oxauth.model.common.Scope> scopes) {
+    private void putInCache(String claimDn, List<org.oxauth.persistence.model.Scope> scopes) {
     	if (scopes == null) {
     		return;
     	}
@@ -194,30 +194,31 @@ public class ScopeService {
         }
     }
 
-    private org.xdi.oxauth.model.common.Scope fromCacheByDn(String dn) {
+    private org.oxauth.persistence.model.Scope fromCacheByDn(String dn) {
         try {
             String key = getScopeDnCacheKey(dn);
-            return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
+            return (org.oxauth.persistence.model.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
             log.error("Failed to get scope from cache, scopeDn: '{}'", dn, ex);
             return null;
         }
     }
 
-    private org.xdi.oxauth.model.common.Scope fromCacheByName(String name) {
+    private org.oxauth.persistence.model.Scope fromCacheByName(String name) {
         try {
             String key = getScopeNameCacheKey(name);
-            return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
+            return (org.oxauth.persistence.model.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
             log.error("Failed to get scope from cache, name: '{}'", name, ex);
             return null;
         }
     }
 
-    private List<org.xdi.oxauth.model.common.Scope> fromCacheByClaimDn(String claimDn) {
+    @SuppressWarnings("unchecked")
+	private List<org.oxauth.persistence.model.Scope> fromCacheByClaimDn(String claimDn) {
         try {
         	String key = getClaimDnCacheKey(claimDn);
-            return (List<org.xdi.oxauth.model.common.Scope>) cacheService.get(CACHE_SCOPE_NAME, key);
+            return (List<org.oxauth.persistence.model.Scope>) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
             log.error("Failed to get scopes from cache, claimDn: '{}'", claimDn, ex);
             return null;
