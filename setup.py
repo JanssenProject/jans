@@ -3852,7 +3852,7 @@ class Setup(object):
         #TO DO: calculations of bucketRamsize is neaded
         self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
+        self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
         #self.couchebaseCreateBucket('gluu_session', bucketType='ephemeral', bucketRamsize=self.couchbaseClusterRamsize/5)
