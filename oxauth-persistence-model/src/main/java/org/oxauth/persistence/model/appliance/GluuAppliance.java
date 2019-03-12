@@ -4,12 +4,13 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.model.appliance;
+package org.oxauth.persistence.model.appliance;
 
 import java.io.Serializable;
 import java.util.List;
 
 import org.gluu.persist.model.base.GluuBoolean;
+import org.gluu.persist.model.base.InumEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
