@@ -194,7 +194,7 @@ public class UmaPctService {
             }
 
         };
-        ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, gethExpiredUmaPctFilter(now), SearchScope.SUB, new String[] { "" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, gethExpiredUmaPctFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 
     private Filter gethExpiredUmaPctFilter(Date date) {
