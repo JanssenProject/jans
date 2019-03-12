@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
 import org.xdi.oxauth.auth.Authenticator;
@@ -207,7 +208,7 @@ public class AuthorizeService {
         facesService.redirect("/error.xhtml");
     }
 
-    public List<org.xdi.oxauth.model.common.Scope> getScopes() {
+    public List<org.oxauth.persistence.model.Scope> getScopes() {
         SessionId session = getSession();
         String scope = session.getSessionAttributes().get("scope");
 
@@ -216,12 +217,12 @@ public class AuthorizeService {
     }
 
     public List<Scope> getScopes(String scopes) {
-        List<org.xdi.oxauth.model.common.Scope> result = new ArrayList<org.xdi.oxauth.model.common.Scope>();
+        List<org.oxauth.persistence.model.Scope> result = new ArrayList<org.oxauth.persistence.model.Scope>();
 
         if (scopes != null && !scopes.isEmpty()) {
             String[] scopesName = scopes.split(" ");
             for (String scopeName : scopesName) {
-                org.xdi.oxauth.model.common.Scope s = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope s = scopeService.getScopeByDisplayName(scopeName);
                 if (s != null && s.getDescription() != null) {
                     result.add(s);
                 }
