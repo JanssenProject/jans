@@ -27,7 +27,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Client Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version March 9, 2019
  */
 public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -143,7 +143,6 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();

@@ -36,90 +36,104 @@ import java.security.cert.X509Certificate;
 @Priority(Interceptor.Priority.LIBRARY_BEFORE)
 public class MTLSInterceptor implements MTLSInterceptionInterface, Serializable {
 
-    private final static Logger log = LoggerFactory.getLogger(MTLSInterceptor.class);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6153350621622208537L;
+	private final static Logger log = LoggerFactory.getLogger(MTLSInterceptor.class);
 
-    public MTLSInterceptor() {
-        log.info("MTLS Interceptor loaded.");
-    }
+	public MTLSInterceptor() {
+		log.info("MTLS Interceptor loaded.");
+	}
 
-    @AroundInvoke
-    public Object processMTLS(InvocationContext ctx) {
-        log.debug("processMTLS...");
-        try {
-            HttpServletRequest httpRequest = (HttpServletRequest) ctx.getParameters()[0];
-            HttpServletResponse httpResponse = (HttpServletResponse) ctx.getParameters()[1];
-            FilterChain filterChain = (FilterChain) ctx.getParameters()[2];
-            ClientReference client = (ClientReference) ctx.getParameters()[3];
-            AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[4];
-            AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[5];
-            final boolean result = processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
-            ctx.proceed();
-            return result;
-        } catch (Exception e) {
-            log.error("Failed to process MTLS.", e);
-            return false;
-        }
-    }
+	@AroundInvoke
+	public Object processMTLS(InvocationContext ctx) {
+		log.debug("processMTLS...");
+		try {
+			HttpServletRequest httpRequest = (HttpServletRequest) ctx.getParameters()[0];
+			HttpServletResponse httpResponse = (HttpServletResponse) ctx.getParameters()[1];
+			FilterChain filterChain = (FilterChain) ctx.getParameters()[2];
+			ClientReference client = (ClientReference) ctx.getParameters()[3];
+			AuthenticatorReference authenticator = (AuthenticatorReference) ctx.getParameters()[4];
+			AbstractCryptoProvider cryptoProvider = (AbstractCryptoProvider) ctx.getParameters()[5];
+			final boolean result = processMTLS(httpRequest, httpResponse, filterChain, client, authenticator,
+					cryptoProvider);
+			ctx.proceed();
+			return result;
+		} catch (Exception e) {
+			log.error("Failed to process MTLS.", e);
+			return false;
+		}
+	}
 
-    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                                ClientReference client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
+	public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+			FilterChain filterChain, ClientReference client, AuthenticatorReference authenticator,
+			AbstractCryptoProvider cryptoProvider) throws Exception {
 
-        log.debug("Trying to authenticate client {} via {} ...", client.getClientId(), client.getAuthenticationMethod());
+		log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
+				client.getAuthenticationMethod());
 
-        final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
-        if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", client.getClientId());
-            return false;
-        }
+		final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+		if (StringUtils.isBlank(clientCertAsPem)) {
+			log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", client.getClientId());
+			return false;
+		}
 
-        X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
-        if (cert == null) {
-            log.debug("Failed to parse client certificate, client_id: {}.", client.getClientId());
-            return false;
-        }
+		X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
+		if (cert == null) {
+			log.debug("Failed to parse client certificate, client_id: {}.", client.getClientId());
+			return false;
+		}
 
-        if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
+		if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
 
-            final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
-            if (StringUtils.isBlank(subjectDn)) {
-                log.debug("SubjectDN is not set for client {} which is required to authenticate it via `tls_client_auth`.", client.getClientId());
-                return false;
-            }
+			final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
+			if (StringUtils.isBlank(subjectDn)) {
+				log.debug(
+						"SubjectDN is not set for client {} which is required to authenticate it via `tls_client_auth`.",
+						client.getClientId());
+				return false;
+			}
 
-            // we check only `subjectDn`, the PKI certificate validation is performed by apache/httpd
-            if (subjectDn.equals(cert.getSubjectDN().getName())) {
-                log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
-                authenticator.configureSessionClient();
+			// we check only `subjectDn`, the PKI certificate validation is performed by
+			// apache/httpd
+			if (subjectDn.equals(cert.getSubjectDN().getName())) {
+				log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
+				authenticator.configureSessionClient();
 
-                filterChain.doFilter(httpRequest, httpResponse);
-                return true;
-            }
-        }
+				filterChain.doFilter(httpRequest, httpResponse);
+				return true;
+			}
+		}
 
-        if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it temporarily
-            final PublicKey publicKey = cert.getPublicKey();
-            final byte[] encodedKey = publicKey.getEncoded();
+		if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
+																									// temporarily
+			final PublicKey publicKey = cert.getPublicKey();
+			final byte[] encodedKey = publicKey.getEncoded();
 
-            JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks()) ?
-                    JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                    new JSONObject(client.getJwks());
+			JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks())
+					? JwtUtil.getJSONWebKeys(client.getJwksUri())
+					: new JSONObject(client.getJwks());
 
-            if (jsonWebKeys == null) {
-                log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(), client.getJwksUri(), client.getJwks());
-                return false;
-            }
+			if (jsonWebKeys == null) {
+				log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(),
+						client.getJwksUri(), client.getJwks());
+				return false;
+			}
 
-            final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
-            for (JSONWebKey key : keySet.getKeys()) {
-                if (ArrayUtils.isEquals(encodedKey, cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
-                    log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.", client.getClientId(), key.getKid());
-                    authenticator.configureSessionClient();
+			final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
+			for (JSONWebKey key : keySet.getKeys()) {
+				if (ArrayUtils.isEquals(encodedKey,
+						cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
+					log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
+							client.getClientId(), key.getKid());
+					authenticator.configureSessionClient();
 
-                    filterChain.doFilter(httpRequest, httpResponse);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+					filterChain.doFilter(httpRequest, httpResponse);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

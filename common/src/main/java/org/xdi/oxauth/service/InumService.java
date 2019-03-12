@@ -6,11 +6,9 @@
 
 package org.xdi.oxauth.service;
 
-import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.IdType;

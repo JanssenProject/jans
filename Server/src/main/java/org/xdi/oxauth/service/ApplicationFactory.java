@@ -14,11 +14,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.oxauth.persistence.model.appliance.GluuAppliance;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
-import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
