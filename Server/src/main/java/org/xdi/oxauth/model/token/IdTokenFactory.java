@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
+import org.oxauth.persistence.model.PairwiseIdentifier;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.GluuAttributeDataType;
@@ -36,7 +38,6 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
@@ -145,7 +146,7 @@ public class IdTokenFactory {
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
-                org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
@@ -340,7 +341,7 @@ public class IdTokenFactory {
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
-                org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
@@ -517,7 +518,7 @@ public class IdTokenFactory {
             }
 
             for (String scopeName : scopes) {
-                org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
 
                 if (scope != null && scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {

@@ -16,11 +16,11 @@ import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
+import org.oxauth.persistence.model.Scope;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.scope.DynamicScopeType;
-import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
 
@@ -76,7 +76,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 
 	private Set<CustomScriptConfiguration> getScriptsToExecute(DynamicScopeExternalContext context) {
         Set<String> allowedScripts = Sets.newHashSet();
-		for (org.xdi.oxauth.model.common.Scope scope : context.getScopes()) {
+		for (org.oxauth.persistence.model.Scope scope : context.getScopes()) {
 			List<String> scopeScripts = scope.getDynamicScopeScripts();
 			if (scopeScripts != null) { 
 				allowedScripts.addAll(scopeScripts);

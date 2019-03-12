@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.ldap;
+package org.oxauth.persistence.model;
 
 import java.io.Serializable;
 import java.util.List;

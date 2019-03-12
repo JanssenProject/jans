@@ -6,8 +6,22 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
@@ -19,7 +33,6 @@ import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
@@ -38,15 +51,8 @@ import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,258 +64,254 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Named
 public class CleanerTimer {
 
-    public final static int BATCH_SIZE = 25;
-    private final static int DEFAULT_INTERVAL = 600; // 10 minutes
+	public final static int BATCH_SIZE = 25;
+	private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
-    @Inject
-    private Logger log;
+	@Inject
+	private Logger log;
 
-    @Inject
-    private PersistenceEntryManager ldapEntryManager;
+	@Inject
+	private PersistenceEntryManager ldapEntryManager;
 
-    @Inject
-    private AuthorizationGrantList authorizationGrantList;
+	@Inject
+	private GrantService grantService;
 
-    @Inject
-    private ClientService clientService;
+	@Inject
+	private UmaRptService umaRptService;
 
-    @Inject
-    private GrantService grantService;
+	@Inject
+	private UmaPctService umaPctService;
 
-    @Inject
-    private UmaRptService umaRptService;
+	@Inject
+	private UmaPermissionService umaPermissionService;
 
-    @Inject
-    private UmaPctService umaPctService;
+	@Inject
+	private UmaResourceService umaResourceService;
 
-    @Inject
-    private UmaPermissionService umaPermissionService;
+	@Inject
+	private CacheProvider cacheProvider;
 
-    @Inject
-    private UmaResourceService umaResourceService;
+	@Inject
+	@Named("u2fRequestService")
+	private RequestService u2fRequestService;
 
-    @Inject
-    private SessionIdService sessionIdService;
+	@Inject
+	private AuthenticationPersistenceService authenticationPersistenceService;
 
-    @Inject
-    private CacheProvider cacheProvider;
+	@Inject
+	private RegistrationPersistenceService registrationPersistenceService;
 
-    @Inject
-    @Named("u2fRequestService")
-    private RequestService u2fRequestService;
+	@Inject
+	private MetricService metricService;
 
-    @Inject
-    private AuthenticationPersistenceService authenticationPersistenceService;
+	@Inject
+	private DeviceRegistrationService deviceRegistrationService;
 
-    @Inject
-    private RegistrationPersistenceService registrationPersistenceService;
+	@Inject
+	private AppConfiguration appConfiguration;
 
-    @Inject
-    private MetricService metricService;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
-    @Inject
-    private DeviceRegistrationService deviceRegistrationService;
+	@Inject
+	private CacheConfiguration cacheConfiguration;
 
-    @Inject
-    private AppConfiguration appConfiguration;
+	@Inject
+	private Event<TimerEvent> cleanerEvent;
 
-    @Inject
-    private StaticConfiguration staticConfiguration;
+	private AtomicBoolean isActive;
 
-    @Inject
-    private CacheConfiguration cacheConfiguration;
+	public void initTimer() {
+		log.debug("Initializing Cleaner Timer");
+		this.isActive = new AtomicBoolean(false);
 
-    @Inject
-    private Event<TimerEvent> cleanerEvent;
+		int interval = appConfiguration.getCleanServiceInterval();
+		if (interval < 0) {
+			log.info("Cleaner Timer is disabled.");
+			log.warn(
+					"Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+			return;
+		}
 
-    private AtomicBoolean isActive;
+		if (interval == 0) {
+			interval = DEFAULT_INTERVAL;
+		}
 
-    public void initTimer() {
-        log.debug("Initializing Cleaner Timer");
-        this.isActive = new AtomicBoolean(false);
+		cleanerEvent.fire(
+				new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+	}
 
-        int interval = appConfiguration.getCleanServiceInterval();
-        if (interval < 0) {
-            log.info("Cleaner Timer is disabled.");
-            log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
-            return;
-        }
+	@Asynchronous
+	public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
+		if (this.isActive.get()) {
+			return;
+		}
 
-        if (interval == 0) {
-            interval = DEFAULT_INTERVAL;
-        }
+		if (!this.isActive.compareAndSet(false, true)) {
+			return;
+		}
 
-        cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
-    }
+		try {
+			processImpl();
+		} finally {
+			this.isActive.set(false);
+		}
+	}
 
-    @Asynchronous
-    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
-        if (this.isActive.get()) {
-            return;
-        }
+	public void processImpl() {
+		try {
+			Date now = new Date();
+			final int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
 
-        if (!this.isActive.compareAndSet(false, true)) {
-            return;
-        }
+			for (String baseDn : createCleanServiceBaseDns()) {
+				try {
+					log.debug("Start clean up for baseDn: " + baseDn);
+					final Stopwatch started = Stopwatch.createStarted();
 
-        try {
-            processImpl();
-        } finally {
-            this.isActive.set(false);
-        }
-    }
+					BatchOperation<DeletableEntity> batchOperation = new ProcessBatchOperation<DeletableEntity>() {
+						@Override
+						public void performAction(List<DeletableEntity> entries) {
+							for (DeletableEntity entity : entries) {
+								try {
+									ldapEntryManager.remove(entity);
+									log.trace("Removed {}", entity.getDn());
+								} catch (Exception e) {
+									log.error("Failed to remove entry, dn: " + entity.getDn(), e);
+								}
+							}
+						}
+					};
 
-    public void processImpl() {
-        try {
-            Date now = new Date();
-            final int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+					Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("oxDeletable", "true"),
+							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now)));
 
-            for (String baseDn : createCleanServiceBaseDns()) {
-                try {
-                    log.debug("Start clean up for baseDn: " + baseDn);
-                    final Stopwatch started = Stopwatch.createStarted();
+					ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB,
+							new String[] { "oxAuthExpiration", "oxDeletable" }, batchOperation, 0, chunkSize,
+							chunkSize);
 
-                    BatchOperation<DeletableEntity> batchOperation = new ProcessBatchOperation<DeletableEntity>() {
-                        @Override
-                        public void performAction(List<DeletableEntity> entries) {
-                            for (DeletableEntity entity : entries) {
-                                try {
-                                    ldapEntryManager.remove(entity);
-                                    log.trace("Removed {}", entity.getDn());
-                                } catch (Exception e) {
-                                    log.error("Failed to remove entry, dn: " + entity.getDn(), e);
-                                }
-                            }
-                        }
-                    };
+					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn,
+							started.elapsed(TimeUnit.MILLISECONDS));
+				} catch (Exception e) {
+					log.error("Failed to process clean up for baseDn: {}", baseDn);
+				}
+			}
 
-                    Filter filter = Filter.createANDFilter(
-                            Filter.createEqualityFilter("oxDeletable", "true"),
-                            Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now))
-                    );
+			processCache(now);
+			processAuthorizationGrantList();
 
-                    ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB, new String[]{"oxAuthExpiration", "oxDeletable"}, batchOperation, 0, chunkSize, chunkSize);
+			this.umaRptService.cleanup(now);
+			this.umaPermissionService.cleanup(now);
+			this.umaPctService.cleanup(now);
+			this.umaResourceService.cleanup(now);
 
-                    log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
-                } catch (Exception e) {
-                    log.error("Failed to process clean up for baseDn: {}", baseDn);
-                }
-            }
+			processU2fRequests();
+			processU2fDeviceRegistrations();
 
-            processCache(now);
-            processAuthorizationGrantList();
+			this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
+			this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
 
-            this.umaRptService.cleanup(now);
-            this.umaPermissionService.cleanup(now);
-            this.umaPctService.cleanup(now);
-            this.umaResourceService.cleanup(now);
+			processMetricEntries();
+		} catch (Exception e) {
+			log.error("Failed to process clean up.", e);
+		}
+	}
 
-            processU2fRequests();
-            processU2fDeviceRegistrations();
+	public Set<String> createCleanServiceBaseDns() {
+		final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
+		cleanServiceBaseDns.add(umaPctService.branchBaseDn());
+		cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getU2fBase());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
+		if (cacheConfiguration.getNativePersistenceConfiguration() != null
+				&& StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
+			cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());
+		}
+		return cleanServiceBaseDns;
+	}
 
-            this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
-            this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
+	private void processCache(Date now) {
+		try {
+			cacheProvider.cleanup(now);
+		} catch (Exception e) {
+			log.error("Failed to clean up cache.", e);
+		}
+	}
 
-            processMetricEntries();
-        } catch (Exception e) {
-            log.error("Failed to process clean up.", e);
-        }
-    }
+	private void processAuthorizationGrantList() {
+		log.debug("Start AuthorizationGrant clean up");
+		grantService.cleanUp();
+		log.debug("End AuthorizationGrant clean up");
+	}
 
-    public Set<String> createCleanServiceBaseDns() {
-        final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
-        cleanServiceBaseDns.add(umaPctService.branchBaseDn());
-        cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getU2fBase());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
-        if (cacheConfiguration.getNativePersistenceConfiguration() != null && StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
-            cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());
-        }
-        return cleanServiceBaseDns;
-    }
+	private void processU2fRequests() {
+		log.debug("Start U2F request clean up");
 
-    private void processCache(Date now) {
-        try {
-            cacheProvider.cleanup(now);
-        } catch (Exception e) {
-            log.error("Failed to clean up cache.", e);
-        }
-    }
+		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		calendar.add(Calendar.SECOND, -90);
+		final Date expirationDate = calendar.getTime();
 
-    private void processAuthorizationGrantList() {
-        log.debug("Start AuthorizationGrant clean up");
-        grantService.cleanUp();
-        log.debug("End AuthorizationGrant clean up");
-    }
+		BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new ProcessBatchOperation<RequestMessageLdap>() {
+			@Override
+			public void performAction(List<RequestMessageLdap> entries) {
+				for (RequestMessageLdap requestMessageLdap : entries) {
+					try {
+						log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
+								requestMessageLdap.getRequestId(), requestMessageLdap.getCreationDate());
+						u2fRequestService.removeRequestMessage(requestMessageLdap);
+					} catch (Exception e) {
+						log.error("Failed to remove entry", e);
+					}
+				}
+			}
+		};
 
-    private void processU2fRequests() {
-        log.debug("Start U2F request clean up");
+		u2fRequestService.getExpiredRequestMessages(requestMessageLdapBatchService, expirationDate,
+				new String[] { "oxRequestId", "creationDate" }, 0, BATCH_SIZE);
+		log.debug("End U2F request clean up");
+	}
 
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.SECOND, -90);
-        final Date expirationDate = calendar.getTime();
+	private void processU2fDeviceRegistrations() {
+		log.debug("Start U2F request clean up");
 
-        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new ProcessBatchOperation<RequestMessageLdap>() {
-            @Override
-            public void performAction(List<RequestMessageLdap> entries) {
-                for (RequestMessageLdap requestMessageLdap : entries) {
-                    try {
-                        log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
-                                requestMessageLdap.getRequestId(),
-                                requestMessageLdap.getCreationDate());
-                        u2fRequestService.removeRequestMessage(requestMessageLdap);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
+		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		calendar.add(Calendar.SECOND, -90);
+		final Date expirationDate = calendar.getTime();
 
-        u2fRequestService.getExpiredRequestMessages(requestMessageLdapBatchService, expirationDate, new String[] {"oxRequestId", "creationDate"}, 0, BATCH_SIZE);
-        log.debug("End U2F request clean up");
-    }
+		BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new ProcessBatchOperation<DeviceRegistration>() {
+			@Override
+			public void performAction(List<DeviceRegistration> entries) {
+				for (DeviceRegistration deviceRegistration : entries) {
+					try {
+						log.debug("Removing DeviceRegistration: {}, Creation date: {}", deviceRegistration.getId(),
+								deviceRegistration.getCreationDate());
+						deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
+					} catch (Exception e) {
+						log.error("Failed to remove entry", e);
+					}
+				}
+			}
+		};
+		deviceRegistrationService.getExpiredDeviceRegistrations(deviceRegistrationBatchService, expirationDate,
+				new String[] { "oxId", "creationDate" }, 0, BATCH_SIZE);
 
-    private void processU2fDeviceRegistrations() {
-        log.debug("Start U2F request clean up");
+		log.debug("End U2F request clean up");
+	}
 
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.SECOND, -90);
-        final Date expirationDate = calendar.getTime();
+	private void processMetricEntries() {
+		log.debug("Start metric entries clean up");
 
-        BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new ProcessBatchOperation<DeviceRegistration>() {
-            @Override
-            public void performAction(List<DeviceRegistration> entries) {
-                for (DeviceRegistration deviceRegistration : entries) {
-                    try {
-                        log.debug("Removing DeviceRegistration: {}, Creation date: {}",
-                                deviceRegistration.getId(),
-                                deviceRegistration.getCreationDate());
-                        deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
-        deviceRegistrationService.getExpiredDeviceRegistrations(deviceRegistrationBatchService, expirationDate, new String[] {"oxId", "creationDate"}, 0, BATCH_SIZE);
+		int keepDataDays = appConfiguration.getMetricReporterKeepDataDays();
 
-        log.debug("End U2F request clean up");
-    }
+		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		calendar.add(Calendar.DATE, -keepDataDays);
+		Date expirationDate = calendar.getTime();
 
-    private void processMetricEntries() {
-        log.debug("Start metric entries clean up");
+		metricService.removeExpiredMetricEntries(expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum(),
+				0, BATCH_SIZE);
 
-        int keepDataDays = appConfiguration.getMetricReporterKeepDataDays();
-
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.DATE, -keepDataDays);
-        Date expirationDate = calendar.getTime();
-
-        metricService.removeExpiredMetricEntries(expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum(), 0, BATCH_SIZE);
-
-        log.debug("End metric entries clean up");
-    }
+		log.debug("End metric entries clean up");
+	}
 
 }
