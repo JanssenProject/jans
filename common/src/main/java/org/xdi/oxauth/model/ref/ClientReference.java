@@ -1,7 +1,6 @@
 package org.xdi.oxauth.model.ref;
 
 import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.ClientAttributes;
 
 /**
  * @author Yuriy Zabrovarnyy

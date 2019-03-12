@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @version March 9, 2019
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -196,7 +196,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
@@ -247,7 +246,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
@@ -297,7 +295,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();

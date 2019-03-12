@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.comp;
 
-import java.util.Date;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -18,6 +13,10 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.service.GrantService;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,7 +62,7 @@ public class GrantServiceTest extends BaseComponentTest {
 	private TokenLdap createTestToken() {
 		final String id = GrantService.generateGrantId();
 		final String grantId = GrantService.generateGrantId();
-		final String dn = grantService.buildDn(id, grantId, m_clientId);
+		final String dn = grantService.buildDn(id, m_clientId);
 
 		final TokenLdap t = new TokenLdap();
 		t.setId(id);

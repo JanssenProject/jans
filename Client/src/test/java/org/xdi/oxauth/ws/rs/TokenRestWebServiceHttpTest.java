@@ -29,7 +29,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version February 8, 2019
+ * @version March 9, 2019
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -120,7 +120,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -219,7 +218,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -275,7 +273,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -332,7 +329,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
@@ -389,7 +385,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -452,7 +447,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -515,7 +509,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
@@ -577,7 +570,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
@@ -640,7 +632,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getEntity(), "The entity is null");
         assertNotNull(response1.getAccessToken(), "The access token is null");
         assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
@@ -703,7 +694,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
@@ -766,7 +756,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS256_keyId", "dnName", "keyStoreFile",
@@ -829,7 +818,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS384_keyId", "dnName", "keyStoreFile",
@@ -892,7 +880,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS512_keyId", "dnName", "keyStoreFile",
@@ -954,7 +941,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -1017,7 +1003,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -1080,7 +1065,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
@@ -1142,7 +1126,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
@@ -1205,7 +1188,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
@@ -1268,7 +1250,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
@@ -1331,7 +1312,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
