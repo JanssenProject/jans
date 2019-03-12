@@ -18,7 +18,7 @@ public class HealthCheckTest {
 
         String resp = Tester.newClient(host).healthCheck();
         assertNotNull(resp);
-        assertEquals(new String("{\"status\":\"running\"}").trim(), resp);
+        assertEquals("{\"status\":\"running\"}", resp);
 
     }
 }
