@@ -2449,7 +2449,7 @@ class Setup(object):
                 self.ldap_type = backend_types[int(option)-1][1]
 
                 if self.ldap_type == 'couchbase':
-                    self.cache_provider_type = 'NATIVE'
+                    self.cache_provider_type = 'NATIVE_PERSISTENCE'
                     print ('  Please note that you have to update your firewall configuration to\n'
                             '  allow connections to the following ports:\n'
                             '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
