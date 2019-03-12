@@ -247,6 +247,11 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-common</artifactId>
 		</dependency>
+		<!-- persistence model -->
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxauth-persistence-model</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.xdi</groupId>

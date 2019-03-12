@@ -10,10 +10,10 @@ import javax.inject.Named;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.PairwiseIdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
 

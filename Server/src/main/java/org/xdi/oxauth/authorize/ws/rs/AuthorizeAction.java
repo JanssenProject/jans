@@ -387,7 +387,7 @@ public class AuthorizeAction {
         return authorizeService.getSession(sessionId);
     }
 
-    public List<org.xdi.oxauth.model.common.Scope> getScopes() {
+    public List<org.oxauth.persistence.model.Scope> getScopes() {
         return authorizeService.getScopes(allowedScope);
     }
 
