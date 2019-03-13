@@ -20,7 +20,10 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -66,7 +69,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 4, 2018
+ * @version March 13, 2019
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -301,12 +304,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
-            redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
+            redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
             p_client.setRedirectUris(redirectUris.toArray(new String[redirectUris.size()]));
         }
         List<String> claimsRedirectUris = requestObject.getClaimsRedirectUris();
         if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            claimsRedirectUris = new ArrayList<String>(new HashSet<String>(claimsRedirectUris)); // Remove repeated elements
+            claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
             p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[claimsRedirectUris.size()]));
         }
         if (requestObject.getApplicationType() != null) {
@@ -319,10 +322,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
 
-        Set<ResponseType> responseTypeSet = new HashSet<ResponseType>();
+        Set<ResponseType> responseTypeSet = new HashSet<>();
         responseTypeSet.addAll(requestObject.getResponseTypes());
 
-        Set<GrantType> grantTypeSet = new HashSet<GrantType>();
+        Set<GrantType> grantTypeSet = new HashSet<>();
         grantTypeSet.addAll(requestObject.getGrantTypes());
 
         if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
@@ -355,16 +358,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+        if (!update || requestObject.getResponseTypes().size() > 0) {
+            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+        }
         if (!update) {
             p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
-        } else if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+        } else if (appConfiguration.getEnableClientGrantTypeUpdate() && requestObject.getGrantTypes().size() > 0) {
             p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
         }
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
-            contacts = new ArrayList<String>(new HashSet<String>(contacts)); // Remove repeated elements
+            contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
             p_client.setContacts(contacts.toArray(new String[contacts.size()]));
         }
         if (StringUtils.isNotBlank(requestObject.getLogoUri())) {
@@ -443,7 +448,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            defaultAcrValues = new ArrayList<String>(new HashSet<String>(defaultAcrValues)); // Remove repeated elements
+            defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements
             p_client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
         }
         if (StringUtils.isNotBlank(requestObject.getInitiateLoginUri())) {
@@ -451,7 +456,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         List<String> postLogoutRedirectUris = requestObject.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            postLogoutRedirectUris = new ArrayList<String>(new HashSet<String>(postLogoutRedirectUris)); // Remove repeated elements
+            postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
@@ -462,13 +467,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
-            requestUris = new ArrayList<String>(new HashSet<String>(requestUris)); // Remove repeated elements
+            requestUris = new ArrayList<>(new HashSet<>(requestUris)); // Remove repeated elements
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
         List<String> authorizedOrigins = requestObject.getAuthorizedOrigins();
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            authorizedOrigins = new ArrayList<String>(new HashSet<String>(authorizedOrigins)); // Remove repeated elements
+            authorizedOrigins = new ArrayList<>(new HashSet<>(authorizedOrigins)); // Remove repeated elements
             p_client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
         }
 
