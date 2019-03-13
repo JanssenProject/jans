@@ -416,9 +416,9 @@ then
   echo "RUN_CMD        =  ${RUN_CMD[*]}"
 fi
 
-NODE_INIT_LOG="$NODE_LOGS/`ls -1rt $NODE_LOGS|tail -n 1`"
 dip_in_logs() {
 	echo "Checking logs for possible errors:"
+	NODE_INIT_LOG="$NODE_LOGS/`ls -1rt $NODE_LOGS|tail -n 1`"
         if [ ! -f $NODE_INIT_LOG ]; then
                 TODAY=`date +%Y-%m-%d`
                 NODE_INIT_LOG="$NODE_LOGS/passport-${TODAY}.log"
@@ -426,24 +426,24 @@ dip_in_logs() {
                 chown node:node $NODE_INIT_LOG
         fi
 
-	INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
-	while true;
-	do
-		if [ "x$INIT_START_STATUS" != "x" ]; then
-			if [ "x$PREV_START_STATUS" = "x" ]; then
-				PREV_START_STATUS=$INIT_START_STATUS
-				sleep 2
-				INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
-			fi
-		fi
-		if [ "$INIT_START_STATUS" != "$PREV_START_STATUS" ]; then
-			PREV_START_STATUS=$INIT_START_STATUS	
-			sleep 2
-			INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
-		else
-			break;
-		fi
-	done	
+#	INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
+#	while true;
+#	do
+#		if [ "x$INIT_START_STATUS" != "x" ]; then
+#			if [ "x$PREV_START_STATUS" = "x" ]; then
+#				PREV_START_STATUS=$INIT_START_STATUS
+#				sleep 2
+#				INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
+#			fi
+#		fi
+#		if [ "$INIT_START_STATUS" != "$PREV_START_STATUS" ]; then
+#			PREV_START_STATUS=$INIT_START_STATUS	
+#			sleep 2
+#			INIT_START_STATUS=`tail -n 1 $NODE_INIT_LOG`
+#		else
+#			break;
+#		fi
+#	done	
 }
 
 do_start () {
@@ -458,11 +458,11 @@ do_start () {
       			then
         			CH_USER="-c$NODE_USER"
       			fi
-      			start-stop-daemon -S -p"$NODE_PID_FILE" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]} start-log-file=$NODE_LOGS/start.log >> $NODE_LOGS/start.log 2>&1"
+      			start-stop-daemon -S -p"$NODE_PID_FILE" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]} start-log-file=$NODE_LOGS/start.log > $NODE_LOGS/start.log 2>&1"
                         
 			sleep 2
 			dip_in_logs
-                	START_STATUS=`tail -n 10 $NODE_INIT_LOG|grep -i 'Server listening on'`
+                	START_STATUS=`tail -n 10 $NODE_LOGS/start.log|grep -i 'Server listening on'`
                 	ERROR_STATUS=`tail -n 10 $NODE_INIT_LOG|egrep -i "[ERROR] Error in starting the server|[Error]"`
                 	if [ "x$START_STATUS" = "x" ]; then
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
