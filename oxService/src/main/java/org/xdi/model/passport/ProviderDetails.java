@@ -8,7 +8,6 @@ import java.util.Map;
 /**
  * Created by jgomer on 2019-02-21.
  */
-
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class ProviderDetails {
 
