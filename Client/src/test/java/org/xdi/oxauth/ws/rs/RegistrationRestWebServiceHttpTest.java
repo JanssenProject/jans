@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.common.GrantType.*;
+import static org.xdi.oxauth.model.common.ResponseType.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
@@ -38,7 +40,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version December 4, 2018
+ * @version March 13, 2019
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -52,20 +54,71 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     public void requestClientAssociate1(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientAssociate1");
 
+        // 1. Register Client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(Arrays.asList(
+                AUTHORIZATION_CODE,
+                IMPLICIT,
+                RESOURCE_OWNER_PASSWORD_CREDENTIALS,
+                CLIENT_CREDENTIALS,
+                REFRESH_TOKEN,
+                OXAUTH_UMA_TICKET));
+        registerRequest.setResponseTypes(Arrays.asList(
+                CODE,
+                TOKEN,
+                ID_TOKEN
+        ));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
+        RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client Update
+        String newClientName = "New Client Name";
+
+        RegisterRequest clientUpdateRequest = new RegisterRequest(registrationAccessToken);
+        clientUpdateRequest.setHttpMethod(HttpMethod.PUT);
+        clientUpdateRequest.setClientName(newClientName);
+
+        RegisterClient clientUpdateClient = new RegisterClient(registrationClientUri);
+        clientUpdateClient.setRequest(clientUpdateRequest);
+        RegisterResponse clientUpdateResponse = clientUpdateClient.exec();
+
+        showClient(clientUpdateClient);
+        assertEquals(clientUpdateResponse.getStatus(), 200, "Unexpected response code: " + clientUpdateResponse.getEntity());
+        assertEquals(clientUpdateResponse.getClaims().get(CLIENT_NAME.toString()), newClientName);
+        assertEquals(clientUpdateResponse.getClientId(), registerResponse.getClientId());
+        assertEquals(clientUpdateResponse.getClientSecret(), registerResponse.getClientSecret());
+        assertEquals(clientUpdateResponse.getRegistrationAccessToken(), registerResponse.getRegistrationAccessToken());
+        assertEquals(clientUpdateResponse.getRegistrationClientUri(), registerResponse.getRegistrationClientUri());
+        assertEquals(clientUpdateResponse.getClientIdIssuedAt(), registerResponse.getClientIdIssuedAt());
+        assertEquals(clientUpdateResponse.getClientSecretExpiresAt(), registerResponse.getClientSecretExpiresAt());
+        assertEquals(clientUpdateResponse.getResponseTypes(), registerResponse.getResponseTypes());
+        assertEquals(clientUpdateResponse.getGrantTypes(), registerResponse.getGrantTypes());
+        assertEquals(clientUpdateResponse.getClaims().get(REDIRECT_URIS.toString()), registerResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(APPLICATION_TYPE.toString()), registerResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(SECTOR_IDENTIFIER_URI.toString()), registerResponse.getClaims().get(SECTOR_IDENTIFIER_URI.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(SUBJECT_TYPE.toString()), registerResponse.getClaims().get(SUBJECT_TYPE.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()), registerResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()), registerResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(REQUIRE_AUTH_TIME.toString()), registerResponse.getClaims().get(REQUIRE_AUTH_TIME.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(RPT_AS_JWT.toString()), registerResponse.getClaims().get(RPT_AS_JWT.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()), registerResponse.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        assertEquals(clientUpdateResponse.getClaims().get(SCOPE.toString()), registerResponse.getClaims().get(SCOPE.toString()));
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
@@ -441,7 +494,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     @Parameters({"redirectUris"})
     @Test
     public void registerWithCustomURI(final String redirectUris) throws Exception {
-        showTitle("requestClientAssociate1");
+        showTitle("registerWithCustomURI");
 
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("myschema://client.example.com/cb"); // URI with custom schema
