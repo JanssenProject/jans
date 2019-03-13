@@ -29,7 +29,7 @@ import java.util.Map;
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version March 13, 2019
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -118,8 +118,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         try {
             URL theUrl = new URL(url);
 
-            if (getHttpMethod().equals(HttpMethod.POST)) {
-                sb.append(HttpMethod.POST).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
+            if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT)) {
+                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
                 if (StringUtils.isNotBlank(request.getContentType())) {
                     sb.append("\n");
                     sb.append("Content-Type: ").append(request.getContentType());
