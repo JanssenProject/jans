@@ -22,12 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.persist.PersistenceEntryManager;
@@ -62,7 +56,7 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public abstract class BaseEntryManager implements EntityManager, PersistenceEntryManager {
+public abstract class BaseEntryManager implements PersistenceEntryManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
@@ -1592,91 +1586,6 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
             searchFilter = Filter.createANDFilter(Filter.createANDFilter(objectClassFilter), filter);
         }
         return searchFilter;
-    }
-
-    @Override
-    public boolean isOpen() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void refresh(Object entry) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void close() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Query createNamedQuery(String name) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Query createNativeQuery(String sqlString) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Query createNativeQuery(String sqlString, @SuppressWarnings("rawtypes") Class resultClass) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Query createNativeQuery(String sqlString, String resultSetMapping) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Query createQuery(String qlString) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void flush() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public Object getDelegate() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public FlushModeType getFlushMode() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public <T> T getReference(Class<T> entryClass, Object primaryKey) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public EntityTransaction getTransaction() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void joinTransaction() {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void lock(Object entry, LockModeType lockMode) {
-        throw new UnsupportedOperationException("Method not implemented.");
-    }
-
-    @Override
-    public void setFlushMode(FlushModeType flushMode) {
-        throw new UnsupportedOperationException("Method not implemented.");
     }
 
     protected static final class PropertyComparator<T> implements Comparator<T>, Serializable {
