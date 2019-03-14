@@ -2,7 +2,6 @@ package org.xdi.config.oxtrust;
 
 import org.gluu.persist.model.base.Entry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
@@ -19,19 +18,10 @@ import org.xdi.model.passport.PassportConfiguration;
 public class LdapOxPassportConfiguration extends Entry {
 
 	private static final long serialVersionUID = -8451013277721189767L;
-	@LdapDN
-	private String dn;
+
 	@LdapJsonObject
 	@LdapAttribute(name = "gluuPassportConfiguration")
 	private PassportConfiguration passportConfiguration;
-
-	public String getDn() {
-		return dn;
-	}
-
-	public void setDn(String dn) {
-		this.dn = dn;
-	}
 
 	public PassportConfiguration getPassportConfiguration() {
 		return passportConfiguration;
@@ -40,4 +30,5 @@ public class LdapOxPassportConfiguration extends Entry {
 	public void setPassportConfiguration(PassportConfiguration passportConfiguration) {
 		this.passportConfiguration = passportConfiguration;
 	}
+
 }
