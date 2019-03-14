@@ -384,7 +384,6 @@ class Setup(object):
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
-        self.ldap_jmx_port = '1689'
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
 
