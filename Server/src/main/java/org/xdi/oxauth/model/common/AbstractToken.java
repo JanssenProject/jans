@@ -32,7 +32,7 @@ import java.util.Date;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version March 14, 2019
  */
 public abstract class AbstractToken implements Serializable {
 
@@ -248,7 +248,7 @@ public abstract class AbstractToken implements Serializable {
         return expiresIn;
     }
 
-    public String getHash(SignatureAlgorithm signatureAlgorithm) {
+    public static String getHash(String input, SignatureAlgorithm signatureAlgorithm) {
         String hash = null;
 
         try {
@@ -256,17 +256,17 @@ public abstract class AbstractToken implements Serializable {
             if (signatureAlgorithm == SignatureAlgorithm.HS256 ||
                     signatureAlgorithm == SignatureAlgorithm.RS256 ||
                     signatureAlgorithm == SignatureAlgorithm.ES256) {
-                digest = JwtUtil.getMessageDigestSHA256(code);
+                digest = JwtUtil.getMessageDigestSHA256(input);
             } else if (signatureAlgorithm == SignatureAlgorithm.HS384 ||
                     signatureAlgorithm == SignatureAlgorithm.RS384 ||
                     signatureAlgorithm == SignatureAlgorithm.ES512) {
-                digest = JwtUtil.getMessageDigestSHA384(code);
+                digest = JwtUtil.getMessageDigestSHA384(input);
             } else if (signatureAlgorithm == SignatureAlgorithm.HS512 ||
                     signatureAlgorithm == SignatureAlgorithm.RS384 ||
                     signatureAlgorithm == SignatureAlgorithm.ES512) {
-                digest = JwtUtil.getMessageDigestSHA512(code);
+                digest = JwtUtil.getMessageDigestSHA512(input);
             } else { // Default
-                digest = JwtUtil.getMessageDigestSHA256(code);
+                digest = JwtUtil.getMessageDigestSHA256(input);
             }
 
             if (digest != null) {

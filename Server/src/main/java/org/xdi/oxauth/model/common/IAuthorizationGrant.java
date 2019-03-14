@@ -8,17 +8,10 @@ package org.xdi.oxauth.model.common;
 
 import com.google.common.base.Function;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.JsonWebResponse;
-import org.xdi.util.security.StringEncrypter;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -27,102 +20,100 @@ import java.util.Set;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version March 14, 2019
  */
 
 public interface IAuthorizationGrant {
 
-    public String getGrantId();
+    String getGrantId();
 
-    public void setGrantId(String p_grantId);
+    void setGrantId(String p_grantId);
 
-    public AuthorizationCode getAuthorizationCode();
+    AuthorizationCode getAuthorizationCode();
 
-    public void setAuthorizationCode(AuthorizationCode authorizationCode);
+    void setAuthorizationCode(AuthorizationCode authorizationCode);
 
-    public String getNonce();
+    String getNonce();
 
-    public void setNonce(String nonce);
+    void setNonce(String nonce);
 
-    public AccessToken createAccessToken(String certAsPem);
+    AccessToken createAccessToken(String certAsPem);
 
-    public RefreshToken createRefreshToken();
+    RefreshToken createRefreshToken();
 
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing)
-            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
-            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException;
+    IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
+                          AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing);
 
-    public RefreshToken getRefreshToken(String refreshTokenCode);
+    RefreshToken getRefreshToken(String refreshTokenCode);
 
-    public AbstractToken getAccessToken(String tokenCode);
+    AbstractToken getAccessToken(String tokenCode);
 
-    public boolean isValid();
+    boolean isValid();
 
-    public void revokeAllTokens();
+    void revokeAllTokens();
 
-    public void checkExpiredTokens();
+    void checkExpiredTokens();
 
-    public String checkScopesPolicy(String scope);
+    String checkScopesPolicy(String scope);
 
-    public User getUser();
+    User getUser();
 
-    public String getUserId();
+    String getUserId();
 
-    public String getUserDn();
+    String getUserDn();
 
-    public AuthorizationGrantType getAuthorizationGrantType();
+    AuthorizationGrantType getAuthorizationGrantType();
 
-    public String getClientId();
+    String getClientId();
 
-    public Client getClient();
+    Client getClient();
 
-    public String getClientDn();
+    String getClientDn();
 
-    public List<AccessToken> getAccessTokens();
+    List<AccessToken> getAccessTokens();
 
-    public Set<String> getScopes();
+    Set<String> getScopes();
 
-    public Set<String> getRefreshTokensCodes();
+    Set<String> getRefreshTokensCodes();
 
-    public Set<String> getAccessTokensCodes();
+    Set<String> getAccessTokensCodes();
 
-    public List<RefreshToken> getRefreshTokens();
+    List<RefreshToken> getRefreshTokens();
 
-    public void setRefreshTokens(List<RefreshToken> refreshTokens);
+    void setRefreshTokens(List<RefreshToken> refreshTokens);
 
-    public AccessToken getLongLivedAccessToken();
+    AccessToken getLongLivedAccessToken();
 
-    public IdToken getIdToken();
+    IdToken getIdToken();
 
-    public JwtAuthorizationRequest getJwtAuthorizationRequest();
+    JwtAuthorizationRequest getJwtAuthorizationRequest();
 
-    public void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest);
+    void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest);
 
-    public Date getAuthenticationTime();
+    Date getAuthenticationTime();
 
-    public TokenLdap getTokenLdap();
+    TokenLdap getTokenLdap();
 
-    public void setTokenLdap(TokenLdap p_tokenLdap);
+    void setTokenLdap(TokenLdap p_tokenLdap);
 
-    public void setLongLivedAccessToken(AccessToken longLivedAccessToken);
+    void setLongLivedAccessToken(AccessToken longLivedAccessToken);
 
-    public void setIdToken(IdToken idToken);
+    void setIdToken(IdToken idToken);
 
-    public void setScopes(Collection<String> scopes);
+    void setScopes(Collection<String> scopes);
 
-    public void setAccessTokens(List<AccessToken> accessTokens);
+    void setAccessTokens(List<AccessToken> accessTokens);
 
-    public String getAcrValues();
+    String getAcrValues();
 
-    public void setAcrValues(String authMode);
+    void setAcrValues(String authMode);
 
-    public String getSessionDn();
+    String getSessionDn();
 
-    public void setSessionDn(String sessionDn);
+    void setSessionDn(String sessionDn);
 
     /**
      * Saves changes asynchronously
      */
-    public void save();
+    void save();
 }
