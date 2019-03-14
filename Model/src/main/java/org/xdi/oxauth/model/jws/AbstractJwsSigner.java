@@ -21,7 +21,7 @@ import java.security.SignatureException;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version March 14, 2019
  */
 public abstract class AbstractJwsSigner implements JwsSigner {
 
@@ -70,6 +70,10 @@ public abstract class AbstractJwsSigner implements JwsSigner {
 
     public boolean validateAccessToken(String accessToken, Jwt idToken) {
         return validateHash(accessToken, idToken.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
+    }
+
+    public boolean validateState(String state, Jwt idToken) {
+        return validateHash(state, idToken.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
     }
 
     private boolean validateHash(String tokenCode, String tokenHash) {

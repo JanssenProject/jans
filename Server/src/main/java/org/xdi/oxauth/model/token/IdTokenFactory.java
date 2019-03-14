@@ -9,6 +9,7 @@ package org.xdi.oxauth.model.token;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
@@ -69,7 +70,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 8, 2019
+ * @version March 14, 2019
  */
 @Stateless
 @Named
@@ -103,7 +104,7 @@ public class IdTokenFactory {
     private WebKeysConfiguration webKeysConfiguration;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                     AuthorizationCode authorizationCode, AccessToken accessToken,
+                                     AuthorizationCode authorizationCode, AccessToken accessToken, String state,
                                      Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, authorizationGrant.getClient());
@@ -133,12 +134,16 @@ public class IdTokenFactory {
             jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
         }
         if (authorizationCode != null) {
-            String codeHash = authorizationCode.getHash(jwtSigner.getSignatureAlgorithm());
+            String codeHash = AbstractToken.getHash(authorizationCode.getCode(), jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
         }
         if (accessToken != null) {
-            String accessTokenHash = accessToken.getHash(jwtSigner.getSignatureAlgorithm());
+            String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
+        }
+        if (Strings.isNotBlank(state)) {
+            String stateHash = AbstractToken.getHash(state, jwtSigner.getSignatureAlgorithm());
+            jwt.getClaims().setClaim(JwtClaimName.STATE_HASH, stateHash);
         }
         jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
@@ -288,9 +293,9 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    public Jwe generateEncryptedIdToken(
-            IAuthorizationGrant authorizationGrant, String nonce, AuthorizationCode authorizationCode,
-            AccessToken accessToken, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
+                                        AuthorizationCode authorizationCode, AccessToken accessToken, String state,
+                                        Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header
@@ -328,12 +333,16 @@ public class IdTokenFactory {
             jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
         }
         if (authorizationCode != null) {
-            String codeHash = authorizationCode.getHash(null);
+            String codeHash = authorizationCode.getHash(authorizationCode.getCode(), null);
             jwe.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
         }
         if (accessToken != null) {
-            String accessTokenHash = accessToken.getHash(null);
+            String accessTokenHash = accessToken.getHash(accessToken.getCode(), null);
             jwe.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
+        }
+        if (Strings.isNotBlank(state)) {
+            String stateHash = AbstractToken.getHash(state, null);
+            jwe.getClaims().setClaim(JwtClaimName.STATE_HASH, stateHash);
         }
         jwe.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
@@ -492,18 +501,17 @@ public class IdTokenFactory {
         return jwe;
     }
 
-    public JsonWebResponse createJwr(
-            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-            Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing)
-            throws Exception {
+    public JsonWebResponse createJwr(IAuthorizationGrant grant, String nonce,
+                                     AuthorizationCode authorizationCode, AccessToken accessToken, String state,
+                                     Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         final Client grantClient = grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
             return generateEncryptedIdToken(
-                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims, preProcessing);
+                    grant, nonce, authorizationCode, accessToken, state, scopes, includeIdTokenClaims, preProcessing);
         } else {
             return generateSignedIdToken(
-                    grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims, preProcessing);
+                    grant, nonce, authorizationCode, accessToken, state, scopes, includeIdTokenClaims, preProcessing);
         }
     }
 
