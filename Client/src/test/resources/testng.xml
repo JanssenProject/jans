@@ -256,6 +256,12 @@
         </classes>
     </test>
 
+    <test name="Validate Id Token Hashes test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ValidateIdTokenHashesTest"/>
+        </classes>
+    </test>
+
     <test name="Web Keys Test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.WebKeysTest"/>
