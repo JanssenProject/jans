@@ -20,8 +20,6 @@ import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.JsonWebResponse;
@@ -34,7 +32,6 @@ import org.xdi.oxauth.service.external.context.ExternalResourceOwnerPasswordCred
 import org.xdi.oxauth.uma.service.UmaTokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +42,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
-import java.security.SignatureException;
 import java.util.Arrays;
 
 /**
@@ -53,7 +49,7 @@ import java.util.Arrays;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 9, 2019
+ * @version March 14, 2019
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -200,7 +196,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 }
                             };
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
+                                    nonce, null, accToken, null, authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -271,7 +267,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                 appConfiguration.getLegacyIdTokenClaims());
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                                null, null, null, null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -334,7 +330,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                     appConfiguration.getLegacyIdTokenClaims());
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                         }
 
                         oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
@@ -352,18 +348,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
         } catch (WebApplicationException e) {
             throw e;
-        } catch (SignatureException e) {
-            builder = Response.status(500);
-            log.error(e.getMessage(), e);
-        } catch (StringEncrypter.EncryptionException e) {
-            builder = Response.status(500);
-            log.error(e.getMessage(), e);
-        } catch (InvalidJwtException e) {
-            builder = Response.status(500);
-            log.error(e.getMessage(), e);
-        } catch (InvalidJweException e) {
-            builder = Response.status(500);
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = Response.status(500);
             log.error(e.getMessage(), e);

@@ -39,7 +39,6 @@ import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +53,6 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.security.SignatureException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -64,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 8, 2018
+ * @version March 14, 2019
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -618,7 +616,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                     }
                                     IdToken idToken = authorizationGrant.createIdToken(
-                                            nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims, TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
+                                            nonce, authorizationCode, newAccessToken, state,
+                                            authorizationGrant, includeIdTokenClaims,
+                                            TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
 
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
                                 }
@@ -683,15 +683,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
-            log.error(e.getMessage(), e);
-        } catch (SignatureException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
-        } catch (StringEncrypter.EncryptionException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
-            log.error(e.getMessage(), e);
-        } catch (InvalidJwtException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500

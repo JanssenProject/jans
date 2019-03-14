@@ -8,14 +8,10 @@ package org.xdi.oxauth.model.common;
 
 import com.google.common.base.Function;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.JsonWebResponse;
-import org.xdi.util.security.StringEncrypter;
 
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +22,7 @@ import java.util.Set;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version March 14, 2019
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
@@ -78,9 +74,8 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing)
-            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
+                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 
