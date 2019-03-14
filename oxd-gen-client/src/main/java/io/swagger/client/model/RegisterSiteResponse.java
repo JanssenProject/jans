@@ -37,6 +37,9 @@ public class RegisterSiteResponse {
   @SerializedName("client_id")
   private String clientId = null;
 
+  @SerializedName("client_name")
+  private String clientName = null;
+
   @SerializedName("client_secret")
   private String clientSecret = null;
 
@@ -108,6 +111,24 @@ public class RegisterSiteResponse {
 
   public RegisterSiteResponse clientSecret(String clientSecret) {
     this.clientSecret = clientSecret;
+    return this;
+  }
+
+  /**
+   * Get clientName
+   * @return clientName
+   **/
+  @ApiModelProperty(example = "TestClientName", value = "")
+  public String getClientName() {
+    return clientName;
+  }
+
+  public void setClientName(String clientName) {
+    this.clientName= clientName;
+  }
+
+  public RegisterSiteResponse clientName(String clientName) {
+    this.clientName = clientName;
     return this;
   }
 
@@ -196,47 +217,40 @@ public class RegisterSiteResponse {
     this.clientSecretExpiresAt = clientSecretExpiresAt;
   }
 
-
   @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    RegisterSiteResponse registerSiteResponse = (RegisterSiteResponse) o;
-    return Objects.equals(this.oxdId, registerSiteResponse.oxdId) &&
-        Objects.equals(this.opHost, registerSiteResponse.opHost) &&
-        Objects.equals(this.clientId, registerSiteResponse.clientId) &&
-        Objects.equals(this.clientSecret, registerSiteResponse.clientSecret) &&
-        Objects.equals(this.clientRegistrationAccessToken, registerSiteResponse.clientRegistrationAccessToken) &&
-        Objects.equals(this.clientRegistrationClientUri, registerSiteResponse.clientRegistrationClientUri) &&
-        Objects.equals(this.clientIdIssuedAt, registerSiteResponse.clientIdIssuedAt) &&
-        Objects.equals(this.clientSecretExpiresAt, registerSiteResponse.clientSecretExpiresAt);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    RegisterSiteResponse that = (RegisterSiteResponse) o;
+    return Objects.equals(oxdId, that.oxdId) &&
+            Objects.equals(opHost, that.opHost) &&
+            Objects.equals(clientId, that.clientId) &&
+            Objects.equals(clientName, that.clientName) &&
+            Objects.equals(clientSecret, that.clientSecret) &&
+            Objects.equals(clientRegistrationAccessToken, that.clientRegistrationAccessToken) &&
+            Objects.equals(clientRegistrationClientUri, that.clientRegistrationClientUri) &&
+            Objects.equals(clientIdIssuedAt, that.clientIdIssuedAt) &&
+            Objects.equals(clientSecretExpiresAt, that.clientSecretExpiresAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, opHost, clientId, clientSecret, clientRegistrationAccessToken, clientRegistrationClientUri, clientIdIssuedAt, clientSecretExpiresAt);
+    return Objects.hash(oxdId, opHost, clientId, clientName, clientSecret, clientRegistrationAccessToken, clientRegistrationClientUri, clientIdIssuedAt, clientSecretExpiresAt);
   }
-
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class RegisterSiteResponse {\n");
-    
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
-    sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
-    sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
-    sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
-    sb.append("    clientRegistrationAccessToken: ").append(toIndentedString(clientRegistrationAccessToken)).append("\n");
-    sb.append("    clientRegistrationClientUri: ").append(toIndentedString(clientRegistrationClientUri)).append("\n");
-    sb.append("    clientIdIssuedAt: ").append(toIndentedString(clientIdIssuedAt)).append("\n");
-    sb.append("    clientSecretExpiresAt: ").append(toIndentedString(clientSecretExpiresAt)).append("\n");
-    sb.append("}");
-    return sb.toString();
+    return "RegisterSiteResponse{" +
+            "oxdId='" + oxdId + '\'' +
+            ", opHost='" + opHost + '\'' +
+            ", clientId='" + clientId + '\'' +
+            ", clientName='" + clientName + '\'' +
+            ", clientSecret='" + clientSecret + '\'' +
+            ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
+            ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
+            ", clientIdIssuedAt=" + clientIdIssuedAt +
+            ", clientSecretExpiresAt=" + clientSecretExpiresAt +
+            '}';
   }
 
   /**
