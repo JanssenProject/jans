@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.jwt;
 
 /**
  * @author Javier Rojas Blum
- * @version May 19, 2017
+ * @version March 14, 2019
  */
 public final class JwtClaimName {
 
@@ -63,7 +63,7 @@ public final class JwtClaimName {
 
     public static final String TOKEN_BINDING_HASH = "tbh"; // token binding hash
 
-    public static final String CNF = "cnf"; 
+    public static final String CNF = "cnf";
     /**
      * Authorized party - the party to which the ID Token was issued.
      * If present, it must contain the OAuth 2.0 Client ID of this party.
@@ -99,6 +99,7 @@ public final class JwtClaimName {
     public static final String AUTHENTICATION_TIME = "auth_time";
     public static final String ACCESS_TOKEN_HASH = "at_hash";
     public static final String CODE_HASH = "c_hash";
+    public static final String STATE_HASH = "s_hash";
 
     // User Info
     /**
