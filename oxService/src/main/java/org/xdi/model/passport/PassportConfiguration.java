@@ -17,33 +17,31 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PassportConfiguration {
+	private Configuration conf;
+	private IIConfiguration idpInitiated;
+	private List<Provider> providers;
 
-    private Configuration conf;
-    private IIConfiguration idpInitiated;
-    private List<ProviderDetails> providers;
+	public Configuration getConf() {
+		return conf;
+	}
 
-    public Configuration getConf() {
-        return conf;
-    }
+	public void setConf(Configuration conf) {
+		this.conf = conf;
+	}
 
-    public void setConf(Configuration conf) {
-        this.conf = conf;
-    }
+	public IIConfiguration getIdpInitiated() {
+		return idpInitiated;
+	}
 
-    public IIConfiguration getIdpInitiated() {
-        return idpInitiated;
-    }
+	public void setIdpInitiated(IIConfiguration idpInitiated) {
+		this.idpInitiated = idpInitiated;
+	}
 
-    public void setIdpInitiated(IIConfiguration idpInitiated) {
-        this.idpInitiated = idpInitiated;
-    }
+	public List<Provider> getProviders() {
+		return providers;
+	}
 
-    public List<ProviderDetails> getProviders() {
-        return providers;
-    }
-
-    public void setProviders(List<ProviderDetails> providers) {
-        this.providers = providers;
-    }
-
+	public void setProviders(List<Provider> providers) {
+		this.providers = providers;
+	}
 }
