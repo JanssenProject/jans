@@ -34,7 +34,11 @@ public class MigrationServiceTest {
 
     @AfterSuite
     public void tearDownSuite() {
-        service.removeAllRps();
+        try {
+            service.removeAllRps();
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     @Test(enabled = false)
