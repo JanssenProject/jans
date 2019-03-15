@@ -10,6 +10,7 @@ oxAuthResponseType: code
 oxAuthResponseType: token
 oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthRedirectURI: https://%(hostname)s/oxauth/auth/passport/sample-redirector.htm
 
 # Passport Resource Server Client
 dn: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
