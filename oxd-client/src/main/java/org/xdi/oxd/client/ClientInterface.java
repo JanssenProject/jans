@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.common.response.*;
@@ -76,7 +77,7 @@ public interface ClientInterface {
     @Path("/get-user-info")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    GetUserInfoResponse getUserInfo(@HeaderParam("Authorization") String authorization, GetUserInfoParams params);
+    JsonNode getUserInfo(@HeaderParam("Authorization") String authorization, GetUserInfoParams params);
 
     @POST
     @Path("/get-logout-uri")
