@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
 import org.xdi.oxd.common.response.IOpResponse;
@@ -37,7 +39,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
     @Override
     public IOpResponse execute(GetAccessTokenByRefreshTokenParams params) throws Exception {
         try {
-
+            validate(params);
             final Rp rp = getRp();
             final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getTokenEndpoint());
             tokenClient.setExecutor(getHttpService().getClientExecutor());
@@ -74,5 +76,11 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
             scope.addAll(params.getScope());
         }
         return Utils.joinAndUrlEncode(scope);
+    }
+
+    private void validate(GetAccessTokenByRefreshTokenParams params) {
+        if (Strings.isNullOrEmpty(params.getRefreshToken())) {
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_REFRESH_TOKEN);
+        }
     }
 }

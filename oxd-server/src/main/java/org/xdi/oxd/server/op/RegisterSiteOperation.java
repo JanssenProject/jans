@@ -66,6 +66,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         response.setOxdId(oxdId);
         response.setOpHost(params.getOpHost());
         response.setClientId(rp.getClientId());
+        response.setClientName(rp.getClientName());
         response.setClientSecret(rp.getClientSecret());
         response.setClientRegistrationAccessToken(rp.getClientRegistrationAccessToken());
         response.setClientRegistrationClientUri(rp.getClientRegistrationClientUri());

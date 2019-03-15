@@ -27,6 +27,11 @@
     </test>
 
     <!-- Connect -->
+    <test name="HealthCheckTest" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.HealthCheckTest"></class>
+        </classes>
+    </test>
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.RegisterSiteTest"/>
@@ -67,12 +72,12 @@
             <class name="org.xdi.oxd.server.CheckAccessTokenTest"/>
         </classes>
     </test>
-    <test name="Authorization code flow prompt=none" enabled="false">
+    <test name="Authorization code flow prompt=none" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
-    <test name="Migration Service Test" enabled="false">
+    <test name="Migration Service Test" enabled="true">
         <classes>
             <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
         </classes>
