@@ -7,7 +7,7 @@
 	template="/WEB-INF/incl/layout/login-template.xhtml">
 
 	<f:metadata>
-		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{sessionIdService.notSessionIdAuthenticated}" />
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
 
 		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
 	</f:metadata>
@@ -51,8 +51,7 @@
 
 						<h:form id="loginForm"  class="form-horizontal">
                             <h:inputHidden id="platform"/>
-						<h:panelGroup
-									rendered="#{sessionIdService.notSessionIdAuthenticated}">
+						<h:panelGroup>
 
 						  <div class="form-group">
 							<h:outputLabel styleClass="col-sm-3 control-label"	for="username" value="#{msgs['login.username']}" />
@@ -142,8 +141,7 @@
 						<h:form id="loginForm"  class="form-horizontal">
 						   <h:messages class="text-center" style ="color:red;margin:8px;" infoClass="text-center" errorClass="text-center"/>
                             <h:inputHidden id="platform"/>
-						<h:panelGroup
-									rendered="#{sessionIdService.notSessionIdAuthenticated}">						
+						<h:panelGroup>						
 						  <div class="form-group">
 							<h:outputLabel styleClass="col-sm-4 control-label"	for="username" value="#{msgs['login.username']}" />
 							<div class="col-sm-8">
