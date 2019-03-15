@@ -56,7 +56,7 @@ public class RestResource {
     @Path("/health-check")
     @Produces(MediaType.APPLICATION_JSON)
     public String healthCheck() {
-        return "{\"status\" : \"running\"}";
+        return "{\"status\":\"running\"}";
     }
 
     @POST
