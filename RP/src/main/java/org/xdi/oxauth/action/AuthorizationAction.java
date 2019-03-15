@@ -6,20 +6,14 @@
 
 package org.xdi.oxauth.action;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.enterprise.context.SessionScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizeClient;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -31,17 +25,24 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
- * @version August 24, 2016
+ * @version March 15, 2019
  */
 @Named
 @SessionScoped
 public class AuthorizationAction implements Serializable {
 
-	private static final long serialVersionUID = -4131456982254169325L;
+    private static final long serialVersionUID = -4131456982254169325L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     private String authorizationEndpoint;
@@ -130,7 +131,14 @@ public class AuthorizationAction implements Serializable {
                 }
             }
 
+            req.setAuthorizationMethod(AuthorizationMethod.URL_QUERY_PARAMETER);
+            AuthorizeClient client = new AuthorizeClient(authorizationEndpoint);
+            client.setRequest(req);
             String authorizationRequest = authorizationEndpoint + "?" + req.getQueryString();
+
+            showResults = true;
+            requestString = client.getRequestAsString();
+
             FacesContext.getCurrentInstance().getExternalContext().redirect(authorizationRequest);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -439,7 +447,7 @@ public class AuthorizationAction implements Serializable {
                 openIdRequestObject = jwtAuthorizationRequest.getDecodedJwt();
             }
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return openIdRequestObject;
@@ -447,5 +455,29 @@ public class AuthorizationAction implements Serializable {
 
     public void setOpenIdRequestObject(String openIdRequestObject) {
         this.openIdRequestObject = openIdRequestObject;
+    }
+
+    public boolean isShowResults() {
+        return showResults;
+    }
+
+    public void setShowResults(boolean showResults) {
+        this.showResults = showResults;
+    }
+
+    public String getRequestString() {
+        return requestString;
+    }
+
+    public void setRequestString(String requestString) {
+        this.requestString = requestString;
+    }
+
+    public String getResponseString() {
+        return responseString;
+    }
+
+    public void setResponseString(String responseString) {
+        this.responseString = responseString;
     }
 }
