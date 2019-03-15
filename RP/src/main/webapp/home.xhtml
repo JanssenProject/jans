@@ -655,6 +655,29 @@
 						<h:commandButton value="Submit"
 							action="#{authorizationAction.exec}" />
 					</div>
+
+					<h:panelGroup layout="block" id="authorizationResults">
+						<h:panelGroup layout="block" rendered="#{authorizationAction.showResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Authorization Request</f:facet>
+								<h:panelGroup layout="block">
+									<h:inputTextarea readonly="true" styleClass="width100"
+													 rows="10" value="#{authorizationAction.requestString}" />
+								</h:panelGroup>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Authorization Response (Parameters)</f:facet>
+								<h:panelGroup layout="block">
+									<h:inputTextarea id="authorizationResponse" styleClass="width100"
+													 value="#{authorizationAction.responseString}" rows="10" />
+								</h:panelGroup>
+							</rich:panel>
+						</h:panelGroup>
+					</h:panelGroup>
 				</rich:panel>
 			</h:panelGroup>
 
@@ -934,6 +957,8 @@
     }
 
     if (params != null) {
+		document.getElementById("mainForm:authorizationResponse").value = params;
+
         for (var i = 0; i < params.length; i++) {
             var param = params[i].split("=");
 
