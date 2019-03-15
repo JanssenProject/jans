@@ -23,6 +23,8 @@ public enum ErrorResponseCode {
     BAD_REQUEST_NO_CODE(400, "bad_request", "'code' is empty or not specified."),
     BAD_REQUEST_NO_STATE(400, "bad_request", "'state' is empty or not specified."),
     BAD_REQUEST_STATE_NOT_VALID(400, "bad_request", "'state' is not registered."),
+    BAD_REQUEST_INVALID_CODE(400, "bad_request", "'code' is invalid."),
+    BAD_REQUEST_NO_REFRESH_TOKEN(400, "bad_request", "'refresh token' is empty or not specified."),
     NO_ID_TOKEN_RETURNED(500, "no_id_token", "id_token is not returned by OP. Please check whether 'openid' scope is present for 'get_authorization_url' command as well as OP configuration."),
     NO_ID_TOKEN_PARAM(400, "no_id_token", "id_token is not provided in request to oxd."),
     NO_ACCESS_TOKEN_RETURNED(500, "no_access_token", "access_token is not returned by OP. Please check OP configuration."),
@@ -38,7 +40,7 @@ public enum ErrorResponseCode {
     INVALID_ACCESS_TOKEN_BAD_HASH(500, "invalid_access_token_bad_hash", "access_token is invalid. Hash of access_token does not match hash from id_token (at_hash)."),
     INVALID_AUTHORIZATION_CODE_BAD_HASH(500, "invalid_authorization_code_bad_hash", "Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash)."),
     INVALID_REGISTRATION_CLIENT_URL(500, "invalid_registration_client_url", "Registration client URL is invalid. Please check registration_client_url response parameter from IDP (http://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse)."),
-    INVALID_OXD_ID(400, "invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. It does not exist or removed from the server. Please use register_site command to register a site."),
+    INVALID_OXD_ID(400, "invalid_oxd_id", "Invalid oxd_id. Unable to find the site for oxd_id. It does not exist or has been removed from the server. Please use the register_site command to register a site."),
     INVALID_REQUEST(400, "invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED(400, "invalid_request", "Request is invalid. Scopes are required parameter in request."),
     UNSUPPORTED_OPERATION(500, "unsupported_operation", "Operation is not supported by server error."),
@@ -66,7 +68,8 @@ public enum ErrorResponseCode {
     UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS(400, "uma_protection_exists", "Server already has UMA Resources registered for this oxd_id. It is possible to overwrite it if provide overwrite=true for uma_rs_protect command (existing resources will be removed and new UMA Resources added)."),
     FAILED_TO_GET_END_SESSION_ENDPOINT(500, "no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_RPT(500, "internal_error", "Failed to get RPT."),
-    FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site."),;
+    FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site.");
+
 
     private final int httpStatus;
     private final String code;
