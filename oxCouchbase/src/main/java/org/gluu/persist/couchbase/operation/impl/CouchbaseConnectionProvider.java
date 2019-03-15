@@ -78,7 +78,7 @@ public class CouchbaseConnectionProvider {
                 clonedProperties.setProperty("auth.userPassword", "REDACTED");
             }
 
-            LOG.error("Failed to create connection with properties: '{}'", clonedProperties, ex);
+            LOG.error("Failed to create connection with properties: '{}'. Exception: {}", clonedProperties, ex);
         }
     }
 
@@ -299,4 +299,16 @@ public class CouchbaseConnectionProvider {
         return passwordEncryptionMethod;
     }
 
+    public static void main(String[] args) {
+    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment.Builder builder = com.couchbase.client.java.env.DefaultCouchbaseEnvironment.builder().bootstrapHttpDirectPort(38091);
+    	
+    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment couchbaseEnvironment = builder.build();
+    	CouchbaseCluster cluster = CouchbaseCluster.create(couchbaseEnvironment, "u164.gluu.info");
+        cluster.authenticate("admin", "secret");
+        
+        Bucket bucket = cluster.openBucket("gluu");
+        System.out.println(bucket.exists("_"));
+        
+	}
 }
+
