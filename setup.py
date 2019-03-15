@@ -3963,7 +3963,7 @@ def getOpts(argv, setupOptions):
 if __name__ == '__main__':
 
     setupOptions = {
-        'install_dir': '.',
+        'install_dir': os.path.dirname(os.path.realpath(__file__)),
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
