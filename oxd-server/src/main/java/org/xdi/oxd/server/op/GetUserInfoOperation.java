@@ -1,16 +1,17 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
+import org.codehaus.jackson.JsonNode;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoRequest;
+import org.xdi.oxauth.client.UserInfoResponse;
 import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetUserInfoParams;
-import org.xdi.oxd.common.response.GetUserInfoResponse;
 import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.common.response.POJOResponse;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,24 +32,14 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     }
 
     @Override
-    public IOpResponse execute(GetUserInfoParams params) {
+    public IOpResponse execute(GetUserInfoParams params) throws IOException {
         getValidationService().validate(params);
 
         UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId()).getUserInfoEndpoint());
         client.setExecutor(getHttpService().getClientExecutor());
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
-        final Map<String, List<String>> claims = client.exec().getClaims();
-        return new GetUserInfoResponse(normalize(claims));
-    }
-
-    private static Map<String, List<String>> normalize(Map<String, List<String>> claims) {
-        Map<String, List<String>> result = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : claims.entrySet()) {
-            if (entry.getValue() != null) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
+        final UserInfoResponse response = client.exec();
+        return new POJOResponse(CoreUtils.createJsonMapper().readValue(response.getEntity(), JsonNode.class));
     }
 }

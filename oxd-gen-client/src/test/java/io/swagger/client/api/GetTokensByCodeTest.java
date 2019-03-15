@@ -80,7 +80,7 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
+    public static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
                                String nonce, String authorization) throws Exception {
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);

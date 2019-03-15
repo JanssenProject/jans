@@ -740,15 +740,8 @@ paths:
           schema:
             type: object
             title: GetUserInfoResponse
-            required:
-              - claims
-            properties:
-              claims:
+            additionalProperties:
                 type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: string
         400:
           description: Invalid parameters are provided to endpoint.
         403:
