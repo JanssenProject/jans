@@ -18,6 +18,9 @@ public class RegisterSiteResponse implements IOpResponse {
     @JsonProperty(value = "client_id")
     @com.fasterxml.jackson.annotation.JsonProperty(value = "client_id")
     private String clientId;
+    @JsonProperty(value = "client_name")
+    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_name")
+    private String clientName;
     @JsonProperty(value = "client_secret")
     @com.fasterxml.jackson.annotation.JsonProperty(value = "client_secret")
     private String clientSecret;
@@ -59,6 +62,14 @@ public class RegisterSiteResponse implements IOpResponse {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public String getClientSecret() {
@@ -107,6 +118,7 @@ public class RegisterSiteResponse implements IOpResponse {
                 "oxdId='" + oxdId + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", clientId='" + clientId + '\'' +
+                ", clientName='" + clientName + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
                 ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +

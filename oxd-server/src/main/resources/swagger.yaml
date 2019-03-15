@@ -166,6 +166,9 @@ paths:
               client_id:
                 type: string
                 example: "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387"
+              client_name:
+                type: string
+                example: "TestClientName"
               client_secret:
                 type: string
                 example: f436b936-03fc-433f-9772-53c2bc9e1c74
