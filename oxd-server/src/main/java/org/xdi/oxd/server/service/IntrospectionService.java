@@ -141,18 +141,6 @@ public class IntrospectionService {
         }
     }
 
-    public static Set<String> getScopes(IntrospectionResponse response) {
-        Set<String> result = new HashSet<>();
-        if (response.getScopes() != null) {
-            result.addAll(response.getScopes());
-        }
-        if (response.getScope() != null) {
-            result.addAll(response.getScope());
-        }
-
-        return result;
-    }
-
     public static Integer dateToSeconds(Date date) {
         return date != null ? (int) (date.getTime() / 1000) : null;
     }
