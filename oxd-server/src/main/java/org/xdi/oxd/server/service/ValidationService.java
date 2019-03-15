@@ -117,7 +117,7 @@ public class ValidationService {
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
             throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
-        if (!IntrospectionService.getScopes(introspectionResponse).contains("oxd")) {
+        if (!introspectionResponse.getScope().contains("oxd")) {
             throw new HttpException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
