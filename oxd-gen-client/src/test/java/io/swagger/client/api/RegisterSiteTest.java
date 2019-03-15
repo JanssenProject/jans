@@ -64,7 +64,6 @@ public class RegisterSiteTest {
         // more specific site registration
         final UpdateSiteParams params = new UpdateSiteParams();
         params.setOxdId(oxdId);
-        params.setClientSecretExpiresAt(calendar.getTime().getTime());
         params.setScope(Lists.newArrayList("profile", "oxd"));
 
         UpdateSiteResponse resp = api().updateSite(getAuthorization(), params);

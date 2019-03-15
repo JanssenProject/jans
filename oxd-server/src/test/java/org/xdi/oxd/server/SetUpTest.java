@@ -52,7 +52,7 @@ public class SetUpTest {
             Preconditions.checkNotNull(Tester.getAuthorization());
             LOG.debug("Tester's authorization is set.");
 
-            setupSwaggerSuite(host, opHost, redirectUrl);
+            setupSwaggerSuite(Tester.getTargetHost(host), opHost, redirectUrl);
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
             LOG.error("Failed to start suite.", e);

@@ -1,5 +1,7 @@
 package org.xdi.oxd.server;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.codehaus.jettison.json.JSONException;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.client.ClientInterface;
@@ -7,7 +9,6 @@ import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.params.GetUserInfoParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
-import org.xdi.oxd.common.response.GetUserInfoResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import static junit.framework.Assert.assertNotNull;
@@ -22,7 +23,7 @@ public class GetUserInfoTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) {
+    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) throws JSONException {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
@@ -32,9 +33,9 @@ public class GetUserInfoTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
 
-        final GetUserInfoResponse resp = client.getUserInfo(Tester.getAuthorization(), params);
+        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), params);
         assertNotNull(resp);
-        notEmpty(resp.getClaims().get("sub"));
+        assertNotNull(resp.get("sub"));
     }
 
     private GetTokensByCodeResponse requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
