@@ -4,11 +4,12 @@ import io.swagger.client.ApiResponse;
 import io.swagger.client.model.GetTokensByCodeParams;
 import io.swagger.client.model.GetTokensByCodeResponse;
 import io.swagger.client.model.GetUserInfoParams;
-import io.swagger.client.model.GetUserInfoResponse;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.CoreUtils;
+
+import java.util.Map;
 
 import static io.swagger.client.api.Tester.*;
 import static org.testng.Assert.*;
@@ -35,10 +36,10 @@ public class GetUserInfoTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
 
-        final GetUserInfoResponse resp = client.getUserInfo(getAuthorization(site), params);
+        final Map<String, Object> resp = client.getUserInfo(getAuthorization(site), params);
         assertNotNull(resp);
-        assertFalse(resp.getClaims().isEmpty());
-        notEmpty(resp.getClaims().get("sub").get(0));
+        assertFalse(resp.isEmpty());
+        assertNotNull(resp.get("sub"));
     }
 
     @Parameters({"opHost", "redirectUrl"})
@@ -52,11 +53,11 @@ public class GetUserInfoTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken("blahBlah"); // invalid token
 
-        final ApiResponse<GetUserInfoResponse> apiResponse = client.getUserInfoWithHttpInfo(getAuthorization(site), params);
+        final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(getAuthorization(site), params);
         assertEquals(apiResponse.getStatusCode() , 200); // fixme should be 401
 
         assertNotNull(apiResponse.getData());
-        assertNull(apiResponse.getData().getClaims().get("sub"));
+        assertNull(apiResponse.getData().get("sub"));
     }
 
 
