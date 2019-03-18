@@ -26,6 +26,14 @@ class CacheRefresh(CacheRefreshType):
         print "Cache refresh. Destroy"
         print "Cache refresh. Destroyed successfully"
         return True
+
+    # Check if this instance conform starting conditions 
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    #   return True/False
+    def isStartProcess(self, configurationAttributes):
+        print "Cache refresh. Is start process method"
+
+        return False
     
     # Get bind credentials required to access source server 
     #   configId is the source server
@@ -63,4 +71,4 @@ class CacheRefresh(CacheRefreshType):
         return True
 
     def getApiVersion(self):
-        return 2
+        return 3
