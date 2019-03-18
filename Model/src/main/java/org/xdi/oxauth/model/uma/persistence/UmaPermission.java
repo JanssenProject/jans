@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.uma.persistence;
 
 import com.google.common.collect.Maps;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.*;
 
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.*;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
-public class UmaPermission {
+public class UmaPermission extends DeletableEntity {
 
     public static final String PCT = "pct";
 
@@ -31,8 +32,6 @@ public class UmaPermission {
 	private String ticket;
     @LdapAttribute(name = "oxConfigurationCode")
 	private String configurationCode;
-    @LdapAttribute(name = "oxAuthExpiration")
-	private Date expirationDate;
 
     @LdapAttribute(name = "oxResourceSetId")
     private String resourceId;
@@ -54,7 +53,7 @@ public class UmaPermission {
         this.scopeDns = scopes;
 		this.ticket = ticket;
 		this.configurationCode = configurationCode;
-		this.expirationDate = expirationDate;
+		setExpirationDate(expirationDate);
 
 		checkExpired();
 	}
@@ -72,7 +71,7 @@ public class UmaPermission {
 	}
 
 	public void checkExpired(Date now) {
-        if (now.after(expirationDate)) {
+        if (now.after(getExpirationDate())) {
             expired = true;
         }
 	}
@@ -103,14 +102,6 @@ public class UmaPermission {
 
 	public void setTicket(String ticket) {
 		this.ticket = ticket;
-	}
-
-	public Date getExpirationDate() {
-		return expirationDate;
-	}
-
-	public void setExpirationDate(Date expirationDate) {
-		this.expirationDate = expirationDate;
 	}
 
     public String getResourceId() {
@@ -161,12 +152,12 @@ public class UmaPermission {
 
     @Override
     public String toString() {
-        return "UmaPermission{" +
+        return "UmaPermission{" + super.toString() +
                 "dn='" + dn + '\'' +
                 ", status='" + status + '\'' +
                 ", ticket='" + ticket + '\'' +
                 ", configurationCode='" + configurationCode + '\'' +
-                ", expirationDate=" + expirationDate +
+                ", deletable=" + getExpirationDate() +
                 ", resourceId='" + resourceId + '\'' +
                 ", scopeDns=" + scopeDns +
                 ", expired=" + expired +
