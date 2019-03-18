@@ -190,7 +190,6 @@ public class CleanerTimer {
 
 			this.umaPermissionService.cleanup(now);
 			this.umaPctService.cleanup(now);
-			this.umaResourceService.cleanup(now);
 
 			processU2fRequests();
 			processU2fDeviceRegistrations();
