@@ -6,22 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
@@ -42,7 +28,6 @@ import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
-import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.CacheProvider;
 import org.xdi.service.cdi.async.Asynchronous;
@@ -51,8 +36,15 @@ import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -75,9 +67,6 @@ public class CleanerTimer {
 
 	@Inject
 	private GrantService grantService;
-
-	@Inject
-	private UmaRptService umaRptService;
 
 	@Inject
 	private UmaPctService umaPctService;
@@ -173,7 +162,7 @@ public class CleanerTimer {
 						public void performAction(List<DeletableEntity> entries) {
 							for (DeletableEntity entity : entries) {
 								try {
-									ldapEntryManager.remove(entity);
+									ldapEntryManager.removeRecursively(entity.getDn());
 									log.trace("Removed {}", entity.getDn());
 								} catch (Exception e) {
 									log.error("Failed to remove entry, dn: " + entity.getDn(), e);
@@ -199,7 +188,6 @@ public class CleanerTimer {
 			processCache(now);
 			processAuthorizationGrantList();
 
-			this.umaRptService.cleanup(now);
 			this.umaPermissionService.cleanup(now);
 			this.umaPctService.cleanup(now);
 			this.umaResourceService.cleanup(now);
