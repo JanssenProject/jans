@@ -240,12 +240,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public String getSessionDn() {
-        return grant.getSessionDn();
+    public String getSessionId() {
+        return grant.getSessionId();
     }
 
     @Override
-    public void setSessionDn(String sessionDn) {
+    public void setSessionId(String sessionId) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 
