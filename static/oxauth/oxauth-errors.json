@@ -106,7 +106,7 @@
         },
         {
             "id": "invalid_grant_and_session",
-            "description": "The provided access token and session state are invalid or were issued to another client.",
+            "description": "The provided id token (or access token) or session state are invalid or were issued to another client.",
             "uri": null
         },
         {
