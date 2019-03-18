@@ -7,7 +7,6 @@
 package org.xdi.oxauth.model.uma.persistence;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -25,7 +24,7 @@ import java.util.List;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxUmaResource"})
-public class UmaResource extends DeletableEntity {
+public class UmaResource {
 
     @LdapDN
     private String dn;
@@ -52,8 +51,8 @@ public class UmaResource extends DeletableEntity {
     @LdapAttribute(name = "oxAssociatedClient")
     private List<String> clients;
 
-	@LdapAttribute(name = "oxResource")
-	private List<String> resources;
+    @LdapAttribute(name = "oxResource")
+    private List<String> resources;
 
     @LdapAttribute(name = "oxRevision")
     private String rev;
@@ -69,6 +68,20 @@ public class UmaResource extends DeletableEntity {
 
     @LdapAttribute(name = "oxAuthCreation")
     private Date creationDate;
+
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
+
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
 
     public String getScopeExpression() {
         return scopeExpression;
@@ -102,7 +115,7 @@ public class UmaResource extends DeletableEntity {
         this.inum = inum;
     }
 
-	public String getId() {
+    public String getId() {
         return id;
     }
 
@@ -154,12 +167,12 @@ public class UmaResource extends DeletableEntity {
     }
 
     public List<String> getResources() {
-		return resources;
-	}
+        return resources;
+    }
 
-	public void setResources(List<String> resources) {
-		this.resources = resources;
-	}
+    public void setResources(List<String> resources) {
+        this.resources = resources;
+    }
 
     public String getRev() {
         return rev;
@@ -185,9 +198,17 @@ public class UmaResource extends DeletableEntity {
         this.creationDate = creationDate;
     }
 
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
     @JsonIgnore
     public boolean isExpired() {
-        return getExpirationDate() != null && new Date().after(getExpirationDate());
+        return expirationDate != null && new Date().after(expirationDate);
     }
 
     @Override
@@ -207,7 +228,8 @@ public class UmaResource extends DeletableEntity {
                 ", description='" + description + '\'' +
                 ", type='" + type + '\'' +
                 ", creationDate=" + creationDate +
-                ", " + super.toString() +
+                ", expirationDate=" + expirationDate +
+                ", deletable=" + deletable +
                 '}';
     }
 }
