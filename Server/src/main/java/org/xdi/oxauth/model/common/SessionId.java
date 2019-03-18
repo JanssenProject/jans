@@ -30,9 +30,6 @@ public class SessionId implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
-    @LdapDN
-    private String dn;
-
     @LdapAttribute(name = "oxAuthSessionId")
     private String id;
 
@@ -76,14 +73,6 @@ public class SessionId implements Serializable {
     private transient boolean persisted;
 
     public SessionId() {
-    }
-
-    public String getDn() {
-        return dn;
-    }
-
-    public void setDn(String p_dn) {
-        dn = p_dn;
     }
 
     public String getJwt() {
@@ -231,7 +220,6 @@ public class SessionId implements Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("SessionState {");
-        sb.append("dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);
         sb.append(", userDn='").append(userDn).append('\'');

@@ -90,7 +90,7 @@ public class ConsentGatheringSessionService {
 
     public void setAuthenticatedSessionState(HttpServletRequest httpRequest, SessionId sessionId) {
         SessionId connectSession = getConnectSession(httpRequest);
-        sessionIdService.setSessionIdStateAuthenticated(httpRequest, sessionId, connectSession.getDn());
+        sessionIdService.setSessionIdStateAuthenticated(httpRequest, sessionId, connectSession.getId());
     }
 
     public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {

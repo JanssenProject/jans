@@ -59,7 +59,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String claims;
 
     private String acrValues;
-    private String sessionDn;
+    private String sessionId;
 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
@@ -246,12 +246,13 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.acrValues = acrValues;
     }
 
-    public String getSessionDn() {
-        return sessionDn;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setSessionDn(String sessionDn) {
-        this.sessionDn = sessionDn;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        this.sessionId = sessionId;
     }
 
     /**
@@ -289,7 +290,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
-        accessToken.setSessionDn(getSessionDn());
+        accessToken.setSessionDn(getSessionId());
         accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(certAsPem));
 
         return accessToken;
@@ -305,7 +306,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());
-        refreshToken.setSessionDn(getSessionDn());
+        refreshToken.setSessionDn(getSessionId());
 
         return refreshToken;
     }
@@ -476,7 +477,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     public String toString() {
         return "AbstractAuthorizationGrant{" + "user=" + user + ", authorizationCode=" + authorizationCode + ", client="
                 + client + ", grantId='" + grantId + '\'' + ", nonce='" + nonce + '\'' + ", acrValues='" + acrValues
-                + '\'' + ", sessionDn='" + sessionDn + '\'' + ", codeChallenge='" + codeChallenge + '\''
+                + '\'' + ", sessionId='" + sessionId + '\'' + ", codeChallenge='" + codeChallenge + '\''
                 + ", codeChallengeMethod='" + codeChallengeMethod + '\'' + ", authenticationTime=" + authenticationTime
                 + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType + ", tokenBindingHash=" + tokenBindingHash
                 + ", x5cs256=" + x5cs256 + ", claims=" + claims + '}';
