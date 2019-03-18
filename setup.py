@@ -418,20 +418,6 @@ class Setup(object):
         self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
 
-        self.openldapBaseFolder = '/opt/symas'
-        self.openldapBinFolder = '/opt/symas/bin'
-        self.openldapConfFolder = '/opt/symas/etc/openldap'
-        self.openldapRootUser = "cn=directory manager,o=gluu"
-        self.openldapSiteUser = "cn=directory manager,o=site"
-        self.openldapMetricUser = "cn=directory manager,o=metric"
-        self.openldapKeyPass = None
-        self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
-        self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
-        self.openldapTLSKey = '%s/openldap.key' % self.certFolder
-        self.openldapJksPass = None
-        self.openldapJksFn = '%s/openldap.jks' % self.certFolder
-        self.openldapP12Fn = '%s/openldap.pkcs12' % self.certFolder
-
         self.passportSpKeyPass = None
         self.passportSpTLSCACert = '%s/passport-sp.pem' % self.certFolder
         self.passportSpTLSCert = '%s/passport-sp.crt' % self.certFolder
@@ -439,17 +425,6 @@ class Setup(object):
         self.passportSpJksPass = None
         self.passportSpJksFn = '%s/passport-sp.jks' % self.certFolder
 
-        self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
-        self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
-        self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
-        self.openldapSchemaFolder = "%s/openldap" % self.openldapRootSchemaFolder
-        self.openldapLogDir = "/var/log/openldap/"
-        self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
-        self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
-        self.openldapSetupAccessLog = False
-        self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
-        self.gluuAccessLogConf = "%s/static/openldap/o_gluu_accesslog.conf" % self.install_dir
-        self.opendlapIndexDef = "%s/static/openldap/index.json" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -789,9 +764,6 @@ class Setup(object):
             self.shibJksPass = self.getPW()
         if not self.oxauth_openid_jks_pass:
             self.oxauth_openid_jks_pass = self.getPW()
-        if not self.openldapKeyPass:
-            self.openldapKeyPass = self.getPW()
-            self.openldapJksPass = self.getPW()
         if not self.opendj_p12_pass:
             self.opendj_p12_pass = self.getPW()
         if not self.passportSpKeyPass:
@@ -1354,9 +1326,7 @@ class Setup(object):
         changeTo = None
         os_ = self.os_type + self.os_version
 
-        if self.ldap_type == 'openldap':
-            changeTo = 'slapd'
-        elif self.ldap_type == 'couchbase':
+        if self.ldap_type == 'couchbase':
             changeTo = 'couchbase-server'
 
         if changeTo != None:
@@ -1505,7 +1475,6 @@ class Setup(object):
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
-            self.encoded_openldapJksPass = self.obscure(self.openldapJksPass)
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
 
             self.oxauthClient_pw = self.getPW()
@@ -1602,9 +1571,6 @@ class Setup(object):
             self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
 
-            if self.installLdap and self.ldap_type == 'openldap':
-                self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
-
             self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
 
             self.gen_keystore('shibIDP',
@@ -1613,13 +1579,6 @@ class Setup(object):
                               '%s/shibIDP.key' % self.certFolder,
                               '%s/shibIDP.crt' % self.certFolder,
                               'jetty')
-            if self.installLdap and self.ldap_type == 'openldap':
-                self.gen_keystore('openldap',
-                                  self.openldapJksFn,
-                                  self.openldapJksPass,
-                                  '%s/openldap.key' % self.certFolder,
-                                  '%s/openldap.crt' % self.certFolder,
-                                  'jetty')
 
             # permissions
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
@@ -1894,8 +1853,6 @@ class Setup(object):
         self.generate_scim_configuration()
         self.generate_passport_configuration()
 
-        self.ldap_binddn = self.openldapRootUser
-        self.ldap_site_binddn = self.openldapSiteUser
 
         if self.installLdap:
             if self.ldap_type == 'opendj':
@@ -1905,11 +1862,6 @@ class Setup(object):
                 self.ldapCertFn = self.opendj_cert_fn
                 self.ldapTrustStoreFn = self.opendj_p12_fn
                 self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
-            elif self.ldap_type == 'openldap':
-                self.ldapCertFn = self.openldapTLSCert
-                self.ldapTrustStoreFn = self.openldapP12Fn
-                self.encoded_ldapTrustStorePass = self.encoded_openldapJksPass
-                
 
         if self.installSaml:
             self.oxTrustConfigGeneration = "true"
@@ -2120,7 +2072,7 @@ class Setup(object):
 
     def install_gluu_components(self):
         if self.installLdap:
-            if self.ldap_type in ('openldap', 'opendj'):
+            if self.ldap_type == 'opendj':
                 self.pbar.progress("Installing Gluu components: LDAP", False)
                 self.install_ldap_server()
 
@@ -2254,12 +2206,6 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.idp3WebappFolder])
                 # self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
-
-            if self.installLdap and self.ldap_type == 'openldap':
-                self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
-                self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
-                self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/metric_db'])
-
 
         except:
             self.logIt("Error making folders", True)
@@ -2418,9 +2364,6 @@ class Setup(object):
             elif self.os_type in ('centos', 'red', 'fedora'):
                 suffix = 'rpm'
 
-            if self.allowDeprecatedApplications and glob.glob(self.distFolder+'/symas/symas-openldap*.'+suffix):
-                backend_types.append(('OpenLDAP Gluu Edition','openldap'))
-                
             if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
                 backend_types.append(('Couchbase','couchbase'))
 
@@ -3148,21 +3091,7 @@ class Setup(object):
 
         # LDAP services
         if self.installLdap:
-            if self.ldap_type == 'openldap':
-                if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-                    self.run([service_path, 'restart', 'rsyslog.service'])
-                    self.run([service_path, 'restart', 'solserver.service'])
-                else:
-                    # Below two lines are specifically for Ubuntu 14.04
-                    if self.os_type == 'ubuntu':
-                        self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
-                        self.removeFile("/etc/init/rsyslog.conf")
-                        rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
-                        self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
-    
-                    self.run([service_path, 'rsyslog', 'restart'])
-                    self.run([service_path, 'solserver', 'restart'])
-            elif self.ldap_type == 'opendj':
+            if self.ldap_type == 'opendj':
                 self.run_service_command('opendj', 'stop')
                 self.run_service_command('opendj', 'start')
 
@@ -3194,144 +3123,16 @@ class Setup(object):
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
-    def install_openldap(self):
-        self.logIt("Installing OpenLDAP from package")
-        self.pbar.progress("Installing OpenLDAP", False)
-        # Determine package type
-        packageRpm = True
-        packageExtension = ".rpm"
-        if self.os_type in ['debian', 'ubuntu']:
-            packageRpm = False
-            packageExtension = ".deb"
-
-        openLdapDistFolder = "%s/%s" % (self.distFolder, "symas")
-
-        # Find package
-        packageName = None
-        for file in os.listdir(openLdapDistFolder):
-            if file.endswith(packageExtension):
-                packageName = "%s/%s" % ( openLdapDistFolder, file )
-
-        if packageName == None:
-            self.logIt('Failed to find OpenLDAP package in folder %s !' % openLdapDistFolder)
-            return
-
-        self.logIt("Found package '%s' for install" % packageName)
-        if packageRpm:
-            self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
-        else:
-            self.run([self.cmd_dpkg, '--install', packageName])
-
-        openldapRunFolder = '/var/symas/run'
-        self.run([self.cmd_chmod, '-R', '775', openldapRunFolder])
-        self.run([self.cmd_chgrp, '-R', 'ldap', openldapRunFolder])
-
-    def get_openldap_indexes(self):
-        """Function that reads the static/openldap/index.json file and generates
-        slapd.conf compatible index configuration string"""
-        f = open(self.opendlapIndexDef, 'r')
-        jsoninfo = json.loads(f.read())
-        f.close()
-        outString = ""
-        for entry in jsoninfo["indexes"]:
-            outString += "\t".join(["index", entry["attribute"], entry["index"]]) + "\n"
-        return outString
-
-
-    def configure_openldap(self):
-        self.logIt("Configuring OpenLDAP")
-        # 1. Render templates
-        self.templateRenderingDict['openldap_accesslog_conf'] = self.readFile(self.accessLogConfFile)
-        self.templateRenderingDict['openldap_gluu_accesslog'] = self.readFile(self.gluuAccessLogConf)
-        if not self.openldapSetupAccessLog:
-            self.templateRenderingDict['openldap_accesslog_conf'] = self.commentOutText(self.templateRenderingDict['openldap_accesslog_conf'])
-            self.templateRenderingDict['openldap_gluu_accesslog'] = self.commentOutText(self.templateRenderingDict['openldap_gluu_accesslog'])
-
-        # 1.1 convert the indexes
-        self.templateRenderingDict['openldap_indexes'] = self.get_openldap_indexes()
-
-        self.renderTemplate(self.openldapSlapdConf)
-        self.renderTemplate(self.openldapSymasConf)
-
-        # 2. Copy the conf files to
-        self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
-        self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
-
-        # 3. Copy the schema files into place
-        self.createDirs(self.openldapSchemaFolder)
-        self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, self.openldapSchemaFolder)
-        self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
-
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
-        self.run([self.cmd_chmod, '-R', 'a+rX', self.openldapRootSchemaFolder])
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', self.openldapRootSchemaFolder])
-
-        # 5. Create the PEM file from key and crt
-        with open(self.openldapTLSCACert, 'w') as pem:
-            with open(self.openldapTLSCert, 'r') as crt:
-                pem.write(crt.read())
-            with open(self.openldapTLSKey, 'r') as key:
-                pem.write(key.read())
-
-        with open(self.passportSpTLSCACert, 'w') as pem:
-            with open(self.passportSpTLSCert, 'r') as crt:
-                pem.write(crt.read())
-            with open(self.passportSpTLSKey, 'r') as key:
-                pem.write(key.read())
-
-        # 6. Setup Logging
-        self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
-        if self.os_type in ['debian', 'ubuntu']:
-            self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
-        if not os.path.isdir('/etc/rsyslog.d/'):
-            self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
-        self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
-        self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
-
-        #Fix me: for some reason broken startup links are created for opendj.
-        #Remove them.
-        if self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
-
-
-    def import_ldif_template_openldap(self, ldif):
-        self.logIt("Importing LDIF file '%s' into OpenLDAP" % ldif)
-        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
-        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
-        realInstallDir = os.path.realpath(self.install_dir)
-        self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
-
-    def import_ldif_openldap(self):
-        self.logIt("Importing LDIF files into OpenLDAP")
-        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
-        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
-        realInstallDir = os.path.realpath(self.install_dir)
-
-        for ldif in self.ldif_files:
-
-            if 'site.ldif' in ldif:
-                db_base = 'o=site'
-            elif 'metric.ldif' in ldif:
-                db_base = 'o=metric'
-            else:
-                db_base = 'o=gluu'
-
-            self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', db_base, '-f', config, '-l', ldif])])
 
     def import_custom_ldif(self, fullPath):
         output_dir = os.path.join(fullPath, '.output')
         self.logIt("Importing Custom LDIF files")
-        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
-        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
 
         try:
             for ldif in self.get_filepaths(output_dir):
                 custom_ldif = output_dir + '/' + ldif
-                if self.ldap_type == 'openldap':
-                    self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
-                else:
-                    self.import_ldif_template_opendj(custom_ldif)
+                self.import_ldif_template_opendj(custom_ldif)
         except:
             self.logIt("Error importing custom ldif file %s" % ldif, True)
             self.logIt(traceback.format_exc(), True)
@@ -3367,14 +3168,6 @@ class Setup(object):
         except:
             pass
 
-        if self.ldap_type == 'openldap':
-            self.logIt("Running OpenLDAP Setup")
-            self.pbar.progress("OpenLDAP: installingP", False)
-            self.install_openldap()
-            self.pbar.progress("OpenLDAP: configuring", False)
-            self.configure_openldap()
-            self.pbar.progress("OpenLDAP: importing Ldif files", False)
-            self.import_ldif_openldap()
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
         self.logIt("Calculating memory setting for applications")
@@ -4047,13 +3840,6 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-    if 'importLDIFDir' in setupOptions.keys():
-        if os.path.isdir(installObject.openldapBaseFolder):
-            installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
-            installObject.render_custom_templates(setupOptions['importLDIFDir'])
-            installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-            installObject.logIt("Setup is exiting now after import of ldifs generated.", True)
-            sys.exit(2)
 
     # Show to properties for approval
     print '\n%s\n' % `installObject`
