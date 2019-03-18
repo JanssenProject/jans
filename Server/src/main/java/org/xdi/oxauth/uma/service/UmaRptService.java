@@ -203,7 +203,6 @@ public class UmaRptService {
 
             UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
             rpt.setPermissions(getPermissionDns(permissions));
-            rpt.setExpired(true);
             persist(rpt);
             return rpt;
         } catch (Exception e) {

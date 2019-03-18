@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.persist.model.base.Deletable;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
@@ -34,7 +35,7 @@ import java.util.Date;
  * @author Javier Rojas Blum
  * @version March 14, 2019
  */
-public abstract class AbstractToken implements Serializable {
+public abstract class AbstractToken implements Serializable, Deletable {
 
     @LdapAttribute(name = "oxAuthTokenCode")
     private String code;
@@ -42,6 +43,8 @@ public abstract class AbstractToken implements Serializable {
     private Date creationDate;
     @LdapAttribute(name = "oxAuthExpiration")
     private Date expirationDate;
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
     private boolean revoked;
     private boolean expired;
 
@@ -229,6 +232,15 @@ public abstract class AbstractToken implements Serializable {
 
     public void setSessionDn(String sessionDn) {
         this.sessionDn = sessionDn;
+    }
+
+    @Override
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
     }
 
     /**
