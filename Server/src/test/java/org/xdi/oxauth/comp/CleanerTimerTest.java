@@ -122,9 +122,9 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.MINUTE, -10);
-        client.setExpirationDate(calendar.getTime());
+        rpt.setExpirationDate(calendar.getTime());
 
-        umaRptService.persist(rpt);
+        umaRptService.merge(rpt);
 
         // 3. clean up
         cleanerTimer.processImpl();
