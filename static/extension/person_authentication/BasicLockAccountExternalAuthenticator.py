@@ -106,7 +106,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus == None) or (userSatus == "active")):
                     print "Basic (lock account). Locking '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
-                    self.lockUser(user_name, self.maximumInvalidLoginAttemps)
+                    self.lockUser(user_name)
                     return False
 
                 if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and userSatus == "inactive":
@@ -137,6 +137,14 @@ class PersonAuthentication(PersonAuthenticationType):
                         self.unLockUser(user_name)
                         self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
                         logged_in = authenticationService.authenticate(user_name, user_password)
+                        if not logged_in:
+                            # Update number of attempts 
+                            self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(1))
+                            if self.maximumInvalidLoginAttemps == 1:
+                                # Lock user if maximum count login attempts is 1 
+                                self.lockUser(user_name)
+                                return False
+
 
             return logged_in
         else:
@@ -198,7 +206,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return updated_user
 
-    def lockUser(self, user_name, maxCount):
+    def lockUser(self, user_name):
         if StringHelper.isEmpty(user_name):
             return None
 
