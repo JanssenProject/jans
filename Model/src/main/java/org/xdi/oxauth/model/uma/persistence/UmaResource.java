@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.uma.persistence;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxUmaResource"})
-public class UmaResource {
+public class UmaResource extends DeletableEntity {
 
     @LdapDN
     private String dn;
@@ -68,9 +69,6 @@ public class UmaResource {
 
     @LdapAttribute(name = "oxAuthCreation")
     private Date creationDate;
-
-    @LdapAttribute(name = "oxAuthExpiration")
-    private Date expirationDate;
 
     public String getScopeExpression() {
         return scopeExpression;
@@ -187,17 +185,9 @@ public class UmaResource {
         this.creationDate = creationDate;
     }
 
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
     @JsonIgnore
     public boolean isExpired() {
-        return expirationDate != null && new Date().after(expirationDate);
+        return getExpirationDate() != null && new Date().after(getExpirationDate());
     }
 
     @Override
@@ -217,7 +207,7 @@ public class UmaResource {
                 ", description='" + description + '\'' +
                 ", type='" + type + '\'' +
                 ", creationDate=" + creationDate +
-                ", expirationDate=" + expirationDate +
+                ", " + super.toString() +
                 '}';
     }
 }
