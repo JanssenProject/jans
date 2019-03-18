@@ -7,7 +7,6 @@
 package org.xdi.oxauth.model.uma.persistence;
 
 import com.google.common.collect.Maps;
-import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.*;
 
 import java.util.*;
@@ -20,18 +19,22 @@ import java.util.*;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
-public class UmaPermission extends DeletableEntity {
+public class UmaPermission {
 
     public static final String PCT = "pct";
 
     @LdapDN
     private String dn;
     @LdapAttribute(name = "oxStatus")
-	private String status;
+    private String status;
     @LdapAttribute(name = "oxTicket")
-	private String ticket;
+    private String ticket;
     @LdapAttribute(name = "oxConfigurationCode")
-	private String configurationCode;
+    private String configurationCode;
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
 
     @LdapAttribute(name = "oxResourceSetId")
     private String resourceId;
@@ -49,14 +52,14 @@ public class UmaPermission extends DeletableEntity {
 
     public UmaPermission(String resourceId, List<String> scopes, String ticket,
                          String configurationCode, Date expirationDate) {
-		this.resourceId = resourceId;
+        this.resourceId = resourceId;
         this.scopeDns = scopes;
-		this.ticket = ticket;
-		this.configurationCode = configurationCode;
-		setExpirationDate(expirationDate);
+        this.ticket = ticket;
+        this.configurationCode = configurationCode;
+        this.expirationDate = expirationDate;
 
-		checkExpired();
-	}
+        checkExpired();
+    }
 
     public String getDn() {
         return dn;
@@ -66,19 +69,27 @@ public class UmaPermission extends DeletableEntity {
         dn = p_dn;
     }
 
-    public void checkExpired() {
-		checkExpired(new Date());
-	}
+    public boolean isDeletable() {
+        return deletable;
+    }
 
-	public void checkExpired(Date now) {
-        if (now.after(getExpirationDate())) {
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
+
+    public void checkExpired() {
+        checkExpired(new Date());
+    }
+
+    public void checkExpired(Date now) {
+        if (now.after(expirationDate) && deletable) {
             expired = true;
         }
-	}
+    }
 
-	public boolean isValid() {
-		return !expired;
-	}
+    public boolean isValid() {
+        return !expired;
+    }
 
     public String getStatus() {
         return status;
@@ -89,20 +100,28 @@ public class UmaPermission extends DeletableEntity {
     }
 
     public String getConfigurationCode() {
-		return configurationCode;
-	}
+        return configurationCode;
+    }
 
-	public void setConfigurationCode(String configurationCode) {
-		this.configurationCode = configurationCode;
-	}
+    public void setConfigurationCode(String configurationCode) {
+        this.configurationCode = configurationCode;
+    }
 
-	public String getTicket() {
-		return ticket;
-	}
+    public String getTicket() {
+        return ticket;
+    }
 
-	public void setTicket(String ticket) {
-		this.ticket = ticket;
-	}
+    public void setTicket(String ticket) {
+        this.ticket = ticket;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
 
     public String getResourceId() {
         return resourceId;
@@ -152,12 +171,12 @@ public class UmaPermission extends DeletableEntity {
 
     @Override
     public String toString() {
-        return "UmaPermission{" + super.toString() +
+        return "UmaPermission{" +
                 "dn='" + dn + '\'' +
                 ", status='" + status + '\'' +
                 ", ticket='" + ticket + '\'' +
                 ", configurationCode='" + configurationCode + '\'' +
-                ", deletable=" + getExpirationDate() +
+                ", expirationDate=" + expirationDate +
                 ", resourceId='" + resourceId + '\'' +
                 ", scopeDns=" + scopeDns +
                 ", expired=" + expired +

@@ -6,33 +6,26 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
+import org.xdi.service.CacheService;
+import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.PersistenceEntryManager;
-import org.xdi.oxauth.model.config.Constants;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
-import org.xdi.oxauth.service.CleanerTimer;
-import org.xdi.service.CacheService;
-import org.xdi.util.StringHelper;
-
-import com.google.common.base.Preconditions;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides operations with resource set descriptions
@@ -88,13 +81,19 @@ public class UmaResourceService {
         prepareBranch();
     }
 
+    public void updateResource(UmaResource resource) {
+        updateResource(resource, false);
+    }
+
     /**
      * Update resource description entry
      *
      * @param resource resource
      */
-    public void updateResource(UmaResource resource) {
-        validate(resource);
+    public void updateResource(UmaResource resource, boolean skipValidation) {
+        if (!skipValidation) {
+            validate(resource);
+        }
         ldapEntryManager.merge(resource);
     }
 
@@ -257,35 +256,5 @@ public class UmaResourceService {
             log.error("Failed to fetch client from cache, dn: " + dn, e);
             return null;
         }
-    }
-
-    public boolean removeFromCache(UmaResource resource) {
-        try {
-            cacheService.remove(null, resource.getDn());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-
-            return false;
-        }
-        return true;
-    }
-
-    public void cleanup(Date now) {
-        prepareBranch();
-
-        BatchOperation<UmaResource> batchService = new ProcessBatchOperation<UmaResource>() {
-            @Override
-            public void performAction(List<UmaResource> entries) {
-                for (UmaResource p : entries) {
-                    try {
-                        remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-
-        };
-        ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now)), SearchScope.SUB, new String[]{""}, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
     }
 }
