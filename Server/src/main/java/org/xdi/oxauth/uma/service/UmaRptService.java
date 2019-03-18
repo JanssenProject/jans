@@ -211,6 +211,10 @@ public class UmaRptService {
         }
     }
 
+    public void merge(UmaRPT rpt) {
+        ldapEntryManager.merge(rpt);
+    }
+
     private String createRptJwt(Client client, List<UmaPermission> permissions, Date creationDate, Date expirationDate) throws Exception {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getAccessTokenSigningAlg() != null && SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg()) != null) {
