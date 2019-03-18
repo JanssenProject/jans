@@ -6,30 +6,14 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -39,7 +23,6 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
@@ -47,7 +30,11 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
 import org.xdi.util.StringHelper;
 
-import com.google.common.base.Preconditions;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * RPT manager component
@@ -139,26 +126,6 @@ public class UmaRptService {
         }
     }
 
-    public void cleanup(final Date now) {
-    	BatchOperation<UmaRPT> rptBatchService = new ProcessBatchOperation<UmaRPT>() {
-            @Override
-            public void performAction(List<UmaRPT> entries) {
-                for (UmaRPT p : entries) {
-                    try {
-                        ldapEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
-        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getExpiredUmaRptFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, rptBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
-    }
-
-    private Filter getExpiredUmaRptFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
-    }
-
     public void addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {
         addPermissionToRPT(rpt, permissions.toArray(new UmaPermission[permissions.size()]));
     }
@@ -236,6 +203,7 @@ public class UmaRptService {
 
             UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
             rpt.setPermissions(getPermissionDns(permissions));
+            rpt.setExpired(true);
             persist(rpt);
             return rpt;
         } catch (Exception e) {
