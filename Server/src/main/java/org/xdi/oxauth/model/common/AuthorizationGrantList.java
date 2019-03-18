@@ -262,7 +262,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 }
 
                 result.setAcrValues(authMode);
-                result.setSessionDn(sessionDn);
+                result.setSessionId(sessionDn);
                 result.setClaims(claims);
 
                 if (tokenLdap.getTokenTypeEnum() != null) {
