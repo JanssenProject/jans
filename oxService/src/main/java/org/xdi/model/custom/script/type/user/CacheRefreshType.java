@@ -20,6 +20,8 @@ public interface CacheRefreshType extends BaseExternalType {
 
     public BindCredentials getBindCredentials(String configId, Map<String, SimpleCustomProperty> configurationAttributes);
 
+    public boolean isStartProcess(String configId, Map<String, SimpleCustomProperty> configurationAttributes);
+
     public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

@@ -42,4 +42,9 @@ public class DummyCacheRefreshType implements CacheRefreshType {
         return null;
     }
 
+	@Override
+	public boolean isStartProcess(String configId, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
 }
