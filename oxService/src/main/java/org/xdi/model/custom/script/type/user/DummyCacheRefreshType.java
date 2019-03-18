@@ -43,7 +43,7 @@ public class DummyCacheRefreshType implements CacheRefreshType {
     }
 
 	@Override
-	public boolean isStartProcess(String configId, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean isStartProcess(Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
