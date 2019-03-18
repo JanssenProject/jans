@@ -6,7 +6,6 @@
         "clients":"ou=clients,o=%(inumOrg)s,o=gluu",
         "scopes":"ou=scopes,o=%(inumOrg)s,o=gluu",
         "attributes":"ou=attributes,o=%(inumOrg)s,o=gluu",
-        "sessionId":"ou=session,o=%(inumOrg)s,o=gluu",
         "scripts": "ou=scripts,o=%(inumOrg)s,o=gluu",
         "umaBase":"ou=uma,o=%(inumOrg)s,o=gluu",
         "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu",
