@@ -62,7 +62,7 @@ public class CacheGrant implements Serializable {
         codeChallenge = grant.getCodeChallenge();
         codeChallengeMethod = grant.getCodeChallengeMethod();
         claims = grant.getClaims();
-        sessionDn = grant.getSessionDn();
+        sessionDn = grant.getSessionId();
     }
 
     private void initExpiresIn(AuthorizationGrant grant, AppConfiguration appConfiguration) {
@@ -188,7 +188,7 @@ public class CacheGrant implements Serializable {
         grant.setAuthorizationCode(new AuthorizationCode(authorizationCodeString, authorizationCodeCreationDate, authorizationCodeExpirationDate));
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
-        grant.setSessionDn(sessionDn);
+        grant.setSessionId(sessionDn);
         grant.setCodeChallenge(codeChallenge);
         grant.setCodeChallengeMethod(codeChallengeMethod);
         grant.setAcrValues(acrValues);
