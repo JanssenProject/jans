@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
@@ -182,8 +181,6 @@ public class CleanerTimer {
 
 			processCache(now); // we have cache not only in persistence
 
-			processU2fDeviceRegistrations();
-
 			this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
 			this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
 
@@ -217,33 +214,6 @@ public class CleanerTimer {
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}
-	}
-
-	private void processU2fDeviceRegistrations() {
-		log.debug("Start U2F request clean up");
-
-		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-		calendar.add(Calendar.SECOND, -90);
-		final Date expirationDate = calendar.getTime();
-
-		BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new ProcessBatchOperation<DeviceRegistration>() {
-			@Override
-			public void performAction(List<DeviceRegistration> entries) {
-				for (DeviceRegistration deviceRegistration : entries) {
-					try {
-						log.debug("Removing DeviceRegistration: {}, Creation date: {}", deviceRegistration.getId(),
-								deviceRegistration.getCreationDate());
-						deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
-					} catch (Exception e) {
-						log.error("Failed to remove entry", e);
-					}
-				}
-			}
-		};
-		deviceRegistrationService.getExpiredDeviceRegistrations(deviceRegistrationBatchService, expirationDate,
-				new String[] { "oxId", "creationDate" }, 0, BATCH_SIZE);
-
-		log.debug("End U2F request clean up");
 	}
 
 	private void processMetricEntries() {
