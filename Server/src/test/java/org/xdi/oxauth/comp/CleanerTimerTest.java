@@ -1,5 +1,6 @@
 package org.xdi.oxauth.comp;
 
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 import org.xdi.oxauth.BaseComponentTest;
@@ -8,6 +9,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.ClientCredentialsGrant;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
@@ -17,6 +19,7 @@ import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.uma.service.UmaPctService;
@@ -60,6 +63,8 @@ public class CleanerTimerTest extends BaseComponentTest {
     private AuthorizationGrantList authorizationGrantList;
     @Inject
     private GrantService grantService;
+    @Inject
+    private RegistrationService u2fRegistrationService;
 
     @Test
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -126,6 +131,45 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 4. client is in persistence (not removed)
         assertNotNull(clientService.getClient(client.getClientId()));
+    }
+
+    @Test
+    public void u2fRequest_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+        final Client client = createClient();
+        clientService.persist(client);
+
+        // 1. create token
+        String userInum = "";
+        String appId = "https://testapp.com";
+        final RequestMessageLdap request = u2fRegistrationService.storeRegisterRequestMessage(u2fRegistrationService.builRegisterRequestMessage(appId, userInum), userInum, userInum);
+
+        // 2. request exists
+        assertNotNull(u2fRegistrationService.getRegisterRequestMessage(request.getId()));
+
+        // 3. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 4. request exists
+        assertNotNull(u2fRegistrationService.getRegisterRequestMessage(request.getId()));
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -10);
+        request.setExpirationDate(calendar.getTime());
+
+        u2fRegistrationService.merge(request);
+
+        // 5. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 6. no request in persistence
+        try {
+            u2fRegistrationService.getRegisterRequestMessage(request.getId());
+            throw new AssertionError("No exception, expected EntryPersistenceException on find request.");
+        } catch (EntryPersistenceException e) {
+            // ignore
+        }
     }
 
     @Test
