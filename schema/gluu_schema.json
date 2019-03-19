@@ -5519,6 +5519,8 @@
                 "oxApplicationType",
                 "oxMetricType",
                 "creationDate",
+                "oxDeletable",
+                "oxAuthExpirationDate",
                 "oxData"
             ],
             "must": [
