@@ -489,7 +489,7 @@ public class SessionIdService {
             final String opbs = UUID.randomUUID().toString();
             final String sessionState = JwtUtil.bytesToHex(JwtUtil.getMessageDigestSHA256(
                     clientId + " " + appConfiguration.getIssuer() + " " + opbs + " " + salt)) + "." + salt;
-            final String dn = dn(sid);
+            final String dn = sid;
             sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
 
             if (StringUtils.isBlank(dn)) {
@@ -727,15 +727,6 @@ public class SessionIdService {
         return true;
     }
 
-    private String dn(String p_id) {
-        final String baseDn = getBaseDn();
-        final StringBuilder sb = new StringBuilder();
-        if (Util.allNotBlank(p_id, getBaseDn())) {
-            sb.append("oxAuthSessionId=").append(p_id).append(",").append(baseDn);
-        }
-        return sb.toString();
-    }
-
     public SessionId getSessionById(String sessionId) {
         return getFromCache(sessionId);
     }
@@ -761,10 +752,6 @@ public class SessionIdService {
 
         log.trace("Failed to get session by id: {}", sessionId);
         return null;
-    }
-
-    private String getBaseDn() {
-        return staticConfiguration.getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionId sessionId) {
