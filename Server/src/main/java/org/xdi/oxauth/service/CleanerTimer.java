@@ -182,7 +182,6 @@ public class CleanerTimer {
 			}
 
 			processCache(now);
-			processAuthorizationGrantList();
 
 			processU2fRequests();
 			processU2fDeviceRegistrations();
@@ -217,12 +216,6 @@ public class CleanerTimer {
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}
-	}
-
-	private void processAuthorizationGrantList() {
-		log.debug("Start AuthorizationGrant clean up");
-		grantService.cleanUp();
-		log.debug("End AuthorizationGrant clean up");
 	}
 
 	private void processU2fRequests() {
