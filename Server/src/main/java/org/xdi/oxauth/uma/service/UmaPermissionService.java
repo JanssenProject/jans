@@ -6,22 +6,8 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -29,8 +15,12 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Holds permission tokens and permissions
@@ -174,27 +164,6 @@ public class UmaPermissionService {
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
-    }
-
-    public void cleanup(final Date now) {
-    	BatchOperation<UmaPermission> batchService = new ProcessBatchOperation<UmaPermission>() {
-            @Override
-            public void performAction(List<UmaPermission> entries) {
-                for (UmaPermission p : entries) {
-                    try {
-                        ldapEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-
-        };
-        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getExpiredUmaPermissionFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
-    }
-
-    private Filter getExpiredUmaPermissionFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void addBranch(String clientDn) {
