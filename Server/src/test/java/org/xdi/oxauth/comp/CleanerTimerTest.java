@@ -11,7 +11,9 @@ import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
@@ -23,9 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -48,6 +48,8 @@ public class CleanerTimerTest extends BaseComponentTest {
     private UmaResourceService umaResourceService;
     @Inject
     private UmaPermissionService umaPermissionService;
+    @Inject
+    private UmaPctService umaPctService;
 
     @Test
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -235,6 +237,39 @@ public class CleanerTimerTest extends BaseComponentTest {
         // 6. no permission in persistence
         final List<UmaPermission> permissionsByTicket = umaPermissionService.getPermissionsByTicket(ticket);
         assertTrue(permissionsByTicket.isEmpty());
+    }
+
+    @Test
+    public void umaPct_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+        final Client client = createClient();
+        clientService.persist(client);
+
+        // 1. create pct
+        UmaPCT pct = umaPctService.createPct(client.getClientId());
+        umaPctService.persist(pct);
+
+        // 2. pct exists
+        assertNotNull(umaPctService.getByCode(pct.getCode()));
+
+        // 3. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 4. pct exists
+        assertNotNull(umaPctService.getByCode(pct.getCode()));
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -10);
+        pct.setExpirationDate(calendar.getTime());
+
+        umaPctService.merge(pct);
+
+        // 5. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 6. no pct in persistence
+        assertNull(umaPctService.getByCode(pct.getCode()));
     }
 
     private Client createClient() throws StringEncrypter.EncryptionException {
