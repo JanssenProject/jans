@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.config;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,8 +37,6 @@ public class BaseDnConfiguration {
     private String attributes;
     @XmlElement(name = "scripts")
     private String scripts;
-    @XmlElement(name = "sessionId")
-    private String sessionId;
     @XmlElement(name = "umaBase")
     private String umaBase;
     @XmlElement(name = "umaPolicy")
@@ -120,14 +118,6 @@ public class BaseDnConfiguration {
 
     public void setScopes(String p_scopes) {
         scopes = p_scopes;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
     }
 
     public String getU2fBase() {
