@@ -6,11 +6,13 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.service.CacheService;
@@ -18,14 +20,12 @@ import org.xdi.util.security.StringEncrypter;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -46,6 +46,8 @@ public class CleanerTimerTest extends BaseComponentTest {
     private UmaRptService umaRptService;
     @Inject
     private UmaResourceService umaResourceService;
+    @Inject
+    private UmaPermissionService umaPermissionService;
 
     @Test
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -192,6 +194,47 @@ public class CleanerTimerTest extends BaseComponentTest {
             // we expect WebApplicationException 404 here
             assertEquals(404, e.getResponse().getStatus());
         }
+    }
+
+    @Test
+    public void umaPermission_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+        final Client client = createClient();
+
+        clientService.persist(client);
+
+        final String ticket = UUID.randomUUID().toString();
+
+        // 1. create permission
+        UmaPermission permission = new UmaPermission();
+        permission.setTicket(ticket);
+        permission.setConfigurationCode(UUID.randomUUID().toString());
+        permission.setResourceId(UUID.randomUUID().toString());
+
+        umaPermissionService.addPermission(permission, client.getDn());
+
+        // 2. permission exists
+        assertNotNull(umaPermissionService.getPermissionsByTicket(ticket).get(0));
+
+        // 3. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 4. permission exists
+        assertNotNull(umaPermissionService.getPermissionsByTicket(ticket).get(0));
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -10);
+        permission.setExpirationDate(calendar.getTime());
+
+        umaPermissionService.merge(permission);
+
+        // 5. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 6. no permission in persistence
+        final List<UmaPermission> permissionsByTicket = umaPermissionService.getPermissionsByTicket(ticket);
+        assertTrue(permissionsByTicket.isEmpty());
     }
 
     private Client createClient() throws StringEncrypter.EncryptionException {
