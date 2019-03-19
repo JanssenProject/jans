@@ -13,7 +13,6 @@ def test_setup_load_properties(mock_logIt):
     assert_equal(obj.installLdap, True)
     assert_equal(obj.installHttpd, True)
     assert_equal(obj.installSaml, False)
-    assert_equal(obj.installAsimba, False)
     assert_equal(obj.installCas, False)
     assert_equal(obj.installOxAuthRP, False)
 
@@ -24,7 +23,6 @@ def test_setup_load_properties(mock_logIt):
     assert_equal(obj.installLdap, False)
     assert_equal(obj.installHttpd, False)
     assert_equal(obj.installSaml, False)
-    assert_equal(obj.installAsimba, False)
     assert_equal(obj.installCas, False)
     assert_equal(obj.installOxAuthRP, False)
 
@@ -35,7 +33,6 @@ def test_setup_load_properties(mock_logIt):
     assert_equal(obj.installLdap, True)
     assert_equal(obj.installHttpd, True)
     assert_equal(obj.installSaml, True)
-    assert_equal(obj.installAsimba, True)
     assert_equal(obj.installCas, True)
     assert_equal(obj.installOxAuthRP, True)
 
@@ -46,6 +43,5 @@ def test_setup_load_properties(mock_logIt):
     assert_equal(obj.installLdap, False)
     assert_equal(obj.installHttpd, True)
     assert_equal(obj.installSaml, False)
-    assert_equal(obj.installAsimba, True)
     assert_equal(obj.installCas, False)
     assert_equal(obj.installOxAuthRP, True)
