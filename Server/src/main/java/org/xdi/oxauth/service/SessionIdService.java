@@ -489,7 +489,12 @@ public class SessionIdService {
             final String opbs = UUID.randomUUID().toString();
             final String sessionState = JwtUtil.bytesToHex(JwtUtil.getMessageDigestSHA256(
                     clientId + " " + appConfiguration.getIssuer() + " " + opbs + " " + salt)) + "." + salt;
+            final String dn = dn(sid);
             sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
+
+            if (StringUtils.isBlank(dn)) {
+                return null;
+            }
 
             if (SessionIdState.AUTHENTICATED == state) {
                 if (StringUtils.isBlank(userDn)) {
@@ -499,6 +504,7 @@ public class SessionIdService {
 
             final SessionId sessionId = new SessionId();
             sessionId.setId(sid);
+            sessionId.setDn(dn);
             sessionId.setUserDn(userDn);
             sessionId.setSessionState(sessionState);
 
@@ -721,6 +727,15 @@ public class SessionIdService {
         return true;
     }
 
+    private String dn(String p_id) {
+        final String baseDn = getBaseDn();
+        final StringBuilder sb = new StringBuilder();
+        if (Util.allNotBlank(p_id, getBaseDn())) {
+            sb.append("oxAuthSessionId=").append(p_id).append(",").append(baseDn);
+        }
+        return sb.toString();
+    }
+
     public SessionId getSessionById(String sessionId) {
         return getFromCache(sessionId);
     }
@@ -734,7 +749,7 @@ public class SessionIdService {
             final SessionId entity = getSessionById(sessionId);
             log.trace("Try to get session by id: {} ...", sessionId);
             if (entity != null) {
-                log.trace("Session id: {}", entity.getId());
+                log.trace("Session dn: {}", entity.getDn());
 
                 if (isSessionValid(entity)) {
                     return entity;
@@ -746,6 +761,10 @@ public class SessionIdService {
 
         log.trace("Failed to get session by id: {}", sessionId);
         return null;
+    }
+
+    private String getBaseDn() {
+        return staticConfiguration.getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionId sessionId) {

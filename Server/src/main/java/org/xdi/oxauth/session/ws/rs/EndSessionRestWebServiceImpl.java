@@ -225,7 +225,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         if (ldapSessionId != null) {
-            grantService.removeAllTokensBySession(ldapSessionId.getId());
+            grantService.removeAllTokensBySession(ldapSessionId.getDn());
         }
 
         if (identity != null) {
