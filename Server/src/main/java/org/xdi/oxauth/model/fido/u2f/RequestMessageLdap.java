@@ -1,11 +1,14 @@
 package org.xdi.oxauth.model.fido.u2f;
 
-import java.util.Date;
-
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * U2F base request
@@ -32,6 +35,12 @@ public class RequestMessageLdap extends BaseEntry {
     @LdapAttribute(name = "personInum")
     protected String userInum;
 
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
+
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
+
     public RequestMessageLdap() {
     }
 
@@ -46,6 +55,11 @@ public class RequestMessageLdap extends BaseEntry {
         this.creationDate = creationDate;
         this.sessionId = sessionId;
         this.userInum = userInum;
+
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(creationDate);
+        calendar.add(Calendar.SECOND, 90);
+        this.expirationDate = calendar.getTime();
     }
 
     public String getId() {
@@ -88,4 +102,19 @@ public class RequestMessageLdap extends BaseEntry {
         this.userInum = userInum;
     }
 
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
 }
