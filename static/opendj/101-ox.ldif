@@ -2551,13 +2551,13 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.38 NAME 'oxDeviceRegistration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceNotificationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
+  MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceNotificationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxDeletable $ oxAuthExpiration )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.39 NAME 'oxU2fRequest'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ personInum $ creationDate )
+  MAY ( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ personInum $ creationDate $ oxDeletable $ oxAuthExpiration )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.40 NAME 'oxMetric'
   SUP ( top )
