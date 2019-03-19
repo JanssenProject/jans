@@ -108,9 +108,9 @@ public interface IAuthorizationGrant {
 
     void setAcrValues(String authMode);
 
-    String getSessionId();
+    String getSessionDn();
 
-    void setSessionId(String sessionId);
+    void setSessionDn(String sessionDn);
 
     /**
      * Saves changes asynchronously

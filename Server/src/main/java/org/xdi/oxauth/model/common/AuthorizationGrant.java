@@ -132,7 +132,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setNonce(nonce);
                     t.setScope(scopes);
                     t.setAuthMode(getAcrValues());
-                    t.setSessionDn(getSessionId());
+                    t.setSessionDn(getSessionDn());
                     t.setAuthenticationTime(getAuthenticationTime());
                     t.setCodeChallenge(getCodeChallenge());
                     t.setCodeChallengeMethod(getCodeChallengeMethod());
@@ -213,7 +213,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, state,
                     getScopes(), includeIdTokenClaims, preProcessing);
             final String acrValues = authorizationGrant.getAcrValues();
-            final String sessionDn = authorizationGrant.getSessionId();
+            final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
                 tokenLdap.setAuthMode(acrValues);
@@ -222,7 +222,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
 
             setAcrValues(acrValues);
-            setSessionId(sessionDn);
+            setSessionDn(sessionDn);
             save();
             return idToken;
         } catch (Exception e) {
