@@ -197,6 +197,9 @@ public class CleanerTimer {
 				&& StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
 			cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());
 		}
+
+        log.debug("Built-in base dns: " + cleanServiceBaseDns);
+
 		return cleanServiceBaseDns;
 	}
 
