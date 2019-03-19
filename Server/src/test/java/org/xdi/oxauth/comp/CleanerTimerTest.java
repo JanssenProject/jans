@@ -3,13 +3,19 @@ package org.xdi.oxauth.comp;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 import org.xdi.oxauth.BaseComponentTest;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.ClientCredentialsGrant;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
@@ -50,6 +56,10 @@ public class CleanerTimerTest extends BaseComponentTest {
     private UmaPermissionService umaPermissionService;
     @Inject
     private UmaPctService umaPctService;
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+    @Inject
+    private GrantService grantService;
 
     @Test
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -116,6 +126,40 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 4. client is in persistence (not removed)
         assertNotNull(clientService.getClient(client.getClientId()));
+    }
+
+    @Test
+    public void token_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+        final Client client = createClient();
+        clientService.persist(client);
+
+        // 1. create token
+        final ClientCredentialsGrant grant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
+        final AccessToken accessToken = grant.createAccessToken(null);
+
+        // 2. token exists
+        assertNotNull(grantService.getGrantsByCode(accessToken.getCode()));
+
+        // 3. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 4. token exists
+        final TokenLdap grantLdap = grantService.getGrantsByCode(accessToken.getCode());
+        assertNotNull(grantLdap);
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -10);
+        grantLdap.setExpirationDate(calendar.getTime());
+
+        grantService.merge(grantLdap);
+
+        // 5. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 6. no token in persistence
+        assertNull(grantService.getGrantsByCode(accessToken.getCode()));
     }
 
     @Test
