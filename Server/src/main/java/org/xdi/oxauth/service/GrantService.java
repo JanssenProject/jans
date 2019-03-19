@@ -9,16 +9,10 @@ package org.xdi.oxauth.service;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
-import org.xdi.oxauth.model.audit.Action;
-import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.CacheGrant;
 import org.xdi.oxauth.model.common.ClientTokens;
@@ -356,29 +350,6 @@ public class GrantService {
         removeSilently(getGrantsByGrantId(p_grantId));
     }
 
-    public void cleanUp() {
-        try {
-            cleanUpImpl();
-        } catch (EntryPersistenceException ex) {
-            log.error("Failed to process token clean up properly", ex);
-        }
-    }
-
-    private void cleanUpImpl() {
-        BatchOperation<TokenLdap> tokenBatchService = new ProcessBatchOperation<TokenLdap>() {
-            @Override
-            public void performAction(List<TokenLdap> entries) {
-                auditLogging(entries);
-                remove(entries);
-            }
-        };
-        ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, getExpiredTokenFilter(), SearchScope.SUB, new String[]{"oxAuthTokenCode", "oxAuthClientId", "oxAuthScope", "oxAuthUserId"}, tokenBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
-    }
-
-    private Filter getExpiredTokenFilter() {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(new Date()));
-    }
-
     private void prepareBranch(final String clientId) {
         if (!ldapEntryManager.contains(SimpleBranch.class, tokenBaseDn(clientId))) {
             SimpleBranch branch = new SimpleBranch();
@@ -392,16 +363,4 @@ public class GrantService {
     private String tokenBaseDn(final String clientId) {
         return "ou=token," + clientService.buildClientDn(clientId);
     }
-
-    private void auditLogging(Collection<TokenLdap> entries) {
-        for (TokenLdap tokenLdap : entries) {
-            OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(null, Action.SESSION_DESTROYED);
-            oAuth2AuditLog.setSuccess(true);
-            oAuth2AuditLog.setClientId(tokenLdap.getClientId());
-            oAuth2AuditLog.setScope(tokenLdap.getScope());
-            oAuth2AuditLog.setUsername(tokenLdap.getUserId());
-            applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        }
-    }
-
 }
