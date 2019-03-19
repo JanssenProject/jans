@@ -1,18 +1,7 @@
 package org.xdi.oxauth.uma.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -21,9 +10,14 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.util.INumGenerator;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author yuriyz on 05/31/2017.
@@ -176,29 +170,6 @@ public class UmaPctService {
     public String branchBaseDn() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=pct,%s", umaBaseDn);
-    }
-
-    public void cleanup(final Date now) {
-        prepareBranch();
-
-        BatchOperation<UmaPCT> batchService = new ProcessBatchOperation<UmaPCT>() {
-            @Override
-            public void performAction(List<UmaPCT> entries) {
-                for (UmaPCT p : entries) {
-                    try {
-                        remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-
-        };
-        ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, gethExpiredUmaPctFilter(now), SearchScope.SUB, new String[] { "oxAuthExpiration" }, batchService, 0, 0, CleanerTimer.BATCH_SIZE);
-    }
-
-    private Filter gethExpiredUmaPctFilter(Date date) {
-        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(date));
     }
 
     public void merge(UmaPCT pct) {

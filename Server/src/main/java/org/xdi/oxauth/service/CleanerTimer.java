@@ -166,15 +166,16 @@ public class CleanerTimer {
 						}
 					};
 
-					Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("oxDeletable", "true"),
-							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now)));
+					Filter filter = Filter.createANDFilter(
+					        Filter.createEqualityFilter("oxDeletable", "true"),
+							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now))
+                    );
 
 					ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB,
 							new String[] { "oxAuthExpiration", "oxDeletable" }, batchOperation, 0, chunkSize,
 							chunkSize);
 
-					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn,
-							started.elapsed(TimeUnit.MILLISECONDS));
+					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
 				} catch (Exception e) {
 					log.error("Failed to process clean up for baseDn: {}", baseDn);
 				}
@@ -182,8 +183,6 @@ public class CleanerTimer {
 
 			processCache(now);
 			processAuthorizationGrantList();
-
-			this.umaPctService.cleanup(now);
 
 			processU2fRequests();
 			processU2fDeviceRegistrations();
