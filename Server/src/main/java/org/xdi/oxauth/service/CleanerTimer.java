@@ -26,7 +26,6 @@ import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
-import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.CacheProvider;
@@ -72,9 +71,6 @@ public class CleanerTimer {
 	private UmaPctService umaPctService;
 
 	@Inject
-	private UmaPermissionService umaPermissionService;
-
-	@Inject
 	private UmaResourceService umaResourceService;
 
 	@Inject
@@ -117,8 +113,7 @@ public class CleanerTimer {
 		int interval = appConfiguration.getCleanServiceInterval();
 		if (interval < 0) {
 			log.info("Cleaner Timer is disabled.");
-			log.warn(
-					"Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
 			return;
 		}
 
@@ -188,7 +183,6 @@ public class CleanerTimer {
 			processCache(now);
 			processAuthorizationGrantList();
 
-			this.umaPermissionService.cleanup(now);
 			this.umaPctService.cleanup(now);
 
 			processU2fRequests();
