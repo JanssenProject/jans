@@ -9,6 +9,8 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.ClientCredentialsGrant;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -19,6 +21,7 @@ import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
@@ -65,6 +68,8 @@ public class CleanerTimerTest extends BaseComponentTest {
     private GrantService grantService;
     @Inject
     private RegistrationService u2fRegistrationService;
+    @Inject
+    private DeviceRegistrationService deviceRegistrationService;
 
     @Test
     public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
@@ -131,6 +136,51 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 4. client is in persistence (not removed)
         assertNotNull(clientService.getClient(client.getClientId()));
+    }
+
+    @Test
+    public void u2fDevice_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+        final Client client = createClient();
+        clientService.persist(client);
+
+        // 1. create device
+        String userInum = "";
+        String appId = "https://testapp.com";
+        final DeviceRegistration device = new DeviceRegistration();
+        device.setStatus(DeviceRegistrationStatus.ACTIVE);
+        device.setApplication(appId);
+        device.setId(String.valueOf(System.currentTimeMillis()));
+        device.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, device.getId()));
+
+        deviceRegistrationService.addOneStepDeviceRegistration(device);
+
+        // 2. device exists
+        assertNotNull(deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId()));
+
+        // 3. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 4. device exists
+        assertNotNull(deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId()));
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -10);
+        device.setExpirationDate(calendar.getTime());
+
+        deviceRegistrationService.merge(device);
+
+        // 5. clean up
+        cleanerTimer.processImpl();
+        cacheService.clear();
+
+        // 6. no device in persistence
+        try {
+            deviceRegistrationService.findUserDeviceRegistration(userInum, device.getId());
+            throw new AssertionError("No exception, expected EntryPersistenceException on find.");
+        } catch (EntryPersistenceException e) {
+            // ignore
+        }
     }
 
     @Test

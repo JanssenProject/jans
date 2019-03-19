@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -26,6 +18,13 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Provides operations with user U2F devices
@@ -187,6 +186,9 @@ public class DeviceRegistrationService {
 	}
 
 	public String getBaseDnForU2fUserDevices(String userInum) {
+        if (StringHelper.isEmpty(userInum)) {
+            return getDnForOneStepU2fDevice("");
+        }
 		final String userBaseDn = userService.getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=@!1111,o=gluu"
 		return String.format("ou=fido,%s", userBaseDn);
 	}
@@ -214,4 +216,7 @@ public class DeviceRegistrationService {
 		return hash;
     }
 
+    public void merge(DeviceRegistration device) {
+        ldapEntryManager.merge(device);
+    }
 }
