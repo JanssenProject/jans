@@ -18,15 +18,14 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.CacheProvider;
+import org.xdi.service.cache.CacheProviderType;
 import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.CleanerEvent;
 import org.xdi.service.cdi.event.Scheduled;
@@ -39,7 +38,9 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,9 +64,6 @@ public class CleanerTimer {
 	private PersistenceEntryManager ldapEntryManager;
 
 	@Inject
-	private GrantService grantService;
-
-	@Inject
 	private UmaPctService umaPctService;
 
 	@Inject
@@ -83,12 +81,6 @@ public class CleanerTimer {
 
 	@Inject
 	private RegistrationPersistenceService registrationPersistenceService;
-
-	@Inject
-	private MetricService metricService;
-
-	@Inject
-	private DeviceRegistrationService deviceRegistrationService;
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -141,9 +133,11 @@ public class CleanerTimer {
 	}
 
 	public void processImpl() {
-		try {
-			Date now = new Date();
-			final int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+        int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+        if (chunkSize <= 0)
+            chunkSize = BATCH_SIZE;
+        try {
+            Date now = new Date();
 
 			for (String baseDn : createCleanServiceBaseDns()) {
 				try {
@@ -179,12 +173,10 @@ public class CleanerTimer {
 				}
 			}
 
-			processCache(now); // we have cache not only in persistence
+			processCache(now);
 
-			this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
-			this.authenticationPersistenceService.cleanup(now, BATCH_SIZE);
-
-			processMetricEntries();
+			this.registrationPersistenceService.cleanup(now, chunkSize);
+			this.authenticationPersistenceService.cleanup(now, chunkSize);
 		} catch (Exception e) {
 			log.error("Failed to process clean up.", e);
 		}
@@ -210,25 +202,11 @@ public class CleanerTimer {
 
 	private void processCache(Date now) {
 		try {
-			cacheProvider.cleanup(now);
+            if (cacheConfiguration.getCacheProviderType() != CacheProviderType.NATIVE_PERSISTENCE) {
+                cacheProvider.cleanup(now);
+            }
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}
 	}
-
-	private void processMetricEntries() {
-		log.debug("Start metric entries clean up");
-
-		int keepDataDays = appConfiguration.getMetricReporterKeepDataDays();
-
-		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-		calendar.add(Calendar.DATE, -keepDataDays);
-		Date expirationDate = calendar.getTime();
-
-		metricService.removeExpiredMetricEntries(expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum(),
-				0, BATCH_SIZE);
-
-		log.debug("End metric entries clean up");
-	}
-
 }
