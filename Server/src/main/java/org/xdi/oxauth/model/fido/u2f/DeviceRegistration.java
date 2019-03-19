@@ -5,11 +5,6 @@
  */
 package org.xdi.oxauth.model.fido.u2f;
 
-import java.io.Serializable;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -20,6 +15,14 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.util.Base64Util;
 
+import java.io.Serializable;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 /**
  * U2F Device registration
  *
@@ -29,7 +32,7 @@ import org.xdi.oxauth.model.util.Base64Util;
 @LdapObjectClass(values = {"top", "oxDeviceRegistration"})
 public class DeviceRegistration extends BaseEntry implements Serializable {
 
-	private static final long serialVersionUID = -4542931562244920584L;
+	private static final long serialVersionUID = -4542931562244920585L;
 
 	@LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
 	private String id;
@@ -75,6 +78,12 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
     @LdapAttribute(name = "oxLastAccessTime")
     private Date lastAccessTime;
+
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
+
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
 	
 	public DeviceRegistration() {}
 
@@ -87,6 +96,8 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.keyHandle = keyHandle;
 		this.keyHandleHashCode = keyHandleHashCode;
 		this.creationDate = creationDate;
+
+        updateExpirationDate();
 	}
 
 	public DeviceRegistration(String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
@@ -195,9 +206,19 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
+        updateExpirationDate();
+    }
 
-	public DeviceData getDeviceData() {
+    private void updateExpirationDate() {
+        if (creationDate != null) {
+            Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            calendar.setTime(creationDate);
+            calendar.add(Calendar.SECOND, 90);
+            this.expirationDate = calendar.getTime();
+        }
+    }
+
+    public DeviceData getDeviceData() {
 		return deviceData;
 	}
 
@@ -229,16 +250,41 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		counter = clientCounter;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceRegistration [id=").append(id).append(", displayName=").append(displayName).append(", description=")
-				.append(description).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
-				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application)
-				.append(", keyHandle=").append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", deviceData=")
-				.append(deviceData).append(", creationDate=").append(creationDate).append(", lastAccessTime=").append(lastAccessTime)
-				.append("]");
-		return builder.toString();
-	}
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
 
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceRegistration{" +
+                "id='" + id + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", description='" + description + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", deviceRegistrationConfiguration=" + deviceRegistrationConfiguration +
+                ", deviceNotificationConf='" + deviceNotificationConf + '\'' +
+                ", counter=" + counter +
+                ", status=" + status +
+                ", application='" + application + '\'' +
+                ", keyHandle='" + keyHandle + '\'' +
+                ", keyHandleHashCode=" + keyHandleHashCode +
+                ", deviceData=" + deviceData +
+                ", creationDate=" + creationDate +
+                ", lastAccessTime=" + lastAccessTime +
+                ", expirationDate=" + expirationDate +
+                ", deletable=" + deletable +
+                "} " + super.toString();
+    }
 }
