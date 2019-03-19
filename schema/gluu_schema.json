@@ -5466,6 +5466,8 @@
                 "oxDeviceData",
                 "oxCounter",
                 "oxStatus",
+                "oxDeletable",
+                "oxAuthExpiration",
                 "creationDate",
                 "oxLastAccessTime",
                 "oxTrustMetaLastModified",
@@ -5491,6 +5493,8 @@
                 "oxRequestId",
                 "oxRequest",
                 "oxSessionStateId",
+                "oxDeletable",
+                "oxAuthExpiration",
                 "personInum",
                 "creationDate"
             ],
