@@ -5,14 +5,14 @@
  */
 package org.xdi.model.metric.ldap;
 
-import java.util.Date;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
+
+import java.util.Date;
 
 /**
  * Base metric entry
@@ -43,6 +43,11 @@ public class MetricEntry {
 
     @LdapAttribute(name = "creationDate")
     private Date creationDate;
+
+    @LdapAttribute(name = "oxAuthExpiration")
+    private Date expirationDate;
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
 
     public MetricEntry() {
     }
@@ -109,13 +114,35 @@ public class MetricEntry {
         this.creationDate = creationDate;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=")
-                .append(endDate).append(", applicationType=").append(applicationType).append(", metricType=").append(metricType)
-                .append(", creationDate=").append(creationDate).append("]");
-        return builder.toString();
+    public Date getExpirationDate() {
+        return expirationDate;
     }
 
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
+
+
+    @Override
+    public String toString() {
+        return "MetricEntry{" +
+                "dn='" + dn + '\'' +
+                ", id='" + id + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", applicationType=" + applicationType +
+                ", metricType=" + metricType +
+                ", creationDate=" + creationDate +
+                ", expirationDate=" + expirationDate +
+                ", deletable=" + deletable +
+                '}';
+    }
 }

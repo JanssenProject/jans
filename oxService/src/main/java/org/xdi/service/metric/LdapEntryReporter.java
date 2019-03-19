@@ -6,16 +6,9 @@
 
 package org.xdi.service.metric;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
+import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
+import org.apache.commons.lang.time.DateUtils;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.counter.CounterMetricData;
@@ -24,16 +17,8 @@ import org.xdi.model.metric.ldap.MetricEntry;
 import org.xdi.model.metric.timer.TimerMetricData;
 import org.xdi.model.metric.timer.TimerMetricEntry;
 
-import com.codahale.metrics.Clock;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.ScheduledReporter;
-import com.codahale.metrics.Snapshot;
-import com.codahale.metrics.Timer;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A reporter which outputs measurements to LDAP
@@ -253,6 +238,7 @@ public final class LdapEntryReporter extends ScheduledReporter {
             metricEntry.setStartDate(startTime);
             metricEntry.setEndDate(endTime);
             metricEntry.setCreationDate(creationTime);
+            metricEntry.setExpirationDate(DateUtils.addDays(creationTime, metricService.getEntryLifetimeInDays()));
         }
     }
 

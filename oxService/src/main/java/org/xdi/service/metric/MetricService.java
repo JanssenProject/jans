@@ -5,25 +5,9 @@ package org.xdi.service.metric;
  * Copyright (c) 2014, Gluu
  */
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.DefaultBatchOperation;
@@ -39,9 +23,13 @@ import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.metric.inject.ReportMetric;
 import org.xdi.util.StringHelper;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Metric service
@@ -64,12 +52,15 @@ public abstract class MetricService implements Serializable {
 
     private Set<MetricType> registeredMetricTypes;
 
+    private int entryLifetimeInDays;
+
     @Inject
     private Logger log;
 
-    public void initTimer(int metricInterval) {
+    public void initTimer(int metricInterval, int entryLifetimeInDays) {
         this.metricRegistry = new MetricRegistry();
         this.registeredMetricTypes = new HashSet<MetricType>();
+        this.entryLifetimeInDays = entryLifetimeInDays;
 
         LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
@@ -78,6 +69,10 @@ public abstract class MetricService implements Serializable {
             metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
         }
         ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
+    }
+
+    public int getEntryLifetimeInDays() {
+        return entryLifetimeInDays;
     }
 
     @Asynchronous
