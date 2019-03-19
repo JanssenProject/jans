@@ -22,7 +22,6 @@ import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
-import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
@@ -181,9 +180,8 @@ public class CleanerTimer {
 				}
 			}
 
-			processCache(now);
+			processCache(now); // we have cache not only in persistence
 
-			processU2fRequests();
 			processU2fDeviceRegistrations();
 
 			this.registrationPersistenceService.cleanup(now, BATCH_SIZE);
@@ -196,11 +194,14 @@ public class CleanerTimer {
 	}
 
 	public Set<String> createCleanServiceBaseDns() {
-		final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
-		cleanServiceBaseDns.add(umaPctService.branchBaseDn());
-		cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getU2fBase());
+        final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
+
+        final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
+        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
+        cleanServiceBaseDns.add(umaPctService.branchBaseDn());
+        cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
+        cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
+        cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
 		if (cacheConfiguration.getNativePersistenceConfiguration() != null
@@ -216,33 +217,6 @@ public class CleanerTimer {
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}
-	}
-
-	private void processU2fRequests() {
-		log.debug("Start U2F request clean up");
-
-		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-		calendar.add(Calendar.SECOND, -90);
-		final Date expirationDate = calendar.getTime();
-
-		BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new ProcessBatchOperation<RequestMessageLdap>() {
-			@Override
-			public void performAction(List<RequestMessageLdap> entries) {
-				for (RequestMessageLdap requestMessageLdap : entries) {
-					try {
-						log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
-								requestMessageLdap.getRequestId(), requestMessageLdap.getCreationDate());
-						u2fRequestService.removeRequestMessage(requestMessageLdap);
-					} catch (Exception e) {
-						log.error("Failed to remove entry", e);
-					}
-				}
-			}
-		};
-
-		u2fRequestService.getExpiredRequestMessages(requestMessageLdapBatchService, expirationDate,
-				new String[] { "oxRequestId", "creationDate" }, 0, BATCH_SIZE);
-		log.debug("End U2F request clean up");
 	}
 
 	private void processU2fDeviceRegistrations() {
