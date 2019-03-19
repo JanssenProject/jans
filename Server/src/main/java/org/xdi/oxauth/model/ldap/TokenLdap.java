@@ -37,6 +37,8 @@ public class TokenLdap implements Serializable {
     private Date creationDate;
     @LdapAttribute(name = "oxAuthExpiration")
     private Date expirationDate;
+    @LdapAttribute(name = "oxDeletable")
+    private boolean deletable = true;
     @LdapAttribute(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
     @LdapAttribute(name = "oxAuthScope")
@@ -86,6 +88,14 @@ public class TokenLdap implements Serializable {
 
     public final void setAttributes(TokenAttributes attributes) {
         this.attributes = attributes;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
     }
 
     public String getId() {

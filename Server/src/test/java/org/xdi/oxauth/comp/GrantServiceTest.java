@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.comp;
 
-import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
@@ -41,14 +40,6 @@ public class GrantServiceTest extends BaseComponentTest {
 		this.m_clientId = clientId;
 		m_tokenLdap = createTestToken();
 		grantService.persist(m_tokenLdap);
-	}
-
-	@Test(dependsOnMethods = "createTestToken")
-	public void testCleanUp() {
-		grantService.cleanUp(); // clean up must remove just created token
-								// because expiration is set to new Date()
-		final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
-		Assert.assertTrue(t == null);
 	}
 
 	@Test(dependsOnMethods = "createTestToken")
