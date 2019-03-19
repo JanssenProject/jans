@@ -1067,6 +1067,11 @@ class Setup(object):
         p = Properties.Properties()
         try:
             p.load(open(fn))
+
+            if p.getProperty('ldap_type') == 'openldap':
+                self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
+                p.setProperty('ldap_type', 'opendj')
+
             properties_list = p.keys()
             for prop in properties_list:
                 try:
