@@ -569,7 +569,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                     // Store acr_values
                                     authorizationGrant.setAcrValues(acrValuesStr);
-                                    authorizationGrant.setSessionId(sessionUser.getId());
+                                    authorizationGrant.setSessionDn(sessionUser.getDn());
                                     authorizationGrant.save(); // call save after object modification!!!
 
                                     authorizationCode = authorizationGrant.getAuthorizationCode();
@@ -589,7 +589,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
-                                        authorizationGrant.setSessionId(sessionUser.getId());
+                                        authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification!!!
                                     }
                                     newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"));
@@ -612,7 +612,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                         // Store authentication acr values
                                         authorizationGrant.setAcrValues(acrValuesStr);
-                                        authorizationGrant.setSessionId(sessionUser.getId());
+                                        authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                     }
                                     IdToken idToken = authorizationGrant.createIdToken(
