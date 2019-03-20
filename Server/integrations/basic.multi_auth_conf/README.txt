@@ -16,7 +16,7 @@ This module has only one property:
         "bindPassword":"encoded_pass",
         "useSSL":false,
         "maxConnections":3,
-        "baseDNs":["ou=people,o=@!1111,o=gluu"],
+        "baseDNs":["ou=people,o=gluu"],
         "loginAttributes":["uid"],
         "localLoginAttributes":["uid"]
      },
@@ -27,7 +27,7 @@ This module has only one property:
         "bindPassword":"encoded_pass",
         "useSSL":false,
         "maxConnections":3,
-        "baseDNs":["ou=people,o=@!1111,o=gluu"],
+        "baseDNs":["ou=people,o=gluu"],
         "loginAttributes":["mail"],
         "localLoginAttributes":["mail"]
      }
