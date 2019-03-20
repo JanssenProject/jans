@@ -1,4 +1,4 @@
-dn: inum=@!1111!E521.2AE6,ou=scripts,o=@!1111,o=gluu
+dn: inum=@!1111!E521.2AE6,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 displayName: gplus

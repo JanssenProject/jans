@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.UUID;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
@@ -30,19 +32,12 @@ public class InumService {
     @Inject @Any
     private IdGenerator idGenService;
 
-    @Inject
-    private AppConfiguration appConfiguration;
-
     public String generateClientInum() {
-        return generateClientInum(appConfiguration.getOrganizationInum());
-    }
-
-    public String generateClientInum(String p_organizationInum) {
-        return idGenService.generateId(IdType.CLIENTS, p_organizationInum);
+        return UUID.randomUUID().toString();
     }
 
     public String generatePeopleInum() {
-        return idGenService.generateId(IdType.PEOPLE, appConfiguration.getOrganizationInum());
+        return idGenService.generateId(IdType.PEOPLE, UUID.randomUUID().toString());
     }
 
     public String generateInum() {
