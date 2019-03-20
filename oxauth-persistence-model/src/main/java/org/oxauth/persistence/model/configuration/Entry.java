@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.oxauth.persistence.model.appliance;
+package org.oxauth.persistence.model.configuration;
 
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 

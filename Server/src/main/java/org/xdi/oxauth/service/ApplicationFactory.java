@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManagerFactory;
-import org.oxauth.persistence.model.appliance.GluuAppliance;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
@@ -41,7 +41,7 @@ public class ApplicationFactory {
     private ConfigurationFactory configurationFactory;
 
     @Inject
-    private ApplianceService applianceService;
+    private ConfigurationService configurationService;
 
     @Inject
     private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
@@ -65,10 +65,10 @@ public class ApplicationFactory {
 
 	@Produces @ApplicationScoped
 	public CacheConfiguration getCacheConfiguration() {
-		CacheConfiguration cacheConfiguration = applianceService.getAppliance().getCacheConfiguration();
+		CacheConfiguration cacheConfiguration = configurationService.getConfiguration().getCacheConfiguration();
 		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-			log.error("Failed to read cache configuration from LDAP. Please check appliance oxCacheConfiguration attribute " +
-					"that must contain cache configuration JSON represented by CacheConfiguration.class. Applieance DN: " + applianceService.getAppliance().getDn());
+			log.error("Failed to read cache configuration from LDAP. Please check configuration oxCacheConfiguration attribute " +
+					"that must contain cache configuration JSON represented by CacheConfiguration.class. Applieance DN: " + configurationService.getConfiguration().getDn());
 			log.info("Creating fallback IN-MEMORY cache configuration ... ");
 
 			cacheConfiguration = new CacheConfiguration();
@@ -84,14 +84,14 @@ public class ApplicationFactory {
 
 	@Produces @RequestScoped
 	public SmtpConfiguration getSmtpConfiguration() {
-		GluuAppliance appliance = applianceService.getAppliance();
-		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();
+		GluuConfiguration configuration = configurationService.getConfiguration();
+		SmtpConfiguration smtpConfiguration = configuration.getSmtpConfiguration();
 		
 		if (smtpConfiguration == null) {
 			return new SmtpConfiguration();
 		}
 
-		applianceService.decryptSmtpPassword(smtpConfiguration);
+		configurationService.decryptSmtpPassword(smtpConfiguration);
 
     return smtpConfiguration;
 	}

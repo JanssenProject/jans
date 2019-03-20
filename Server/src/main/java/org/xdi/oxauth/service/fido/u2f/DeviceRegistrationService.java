@@ -189,12 +189,12 @@ public class DeviceRegistrationService {
         if (StringHelper.isEmpty(userInum)) {
             return getDnForOneStepU2fDevice("");
         }
-		final String userBaseDn = userService.getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=@!1111,o=gluu"
+		final String userBaseDn = userService.getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=gluu"
 		return String.format("ou=fido,%s", userBaseDn);
 	}
 
 	public String getDnForOneStepU2fDevice(String deviceRegistrationId) {
-		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=gluu
 		if (StringHelper.isEmpty(deviceRegistrationId)) {
 			return String.format("ou=registered_devices,%s", u2fBaseDn);
 		}

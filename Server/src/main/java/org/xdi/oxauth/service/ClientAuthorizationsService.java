@@ -151,8 +151,8 @@ public class ClientAuthorizationsService {
     }
 
     public String getBaseDnForClientAuthorizations(String userInum) {
-        final String userBaseDn = userService.getDnForUser(userInum); // inum=1234,ou=people,o=@!1111,o=gluu"
-        return String.format("ou=clientAuthorizations,%s", userBaseDn); // "ou=clientAuthorizations,inum=1234,ou=people,o=@!1111,o=gluu"
+        final String userBaseDn = userService.getDnForUser(userInum); // inum=1234,ou=people,o=gluu"
+        return String.format("ou=clientAuthorizations,%s", userBaseDn); // "ou=clientAuthorizations,inum=1234,ou=people,o=gluu"
     }
 
     private String getCacheKey(String userInum, String clientId) {
