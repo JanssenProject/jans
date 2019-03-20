@@ -5521,7 +5521,7 @@
                 "oxMetricType",
                 "creationDate",
                 "oxDeletable",
-                "oxAuthExpirationDate",
+                "oxAuthExpiration",
                 "oxData"
             ],
             "must": [
