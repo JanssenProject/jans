@@ -6,15 +6,6 @@
 
 package org.xdi.oxauth.dev;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
@@ -23,6 +14,14 @@ import org.xdi.oxauth.model.error.ErrorMessage;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -95,7 +94,6 @@ public class ConfSerialization {
 		baseDn.setClients("ou=clients,o=@!1111,o=gluu");
 		baseDn.setScopes("ou=scopes,o=@!1111,o=gluu");
 		baseDn.setAttributes("ou=attributes,o=@!1111,o=gluu");
-		baseDn.setSessionId("ou=session,o=@!1111,o=gluu");
 
 		final StaticConfiguration c = new StaticConfiguration();
 		c.setBaseDn(baseDn);
