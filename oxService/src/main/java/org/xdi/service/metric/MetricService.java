@@ -119,11 +119,6 @@ public abstract class MetricService implements Serializable {
         // Create ou=application_type branch if needed
         String applicationBaseDn = buildDn(null, null, applicationType);
         if (!containsBranch(applicationBaseDn)) {
-        	// Create ou=appliance_inum branch if needed
-        	String applianceBaseDn = buildDn(null, null, null);
-        	if (!containsBranch(applianceBaseDn)) {
-        		createBranch(applianceBaseDn, applianceInum());
-        	}
         	createBranch(applicationBaseDn, applicationType.getValue());
         }
     }
@@ -162,7 +157,7 @@ public abstract class MetricService implements Serializable {
         return getEntryManager().find(metricType.getMetricEntryType(), metricEventDn);
     }
 
-    public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
+    public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType,
             List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
         prepareBranch(null, applicationType);
 
@@ -173,7 +168,7 @@ public abstract class MetricService implements Serializable {
         }
 
         // Prepare list of DNs
-        Set<String> metricDns = getBaseDnForPeriod(applicationType, applianceInum, startDate, endDate);
+        Set<String> metricDns = getBaseDnForPeriod(applicationType, startDate, endDate);
 
         if (metricDns.size() == 0) {
             return result;
@@ -220,19 +215,19 @@ public abstract class MetricService implements Serializable {
     }
 
     public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType,
-            String applianceInum, int count, int chunkSize) {
-        String baseDn = buildDn(null, null, applicationType, applianceInum);
+            int count, int chunkSize) {
+        String baseDn = buildDn(null, null, applicationType);
 
         Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
         return getEntryManager().findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0,
                 count, chunkSize);
     }
 
-    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int count,
+    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, int count,
             int chunkSize) {
         createApplicationBaseBranch(getApplicationType());
 
-        final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
+        final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, expirationDate, new Date());
         // Remove expired entries
         for (final String baseDnForPeriod : keepBaseDnForPeriod) {
             DefaultBatchOperation<MetricEntry> metricEntryBatchOperation = new DefaultBatchOperation<MetricEntry>() {
@@ -259,7 +254,7 @@ public abstract class MetricService implements Serializable {
 
             @Override
             public void performAction(List<SimpleBranch> objects) {
-                String baseDn = buildDn(null, null, applicationType, applianceInum);
+                String baseDn = buildDn(null, null, applicationType);
                 Set<String> periodBranchesStrings = new HashSet<String>();
                 for (SimpleBranch periodBranch : objects) {
                     if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
@@ -274,10 +269,10 @@ public abstract class MetricService implements Serializable {
                 }
             }
         };
-        findAllPeriodBranches(batchOperation, applicationType, applianceInum, count, chunkSize);
+        findAllPeriodBranches(batchOperation, applicationType, count, chunkSize);
     }
 
-    private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
+    private Set<String> getBaseDnForPeriod(ApplicationType applicationType, Date startDate, Date endDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         cal.setTime(startDate);
@@ -295,7 +290,7 @@ public abstract class MetricService implements Serializable {
             int currentMonth = cal.get(Calendar.MONTH);
             Date currentStartDate = cal.getTime();
 
-            String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
+            String baseDn = buildDn(null, currentStartDate, applicationType);
             if (containsBranch(baseDn)) {
                 metricDns.add(baseDn);
             }
@@ -342,16 +337,11 @@ public abstract class MetricService implements Serializable {
         counter.inc();
     }
 
-    public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
-        return buildDn(uniqueIdentifier, creationDate, applicationType, null);
-    }
-
     /*
      * Should return similar to this pattern DN:
-     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=
-     * metric,ou=organization_name,o=gluu
+     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=metric,ou=organization_name,o=gluu
      */
-    public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String currentApplianceInum) {
+    public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
         final StringBuilder dn = new StringBuilder();
         if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
             dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
@@ -363,11 +353,6 @@ public abstract class MetricService implements Serializable {
             dn.append(String.format("ou=%s,", applicationType.getValue()));
         }
 
-        if (currentApplianceInum == null) {
-            dn.append(String.format("ou=%s,", applianceInum()));
-        } else {
-            dn.append(String.format("ou=%s,", currentApplianceInum));
-        }
         dn.append(baseDn());
 
         return dn.toString();
@@ -379,9 +364,6 @@ public abstract class MetricService implements Serializable {
 
     // Should return ou=metric,o=gluu
     public abstract String baseDn();
-
-    // Should return appliance Inum
-    public abstract String applianceInum();
 
     public abstract MetricService getMetricServiceInstance();
 
