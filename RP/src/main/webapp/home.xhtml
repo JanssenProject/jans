@@ -957,7 +957,10 @@
     }
 
     if (params != null) {
-		document.getElementById("mainForm:authorizationResponse").value = params;
+		var authorizationResponse = document.getElementById("mainForm:authorizationResponse");
+		if (authorizationResponse != null) {
+			authorizationResponse.value = params;
+		}
 
         for (var i = 0; i < params.length; i++) {
             var param = params[i].split("=");
