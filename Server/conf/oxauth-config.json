@@ -198,7 +198,6 @@
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "organizationInum":"${config.oxauth.organization}",
     "oxId":"https://${server.name}/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
@@ -229,7 +228,7 @@
             "filter":"myCustomAttr1={0}",
             "bind":false,
             "bindPasswordAttribute":"oxAuthClientSecret",
-            "baseDn":"ou=clients,o=${config.oxauth.organization},o=gluu"
+            "baseDn":"ou=clients,o=gluu"
         }
     ],
     "applianceInum":"${config.oxauth.appliance}",

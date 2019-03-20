@@ -71,7 +71,7 @@ public class GrantService {
     }
 
     public String clientsBaseDn() {
-        return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
+        return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=gluu
     }
 
     public void merge(TokenLdap p_token) {

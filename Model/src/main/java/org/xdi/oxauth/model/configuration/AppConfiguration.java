@@ -99,7 +99,6 @@ public class AppConfiguration implements Configuration {
     private int keyRegenerationInterval;
     private String defaultSignatureAlgorithm;
     private String oxOpenIdConnectVersion;
-    private String organizationInum;
     private String oxId;
     private Boolean dynamicRegistrationEnabled;
     private int dynamicRegistrationExpirationTime = -1;
@@ -124,7 +123,6 @@ public class AppConfiguration implements Configuration {
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
-    private String applianceInum;
     private int sessionIdUnusedLifetime;
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
@@ -880,14 +878,6 @@ public class AppConfiguration implements Configuration {
         this.oxOpenIdConnectVersion = oxOpenIdConnectVersion;
     }
 
-    public String getOrganizationInum() {
-        return organizationInum;
-    }
-
-    public void setOrganizationInum(String organizationInum) {
-        this.organizationInum = organizationInum;
-    }
-
     public String getOxId() {
         return oxId;
     }
@@ -1053,14 +1043,6 @@ public class AppConfiguration implements Configuration {
         }
 
         return corsConfigurationFilters;
-    }
-
-    public String getApplianceInum() {
-        return applianceInum;
-    }
-
-    public void setApplianceInum(String applianceInum) {
-        this.applianceInum = applianceInum;
     }
 
     public int getSessionIdUnusedLifetime() {
