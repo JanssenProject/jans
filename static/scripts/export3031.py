@@ -762,43 +762,12 @@ class Exporter(object):
                     return line.split('=')[-1].strip()
 
 
-    def getLDAPServerTypeChoice(self):
-        
-        if self.cur_ldap == 'openldap':
-            cur_choice = 1
-        else:
-            cur_choice = 2
-        
-        while True:
-            self.choice = raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [{0}]: ".format(cur_choice))
-            if not self.choice.strip():
-                self.choice = cur_choice
-                break
-
-            if self.choice == '1' or self.choice == '2':
-                self.choice = int(self.choice)
-                break
-            else:
-                print ("Invalid option. Please enter either 1 or 2.")
-        
-        if self.choice == 1:
-            print "Target LDAP Server is OpenLDAP"
-        else:
-            print "Target LDAP Server is OpenDJ"
-
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
         props = {}
         props['ldapPass'] = self.getOutput([self.cat, self.passwordFile]).strip()
 
-        ldap_type = 'openldap'
-        if self.choice == 1:
-            ldap_type = 'openldap'
-        elif self.choice == 2:
-            ldap_type = 'opendj'
-            props['opendj_version'] = 3.0
-
-        props['ldap_type'] = ldap_type
+        props['ldap_type'] = 'opendj'
         props['hostname'] = self.getOutput([self.hostname]).strip()
         props['inumAppliance'] = self.getOutput(
             [self.grep, "^inum", "%s/ldif/appliance.ldif" % self.backupDir]
@@ -944,21 +913,20 @@ class Exporter(object):
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
-        print("            Gluu Server Data Export Tool For v3.1.x            ")
+        print("            Gluu Server Data Export Tool For v3.1.x          ")
         print("-------------------------------------------------------------")
         print("")
         # self.stopOpenDJ()
         # self.editLdapConfig()
         # self.startOpenDJ()
         self.inumOrg = self.getProp('inumOrg')
-        self.getLDAPServerTypeChoice()
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
         self.getLdif()
         self.genProperties()
         self.removeLdapConfig()
-        if self.cur_ldap == 'openldap' and self.choice == 2:
+        if self.cur_ldap == 'openldap':
             self.fixLdapBindDN()
         print("")
         print("-------------------------------------------------------------")
