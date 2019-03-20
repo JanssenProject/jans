@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.oxauth.persistence.model.appliance;
+package org.oxauth.persistence.model.configuration;
 
 import java.io.Serializable;
 import java.util.List;
@@ -19,13 +19,13 @@ import org.xdi.model.SmtpConfiguration;
 import org.xdi.service.cache.CacheConfiguration;
 
 /**
- * Gluu Appliance
+ * Gluu Configuration
  *
  * @author Yuriy Movchan Date: 08.27.2012
  */
 @LdapEntry
-@LdapObjectClass(values = { "top", "gluuAppliance" })
-public class GluuAppliance extends InumEntry implements Serializable {
+@LdapObjectClass(values = { "top", "gluuConfiguration" })
+public class GluuConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -2818003894646725601L;
 
@@ -100,7 +100,7 @@ public class GluuAppliance extends InumEntry implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("GluuAppliance [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", oxIDPAuthentication=")
+		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", oxIDPAuthentication=")
 				.append(oxIDPAuthentication).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
 				.append("]");
 		return builder.toString();
