@@ -28,8 +28,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String baseDN;
 
-    private String orgInum;
-    private String orgIname;
     private String orgSupportEmail;
 
     private String applicationInum;
@@ -201,22 +199,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setBaseDN(String baseDN) {
         this.baseDN = baseDN;
-    }
-
-    public String getOrgInum() {
-        return orgInum;
-    }
-
-    public void setOrgInum(String orgInum) {
-        this.orgInum = orgInum;
-    }
-
-    public String getOrgIname() {
-        return orgIname;
-    }
-
-    public void setOrgIname(String orgIname) {
-        this.orgIname = orgIname;
     }
 
     public String getOrgSupportEmail() {
