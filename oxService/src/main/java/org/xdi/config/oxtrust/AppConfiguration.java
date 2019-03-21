@@ -32,8 +32,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private String orgIname;
     private String orgSupportEmail;
 
-    private String applianceInum;
-    private String applianceUrl;
+    private String applicationInum;
+    private String applicationUrl;
 
     private String baseEndpoint;
 
@@ -53,7 +53,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String ldifStore;
 
-    private boolean updateApplianceStatus;
+    private boolean updateStatus;
 
     private String svnConfigurationStoreRoot;
     private String svnConfigurationStorePassword;
@@ -227,20 +227,20 @@ public class AppConfiguration implements Configuration, Serializable {
         this.orgSupportEmail = orgSupportEmail;
     }
 
-    public String getApplianceInum() {
-        return applianceInum;
+    public String getApplicationInum() {
+        return applicationInum;
     }
 
-    public void setApplianceInum(String applianceInum) {
-        this.applianceInum = applianceInum;
+    public void setApplicationInum(String applicationInum) {
+        this.applicationInum = applicationInum;
     }
 
-    public String getApplianceUrl() {
-        return applianceUrl;
+    public String getApplicationUrl() {
+        return applicationUrl;
     }
 
-    public void setApplianceUrl(String applianceUrl) {
-        this.applianceUrl = applianceUrl;
+    public void setApplicationUrl(String applicationUrl) {
+        this.applicationUrl = applicationUrl;
     }
 
     public String getBaseEndpoint() {
@@ -339,12 +339,12 @@ public class AppConfiguration implements Configuration, Serializable {
         this.ldifStore = ldifStore;
     }
 
-    public boolean isUpdateApplianceStatus() {
-        return updateApplianceStatus;
+    public boolean isUpdateStatus() {
+        return updateStatus;
     }
 
-    public void setUpdateApplianceStatus(boolean updateApplianceStatus) {
-        this.updateApplianceStatus = updateApplianceStatus;
+    public void setUpdateStatus(boolean updateStatus) {
+        this.updateStatus = updateStatus;
     }
 
     public String getSvnConfigurationStoreRoot() {
