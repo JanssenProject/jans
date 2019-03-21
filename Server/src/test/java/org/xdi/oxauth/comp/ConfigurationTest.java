@@ -70,7 +70,7 @@ public class ConfigurationTest extends ConfigurableTest {
 		final String configJson = ServerUtil.createJsonMapper().writeValueAsString(loadConfFromFile(configFile));
 
 		final Conf c = new Conf();
-		c.setDn("ou=testconfiguration,o=@!1111,o=gluu");
+		c.setDn("ou=testconfiguration,o=gluu");
 		c.setDynamic(configJson);
 		c.setErrors(errorsJson);
 		c.setStatics(staticConfJson);

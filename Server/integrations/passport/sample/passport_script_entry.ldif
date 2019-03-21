@@ -1,4 +1,4 @@
-dn: inum=@!1111!2FDB.CF02,ou=scripts,o=@!1111,o=gluu
+dn: inum=@!1111!2FDB.CF02,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module

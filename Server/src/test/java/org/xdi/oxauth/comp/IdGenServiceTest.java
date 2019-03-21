@@ -8,6 +8,7 @@ package org.xdi.oxauth.comp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -47,8 +48,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 	private static String idCustomScriptDn;
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
-		String basedInum = configurationFactory.getAppConfiguration().getOrganizationInum();
-		String customScriptId = basedInum + "!" + INumGenerator.generate(2);
+		String customScriptId = UUID.randomUUID().toString();
 		String dn = customScriptService.buildDn(customScriptId);
 
 		CustomScript customScript = new CustomScript();

@@ -89,11 +89,11 @@ public class ConfSerialization {
 	public void claims() throws IOException {
 
 		final BaseDnConfiguration baseDn = new BaseDnConfiguration();
-		baseDn.setAppliance("ou=appliances,o=gluu");
-		baseDn.setPeople("ou=people,o=@!1111,o=gluu");
-		baseDn.setClients("ou=clients,o=@!1111,o=gluu");
-		baseDn.setScopes("ou=scopes,o=@!1111,o=gluu");
-		baseDn.setAttributes("ou=attributes,o=@!1111,o=gluu");
+		baseDn.setConfiguration("ou=configuration,o=gluu");
+		baseDn.setPeople("ou=people,o=gluu");
+		baseDn.setClients("ou=clients,o=gluu");
+		baseDn.setScopes("ou=scopes,o=gluu");
+		baseDn.setAttributes("ou=attributes,o=gluu");
 
 		final StaticConfiguration c = new StaticConfiguration();
 		c.setBaseDn(baseDn);

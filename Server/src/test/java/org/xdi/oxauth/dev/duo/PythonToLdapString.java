@@ -38,7 +38,7 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
 
 	// VIEW:
 	// u:\own\java\opendj-2.4.4\OpenDJ\bat\ldapsearch.bat -h localhost -p 1636
-	// -Z -X -D "cn=directory manager" -w secret -b "ou=appliances,o=gluu"
+	// -Z -X -D "cn=directory manager" -w secret -b "ou=configuration,o=gluu"
 	// "inum=@!1111!0002!4907"
 	// MODIFY:
 	// u:\own\java\opendj-2.4.4\OpenDJ\bat\ldapmodify.bat -h localhost -p 1636

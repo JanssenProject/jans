@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.oxauth.persistence.model.appliance.GluuAppliance;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
@@ -43,11 +43,11 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 	private Logger log;
 
 	@Inject
-	private ApplianceService applianceService;
+	private ConfigurationService configurationService;
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {
-		GluuAppliance gluuAppliance = applianceService.getAppliance();
-		List<String> configurationJsons = gluuAppliance.getOxIDPAuthentication();
+		GluuConfiguration gluuConfiguration = configurationService.getConfiguration();
+		List<String> configurationJsons = gluuConfiguration.getOxIDPAuthentication();
 		
 		List<CustomAuthenticationConfiguration> customAuthenticationConfigurations = new ArrayList<CustomAuthenticationConfiguration>();
 		
