@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.oxauth.persistence.model.appliance;
+package org.oxauth.persistence.model.configuration;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,7 +25,7 @@ import org.xdi.service.cache.CacheConfiguration;
  */
 @LdapEntry
 @LdapObjectClass(values = { "top", "gluuAppliance" })
-public class GluuAppliance extends InumEntry implements Serializable {
+public class GluuConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -2818003894646725601L;
 
