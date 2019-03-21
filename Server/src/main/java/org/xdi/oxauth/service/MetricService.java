@@ -36,7 +36,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
     private Instance<MetricService> instance;
 
 	@Inject
-    private ApplianceService applianceService;
+    private ConfigurationService configurationService;
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -56,11 +56,6 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@Override
 	public String baseDn() {
 		return staticConfiguration.getBaseDn().getMetric();
-	}
-
-	@Override
-	public String applianceInum() {
-		return applianceService.getApplianceInum();
 	}
 
 	public org.xdi.service.metric.MetricService getMetricServiceInstance() {

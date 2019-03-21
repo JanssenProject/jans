@@ -114,8 +114,8 @@ public class InumGenerator {
         switch (p_type) {
             case CLIENTS:
                 return baseDn.getClients();
-            case APPLIANCE:
-                return baseDn.getAppliance();
+            case CONFIGURATION:
+                return baseDn.getConfiguration();
             case ATTRIBUTE:
                 return baseDn.getAttributes();
             case PEOPLE:
