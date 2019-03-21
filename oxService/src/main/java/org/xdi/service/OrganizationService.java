@@ -17,11 +17,11 @@ public abstract class OrganizationService implements Serializable {
 
     private static final long serialVersionUID = -6601700282123372943L;
 
-    public String getDnForOrganization(String inum, String baseDn) {
+    public String getDnForOrganization(String baseDn) {
         if (baseDn == null) {
             baseDn = "o=gluu";
         }
-        return String.format("o=%s,%s", inum, baseDn);
+        return baseDn;
     }
 
 }
