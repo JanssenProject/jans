@@ -91,6 +91,7 @@
 
 	<modules>
 		<module>Model</module>
+		<module>persistence-model</module>
 		<module>Client</module>
 		<module>oxAuthStatic</module>
 		<module>RP</module>
@@ -98,9 +99,8 @@
 		<module>common</module>
 		<module>fido2-server</module>
 		<module>fido2-client</module>
-		<module>oxauth-mtls</module>
+		<module>mtls</module>
 		<module>Server</module>
-        <module>oxauth-persistence-model</module>
   </modules>
 
 	<dependencyManagement>
