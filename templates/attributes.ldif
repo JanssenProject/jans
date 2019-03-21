@@ -2,7 +2,7 @@
 # Gluu Person Attributes
 #########################
 
-dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=gluu
 displayName: Inum
 gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
@@ -18,7 +18,7 @@ objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:inum
 description: XRI i-number, persistent non-reassignable identifier
 
-dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=gluu
 displayName: First Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -37,7 +37,7 @@ description: Given name(s) or first name(s) of the End-User.
  Note that in some cultures, people can have multiple given names;
  all can be present, with the names being separated by space characters.
 
-dn: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=gluu
 displayName: Username
 gluuAttributeName: uid
 gluuAttributeOrigin: gluuPerson
@@ -54,7 +54,7 @@ urn: urn:mace:dir:attribute-def:uid
 description: A domain issued and managed identifier for the person.
  Subject - Identifier for the End-User at the Issuer.
 
-dn: inum=%(inumOrg)s!0005!B52A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!B52A,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Preferred Username
@@ -71,7 +71,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferr
 description: A domain issued and managed identifier for the person.
  Subject - Identifier for the End-User at the Issuer.
 
-dn: inum=%(inumOrg)s!0005!64A0,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!64A0,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Profile URL
@@ -88,7 +88,7 @@ inum: %(inumOrg)s!0005!64A0
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile
 description: URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.
 
-dn: inum=%(inumOrg)s!0005!3B47,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!3B47,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Website URL
@@ -105,7 +105,7 @@ inum: %(inumOrg)s!0005!3B47
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/website
 description: URL of the End-User's Web page or blog.
 
-dn: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Email Verified
@@ -122,7 +122,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/email_v
 description: True if the End-User's e-mail address has been verified; otherwise false
 
 
-dn: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Phone Number Verified
@@ -138,7 +138,7 @@ inum: %(inumOrg)s!0005!B17A
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/phone_number_verified
 description: True if the End-User's phone number has been verified; otherwise false
 
-dn: inum=%(inumOrg)s!0005!C8D5,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!C8D5,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: OpenID Connect JSON formatted address
@@ -155,7 +155,7 @@ description: End-User's preferred postal address. The value of the address membe
  JSON [RFC4627] structure containing some or all of the members defined in
  OpenID Connect 1.0 Core Standard Section 5.1.1
 
-dn: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Last Updated
@@ -173,7 +173,7 @@ description: Time the End-User's information was last updated. Its value is a
  JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in
  UTC until the date/time.
 
-dn: inum=%(inumOrg)s!0005!3692,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!3692,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Gender, male or female
@@ -190,7 +190,7 @@ inum: %(inumOrg)s!0005!3692
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
 description: Gender of the person, either male or female
 
-dn: inum=%(inumOrg)s!0005!98FC,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!98FC,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Birthdate
@@ -207,7 +207,7 @@ inum: %(inumOrg)s!0005!98FC
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate
 description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.
 
-dn: inum=%(inumOrg)s!0005!D2E0,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!D2E0,ou=attributes,o=gluu
 description: memberOf
 displayName: memberOf
 gluuAttributeName: memberOf
@@ -222,7 +222,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:memberOf
 
-dn: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!A901,ou=attributes,o=gluu
 displayName: Time zone info
 gluuAttributeName: zoneinfo
 gluuAttributeOrigin: gluuPerson
@@ -240,7 +240,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zoneinf
 description: String from time zone database representing the End-User's time zone. For example,
  Europe/Paris or America/Los_Angeles.
 
-dn: inum=%(inumOrg)s!0005!36D9,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!36D9,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Locale
@@ -261,7 +261,7 @@ description: End-User's locale, represented as a BCP47 (RFC5646) language tag. T
  some implementations have used an underscore as the separator rather than a dash, for example, en_US;
  Relying Parties MAY choose to accept this locale syntax as well.
 
-dn: inum=%(inumOrg)s!0005!8A11,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!8A11,ou=attributes,o=gluu
 description: Secret Question
 displayName: Secret Question
 gluuAttributeEditType: user
@@ -277,7 +277,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretQuestion
 
-dn: inum=%(inumOrg)s!0005!C703,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!C703,ou=attributes,o=gluu
 description: Secret Answer
 displayName: Secret Answer
 gluuAttributeEditType: user
@@ -293,7 +293,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretAnswer
 
-dn: inum=%(inumOrg)s!0005!6493,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6493,ou=attributes,o=gluu
 description: Preferred Language
 displayName: Preferred Language
 gluuAttributeEditType: user
@@ -310,7 +310,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:preferredLanguage
 
-dn: inum=%(inumOrg)s!0005!5CA2,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!5CA2,ou=attributes,o=gluu
 description: iname
 displayName: iname
 gluuAttributeName: iname
@@ -325,7 +325,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:iname
 
-dn: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=gluu
 description: Primary Email Address
 displayName: Email
 gluuAttributeEditType: user
@@ -342,7 +342,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:mail
 
-dn: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=gluu
 displayName: Middle Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -362,7 +362,7 @@ description: Middle name(s) of the End-User. Note that in some cultures,
  being separated by space characters. Also note that in some cultures,
  middle names are not used.
 
-dn: inum=%(inumOrg)s!0005!5EC6,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!5EC6,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Nickname
@@ -381,7 +381,7 @@ description: Casual name of the End-User that may or may not be the same as the 
  For instance, a nickname value of Mike might be returned alongside a given_name value 
  of Michael.
 
-dn: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=gluu
 description: Last Name
 displayName: Last Name
 oxAuthClaimName: family_name
@@ -401,7 +401,7 @@ description: Surname(s) or last name(s) of the End-User. Note that in some
  cultures, people can have multiple family names or no family name; all can
  be present, with the names being separated by space characters.
 
-dn: inum=%(inumOrg)s!0005!BCA8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BCA8,ou=attributes,o=gluu
 description: TransientId
 displayName: TransientId
 gluuAttributeEditType: user
@@ -419,7 +419,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: mace:shibboleth:1.0:nameIdentifier
 
-dn: inum=%(inumOrg)s!0005!BCB8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BCB8,ou=attributes,o=gluu
 description: PersistentId
 displayName: PersistentId
 gluuAttributeEditType: user
@@ -437,7 +437,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: mace:shibboleth:1.0:nameIdentifier
 
-dn: inum=%(inumOrg)s!0005!BCE8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BCE8,ou=attributes,o=gluu
 description: Country
 displayName: Country
 gluuAttributeEditType: user
@@ -456,7 +456,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:c
 
-dn: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=gluu
 displayName: Display Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -475,7 +475,7 @@ description: End-User's full name in displayable form
  including all name parts, possibly including titles and
  suffixes, ordered according to the End-User's locale and preferences.
 
-dn: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 inum: %(inumOrg)s!0005!EC3A
@@ -492,7 +492,7 @@ oxAuthClaimName: picture
 gluuStatus: active
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
 
-dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=gluu
 description: Organization
 displayName: Organization
 gluuAttributeName: o
@@ -507,7 +507,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:o
 
-dn: inum=%(inumOrg)s!0005!AAEE,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!AAEE,ou=attributes,o=gluu
 description: User secret string
 displayName: Password
 gluuAttributeEditType: user
@@ -527,7 +527,7 @@ urn: urn:gluu:dir:attribute-def:userPassword
 # InetOrgPerson Attributes
 #############################
 
-dn: inum=%(inumOrg)s!0005!C001,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!C001,ou=attributes,o=gluu
 description: Organizational Title
 displayName: Title
 gluuAttributeEditType: admin
@@ -542,7 +542,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:title
 
-dn: inum=%(inumOrg)s!0005!4502,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4502,ou=attributes,o=gluu
 description: Vehicle License Plate Number
 displayName: License Plate
 gluuAttributeEditType: user
@@ -558,7 +558,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:carLicense
 
-dn: inum=%(inumOrg)s!0005!BD22,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BD22,ou=attributes,o=gluu
 description: Fax Telephone Number
 displayName: Fax Number
 gluuAttributeEditType: user
@@ -574,7 +574,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
 
-dn: inum=%(inumOrg)s!0005!08E2,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!08E2,ou=attributes,o=gluu
 description: Organizational Department
 displayName: Department
 gluuAttributeEditType: admin
@@ -589,7 +589,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:departmentNumber
 
-dn: inum=%(inumOrg)s!0005!3D44,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!3D44,ou=attributes,o=gluu
 description: Employee Type
 displayName: Employee Type
 gluuAttributeEditType: admin
@@ -603,7 +603,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:employeeType
 
-dn: inum=%(inumOrg)s!0005!D054,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!D054,ou=attributes,o=gluu
 description: Name search keywords
 displayName: Name search keywords
 gluuAttributeEditType: user
@@ -619,7 +619,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:cn
 
-dn: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=gluu
 description: Mobile Telephone Number
 displayName: Mobile Telephone Number
 gluuAttributeEditType: user
@@ -636,7 +636,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:mobile
 
-dn: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=gluu
 description: Home Telephone Number
 displayName: Home Telephone Number
 gluuAttributeEditType: user
@@ -653,7 +653,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:phone_number
 
-dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=gluu
 description: State or Province
 displayName: State or Province
 gluuAttributeEditType: user
@@ -670,7 +670,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:st
 
-dn: inum=%(inumOrg)s!0005!42D8,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!42D8,ou=attributes,o=gluu
 description: Manager
 displayName: Manager
 gluuAttributeEditType: admin
@@ -684,7 +684,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:manager
 
-dn: inum=%(inumOrg)s!0005!6609,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6609,ou=attributes,o=gluu
 description: Street
 displayName: Street
 gluuAttributeEditType: user
@@ -701,7 +701,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:street
 
-dn: inum=%(inumOrg)s!0005!E999,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!E999,ou=attributes,o=gluu
 description: Postal Box
 displayName: PO Box
 gluuAttributeEditType: user
@@ -717,7 +717,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:postOfficeBox
 
-dn: inum=%(inumOrg)s!0005!D0C9,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!D0C9,ou=attributes,o=gluu
 description: Employee Number
 displayName: Employee Number
 gluuAttributeEditType: admin
@@ -731,7 +731,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:employeeNumber
 
-dn: inum=%(inumOrg)s!0005!894A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!894A,ou=attributes,o=gluu
 description: Preferred Delivery Method
 displayName: Preferred Delivery Method
 gluuAttributeEditType: admin
@@ -745,7 +745,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
 
-dn: inum=%(inumOrg)s!0005!570B,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!570B,ou=attributes,o=gluu
 description: Work Telephone Number
 displayName: Work Telephone Number
 gluuAttributeEditType: user
@@ -761,7 +761,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:telephoneNumber
 
-dn: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=gluu
 description: Room Number
 displayName: Room Number
 gluuAttributeEditType: user
@@ -777,7 +777,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:roomNumber
 
-dn: inum=%(inumOrg)s!0005!AC0B,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!AC0B,ou=attributes,o=gluu
 description: Secretary
 displayName: Secretary
 gluuAttributeEditType: admin
@@ -791,7 +791,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretary
 
-dn: inum=%(inumOrg)s!0005!4649,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4649,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 gluuAttributeName: gluuStatus
@@ -806,7 +806,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!4649
 urn: urn:gluu:dir:attribute-def:status
 
-dn: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=gluu
 description: Home Address
 displayName: Home Address
 gluuAttributeEditType: user
@@ -823,7 +823,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:homePostalAddress
 
-dn: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=gluu
 description: City
 displayName: City
 gluuAttributeEditType: user
@@ -840,7 +840,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:l
 
-dn: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=gluu
 description: Postal or Zip Code
 displayName: Postal Code
 gluuAttributeEditType: user
@@ -857,7 +857,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:postalCode
 
-dn: inum=%(inumOrg)s!0005!48EE,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!48EE,ou=attributes,o=gluu
 description: Description
 displayName: Description
 gluuAttributeEditType: user
@@ -877,7 +877,7 @@ urn: urn:mace:dir:attribute-def:description
 # eduPerson Attributes
 #########################
 
-dn: inum=%(inumOrg)s!0005!4E0C,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4E0C,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!4E0C
 objectClass: top
 objectClass: gluuAttribute
@@ -892,7 +892,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.1
 
-dn: inum=%(inumOrg)s!0005!E7BC,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!E7BC,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!E7BC
 objectClass: top
 objectClass: gluuAttribute
@@ -908,7 +908,7 @@ description: Person's nickname, or the informal name by which the End-User is ac
  to be hailed. A casual name that may or may not be the same as the given_name. For instance,
  a nickname value of Mike might be returned alongside a given_name value of Michael.
 
-dn: inum=%(inumOrg)s!0005!6366,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6366,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!6366
 objectClass: top
 objectClass: gluuAttribute
@@ -923,7 +923,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.3
 
-dn: inum=%(inumOrg)s!0005!ED0D,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!ED0D,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!ED0D
 objectClass: top
 objectClass: gluuAttribute
@@ -941,7 +941,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.4
 
-dn: inum=%(inumOrg)s!0005!91E7,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!91E7,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!91E7
 objectClass: top
 objectClass: gluuAttribute
@@ -957,7 +957,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn:oid:1.3.6.1.4.1.5923.1.1.1.5
 
-dn: inum=%(inumOrg)s!0005!096B,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!096B,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!096B
 objectClass: top
 objectClass: gluuAttribute
@@ -977,7 +977,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.6
 
-dn: inum=%(inumOrg)s!0005!BF03,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!BF03,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!BF03
 objectClass: top
 objectClass: gluuAttribute
@@ -991,7 +991,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.7
 
-dn: inum=%(inumOrg)s!0005!0247,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!0247,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!0247
 objectClass: top
 objectClass: gluuAttribute
@@ -1006,7 +1006,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
-dn: inum=%(inumOrg)s!0005!002A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!002A,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!002A
 objectClass: top
 objectClass: gluuAttribute
@@ -1029,7 +1029,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.9
 
-dn: inum=%(inumOrg)s!0005!8FF3,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!8FF3,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!8FF3
 objectClass: top
 objectClass: gluuAttribute
@@ -1043,7 +1043,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.10
 
-dn: inum=%(inumOrg)s!0005!4B0F,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4B0F,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!4B0F
 objectClass: top
 objectClass: gluuAttribute
@@ -1058,7 +1058,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
 
-dn: inum=%(inumOrg)s!0005!4A0A,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4A0A,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!4A0A
 objectClass: top
 objectClass: gluuAttribute
@@ -1072,7 +1072,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.12
 
-dn: inum=%(inumOrg)s!0005!4A0B,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4A0B,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!4A0B
 objectClass: top
 objectClass: gluuAttribute
@@ -1086,7 +1086,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.13
 
-dn: inum=%(inumOrg)s!0005!4A0C,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!4A0C,ou=attributes,o=gluu
 inum: %(inumOrg)s!0005!4A0C
 objectClass: top
 objectClass: gluuAttribute
@@ -1100,7 +1100,7 @@ gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.16
 
-dn: inum=%(inumOrg)s!0005!5039,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!5039,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 inum: %(inumOrg)s!0005!5039
@@ -1116,7 +1116,7 @@ urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
 description: Enrollment code, non-reassignable code
 oxSCIMCustomAttribute: true
 
-dn: inum=%(inumOrg)s!0005!42E1,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!42E1,ou=attributes,o=gluu
 displayName: IMAP Data
 gluuAttributeName: gluuIMAPData
 gluuAttributeOrigin: gluuPerson
@@ -1133,7 +1133,7 @@ objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:gluuIMAPData
 description: IMAP Data
 
-dn: inum=%(inumOrg)s!0005!6049,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!6049,ou=attributes,o=gluu
 objectClass: gluuAttribute
 objectClass: top
 description: gluuPermission
@@ -1149,7 +1149,7 @@ inum: %(inumOrg)s!0005!6049
 urn: urn:gluu:dir:attribute-def:role
 oxMultivaluedAttribute: true
 
-dn: inum=%(inumOrg)s!0005!CACA,ou=attributes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0005!CACA,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 inum: %(inumOrg)s!0005!CACA

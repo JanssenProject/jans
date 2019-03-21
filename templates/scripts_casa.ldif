@@ -1,4 +1,4 @@
-dn: inum=%(inumOrg)s!0011!BABA.CACA,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!BABA.CACA,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Authentication script for Gluu Casa
@@ -15,7 +15,7 @@ oxScript::%(person_authentication_casa)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!DAA9.F7F8,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.F7F8,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Gluu Casa Client Registration script
