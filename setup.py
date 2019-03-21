@@ -335,9 +335,7 @@ class Setup(object):
 
         self.baseInum = None
         self.inumOrg = None
-        self.inumAppliance = None
         self.inumOrgFN = None
-        self.inumApplianceFN = None
         self.ldapBaseFolderldapPass = None
 
         self.oxauth_client_id = None
@@ -444,7 +442,6 @@ class Setup(object):
         self.apache2_24_conf = '%s/httpd_2.4.conf' % self.outputFolder
         self.apache2_ssl_24_conf = '%s/https_gluu.conf' % self.outputFolder
         self.ldif_base = '%s/base.ldif' % self.outputFolder
-        self.ldif_appliance = '%s/appliance.ldif' % self.outputFolder
         self.ldif_attributes = '%s/attributes.ldif' % self.outputFolder
         self.ldif_scopes = '%s/scopes.ldif' % self.outputFolder
         self.ldif_clients = '%s/clients.ldif' % self.outputFolder
@@ -546,7 +543,6 @@ class Setup(object):
         self.couchbaseBuckets = []
 
         self.ldif_files = [self.ldif_base,
-                           self.ldif_appliance,
                            self.ldif_attributes,
                            self.ldif_scopes,
                            self.ldif_clients,
@@ -578,7 +574,6 @@ class Setup(object):
                              self.etc_hosts: False,
                              self.etc_hostname: False,
                              self.ldif_base: False,
-                             self.ldif_appliance: False,
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.ldif_clients: False,
@@ -776,9 +771,6 @@ class Setup(object):
         if not self.inumOrg:
             orgTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.inumOrg = '%s!0001!%s' % (self.baseInum, orgTwoQuads)
-        if not self.inumAppliance:
-            applianceTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.inumAppliance = '%s!0002!%s' % (self.baseInum, applianceTwoQuads)
         if not self.oxauth_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.oxauth_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
@@ -802,8 +794,6 @@ class Setup(object):
         if not self.passport_rp_ii_client_id:
             passportRpIIClientTwoQuads  = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.passport_rp_ii_client_id = '%s!0008!%s' % (self.inumOrg, passportRpIIClientTwoQuads)
-        if not self.inumApplianceFN:
-            self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
         if not self.application_max_ram:
@@ -3618,7 +3608,6 @@ class Setup(object):
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
                     'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
-                    'inumAppliance': self.inumAppliance,
                     'certFolder': self.certFolder,
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }

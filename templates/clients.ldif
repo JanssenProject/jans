@@ -2,7 +2,7 @@
 # OX Clients Definition
 #########################
 
-dn: inum=%(oxauth_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+dn: inum=%(oxauth_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 displayName: oxTrust Admin GUI
@@ -13,9 +13,9 @@ oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=gluu
 oxAuthLogoutURI: https://%(hostname)s/identity/ssologout
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
@@ -32,7 +32,7 @@ oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: true
 
 
-dn: inum=%(idp_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+dn: inum=%(idp_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 displayName: IDP client
@@ -42,9 +42,9 @@ oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=gluu
 oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
