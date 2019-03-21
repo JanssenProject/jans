@@ -1,4 +1,71 @@
-dn: ou=oxauth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+dn: ou=configuration,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+objectclass: gluuConfiguration
+ou: configuration
+gluuMaxLogSize: 200
+gluuWhitePagesEnabled: disabled
+gluuOrgProfileMgt: disabled
+gluuManageIdentityPermission: enabled
+gluuFederationHostingEnabled: disabled
+gluuVdsCacheRefreshEnabled: disabled
+gluuScimEnabled: disabled
+oxAuthenticationMode: auth_ldap_server
+oxTrustAuthenticationMode: auth_ldap_server
+gluuPassportEnabled: disabled
+oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
+oxTrustStoreConf: {"useJreCertificates":true}
+oxTrustCacheRefreshServerIpAddress: 255.255.255.255
+oxIDPAuthentication: {"type": "auth",
+  "name": null,
+  "level": 0,
+  "priority": 1,
+  "enabled": true,
+  "version": 0,
+  "config": "{\"configId\": \"auth_ldap_server\",
+            \"servers\": [\"%(ldap_hostname)s:%(ldaps_port)s\"],
+            \"maxConnections\": 1000,
+            \"bindDN\": \"%(ldap_binddn)s\",
+            \"bindPassword\": \"%(encoded_ox_ldap_pw)s\",
+            \"useSSL\": \"true\",
+            \"baseDNs\": [\"ou=people,o=gluu\"],
+            \"primaryKey\": \"uid\",
+            \"localPrimaryKey\": \"uid\",
+            \"useAnonymousBind\": false,
+            \"enabled\": true}"
+  }
+oxLogViewerConfig: {
+  "log_template":[
+    {
+      "value1":"oxAuth logs",
+      "value2":"%(jetty_base)s/oxauth/logs/*.log",
+      "description":""
+    },
+    {
+      "value1":"oxTrust logs",
+      "value2":"%(jetty_base)s/identity/logs/*.log",
+      "description":""
+    }
+  ]}
+
+######################################
+
+# SAML Trust Relationships - Level 3
+dn: ou=trustRelationships,ou=configuration,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: trustRelationships
+
+######################################
+
+# SAML2 Federations - LEVEL 3
+# WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
+dn: ou=federations,ou=configuration,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: federations
+
+dn: ou=oxauth,ou=configuration,o=gluu
 objectClass: oxAuthConfiguration
 objectClass: top
 ou: oxauth
@@ -8,7 +75,7 @@ oxAuthConfWebKeys::%(oxauth_openid_key_base64)s
 oxAuthConfErrors::%(oxauth_error_base64)s
 oxRevision: 1
 
-dn: ou=oxtrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+dn: ou=oxtrust,ou=configuration,o=gluu
 objectClass: top
 objectClass: oxTrustConfiguration
 ou: oxtrust
@@ -17,7 +84,7 @@ oxTrustConfCacheRefresh::%(oxtrust_cache_refresh_base64)s
 oxTrustConfImportPerson::%(oxtrust_import_person_base64)s
 oxRevision: 1
 
-dn: ou=oxidp,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+dn: ou=oxidp,ou=configuration,o=gluu
 objectClass: top
 objectClass: oxApplicationConfiguration
 ou: oxidp
