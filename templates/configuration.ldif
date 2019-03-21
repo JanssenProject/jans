@@ -50,17 +50,17 @@ oxLogViewerConfig: {
 
 ######################################
 
-# SAML Trust Relationships - Level 3
-dn: ou=trustRelationships,ou=configuration,o=gluu
+# SAML Trust Relationships - Level 2
+dn: ou=trustRelationships,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: trustRelationships
 
 ######################################
 
-# SAML2 Federations - LEVEL 3
+# SAML2 Federations - LEVEL 2
 # WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
-dn: ou=federations,ou=configuration,o=gluu
+dn: ou=federations,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: federations
