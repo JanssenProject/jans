@@ -1,4 +1,4 @@
-dn: inum=%(inumOrg)s!2124.0CF1,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!2124.0CF1,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Cert authentication module
@@ -21,7 +21,7 @@ oxScript::%(person_authentication_usercertexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!2FDB.CF02,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!2FDB.CF02,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module
@@ -40,7 +40,7 @@ oxScript::%(person_authentication_passportexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!CB5B.3211,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!CB5B.3211,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Permission Dynamic Scope script
@@ -54,7 +54,7 @@ oxScript::%(dynamic_scope_dynamic_permission)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!031C.4A65,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!031C.4A65,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Id Generator script
@@ -68,7 +68,7 @@ oxScript::%(id_generator_samplescript)s
 oxScriptType: id_generator
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for org_name
@@ -82,7 +82,7 @@ oxScript::%(dynamic_scope_org_name)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!031C.5622,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!031C.5622,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for work_phone
@@ -96,7 +96,7 @@ oxScript::%(dynamic_scope_work_phone)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!13D3.E7AD,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!13D3.E7AD,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Cache Refresh script
@@ -110,7 +110,7 @@ oxScript::%(cache_refresh_samplescript)s
 oxScriptType: cache_refresh
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!24FD.B96E,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!24FD.B96E,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: OTP Validation of passwords using Yubicloud authentication module
@@ -128,7 +128,7 @@ oxScript::%(person_authentication_yubicloudexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA RPT Policy
@@ -143,7 +143,7 @@ oxScript::%(uma_rpt_policy_uma_rpt_policy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
@@ -158,7 +158,7 @@ oxScript::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!2DAF.F996,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.F996,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Claims Gathering
@@ -172,7 +172,7 @@ oxScript::%(uma_claims_gathering_uma_claims_gathering)s
 oxScriptType: uma_claims_gathering
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!2DAF.AA90,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.AA90,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Introspection sample script
@@ -186,7 +186,7 @@ oxScript::%(introspection_introspection)s
 oxScriptType: introspection
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!2DAF.AA91,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.AA91,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Example
@@ -200,7 +200,7 @@ oxScript::%(resource_owner_password_credentials_resource_owner_password_credenti
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Basic (with user locking) authentication module
@@ -218,7 +218,7 @@ oxScript::%(person_authentication_basiclockaccountexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!5018.AF9C,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!5018.AF9C,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: UAF authentication module
@@ -238,7 +238,7 @@ oxScript::%(person_authentication_uafexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!5018.D4BF,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!5018.D4BF,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: HOTP/TOPT authentication module
@@ -259,7 +259,7 @@ oxScript::%(person_authentication_otpexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!5018.F9CF,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!5018.F9CF,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: DUO authentication module
@@ -276,7 +276,7 @@ oxScript::%(person_authentication_duoexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!522F.CDC5,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!522F.CDC5,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Update User script
@@ -290,7 +290,7 @@ oxScript::%(update_user_samplescript)s
 oxScriptType: update_user
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!6EA0.8F0C,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!6EA0.8F0C,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample User Registration script
@@ -305,7 +305,7 @@ oxScript::%(user_registration_samplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!6EA0.8F0D,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!6EA0.8F0D,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Confirm User Registration  script
@@ -319,7 +319,7 @@ oxScript::%(user_registration_confirmregistrationsamplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!8BAF.80D6,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!8BAF.80D6,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Fido U2F authentication module
@@ -336,7 +336,7 @@ oxScript::%(person_authentication_u2fexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!8BAF.80D7,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!8BAF.80D7,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Fido2 authentication module
@@ -352,7 +352,7 @@ oxScript::%(person_authentication_fido2externalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!92F0.BF9E,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!92F0.BF9E,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Super Gluu authentication module
@@ -375,7 +375,7 @@ oxScript::%(person_authentication_supergluuexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!92F0.759E,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!92F0.759E,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: ThumbSignIn authentication module
@@ -393,7 +393,7 @@ oxScript::%(person_authentication_thumbsigninexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!A51E.76DA,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!A51E.76DA,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample authentication module
@@ -408,7 +408,7 @@ oxScript::%(person_authentication_basicexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!A910.56AB,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!A910.56AB,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample script for SCIM events
@@ -424,7 +424,7 @@ oxScript::%(scim_samplescript)s
 oxScriptType: scim
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!D40C.1CA4,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!D40C.1CA4,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Passport SAML authentication module
@@ -443,7 +443,7 @@ oxScript::%(person_authentication_samlpassportauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!DAA9.B788,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.B788,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Client Registration script
@@ -458,7 +458,7 @@ oxScript::%(client_registration_samplescript)s
 oxScriptType: client_registration
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!09A0.93D6,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!09A0.93D6,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Twilio SMS authentication module
@@ -476,7 +476,7 @@ oxScript::%(person_authentication_twilio2fa)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!DAA9.B789,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.B789,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Application Session script
@@ -490,7 +490,7 @@ oxScript::%(application_session_samplescript)s
 oxScriptType: application_session
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!0011!DAA9.BA60,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.BA60,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Consent Gathering script
