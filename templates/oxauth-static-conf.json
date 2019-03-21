@@ -1,16 +1,16 @@
 {
     "baseDn":{
-        "appliance":"ou=appliances,o=gluu",
-        "people":"ou=people,o=%(inumOrg)s,o=gluu",
-        "groups":"ou=groups,o=%(inumOrg)s,o=gluu",
-        "clients":"ou=clients,o=%(inumOrg)s,o=gluu",
-        "scopes":"ou=scopes,o=%(inumOrg)s,o=gluu",
-        "attributes":"ou=attributes,o=%(inumOrg)s,o=gluu",
-        "scripts": "ou=scripts,o=%(inumOrg)s,o=gluu",
-        "umaBase":"ou=uma,o=%(inumOrg)s,o=gluu",
-        "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu",
-        "u2fBase":"ou=u2f,o=%(inumOrg)s,o=gluu",
+        "configuration":"ou=configuration,o=gluu",
+        "people":"ou=people,o=gluu",
+        "groups":"ou=groups,o=gluu",
+        "clients":"ou=clients,o=gluu",
+        "scopes":"ou=scopes,o=gluu",
+        "attributes":"ou=attributes,o=gluu",
+        "scripts": "ou=scripts,o=gluu",
+        "umaBase":"ou=uma,o=gluu",
+        "umaPolicy":"ou=policies,ou=uma,o=gluu",
+        "u2fBase":"ou=u2f,o=gluu",
         "metric":"ou=statistic,o=metric",
-        "sectorIdentifiers": "ou=sector_identifiers,o=%(inumOrg)s,o=gluu"
+        "sectorIdentifiers": "ou=sector_identifiers,o=gluu"
     }
 }
