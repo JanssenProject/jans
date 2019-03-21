@@ -3,8 +3,8 @@
 # Organization data - LEVEL 1
 ################################
 dn: o=gluu
-objectclass: organization
 objectclass: top
+objectclass: organization
 objectClass: gluuOrganization
 o: gluu
 gluuThemeColor: 166309
