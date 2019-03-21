@@ -3,14 +3,12 @@
     "orgIname":"",
     "orgSupportEmail":"%(admin_email)s",
 
-    "applianceInum":"%(inumAppliance)s",
-
     "baseDN":"o=gluu",
 
     "baseEndpoint":"https://%(hostname)s/identity/restv1",
 
     "idpUrl":"https://%(hostname)s",
-    "applianceUrl":"https://%(hostname)s",
+    "applicationUrl":"https://%(hostname)s",
 
     "keystorePath":"%(shibJksFn)s",
     "keystorePassword":"%(shibJksPass)s",
@@ -31,7 +29,7 @@
     "persistSVN":false,
 
     "allowPersonModification":true,
-    "updateApplianceStatus":true,
+    "updateStatus":true,
 
     "clientAssociationAttribute":"inum",
 

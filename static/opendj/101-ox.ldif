@@ -2350,7 +2350,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.4 NAME 'gluuOrganization'
   MUST ( objectclass )
   MAY ( c $ county $ deployedAppliances $ description $ displayName $ gluuAddPersonCapability $ gluuAdditionalUsers $ gluuApplianceUpdateRequestList $ gluuCustomMessage $ gluuFaviconImage $ gluuFederationHostingEnabled $ gluuInvoiceNo $ gluuLogoImage $ gluuManageIdentityPermission $ gluuManager $ gluuManagerGroup $ gluuOrgShortName $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuProStoresUser $ gluuStatus $ gluuTempFaviconImage $ gluuThemeColor $ gluuWhitePagesEnabled $ iname $ inum $ l $ mail $ memberOf $ nonProfit $ o $ oxCreationTimestamp $ oxLinkLinktrack $ oxLinktrackEnabled $ oxLinktrackLogin $ oxLinktrackPassword $ oxRegistrationConfiguration $ postalCode $ proStoresToken $ prostoresTimestamp $ scimAuthMode $ scimGroup $ scimStatus $ st $ street $ telephoneNumber $ title $ uid $ userPassword )
   X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'gluuAppliance'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'gluuConfiguration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )

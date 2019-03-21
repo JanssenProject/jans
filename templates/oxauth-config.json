@@ -225,10 +225,9 @@
             "filter":"myCustomAttr1={0}",
             "bind":"",
             "bindPasswordAttribute":"",
-            "baseDn":"ou=clients,o=%(inumOrg)s,o=gluu"
+            "baseDn":"ou=clients,o=gluu"
         }
     ],
-    "applianceInum":"%(inumAppliance)s",
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
