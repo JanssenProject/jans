@@ -161,7 +161,7 @@ http://localhost:8080/oxauth/authorize.seam?response_type=code&client_id=06fe985
 REGISTRATION
 
 $ cat clients.ldif
-dn: ou=clients,o=@!1111,o=gluu
+dn: ou=clients,o=gluu
 objectClass: organizationalUnit
 objectClass: top
 ou: clients
@@ -172,7 +172,7 @@ $ ldapmodify --defaultAdd --port 1389 --bindDN 'cn=directory manager' --bindPass
 
 
 $ cat addClient.ldif
-dn: inum=@!1111!0000!6216!CCE6,ou=clients,o=@!1111,o=gluu
+dn: inum=@!1111!0000!6216!CCE6,ou=clients,o=gluu
 displayName: oxAuth test app
 inum: @!1111!0000!6216!CCE6
 objectClass: oxAuthClient

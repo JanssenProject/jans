@@ -113,7 +113,7 @@ public class PairwiseIdentifierService {
     }
 
     public String getBaseDnForPairwiseIdentifiers(String userInum) {
-        final String userBaseDn = userService.getDnForUser(userInum); // "ou=pairwiseIdentifiers,inum=1234,ou=people,o=@!1111,o=gluu"
+        final String userBaseDn = userService.getDnForUser(userInum); // "ou=pairwiseIdentifiers,inum=1234,ou=people,o=gluu"
         return String.format("ou=pairwiseIdentifiers,%s", userBaseDn);
     }
 

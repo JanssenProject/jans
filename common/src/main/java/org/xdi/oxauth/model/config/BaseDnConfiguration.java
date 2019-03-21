@@ -23,8 +23,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseDnConfiguration {
-    @XmlElement(name = "appliance")
-    private String appliance;
+    @XmlElement(name = "configuration")
+    private String configuration;
     @XmlElement(name = "people")
     private String people;
     @XmlElement(name = "groups")
@@ -64,12 +64,12 @@ public class BaseDnConfiguration {
         umaPolicy = p_umaPolicy;
     }
 
-    public String getAppliance() {
-        return appliance;
+    public String getConfiguration() {
+        return configuration;
     }
 
-    public void setAppliance(String p_appliance) {
-        appliance = p_appliance;
+    public void setConfiguration(String p_configuration) {
+    	configuration = p_configuration;
     }
 
     public String getAttributes() {
