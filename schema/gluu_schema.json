@@ -4619,7 +4619,7 @@
                 "objectclass"
             ],
             "names": [
-                "gluuAppliance"
+                "gluuConfiguration"
             ],
             "oid": "oxObjectClass:5",
             "sup": [

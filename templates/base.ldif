@@ -1,30 +1,14 @@
 # TOP - LEVEL 1
+################################
+# Organization data - LEVEL 1
+################################
 dn: o=gluu
 objectclass: organization
 objectclass: top
-o: gluu
-
-######################################
-######################################
-# Appliance Configuratoin - LEVEL 2
-######################################
-dn: ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: appliances
-
-######################################
-
-################################
-################################
-# Organization data - LEVEL 2
-################################
-dn: o=%(inumOrg)s,o=gluu
-objectClass: top
 objectClass: gluuOrganization
-o: %(inumOrg)s
+o: gluu
 gluuThemeColor: 166309
-gluuManagerGroup: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+gluuManagerGroup: inum=%(inumOrg)s!0003!60B7,ou=groups,o=gluu
 gluuOrgShortName: %(orgName)s
 gluuAddPersonCapability: enabled
 description: Welcome to oxTrust!
@@ -35,7 +19,7 @@ scimStatus: disabled
 ################################
 
 # People data - LEVEL 3
-dn: ou=people,o=%(inumOrg)s,o=gluu
+dn: ou=people,o=gluu
 objectclass: top
 objectclass: organizationalunit
 ou: people
@@ -43,7 +27,7 @@ ou: people
 ################################
 
 # Groups data - LEVEL 3
-dn: ou=groups,o=%(inumOrg)s,o=gluu
+dn: ou=groups,o=gluu
 objectclass: top
 objectclass: organizationalunit
 ou: groups
@@ -51,7 +35,7 @@ ou: groups
 ################################
 
 # User Attribute Metadata - LEVEL 3
-dn: ou=attributes,o=%(inumOrg)s,o=gluu
+dn: ou=attributes,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: attributes
@@ -59,7 +43,7 @@ ou: attributes
 ################################
 
 # Oauth2 Scopes - LEVEL 3
-dn: ou=scopes,o=%(inumOrg)s,o=gluu
+dn: ou=scopes,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: scopes
@@ -67,7 +51,7 @@ ou: scopes
 ################################
 
 # Client data - LEVEL 3
-dn: ou=clients,o=%(inumOrg)s,o=gluu
+dn: ou=clients,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: clients
@@ -75,7 +59,7 @@ ou: clients
 ################################
 
 # Custom scripts - LEVEL 3
-dn: ou=scripts,o=%(inumOrg)s,o=gluu
+dn: ou=scripts,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: scripts
@@ -84,19 +68,19 @@ ou: scripts
 
 # UMA data - LEVEL 3
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
-dn: ou=uma,o=%(inumOrg)s,o=gluu
+dn: ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: uma
 
 # UMA scope data - LEVEL 4
-dn: ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+dn: ou=scopes,ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: scopes
 
 # UMA resources - LEVEL 4
-dn: ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
+dn: ou=resources,ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: resources
@@ -105,7 +89,7 @@ ou: resources
 
 # OX UMA Hosts - LEVEL 3
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
-dn: ou=hosts,o=%(inumOrg)s,o=gluu
+dn: ou=hosts,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: hosts
@@ -113,19 +97,19 @@ ou: hosts
 ################################
 
 # oxPush Data - LEVEL 3
-dn: ou=push,o=%(inumOrg)s,o=gluu
+dn: ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: push
 
 # oxPush application Data - LEVEL 4
-dn: ou=application,ou=push,o=%(inumOrg)s,o=gluu
+dn: ou=application,ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: application
 
 # oxPush device Data - LEVEL 4
-dn: ou=device,ou=push,o=%(inumOrg)s,o=gluu
+dn: ou=device,ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: device
@@ -134,25 +118,25 @@ ou: device
 
 # U2F data - LEVEL 3
 # Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
-dn: ou=u2f,o=%(inumOrg)s,o=gluu
+dn: ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: u2f
 
 # U2F registration requests - LEVEL 4
-dn: ou=registration_requests,ou=u2f,o=%(inumOrg)s,o=gluu
+dn: ou=registration_requests,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: registration_requests
 
 # U2F authentication requests - LEVEL 4
-dn: ou=authentication_requests,ou=u2f,o=%(inumOrg)s,o=gluu
+dn: ou=authentication_requests,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: authentication_requests
 
 # U2F registered devices - LEVEL 4
-dn: ou=registered_devices,ou=u2f,o=%(inumOrg)s,o=gluu
+dn: ou=registered_devices,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: registered_devices
@@ -160,7 +144,7 @@ ou: registered_devices
 ################################
 
 # Metric data - LEVEL 3
-dn: ou=metric,o=%(inumOrg)s,o=gluu
+dn: ou=metric,o=gluu
 objectclass: top
 objectclass: organizationalunit
 ou: metric
@@ -168,7 +152,7 @@ ou: metric
 ################################
 
 # Sector Identifiers - LEVEL 3
-dn: ou=sector_identifiers,o=%(inumOrg)s,o=gluu
+dn: ou=sector_identifiers,o=gluu
 objectclass: top
 objectclass: organizationalunit
 ou: sector_identifiers
