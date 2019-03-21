@@ -29,7 +29,7 @@ import javax.servlet.ServletContext;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.oxauth.persistence.model.appliance.GluuAppliance;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
@@ -542,13 +542,13 @@ public class AppInitializer {
 	}
 
 	private String getActualDefaultAuthenticationMethod(PersistenceEntryManager localPersistenceEntryManager) {
-		GluuAppliance appliance = loadAppliance(localPersistenceEntryManager, "oxAuthenticationMode");
+		GluuConfiguration configuration = loadConfiguration(localPersistenceEntryManager, "oxAuthenticationMode");
 
-		if (appliance == null) {
+		if (configuration == null) {
 			return null;
 		}
 
-		return appliance.getAuthenticationMode();
+		return configuration.getAuthenticationMode();
 	}
 
 	@Produces
@@ -557,26 +557,23 @@ public class AppInitializer {
 		return authenticationMode;
 	}
 
-	private GluuAppliance loadAppliance(PersistenceEntryManager localPersistenceEntryManager,
+	private GluuConfiguration loadConfiguration(PersistenceEntryManager localPersistenceEntryManager,
 			String... persistenceReturnAttributes) {
-		String baseDn = configurationFactory.getBaseDn().getAppliance();
-		String applianceInum = configurationFactory.getAppConfiguration().getApplianceInum();
-		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
+		String configurationDn = configurationFactory.getBaseDn().getConfiguration();
+		if (StringHelper.isEmpty(configurationDn)) {
 			return null;
 		}
 
-		String applianceDn = String.format("inum=%s,%s", applianceInum, baseDn);
-
-		GluuAppliance appliance = null;
+		GluuConfiguration configuration = null;
 		try {
-			appliance = localPersistenceEntryManager.find(GluuAppliance.class, applianceDn,
+			configuration = localPersistenceEntryManager.find(GluuConfiguration.class, configurationDn,
 					persistenceReturnAttributes);
 		} catch (BasePersistenceException ex) {
-			log.error("Failed to load appliance entry from Ldap", ex);
+			log.error("Failed to load global configuration entry from Ldap", ex);
 			return null;
 		}
 
-		return appliance;
+		return configuration;
 	}
 
 	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(
@@ -599,20 +596,20 @@ public class AppInitializer {
 	}
 
 	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
-		GluuAppliance appliance = loadAppliance(localPersistenceEntryManager, "oxIDPAuthentication");
+		GluuConfiguration configuration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication");
 
-		if ((appliance == null) || (appliance.getOxIDPAuthentication() == null)) {
+		if ((configuration == null) || (configuration.getOxIDPAuthentication() == null)) {
 			return null;
 		}
 
 		List<oxIDPAuthConf> configurations = new ArrayList<oxIDPAuthConf>();
-		for (String configurationJson : appliance.getOxIDPAuthentication()) {
+		for (String configurationJson : configuration.getOxIDPAuthentication()) {
 
 			try {
-				oxIDPAuthConf configuration = jsonService.jsonToObject(configurationJson, oxIDPAuthConf.class);
-				if (configuration.getType().equalsIgnoreCase("ldap")
-						|| configuration.getType().equalsIgnoreCase("auth")) {
-					configurations.add(configuration);
+				oxIDPAuthConf authConf = jsonService.jsonToObject(configurationJson, oxIDPAuthConf.class);
+				if (authConf.getType().equalsIgnoreCase("ldap")
+						|| authConf.getType().equalsIgnoreCase("auth")) {
+					configurations.add(authConf);
 				}
 			} catch (Exception ex) {
 				log.error("Failed to create object by json: '{}'", configurationJson, ex);

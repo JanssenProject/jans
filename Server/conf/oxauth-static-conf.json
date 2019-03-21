@@ -1,17 +1,17 @@
 {
     "baseDn": {
-        "appliance": "ou=appliances,o=gluu",
-        "people": "ou=people,o=${config.oxauth.organization},o=gluu",
-        "groups": "ou=groups,o=${config.oxauth.organization},o=gluu",
-        "clients": "ou=clients,o=${config.oxauth.organization},o=gluu",
-        "scopes": "ou=scopes,o=${config.oxauth.organization},o=gluu",
-        "attributes": "ou=attributes,o=${config.oxauth.organization},o=gluu",
-        "sessionId": "ou=session,o=${config.oxauth.organization},o=gluu",
-        "scripts": "ou=scripts,o=${config.oxauth.organization},o=gluu",
-        "umaBase": "ou=uma,o=${config.oxauth.organization},o=gluu",
-        "umaPolicy": "ou=policies,ou=uma,o=${config.oxauth.organization},o=gluu",
-        "u2fBase": "ou=u2f,o=${config.oxauth.organization},o=gluu",
+        "configuration": "ou=configuration,o=gluu",
+        "people": "ou=people,o=gluu",
+        "groups": "ou=groups,o=gluu",
+        "clients": "ou=clients,o=gluu",
+        "scopes": "ou=scopes,o=gluu",
+        "attributes": "ou=attributes,o=gluu",
+        "sessionId": "ou=session,o=gluu",
+        "scripts": "ou=scripts,o=gluu",
+        "umaBase": "ou=uma,o=gluu",
+        "umaPolicy": "ou=policies,ou=uma,o=gluu",
+        "u2fBase": "ou=u2f,o=gluu",
         "metric": "ou=statistic,o=metric",
-        "sectorIdentifiers": "ou=sector_identifiers,o=${config.oxauth.organization},o=gluu"
+        "sectorIdentifiers": "ou=sector_identifiers,o=gluu"
     }
 }
