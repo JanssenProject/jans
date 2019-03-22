@@ -723,10 +723,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     private SearchResultEntry lookupImpl(String dn, String... attributes) {
-        if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
-            (new Exception()).printStackTrace();
-        }
-
         try {
             if (attributes == null) {
                 return getConnectionPool().getEntry(dn);
