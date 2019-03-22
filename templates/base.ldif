@@ -10,15 +10,12 @@ o: gluu
 gluuThemeColor: 166309
 gluuManagerGroup: inum=%(inumOrg)s!0003!60B7,ou=groups,o=gluu
 gluuOrgShortName: %(orgName)s
-gluuAddPersonCapability: enabled
 description: Welcome to oxTrust!
 displayName: %(orgName)s
-scimAuthMode: basic
-scimStatus: disabled
 
 ################################
 
-# People data - LEVEL 3
+# People data - LEVEL 2
 dn: ou=people,o=gluu
 objectclass: top
 objectclass: organizationalunit
@@ -26,7 +23,7 @@ ou: people
 
 ################################
 
-# Groups data - LEVEL 3
+# Groups data - LEVEL 2
 dn: ou=groups,o=gluu
 objectclass: top
 objectclass: organizationalunit
@@ -34,7 +31,7 @@ ou: groups
 
 ################################
 
-# User Attribute Metadata - LEVEL 3
+# User Attribute Metadata - LEVEL 2
 dn: ou=attributes,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -42,7 +39,7 @@ ou: attributes
 
 ################################
 
-# Oauth2 Scopes - LEVEL 3
+# Oauth2 Scopes - LEVEL 2
 dn: ou=scopes,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -50,7 +47,7 @@ ou: scopes
 
 ################################
 
-# Client data - LEVEL 3
+# Client data - LEVEL 2
 dn: ou=clients,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -58,7 +55,7 @@ ou: clients
 
 ################################
 
-# Custom scripts - LEVEL 3
+# Custom scripts - LEVEL 2
 dn: ou=scripts,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -66,20 +63,28 @@ ou: scripts
 
 ################################
 
-# UMA data - LEVEL 3
+# Reset password requests - LEVEL 2
+dn: ou=resetPasswordRequests,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: resetPasswordRequests
+
+################################
+
+# UMA data - LEVEL 2
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
 dn: ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: uma
 
-# UMA scope data - LEVEL 4
+# UMA scope data - LEVEL 3
 dn: ou=scopes,ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: scopes
 
-# UMA resources - LEVEL 4
+# UMA resources - LEVEL 3
 dn: ou=resources,ou=uma,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -87,7 +92,7 @@ ou: resources
 
 ################################
 
-# OX UMA Hosts - LEVEL 3
+# OX UMA Hosts - LEVEL 2
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
 dn: ou=hosts,o=gluu
 objectclass: top
@@ -96,19 +101,19 @@ ou: hosts
 
 ################################
 
-# oxPush Data - LEVEL 3
+# oxPush Data - LEVEL 2
 dn: ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: push
 
-# oxPush application Data - LEVEL 4
+# oxPush application Data - LEVEL 3
 dn: ou=application,ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: application
 
-# oxPush device Data - LEVEL 4
+# oxPush device Data - LEVEL 3
 dn: ou=device,ou=push,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -116,26 +121,26 @@ ou: device
 
 ################################
 
-# U2F data - LEVEL 3
+# U2F data - LEVEL 2
 # Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
 dn: ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: u2f
 
-# U2F registration requests - LEVEL 4
+# U2F registration requests - LEVEL 3
 dn: ou=registration_requests,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: registration_requests
 
-# U2F authentication requests - LEVEL 4
+# U2F authentication requests - LEVEL 3
 dn: ou=authentication_requests,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: authentication_requests
 
-# U2F registered devices - LEVEL 4
+# U2F registered devices - LEVEL 3
 dn: ou=registered_devices,ou=u2f,o=gluu
 objectclass: top
 objectclass: organizationalUnit
@@ -143,7 +148,7 @@ ou: registered_devices
 
 ################################
 
-# Metric data - LEVEL 3
+# Metric data - LEVEL 2
 dn: ou=metric,o=gluu
 objectclass: top
 objectclass: organizationalunit
@@ -151,7 +156,7 @@ ou: metric
 
 ################################
 
-# Sector Identifiers - LEVEL 3
+# Sector Identifiers - LEVEL 2
 dn: ou=sector_identifiers,o=gluu
 objectclass: top
 objectclass: organizationalunit
