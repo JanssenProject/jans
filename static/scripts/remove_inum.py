@@ -125,7 +125,9 @@ for dn in ldif_parser.DNs:
             continue
 
     for p in ('oxAuthClaim', 'owner', 'oxAssociatedClient', 
-                'oxAuthUmaScope', 'gluuManagerGroup', 'member', 'oxPolicyScriptDn'):
+                'oxAuthUmaScope', 'gluuManagerGroup', 'member', 
+                'oxPolicyScriptDn','oxScriptDn', 'oxAuthScope',
+                'memberOf',):
 
         if p in new_entry:
             for i, oac in enumerate(new_entry[p][:]):
