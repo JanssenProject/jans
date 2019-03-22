@@ -108,6 +108,7 @@ for dn in ldif_parser.DNs:
                             }
                         }
 
+    
 
         new_entry['oxAuthConfStatic'][0] = json.dumps(oxAuthConfStatic, indent=2)
         
@@ -122,6 +123,15 @@ for dn in ldif_parser.DNs:
     if 'ou=configuration,o=gluu' == new_dn:
         if not 'oxCacheConfiguration' in new_entry:
             continue
+
+    for p in ('oxAuthClaim', 'owner', 'oxAssociatedClient', 
+                'oxAuthUmaScope', 'gluuManagerGroup', 'member', 'oxPolicyScriptDn'):
+
+        if p in new_entry:
+            for i, oac in enumerate(new_entry[p][:]):
+                new_entry[p][i] = oac.replace(inumOrg_ou+',','')
+
+
     
     ldif_writer.unparse(new_dn, new_entry)
 
