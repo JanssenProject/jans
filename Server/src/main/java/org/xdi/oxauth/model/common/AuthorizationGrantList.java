@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -60,8 +58,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Inject
     private CacheService cacheService;
-
-    private final Pattern clientInumPattern = Pattern.compile(".+inum=([\\w\\!\\@\\.]+).+");
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
@@ -187,13 +183,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         return asGrant(grantService.getGrantsByCodeAndClient(p_code, clientId));
     }
 
-    public String extractClientIdFromTokenDn(String p_dn) {
-        Matcher m = clientInumPattern.matcher(p_dn);
-        if (m.matches()) {
-        	return m.group(1);
-        }
-
-        return "";
+    public static String extractClientIdFromTokenDn(String p_dn) {
+        return StringUtils.substringBetween(p_dn, "inum=", "ou=clients").replaceAll(",", "");
     }
 
     public AuthorizationGrant asGrant(TokenLdap tokenLdap) {
