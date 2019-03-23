@@ -45,8 +45,3 @@ jksPass=
 ### The cn=Directory Manager's password in ldap
 ldapPass=
 
-### Do not change this unless you know what you're doing
-inumOrg=
-
-### Do not change this unless you know what you're doing
-inumAppliance=
