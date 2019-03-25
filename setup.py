@@ -1810,8 +1810,28 @@ class Setup(object):
         except:
             return None
 
-    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=[]):
-        return ''.join(random.choice(chars+special) for _ in range(size))
+    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
+        
+        if not special:
+            random_password = [random.choice(chars) for _ in range(size)]
+        else:
+            ndigit = random.randint(1,3)
+            nspecial = random.randint(1,2)
+            ncletter = random.randint(2, 5)
+            nsletter = size - ndigit - nspecial - ncletter
+            
+            random_password = []
+            
+            for n, rc in ((ndigit, string.digits), (nspecial, special),
+                        (ncletter, string.ascii_uppercase),
+                        (nsletter, string.lowercase)):
+            
+                random_password += [random.choice(rc) for _ in range(n)]
+            
+        random.shuffle(random_password)
+                
+        return ''.join(random_password)
+
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
