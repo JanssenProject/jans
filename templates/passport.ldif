@@ -9,7 +9,7 @@ oxAuthGrantType: implicit
 oxAuthResponseType: code
 oxAuthResponseType: token
 oxAuthResponseType: id_token
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=!0009!F0C4,ou=scopes,o=gluu
 oxAuthRedirectURI: https://%(hostname)s/oxauth/auth/passport/sample-redirector.htm
 
 # Passport Resource Server Client
@@ -21,7 +21,7 @@ displayName: Passport Resource Server Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=gluu
+oxAuthScope: inum=!0009!6D99,ou=scopes,o=gluu
 oxAuthJwks:: %(passport_rs_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
@@ -37,7 +37,7 @@ inum: %(passport_rp_client_id)s
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=gluu
+oxAuthScope: inum=!0009!6D98,ou=scopes,o=gluu
 oxAuthJwks:: %(passport_rp_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
@@ -45,25 +45,25 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # Passport Scope
-dn: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=gluu
+dn: inum=!0010!8CAD.B06E,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: Passport Access
-inum: %(inumOrg)s!0010!8CAD.B06E
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+inum: !0010!8CAD.B06E
+owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access
 oxRevision: 1
-oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=gluu
+oxPolicyScriptDn: inum=!0011!2DAF.F9A5,ou=scripts,o=gluu
 
 # Passport Resource
 dn: oxId=0f963ecc-93f0-49c1-beae-ad2006abbb99,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: Passport Resource
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/passport_logo.png
 oxAssociatedClient: inum=%(passport_rs_client_id)s,ou=clients,o=gluu
-oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=gluu
+oxAuthUmaScope: inum=!0010!8CAD.B06E,ou=scopes,ou=uma,o=gluu
 oxId: 0f963ecc-93f0-49c1-beae-ad2006abbb99
 oxResource: https://%(hostname)s/identity/restv1/passport/config
 oxRevision: 1
