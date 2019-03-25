@@ -1810,8 +1810,8 @@ class Setup(object):
         except:
             return None
 
-    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase):
-        return ''.join(random.choice(chars) for _ in range(size))
+    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=[]):
+        return ''.join(random.choice(chars+special) for _ in range(size))
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
@@ -2311,8 +2311,16 @@ class Setup(object):
         self.orgName = self.getPrompt("Enter Organization Name")
         self.admin_email = self.getPrompt('Enter email address for support at your organization')
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
-        randomPW = self.getPW()
-        self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
+        ldapPass = self.getPW(special='*=()![]%&+/-')
+
+        while True:
+            ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
+
+            if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
+                break
+            else:
+                print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+        
 
         if setupOptions['allowPreReleasedApplications'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
             while True:
