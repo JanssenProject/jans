@@ -2311,7 +2311,7 @@ class Setup(object):
         self.orgName = self.getPrompt("Enter Organization Name")
         self.admin_email = self.getPrompt('Enter email address for support at your organization')
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
-        ldapPass = self.getPW(special='*=()![]%&+/-')
+        ldapPass = self.getPW(special='*=!%&+/-')
 
         while True:
             ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
