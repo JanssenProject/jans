@@ -2309,7 +2309,16 @@ class Setup(object):
                 long_enough = True
 
         self.orgName = self.getPrompt("Enter Organization Name")
-        self.admin_email = self.getPrompt('Enter email address for support at your organization')
+        
+        
+        while True:
+            self.admin_email = self.getPrompt('Enter email address for support at your organization')
+            if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', self.admin_email):
+                break
+            else:
+                print("Please enter valid email address")
+            
+        
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
         ldapPass = self.getPW(special='*=!%&+/-')
 
