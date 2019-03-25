@@ -2321,6 +2321,7 @@ class Setup(object):
             else:
                 print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
         
+        self.ldapPass = ldapPass
 
         if setupOptions['allowPreReleasedApplications'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
             while True:
