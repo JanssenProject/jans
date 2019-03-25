@@ -1803,6 +1803,9 @@ class Setup(object):
         else:
             ndigit = random.randint(1, 3)
             nspecial = random.randint(1, 2)
+            ndigit = random.randint(1,3)
+            nspecial = random.randint(1,2)
+
             ncletter = random.randint(2, 5)
             nsletter = size - ndigit - nspecial - ncletter
             
