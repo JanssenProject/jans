@@ -1,11 +1,11 @@
-dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=gluu
+dn: inum=!0003!60B7,ou=groups,o=gluu
 objectClass: top
 objectClass: gluuGroup
 gluuGroupType: gluuManagerGroup
-inum: %(inumOrg)s!0003!60B7
+inum: !0003!60B7
 gluuStatus: active
 displayName: Gluu Manager Group
 description: This group is for administrative purpose, with full acces to users
 gluuGroupVisibility: private
-member: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+member: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
 

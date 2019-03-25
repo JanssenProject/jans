@@ -7,7 +7,7 @@ displayName: SCIM Resource Server Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=gluu
+oxAuthScope: inum=!0009!6D99,ou=scopes,o=gluu
 oxAuthJwks:: %(scim_rs_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
@@ -23,7 +23,7 @@ displayName: SCIM Requesting Party Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=gluu
+oxAuthScope: inum=!0009!6D98,ou=scopes,o=gluu
 oxAuthJwks:: %(scim_rp_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
@@ -31,25 +31,25 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # SCIM Scope
-dn: inum=%(inumOrg)s!0010!8CAD.B06D,ou=scopes,ou=uma,o=gluu
+dn: inum=!0010!8CAD.B06D,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: SCIM Access
-inum: %(inumOrg)s!0010!8CAD.B06D
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+inum: !0010!8CAD.B06D
+owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/scim_access
 oxRevision: 1
-oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=gluu
+oxPolicyScriptDn: inum=!0011!2DAF.F9A5,ou=scripts,o=gluu
 
 # SCIM Resource
 dn: oxId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: SCIM Resource
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/scim_logo.png
 oxAssociatedClient: inum=%(scim_rs_client_id)s,ou=clients,o=gluu
-oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06D,ou=scopes,ou=uma,o=gluu
+oxAuthUmaScope: inum=!0010!8CAD.B06D,ou=scopes,ou=uma,o=gluu
 oxId: %(scim_resource_oxid)s
 oxResource: https://%(hostname)s/identity/restv1/scim/v2
 oxRevision: 1

@@ -188,7 +188,6 @@
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "organizationInum":"%(inumOrg)s",
     "oxId":"https://%(hostname)s/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":-1,
