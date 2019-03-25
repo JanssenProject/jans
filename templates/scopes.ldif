@@ -2,134 +2,134 @@
 # OX Scopes Definition
 #########################
 
-dn: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=gluu
+dn: inum=!0009!F0C4,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: openid
-inum: %(inumOrg)s!0009!F0C4
+inum: !0009!F0C4
 defaultScope: true
 description: Authenticate using OpenID Connect.
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=gluu
+dn: inum=!0009!43F1,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: profile
-inum: %(inumOrg)s!0009!43F1
+inum: !0009!43F1
 defaultScope: false
 description: View your basic profile info.
-oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!5EC6,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!B52A,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!64A0,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!3B47,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!3692,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!98FC,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!A901,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!36D9,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!6493,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!2B29,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!0C85,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!B4B0,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!A0E8,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!5EC6,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!B52A,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!64A0,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!EC3A,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!3B47,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!3692,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!98FC,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!A901,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!36D9,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!BE64,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!6493,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!764C,ou=scopes,o=gluu
+dn: inum=!0009!764C,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: email
-inum: %(inumOrg)s!0009!764C
+inum: !0009!764C
 defaultScope: false
 description: View your email address.
-oxAuthClaim: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!8F88,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!CAE3,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!C17A,ou=scopes,o=gluu
+dn: inum=!0009!C17A,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: address
-inum: %(inumOrg)s!0009!C17A
+inum: !0009!C17A
 description: View your address.
 defaultScope: false
-oxAuthClaim: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!6609,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!BCE8,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!E999,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!27DB,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!2A3D,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!6609,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!6EEB,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!BCE8,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!D90B,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!E6B8,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!E999,ou=attributes,o=gluu
 oxAuthGroupClaims: true
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!D491,ou=scopes,o=gluu
+dn: inum=!0009!D491,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: phone
-inum: %(inumOrg)s!0009!D491
+inum: !0009!D491
 description: View your phone number.
 defaultScope: false
-oxAuthClaim: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!B17A,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!0C18,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=gluu
+dn: inum=!0009!341A,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: false
 description: View the client info.
 displayName: clientinfo
-inum: %(inumOrg)s!0009!341A
-oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=gluu
+inum: !0009!341A
+oxAuthClaim: inum=!0005!2B29,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!29DA,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=gluu
+dn: inum=!0009!10B2,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: user_name
-inum: %(inumOrg)s!0009!10B2
+inum: !0009!10B2
 description: View your local username in the Gluu Server.
 defaultScope: false
-oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!42E0,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=gluu
+dn: inum=!0009!6D99,ou=scopes,o=gluu
 defaultScope: true
 description: Obtain UMA PAT.
 displayName: uma_protection
-inum: %(inumOrg)s!0009!6D99
+inum: !0009!6D99
 objectClass: oxAuthCustomScope
 objectClass: top
 oxScopeType: uma
 
-dn: inum=%(inumOrg)s!0009!6D90,ou=scopes,o=gluu
+dn: inum=!0009!6D90,ou=scopes,o=gluu
 defaultScope: true
 description: oxd scope which is required to call oxd API
 displayName: oxd
-inum: %(inumOrg)s!0009!6D90
+inum: !0009!6D90
 objectClass: oxAuthCustomScope
 objectClass: top
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!8A01,ou=scopes,o=gluu
+dn: inum=!0009!8A01,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: mobile_phone
-inum: %(inumOrg)s!0009!8A01
+inum: !0009!8A01
 description: View your mobile phone number.
 defaultScope: false
-oxAuthClaim: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=gluu
+oxAuthClaim: inum=!0005!6DA6,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!C4F5.F66C,ou=scopes,o=gluu
+dn: inum=!0009!C4F5.F66C,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
 description: View your user permission and roles.
 displayName: permission
-inum: %(inumOrg)s!0009!C4F5.F66C
+inum: !0009!C4F5.F66C
 oxScopeType: dynamic
-oxScriptDn: inum=%(inumOrg)s!CB5B.3211,ou=scripts,o=gluu
+oxScriptDn: inum=!CB5B.3211,ou=scripts,o=gluu

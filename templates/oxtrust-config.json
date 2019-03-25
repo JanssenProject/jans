@@ -1,5 +1,4 @@
 {
-    "orgInum":"%(inumOrg)s",
     "orgIname":"",
     "orgSupportEmail":"%(admin_email)s",
 

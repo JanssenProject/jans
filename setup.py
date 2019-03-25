@@ -83,16 +83,11 @@ class ProgressBar:
 
 listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
 
-def get_key_from(dn, inum):
+def get_key_from(dn):
     dns = dn.split(",")
 
     if "o=gluu" in dns:
         dns.remove("o=gluu")
-        
-    o_inumOrg = 'o='+inum
-
-    if o_inumOrg in dns:
-        dns.remove(o_inumOrg)
 
     for i in range(len(dns)):
         e = dns[i]
@@ -119,14 +114,14 @@ class myLdifParser(LDIFParser):
         self.entries.append((dn, entry))
 
 
-def get_documents_from_ldif(ldif_file,  inumOrg):
+def get_documents_from_ldif(ldif_file):
     parser = myLdifParser(ldif_file)
     parser.parse()
     documents = []
 
     for dn, entry in parser.entries:
         if len(entry) > 2:
-            key = get_key_from(dn, inumOrg)
+            key = get_key_from(dn)
             entry['dn'] = dn
             for k in copy.deepcopy(entry):
                 if len(entry[k]) == 1:
@@ -333,9 +328,7 @@ class Setup(object):
         self.application_max_ram = None    # in MB
         self.encode_salt = None
 
-        self.baseInum = None
-        self.inumOrg = None
-        self.inumOrgFN = None
+
         self.ldapBaseFolderldapPass = None
 
         self.oxauth_client_id = None
@@ -766,36 +759,29 @@ class Setup(object):
             self.passportSpJksPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
-        if not self.baseInum:
-            self.baseInum = '@!%s.%s.%s.%s' % tuple([self.getQuad() for i in xrange(4)])
-        if not self.inumOrg:
-            orgTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.inumOrg = '%s!0001!%s' % (self.baseInum, orgTwoQuads)
         if not self.oxauth_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.oxauth_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
+            self.oxauth_client_id = '!0008!%s' % (clientTwoQuads)
         if not self.idp_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.idp_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
+            self.idp_client_id = '!0008!%s' % (clientTwoQuads)
         if not self.scim_rs_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.scim_rs_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+            self.scim_rs_client_id = '!0008!%s' % (scimClientTwoQuads)
         if not self.scim_rp_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.scim_rp_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+            self.scim_rp_client_id = '!0008!%s' % (scimClientTwoQuads)
         if not self.scim_resource_oxid:
             self.scim_resource_oxid = str(uuid.uuid4())
         if not self.passport_rs_client_id:
             passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rs_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
+            self.passport_rs_client_id = '!0008!%s' % (passportClientTwoQuads)
         if not self.passport_rp_client_id:
             passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rp_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)            
+            self.passport_rp_client_id = '!0008!%s' % (passportClientTwoQuads)            
         if not self.passport_rp_ii_client_id:
             passportRpIIClientTwoQuads  = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rp_ii_client_id = '%s!0008!%s' % (self.inumOrg, passportRpIIClientTwoQuads)
-        if not self.inumOrgFN:
-            self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
+            self.passport_rp_ii_client_id = '!0008!%s' % (passportRpIIClientTwoQuads)
         if not self.application_max_ram:
             self.application_max_ram = 3072
 
@@ -1810,8 +1796,27 @@ class Setup(object):
         except:
             return None
 
-    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=[]):
-        return ''.join(random.choice(chars+special) for _ in range(size))
+    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
+        
+        if not special:
+            random_password = [random.choice(chars) for _ in range(size)]
+        else:
+            ndigit = random.randint(1, 3)
+            nspecial = random.randint(1, 2)
+            ncletter = random.randint(2, 5)
+            nsletter = size - ndigit - nspecial - ncletter
+            
+            random_password = []
+            
+            for n, rc in ((ndigit, string.digits), (nspecial, special),
+                        (ncletter, string.ascii_uppercase),
+                        (nsletter, string.lowercase)):
+            
+                random_password += [random.choice(rc) for _ in range(n)]
+            
+        random.shuffle(random_password)
+                
+        return ''.join(random_password)
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
@@ -2320,7 +2325,7 @@ class Setup(object):
             
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
-        ldapPass = self.getPW(special='*=!%&+/-')
+        ldapPass = self.getPW(special='.*=!%&+/-')
 
         while True:
             ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
@@ -3476,7 +3481,7 @@ class Setup(object):
         
         for ldif in ldif_file_list:
             self.logIt("Importing ldif file %s to Couchebase" % ldif)
-            documents = get_documents_from_ldif(ldif,  self.inumOrg)
+            documents = get_documents_from_ldif(ldif)
             
             ldif_base_name = os.path.basename(ldif)
             name, ext = os.path.splitext(ldif_base_name)
