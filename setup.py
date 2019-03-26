@@ -30,7 +30,6 @@ import shutil
 import socket
 import string
 import time
-import uuid
 import json
 import traceback
 import subprocess
@@ -760,28 +759,21 @@ class Setup(object):
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.oxauth_client_id:
-            clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.oxauth_client_id = '!0008!%s' % (clientTwoQuads)
+            self.oxauth_client_id = '0008-e701-4470-b6b4-0fee15ca666f'
         if not self.idp_client_id:
-            clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.idp_client_id = '!0008!%s' % (clientTwoQuads)
+            self.idp_client_id = '0008-7e44-4734-9360-d4fe9767884d'
         if not self.scim_rs_client_id:
-            scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.scim_rs_client_id = '!0008!%s' % (scimClientTwoQuads)
+            self.scim_rs_client_id = '0008-6e01-43a4-af05-29a7dc9e49bc'
         if not self.scim_rp_client_id:
-            scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.scim_rp_client_id = '!0008!%s' % (scimClientTwoQuads)
+            self.scim_rp_client_id = '0008-61d5-49c3-861a-d5ee2c2f7709'
         if not self.scim_resource_oxid:
-            self.scim_resource_oxid = str(uuid.uuid4())
+            self.scim_resource_oxid = 'b49a9858-ec79-4144-a7e5-9d992e7abb84'
         if not self.passport_rs_client_id:
-            passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rs_client_id = '!0008!%s' % (passportClientTwoQuads)
+            self.passport_rs_client_id = '0008-fca1-48a6-a62f-9681dbb8816d'
         if not self.passport_rp_client_id:
-            passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rp_client_id = '!0008!%s' % (passportClientTwoQuads)            
+            self.passport_rp_client_id = '0008-de0c-476a-9c9f-9c0f079c72d1'           
         if not self.passport_rp_ii_client_id:
-            passportRpIIClientTwoQuads  = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.passport_rp_ii_client_id = '!0008!%s' % (passportRpIIClientTwoQuads)
+            self.passport_rp_ii_client_id = '0008-4252-4d65-8bc0-58ad3825a401'
         if not self.application_max_ram:
             self.application_max_ram = 3072
 
@@ -1821,8 +1813,6 @@ class Setup(object):
                 
         return ''.join(random_password)
 
-    def getQuad(self):
-        return str(uuid.uuid4())[:4].upper()
 
     def prepare_openid_keys_generator(self):
         self.logIt("Preparing files needed to run OpenId keys generator")
