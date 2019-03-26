@@ -1856,11 +1856,12 @@ class Setup(object):
         self.generate_scim_configuration()
         self.generate_passport_configuration()
 
+        self.ldap_binddn = self.opendj_ldap_binddn
+        self.ldap_site_binddn = self.opendj_ldap_binddn
 
         if self.installLdap:
             if self.ldap_type == 'opendj':
-                self.ldap_binddn = self.opendj_ldap_binddn
-                self.ldap_site_binddn = self.opendj_ldap_binddn
+
 
                 self.ldapCertFn = self.opendj_cert_fn
                 self.ldapTrustStoreFn = self.opendj_p12_fn
@@ -2718,11 +2719,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def deleteLdapPw(self):
-        try:
+        if os.path.isfile(self.ldapPassFn):
             os.remove(self.ldapPassFn)
-        except:
-            self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
-            self.logIt(traceback.format_exc(), True)
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
@@ -3499,13 +3497,13 @@ class Setup(object):
 
                     if bucket:
                         cur_bucket = bucket
-                    elif e[0].startswith('site_@'):
+                    elif e[0].startswith('site_'):
                         cur_bucket = 'gluu_site'
-                    elif e[0].startswith('groups_@') or e[0].startswith('people_@'):
+                    elif e[0].startswith('groups_') or e[0].startswith('people_'):
                         cur_bucket = 'gluu_user'
-                    elif e[0].startswith('metric_@'):
+                    elif e[0].startswith('metric_'):
                         cur_bucket = 'gluu_statistic'
-                    elif e[0].startswith('cache_@'):
+                    elif e[0].startswith('cache_'):
                         cur_bucket = 'gluu_cache'
                     else:
                         cur_bucket = 'gluu'
