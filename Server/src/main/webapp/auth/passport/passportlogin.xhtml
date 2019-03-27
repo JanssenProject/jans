@@ -325,16 +325,25 @@ input[type="text"]:focus, input[type="password"]:focus {
 				form["loginForm:loginButton"].click();
 			}
 
-			function dynamic_link(provider, logo_img) {
+			function dynamic_link(provider, logo_img, name) {
+				name = name ? name : provider;
+				if (logo_img == null) {
+					logo_img = "img/" + name.toLowerCase() + ".png"
+				}
+				if (logo_img.indexOf("http") != 0) {
+					//logo is assumed to be located relative to /oxauth/auth/passport
+					logo_img = "auth/passport/" + logo_img
+				}
+            			
 				imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="'
-						+ provider
+						+ name
 						+ '" onclick="idp_redirect(\''
 						+ provider
 						+ '\')" src="' + logo_img + '"></img>';
 				leftMarkup = '<div class="col-xs-3 col-sm-1 col-md-2">'
 						+ imgMarkup + '</div>';
 				rightMarkup = '<div class="col-xs-9 col-sm-11 col-md-10"><h4>'
-						+ provider + '</h4></div>'
+						+ name + '</h4></div>'
 				$('#add_here').append(
 						'<div class="row">' + leftMarkup + rightMarkup
 								+ '<div class="clearfix"></div><hr /></div>');
@@ -347,7 +356,7 @@ input[type="text"]:focus, input[type="password"]:focus {
                             var providers = JSON.parse(jsonProviders)
 
                             for (var idprv in providers) {
-                                dynamic_link(idprv, providers[idprv].logo_img)
+                                dynamic_link(idprv, providers[idprv].logo_img, providers[idprv].displayName)
                             }
                         } catch (e) {
                         }
