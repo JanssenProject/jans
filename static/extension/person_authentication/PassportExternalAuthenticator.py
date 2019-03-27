@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2019, Gluu
 #
 # Author: Jose Gonzalez
 # Author: Yuriy Movchan
@@ -41,12 +41,15 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        self.attributesMapping = self.prepareAttributesMapping(configurationAttributes)
-        success = self.attributesMapping != None and self.processKeyStoreProperties(configurationAttributes)
-
         print "Passport. init. Behaviour is social"
-        self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
-        print "Passport. init. Initialization success" if success else "Passport. init. Initialization failed"
+        success = self.processKeyStoreProperties(configurationAttributes)
+
+        if success:
+            self.providerKey = "provider"
+            self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
+            print "Passport. init. Initialization success"
+        else:
+            print "Passport. init. Initialization failed"
         return success
 
 
@@ -73,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if extensionResult != None:
             return extensionResult
 
-        print "Passport. authenticate called %s" % str(step)
+        print "Passport. authenticate for step %s called" % str(step)
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
@@ -127,9 +130,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.setEmailMessageError()
             elif json != None:
                 # Completion of profile takes place
-                attr = self.getRemoteAttr("mail")
                 user_profile = self.getProfileFromJson(json)
-                user_profile[attr] = mail
+                user_profile["mail"] = mail
 
                 return self.attemptAuthentication(identity, user_profile, json)
 
@@ -204,12 +206,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getPageForStep(self, configurationAttributes, step):
-
+        print "Passport. getPageForStep called"
+        
         extensionResult = self.extensionGetPageForStep(configurationAttributes, step)
         if extensionResult != None:
             return extensionResult
 
-        if (step == 1):
+        if step == 1:
             return "/auth/passport/passportlogin.xhtml"
         return "/auth/passport/passportpostlogin.xhtml"
 
@@ -274,39 +277,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
 
-    def prepareAttributesMapping(self, attrs):
-
-        remote = attrs.get("generic_remote_attributes_list")
-        local = attrs.get("generic_local_attributes_list")
-
-        if remote == None or local == None:
-            print "Passport. checkPropertiesConsistency. Property generic_remote_attributes_list or generic_local_attributes_list was not supplied"
-            return None
-
-        remote = StringHelper.split(remote.getValue2().lower(), ",")
-        local = StringHelper.split(local.getValue2().lower(), ",")
-        llocal = len(local)
-
-        if len(remote) != llocal:
-            print "Passport. checkPropertiesConsistency. Number of items in generic_remote_attributes_list and generic_local_attributes_list not equal"
-            return None
-
-        for i in range(llocal):
-            if len(remote[i]) == 0 or len(local[i]) == 0:
-                print "Passport. checkPropertiesConsistency. Empty attribute name detected in generic_remote_attributes_list or generic_local_attributes_list"
-                return None
-
-        if not "uid" in local:
-            print "Passport. checkPropertiesConsistency. Property generic_local_attributes_list must contain 'uid'"
-            return None
-
-        mapping = {}
-        for i in range(llocal):
-            mapping[remote[i]] = local[i]
-
-        return mapping
-
-
     def processKeyStoreProperties(self, attrs):
         file = attrs.get("key_store_file")
         password = attrs.get("key_store_password")
@@ -342,36 +312,55 @@ class PersonAuthentication(PersonAuthenticationType):
 
 # Configuration parsing
 
+    def parseAllProviders(self):
+
+        registeredProviders = {}
+        print "Passport. parseAllProviders. Adding providers"
+        passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
+        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        
+        config = LdapOxPassportConfiguration()
+        config = entryManager.find(config.getClass(), passportDN).getPassportConfiguration()
+        config = config.getProviders() if config != None else config
+            
+        if config != None and len(config) > 0:      
+            for prvdetails in config:
+                if prvdetails.isEnabled():              
+                    registeredProviders[prvdetails.getId()] = {     
+                        "emailLinkingSafe": prvdetails.isEmailLinkingSafe(), 
+                        "requestForEmail" : prvdetails.isRequestForEmail(),
+                        "logo_img": prvdetails.getLogoImg(),
+                        "displayName": prvdetails.getDisplayName(),
+                        "type": prvdetails.getType()
+                    }
+        
+        return registeredProviders
+
+
     def parseProviderConfigs(self):
 
-        self.registeredProviders = {}
+        registeredProviders = {}
         try:
-            print "Passport. parseProviderConfigs. Adding social providers"
-            passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-            entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
-            config = LdapOxPassportConfiguration()
-            config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
-
-            if config != None:
-                for strategy in config:
-                    idProvider = strategy.getStrategy()
-                    provider = { "emailLinkingSafe" : False, "requestForEmail" : False }
-
-                    for field in strategy.getFieldset():
-                        for property in provider:
-                            if StringHelper.equalsIgnoreCase(field.getValue1(), property) and StringHelper.equalsIgnoreCase(field.getValue2(), "true"):
-                                provider[property] = True
-
-                        if (field.getValue1() == "logo_img"):
-                            provider["logo_img"] = field.getValue2()
-
-                    provider["saml"] = False
-                    if not "logo_img" in provider:
-                        provider["logo_img"] = "img/%s.png" % idProvider
-
-                    self.registeredProviders[idProvider] = provider
+            registeredProviders = self.parseAllProviders()
+            toRemove = []
+            
+            for provider in registeredProviders:                
+                if registeredProviders[provider]["type"] == "saml":
+                    toRemove.append(provider)
+                else:
+                    registeredProviders[provider]["saml"] = False
+                
+            for provider in toRemove:
+                registeredProviders.pop(provider)
+                
+            if len(registeredProviders.keys()) > 0:
+                print "Passport. parseProviderConfigs. Configured providers:", registeredProviders    
+            else:
+                print "Passport. parseProviderConfigs. No providers registered yet"
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
+            
+        self.registeredProviders = registeredProviders
 
 # Auxiliary routines
 
@@ -380,7 +369,7 @@ class PersonAuthentication(PersonAuthenticationType):
         provider = None
         try:
             obj = json.loads(Base64Util.base64urldecodeToString(providerJson))
-            provider = obj["provider"]
+            provider = obj[self.providerKey]
         except:
             print "Passport. getProviderFromJson. Could not parse provided Json string. Returning None"
 
@@ -407,12 +396,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getPassportRedirectUrl. Response was %s" % httpResponse.getStatusLine().getStatusCode()
 
             tokenObj = json.loads(response)
-
-            if self.registeredProviders[provider]["saml"]:
-                provider = "saml/" + provider
-
             url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
-
         except:
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
 
@@ -463,43 +447,39 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
 
-        # "uid" is always present in mapping, see prepareAttributesMapping
-        uidRemoteAttr = self.getRemoteAttr("uid")
-        providerKey = "provider"
-        if not self.checkRequiredAttributes(user_profile, [uidRemoteAttr, providerKey]):
+        uidKey = "uid" 
+        if not self.checkRequiredAttributes(user_profile, [uidKey, self.providerKey]):
             return False
 
-        provider = user_profile[providerKey]
+        provider = user_profile[self.providerKey]
         if not provider in self.registeredProviders:
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
-        uidRemoteAttr = user_profile[uidRemoteAttr]
-        externalUid = "passport-%s:%s" % (provider, uidRemoteAttr)
+        uid = user_profile[uidKey][0]
+        externalUid = "passport-%s:%s" % (provider, uid)
 
         userService = CdiUtil.bean(UserService)
         userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
 
-        mailRemoteAttr = self.getRemoteAttr("mail")
         email = None
-        if mailRemoteAttr in user_profile:
-            email = self.flatValues(user_profile[mailRemoteAttr])
+        if "mail" in user_profile:
+            email = user_profile["mail"]
             if len(email) == 0:
                 email = None
             else:
                 email = email[0]
-                user_profile[mailRemoteAttr] = email
+                user_profile["mail"] = email
 
         if email == None and self.registeredProviders[provider]["requestForEmail"]:
             print "Passport. attemptAuthentication. Email was not received"
 
             if userByUid != None:
-                # This helps asking for the email over every login attempt
+                # This avoids asking for the email over every login attempt
                 email = userByUid.getAttribute("mail")
                 if email != None:
                     print "Passport. attemptAuthentication. Filling missing email value with %s" % email
-                    # Assumes mailRemoteAttr is not None
-                    user_profile[mailRemoteAttr] = email
+                    user_profile["mail"] = email
 
             if email == None:
                 # Store user profile in session and abort this routine
@@ -567,20 +547,10 @@ class PersonAuthentication(PersonAuthenticationType):
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Email was missing in user profile")
 
 
-    def getRemoteAttr(self, name):
-
-        # It's guaranteed this does not return None when name == "uid" (see prepareAttributesMapping)
-        mapping = self.attributesMapping
-        for remoteAttr in mapping.keys():
-            if mapping[remoteAttr] == name:
-                return remoteAttr
-        return None
-
-
     def checkRequiredAttributes(self, profile, attrs):
 
         for attr in attrs:
-            if (not attr in profile) or len(self.flatValues(profile[attr])) == 0:
+            if (not attr in profile) or len(profile[attr]) == 0:
                 print "Passport. checkRequiredAttributes. Attribute '%s' is missing in profile" % attr
                 return False
         return True
@@ -606,46 +576,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def fillUser(self, foundUser, profile):
 
-        # mapping is already lower cased
-        mapping = self.attributesMapping
-        for remoteAttr in mapping:
-            values = self.flatValues(profile[remoteAttr])
-
+        for attr in profile:
             # "provider" is disregarded if part of mapping
-            if remoteAttr != "provider":
-                localAttr = mapping[remoteAttr]
-                print "Remote (%s), Local (%s) = %s" % (remoteAttr, localAttr, values)
-                foundUser.setAttribute(localAttr, values)
-
-    # This routine converts a value into an array of flat string values. Examples:
-    # "" --> []
-    # "hi" --> ["hi"]
-    # ["hi", "there"] --> ["hi", "there"]
-    # [{"attr":"hi"}, {"attr":"there"}] --> ['{"attr":"hi"}', '{"attr":"there"}']
-    # {"attr":"hi"} --> ['{"attr":"hi"}']
-    # [] --> []
-    # None --> []
-    def flatValues(self, value):
-
-        try:
-            typ = type(value)
-            if typ is str or typ is unicode:
-                return [] if len(value) == 0 else [value]
-            elif typ is dict:
-                return [json.dumps(value)]
-            elif typ is list:
-                if len(value) > 0 and type(value[0]) is dict:
-                    # it's an array of objects
-                    l = []
-                    for i in range(len(value)):
-                        l.append(json.dumps(value[i]))
-                    return l
-                else:
-                    return value
-            else:
-                # value = None?
-                return []
-        except:
-            # failed!
-            print "Passport. flatValues. Failed to convert %s to an array" % value
-            return []
+            if attr != self.providerKey:
+                values = profile[attr]
+                print "%s = %s" % (attr, values)
+                foundUser.setAttribute(attr, values)
