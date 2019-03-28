@@ -1,4 +1,4 @@
-package org.xdi.model.uma;
+package org.gluu.model.uma;
 
 import java.util.ArrayList;
 import java.util.Collections;

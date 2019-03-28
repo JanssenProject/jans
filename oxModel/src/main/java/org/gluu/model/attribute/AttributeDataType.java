@@ -2,9 +2,7 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */
-
-package org.xdi.model.attribute;
+ */package org.gluu.model.attribute;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,26 +10,30 @@ import java.util.Map;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
- * Attribute Usage Type
+ * Attribute Data Type
  *
- * @author Yuriy Movchan Date: 02/12/2014
+ * @author Yuriy Movchan
+ * @author Javier Rojas Blum
+ *
+ * @version September 27, 2017
  */
-public enum AttributeUsageType implements LdapEnum {
+public enum AttributeDataType implements LdapEnum {
 
-    OPENID("openid", "OpenID");
+    STRING("string", "Text"), NUMERIC("numeric", "Numeric"), BOOLEAN("boolean", "Boolean"), BINARY("binary", "Binary"), CERTIFICATE("certificate",
+            "Certificate"), DATE("generalizedTime", "Date");
 
     private String value;
     private String displayName;
 
-    private static Map<String, AttributeUsageType> MAP_BY_VALUES = new HashMap<String, AttributeUsageType>();
+    private static Map<String, AttributeDataType> MAP_BY_VALUES = new HashMap<String, AttributeDataType>();
 
     static {
-        for (AttributeUsageType enumType : values()) {
+        for (AttributeDataType enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    AttributeUsageType(String value, String displayName) {
+    AttributeDataType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -44,7 +46,7 @@ public enum AttributeUsageType implements LdapEnum {
         return displayName;
     }
 
-    public static AttributeUsageType getByValue(String value) {
+    public static AttributeDataType getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 

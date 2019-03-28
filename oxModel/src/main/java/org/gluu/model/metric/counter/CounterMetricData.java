@@ -4,10 +4,10 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.metric.counter;
+package org.gluu.model.metric.counter;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.xdi.model.metric.MetricData;
+import org.gluu.model.metric.MetricData;
 
 /**
  * Numeric counter metric data class

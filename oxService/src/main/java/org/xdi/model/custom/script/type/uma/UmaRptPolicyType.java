@@ -2,8 +2,8 @@ package org.xdi.model.custom.script.type.uma;
 
 import java.util.List;
 
+import org.gluu.model.uma.ClaimDefinition;
 import org.xdi.model.custom.script.type.BaseExternalType;
-import org.xdi.model.uma.ClaimDefinition;
 
 /**
  * @author yuriyz on 05/30/2017.

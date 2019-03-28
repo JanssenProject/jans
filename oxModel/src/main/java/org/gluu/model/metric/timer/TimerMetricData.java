@@ -4,10 +4,10 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.metric.timer;
+package org.gluu.model.metric.timer;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.xdi.model.metric.MetricData;
+import org.gluu.model.metric.MetricData;
 
 /**
  * Timer metric data class

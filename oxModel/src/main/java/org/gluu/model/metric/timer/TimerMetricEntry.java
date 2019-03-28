@@ -2,13 +2,13 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.metric.timer;
+ */package org.gluu.model.metric.timer;
 
 import java.util.Date;
 
+import org.gluu.model.metric.ldap.MetricEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.xdi.model.metric.ldap.MetricEntry;
 
 /**
  * Timer entry which represents timer value

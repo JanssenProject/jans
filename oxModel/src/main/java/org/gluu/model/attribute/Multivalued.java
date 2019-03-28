@@ -2,7 +2,7 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.scim;
+ */package org.gluu.model.attribute;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,22 +14,22 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  *
  * @author Reda Zerrad Date: 08.02.2012
  */
-public enum ScimCustomAtribute implements LdapEnum {
+public enum Multivalued implements LdapEnum {
 
     TRUE("true", "True"), FALSE("false", "False");
 
     private String value;
     private String displayName;
 
-    private static Map<String, ScimCustomAtribute> MAP_BY_VALUES = new HashMap<String, ScimCustomAtribute>();
+    private static Map<String, Multivalued> MAP_BY_VALUES = new HashMap<String, Multivalued>();
 
     static {
-        for (ScimCustomAtribute enumType : values()) {
+        for (Multivalued enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    ScimCustomAtribute(String value, String displayName) {
+    Multivalued(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -42,7 +42,7 @@ public enum ScimCustomAtribute implements LdapEnum {
         return displayName;
     }
 
-    public static ScimCustomAtribute getByValue(String value) {
+    public static Multivalued getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 

@@ -3,14 +3,14 @@
  *
  * Copyright (c) 2014, Gluu
  */
-package org.xdi.model.metric.ldap;
+package org.gluu.model.metric.ldap;
 
+import org.gluu.model.ApplicationType;
+import org.gluu.model.metric.MetricType;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.model.ApplicationType;
-import org.xdi.model.metric.MetricType;
 
 import java.util.Date;
 

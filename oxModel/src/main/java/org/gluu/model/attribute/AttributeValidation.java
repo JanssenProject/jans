@@ -1,4 +1,4 @@
-package org.xdi.model.attribute;
+package org.gluu.model.attribute;
 
 import java.io.Serializable;
 

@@ -2,7 +2,7 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.attribute;
+ */package org.gluu.model.scim;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,30 +10,26 @@ import java.util.Map;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
- * Attribute Data Type
+ * SCIM Custom Attribute
  *
- * @author Yuriy Movchan
- * @author Javier Rojas Blum
- *
- * @version September 27, 2017
+ * @author Reda Zerrad Date: 08.02.2012
  */
-public enum AttributeDataType implements LdapEnum {
+public enum ScimCustomAtribute implements LdapEnum {
 
-    STRING("string", "Text"), NUMERIC("numeric", "Numeric"), BOOLEAN("boolean", "Boolean"), BINARY("binary", "Binary"), CERTIFICATE("certificate",
-            "Certificate"), DATE("generalizedTime", "Date");
+    TRUE("true", "True"), FALSE("false", "False");
 
     private String value;
     private String displayName;
 
-    private static Map<String, AttributeDataType> MAP_BY_VALUES = new HashMap<String, AttributeDataType>();
+    private static Map<String, ScimCustomAtribute> MAP_BY_VALUES = new HashMap<String, ScimCustomAtribute>();
 
     static {
-        for (AttributeDataType enumType : values()) {
+        for (ScimCustomAtribute enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    AttributeDataType(String value, String displayName) {
+    ScimCustomAtribute(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -46,7 +42,7 @@ public enum AttributeDataType implements LdapEnum {
         return displayName;
     }
 
-    public static AttributeDataType getByValue(String value) {
+    public static ScimCustomAtribute getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 

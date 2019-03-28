@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2014, Gluu
  */
-package org.xdi.model.attribute;
+package org.gluu.model.attribute;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -13,14 +13,14 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.gluu.model.GluuStatus;
+import org.gluu.model.scim.ScimCustomAtribute;
+import org.gluu.model.user.UserRole;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.model.GluuStatus;
-import org.xdi.model.scim.ScimCustomAtribute;
-import org.xdi.model.user.UserRole;
 
 /**
  * Attribute Metadata
