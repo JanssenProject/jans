@@ -131,7 +131,7 @@ public class UmaResourceService {
             prepareBranch();
 
             if (StringUtils.isNotBlank(associatedClientDn)) {
-                final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", associatedClientDn));
+                final Filter filter = Filter.createEqualityFilter("oxAssociatedClient", associatedClientDn);
                 return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, filter);
             }
         } catch (Exception e) {
