@@ -1,7 +1,7 @@
 package org.xdi.oxauth.model.uma;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.model.uma.ClaimDefinition;
+import org.gluu.model.uma.ClaimDefinition;
 
 import java.io.Serializable;
 import java.util.List;

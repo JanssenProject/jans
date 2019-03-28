@@ -16,9 +16,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.model.uma.ClaimDefinition;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.UmaConstants;
