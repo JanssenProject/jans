@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
@@ -28,6 +18,15 @@ import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -67,7 +66,7 @@ public class UmaScopeService {
 
     public UmaScopeDescription getScope(String scopeId) {
         try {
-            final Filter filter = Filter.create(String.format("&(oxId=%s)", scopeId));
+            final Filter filter = Filter.createEqualityFilter("oxId", scopeId);
             final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 // if more then one scope then it's problem, non-deterministic behavior, id must be unique
