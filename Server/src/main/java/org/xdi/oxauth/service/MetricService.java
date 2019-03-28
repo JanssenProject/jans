@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.service;
 
+import org.gluu.model.ApplicationType;
 import org.gluu.persist.PersistenceEntryManager;
-import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.service.metric.inject.ReportMetric;

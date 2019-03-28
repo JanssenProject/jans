@@ -1,6 +1,6 @@
 package org.xdi.oxauth.util;
 
-import org.xdi.model.attribute.AttributeValidation;
+import org.gluu.model.attribute.AttributeValidation;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.service.AttributeService;
 
