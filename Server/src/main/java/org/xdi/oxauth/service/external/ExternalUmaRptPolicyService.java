@@ -18,11 +18,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
+import org.gluu.model.uma.ClaimDefinition;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.uma.UmaRptPolicyType;
-import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.service.LookupService;
 import org.xdi.service.custom.script.CustomScriptManager;

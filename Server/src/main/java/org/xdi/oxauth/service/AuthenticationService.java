@@ -29,15 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.GluuStatus;
+import org.gluu.model.metric.MetricType;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.slf4j.Logger;
-import org.xdi.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
-import org.xdi.model.metric.MetricType;
 import org.xdi.model.security.Credentials;
 import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.model.common.SessionId;
