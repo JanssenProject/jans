@@ -101,7 +101,7 @@ public class UmaRptService {
 
     public UmaRPT getRPTByCode(String rptCode) {
         try {
-            final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", rptCode));
+            final Filter filter = Filter.createEqualityFilter("oxAuthTokenCode", rptCode);
             final String baseDn = staticConfiguration.getBaseDn().getClients();
             final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
             if (entries != null && !entries.isEmpty()) {
