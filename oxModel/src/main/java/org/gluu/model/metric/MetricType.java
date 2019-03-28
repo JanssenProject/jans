@@ -4,17 +4,17 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.metric;
+package org.gluu.model.metric;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.gluu.model.metric.counter.CounterMetricData;
+import org.gluu.model.metric.counter.CounterMetricEntry;
+import org.gluu.model.metric.ldap.MetricEntry;
+import org.gluu.model.metric.timer.TimerMetricData;
+import org.gluu.model.metric.timer.TimerMetricEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
-import org.xdi.model.metric.counter.CounterMetricData;
-import org.xdi.model.metric.counter.CounterMetricEntry;
-import org.xdi.model.metric.ldap.MetricEntry;
-import org.xdi.model.metric.timer.TimerMetricData;
-import org.xdi.model.metric.timer.TimerMetricEntry;
 
 /**
  * Metric event type declaration

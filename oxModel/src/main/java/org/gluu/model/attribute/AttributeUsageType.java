@@ -2,7 +2,9 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.attribute;
+ */
+
+package org.gluu.model.attribute;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,26 +12,26 @@ import java.util.Map;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
- * SCIM Custom Attribute
+ * Attribute Usage Type
  *
- * @author Reda Zerrad Date: 08.02.2012
+ * @author Yuriy Movchan Date: 02/12/2014
  */
-public enum Multivalued implements LdapEnum {
+public enum AttributeUsageType implements LdapEnum {
 
-    TRUE("true", "True"), FALSE("false", "False");
+    OPENID("openid", "OpenID");
 
     private String value;
     private String displayName;
 
-    private static Map<String, Multivalued> MAP_BY_VALUES = new HashMap<String, Multivalued>();
+    private static Map<String, AttributeUsageType> MAP_BY_VALUES = new HashMap<String, AttributeUsageType>();
 
     static {
-        for (Multivalued enumType : values()) {
+        for (AttributeUsageType enumType : values()) {
             MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
-    Multivalued(String value, String displayName) {
+    AttributeUsageType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -42,7 +44,7 @@ public enum Multivalued implements LdapEnum {
         return displayName;
     }
 
-    public static Multivalued getByValue(String value) {
+    public static AttributeUsageType getByValue(String value) {
         return MAP_BY_VALUES.get(value);
     }
 

@@ -13,14 +13,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.gluu.model.GluuStatus;
+import org.gluu.model.attribute.AttributeValidation;
+import org.gluu.model.scim.ScimCustomAtribute;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-//import org.xdi.ldap.model.Entry;
-import org.xdi.model.attribute.AttributeValidation;
-import org.xdi.model.scim.ScimCustomAtribute;
 
 /**
  * Attribute Metadata

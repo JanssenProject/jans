@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model;
+package org.gluu.model;
 
 import java.util.HashMap;
 import java.util.Map;

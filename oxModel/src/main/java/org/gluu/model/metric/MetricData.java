@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.metric;
+package org.gluu.model.metric;
 
 import java.io.Serializable;
 

@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2014, Gluu
  */
-package org.xdi.model.metric.ldap;
+package org.gluu.model.metric.ldap;
 
 import java.util.Date;
 import java.util.List;

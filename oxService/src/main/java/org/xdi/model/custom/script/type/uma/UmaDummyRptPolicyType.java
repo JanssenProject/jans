@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.gluu.model.uma.ClaimDefinition;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.uma.ClaimDefinition;
 
 /**
  * @author yuriyz on 05/30/2017.
