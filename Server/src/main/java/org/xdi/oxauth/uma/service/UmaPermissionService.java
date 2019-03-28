@@ -85,7 +85,7 @@ public class UmaPermissionService {
             }
             return created.get(0).getTicket();
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -107,7 +107,7 @@ public class UmaPermissionService {
             permission.setDn(getDn(clientDn, permission.getTicket()));
             ldapEntryManager.persist(permission);
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -126,10 +126,10 @@ public class UmaPermissionService {
     public List<UmaPermission> getPermissionsByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
-            final Filter filter = Filter.create(String.format("&(oxTicket=%s)", ticket));
+            final Filter filter = Filter.createEqualityFilter("oxTicket", ticket);
             return ldapEntryManager.findEntries(baseDn, UmaPermission.class, filter);
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -144,13 +144,13 @@ public class UmaPermissionService {
 
     public UmaPermission getPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
         try {
-            final Filter filter = Filter.create(String.format("&(oxConfigurationCode=%s)", p_configurationCode));
+            final Filter filter = Filter.createEqualityFilter("oxConfigurationCode", p_configurationCode);
             final List<UmaPermission> entries = ldapEntryManager.findEntries(clientDn, UmaPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
             }
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -162,7 +162,7 @@ public class UmaPermissionService {
                 ldapEntryManager.remove(p);
             }
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
