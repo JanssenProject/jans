@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.crypto.binding;
+package org.gluu.oxauth.model.crypto.binding;
 
 import org.gluu.oxauth.model.crypto.binding.TokenBinding;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;

@@ -1,0 +1,5 @@
+1. Replace:
+org.xdi
+
+with:
+org.gluu

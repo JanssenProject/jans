@@ -1,4 +1,4 @@
-package org.xdi.oxauth.rp.demo;
+package org.gluu.oxauth.rp.demo;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;

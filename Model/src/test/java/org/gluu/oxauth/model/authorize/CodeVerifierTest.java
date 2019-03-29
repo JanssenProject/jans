@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.authorize;
+package org.gluu.oxauth.model.authorize;
 
 import org.gluu.oxauth.model.authorize.CodeVerifier;
 import org.testng.annotations.Test;
