@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.comp;
 
-import org.xdi.oxauth.BaseTest;
+import org.gluu.oxauth.BaseTest;
 
 /**
  * @author Javier Rojas Blum

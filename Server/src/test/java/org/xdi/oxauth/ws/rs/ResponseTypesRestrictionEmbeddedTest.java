@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.client.RegisterRequest;
@@ -56,7 +57,6 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * @author Javier Rojas Blum

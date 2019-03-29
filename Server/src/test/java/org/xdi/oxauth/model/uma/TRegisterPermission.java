@@ -17,6 +17,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.common.Holder;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -24,7 +25,6 @@ import org.gluu.oxauth.model.uma.UmaPermission;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * @author Yuriy Zabrovarnyy

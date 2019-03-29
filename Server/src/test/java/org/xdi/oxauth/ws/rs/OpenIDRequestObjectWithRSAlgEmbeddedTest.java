@@ -23,9 +23,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.ResponseAsserter;
 import org.gluu.oxauth.client.model.authorize.Claim;
 import org.gluu.oxauth.client.model.authorize.ClaimValue;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -41,8 +43,6 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.ResponseAsserter;
 
 /**
  * Functional tests for OpenID Request Object (embedded)
