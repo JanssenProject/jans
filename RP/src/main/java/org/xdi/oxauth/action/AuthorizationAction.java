@@ -7,6 +7,11 @@
 package org.xdi.oxauth.action;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.AuthorizeClient;
+import org.gluu.oxauth.client.model.authorize.Claim;
+import org.gluu.oxauth.client.model.authorize.ClaimValue;
+import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.AuthorizationMethod;
 import org.gluu.oxauth.model.common.Display;
 import org.gluu.oxauth.model.common.Prompt;
@@ -19,11 +24,6 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.slf4j.Logger;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.model.authorize.Claim;
-import org.xdi.oxauth.client.model.authorize.ClaimValue;
-import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;

@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.load.benchmark;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.register.ApplicationType;
@@ -16,7 +17,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 

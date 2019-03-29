@@ -9,7 +9,7 @@ package org.xdi.oxauth.ws.rs;
 import static org.testng.Assert.assertNotNull;
 import static org.xdi.oxauth.model.uma.TestUtil.assertNotBlank;
 
-import org.xdi.oxauth.client.RegisterResponse;
+import org.gluu.oxauth.client.RegisterResponse;
 
 /**
  * @author Yuriy Zabrovarnyy

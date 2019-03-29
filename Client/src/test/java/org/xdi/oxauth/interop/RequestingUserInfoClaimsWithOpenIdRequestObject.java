@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.interop;
 
+import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
@@ -19,8 +21,6 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 
 import java.util.Arrays;
 import java.util.List;

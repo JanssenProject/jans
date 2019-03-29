@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -18,7 +19,6 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.util.Arrays;
 import java.util.List;

@@ -10,14 +10,14 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.BaseRequest;
-import org.xdi.oxauth.client.service.ClientFactory;
-import org.xdi.oxauth.client.service.IntrospectionService;
-import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
+import org.gluu.oxauth.client.BaseRequest;
+import org.gluu.oxauth.client.service.ClientFactory;
+import org.gluu.oxauth.client.service.IntrospectionService;
+import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.common.IntrospectionResponse;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 

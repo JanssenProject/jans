@@ -8,6 +8,8 @@ package org.xdi.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.model.SoftwareStatement;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -20,8 +22,6 @@ import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.client.model.SoftwareStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;

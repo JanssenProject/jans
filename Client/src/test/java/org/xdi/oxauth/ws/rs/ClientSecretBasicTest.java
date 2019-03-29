@@ -7,6 +7,7 @@
 package org.xdi.oxauth.ws.rs;
 
 import org.apache.commons.codec.binary.Base64;
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -23,7 +24,6 @@ import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.net.URLEncoder;
 import java.util.Arrays;

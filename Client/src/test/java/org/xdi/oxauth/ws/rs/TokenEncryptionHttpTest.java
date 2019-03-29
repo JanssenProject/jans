@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -18,7 +19,6 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.security.PrivateKey;
 import java.util.Arrays;
