@@ -3,6 +3,8 @@ package org.xdi.oxauth.client;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import org.gluu.oxauth.client.RegisterResponse;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 25/03/2016

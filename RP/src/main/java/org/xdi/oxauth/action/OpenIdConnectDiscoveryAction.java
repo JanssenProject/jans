@@ -18,14 +18,14 @@ import javax.inject.Named;
 import org.apache.http.client.HttpClient;
 import org.gluu.net.SslDefaultHttpClient;
 import org.gluu.net.TrustAllTrustManager;
+import org.gluu.oxauth.client.OpenIdConfigurationClient;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryRequest;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.slf4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.xdi.oxauth.client.OpenIdConfigurationClient;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 
 /**
  * @author Javier Rojas Blum

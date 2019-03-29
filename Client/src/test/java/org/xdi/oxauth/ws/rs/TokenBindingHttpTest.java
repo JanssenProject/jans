@@ -1,5 +1,6 @@
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -12,7 +13,6 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
