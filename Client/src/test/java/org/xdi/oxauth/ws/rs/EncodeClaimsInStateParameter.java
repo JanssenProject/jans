@@ -7,29 +7,29 @@
 package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwe.Jwe;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.JwtState;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
 import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum

@@ -8,20 +8,20 @@ package org.xdi.oxauth.comp;
 
 import static org.testng.Assert.assertTrue;
 
+import org.gluu.oxauth.model.crypto.Certificate;
+import org.gluu.oxauth.model.crypto.Key;
+import org.gluu.oxauth.model.crypto.KeyFactory;
+import org.gluu.oxauth.model.crypto.signature.ECDSAKeyFactory;
+import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.RSAKeyFactory;
+import org.gluu.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jws.ECDSASigner;
+import org.gluu.oxauth.model.jws.RSASigner;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.crypto.Certificate;
-import org.xdi.oxauth.model.crypto.Key;
-import org.xdi.oxauth.model.crypto.KeyFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jws.ECDSASigner;
-import org.xdi.oxauth.model.jws.RSASigner;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012

@@ -1,8 +1,8 @@
 package org.xdi.oxauth.auth;
 
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.interception.MTLSInterception;
 import org.xdi.oxauth.interception.MTLSInterceptionInterface;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.ref.AuthenticatorReference;
 import org.xdi.oxauth.model.ref.ClientReference;
 

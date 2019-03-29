@@ -1,5 +1,6 @@
 package org.xdi.oxauth.model.util;
 
+import org.gluu.oxauth.model.util.CertUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

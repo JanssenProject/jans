@@ -8,12 +8,12 @@ package org.xdi.oxauth.client.model;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtHeader;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.JwtHeader;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

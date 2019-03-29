@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.client;
 
-import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
+import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 
 /**
  * Represents an end session response received from the authorization server.

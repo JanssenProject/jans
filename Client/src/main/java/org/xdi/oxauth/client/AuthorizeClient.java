@@ -7,13 +7,13 @@
 package org.xdi.oxauth.client;
 
 import org.apache.log4j.Logger;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import org.gluu.oxauth.model.common.AuthorizationMethod;
+import org.gluu.oxauth.model.common.Display;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;

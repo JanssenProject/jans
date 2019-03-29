@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.client.service;
 
-import org.xdi.oxauth.model.common.IntrospectionResponse;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+
+import org.gluu.oxauth.model.common.IntrospectionResponse;
 
 /**
  * Introspection service.

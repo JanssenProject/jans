@@ -6,6 +6,11 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import org.gluu.oxauth.model.fido.u2f.*;
+import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
+import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
+import org.gluu.oxauth.model.fido.u2f.protocol.*;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
@@ -13,11 +18,10 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.fido.u2f.*;
-import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
-import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.*;
-import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 

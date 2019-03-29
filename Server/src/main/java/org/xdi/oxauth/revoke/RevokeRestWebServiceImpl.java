@@ -7,17 +7,17 @@
 package org.xdi.oxauth.revoke;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.TokenTypeHint;
+import org.gluu.oxauth.model.token.TokenRevocationErrorResponseType;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.TokenTypeHint;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
-import org.xdi.oxauth.model.token.TokenRevocationErrorResponseType;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.util.ServerUtil;

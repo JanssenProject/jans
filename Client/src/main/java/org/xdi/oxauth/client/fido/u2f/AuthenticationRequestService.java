@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.client.fido.u2f;
 
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
-
 import javax.ws.rs.*;
+
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
 
 /**
  * The endpoint allows to start and finish U2F authentication process

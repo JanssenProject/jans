@@ -16,12 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.debug.entity.HttpRequest;
 import org.xdi.oxauth.audit.debug.entity.HttpResponse;
 import org.xdi.oxauth.audit.debug.wrapper.RequestWrapper;
 import org.xdi.oxauth.audit.debug.wrapper.ResponseWrapper;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;

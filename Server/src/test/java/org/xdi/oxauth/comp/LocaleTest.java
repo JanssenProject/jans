@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.gluu.oxauth.model.util.LocaleUtil;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.util.LocaleUtil;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013

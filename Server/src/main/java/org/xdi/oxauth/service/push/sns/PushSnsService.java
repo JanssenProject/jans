@@ -9,9 +9,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.util.ServerUtil;
 

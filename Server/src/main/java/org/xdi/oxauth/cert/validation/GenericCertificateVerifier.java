@@ -13,12 +13,12 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on CRL

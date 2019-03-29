@@ -16,6 +16,8 @@ import java.net.URI;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.util.ServerUtil;

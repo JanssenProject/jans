@@ -10,15 +10,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
-import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+
+import java.io.IOException;
 
 /**
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.

@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
+import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
@@ -35,6 +35,7 @@ import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.model.metric.MetricType;
 import org.gluu.model.security.Credentials;
 import org.gluu.model.security.SimplePrincipal;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
@@ -45,7 +46,6 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.security.Identity;

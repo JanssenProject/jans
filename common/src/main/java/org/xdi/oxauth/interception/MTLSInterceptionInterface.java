@@ -1,6 +1,6 @@
 package org.xdi.oxauth.interception;
 
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.ref.AuthenticatorReference;
 import org.xdi.oxauth.model.ref.ClientReference;
 

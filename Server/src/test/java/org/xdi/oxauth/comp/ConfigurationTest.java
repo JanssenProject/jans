@@ -15,13 +15,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.ConfigurableTest;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

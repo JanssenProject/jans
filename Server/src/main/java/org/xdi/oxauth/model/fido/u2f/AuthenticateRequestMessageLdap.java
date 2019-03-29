@@ -8,9 +8,9 @@ package org.xdi.oxauth.model.fido.u2f;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 
 /**
  * U2F authentication requests

@@ -20,6 +20,7 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationStatus;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
@@ -30,7 +31,6 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.UserService;
 
 @ApplicationScoped

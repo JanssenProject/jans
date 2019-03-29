@@ -8,20 +8,20 @@ package org.xdi.oxauth.uma.service;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_PCT;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_SCOPE;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_RPT;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TICKET;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_PCT;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_SCOPE;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RPT;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TICKET;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -37,6 +37,22 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.gluu.oxauth.model.jws.RSASigner;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.jwt.JwtHeaderName;
+import org.gluu.oxauth.model.uma.ClaimTokenFormatType;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.UmaPermissionList;
+import org.gluu.oxauth.model.uma.UmaScopeType;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
 import org.python.google.common.base.Function;
@@ -44,25 +60,9 @@ import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jws.RSASigner;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.ClaimTokenFormatType;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.UmaPermissionList;
-import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.token.TokenService;
@@ -191,12 +191,12 @@ public class UmaValidationService {
     }
 
     public void validatePermissions(UmaPermissionList permissions) {
-        for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
+        for (org.gluu.oxauth.model.uma.UmaPermission permission : permissions) {
             validatePermission(permission);
         }
     }
 
-    public void validatePermission(org.xdi.oxauth.model.uma.UmaPermission permission) {
+    public void validatePermission(org.gluu.oxauth.model.uma.UmaPermission permission) {
         String resourceId = permission.getResourceId();
         if (StringHelper.isEmpty(resourceId)) {
             log.error("Resource id is empty");
@@ -486,7 +486,7 @@ public class UmaValidationService {
         }
     }
 
-    public void validateResource(org.xdi.oxauth.model.uma.UmaResource resource) {
+    public void validateResource(org.gluu.oxauth.model.uma.UmaResource resource) {
         validateScopeExpression(resource.getScopeExpression());
 
         List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());

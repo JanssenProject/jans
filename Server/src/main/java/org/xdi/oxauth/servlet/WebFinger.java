@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.servlet;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.HREF;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.LINKS;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.RESOURCE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.SUBJECT;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.HREF;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.LINKS;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.REL;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.RESOURCE;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.SUBJECT;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 
 /**
