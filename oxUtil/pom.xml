@@ -7,7 +7,7 @@
 	<name>oxUtil</name>
 
 	<parent>
-		<groupId>org.xdi</groupId>
+		<groupId>org.gluu</groupId>
 		<artifactId>oxcore</artifactId>
 		<version>4.0.0-SNAPSHOT</version>
 	</parent>
