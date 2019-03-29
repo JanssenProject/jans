@@ -87,8 +87,8 @@
 
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
-		<Logger name="org.gluu.oxauth" level="${log4j.default.log.level}" />
-		<Logger name="org.gluu.service" level="${log4j.default.log.level}" />
+		<Logger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
+		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
 
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />
@@ -101,7 +101,7 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-		<Logger name="org.gluu.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE" />
 		</Logger>
 
@@ -121,23 +121,23 @@
 			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.service.PythonService" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.service.PythonService" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.service.custom.script" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.service.custom.script" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_AUDIT_LOG_FILE" />
 		</Logger>
 

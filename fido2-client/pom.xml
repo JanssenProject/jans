@@ -8,7 +8,7 @@
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.gluu</groupId>
+		<groupId>org.xdi</groupId>
 		<artifactId>oxauth</artifactId>
 		<version>4.0.0-SNAPSHOT</version>
 	</parent>

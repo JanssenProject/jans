@@ -5,14 +5,14 @@
     <!-- Authorization Benchmark test -->
     <test name="Authorization Benchmark tests" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.load.benchmark.BenchmarkRequestAuthorization"/>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAuthorization"/>
         </classes>
     </test>
 
     <!-- Access Token Benchmark test -->
     <test name="Access Token Benchmark test" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.load.benchmark.BenchmarkRequestAccessToken"/>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAccessToken"/>
         </classes>
     </test>
 
