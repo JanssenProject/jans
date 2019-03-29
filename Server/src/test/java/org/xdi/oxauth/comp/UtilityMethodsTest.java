@@ -7,9 +7,10 @@
 package org.xdi.oxauth.comp;
 
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
 
 import static org.testng.Assert.assertEquals;
+
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
 
 /**
  * @author Yuriy Zabrovarnyy

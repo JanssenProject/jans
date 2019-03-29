@@ -18,7 +18,7 @@ import org.gluu.oxauth.model.uma.UmaPermission;
 import org.gluu.oxauth.model.uma.UmaResource;
 import org.gluu.oxauth.model.uma.UmaResourceResponse;
 import org.gluu.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.util.ServerUtil;
+import org.gluu.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
