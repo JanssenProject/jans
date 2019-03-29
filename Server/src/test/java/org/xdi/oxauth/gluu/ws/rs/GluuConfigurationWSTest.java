@@ -12,6 +12,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.gluu.GluuConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -20,7 +21,6 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * Created by eugeniuparvan on 8/12/16.

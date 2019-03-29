@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -29,7 +30,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.python.core.util.StringUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * Functional tests for JWK Web Services (embedded)
