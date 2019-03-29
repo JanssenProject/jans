@@ -43,8 +43,8 @@ import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

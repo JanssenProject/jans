@@ -3,8 +3,8 @@
 
     <!-- Cert authentication for case when there is no proxy like Apache -->
     <!-- Don't remove. Use when there is standalone tomcat only.
-		<Realm className="org.gluu.tomcat7.WantSslRealm" validate="true" allRolesMode="authOnly"/>
-    	<Valve className="org.gluu.tomcat7.WantSslAuthenticator" />
+		<Realm className="org.xdi.tomcat7.WantSslRealm" validate="true" allRolesMode="authOnly"/>
+    	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />
      -->
 
   <!-- For Tomcat -->

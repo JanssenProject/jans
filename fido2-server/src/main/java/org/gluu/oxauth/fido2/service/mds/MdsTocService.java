@@ -47,12 +47,12 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.configuration.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Fido2Configuration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
