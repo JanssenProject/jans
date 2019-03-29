@@ -17,13 +17,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
+import org.gluu.oxauth.service.SessionIdService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 
 /**

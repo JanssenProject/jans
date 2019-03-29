@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.service.fido.u2f.RawRegistrationService;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;

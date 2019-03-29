@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.comp;
 
+import org.gluu.oxauth.model.ldap.TokenLdap;
+import org.gluu.oxauth.model.ldap.TokenType;
+import org.gluu.oxauth.service.GrantService;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.model.ldap.TokenLdap;
-import org.xdi.oxauth.model.ldap.TokenType;
-import org.xdi.oxauth.service.GrantService;
 
 import javax.inject.Inject;
 import java.util.Date;

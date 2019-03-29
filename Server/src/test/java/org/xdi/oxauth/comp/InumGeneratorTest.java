@@ -9,11 +9,11 @@ package org.xdi.oxauth.comp;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.idgen.ws.rs.InumGenerator;
 import org.gluu.oxauth.model.common.IdType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.idgen.ws.rs.InumGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy

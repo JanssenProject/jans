@@ -12,14 +12,14 @@ from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
-from org.xdi.ldap.model import CustomAttribute
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.model.common import User
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper, ArrayHelper, Util
+from org.gluu.ldap.model import CustomAttribute
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.model.common import User
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
+from org.gluu.oxauth.service.net import HttpService
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper, ArrayHelper, Util
 from org.gluu.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):
