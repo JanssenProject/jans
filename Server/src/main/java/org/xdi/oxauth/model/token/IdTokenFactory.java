@@ -16,33 +16,40 @@ import org.gluu.model.GluuAttribute;
 import org.gluu.model.GluuAttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidClaimException;
+import org.gluu.oxauth.model.exception.InvalidJweException;
+import org.gluu.oxauth.model.jwe.Jwe;
+import org.gluu.oxauth.model.jwe.JweEncrypter;
+import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
+import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import org.gluu.oxauth.model.jwk.Use;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
+import org.gluu.oxauth.model.jwt.JwtType;
+import org.gluu.oxauth.model.token.JsonWebResponse;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AbstractToken;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCode;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jwe.JweEncrypter;
-import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
-import org.xdi.oxauth.model.jwk.Algorithm;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.jwk.Use;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
-import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
@@ -152,7 +159,7 @@ public class IdTokenFactory {
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-                if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+                if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
                 }
@@ -351,7 +358,7 @@ public class IdTokenFactory {
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-                if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+                if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
                 }

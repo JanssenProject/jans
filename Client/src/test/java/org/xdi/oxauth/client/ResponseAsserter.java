@@ -2,11 +2,11 @@ package org.xdi.oxauth.client;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.register.RegisterResponseParam;
+import org.gluu.oxauth.model.register.RegisterResponseParam;
 
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * @author yuriyz

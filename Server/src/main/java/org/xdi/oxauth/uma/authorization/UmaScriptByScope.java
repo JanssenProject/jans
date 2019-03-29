@@ -1,7 +1,7 @@
 package org.xdi.oxauth.uma.authorization;
 
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 
 /**
  * @author yuriyz

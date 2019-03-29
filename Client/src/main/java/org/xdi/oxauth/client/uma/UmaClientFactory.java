@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.client.uma;
 
+import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.xdi.oxauth.model.uma.UmaMetadata;
 
 /**
  * Helper class which creates proxied UMA services

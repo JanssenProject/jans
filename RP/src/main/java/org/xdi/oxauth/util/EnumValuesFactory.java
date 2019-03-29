@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.util;
 
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.register.ApplicationType;
-
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
+
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.register.ApplicationType;
 
 /**
  * @author Javier Rojas Blum

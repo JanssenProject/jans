@@ -6,19 +6,19 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.uma.UmaScopeType;
+import org.gluu.oxauth.model.uma.wrapper.Token;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.uma.exception.UmaException;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

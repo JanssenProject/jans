@@ -4,11 +4,11 @@ import static org.testng.Assert.assertNotNull;
 
 import javax.inject.Inject;
 
+import org.gluu.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
-import org.xdi.oxauth.model.util.Base64Util;
 
 public class RawAuthenticationServiceTest extends BaseComponentTest {
 

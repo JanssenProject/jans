@@ -14,10 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.SimpleCustomProperty;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.authorize.ws.rs.ConsentGatheringSessionService;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.UserService;
 

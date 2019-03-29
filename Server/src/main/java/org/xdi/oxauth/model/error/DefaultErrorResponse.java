@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.model.error;
 
+import org.gluu.oxauth.model.error.IErrorType;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 19/09/2012

@@ -18,6 +18,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
+import org.gluu.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
+import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
+import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
@@ -30,13 +37,6 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
-import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
-import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 
 /**

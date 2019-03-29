@@ -33,15 +33,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceResponse;
+import org.gluu.oxauth.model.uma.UmaResourceWithId;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaResource;
-import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.UmaResourceWithId;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaScopeService;
@@ -185,7 +185,7 @@ public class UmaResourceRegistrationWS {
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
             log.debug("Getting resource description: '{}'", rsid);
 
-            final org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
+            final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
 
             final UmaResourceWithId response = new UmaResourceWithId();
 
@@ -246,11 +246,11 @@ public class UmaResourceRegistrationWS {
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
 
-            final List<org.xdi.oxauth.model.uma.persistence.UmaResource> ldapResources = resourceService
+            final List<org.gluu.oxauth.model.uma.persistence.UmaResource> ldapResources = resourceService
                     .getResourcesByAssociatedClient(clientDn);
 
             final List<String> result = new ArrayList<String>(ldapResources.size());
-            for (org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource : ldapResources) {
+            for (org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource : ldapResources) {
 
                 // if scope parameter is not null then filter by it, otherwise just add to result
                 if (StringUtils.isNotBlank(scope)) {
@@ -328,7 +328,7 @@ public class UmaResourceRegistrationWS {
         }
 
         // Load resource description
-        org.xdi.oxauth.model.uma.persistence.UmaResource ldapUpdatedResource = resourceService.getResourceByDn(resourceDn);
+        org.gluu.oxauth.model.uma.persistence.UmaResource ldapUpdatedResource = resourceService.getResourceByDn(resourceDn);
 
         UmaResourceResponse response = new UmaResourceResponse();
         response.setId(ldapUpdatedResource.getId());
@@ -346,7 +346,7 @@ public class UmaResourceRegistrationWS {
         final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
 
         final Calendar calendar = Calendar.getInstance();
-        final org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = new org.xdi.oxauth.model.uma.persistence.UmaResource();
+        final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = new org.gluu.oxauth.model.uma.persistence.UmaResource();
 
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
@@ -379,7 +379,7 @@ public class UmaResourceRegistrationWS {
     private String updateResource(String rsid, UmaResource resource) {
         log.debug("Updating resource description: '{}'.", rsid);
 
-        org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
+        org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
         if (ldapResource == null) {
             return throwNotFoundException(rsid);
         }

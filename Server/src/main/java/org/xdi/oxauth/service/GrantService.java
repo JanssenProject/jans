@@ -8,6 +8,7 @@ package org.xdi.oxauth.service;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
@@ -19,7 +20,6 @@ import org.xdi.oxauth.model.common.CacheGrant;
 import org.xdi.oxauth.model.common.ClientTokens;
 import org.xdi.oxauth.model.common.SessionTokens;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;

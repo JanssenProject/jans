@@ -1,5 +1,6 @@
 package org.xdi.oxauth.model.authorize;
 
+import org.gluu.oxauth.model.authorize.CodeVerifier;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;

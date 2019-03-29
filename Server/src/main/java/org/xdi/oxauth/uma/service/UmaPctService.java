@@ -1,16 +1,16 @@
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaims;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaims;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 
 import javax.ejb.Stateless;

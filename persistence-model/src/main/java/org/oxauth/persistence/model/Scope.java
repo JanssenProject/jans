@@ -9,11 +9,11 @@ package org.oxauth.persistence.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.oxauth.model.common.ScopeType;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

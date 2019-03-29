@@ -7,12 +7,12 @@
 package org.xdi.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.site.ldap.persistence.annotation.*;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.ref.ClientAttributes;
 import org.xdi.oxauth.model.ref.ClientReference;
 

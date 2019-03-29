@@ -9,8 +9,8 @@ package org.xdi.oxauth.model.config;
 import javax.enterprise.inject.Vetoed;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.xdi.oxauth.model.configuration.Configuration;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.gluu.oxauth.model.configuration.Configuration;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 
 /**
  * @author Yuriy Movchan

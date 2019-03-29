@@ -1,6 +1,6 @@
 package org.xdi.oxauth.model.ref;
 
-import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 
 /**
  * @author Yuriy Zabrovarnyy

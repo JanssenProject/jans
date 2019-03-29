@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
+import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 
 /**
  * Represents an client info response received from the authorization server.

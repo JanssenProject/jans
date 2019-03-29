@@ -5,8 +5,8 @@ import java.security.cert.X509Certificate;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
-import org.xdi.oxauth.model.util.Base64Util;
 
 /**
  * U2F Device registration key

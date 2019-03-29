@@ -14,13 +14,13 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrantType;
 import org.xdi.oxauth.model.common.IdToken;
 import org.xdi.oxauth.model.common.RefreshToken;
-import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 05.22.2012

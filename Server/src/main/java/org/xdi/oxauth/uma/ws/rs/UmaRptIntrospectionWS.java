@@ -22,13 +22,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.uma.service.UmaPctService;
@@ -96,7 +96,7 @@ public class UmaRptIntrospectionWS {
                         build();
             }
 
-            final List<org.xdi.oxauth.model.uma.UmaPermission> permissions = buildStatusResponsePermissions(rpt);
+            final List<org.gluu.oxauth.model.uma.UmaPermission> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
@@ -156,14 +156,14 @@ public class UmaRptIntrospectionWS {
         return false;
     }
 
-    private List<org.xdi.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT rpt) {
-        final List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
+    private List<org.gluu.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT rpt) {
+        final List<org.gluu.oxauth.model.uma.UmaPermission> result = new ArrayList<org.gluu.oxauth.model.uma.UmaPermission>();
         if (rpt != null) {
             final List<UmaPermission> rptPermissions = rptService.getRptPermissions(rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (UmaPermission permission : rptPermissions) {
                     if (isValid(permission)) {
-                        final org.xdi.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
+                        final org.gluu.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                         if (toAdd != null) {
                             result.add(toAdd);
                         }

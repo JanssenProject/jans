@@ -10,11 +10,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.uma.UmaErrorResponse;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaErrorResponse;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 
 /**
  * @author yuriyz on 06/06/2017.

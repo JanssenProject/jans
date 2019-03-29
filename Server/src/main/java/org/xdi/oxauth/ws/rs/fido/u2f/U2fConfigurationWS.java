@@ -14,11 +14,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
+import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
-import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
 import com.wordnik.swagger.annotations.Api;

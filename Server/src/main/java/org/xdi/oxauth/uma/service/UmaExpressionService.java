@@ -12,16 +12,16 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
 
+import org.gluu.oxauth.model.uma.JsonLogic;
+import org.gluu.oxauth.model.uma.JsonLogicNode;
+import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.JsonLogic;
-import org.xdi.oxauth.model.uma.JsonLogicNode;
-import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaScriptByScope;

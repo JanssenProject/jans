@@ -1,8 +1,8 @@
 package org.xdi.oxauth.service.external.context;
 
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.AttributeService;
 
 import javax.servlet.http.HttpServletRequest;

@@ -9,10 +9,10 @@ package org.xdi.oxauth.service.external.context;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.oxauth.persistence.model.Scope;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.token.JsonWebResponse;
 
 /**
  * Holds object required in dynamic scope custom scripts 

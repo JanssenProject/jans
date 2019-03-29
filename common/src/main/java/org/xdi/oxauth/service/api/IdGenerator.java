@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.api;
 
-import org.xdi.oxauth.model.common.IdType;
+import org.gluu.oxauth.model.common.IdType;
 
 /**
  * Id generator interface. Base interface for id generation. It must be implemented by

@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.model.clientinfo;
 
-import org.xdi.oxauth.model.error.IErrorType;
+import org.gluu.oxauth.model.error.IErrorType;
 
 /**
  * @author Javier Rojas Date: 07.19.2012

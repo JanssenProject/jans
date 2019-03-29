@@ -27,11 +27,11 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.configuration.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.configuration.Fido2Configuration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

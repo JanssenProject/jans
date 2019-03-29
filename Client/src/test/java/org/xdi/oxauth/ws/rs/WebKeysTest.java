@@ -6,11 +6,12 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.model.util.Base64Util;
 import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.util.Base64Util;
+
 import sun.security.x509.X509CertImpl;
 
 import java.math.BigInteger;
