@@ -30,7 +30,7 @@ import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

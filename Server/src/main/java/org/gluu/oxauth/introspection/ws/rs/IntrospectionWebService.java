@@ -27,7 +27,7 @@ import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.Pair;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

@@ -27,7 +27,7 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.ref.AuthenticatorReference;
+import org.gluu.oxauth.model.ref.AuthenticatorReference;
 
 import javax.inject.Inject;
 import javax.servlet.*;

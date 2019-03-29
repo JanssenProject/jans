@@ -28,7 +28,7 @@ import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;

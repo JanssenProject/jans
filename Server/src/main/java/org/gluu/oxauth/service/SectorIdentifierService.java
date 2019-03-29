@@ -7,7 +7,7 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * @author Javier Rojas Blum

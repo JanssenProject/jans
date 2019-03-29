@@ -16,8 +16,8 @@ import org.gluu.oxauth.uma.ws.rs.UmaMetadataWS;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.service.InumService;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.service.InumService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

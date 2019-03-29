@@ -21,9 +21,9 @@ import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.service.api.IdGenerator;
+import org.gluu.oxauth.model.config.BaseDnConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.service.api.IdGenerator;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.

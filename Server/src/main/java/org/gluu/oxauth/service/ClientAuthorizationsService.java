@@ -23,7 +23,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Javier Rojas Blum

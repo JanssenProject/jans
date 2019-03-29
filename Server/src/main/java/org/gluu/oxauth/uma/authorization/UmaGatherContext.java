@@ -27,8 +27,8 @@ import org.gluu.oxauth.uma.service.UmaPctService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
 import org.gluu.oxauth.uma.ws.rs.UmaMetadataWS;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz

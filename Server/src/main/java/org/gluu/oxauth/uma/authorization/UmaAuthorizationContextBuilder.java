@@ -17,7 +17,7 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz on 06/06/2017.
