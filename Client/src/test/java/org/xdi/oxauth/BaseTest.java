@@ -20,6 +20,7 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.error.IErrorType;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
@@ -37,7 +38,6 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
-import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 
 import javax.net.ssl.HostnameVerifier;

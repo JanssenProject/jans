@@ -3,9 +3,9 @@ package org.xdi.oxauth.rp.demo;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
-import org.xdi.oxauth.client.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

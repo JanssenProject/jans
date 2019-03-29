@@ -1,5 +1,6 @@
 package org.xdi.oxauth.interop;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
@@ -7,7 +8,6 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.util.Arrays;
 import java.util.List;

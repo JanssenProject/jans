@@ -17,6 +17,7 @@ import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
@@ -25,7 +26,6 @@ import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
-import org.xdi.oxauth.client.QueryStringDecoder;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;

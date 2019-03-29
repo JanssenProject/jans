@@ -1,8 +1,8 @@
 package org.xdi.oxauth.rp.demo;
 
 import org.apache.log4j.Logger;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.gluu.oxauth.client.UserInfoClient;
+import org.gluu.oxauth.client.UserInfoResponse;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

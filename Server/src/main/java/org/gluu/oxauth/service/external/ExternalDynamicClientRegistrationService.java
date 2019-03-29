@@ -16,9 +16,9 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.client.ClientRegistrationType;
+import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.service.custom.script.ExternalScriptService;
-import org.xdi.oxauth.client.RegisterRequest;
 
 /**
  * Provides factory methods needed to create external dynamic client registration extension
