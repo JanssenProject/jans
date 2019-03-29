@@ -9,16 +9,16 @@ from java.nio.charset import Charset
 
 from org.apache.http.params import CoreConnectionPNames
 
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import AuthenticationService, UserService, EncryptionService, AppInitializer
-from org.xdi.oxauth.service.custom import CustomScriptService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.model import SimpleCustomProperty
-from org.xdi.model.custom.script import CustomScriptType
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.service import AuthenticationService, UserService, EncryptionService, AppInitializer
+from org.gluu.oxauth.service.custom import CustomScriptService
+from org.gluu.oxauth.service.net import HttpService
+from org.gluu.oxauth.util import ServerUtil
+from org.gluu.model import SimpleCustomProperty
+from org.gluu.model.custom.script import CustomScriptType
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper
 
 try:
     import json

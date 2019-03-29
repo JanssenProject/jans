@@ -7,21 +7,21 @@
 from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
 
-from org.xdi.oxauth.model.common import User, WebKeyStorage
-from org.xdi.oxauth.model.config import ConfigurationFactory
-from org.xdi.oxauth.model.configuration import AppConfiguration
-from org.xdi.oxauth.model.crypto import CryptoProviderFactory
-from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
-from org.xdi.oxauth.model.util import Base64Util
-from org.xdi.oxauth.service import AppInitializer, AuthenticationService, UserService
-from org.xdi.oxauth.model.authorize import AuthorizeRequestParam
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.config.oxtrust import LdapOxPassportConfiguration
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
+from org.gluu.oxauth.model.common import User, WebKeyStorage
+from org.gluu.oxauth.model.config import ConfigurationFactory
+from org.gluu.oxauth.model.configuration import AppConfiguration
+from org.gluu.oxauth.model.crypto import CryptoProviderFactory
+from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
+from org.gluu.oxauth.model.util import Base64Util
+from org.gluu.oxauth.service import AppInitializer, AuthenticationService, UserService
+from org.gluu.oxauth.model.authorize import AuthorizeRequestParam
+from org.gluu.oxauth.service.net import HttpService
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.util import ServerUtil
+from org.gluu.config.oxtrust import LdapOxPassportConfiguration
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper
 from java.util import ArrayList, Arrays, Collections, HashSet
 
 from javax.faces.application import FacesMessage

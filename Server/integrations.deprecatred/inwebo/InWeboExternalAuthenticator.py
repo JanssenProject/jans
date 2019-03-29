@@ -4,15 +4,15 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.oxauth.security import Identity
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.service import XmlService
-from org.xdi.oxauth.service import EncryptionService 
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.gluu.oxauth.security import Identity
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.oxauth.service.net import HttpService
+from org.gluu.service import XmlService
+from org.gluu.oxauth.service import EncryptionService 
+from org.gluu.util import StringHelper
+from org.gluu.util import ArrayHelper
 from java.lang import Boolean
 
 import java

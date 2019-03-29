@@ -20,8 +20,8 @@
 
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
-		<Logger name="org.xdi.oxauth" level="debug" />
-		<Logger name="org.xdi.service" level="error" />
+		<Logger name="org.gluu.oxauth" level="debug" />
+		<Logger name="org.gluu.service" level="error" />
 
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="error" />

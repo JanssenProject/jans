@@ -5,7 +5,7 @@
     <!-- Authorization multi-step flow -->
     <test name="Authorization multi-step flow" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.MultiStepAuthorizationCodeFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.MultiStepAuthorizationCodeFlowHttpTest"/>
         </classes>
     </test>
 
