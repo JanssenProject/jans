@@ -14,11 +14,12 @@ import org.xdi.oxauth.client.BaseRequest;
 import org.xdi.oxauth.client.service.ClientFactory;
 import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
-import org.xdi.oxauth.model.uma.wrapper.Token;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+
+import org.gluu.oxauth.model.common.IntrospectionResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
 
 /**
  * @author Yuriy Zabrovarnyy

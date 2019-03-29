@@ -9,8 +9,8 @@ package org.xdi.oxauth.client.fido.u2f;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 
-import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
-import org.xdi.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
+import org.gluu.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the requester can obtain FIDO U2F metadata configuration

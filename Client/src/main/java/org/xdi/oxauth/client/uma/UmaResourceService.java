@@ -6,12 +6,13 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.UmaResource;
-import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.UmaResourceWithId;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.*;
+
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceResponse;
+import org.gluu.oxauth.model.uma.UmaResourceWithId;
+
 import java.util.List;
 
 /**

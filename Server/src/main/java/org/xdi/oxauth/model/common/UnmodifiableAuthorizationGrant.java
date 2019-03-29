@@ -7,10 +7,11 @@
 package org.xdi.oxauth.model.common;
 
 import com.google.common.base.Function;
+
+import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.token.JsonWebResponse;
 
 import java.util.Collection;
 import java.util.Date;

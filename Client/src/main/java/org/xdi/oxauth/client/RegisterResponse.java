@@ -11,19 +11,19 @@ import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.register.RegisterResponseParam;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.RegisterErrorResponseType;
-import org.xdi.oxauth.model.register.RegisterResponseParam;
-import org.xdi.oxauth.model.util.Util;
+
+import static org.gluu.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
+import static org.gluu.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Represents a register response received from the authorization server.

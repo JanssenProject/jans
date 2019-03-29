@@ -13,7 +13,7 @@ import java.util.List;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012

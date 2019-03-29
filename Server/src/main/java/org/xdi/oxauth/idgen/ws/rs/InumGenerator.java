@@ -15,12 +15,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.IdType;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.api.IdGenerator;

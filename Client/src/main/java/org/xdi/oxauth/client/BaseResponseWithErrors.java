@@ -9,8 +9,8 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.error.IErrorType;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.error.IErrorType;
 
 /**
  * @author Yuriy Zabrovarnyy

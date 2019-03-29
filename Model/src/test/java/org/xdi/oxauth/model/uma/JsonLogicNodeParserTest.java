@@ -1,6 +1,8 @@
 package org.xdi.oxauth.model.uma;
 
 import org.apache.commons.io.IOUtils;
+import org.gluu.oxauth.model.uma.JsonLogicNode;
+import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

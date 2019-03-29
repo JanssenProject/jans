@@ -7,8 +7,8 @@
 package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.session.EndSessionRequestParam;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.session.EndSessionRequestParam;
+import org.gluu.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

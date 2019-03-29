@@ -13,6 +13,20 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.register.RegisterResponseParam;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
@@ -22,25 +36,11 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.register.RegisterErrorResponseType;
-import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.registration.RegisterParamsValidator;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
@@ -55,13 +55,14 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static org.gluu.oxauth.model.util.StringUtils.implode;
+import static org.gluu.oxauth.model.util.StringUtils.toList;
+
 import java.net.URI;
 import java.util.*;
-
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
  * Implementation for register REST web services.

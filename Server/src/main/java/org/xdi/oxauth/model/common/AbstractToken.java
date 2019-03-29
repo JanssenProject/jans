@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.persist.model.base.Deletable;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;

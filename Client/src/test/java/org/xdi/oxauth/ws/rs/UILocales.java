@@ -6,21 +6,21 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

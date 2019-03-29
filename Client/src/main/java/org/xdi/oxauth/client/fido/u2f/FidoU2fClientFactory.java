@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.client.fido.u2f;
 
+import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
 
 /**
  * Helper class which creates proxy FIDO U2F services

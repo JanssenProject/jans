@@ -21,16 +21,16 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.util.URLPatternList;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.register.RegisterErrorResponseType;
-import org.xdi.oxauth.model.util.URLPatternList;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

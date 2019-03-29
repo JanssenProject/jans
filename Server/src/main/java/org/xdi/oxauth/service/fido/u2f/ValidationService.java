@@ -10,12 +10,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.model.fido.u2f.U2fConstants;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.fido.u2f.U2fConstants;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 

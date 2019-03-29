@@ -17,6 +17,8 @@ import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
@@ -24,8 +26,6 @@ import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
-import org.xdi.oxauth.model.util.Util;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;

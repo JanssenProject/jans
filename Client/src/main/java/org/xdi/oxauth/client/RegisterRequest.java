@@ -10,22 +10,23 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.register.RegisterRequestParam;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterRequestParam;
 
 import javax.ws.rs.core.MediaType;
-import java.util.*;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
+import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static org.gluu.oxauth.model.util.StringUtils.implode;
+import static org.gluu.oxauth.model.util.StringUtils.toJSONArray;
+
+import java.util.*;
 
 /**
  * Represents a register request to send to the authorization server.

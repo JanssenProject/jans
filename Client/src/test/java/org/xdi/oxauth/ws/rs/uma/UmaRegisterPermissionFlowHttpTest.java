@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
+import org.gluu.oxauth.model.uma.*;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -14,7 +15,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaPermissionService;
-import org.xdi.oxauth.model.uma.*;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

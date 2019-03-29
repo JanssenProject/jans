@@ -15,11 +15,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -51,7 +51,7 @@ public class UmaScopeWS {
             if (StringUtils.isNotBlank(id)) {
                 final UmaScopeDescription scope = umaScopeService.getScope(id);
                 if (scope != null) {
-                    final org.xdi.oxauth.model.uma.UmaScopeDescription jsonScope = new org.xdi.oxauth.model.uma.UmaScopeDescription();
+                    final org.gluu.oxauth.model.uma.UmaScopeDescription jsonScope = new org.gluu.oxauth.model.uma.UmaScopeDescription();
                     jsonScope.setIconUri(scope.getIconUrl());
                     jsonScope.setName(scope.getDisplayName());
                     jsonScope.setDescription(scope.getDescription());

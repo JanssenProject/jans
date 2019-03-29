@@ -14,6 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -27,13 +34,6 @@ import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.oxauth.model.util.Util;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.

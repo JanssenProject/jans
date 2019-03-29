@@ -15,8 +15,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

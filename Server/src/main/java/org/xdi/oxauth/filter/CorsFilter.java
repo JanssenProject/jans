@@ -23,12 +23,12 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxserver.filters.AbstractCorsFilter;
 import org.gluu.util.StringHelper;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 
 /**

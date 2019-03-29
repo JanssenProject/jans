@@ -8,11 +8,11 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;

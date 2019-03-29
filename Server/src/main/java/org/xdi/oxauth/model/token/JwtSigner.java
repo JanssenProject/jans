@@ -6,17 +6,17 @@
 
 package org.xdi.oxauth.model.token;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import org.gluu.oxauth.model.jwk.Use;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.python.jline.internal.Preconditions;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwk.Algorithm;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.jwk.Use;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 

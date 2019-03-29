@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.dev;
 
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorMessage;
 import org.xdi.oxauth.model.error.ErrorMessages;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.xml.bind.JAXBContext;

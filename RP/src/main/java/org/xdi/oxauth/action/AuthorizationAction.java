@@ -7,23 +7,23 @@
 package org.xdi.oxauth.action;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.common.AuthorizationMethod;
+import org.gluu.oxauth.model.common.Display;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.AuthorizeClient;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;

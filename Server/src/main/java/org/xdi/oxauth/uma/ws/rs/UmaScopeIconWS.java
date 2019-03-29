@@ -17,12 +17,12 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuImage;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.service.XmlService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 
 import com.wordnik.swagger.annotations.Api;

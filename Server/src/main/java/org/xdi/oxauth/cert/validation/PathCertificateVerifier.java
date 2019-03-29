@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 /**
  * Chain certificate verifier

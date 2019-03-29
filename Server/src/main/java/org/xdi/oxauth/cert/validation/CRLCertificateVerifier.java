@@ -44,12 +44,12 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;

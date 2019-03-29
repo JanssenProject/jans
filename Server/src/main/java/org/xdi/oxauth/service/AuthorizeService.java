@@ -11,13 +11,15 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.security.Identity;
+import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 import org.xdi.oxauth.auth.Authenticator;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
@@ -150,7 +152,7 @@ public class AuthorizeService {
 
             boolean persistDuringImplicitFlow = ServerUtil.isFalse(appConfiguration.getUseCacheForAllImplicitFlowObjects()) || !ResponseType.isImplicitFlow(responseType);
             if (!client.getTrustedClient() && persistDuringImplicitFlow) {
-                final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
+                final Set<String> scopes = Sets.newHashSet(org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
                 clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes, client.getPersistClientAuthorizations());
             }
             session.addPermission(clientId, true);
@@ -165,7 +167,7 @@ public class AuthorizeService {
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
                 List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
                 prompts.remove(Prompt.CONSENT);
-                sessionAttribute.put(AuthorizeRequestParam.PROMPT, org.xdi.oxauth.model.util.StringUtils.implodeEnum(prompts, " "));
+                sessionAttribute.put(AuthorizeRequestParam.PROMPT, org.gluu.oxauth.model.util.StringUtils.implodeEnum(prompts, " "));
             }
 
             final String parametersAsString = requestParameterService.parametersAsString(sessionAttribute);

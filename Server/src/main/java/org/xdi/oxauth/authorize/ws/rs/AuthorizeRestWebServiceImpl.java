@@ -11,6 +11,15 @@ import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.authorize.*;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientRequest;
@@ -19,20 +28,24 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.authorize.*;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.xdi.oxauth.model.authorize.Claim;
+import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.authorize.ScopeChecker;
+import org.xdi.oxauth.model.common.AbstractToken;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCode;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IdToken;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.AcrChangedException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.util.QueryStringDecoder;
@@ -49,14 +62,15 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+
+import static org.gluu.oxauth.model.util.StringUtils.implode;
+
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
-
-import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -206,7 +220,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         prompts.add(Prompt.LOGIN);
 
                         sessionUser.setState(SessionIdState.UNAUTHENTICATED);
-                        sessionUser.getSessionAttributes().put("prompt", org.xdi.oxauth.model.util.StringUtils.implode(prompts, " "));
+                        sessionUser.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
                         sessionIdService.persistSessionId(sessionUser);
                     }
                 } else {

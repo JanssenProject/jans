@@ -8,17 +8,17 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.token.ClientAssertionType;
-import org.xdi.oxauth.model.uma.UmaScopeType;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.gluu.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtType;
+import org.gluu.oxauth.model.token.ClientAssertionType;
+import org.gluu.oxauth.model.uma.UmaScopeType;
 
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
