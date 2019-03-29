@@ -9,7 +9,7 @@ package org.gluu.oxauth.model.common;
 import java.util.Date;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 /**
  * <p>

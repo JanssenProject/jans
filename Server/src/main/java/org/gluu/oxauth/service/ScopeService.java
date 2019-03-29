@@ -19,7 +19,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

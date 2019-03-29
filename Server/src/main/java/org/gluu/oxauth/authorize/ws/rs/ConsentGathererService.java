@@ -29,7 +29,7 @@ import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017

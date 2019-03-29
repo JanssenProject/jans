@@ -19,8 +19,8 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.service.CacheService;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;

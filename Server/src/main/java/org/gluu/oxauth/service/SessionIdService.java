@@ -35,7 +35,7 @@ import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;

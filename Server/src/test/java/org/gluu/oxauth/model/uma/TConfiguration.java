@@ -21,7 +21,7 @@ import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -15,7 +15,7 @@ import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import java.util.*;

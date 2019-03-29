@@ -12,10 +12,10 @@ import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.interception.MTLSInterception;
-import org.xdi.oxauth.interception.MTLSInterceptionInterface;
-import org.xdi.oxauth.model.ref.AuthenticatorReference;
-import org.xdi.oxauth.model.ref.ClientReference;
+import org.gluu.oxauth.interception.MTLSInterception;
+import org.gluu.oxauth.interception.MTLSInterceptionInterface;
+import org.gluu.oxauth.model.ref.AuthenticatorReference;
+import org.gluu.oxauth.model.ref.ClientReference;
 
 import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;

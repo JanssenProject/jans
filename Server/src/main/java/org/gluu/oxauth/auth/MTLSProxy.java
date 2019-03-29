@@ -1,10 +1,10 @@
 package org.gluu.oxauth.auth;
 
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.interception.MTLSInterception;
-import org.xdi.oxauth.interception.MTLSInterceptionInterface;
-import org.xdi.oxauth.model.ref.AuthenticatorReference;
-import org.xdi.oxauth.model.ref.ClientReference;
+import org.gluu.oxauth.interception.MTLSInterception;
+import org.gluu.oxauth.interception.MTLSInterceptionInterface;
+import org.gluu.oxauth.model.ref.AuthenticatorReference;
+import org.gluu.oxauth.model.ref.ClientReference;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
