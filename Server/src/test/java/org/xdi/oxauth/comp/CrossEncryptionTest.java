@@ -38,6 +38,7 @@ import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtType;
+import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -47,7 +48,6 @@ import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.token.JwtSigner;
 
 import java.security.Security;
 import java.security.Signature;

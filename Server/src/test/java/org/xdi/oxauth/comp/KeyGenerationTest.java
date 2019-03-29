@@ -8,10 +8,10 @@ package org.xdi.oxauth.comp;
 
 import javax.inject.Inject;
 
+import org.gluu.oxauth.service.EncryptionService;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.service.EncryptionService;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012
