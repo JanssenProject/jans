@@ -1,11 +1,11 @@
 package org.xdi.oxauth.service.external;
 
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
+import org.gluu.service.custom.script.ExternalScriptService;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
 import org.xdi.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
-import org.xdi.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

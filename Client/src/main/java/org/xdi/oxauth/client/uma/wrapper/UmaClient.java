@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
+import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.uma.exception.UmaException;
@@ -18,7 +19,6 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

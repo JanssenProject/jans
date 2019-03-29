@@ -43,12 +43,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.gluu.net.SslDefaultHttpClient;
+import org.gluu.util.StringHelper;
+import org.gluu.util.Util;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
-import org.xdi.net.SslDefaultHttpClient;
 import org.xdi.oxauth.model.net.HttpServiceResponse;
-import org.xdi.util.StringHelper;
-import org.xdi.util.Util;
 /**
  * Provides operations with http requests
  *

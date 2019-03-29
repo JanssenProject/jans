@@ -20,6 +20,7 @@ import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
@@ -37,7 +38,6 @@ import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
-import org.xdi.util.StringHelper;
 
 /**
  * Provides operations with U2F authentication request
@@ -225,7 +225,7 @@ public class AuthenticationService extends RequestService {
     }
 
     public String getUserInumByKeyHandle(String appId, String keyHandle) throws InvalidKeyHandleDeviceException {
-        if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+        if (org.gluu.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
             return null;
         }
 

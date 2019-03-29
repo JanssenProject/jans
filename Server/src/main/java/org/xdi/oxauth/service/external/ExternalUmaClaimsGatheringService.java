@@ -13,15 +13,15 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.type.uma.UmaClaimsGatheringType;
+import org.gluu.service.LookupService;
+import org.gluu.service.custom.script.CustomScriptManager;
+import org.gluu.service.custom.script.ExternalScriptService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
-import org.xdi.service.LookupService;
-import org.xdi.service.custom.script.CustomScriptManager;
-import org.xdi.service.custom.script.ExternalScriptService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author yuriyz on 06/18/2017.

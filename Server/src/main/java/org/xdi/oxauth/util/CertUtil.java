@@ -8,10 +8,10 @@ package org.xdi.oxauth.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
-import org.xdi.util.StringHelper;
 
 import java.io.File;
 import java.io.IOException;

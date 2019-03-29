@@ -9,6 +9,8 @@ package org.xdi.oxauth.model.token;
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.service.cdi.util.CdiUtil;
+import org.gluu.util.security.StringEncrypter;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -23,8 +25,6 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.service.cdi.util.CdiUtil;
-import org.xdi.util.security.StringEncrypter;
 
 import java.util.Date;
 import java.util.List;

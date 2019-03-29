@@ -1,12 +1,12 @@
 package org.xdi.oxauth.service.external;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.type.introspection.IntrospectionType;
+import org.gluu.service.custom.script.ExternalScriptService;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.introspection.IntrospectionType;
 import org.xdi.oxauth.service.external.context.ExternalIntrospectionContext;
-import org.xdi.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.util.StringHelper;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011

@@ -8,8 +8,10 @@ package org.xdi.oxauth.session.ws.rs;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.model.security.Identity;
+import org.gluu.util.Pair;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.security.Identity;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -30,8 +32,6 @@ import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.Pair;
-import org.xdi.util.StringHelper;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

@@ -3,7 +3,7 @@ package org.xdi.oxauth.model.audit;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.xdi.net.InetAddressUtility;
+import org.gluu.net.InetAddressUtility;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 
 

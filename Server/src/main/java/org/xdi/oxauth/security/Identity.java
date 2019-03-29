@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.session.SessionClient;
  */
 @RequestScoped
 @Named
-public class Identity extends org.xdi.model.security.Identity {
+public class Identity extends org.gluu.model.security.Identity {
 
     private static final long serialVersionUID = 2751659008033189259L;
 

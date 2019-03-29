@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 import com.google.common.base.Preconditions;
 
