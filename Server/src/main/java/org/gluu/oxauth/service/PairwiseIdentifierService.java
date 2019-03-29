@@ -16,7 +16,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Javier Rojas Blum

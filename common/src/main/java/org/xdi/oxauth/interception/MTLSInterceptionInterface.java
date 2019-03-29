@@ -1,8 +1,8 @@
 package org.xdi.oxauth.interception;
 
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.ref.AuthenticatorReference;
-import org.xdi.oxauth.model.ref.ClientReference;
+import org.gluu.oxauth.model.ref.AuthenticatorReference;
+import org.gluu.oxauth.model.ref.ClientReference;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;

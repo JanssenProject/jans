@@ -47,8 +47,8 @@ import org.gluu.service.timer.schedule.TimerSchedule;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.BaseDnConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

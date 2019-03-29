@@ -16,7 +16,7 @@ import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * Test cases for the obtaining UMA PAT token flow (HTTP)

@@ -36,7 +36,7 @@ import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.oxauth.persistence.model.Scope;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import com.google.common.collect.Sets;
 

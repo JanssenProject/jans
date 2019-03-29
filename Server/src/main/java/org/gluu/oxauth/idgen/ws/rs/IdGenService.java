@@ -15,7 +15,7 @@ import org.gluu.oxauth.model.common.IdType;
 import org.gluu.oxauth.service.external.ExternalIdGeneratorService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.api.IdGenerator;
+import org.gluu.oxauth.service.api.IdGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy

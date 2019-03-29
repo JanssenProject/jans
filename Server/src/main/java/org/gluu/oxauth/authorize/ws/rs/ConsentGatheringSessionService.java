@@ -13,8 +13,8 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

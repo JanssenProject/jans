@@ -11,7 +11,7 @@ import javax.inject.Named;
 
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.session.SessionClient;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 /**
  * @version August 9, 2017

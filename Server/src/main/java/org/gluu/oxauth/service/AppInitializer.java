@@ -62,7 +62,7 @@ import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.event.ApplicationInitializedEvent;
+import org.gluu.oxauth.model.event.ApplicationInitializedEvent;
 
 /**
  * @author Javier Rojas Blum

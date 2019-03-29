@@ -42,8 +42,8 @@ import org.gluu.oxauth.service.fido.u2f.ValidationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 import com.wordnik.swagger.annotations.Api;
 import javax.inject.Inject;
