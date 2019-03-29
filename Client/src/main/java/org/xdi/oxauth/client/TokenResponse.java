@@ -10,9 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.common.TokenType;
+import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.common.TokenType;
-import org.xdi.oxauth.model.token.TokenErrorResponseType;
 
 /**
  * Represents a token response received from the authorization server.

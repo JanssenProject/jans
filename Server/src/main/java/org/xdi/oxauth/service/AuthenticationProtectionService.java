@@ -5,9 +5,9 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.configuration.AuthenticationProtectionConfiguration;
 import org.gluu.service.cdi.event.ConfigurationUpdate;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.configuration.AuthenticationProtectionConfiguration;
 
 /**
  * Brute Force authentication protection service implementation

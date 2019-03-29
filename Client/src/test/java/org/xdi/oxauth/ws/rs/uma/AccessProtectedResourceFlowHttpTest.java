@@ -8,6 +8,12 @@ package org.xdi.oxauth.ws.rs.uma;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
+import org.gluu.oxauth.model.uma.UmaTokenResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
@@ -18,12 +24,6 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.UmaTokenService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.uma.UmaMetadata;
-import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
-import org.xdi.oxauth.model.uma.UmaTokenResponse;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;

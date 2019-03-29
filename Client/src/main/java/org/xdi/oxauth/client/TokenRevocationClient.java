@@ -8,9 +8,9 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.TokenTypeHint;
-import org.xdi.oxauth.model.token.TokenRevocationRequestParam;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.TokenTypeHint;
+import org.gluu.oxauth.model.token.TokenRevocationRequestParam;
 
 import javax.ws.rs.HttpMethod;
 

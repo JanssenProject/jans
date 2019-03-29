@@ -10,6 +10,11 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
@@ -18,13 +23,8 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.JwtSigner;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
@@ -245,13 +245,13 @@ public class UmaRptService {
     }
 
     public JSONArray buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
-        List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
+        List<org.gluu.oxauth.model.uma.UmaPermission> result = new ArrayList<org.gluu.oxauth.model.uma.UmaPermission>();
 
         for (UmaPermission permission : permissions) {
             permission.checkExpired();
             permission.isValid();
             if (permission.isValid()) {
-                final org.xdi.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
+                final org.gluu.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                 if (toAdd != null) {
                     result.add(toAdd);
                 }

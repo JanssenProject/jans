@@ -10,15 +10,15 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.crypto.Certificate;
+import org.gluu.oxauth.model.crypto.Key;
+import org.gluu.oxauth.model.crypto.signature.ECDSAKeyFactory;
+import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.Use;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.python.icu.util.Calendar;
-import org.xdi.oxauth.model.crypto.Certificate;
-import org.xdi.oxauth.model.crypto.Key;
-import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwk.Use;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 /**
  * @author Yuriy Movchan

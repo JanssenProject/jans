@@ -9,6 +9,9 @@ package org.xdi.oxauth.service;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.Scheduled;
@@ -17,9 +20,6 @@ import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.service.cdi.event.KeyGenerationEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -27,11 +27,12 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
+
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum

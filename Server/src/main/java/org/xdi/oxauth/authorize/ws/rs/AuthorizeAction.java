@@ -11,6 +11,16 @@ import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.oxauth.model.authorize.*;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.exception.InvalidJweException;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.LocaleUtil;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
 import org.gluu.util.StringHelper;
@@ -20,21 +30,18 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
-import org.xdi.oxauth.model.authorize.*;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.xdi.oxauth.model.authorize.Claim;
+import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.authorize.ScopeChecker;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.AcrChangedException;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.LocaleUtil;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
@@ -208,7 +215,7 @@ public class AuthorizeAction {
 
         // Fix the list of scopes in the authorization page. oxAuth #739
         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-        allowedScope = org.xdi.oxauth.model.util.StringUtils.implode(grantedScopes, " ");
+        allowedScope = org.gluu.oxauth.model.util.StringUtils.implode(grantedScopes, " ");
 
         SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
@@ -333,7 +340,7 @@ public class AuthorizeAction {
                     client.getPersistClientAuthorizations());
             if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
                     Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                            org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                            org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
                 permissionGranted(session);
                 return;
             }
@@ -369,7 +376,7 @@ public class AuthorizeAction {
                 if (!prompts.contains(Prompt.LOGIN)) {
                     prompts.add(Prompt.LOGIN);
                 }
-                session.getSessionAttributes().put("prompt", org.xdi.oxauth.model.util.StringUtils.implode(prompts, " "));
+                session.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
                 session.setState(SessionIdState.UNAUTHENTICATED);
 
                 // Update Remote IP

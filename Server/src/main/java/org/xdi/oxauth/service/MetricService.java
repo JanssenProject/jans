@@ -7,10 +7,10 @@
 package org.xdi.oxauth.service;
 
 import org.gluu.model.ApplicationType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.metric.inject.ReportMetric;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

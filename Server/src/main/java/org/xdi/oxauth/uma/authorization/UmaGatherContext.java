@@ -15,13 +15,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.SimpleCustomProperty;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.JwtClaims;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 import org.xdi.oxauth.uma.service.RedirectParameters;

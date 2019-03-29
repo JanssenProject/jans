@@ -12,20 +12,20 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.OxElevenCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwk.*;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.OxElevenCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.*;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.oxauth.model.util.StringUtils;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * Command example:

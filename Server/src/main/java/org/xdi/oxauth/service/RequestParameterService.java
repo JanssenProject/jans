@@ -26,12 +26,12 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Yuriy Movchan

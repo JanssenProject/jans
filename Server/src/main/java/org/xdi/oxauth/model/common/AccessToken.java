@@ -8,6 +8,8 @@ package org.xdi.oxauth.model.common;
 
 import java.util.Date;
 
+import org.gluu.oxauth.model.common.TokenType;
+
 /**
  * <p>
  * Access token (as well as any access token type-specific attributes) MUST be

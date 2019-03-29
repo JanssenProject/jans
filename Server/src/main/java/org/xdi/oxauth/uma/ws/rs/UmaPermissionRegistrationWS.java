@@ -21,12 +21,12 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.UmaPermissionList;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
@@ -129,14 +129,14 @@ public class UmaPermissionRegistrationWS {
     private UmaPermissionList parseRequest(String requestAsString) {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
         try {
-            org.xdi.oxauth.model.uma.UmaPermission permission = mapper.readValue(requestAsString, org.xdi.oxauth.model.uma.UmaPermission.class);
+            org.gluu.oxauth.model.uma.UmaPermission permission = mapper.readValue(requestAsString, org.gluu.oxauth.model.uma.UmaPermission.class);
             return new UmaPermissionList().addPermission(permission);
         } catch (IOException e) {
             // ignore
         }
 
         try {
-            UmaPermissionList permissions = mapper.readValue(requestAsString, org.xdi.oxauth.model.uma.UmaPermissionList.class);
+            UmaPermissionList permissions = mapper.readValue(requestAsString, org.gluu.oxauth.model.uma.UmaPermissionList.class);
             if (!permissions.isEmpty()) {
                 return permissions;
             }

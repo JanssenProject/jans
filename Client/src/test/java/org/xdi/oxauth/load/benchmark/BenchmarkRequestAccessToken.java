@@ -6,6 +6,10 @@
 
 package org.xdi.oxauth.load.benchmark;
 
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -15,10 +19,6 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;

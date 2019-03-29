@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaPermissionList;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+
+import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaPermissionList;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a

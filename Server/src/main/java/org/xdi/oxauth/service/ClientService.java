@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
@@ -34,8 +36,6 @@ import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.registration.Client;
 
 import com.google.common.collect.Sets;

@@ -7,15 +7,15 @@
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.uma.UmaPermissionList;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.uma.UmaPermissionList;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -62,7 +62,7 @@ public class UmaPermissionService {
 
         final String ticket = generateNewTicket();
         List<UmaPermission> result = new ArrayList<UmaPermission>();
-        for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
+        for (org.gluu.oxauth.model.uma.UmaPermission permission : permissions) {
             UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
             if (permission.getParams() != null && !permission.getParams().isEmpty()) {
                 p.getAttributes().putAll(permission.getParams());

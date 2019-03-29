@@ -10,7 +10,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.RPTResponse;
+import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaPermission;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

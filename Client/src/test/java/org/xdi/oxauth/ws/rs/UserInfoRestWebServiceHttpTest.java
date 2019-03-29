@@ -7,6 +7,14 @@
 package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -15,14 +23,6 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.client.model.authorize.UserInfoMember;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import java.security.PrivateKey;
 import java.util.ArrayList;

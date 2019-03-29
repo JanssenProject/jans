@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.action;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
 
 import java.io.Serializable;
 import java.net.URISyntaxException;

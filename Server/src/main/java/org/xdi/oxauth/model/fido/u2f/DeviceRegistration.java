@@ -5,15 +5,16 @@
  */
 package org.xdi.oxauth.model.fido.u2f;
 
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
+import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
-import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
-import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.xdi.oxauth.model.util.Base64Util;
 
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;

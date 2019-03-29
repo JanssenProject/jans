@@ -4,7 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

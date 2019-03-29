@@ -10,14 +10,14 @@ import junit.framework.Assert;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
 
 import java.util.Arrays;
 

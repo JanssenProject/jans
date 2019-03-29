@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;

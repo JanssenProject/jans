@@ -9,6 +9,7 @@ package org.xdi.oxauth.ws.rs.uma;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -16,7 +17,6 @@ import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
-import org.xdi.oxauth.model.uma.wrapper.Token;
 
 /**
  * Test cases for the obtaining UMA PAT token flow (HTTP)

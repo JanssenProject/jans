@@ -10,24 +10,24 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
-import org.xdi.oxauth.model.jwt.JwtClaims;
-import org.xdi.oxauth.model.jwt.JwtHeader;
-import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwe.Jwe;
+import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
+import org.gluu.oxauth.model.jwt.JwtClaims;
+import org.gluu.oxauth.model.jwt.JwtHeader;
+import org.gluu.oxauth.model.jwt.JwtType;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.Util;
+
+import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.PublicKey;
-
-import static org.xdi.oxauth.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum

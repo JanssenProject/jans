@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.oxauth.model.common.HasParamName;
+
 /**
  * An authorization grant is a credential representing the resource owner's
  * authorization (to access its protected resources) used by the client to

@@ -7,8 +7,8 @@
 package org.xdi.oxauth.model.ldap;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.site.ldap.persistence.annotation.*;
-import org.xdi.oxauth.model.common.GrantType;
 
 import java.io.Serializable;
 import java.util.Date;

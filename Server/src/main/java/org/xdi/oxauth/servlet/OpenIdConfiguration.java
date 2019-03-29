@@ -11,12 +11,12 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.model.GluuAttribute;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.ScopeType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.ScopeType;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -28,12 +28,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.gluu.oxauth.model.util.StringUtils.implode;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
-import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum

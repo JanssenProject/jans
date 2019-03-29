@@ -17,15 +17,15 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.model.common.IntrospectionResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
-import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

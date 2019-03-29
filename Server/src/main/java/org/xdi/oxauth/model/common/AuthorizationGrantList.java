@@ -7,14 +7,14 @@
 package org.xdi.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.service.CacheService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;

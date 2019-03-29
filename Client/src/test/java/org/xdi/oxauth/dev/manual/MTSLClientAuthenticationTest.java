@@ -4,12 +4,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;

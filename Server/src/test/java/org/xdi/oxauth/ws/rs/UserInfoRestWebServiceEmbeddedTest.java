@@ -9,6 +9,16 @@ package org.xdi.oxauth.ws.rs;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
+import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterResponseParam;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -18,16 +28,6 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.register.RegisterResponseParam;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -38,8 +38,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Functional tests for User Info Web Services (embedded)

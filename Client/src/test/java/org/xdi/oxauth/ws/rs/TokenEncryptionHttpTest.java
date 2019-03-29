@@ -6,19 +6,19 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.jwe.Jwe;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.jwt.JwtHeaderName;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.oxauth.model.util.Util;
 
 import java.security.PrivateKey;
 import java.util.Arrays;

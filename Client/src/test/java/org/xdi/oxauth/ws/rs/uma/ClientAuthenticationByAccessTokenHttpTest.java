@@ -1,5 +1,17 @@
 package org.xdi.oxauth.ws.rs.uma;
 
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.jwt.JwtHeaderName;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -10,18 +22,6 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.UmaTokenService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.uma.UmaMetadata;
-import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

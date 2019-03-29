@@ -9,19 +9,19 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.common.TokenType;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.TokenType;
-import org.xdi.oxauth.model.util.Util;
+
+import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.

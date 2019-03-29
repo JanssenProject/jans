@@ -11,16 +11,17 @@ import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.discovery.WebFingerLink;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.discovery.WebFingerLink;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.net.URISyntaxException;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.*;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.*;
+
+import java.net.URISyntaxException;
 
 /**
  * @author Javier Rojas Blum

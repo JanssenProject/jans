@@ -1,18 +1,18 @@
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
