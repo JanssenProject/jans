@@ -9,6 +9,7 @@ package org.xdi.oxauth.uma.ws.rs;
 import java.net.URI;
 import java.util.Arrays;
 
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.RPTResponse;
 import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
@@ -19,7 +20,6 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
