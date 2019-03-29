@@ -5,755 +5,755 @@
     <!-- Address claims test -->
     <test name="Address claims test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AddressClaimsTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AddressClaimsTest"/>
         </classes>
     </test>
 
     <!-- Application Type Restriction test -->
     <test name="Application Type Restriction (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ApplicationTypeRestrictionHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ApplicationTypeRestrictionHttpTest"/>
         </classes>
     </test>
 
     <!-- Token binding -->
     <test name="Token Binding test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenBindingHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenBindingHttpTest"/>
         </classes>
     </test>
 
     <!-- Access Token as JWT -->
     <test name="Access Token as JWT test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AccessTokenAsJwtHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AccessTokenAsJwtHttpTest"/>
         </classes>
     </test>
 
     <!-- Authorization Code Flow test -->
     <test name="Authorization Code Flow test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizationCodeFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AuthorizationCodeFlowHttpTest"/>
         </classes>
     </test>
 
     <!-- Authorization Response Custom Header test -->
     <test name="Authorization Response Custom Header test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizationResponseCustomHeaderTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AuthorizationResponseCustomHeaderTest"/>
         </classes>
     </test>
 
     <!-- Authorization Response Mode -->
     <test name="Authorization Response Mode (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizationResponseModeHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AuthorizationResponseModeHttpTest"/>
         </classes>
     </test>
 
     <!-- Authorize test -->
     <test name="Authorize test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AuthorizeRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <!-- Authorize test -->
     <test name="Authorize session id test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionIdRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.AuthorizeSessionIdRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <!-- Client Authentication Filter test -->
     <test name="Client Authentication Filter test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientAuthenticationFilterHttpTest"/>
         </classes>
     </test>
 
     <!-- Client Credentials Grant test -->
     <test name="Client Credentials Grant test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientCredentialsGrantHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientCredentialsGrantHttpTest"/>
         </classes>
     </test>
 
     <!-- Client Info test  -->
     <test name="Client Info test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientInfoRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <!-- Client Secret Basic test -->
     <test name="Client Secret Basic test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientSecretBasicTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientSecretBasicTest"/>
         </classes>
     </test>
 
     <!-- Client Specific Access Token Expiration -->
     <test name="Client Specific Access Token Expiration" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientSpecificAccessTokenExpiration"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientSpecificAccessTokenExpiration"/>
         </classes>
     </test>
 
     <!-- Client White List Black List Redirect Uris -->
     <test name="Client White List Black List Redirect Uris" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientWhiteListBlackListRedirectUris"/>
+            <class name="org.gluu.oxauth.ws.rs.ClientWhiteListBlackListRedirectUris"/>
         </classes>
     </test>
 
     <!-- Configuration test -->
     <test name="Configuration test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ConfigurationRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ConfigurationRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <test name="Enable Client to restrict JavaScript Origins" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.EnableClientToRestrictJavascriptOrigin"/>
+            <class name="org.gluu.oxauth.ws.rs.EnableClientToRestrictJavascriptOrigin"/>
         </classes>
     </test>
 
     <test name="Encode claims in state parameter" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.EncodeClaimsInStateParameter"/>
+            <class name="org.gluu.oxauth.ws.rs.EncodeClaimsInStateParameter"/>
         </classes>
     </test>
 
     <!-- End Session test -->
     <test name="End Session test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.EndSessionRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.EndSessionRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <test name="Grant Types Restriction (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.GrantTypesRestrictionHttpTest"/>
         </classes>
     </test>
 
     <test name="Individual Claims Requests test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.IndividualClaimsRequestsTest"/>
+            <class name="org.gluu.oxauth.ws.rs.IndividualClaimsRequestsTest"/>
         </classes>
     </test>
 
     <!-- JWK test -->
     <test name="JWK test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.JwkRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.JwkRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <test name="Multivalued claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.MultivaluedClaims"/>
+            <class name="org.gluu.oxauth.ws.rs.MultivaluedClaims"/>
         </classes>
     </test>
 
     <!-- OpenID Request Object test -->
     <test name="OpenID Request Object test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.OpenIDRequestObjectHttpTest"/>
         </classes>
     </test>
 
     <!-- PersistClientAuthorizationsHttpTest -->
     <test name="Persist Client Authorizations test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.PersistClientAuthorizationsHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.PersistClientAuthorizationsHttpTest"/>
         </classes>
     </test>
 
     <!-- Register test -->
     <test name="Register test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.RegistrationRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.RegistrationRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <!-- Registration test with Software Statement -->
     <test name="Registration test with Software Statement" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.RegistrationWithSoftwareStatement"/>
+            <class name="org.gluu.oxauth.ws.rs.RegistrationWithSoftwareStatement"/>
         </classes>
     </test>
 
     <!-- Sector Identifier URL Verification test -->
     <test name="Sector Identifier URL Verification (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.SectorIdentifierUrlVerificationHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.SectorIdentifierUrlVerificationHttpTest"/>
         </classes>
     </test>
 
     <!-- SSO with Multiple Backend Services test -->
     <test name="SSO with Multiple Backend Services test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.SSOWithMultipleBackendServicesHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.SSOWithMultipleBackendServicesHttpTest"/>
         </classes>
     </test>
 
     <!-- OpenID Connect Discovery test -->
     <test name="OpenID Connect Discovery test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDConnectDiscoveryHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.OpenIDConnectDiscoveryHttpTest"/>
         </classes>
     </test>
 
     <!-- Token Endpoint Auth Method Restriction test -->
     <test name="Token Endpoint Auth Method Restriction (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenEndpointAuthMethodRestrictionHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenEndpointAuthMethodRestrictionHttpTest"/>
         </classes>
     </test>
 
     <!-- Token test -->
     <test name="Token test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <!-- Token revocation -->
     <test name="Token revocation test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenRevocationTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenRevocationTest"/>
         </classes>
     </test>
 
     <!-- Token Signatures test -->
     <test name="Token Signatures test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenSignaturesHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenSignaturesHttpTest"/>
         </classes>
     </test>
 
     <!-- Token Encryption test -->
     <test name="Token Encryption test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenEncryptionHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.TokenEncryptionHttpTest"/>
         </classes>
     </test>
 
     <!-- User Authentication Filter test -->
     <test name="User Authentication Filter test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.UserAuthenticationFilterHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.UserAuthenticationFilterHttpTest"/>
         </classes>
     </test>
 
     <!-- User Info test -->
     <test name="User Info test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.UserInfoRestWebServiceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.UserInfoRestWebServiceHttpTest"/>
         </classes>
     </test>
 
     <test name="Validate Id Token Hashes test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ValidateIdTokenHashesTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ValidateIdTokenHashesTest"/>
         </classes>
     </test>
 
     <test name="Web Keys Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.WebKeysTest"/>
+            <class name="org.gluu.oxauth.ws.rs.WebKeysTest"/>
         </classes>
     </test>
 
     <!-- Dev tests-->
     <test name="Custom token issuing test via session" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.dev.TestSessionWorkflow"/>
+            <class name="org.gluu.oxauth.dev.TestSessionWorkflow"/>
         </classes>
     </test>
 
     <!-- UMA tests -->
     <test name="UMA : Getting UMA meta data configuration (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.MetaDataFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.MetaDataFlowHttpTest"/>
         </classes>
     </test>
 
     <test name="UMA : Obtain PAT token test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.ObtainPatTokenFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.ObtainPatTokenFlowHttpTest"/>
         </classes>
     </test>
 
     <test name="UMA : Register resource test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
         </classes>
     </test>
 
     <test name="Response Types Restriction (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.ResponseTypesRestrictionHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.ResponseTypesRestrictionHttpTest"/>
         </classes>
     </test>
 
     <test name="UMA : Register UMA permissions test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.UmaRegisterPermissionFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.UmaRegisterPermissionFlowHttpTest"/>
         </classes>
     </test>
 
     <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest"/>
         </classes>
     </test>
 
     <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.ScopeHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.ScopeHttpTest"/>
         </classes>
     </test>
 
     <test name="Client authentication by Access Token" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.ClientAuthenticationByAccessTokenHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.uma.ClientAuthenticationByAccessTokenHttpTest"/>
         </classes>
     </test>
 
     <test name="Introspection test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.IntrospectionWsHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.IntrospectionWsHttpTest"/>
         </classes>
     </test>
 
     <test name="PKCE test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.PkceHttpTest"/>
+            <class name="org.gluu.oxauth.ws.rs.PkceHttpTest"/>
         </classes>
     </test>
 
     <!-- OIC Interop Tests -->
     <test name="OC5. FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.AcceptRequestWithoutRedirectUriWhenOneRegistered"/>
+            <class name="org.gluu.oxauth.interop.AcceptRequestWithoutRedirectUriWhenOneRegistered"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Accept Valid Asymmetric ID Token Signature" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.AcceptValidAsymmetricIdTokenSignature"/>
+            <class name="org.gluu.oxauth.interop.AcceptValidAsymmetricIdTokenSignature"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Accept Valid Symmetric ID Token Signature" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.AcceptValidSymmetricIdTokenSignature"/>
+            <class name="org.gluu.oxauth.interop.AcceptValidSymmetricIdTokenSignature"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Discover Identifiers using E-Mail Syntax" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingEMailSyntax"/>
+            <class name="org.gluu.oxauth.interop.CanDiscoverIdentifiersUsingEMailSyntax"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Discover Identifiers using URL Syntax" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingUrlSyntax"/>
+            <class name="org.gluu.oxauth.interop.CanDiscoverIdentifiersUsingUrlSyntax"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Make Access Token Request with client secret basic Authentication" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretBasicAuthentication"/>
+            <class name="org.gluu.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretBasicAuthentication"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Make Access Token Request with client secret jwt Authentication" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretJwtAuthentication"/>
+            <class name="org.gluu.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretJwtAuthentication"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Make Access Token Request with client secret post Authentication" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretPostAuthentication"/>
+            <class name="org.gluu.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretPostAuthentication"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Make Access Token Request with private key jwt Authentication" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication"/>
+            <class name="org.gluu.oxauth.interop.CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Provide Encrypted ID Token Response" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanProvideEncryptedIdTokenResponse"/>
+            <class name="org.gluu.oxauth.interop.CanProvideEncryptedIdTokenResponse"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Provide Encrypted UserInfo Response" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanProvideEncryptedUserInfoResponse"/>
+            <class name="org.gluu.oxauth.interop.CanProvideEncryptedUserInfoResponse"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Provide Signed UserInfo Response" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanProvideSignedUserInfoResponse"/>
+            <class name="org.gluu.oxauth.interop.CanProvideSignedUserInfoResponse"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Request and Use Claims in id token" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanRequestAndUseClaimsInIdToken"/>
+            <class name="org.gluu.oxauth.interop.CanRequestAndUseClaimsInIdToken"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Request and Use Encrypted ID Token Response" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanRequestAndUseEncryptedIdTokenResponse"/>
+            <class name="org.gluu.oxauth.interop.CanRequestAndUseEncryptedIdTokenResponse"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Can Request and Use Signed UserInfo Response" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.CanRequestAndUseSignedUserInfoResponse"/>
+            <class name="org.gluu.oxauth.interop.CanRequestAndUseSignedUserInfoResponse"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Displays Logo in Login Page" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.DisplaysLogoInLoginPage"/>
+            <class name="org.gluu.oxauth.interop.DisplaysLogoInLoginPage"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Displays Policy in Login Page" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
+            <class name="org.gluu.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support WebFinger Discovery" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportWebFingerDiscovery"/>
+            <class name="org.gluu.oxauth.interop.SupportWebFingerDiscovery"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Enables Dynamic Registration" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.EnablesDynamicRegistration"/>
+            <class name="org.gluu.oxauth.interop.EnablesDynamicRegistration"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Ignores Extra Query Component in Request" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.IgnoresExtraQueryComponentInRequest"/>
+            <class name="org.gluu.oxauth.interop.IgnoresExtraQueryComponentInRequest"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Includes at hash in ID Token when Implicit Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.IncludesAtHashInIdTokenWhenImplicitFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.IncludesAtHashInIdTokenWhenImplicitFlowUsed"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
         </classes>
     </test>
     <test name="OPRegistrationJwks" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.OPRegistrationJwks"/>
+            <class name="org.gluu.oxauth.interop.OPRegistrationJwks"/>
         </classes>
     </test>
     <test name="ProvidingAcrValues" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingAcrValues"/>
+            <class name="org.gluu.oxauth.interop.ProvidingAcrValues"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
+            <class name="org.gluu.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing ID Token with max age Restriction" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithMaxAgeRestriction"/>
+            <class name="org.gluu.oxauth.interop.ProvidingIdTokenWithMaxAgeRestriction"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing Individually Requested Essential and Voluntary Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims"/>
+            <class name="org.gluu.oxauth.interop.ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing Individually Requested Essential Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialClaims"/>
+            <class name="org.gluu.oxauth.interop.ProvidingIndividuallyRequestedEssentialClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedVoluntaryClaims"/>
+            <class name="org.gluu.oxauth.interop.ProvidingIndividuallyRequestedVoluntaryClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.PublishOpenIdConfigurationDiscoveryInformation"/>
+            <class name="org.gluu.oxauth.interop.PublishOpenIdConfigurationDiscoveryInformation"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectInvalidAsymmetricIdTokenSignature"/>
+            <class name="org.gluu.oxauth.interop.RejectInvalidAsymmetricIdTokenSignature"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Invalid Symmetric ID Token Signature" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectInvalidSymmetricIdTokenSignature"/>
+            <class name="org.gluu.oxauth.interop.RejectInvalidSymmetricIdTokenSignature"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject redirect uri Not Matching a Registered redirect uri" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectRedirectUriNotMatchingARegisteredRedirectUri"/>
+            <class name="org.gluu.oxauth.interop.RejectRedirectUriNotMatchingARegisteredRedirectUri"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Registration of redirect uri with Fragment" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectRegistrationOfRedirectUriWithFragment"/>
+            <class name="org.gluu.oxauth.interop.RejectRegistrationOfRedirectUriWithFragment"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Requests Without nonce Using Implicit Flow" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectRequestsWithoutNonceUsingImplicitFlow"/>
+            <class name="org.gluu.oxauth.interop.RejectRequestsWithoutNonceUsingImplicitFlow"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Request Without redirect uri when Multiple Registered" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectRequestWithoutRedirectUriWhenMultipleRegistered"/>
+            <class name="org.gluu.oxauth.interop.RejectRequestWithoutRedirectUriWhenMultipleRegistered"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Reject Request Without response type" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectRequestWithoutResponseType"/>
+            <class name="org.gluu.oxauth.interop.RejectRequestWithoutResponseType"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Rejects Incorrect at hash when Implicit Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectsIncorrectAtHashWhenImplicitFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.RejectsIncorrectAtHashWhenImplicitFlowUsed"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Rejects Incorrect c hash when Code Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectsIncorrectCHashWhenCodeFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.RejectsIncorrectCHashWhenCodeFlowUsed"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Rejects redirect uri when Query Parameter Does Not Match" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectsRedirectUriWhenQueryParameterDoesNotMatch"/>
+            <class name="org.gluu.oxauth.interop.RejectsRedirectUriWhenQueryParameterDoesNotMatch"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Rejects Second Use of Access Code" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectsSecondUseOfAccessCode"/>
+            <class name="org.gluu.oxauth.interop.RejectsSecondUseOfAccessCode"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values"
           enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues"/>
+            <class name="org.gluu.oxauth.interop.RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Requesting UserInfo Claims with OpenID Request Object" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject"/>
+            <class name="org.gluu.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Requesting UserInfo Claims with scope Values" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithScopeValues"/>
+            <class name="org.gluu.oxauth.interop.RequestingUserInfoClaimsWithScopeValues"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken"/>
+            <class name="org.gluu.oxauth.interop.SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body"
           enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingFormEncodedClientCredentialsInPostBody"/>
+            <class name="org.gluu.oxauth.interop.SupportAuthenticationToTokenEndpointUsingFormEncodedClientCredentialsInPostBody"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using HTTP Basic with POST" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingHttpBasicWithPost"/>
+            <class name="org.gluu.oxauth.interop.SupportAuthenticationToTokenEndpointUsingHttpBasicWithPost"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs"
           enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs"/>
+            <class name="org.gluu.oxauth.interop.SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs"
           enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs"/>
+            <class name="org.gluu.oxauth.interop.SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support code Response Type" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportCodeResponseType"/>
+            <class name="org.gluu.oxauth.interop.SupportCodeResponseType"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Combination of code id token token Response Types" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeIdTokenTokenResponseTypes"/>
+            <class name="org.gluu.oxauth.interop.SupportCombinationOfCodeIdTokenTokenResponseTypes"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Combination of code token Response Types" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeTokenResponseTypes"/>
+            <class name="org.gluu.oxauth.interop.SupportCombinationOfCodeTokenResponseTypes"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Combination of id token code Response Types" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenCodeResponseTypes"/>
+            <class name="org.gluu.oxauth.interop.SupportCombinationOfIdTokenCodeResponseTypes"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Combination of id token token Response Types" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenTokenResponseTypes"/>
+            <class name="org.gluu.oxauth.interop.SupportCombinationOfIdTokenTokenResponseTypes"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support display value page" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportDisplayValuePage"/>
+            <class name="org.gluu.oxauth.interop.SupportDisplayValuePage"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support display value popup" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportDisplayValuePopup"/>
+            <class name="org.gluu.oxauth.interop.SupportDisplayValuePopup"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support id token Response Type" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportIdTokenResponseType"/>
+            <class name="org.gluu.oxauth.interop.SupportIdTokenResponseType"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support prompt value login" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportPromptValueLogin"/>
+            <class name="org.gluu.oxauth.interop.SupportPromptValueLogin"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support prompt value none" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportPromptValueNone"/>
+            <class name="org.gluu.oxauth.interop.SupportPromptValueNone"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Registration Read" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportRegistrationRead"/>
+            <class name="org.gluu.oxauth.interop.SupportRegistrationRead"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Request File" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportRequestFile"/>
+            <class name="org.gluu.oxauth.interop.SupportRequestFile"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support claims Request Specifying sub Value" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportClaimsRequestSpecifyingSubValue"/>
+            <class name="org.gluu.oxauth.interop.SupportClaimsRequestSpecifyingSubValue"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Requests Containing nonce" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportRequestsContainingNonce"/>
+            <class name="org.gluu.oxauth.interop.SupportRequestsContainingNonce"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support Requests Without nonce" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportRequestsWithoutNonce"/>
+            <class name="org.gluu.oxauth.interop.SupportRequestsWithoutNonce"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportsCombiningClaimsRequestedWithScopeAndRequestObject"/>
+            <class name="org.gluu.oxauth.interop.SupportsCombiningClaimsRequestedWithScopeAndRequestObject"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting address Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingAddressClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingAddressClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting All Basic Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingAllBasicClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingAllBasicClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting email Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingEmailClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingEmailClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting No Specific Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingNoSpecificClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingNoSpecificClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting phone Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingPhoneClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingPhoneClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support scope Requesting profile Claims" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportScopeRequestingProfileClaims"/>
+            <class name="org.gluu.oxauth.interop.SupportScopeRequestingProfileClaims"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Supports Returning Claims in ID Token" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportsReturningClaimsInIdToken"/>
+            <class name="org.gluu.oxauth.interop.SupportsReturningClaimsInIdToken"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint"/>
+            <class name="org.gluu.oxauth.interop.SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Support token Response Type" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.SupportTokenResponseType"/>
+            <class name="org.gluu.oxauth.interop.SupportTokenResponseType"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-UserInfo Endpoint" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UserInfoEndpoint"/>
+            <class name="org.gluu.oxauth.interop.UserInfoEndpoint"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-UserInfo Endpoint Access with Form-Encoded Body Method" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithFormEncodedBodyMethod"/>
+            <class name="org.gluu.oxauth.interop.UserInfoEndpointAccessWithFormEncodedBodyMethod"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-UserInfo Endpoint Access with Header Method" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithHeaderMethod"/>
+            <class name="org.gluu.oxauth.interop.UserInfoEndpointAccessWithHeaderMethod"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Uses Asymmetric ID Token Signatures" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UsesAsymmetricIdTokenSignatures"/>
+            <class name="org.gluu.oxauth.interop.UsesAsymmetricIdTokenSignatures"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Uses Discovery" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UsesDiscovery"/>
+            <class name="org.gluu.oxauth.interop.UsesDiscovery"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Uses Dynamic Registration" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UsesDynamicRegistration"/>
+            <class name="org.gluu.oxauth.interop.UsesDynamicRegistration"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Uses Symmetric ID Token Signatures" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.UsesSymmetricIdTokenSignatures"/>
+            <class name="org.gluu.oxauth.interop.UsesSymmetricIdTokenSignatures"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Verifies Correct at hash when Implicit Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.VerifiesCorrectAtHashWhenImplicitFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.VerifiesCorrectAtHashWhenImplicitFlowUsed"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Verifies Correct c hash when Code Flow Used" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.VerifiesCorrectCHashWhenCodeFlowUsed"/>
+            <class name="org.gluu.oxauth.interop.VerifiesCorrectCHashWhenCodeFlowUsed"/>
         </classes>
     </test>
 

@@ -6,6 +6,6 @@
       http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
        bean-discovery-mode="annotated">
     <interceptors>
-        <class>org.xdi.oxauth.auth.mtls.MTLSInterceptor</class>
+        <class>org.gluu.oxauth.auth.mtls.MTLSInterceptor</class>
     </interceptors>
 </beans>
