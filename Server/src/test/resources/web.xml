@@ -13,7 +13,7 @@
 	<!-- Authentication filter -->
 	<filter>
 		<filter-name>Authentication Filter</filter-name>
-		<filter-class>org.xdi.oxauth.auth.AuthenticationFilter</filter-class>
+		<filter-class>org.gluu.oxauth.auth.AuthenticationFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
@@ -83,7 +83,7 @@
 		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>org.xdi.oxauth.service.TestResteasyInitializer</param-value>
+			<param-value>org.gluu.oxauth.service.TestResteasyInitializer</param-value>
 		</init-param>
 	</servlet>
 
