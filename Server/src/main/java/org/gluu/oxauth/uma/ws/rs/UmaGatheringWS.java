@@ -46,7 +46,7 @@ import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * Claims-Gathering Endpoint.

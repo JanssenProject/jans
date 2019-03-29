@@ -44,8 +44,8 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.service.InumService;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.service.InumService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

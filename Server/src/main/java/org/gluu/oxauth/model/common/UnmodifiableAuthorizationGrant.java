@@ -12,7 +12,7 @@ import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JsonWebResponse;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import java.util.Collection;
 import java.util.Date;

@@ -13,7 +13,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.EncryptionService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

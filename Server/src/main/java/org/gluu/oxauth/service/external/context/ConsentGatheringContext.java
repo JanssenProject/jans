@@ -18,8 +18,8 @@ import org.gluu.oxauth.authorize.ws.rs.ConsentGatheringSessionService;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017

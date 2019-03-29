@@ -30,7 +30,7 @@ import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz

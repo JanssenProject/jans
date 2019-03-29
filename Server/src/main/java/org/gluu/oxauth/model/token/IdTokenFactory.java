@@ -51,7 +51,7 @@ import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

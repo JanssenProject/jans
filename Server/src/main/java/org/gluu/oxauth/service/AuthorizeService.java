@@ -21,8 +21,8 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;

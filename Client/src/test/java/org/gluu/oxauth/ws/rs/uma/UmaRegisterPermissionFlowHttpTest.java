@@ -15,7 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

@@ -23,7 +23,7 @@ import org.gluu.service.cache.InMemoryConfiguration;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * Holds factory methods to create services

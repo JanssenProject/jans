@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -20,7 +20,7 @@ import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

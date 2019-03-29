@@ -24,7 +24,7 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Yuriy Zabrovarnyy

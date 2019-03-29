@@ -26,8 +26,8 @@ import org.gluu.oxauth.service.external.context.ExternalScriptContext;
 import org.gluu.oxauth.uma.service.RedirectParameters;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

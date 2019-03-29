@@ -13,7 +13,7 @@ import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * Test cases for getting meta data configuration flow (HTTP)
