@@ -8,6 +8,7 @@ package org.xdi.oxauth.comp;
 
 import static org.testng.Assert.assertTrue;
 
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.crypto.Certificate;
 import org.gluu.oxauth.model.crypto.Key;
 import org.gluu.oxauth.model.crypto.KeyFactory;
@@ -21,7 +22,6 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jws.ECDSASigner;
 import org.gluu.oxauth.model.jws.RSASigner;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012

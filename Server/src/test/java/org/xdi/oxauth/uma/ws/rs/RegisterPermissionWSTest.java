@@ -17,6 +17,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaPermission;
@@ -28,7 +29,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
