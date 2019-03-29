@@ -12,15 +12,15 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gluu.oxauth.client.RegisterClient;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
 
 /**
  * OC5:FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values

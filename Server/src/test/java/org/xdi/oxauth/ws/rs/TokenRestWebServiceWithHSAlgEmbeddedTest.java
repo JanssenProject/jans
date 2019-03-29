@@ -8,6 +8,8 @@ package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.TokenRequest;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -20,8 +22,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.TokenRequest;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;

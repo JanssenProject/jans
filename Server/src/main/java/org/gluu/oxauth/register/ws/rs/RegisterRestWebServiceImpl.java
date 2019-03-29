@@ -14,6 +14,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
@@ -43,7 +44,6 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.InumService;
 

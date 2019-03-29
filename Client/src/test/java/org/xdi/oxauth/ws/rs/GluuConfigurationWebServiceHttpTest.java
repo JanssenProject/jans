@@ -2,11 +2,12 @@ package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.GluuConfigurationClient;
-import org.xdi.oxauth.client.GluuConfigurationResponse;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
+import org.gluu.oxauth.client.GluuConfigurationClient;
+import org.gluu.oxauth.client.GluuConfigurationResponse;
 
 /**
  * Created by eugeniuparvan on 8/12/16.

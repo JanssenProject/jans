@@ -5,6 +5,7 @@
  */
 package org.xdi.oxauth.ws.rs;
 
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
@@ -13,7 +14,6 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
 
 import java.util.*;
 

@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
+import org.gluu.oxauth.client.uma.UmaClientFactory;
+import org.gluu.oxauth.client.uma.UmaResourceService;
+import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxauth.model.uma.UmaResource;
 import org.gluu.oxauth.model.uma.UmaResourceResponse;
@@ -16,9 +19,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.UmaResourceService;
-import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 import javax.ws.rs.core.Response;
