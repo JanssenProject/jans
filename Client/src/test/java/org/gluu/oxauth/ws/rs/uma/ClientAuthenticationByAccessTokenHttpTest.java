@@ -31,7 +31,7 @@ import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
 
 /**
  * @author yuriyz
