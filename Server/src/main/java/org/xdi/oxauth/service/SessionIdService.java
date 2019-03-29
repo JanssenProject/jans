@@ -11,6 +11,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.service.CacheService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -34,8 +36,6 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.CacheService;
-import org.xdi.util.StringHelper;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;

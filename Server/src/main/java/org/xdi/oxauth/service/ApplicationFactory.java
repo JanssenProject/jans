@@ -13,17 +13,17 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.model.SmtpConfiguration;
 import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.gluu.service.cache.CacheConfiguration;
+import org.gluu.service.cache.InMemoryConfiguration;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.service.cache.CacheConfiguration;
-import org.xdi.service.cache.InMemoryConfiguration;
 
 /**
  * Holds factory methods to create services

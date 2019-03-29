@@ -5,9 +5,9 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.service.cdi.event.ConfigurationUpdate;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.configuration.AuthenticationProtectionConfiguration;
-import org.xdi.service.cdi.event.ConfigurationUpdate;
 
 /**
  * Brute Force authentication protection service implementation
@@ -16,7 +16,7 @@ import org.xdi.service.cdi.event.ConfigurationUpdate;
  */
 @ApplicationScoped
 @Named
-public class AuthenticationProtectionService extends org.xdi.service.security.protect.AuthenticationProtectionService {
+public class AuthenticationProtectionService extends org.gluu.service.security.protect.AuthenticationProtectionService {
 
     private static final int DEFAULT_ATTEMPT_EXPIRATION = 15; // 15 seconds
 

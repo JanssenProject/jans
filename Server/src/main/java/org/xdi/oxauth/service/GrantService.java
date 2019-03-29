@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.CacheService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -23,7 +24,6 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.TokenHashUtil;
-import org.xdi.service.CacheService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

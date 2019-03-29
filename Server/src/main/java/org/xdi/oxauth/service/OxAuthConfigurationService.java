@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
 
+import org.gluu.util.StringHelper;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.util.StringHelper;
 
 /**
  * OxAuthConfigurationService

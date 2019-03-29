@@ -38,6 +38,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.util.StringHelper;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
@@ -69,7 +70,6 @@ import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
 
 import com.google.common.base.Joiner;
 

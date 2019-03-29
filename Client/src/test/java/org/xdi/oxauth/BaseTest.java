@@ -20,6 +20,7 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
@@ -38,7 +39,6 @@ import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.util.StringHelper;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;

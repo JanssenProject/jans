@@ -8,8 +8,9 @@ package org.xdi.oxauth.auth;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.model.security.Identity;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -27,7 +28,6 @@ import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
 
 import javax.inject.Inject;
 import javax.servlet.*;

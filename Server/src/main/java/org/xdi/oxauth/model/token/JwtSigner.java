@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
+import org.gluu.service.cdi.util.CdiUtil;
 import org.python.jline.internal.Preconditions;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -18,7 +19,6 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.service.cdi.util.CdiUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

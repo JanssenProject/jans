@@ -16,8 +16,8 @@ package org.gluu.oxauth.fido2.service.exception;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.service.exception.ExceptionHandler;
 import org.slf4j.Logger;
-import org.xdi.service.exception.ExceptionHandler;
 
 public class Fido2RPRuntimeExceptionHandler {
 

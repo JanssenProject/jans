@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.service.CacheService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -19,7 +20,6 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
-import org.xdi.service.CacheService;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;

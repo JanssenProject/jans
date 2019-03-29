@@ -15,11 +15,11 @@ import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.CacheService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.service.CacheService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

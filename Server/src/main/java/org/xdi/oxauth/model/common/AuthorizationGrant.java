@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.service.CacheService;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.util.TokenHashUtil;
-import org.xdi.service.CacheService;
 
 import javax.inject.Inject;
 import java.util.Date;

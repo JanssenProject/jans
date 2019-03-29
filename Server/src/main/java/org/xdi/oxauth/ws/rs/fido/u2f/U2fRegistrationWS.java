@@ -18,8 +18,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -43,7 +44,6 @@ import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionIdService;
 import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
 
 import com.wordnik.swagger.annotations.Api;
 import javax.inject.Inject;

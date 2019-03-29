@@ -13,7 +13,7 @@ import java.util.List;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013

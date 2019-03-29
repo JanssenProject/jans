@@ -13,6 +13,8 @@ import org.codehaus.jettison.json.JSONException;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.INumGenerator;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
@@ -27,8 +29,6 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.INumGenerator;
-import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
