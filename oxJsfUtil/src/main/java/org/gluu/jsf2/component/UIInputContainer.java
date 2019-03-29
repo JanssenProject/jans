@@ -23,7 +23,7 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 @FacesComponent(UIInputContainer.COMPONENT_TYPE)
 public class UIInputContainer extends UIComponentBase implements NamingContainer {

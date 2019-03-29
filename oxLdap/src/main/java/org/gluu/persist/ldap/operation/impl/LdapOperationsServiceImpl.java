@@ -32,11 +32,11 @@ import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.persist.watch.DurationUtil;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.Pair;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.Pair;
-import org.xdi.util.StringHelper;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.Attribute;
@@ -317,7 +317,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * (non-Javadoc)
      *
      * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
-     * com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int, int,
+     * com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope, int, int,
      * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
     @Override
@@ -330,7 +330,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * (non-Javadoc)
      *
      * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
-     * com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope,
+     * com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope,
      * org.gluu.site.ldap.persistence.BatchOperation, int, int, int,
      * com.unboundid.ldap.sdk.Control[], java.lang.String)
      */
@@ -499,9 +499,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * (non-Javadoc)
      *
      * @see org.gluu.site.ldap.PlatformOperationFacade#searchSearchResult(java.lang.
-     * String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int,
-     * int, int, java.lang.String, org.xdi.ldap.model.SortOrder,
-     * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
+     * String, com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope, int,
+     * int, int, java.lang.String, org.gluu.ldap.model.SortOrder,
+     * org.gluu.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Override
     public List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
@@ -615,9 +615,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      *
      * @see
      * org.gluu.site.ldap.PlatformOperationFacade#searchVirtualListView(java.lang.
-     * String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, int,
-     * int, java.lang.String, org.xdi.ldap.model.SortOrder,
-     * org.xdi.ldap.model.VirtualListViewResponse, java.lang.String)
+     * String, com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope, int,
+     * int, java.lang.String, org.gluu.ldap.model.SortOrder,
+     * org.gluu.ldap.model.VirtualListViewResponse, java.lang.String)
      */
     @Deprecated
     public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,

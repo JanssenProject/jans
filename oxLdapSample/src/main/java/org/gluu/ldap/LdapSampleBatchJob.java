@@ -12,6 +12,7 @@ import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.ldap.model.SimpleClient;
 import org.gluu.ldap.model.SimpleSession;
 import org.gluu.ldap.model.SimpleTokenLdap;
+import org.gluu.log.LoggingHelper;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.BatchOperation;
@@ -20,7 +21,6 @@ import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
-import org.xdi.log.LoggingHelper;
 
 import com.unboundid.util.StaticUtils;
 

@@ -9,13 +9,13 @@ import org.gluu.ldap.model.SimpleAttribute;
 import org.gluu.ldap.model.SimpleGrant;
 import org.gluu.ldap.model.SimpleSession;
 import org.gluu.ldap.model.SimpleUser;
+import org.gluu.log.LoggingHelper;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
-import org.xdi.log.LoggingHelper;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016

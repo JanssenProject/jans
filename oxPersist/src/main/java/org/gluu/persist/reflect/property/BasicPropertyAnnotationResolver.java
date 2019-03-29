@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.gluu.persist.exception.PropertyNotFoundException;
 import org.gluu.persist.reflect.util.ReflectHelper;
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * Defines a strategy for accessing class and propery annotations.

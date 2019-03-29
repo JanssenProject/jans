@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.couchbase.model.SimpleSessionState;
+import org.gluu.log.LoggingHelper;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
-import org.xdi.log.LoggingHelper;
 
 /**
  * @author Yuriy Movchan Date: 01/25/2016

@@ -16,7 +16,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
-import org.xdi.service.el.ExpressionEvaluator;
+import org.gluu.service.el.ExpressionEvaluator;
 
 /**
  * @author Yuriy Movchan

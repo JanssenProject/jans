@@ -7,9 +7,9 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 
+import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeValidation;
-import org.xdi.model.GluuAttribute;
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * Attribute Metadata Validator

@@ -16,7 +16,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan

@@ -46,10 +46,10 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.gluu.site.ldap.persistence.annotation.LdapSchemaEntry;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 
 /**
  * Abstract Entry Manager

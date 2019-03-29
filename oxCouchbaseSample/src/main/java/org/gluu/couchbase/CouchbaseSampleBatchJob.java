@@ -11,6 +11,7 @@ import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.couchbase.model.SimpleClient;
 import org.gluu.couchbase.model.SimpleSession;
 import org.gluu.couchbase.model.SimpleTokenCouchbase;
+import org.gluu.log.LoggingHelper;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
@@ -19,7 +20,6 @@ import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
-import org.xdi.log.LoggingHelper;
 
 /**
  * Created by eugeniuparvan on 1/12/17.
