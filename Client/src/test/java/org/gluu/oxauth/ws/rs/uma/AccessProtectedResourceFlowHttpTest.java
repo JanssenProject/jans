@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 
 import static org.testng.Assert.assertEquals;
-import static org.xdi.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
