@@ -8,10 +8,10 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
-from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.uma import ClaimDefinitionBuilder
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.uma import UmaRptPolicyType
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.model.uma import ClaimDefinitionBuilder
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 from java.lang import String
 
@@ -38,7 +38,7 @@ class UmaRptPolicy(UmaRptPolicyType):
         ]"""
         return ClaimDefinitionBuilder.build(json)
 
-    def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
+    def authorize(self, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
 
         client_id=context.getClient().getClientId()

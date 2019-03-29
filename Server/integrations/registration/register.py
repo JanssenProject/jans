@@ -4,21 +4,21 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
 from org.gluu.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.model.common import User
-from org.xdi.oxauth.util import ServerUtil
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService
+from org.gluu.util import StringHelper
+from org.gluu.oxauth.model.common import User
+from org.gluu.oxauth.util import ServerUtil
 from org.gluu.jsf2.service import FacesService
-from org.xdi.oxauth.model.util import Base64Util
+from org.gluu.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
-from org.xdi.oxauth.service.net import HttpService
+from org.gluu.oxauth.service.net import HttpService
 from javax.faces.context import FacesContext
 
 import java

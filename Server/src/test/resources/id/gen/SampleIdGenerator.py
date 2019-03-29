@@ -1,5 +1,5 @@
-from org.xdi.model.custom.script.type.id import IdGeneratorType
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.id import IdGeneratorType
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from java.util import UUID
 
