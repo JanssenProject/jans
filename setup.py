@@ -351,7 +351,7 @@ class Setup(object):
 
         self.oxauth_error_json = '%s/oxauth/oxauth-errors.json' % self.staticFolder
 
-        self.oxauth_openid_jwks_fn = "%s/oxauth-keys.json" % self.certFolder
+        self.oxauth_openid_jwks_fn = "%s/oxauth-keys.json" % self.outputFolder
         self.oxauth_openid_jks_fn = "%s/oxauth-keys.jks" % self.certFolder
         self.oxauth_openid_jks_pass = None
 
@@ -654,9 +654,7 @@ class Setup(object):
 
 
         if self.installOxAuth:
-            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
-            self.run([self.cmd_chmod, '660', self.oxauth_openid_jwks_fn])
             self.run([self.cmd_chmod, '660', self.oxauth_openid_jks_fn])
 
         if self.installSaml:
