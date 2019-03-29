@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.Constants;

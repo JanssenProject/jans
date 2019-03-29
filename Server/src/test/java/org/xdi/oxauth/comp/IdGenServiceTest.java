@@ -14,17 +14,17 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.model.ProgrammingLanguage;
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.util.INumGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.xdi.model.ProgrammingLanguage;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.custom.CustomScriptService;
-import org.xdi.util.INumGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy

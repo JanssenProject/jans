@@ -10,13 +10,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.model.SmtpConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.util.StringHelper;
+import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
-import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 /**
  * GluuConfiguration service

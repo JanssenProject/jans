@@ -13,12 +13,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
-import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.session.ApplicationSessionType;
+import org.gluu.model.SimpleCustomProperty;
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.type.session.ApplicationSessionType;
+import org.gluu.service.custom.script.ExternalScriptService;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.service.custom.script.ExternalScriptService;
 
 /**
  * Provides factory methods needed to create external application session extension

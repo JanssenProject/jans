@@ -9,14 +9,14 @@ package org.oxauth.persistence.model.configuration;
 import java.io.Serializable;
 import java.util.List;
 
+import org.gluu.model.SmtpConfiguration;
 import org.gluu.persist.model.base.GluuBoolean;
 import org.gluu.persist.model.base.InumEntry;
+import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.model.SmtpConfiguration;
-import org.xdi.service.cache.CacheConfiguration;
 
 /**
  * Gluu Appliance

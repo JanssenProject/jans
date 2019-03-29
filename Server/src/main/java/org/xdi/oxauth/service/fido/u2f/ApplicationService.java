@@ -12,7 +12,7 @@ import java.net.URISyntaxException;
 import javax.ejb.Stateless;
 import javax.inject.Named;
 
-import org.xdi.net.InetAddressUtility;
+import org.gluu.net.InetAddressUtility;
 import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
 
 /**

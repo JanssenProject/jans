@@ -9,14 +9,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.type.authz.ConsentGatheringType;
+import org.gluu.service.LookupService;
+import org.gluu.service.custom.script.ExternalScriptService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.authz.ConsentGatheringType;
 import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
-import org.xdi.service.LookupService;
-import org.xdi.service.custom.script.ExternalScriptService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017

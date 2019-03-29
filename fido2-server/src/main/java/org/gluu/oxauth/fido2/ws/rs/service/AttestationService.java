@@ -41,9 +41,9 @@ import org.gluu.oxauth.fido2.service.verifier.AuthenticatorAttestationVerifier;
 import org.gluu.oxauth.fido2.service.verifier.ChallengeVerifier;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.verifier.DomainVerifier;
+import org.gluu.service.net.NetworkService;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.service.net.NetworkService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

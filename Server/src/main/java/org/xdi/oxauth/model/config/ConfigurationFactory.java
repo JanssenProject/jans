@@ -26,11 +26,20 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.exception.ConfigurationException;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.ConfigurationEvent;
+import org.gluu.service.cdi.event.ConfigurationUpdate;
+import org.gluu.service.cdi.event.LdapConfigurationReload;
+import org.gluu.service.cdi.event.Scheduled;
+import org.gluu.service.timer.event.TimerEvent;
+import org.gluu.service.timer.schedule.TimerSchedule;
+import org.gluu.util.StringHelper;
+import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
-import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -38,15 +47,6 @@ import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.cdi.async.Asynchronous;
-import org.xdi.service.cdi.event.ConfigurationEvent;
-import org.xdi.service.cdi.event.ConfigurationUpdate;
-import org.xdi.service.cdi.event.LdapConfigurationReload;
-import org.xdi.service.cdi.event.Scheduled;
-import org.xdi.service.timer.event.TimerEvent;
-import org.xdi.service.timer.schedule.TimerSchedule;
-import org.xdi.util.StringHelper;
-import org.xdi.util.properties.FileConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

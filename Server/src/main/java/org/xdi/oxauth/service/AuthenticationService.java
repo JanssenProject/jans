@@ -30,16 +30,17 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.GluuStatus;
+import org.gluu.model.SimpleProperty;
+import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.model.metric.MetricType;
+import org.gluu.model.security.Credentials;
+import org.gluu.model.security.SimplePrincipal;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.SimpleProperty;
-import org.xdi.model.ldap.GluuLdapConfiguration;
-import org.xdi.model.security.Credentials;
-import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
@@ -48,7 +49,6 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.security.Identity;
-import org.xdi.util.StringHelper;
 
 /**
  * Authentication service methods

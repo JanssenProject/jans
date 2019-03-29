@@ -7,6 +7,7 @@
 package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.util.StringHelper;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -27,7 +28,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.util.StringHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;

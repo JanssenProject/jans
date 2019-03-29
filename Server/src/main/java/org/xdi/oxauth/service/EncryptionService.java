@@ -12,11 +12,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.util.StringHelper;
+import org.gluu.util.security.PropertiesDecrypter;
+import org.gluu.util.security.StringEncrypter;
+import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
-import org.xdi.util.StringHelper;
-import org.xdi.util.security.PropertiesDecrypter;
-import org.xdi.util.security.StringEncrypter;
-import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 /**
  * Allows to decrypt passwords

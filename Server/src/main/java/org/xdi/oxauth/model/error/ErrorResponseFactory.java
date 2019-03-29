@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.error;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -22,7 +23,6 @@ import org.xdi.oxauth.model.uma.UmaErrorResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
 
 import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
