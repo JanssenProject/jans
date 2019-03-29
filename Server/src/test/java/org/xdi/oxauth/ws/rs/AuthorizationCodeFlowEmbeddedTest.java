@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.client.RegisterRequest;
@@ -40,11 +41,11 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.ws.rs.ClientTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
 
 /**
  * Test cases for the authorization code flow (embedded)
