@@ -7,7 +7,7 @@
 package org.gluu.oxauth.ws.rs;
 
 import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.uma.TestUtil.assertNotBlank;
+import static org.gluu.oxauth.model.uma.TestUtil.assertNotBlank;
 
 import org.gluu.oxauth.client.RegisterResponse;
 
