@@ -4,13 +4,13 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.service import MailService
-from org.xdi.util import ArrayHelper
-from org.xdi.util import StringHelper
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.service import MailService
+from org.gluu.util import ArrayHelper
+from org.gluu.util import StringHelper
 from java.util import Arrays
 
 import duo_web
