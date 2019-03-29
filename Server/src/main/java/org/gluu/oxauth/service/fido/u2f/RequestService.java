@@ -19,7 +19,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * Provides generic operations with U2F requests

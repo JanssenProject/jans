@@ -46,7 +46,7 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.TestUtil;
+import org.gluu.oxauth.model.uma.TestUtil;
 
 /**
  * Functional tests for Client Registration Web Services (embedded)

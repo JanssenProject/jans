@@ -12,7 +12,7 @@ import java.util.List;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.oxauth.persistence.model.Scope;
-import org.xdi.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.User;
 
 /**
  * Holds object required in dynamic scope custom scripts 

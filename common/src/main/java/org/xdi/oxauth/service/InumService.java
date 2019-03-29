@@ -16,7 +16,7 @@ import org.gluu.oxauth.model.common.IdType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Pair;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.api.IdGenerator;
+import org.gluu.oxauth.service.api.IdGenerator;
 
 /**
  * Provides operations with clients.

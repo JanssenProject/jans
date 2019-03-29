@@ -47,9 +47,9 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.SimpleUser;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.model.common.SimpleUser;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * Authentication service methods

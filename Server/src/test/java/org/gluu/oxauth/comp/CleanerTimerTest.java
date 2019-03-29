@@ -28,9 +28,9 @@ import org.gluu.service.CacheService;
 import org.gluu.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.service.InumService;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.service.InumService;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;

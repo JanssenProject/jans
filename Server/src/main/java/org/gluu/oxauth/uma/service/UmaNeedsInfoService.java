@@ -33,7 +33,7 @@ import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
-import org.xdi.oxauth.service.UserService;
+import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz on 06/16/2017.

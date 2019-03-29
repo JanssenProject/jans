@@ -15,7 +15,7 @@ import javax.inject.Named;
 
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.service.custom.script.AbstractCustomScriptService;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * Operations with custom scripts

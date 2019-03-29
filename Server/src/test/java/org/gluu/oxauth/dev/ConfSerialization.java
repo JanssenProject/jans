@@ -12,8 +12,8 @@ import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.util.ServerUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.BaseDnConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
