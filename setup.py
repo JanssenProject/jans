@@ -1653,7 +1653,7 @@ class Setup(object):
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(oxauth_lib_files),
-                        "org.xdi.oxauth.util.KeyGenerator",
+                        "org.gluu.oxauth.util.KeyGenerator",
                         "-keystore",
                         jks_path,
                         "-keypasswd",
@@ -1692,7 +1692,7 @@ class Setup(object):
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(oxauth_lib_files),
-                        "org.xdi.oxauth.util.KeyExporter",
+                        "org.gluu.oxauth.util.KeyExporter",
                         "-keystore",
                         jks_path,
                         "-keypasswd",
@@ -1945,7 +1945,7 @@ class Setup(object):
 
             # generate new keystore with AES symmetric key
             # there is one throuble with Shibboleth IDP 3.x - it doesn't load keystore from /etc/certs. It accepts %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver path format only.
-            self.run([self.cmd_java,'-classpath', self.distGluuFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
+            self.run([self.cmd_java,'-classpath', self.distGluuFolder + '/idp3_cml_keygenerator.jar', 'org.gluu.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
 
             jettyIdpServiceName = 'idp'
             jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)

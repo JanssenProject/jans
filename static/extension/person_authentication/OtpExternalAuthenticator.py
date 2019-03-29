@@ -30,12 +30,12 @@ from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
+from org.gluu.oxauth.util import ServerUtil
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):
