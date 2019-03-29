@@ -30,6 +30,12 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.QueryStringDecoder;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.model.authorize.Claim;
+import org.gluu.oxauth.client.model.authorize.ClaimValue;
+import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -43,12 +49,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.model.authorize.Claim;
-import org.xdi.oxauth.client.model.authorize.ClaimValue;
-import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 
 /**
  * Functional tests for OpenID Request Object (embedded)

@@ -37,6 +37,10 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.QueryStringDecoder;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.TokenRequest;
 import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
@@ -52,10 +56,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.TokenRequest;
 
 /**
  * @author Javier Rojas Blum

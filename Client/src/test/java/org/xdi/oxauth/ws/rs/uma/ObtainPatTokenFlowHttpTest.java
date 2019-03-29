@@ -9,13 +9,13 @@ package org.xdi.oxauth.ws.rs.uma;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import org.gluu.oxauth.client.TokenClient;
+import org.gluu.oxauth.client.TokenResponse;
+import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 /**

@@ -14,10 +14,10 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.client.UserInfoClient;
+import org.gluu.oxauth.client.UserInfoRequest;
 import org.gluu.oxauth.model.common.AuthorizationMethod;
 import org.slf4j.Logger;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoRequest;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2012

@@ -11,6 +11,9 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 
+import org.gluu.oxauth.client.RegisterClient;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -19,9 +22,6 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
 
 /**
  * OC5:FeatureTest-Uses Dynamic Registration
