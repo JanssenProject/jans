@@ -17,13 +17,13 @@
         </locale-config>
 
         <resource-bundle>
-            <base-name>org.gluu.oxauth.i18n.CustomResourceBundle</base-name>
+            <base-name>org.xdi.oxauth.i18n.CustomResourceBundle</base-name>
             <var>msgs</var>
         </resource-bundle>
     </application>
     <factory>
         <exception-handler-factory>
-            org.gluu.oxauth.exception.GlobalExceptionHandlerFactory
+            org.xdi.oxauth.exception.GlobalExceptionHandlerFactory
         </exception-handler-factory>
     </factory>
 
