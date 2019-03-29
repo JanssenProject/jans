@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<parent>
-		<groupId>org.xdi</groupId>
+		<groupId>org.gluu</groupId>
 		<artifactId>oxauth</artifactId>
 		<version>4.0.0-SNAPSHOT</version>
 	</parent>
@@ -239,69 +239,69 @@
 		</dependency>
 		<!-- oxAuth -->
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-common</artifactId>
 		</dependency>
 		<!-- persistence model -->
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-persistence-model</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-fido2-server</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-fido2-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-static</artifactId>
 		</dependency>
 
 		<!-- Gluu -->
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-ldap-annotations</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-ldap</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-couchbase</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
 			<exclusions>
 				<exclusion>
@@ -338,11 +338,11 @@
 		<!-- oxLicense -->
 <!--
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxlicense-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxlicense-validator</artifactId>
 		</dependency>
 -->
@@ -560,14 +560,14 @@
 
 		<!-- Test -->
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-model</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-client</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -992,7 +992,7 @@
 						<configuration>
 							<apiSources>
 								<apiSource>
-									<locations>org.xdi.oxauth.model.uma;
+									<locations>org.gluu.oxauth.model.uma;
 									</locations>
 									<apiVersion>v1</apiVersion>
 									<basePath>http://gluu.org</basePath>
@@ -1054,7 +1054,7 @@
 			</build>
 			<dependencies>
 				<dependency>
-					<groupId>org.xdi</groupId>
+					<groupId>org.gluu</groupId>
 					<artifactId>oxcore-saml</artifactId>
 				</dependency>
 			</dependencies>
@@ -1130,14 +1130,14 @@
 			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.xdi</groupId>
+					<groupId>org.gluu</groupId>
 					<artifactId>oxauth-model</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.xdi</groupId>
+					<groupId>org.gluu</groupId>
 					<artifactId>oxauth-client</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>

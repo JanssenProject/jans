@@ -17,14 +17,14 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.model.ProgrammingLanguage;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
+import org.gluu.oxauth.idgen.ws.rs.IdGenService;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.service.custom.CustomScriptService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.util.INumGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.idgen.ws.rs.IdGenService;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.service.custom.CustomScriptService;
 
 /**
  * @author Yuriy Zabrovarnyy
