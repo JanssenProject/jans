@@ -1,8 +1,8 @@
 package org.gluu.jsf2.customization;
 
-import org.xdi.util.StringHelper;
-
 import java.io.File;
+
+import org.gluu.util.StringHelper;
 
 /**
  * Created by eugeniuparvan on 5/1/17.

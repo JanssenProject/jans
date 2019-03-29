@@ -6,7 +6,7 @@
 
 package org.gluu.persist.exception;
 
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * A problem occurred accessing a property of an instance of a persistent class

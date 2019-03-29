@@ -20,10 +20,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.ws.security.saml.ext.OpenSAMLUtil;
 import org.gluu.saml.exception.CloneFailedException;
+import org.gluu.util.security.CertificateHelper;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
-import org.xdi.util.security.CertificateHelper;
 
 /**
  * Configuration settings

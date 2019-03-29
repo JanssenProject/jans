@@ -17,7 +17,7 @@ import java.util.ListIterator;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.xdi.util.StringHelper;
+import org.gluu.util.StringHelper;
 
 import com.unboundid.ldap.sdk.ChangeType;
 import com.unboundid.ldap.sdk.Entry;

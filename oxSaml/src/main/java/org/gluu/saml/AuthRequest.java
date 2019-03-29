@@ -35,6 +35,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.saml.ext.OpenSAMLUtil;
+import org.gluu.zip.CompressionHelper;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.XMLObject;
@@ -47,7 +48,6 @@ import org.opensaml.xml.signature.SignatureConstants;
 import org.opensaml.xml.signature.Signer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xdi.zip.CompressionHelper;
 import org.xml.sax.InputSource;
 
 /**

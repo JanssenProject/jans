@@ -21,7 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xdi.util.io.HTTPFileDownloader;
+import org.gluu.util.io.HTTPFileDownloader;
 import org.xml.sax.SAXException;
 
 /**

@@ -18,10 +18,10 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.codec.digest.Crypt;
+import org.gluu.util.StringHelper;
+import org.gluu.util.security.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.StringHelper;
-import org.xdi.util.security.BCrypt;
 
 /**
  * Perform authentication and password encryption

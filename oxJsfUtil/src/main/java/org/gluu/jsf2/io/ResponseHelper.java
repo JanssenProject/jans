@@ -21,11 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.gluu.util.StringHelper;
+import org.gluu.util.io.DownloadWrapper;
+import org.gluu.util.io.FileDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.StringHelper;
-import org.xdi.util.io.DownloadWrapper;
-import org.xdi.util.io.FileDownloader;
 
 /**
  * @author Yuriy Movchan Date: 11.24.2010

@@ -12,8 +12,8 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.inject.Inject;
 
-import org.xdi.model.GluuAttribute;
-import org.xdi.service.AttributeService;
+import org.gluu.model.GluuAttribute;
+import org.gluu.service.AttributeService;
 
 @FacesConverter("org.gluu.jsf2.converter.AttributeNameConverter")
 public class AttributeNameConverter implements Converter {

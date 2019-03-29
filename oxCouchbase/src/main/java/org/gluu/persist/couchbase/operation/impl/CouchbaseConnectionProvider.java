@@ -16,10 +16,10 @@ import org.gluu.persist.couchbase.model.ResultCode;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 
 import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.java.Bucket;

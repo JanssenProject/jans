@@ -8,8 +8,8 @@ package org.gluu.persist.model;
 
 import java.util.Arrays;
 
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.StringHelper;
 
 /**
  * LDAP Attribute

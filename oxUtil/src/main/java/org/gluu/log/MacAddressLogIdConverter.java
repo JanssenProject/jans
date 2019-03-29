@@ -4,7 +4,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.pattern.ConverterKeys;
 import org.apache.logging.log4j.core.pattern.LogEventPatternConverter;
-import org.xdi.net.InetAddressUtility;
+import org.gluu.net.InetAddressUtility;
 
 /**
  * Append to log mac address of server

@@ -22,10 +22,10 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 
 import com.couchbase.client.core.CouchbaseException;
 import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
