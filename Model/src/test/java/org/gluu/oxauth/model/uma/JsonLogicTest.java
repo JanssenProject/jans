@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.uma;
+package org.gluu.oxauth.model.uma;
 
 import org.gluu.oxauth.model.uma.JsonLogic;
 import org.testng.Assert;
