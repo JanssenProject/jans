@@ -78,7 +78,6 @@
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
-		<module>oxTomcat</module>
 		<module>oxServer</module>
 		<module>oxJsfUtil</module>
 	</modules>
