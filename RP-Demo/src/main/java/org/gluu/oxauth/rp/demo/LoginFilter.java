@@ -1,4 +1,4 @@
-package org.xdi.oxauth.rp.demo;
+package org.gluu.oxauth.rp.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
