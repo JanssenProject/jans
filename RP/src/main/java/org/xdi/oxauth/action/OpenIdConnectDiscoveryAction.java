@@ -16,11 +16,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.client.HttpClient;
+import org.gluu.net.SslDefaultHttpClient;
+import org.gluu.net.TrustAllTrustManager;
 import org.slf4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.xdi.net.SslDefaultHttpClient;
-import org.xdi.net.TrustAllTrustManager;
 import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;

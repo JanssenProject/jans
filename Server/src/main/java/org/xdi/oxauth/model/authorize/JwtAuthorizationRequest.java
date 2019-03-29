@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.service.cdi.util.CdiUtil;
+import org.gluu.util.security.StringEncrypter;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -32,8 +34,6 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.service.cdi.util.CdiUtil;
-import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

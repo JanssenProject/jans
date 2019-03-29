@@ -13,6 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.util.Pair;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.common.*;
@@ -26,7 +27,6 @@ import org.xdi.oxauth.service.external.ExternalIntrospectionService;
 import org.xdi.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.Pair;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

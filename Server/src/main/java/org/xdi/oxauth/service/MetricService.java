@@ -8,9 +8,9 @@ package org.xdi.oxauth.service;
 
 import org.gluu.model.ApplicationType;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.service.metric.inject.ReportMetric;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.service.metric.inject.ReportMetric;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,7 +26,7 @@ import javax.inject.Named;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-public class MetricService extends org.xdi.service.metric.MetricService {
+public class MetricService extends org.gluu.service.metric.MetricService {
 	
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
@@ -58,7 +58,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 		return staticConfiguration.getBaseDn().getMetric();
 	}
 
-	public org.xdi.service.metric.MetricService getMetricServiceInstance() {
+	public org.gluu.service.metric.MetricService getMetricServiceInstance() {
 		return instance.get();
 	}
 

@@ -15,14 +15,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.gluu.model.AuthenticationScriptUsageType;
+import org.gluu.model.SimpleCustomProperty;
+import org.gluu.model.config.CustomAuthenticationConfiguration;
+import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
-import org.xdi.model.AuthenticationScriptUsageType;
-import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.oxauth.model.config.CustomProperty;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
-import org.xdi.util.StringHelper;
 
 /**
  * Provides service methods methods with LDAP configuration

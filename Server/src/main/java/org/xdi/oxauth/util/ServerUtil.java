@@ -32,14 +32,14 @@ import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.service.cdi.util.CdiUtil;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.uma.service.UmaScopeService;
-import org.xdi.service.cdi.util.CdiUtil;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.Util;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -19,8 +19,10 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.service.JsonService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -31,8 +33,6 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.service.JsonService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum

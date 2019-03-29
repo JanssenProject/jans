@@ -11,6 +11,8 @@ import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
+
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.JsonLogic;
@@ -24,7 +26,6 @@ import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaScriptByScope;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
-import org.xdi.util.StringHelper;
 
 /**
  * @author yuriyz

@@ -18,12 +18,12 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.service.api.IdGenerator;
-import org.xdi.util.INumGenerator;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.

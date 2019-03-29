@@ -14,6 +14,7 @@ import javax.inject.Named;
 
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
+import org.gluu.util.StringHelper;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -22,7 +23,6 @@ import org.xdi.oxauth.model.error.ErrorHandlingMethod;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.util.RedirectUri;
-import org.xdi.util.StringHelper;
 
 /**
  * Helper service to generate either error response or local error based on application settings

@@ -16,6 +16,8 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
+import org.gluu.util.StringHelper;
+import org.gluu.util.properties.FileConfiguration;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OverProtocol;
 import org.jboss.arquillian.testng.Arquillian;
@@ -24,8 +26,6 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxauth.util.Deployments;
-import org.xdi.util.StringHelper;
-import org.xdi.util.properties.FileConfiguration;
 
 /**
  * Base class for all seam test which requre external configuration

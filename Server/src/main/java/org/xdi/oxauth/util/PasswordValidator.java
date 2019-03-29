@@ -1,8 +1,8 @@
 package org.xdi.oxauth.util;
 
 import org.gluu.model.attribute.AttributeValidation;
+import org.gluu.service.AttributeService;
 import org.xdi.oxauth.i18n.LanguageBean;
-import org.xdi.service.AttributeService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;
