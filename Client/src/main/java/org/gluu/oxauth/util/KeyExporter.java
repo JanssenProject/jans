@@ -23,7 +23,7 @@ import java.security.PrivateKey;
 
 /**
  * Export private key from JKS Command example: java -cp
- * org.xdi.oxauth.util.KeyExporter -h
+ * org.gluu.oxauth.util.KeyExporter -h
  * <p/>
  * KeyExporter -keystore /Users/yuriy/tmp/mykeystore.jks -keypasswd secret
  * -alias "2d4817e7-5fe8-4b6b-8f64-fe3723625122"

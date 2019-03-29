@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.model.uma;
+package org.gluu.oxauth.model.uma;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;

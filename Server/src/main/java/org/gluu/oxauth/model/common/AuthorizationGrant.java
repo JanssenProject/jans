@@ -336,7 +336,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public void checkExpiredTokens() {
         // do nothing, clean up is made via grant service:
-        // org.xdi.oxauth.service.GrantService.cleanUp()
+        // org.gluu.oxauth.service.GrantService.cleanUp()
     }
 
     public String getSub() {
