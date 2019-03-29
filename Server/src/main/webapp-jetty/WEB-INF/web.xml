@@ -28,7 +28,7 @@
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
-		<param-value>org.xdi.service.ExternalResourceHandler</param-value>
+		<param-value>org.gluu.service.ExternalResourceHandler</param-value>
 	</context-param>
 	<!-- Change to -1 when you don't want the compiler should check for changes -->
 	<context-param>
