@@ -33,7 +33,7 @@
 
   <filter>
     <filter-name>loginFilter</filter-name>
-    <filter-class>org.gluu.oxauth.rp.demo.LoginFilter</filter-class>
+    <filter-class>org.xdi.oxauth.rp.demo.LoginFilter</filter-class>
     <init-param>
       <param-name>authorizationServerHost</param-name>
       <param-value>https://ce-dev2.gluu.org</param-value>
@@ -62,7 +62,7 @@
 
   <servlet>
     <servlet-name>RP Demo Servlet</servlet-name>
-    <servlet-class>org.gluu.oxauth.rp.demo.RpDemoServlet</servlet-class>
+    <servlet-class>org.xdi.oxauth.rp.demo.RpDemoServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
