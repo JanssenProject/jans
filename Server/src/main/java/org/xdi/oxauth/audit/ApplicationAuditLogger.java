@@ -24,12 +24,12 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
+import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.ConfigurationUpdate;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.cdi.async.Asynchronous;
-import org.xdi.service.cdi.event.ConfigurationUpdate;
 
 import com.google.common.base.Objects;
 

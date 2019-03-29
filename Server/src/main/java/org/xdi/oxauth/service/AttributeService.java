@@ -13,12 +13,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.model.GluuAttribute;
+import org.gluu.service.CacheService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.service.CacheService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
@@ -26,7 +26,7 @@ import org.xdi.util.StringHelper;
  */
 @Stateless
 @Named
-public class AttributeService extends org.xdi.service.AttributeService {
+public class AttributeService extends org.gluu.service.AttributeService {
 
     /**
 	 * 

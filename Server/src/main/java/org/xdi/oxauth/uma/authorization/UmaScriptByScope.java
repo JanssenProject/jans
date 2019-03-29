@@ -1,6 +1,6 @@
 package org.xdi.oxauth.uma.authorization;
 
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 
 /**

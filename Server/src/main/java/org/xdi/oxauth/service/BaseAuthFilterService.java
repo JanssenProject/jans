@@ -21,10 +21,10 @@ import javax.inject.Inject;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.BaseFilter;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan

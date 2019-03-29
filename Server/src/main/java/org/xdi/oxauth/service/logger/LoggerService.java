@@ -14,7 +14,7 @@ import org.xdi.oxauth.util.ServerUtil;
  */
 @ApplicationScoped
 @Named
-public class LoggerService extends org.xdi.service.logger.LoggerService {
+public class LoggerService extends org.gluu.service.logger.LoggerService {
 
     @Inject
     private AppConfiguration appConfiguration;

@@ -1,6 +1,8 @@
 package org.xdi.oxauth.comp;
 
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.service.CacheService;
+import org.gluu.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 import org.xdi.oxauth.BaseComponentTest;
@@ -29,8 +31,6 @@ import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
-import org.xdi.service.CacheService;
-import org.xdi.util.security.StringEncrypter;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;

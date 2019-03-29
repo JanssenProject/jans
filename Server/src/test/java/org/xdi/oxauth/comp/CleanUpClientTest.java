@@ -12,13 +12,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.util.StringHelper;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan

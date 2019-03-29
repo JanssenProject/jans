@@ -20,13 +20,13 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.persist.operation.PersistenceOperationService;
+import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.LdapStatusEvent;
+import org.gluu.service.cdi.event.Scheduled;
+import org.gluu.service.timer.event.TimerEvent;
+import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.ApplicationFactory;
-import org.xdi.service.cdi.async.Asynchronous;
-import org.xdi.service.cdi.event.LdapStatusEvent;
-import org.xdi.service.cdi.event.Scheduled;
-import org.xdi.service.timer.event.TimerEvent;
-import org.xdi.service.timer.schedule.TimerSchedule;
 
 /**
  * @author Yuriy Movchan

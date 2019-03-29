@@ -16,9 +16,9 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.model.GluuAttribute;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoParamsValidator;
 import org.xdi.oxauth.model.common.AuthorizationGrant;

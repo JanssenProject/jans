@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -31,7 +32,6 @@ import org.xdi.oxauth.service.external.ExternalResourceOwnerPasswordCredentialsS
 import org.xdi.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.xdi.oxauth.uma.service.UmaTokenService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

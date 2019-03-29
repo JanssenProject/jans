@@ -19,8 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.Constants;
@@ -29,7 +30,6 @@ import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
 import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017

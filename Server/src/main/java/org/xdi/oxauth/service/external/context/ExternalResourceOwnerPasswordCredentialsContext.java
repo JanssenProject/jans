@@ -1,6 +1,6 @@
 package org.xdi.oxauth.service.external.context;
 
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.AttributeService;

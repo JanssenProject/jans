@@ -4,10 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum

@@ -17,8 +17,8 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.util.StringHelper;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.util.StringHelper;
 
 /**
  * Provides operations with authentication filters

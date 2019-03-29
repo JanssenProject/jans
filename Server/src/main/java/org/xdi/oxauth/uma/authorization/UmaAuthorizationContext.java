@@ -14,7 +14,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.xdi.model.SimpleCustomProperty;
+import org.gluu.model.SimpleCustomProperty;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
