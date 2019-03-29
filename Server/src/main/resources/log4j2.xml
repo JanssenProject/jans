@@ -21,7 +21,7 @@
 	<Loggers>
 		<!-- ############### oxEleven ################# -->
 		<Logger name="org.gluu.oxeleven" level="${log4j.default.log.level}" />
-		<Logger name="org.xdi" level="${log4j.default.log.level}" />
+		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
 		<Root level="info">
 			<AppenderRef ref="FILE" />
