@@ -1,4 +1,4 @@
-package org.xdi.oxauth.rp.demo;
+package org.gluu.oxauth.rp.demo;
 
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.client.UserInfoClient;

@@ -1,4 +1,4 @@
-package org.xdi.oxauth.model.uma;
+package org.gluu.oxauth.model.uma;
 
 import org.apache.commons.io.IOUtils;
 import org.gluu.oxauth.model.uma.JsonLogicNode;

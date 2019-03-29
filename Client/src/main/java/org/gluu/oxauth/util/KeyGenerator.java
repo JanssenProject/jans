@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Command example:
- * java -cp bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar org.xdi.oxauth.util.KeyGenerator -h
+ * java -cp bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar org.gluu.oxauth.util.KeyGenerator -h
  * <p/>
  * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 -enc_keys RSA_OAEP RSA1_5 -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=oxAuth CA Certificates" -expiration 365
  * <p/>

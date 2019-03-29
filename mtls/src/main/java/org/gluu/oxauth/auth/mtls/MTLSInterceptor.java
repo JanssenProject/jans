@@ -1,4 +1,4 @@
-package org.xdi.oxauth.auth.mtls;
+package org.gluu.oxauth.auth.mtls;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.ArrayUtils;
