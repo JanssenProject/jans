@@ -1,2 +1,2 @@
-org.xdi.service.security.SecurityExtension
-org.xdi.service.exception.ExceptionHandlerExtension
+org.gluu.service.security.SecurityExtension
+org.gluu.service.exception.ExceptionHandlerExtension
