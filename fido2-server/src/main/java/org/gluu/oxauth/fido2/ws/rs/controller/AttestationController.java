@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.ws.rs.service.AttestationService;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

@@ -3,23 +3,23 @@
 <suite name="oxAuthModel" parallel="false">
     <test name="Code Verifier (PKCE)" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.model.authorize.CodeVerifierTest"/>
+            <class name="org.xdi.oxauth.model.authorize.CodeVerifierTest"/>
         </classes>
     </test>
 
     <test name="JS Engine test" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.model.uma.JsonLogicTest" />
+            <class name="org.xdi.oxauth.model.uma.JsonLogicTest" />
         </classes>
     </test>
     <test name="JsonLogic Node Parser Test" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.model.uma.JsonLogicNodeParserTest" />
+            <class name="org.xdi.oxauth.model.uma.JsonLogicNodeParserTest" />
         </classes>
     </test>
     <test name="CertUtils Test" enabled="true">
         <classes>
-            <class name="org.gluu.oxauth.model.util.CertUtilsTest"/>
+            <class name="org.xdi.oxauth.model.util.CertUtilsTest"/>
         </classes>
     </test>
 
