@@ -4,8 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.model.custom.script.type.user import UpdateUserType
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.user import UpdateUserType
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
