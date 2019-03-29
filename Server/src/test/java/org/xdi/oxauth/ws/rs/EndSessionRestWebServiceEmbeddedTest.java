@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,6 +27,11 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -37,11 +42,6 @@ import org.xdi.oxauth.client.EndSessionRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
 
 import com.google.common.collect.Lists;
 

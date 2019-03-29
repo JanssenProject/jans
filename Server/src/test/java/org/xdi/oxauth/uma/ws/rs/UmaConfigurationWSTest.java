@@ -8,12 +8,12 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import java.net.URI;
 
+import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 /**

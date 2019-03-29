@@ -9,9 +9,9 @@ package org.xdi.oxauth.model.common;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.util.StringHelper;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011

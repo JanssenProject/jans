@@ -11,9 +11,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.oxauth.model.common.IdType;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.service.api.IdGenerator;
 import org.xdi.oxauth.service.external.ExternalIdGeneratorService;
 

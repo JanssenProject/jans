@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.CertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.util.CertUtils;
 import org.xdi.oxauth.util.TokenHashUtil;
 
 import javax.inject.Inject;

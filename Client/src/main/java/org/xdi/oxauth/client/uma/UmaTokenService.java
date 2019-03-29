@@ -1,9 +1,9 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaTokenResponse;
-
 import javax.ws.rs.*;
+
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaTokenResponse;
 
 /**
  * @author yuriyz on 06/21/2017.

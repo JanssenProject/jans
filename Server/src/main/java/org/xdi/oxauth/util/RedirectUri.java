@@ -16,9 +16,9 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

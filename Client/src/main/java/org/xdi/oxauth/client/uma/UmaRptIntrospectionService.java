@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+
+import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
+import org.gluu.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.

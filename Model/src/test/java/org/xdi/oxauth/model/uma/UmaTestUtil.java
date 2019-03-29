@@ -8,10 +8,19 @@ package org.xdi.oxauth.model.uma;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.Id;
+import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.RPTResponse;
+import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceResponse;
+import org.gluu.oxauth.model.uma.UmaScopeDescription;
+import org.gluu.oxauth.model.uma.UmaTokenResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Id;
-import org.xdi.oxauth.model.uma.wrapper.Token;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

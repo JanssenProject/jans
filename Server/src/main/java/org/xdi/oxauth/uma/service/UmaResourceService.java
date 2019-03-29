@@ -8,6 +8,7 @@ package org.xdi.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

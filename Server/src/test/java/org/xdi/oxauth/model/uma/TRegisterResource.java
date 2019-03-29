@@ -18,9 +18,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceResponse;
+import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**

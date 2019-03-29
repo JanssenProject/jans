@@ -7,14 +7,14 @@
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;

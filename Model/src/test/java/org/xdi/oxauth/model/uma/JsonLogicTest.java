@@ -1,5 +1,6 @@
 package org.xdi.oxauth.model.uma;
 
+import org.gluu.oxauth.model.uma.JsonLogic;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

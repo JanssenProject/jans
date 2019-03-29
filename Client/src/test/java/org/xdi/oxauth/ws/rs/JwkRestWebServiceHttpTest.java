@@ -11,9 +11,10 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.JwkClient;
 import org.xdi.oxauth.client.JwkResponse;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
 
 import static org.testng.Assert.*;
+
+import org.gluu.oxauth.model.jwk.JSONWebKey;
 
 /**
  * Functional tests for JWK Web Services (HTTP)

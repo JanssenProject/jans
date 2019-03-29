@@ -8,13 +8,13 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.AuthorizationMethod;
+import org.gluu.oxauth.model.common.HasParamName;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.HasParamName;
-import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Cookie;

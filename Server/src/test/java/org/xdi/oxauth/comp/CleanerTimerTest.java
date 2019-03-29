@@ -1,5 +1,8 @@
 package org.xdi.oxauth.comp;
 
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.CacheService;
 import org.gluu.util.security.StringEncrypter;
@@ -12,13 +15,10 @@ import org.xdi.oxauth.model.common.ClientCredentialsGrant;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;

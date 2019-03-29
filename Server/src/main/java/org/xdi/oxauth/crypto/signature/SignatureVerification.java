@@ -9,7 +9,7 @@ package org.xdi.oxauth.crypto.signature;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
-import org.xdi.oxauth.model.exception.SignatureException;
+import org.gluu.oxauth.model.exception.SignatureException;
 
 public interface SignatureVerification {
 

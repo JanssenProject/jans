@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.client.fido.u2f;
 
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+
+import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
+import org.gluu.oxauth.model.fido.u2f.protocol.RegisterStatus;
 
 /**
  * Еhe endpoint allows to start and finish U2F registration process

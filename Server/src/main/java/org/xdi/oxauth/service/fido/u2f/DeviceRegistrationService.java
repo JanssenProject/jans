@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.SearchScope;
@@ -15,8 +17,6 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
-import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 
 import javax.ejb.Stateless;

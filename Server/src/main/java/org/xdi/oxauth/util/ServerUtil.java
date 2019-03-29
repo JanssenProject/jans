@@ -30,6 +30,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.service.cdi.util.CdiUtil;
@@ -37,7 +38,6 @@ import org.gluu.util.ArrayHelper;
 import org.gluu.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.ApplicationFactory;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 
@@ -158,9 +158,9 @@ public class ServerUtil {
         });
     }
 
-    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission permission, UmaScopeService umaScopeService) {
+    public static org.gluu.oxauth.model.uma.UmaPermission convert(UmaPermission permission, UmaScopeService umaScopeService) {
         if (permission != null) {
-            final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
+            final org.gluu.oxauth.model.uma.UmaPermission result = new org.gluu.oxauth.model.uma.UmaPermission();
             result.setResourceId(permission.getResourceId());
             result.setScopes(umaScopeService.getScopeIdsByDns(permission.getScopeDns()));
             result.setExpiresAt(dateToSeconds(permission.getExpirationDate()));

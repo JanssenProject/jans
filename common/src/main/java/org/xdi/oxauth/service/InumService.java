@@ -12,10 +12,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
+import org.gluu.oxauth.model.common.IdType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.Pair;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.service.api.IdGenerator;
 
 /**

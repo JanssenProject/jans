@@ -8,8 +8,8 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FOUND;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -32,13 +32,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.uma.UmaConstants;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;

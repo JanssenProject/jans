@@ -7,12 +7,12 @@
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.util.Util;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;

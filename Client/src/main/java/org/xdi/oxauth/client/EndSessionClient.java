@@ -9,10 +9,10 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
-import org.xdi.oxauth.model.session.EndSessionRequestParam;
-import org.xdi.oxauth.model.session.EndSessionResponseParam;
-import org.xdi.oxauth.model.util.Util;
+import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import org.gluu.oxauth.model.session.EndSessionRequestParam;
+import org.gluu.oxauth.model.session.EndSessionResponseParam;
+import org.gluu.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
