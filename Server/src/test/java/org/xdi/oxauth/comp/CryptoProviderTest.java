@@ -7,6 +7,7 @@
 package org.xdi.oxauth.comp;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
@@ -14,7 +15,6 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.ConfigurableTest;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 
 import javax.inject.Inject;
 import java.util.GregorianCalendar;

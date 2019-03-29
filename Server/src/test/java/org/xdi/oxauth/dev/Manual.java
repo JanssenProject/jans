@@ -9,6 +9,7 @@ package org.xdi.oxauth.dev;
 import java.io.File;
 import java.util.Properties;
 
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
@@ -17,7 +18,6 @@ import org.gluu.util.security.PropertiesDecrypter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.registration.Client;
 
 /**
  * Test for manual run. Used for development purpose ONLY. Must not be run in

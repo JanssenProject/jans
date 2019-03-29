@@ -1,11 +1,11 @@
 # Author: Naveen Kumar Gopi
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import AuthenticationService, UserService
-from org.xdi.oxauth.model.common import User
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import AuthenticationService, UserService
+from org.gluu.oxauth.model.common import User
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import IdentityHashMap
 from org.apache.commons.codec.binary import Base64
 from java.lang import String

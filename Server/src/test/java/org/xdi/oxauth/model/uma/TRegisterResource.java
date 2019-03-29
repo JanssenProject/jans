@@ -22,9 +22,9 @@ import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaResource;
 import org.gluu.oxauth.model.uma.UmaResourceResponse;
 import org.gluu.oxauth.model.uma.wrapper.Token;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
