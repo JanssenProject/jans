@@ -20,8 +20,8 @@
 
 	<Loggers>
 		<!-- ############### oxnotify ################# -->
-		<Logger name="org.xdi.oxnotify" level="${log4j.default.log.level}" />
-		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
+		<Logger name="org.gluu.oxnotify" level="${log4j.default.log.level}" />
+		<Logger name="org.gluu.service" level="${log4j.default.log.level}" />
 
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />

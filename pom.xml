@@ -64,7 +64,7 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.xdi</groupId>
+				<groupId>org.gluu</groupId>
 				<artifactId>oxcore-util</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>

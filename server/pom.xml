@@ -23,7 +23,7 @@
 			<artifactId>oxnotify-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-util</artifactId>
 			<exclusions>
 				<exclusion>

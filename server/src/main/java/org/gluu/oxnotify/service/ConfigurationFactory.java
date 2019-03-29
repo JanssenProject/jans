@@ -19,8 +19,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxnotify.exception.ConfigurationException;
 import org.gluu.oxnotify.model.conf.AccessConfiguration;
 import org.gluu.oxnotify.model.conf.Configuration;
+import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
-import org.xdi.util.properties.FileConfiguration;
 
 /**
  * @author Yuriy Movchan
