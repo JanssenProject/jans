@@ -10,7 +10,7 @@
     <url>http://ox.gluu.org</url>
 
     <parent>
-        <groupId>org.xdi</groupId>
+        <groupId>org.gluu</groupId>
         <artifactId>oxd</artifactId>
         <version>4.0-SNAPSHOT</version>
     </parent>
@@ -119,7 +119,7 @@
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.xdi</groupId>
+            <groupId>org.gluu</groupId>
             <artifactId>oxd-common</artifactId>
         </dependency>
     </dependencies>
