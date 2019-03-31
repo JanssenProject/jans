@@ -7,7 +7,7 @@ import io.swagger.client.model.GetUserInfoParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.CoreUtils;
+import org.gluu.oxd.common.CoreUtils;
 
 import java.util.Map;
 

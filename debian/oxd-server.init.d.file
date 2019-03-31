@@ -351,7 +351,7 @@ esac
 # This is how the oxd server will be started
 #####################################################
 
-OXD_START="org.xdi.oxd.server.ServerLauncher"
+OXD_START="org.gluu.oxd.server.ServerLauncher"
 
 case "`uname`" in
 CYGWIN*) OXD_START="`cygpath -w $OXD_START`";;

@@ -10,7 +10,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.rs.protect.Jackson;
+import org.gluu.oxd.rs.protect.Jackson;
 
 import java.io.IOException;
 import java.util.ArrayList;

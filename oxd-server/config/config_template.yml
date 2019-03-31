@@ -43,7 +43,7 @@ logging:
   level: $ROOT_LOG_LEVEL
   loggers:
     org.gluu: $GLUU_LOG_LEVEL
-    org.xdi: $XDI_LOG_LEVEL
+    org.gluu: $XDI_LOG_LEVEL
 
 
   appenders:

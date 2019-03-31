@@ -310,9 +310,9 @@ if update_required:
     oxd4_server_yaml['logging']['appenders'][1]['archivedLogFilenamePattern'] = archivedLogFilenamePattern
 
     categories = log4j_xml_root.findall('category') 
-    org_xdi_attrib = get_by_attrib(categories,  'org.xdi', False)
+    org_xdi_attrib = get_by_attrib(categories,  'org.gluu', False)
     org_xdi = org_xdi_attrib.find('priority').get('value')
-    oxd4_server_yaml['logging']['loggers']['org.xdi'] = org_xdi
+    oxd4_server_yaml['logging']['loggers']['org.gluu'] = org_xdi
 
 
     root = log4j_xml_root.find('root')

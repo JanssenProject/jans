@@ -8,4 +8,4 @@ echo CONF=$CONF
 
 LIB=$BASEDIR/../lib
 javaExe=java
-$javaExe -Djava.net.preferIPv4Stack=true -cp %LIB%/bcprov-jdk15on-1.54.jar:$LIB/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server $CONF
+$javaExe -Djava.net.preferIPv4Stack=true -cp %LIB%/bcprov-jdk15on-1.54.jar:$LIB/oxd-server.jar org.gluu.oxd.server.OxdServerApplication server $CONF
