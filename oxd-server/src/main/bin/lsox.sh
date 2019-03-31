@@ -9,4 +9,4 @@ echo BASEDIR=$BASEDIR
 echo CONF=$CONF
 
 javaExe=java
-$javaExe -cp $LIB/oxd-server.jar org.xdi.oxd.server.Cli -c $CONF "$@"
+$javaExe -cp $LIB/oxd-server.jar org.gluu.oxd.server.Cli -c $CONF "$@"

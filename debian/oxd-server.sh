@@ -6,7 +6,7 @@ OXD_LOGS=/var/log/oxd-server
 OXD_HOME=/opt/oxd-server
 CONF=/opt/oxd-server/conf
 LIB=$OXD_HOME/lib
-JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml"
+JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.gluu.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml"
 OXD_USER=jetty
 ##################################################
 # Set the name which is used by other variables.
@@ -346,7 +346,7 @@ esac
 # This is how the oxd server will be started
 #####################################################
 
-OXD_START="org.xdi.oxd.server.ServerLauncher"
+OXD_START="org.gluu.oxd.server.ServerLauncher"
 
 case "`uname`" in
 CYGWIN*) OXD_START="`cygpath -w $OXD_START`";;
