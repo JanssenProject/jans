@@ -10,7 +10,7 @@ import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.CoreUtils;
+import org.gluu.oxd.common.CoreUtils;
 
 import static io.swagger.client.api.Tester.notEmpty;
 import static org.junit.Assert.assertNotNull;

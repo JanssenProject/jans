@@ -8,8 +8,8 @@ import io.swagger.client.ApiException;
 import io.swagger.client.model.GetClientTokenParams;
 import io.swagger.client.model.GetClientTokenResponse;
 import io.swagger.client.model.RegisterSiteResponse;
-import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.ErrorResponse;
+import org.gluu.oxd.common.CoreUtils;
+import org.gluu.oxd.common.ErrorResponse;
 
 import java.io.IOException;
 import java.util.List;

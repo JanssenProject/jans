@@ -84,4 +84,4 @@ sed -i "s/\$DEFAULT_SITE_CONFIG_CLAIMS_LOCALES/$DEFAULT_SITE_CONFIG_CLAIMS_LOCAL
 sed -i "s/\$DEFAULT_SITE_CONFIG_CONTACTS/$DEFAULT_SITE_CONFIG_CONTACTS/g" config_template.yml
 
 cat /config_template.yml > /opt/oxd-server/conf/oxd-server.yml 
-java -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.xdi.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml
+java -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.gluu.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml

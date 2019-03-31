@@ -22,123 +22,123 @@
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.SetUpTest"/>
+            <class name="org.gluu.oxd.server.SetUpTest"/>
         </classes>
     </test>
 
     <!-- Connect -->
     <test name="HealthCheckTest" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.HealthCheckTest"></class>
+            <class name="org.gluu.oxd.server.HealthCheckTest"></class>
         </classes>
     </test>
     <test name="Register site" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.RegisterSiteTest"/>
+            <class name="org.gluu.oxd.server.RegisterSiteTest"/>
         </classes>
     </test>
     <test name="Remove site" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.RemoveSiteTest"/>
+            <class name="org.gluu.oxd.server.RemoveSiteTest"/>
         </classes>
     </test>
     <test name="Get authorization url" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetAuthorizationUrlTest"/>
+            <class name="org.gluu.oxd.server.GetAuthorizationUrlTest"/>
         </classes>
     </test>
     <test name="Get tokens by code" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetTokensByCodeTest"/>
+            <class name="org.gluu.oxd.server.GetTokensByCodeTest"/>
         </classes>
     </test>
     <test name="Get user info" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetUserInfoTest"/>
+            <class name="org.gluu.oxd.server.GetUserInfoTest"/>
         </classes>
     </test>
     <test name="Log out" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetLogoutUrlTest"/>
+            <class name="org.gluu.oxd.server.GetLogoutUrlTest"/>
         </classes>
     </test>
     <test name="Check IdToken" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.CheckIdTokenTest"/>
+            <class name="org.gluu.oxd.server.CheckIdTokenTest"/>
         </classes>
     </test>
     <test name="Check AccessToken" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.CheckAccessTokenTest"/>
+            <class name="org.gluu.oxd.server.CheckAccessTokenTest"/>
         </classes>
     </test>
     <test name="Authorization code flow prompt=none" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.AuthorizationCodeFlowTest"/>
+            <class name="org.gluu.oxd.server.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
     <test name="Migration Service Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
+            <class name="org.gluu.oxd.server.service.MigrationServiceTest"/>
         </classes>
     </test>
     <test name="Access Token as JWT Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.AccessTokenAsJwtTest"/>
+            <class name="org.gluu.oxd.server.AccessTokenAsJwtTest"/>
         </classes>
     </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.UmaFullTest"/>
+            <class name="org.gluu.oxd.server.UmaFullTest"/>
         </classes>
     </test>
     <test name="RS - Protect" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.RsProtectTest"/>
+            <class name="org.gluu.oxd.server.RsProtectTest"/>
         </classes>
     </test>
     <test name="RS - Check Access" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.RsCheckAccessTest"/>
+            <class name="org.gluu.oxd.server.RsCheckAccessTest"/>
         </classes>
     </test>
     <test name="RP - Get RPT" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.RpGetRptTest"/>
+            <class name="org.gluu.oxd.server.RpGetRptTest"/>
         </classes>
     </test>
     <test name="RP - Get Claims-Gathering Url" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.UmaGetClaimsGatheringUrlTest"/>
+            <class name="org.gluu.oxd.server.UmaGetClaimsGatheringUrlTest"/>
         </classes>
     </test>
     <test name="Introspect RPT" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.IntrospectRptTest"/>
+            <class name="org.gluu.oxd.server.IntrospectRptTest"/>
         </classes>
     </test>
 
     <!-- Custom -->
     <test name="Setup client" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.SetupClientTest"/>
+            <class name="org.gluu.oxd.server.SetupClientTest"/>
         </classes>
     </test>
     <test name="Get client token" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetClientTokenTest"/>
+            <class name="org.gluu.oxd.server.GetClientTokenTest"/>
         </classes>
     </test>
     <test name="Introspect access token" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.IntrospectAccessTokenTest"/>
+            <class name="org.gluu.oxd.server.IntrospectAccessTokenTest"/>
         </classes>
     </test>
     <test name="JWKS Test" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.server.GetJwksTest"/>
+            <class name="org.gluu.oxd.server.GetJwksTest"/>
         </classes>
     </test>
 
