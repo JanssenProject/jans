@@ -36,7 +36,7 @@ logging:
   # Logger-specific levels.
   loggers:
     org.gluu: TRACE
-    org.xdi: TRACE
+    org.gluu: TRACE
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz

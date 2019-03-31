@@ -9,7 +9,7 @@ import io.swagger.client.model.UpdateSiteParams;
 import io.swagger.client.model.UpdateSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.GrantType;
 
 import java.util.ArrayList;
 import java.util.Calendar;

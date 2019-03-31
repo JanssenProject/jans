@@ -7,7 +7,7 @@ import io.swagger.client.model.UpdateSiteResponse;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ErrorResponseCode;
 
 import java.util.UUID;
 

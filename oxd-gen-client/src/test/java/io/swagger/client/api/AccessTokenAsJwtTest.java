@@ -8,8 +8,8 @@ import io.swagger.client.model.RegisterSiteParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.jwt.Jwt;
 
 import static io.swagger.client.api.Tester.api;
 import static org.testng.Assert.*;
