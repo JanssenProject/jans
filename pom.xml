@@ -871,6 +871,11 @@
 						<failOnError>false</failOnError>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>5.0.0-M2</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -880,6 +885,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>5.0.0-M2</version>
 			</plugin>
 		</plugins>
 	</reporting>
