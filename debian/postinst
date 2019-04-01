@@ -14,7 +14,7 @@ fi
 if [ -e /lib/systemd/system/oxd-server.service ]; then
     chown root:root /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
     chmod 755 /lib/systemd/system/oxd-server.service > /dev/null 2>&1 
-    chmod 755 /opt/oxd-server/bin/oxd-server.sh  > /dev/null 2>&
+    chmod 755 /opt/oxd-server/bin/oxd-server.sh  > /dev/null 2>&1
     systemctl enable oxd-server > /dev/null 2>&1 
 fi
 
