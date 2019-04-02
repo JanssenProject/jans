@@ -255,6 +255,13 @@ public class CustomScriptManager implements Serializable {
 
 					}
 				}
+				
+				// Automatic package update '.xdi' --> '.org'
+				String scriptCode = loadedCustomScript.getScript();
+				if (scriptCode != null) {
+					scriptCode = scriptCode.replaceAll(".xdi", ".gluu");
+					loadedCustomScript.setScript(scriptCode);
+				}
 
 				// Load script
 				BaseExternalType newCustomScriptExternalType = createExternalType(loadedCustomScript,
