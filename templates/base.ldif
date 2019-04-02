@@ -8,7 +8,7 @@ objectclass: organization
 objectClass: gluuOrganization
 o: gluu
 gluuThemeColor: 166309
-gluuManagerGroup: inum=!0003!60B7,ou=groups,o=gluu
+gluuManagerGroup: inum=0003-60B7,ou=groups,o=gluu
 gluuOrgShortName: %(orgName)s
 description: Welcome to oxTrust!
 displayName: %(orgName)s

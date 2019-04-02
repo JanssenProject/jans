@@ -1,8 +1,8 @@
-dn: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+dn: inum=0000-A8F2.DE1E.D7FB,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!A8F2.DE1E.D7FB
+inum: 0000-A8F2.DE1E.D7FB
 uid: admin
 givenName: Admin
 middleName: Admin
@@ -11,7 +11,7 @@ preferredUsername: admin
 sn: User
 userPassword: %(encoded_ldap_pw)s
 gluuStatus: active
-memberOf: inum=!0003!60B7,ou=groups,o=gluu
+memberOf: inum=0003-60B7,ou=groups,o=gluu
 displayName: Default Admin User
 mail: admin@%(hostname)s
 emailVerified: true
