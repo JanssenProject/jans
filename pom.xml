@@ -55,7 +55,7 @@
 		<repository>
 			<id>gluu</id>
 			<name>Gluu repository</name>
-			<url>http://ox.gluu.org/maven</url>
+			<url>http://ox.gluu.org/maven</url>`1
 		</repository>
 	</repositories>
 
@@ -64,7 +64,7 @@
 		<connection>scm:git:git://github.com/GluuFederation/oxCore.git</connection>
 		<developerConnection>scm:git:git@github.com:GluuFederation/oxCore.git</developerConnection>
 	</scm>
-
+x
 	<modules>
 		<module>oxUtil</module>
 		<module>oxFilter</module>
@@ -322,7 +322,7 @@
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>2.5.8</version>
+				<version>2.7.4</version>
 			</dependency>
 
 			<!-- Metrics -->
