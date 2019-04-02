@@ -4322,7 +4322,7 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxId",
-                "description ",
+                "description",
                 "oxSectorIdentifier",
                 "oxAuthClientId"
             ],
