@@ -55,7 +55,7 @@
 		<repository>
 			<id>gluu</id>
 			<name>Gluu repository</name>
-			<url>http://ox.gluu.org/maven</url>`1
+			<url>http://ox.gluu.org/maven</url>
 		</repository>
 	</repositories>
 
