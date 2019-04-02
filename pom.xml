@@ -64,7 +64,7 @@
 		<connection>scm:git:git://github.com/GluuFederation/oxCore.git</connection>
 		<developerConnection>scm:git:git@github.com:GluuFederation/oxCore.git</developerConnection>
 	</scm>
-x
+
 	<modules>
 		<module>oxUtil</module>
 		<module>oxFilter</module>
