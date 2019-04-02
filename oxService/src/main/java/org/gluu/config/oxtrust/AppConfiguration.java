@@ -105,8 +105,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String loginRedirectUrl;
     private String logoutRedirectUrl;
 
-    private String[] clusteredInums;
-
     private String clientAssociationAttribute;
 
     private String oxAuthIssuer;
@@ -591,14 +589,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setLogoutRedirectUrl(String logoutRedirectUrl) {
         this.logoutRedirectUrl = logoutRedirectUrl;
-    }
-
-    public String[] getClusteredInums() {
-        return clusteredInums;
-    }
-
-    public void setClusteredInums(String[] clusteredInums) {
-        this.clusteredInums = clusteredInums;
     }
 
     public String getClientAssociationAttribute() {
