@@ -5,7 +5,7 @@
 #
 
 from org.gluu.model.custom.script.type.user import UserRegistrationType
-from org.gluu.ldap.model import GluuStatus
+from org.gluu.model import GluuStatus
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 

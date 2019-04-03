@@ -6,7 +6,7 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.model.custom.script.type.user import UserRegistrationType
 from org.gluu.service import MailService
 from org.gluu.oxtrust.ldap.service import PersonService
-from org.gluu.ldap.model import GluuStatus
+from org.gluu.model import GluuStatus
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.config.oxtrust import AppConfiguration
