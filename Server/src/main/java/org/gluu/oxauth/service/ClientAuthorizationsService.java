@@ -6,16 +6,6 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.oxauth.model.ldap.ClientAuthorizations;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
@@ -23,7 +13,11 @@ import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -40,37 +34,32 @@ public class ClientAuthorizationsService {
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    private UserService userService;
+    private CacheService cacheService;
 
     @Inject
-    private CacheService cacheService;
+    private ClientService clientService;
 
     private static final String CACHE_CLIENT_CUTHORIZATION = "ClientAuthorizationCache";
 
-    public void addBranch(final String userInum) {
+    public void addBranch(final String clientId) {
         SimpleBranch branch = new SimpleBranch();
         branch.setOrganizationalUnitName("clientAuthorizations");
-        branch.setDn(getBaseDnForClientAuthorizations(userInum));
+        branch.setDn(getBaseDnForClientAuthorizations(clientId));
 
         ldapEntryManager.persist(branch);
     }
 
-    public boolean containsBranch(final String userInum) {
-        return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForClientAuthorizations(userInum));
-    }
-
-    public void prepareBranch(final String userInum) {
-        // Create client authorizations branch if needed
-        if (!containsBranch(userInum)) {
-            addBranch(userInum);
+    public void prepareBranch(final String clientId) { // Create client authorizations branch if needed
+        if (!ldapEntryManager.contains(SimpleBranch.class, getBaseDnForClientAuthorizations(clientId))) {
+            addBranch(clientId);
         }
     }
 
     public ClientAuthorizations findClientAuthorizations(String userInum, String clientId, boolean persistInLdap) {
         if (persistInLdap) {
-            prepareBranch(userInum);
+            prepareBranch(clientId);
 
-            String baseDn = getBaseDnForClientAuthorizations(userInum);
+            String baseDn = getBaseDnForClientAuthorizations(clientId);
             Filter filter = Filter.createEqualityFilter("oxAuthClientId", clientId);
 
             List<ClientAuthorizations> entries = ldapEntryManager.findEntries(baseDn, ClientAuthorizations.class, filter);
@@ -101,7 +90,7 @@ public class ClientAuthorizationsService {
             // If a client has pre-authorization=true, there is no point to create the entry under
             // ou=clientAuthorizations it will negatively impact performance, grow the size of the
             // ldap database, and serve no purpose.
-            prepareBranch(userInum);
+            prepareBranch(clientId);
 
             ClientAuthorizations clientAuthorizations = findClientAuthorizations(userInum, clientId, persistInLdap);
 
@@ -110,7 +99,7 @@ public class ClientAuthorizationsService {
                 clientAuthorizations.setId(UUID.randomUUID().toString());
                 clientAuthorizations.setClientId(clientId);
                 clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
-                clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), userInum));
+                clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), clientId));
 
                 ldapEntryManager.persist(clientAuthorizations);
             } else if (clientAuthorizations.getScopes() != null) {
@@ -130,7 +119,7 @@ public class ClientAuthorizationsService {
                 clientAuthorizations.setId(UUID.randomUUID().toString());
                 clientAuthorizations.setClientId(clientId);
                 clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
-                clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), userInum));
+                clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), clientId));
 
                 cacheService.put(CACHE_CLIENT_CUTHORIZATION, key, clientAuthorizations);
             } else if (clientAuthorizations.getScopes() != null) {
@@ -143,17 +132,16 @@ public class ClientAuthorizationsService {
         }
     }
 
-    public String getBaseDnForClientAuthorizations(String oxId, String userInum) {
-        String baseDn = getBaseDnForClientAuthorizations(userInum);
+    public String getBaseDnForClientAuthorizations(String oxId, String clientId) {
+        String baseDn = getBaseDnForClientAuthorizations(clientId);
         if (StringHelper.isEmpty(oxId)) {
             return baseDn;
         }
         return String.format("oxId=%s,%s", oxId, baseDn);
     }
 
-    public String getBaseDnForClientAuthorizations(String userInum) {
-        final String userBaseDn = userService.getDnForUser(userInum); // inum=1234,ou=people,o=gluu"
-        return String.format("ou=clientAuthorizations,%s", userBaseDn); // "ou=clientAuthorizations,inum=1234,ou=people,o=gluu"
+    public String getBaseDnForClientAuthorizations(String clientId) {
+        return String.format("ou=clientAuthorizations,%s", clientService.buildClientDn(clientId)); // "ou=clientAuthorizations,inum=1234,ou=clients,o=gluu"
     }
 
     private String getCacheKey(String userInum, String clientId) {
