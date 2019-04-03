@@ -124,12 +124,12 @@ defaultScope: false
 oxAuthClaim: inum=0005-6DA6,ou=attributes,o=gluu
 oxScopeType: openid
 
-dn: inum=0009-C4F5.F66C,ou=scopes,o=gluu
+dn: inum=0009-C4F5-F66C,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
 description: View your user permission and roles.
 displayName: permission
-inum: 0009-C4F5.F66C
+inum: 0009-C4F5-F66C
 oxScopeType: dynamic
-oxScriptDn: inum=!CB5B.3211,ou=scripts,o=gluu
+oxScriptDn: inum=CB5B-3211,ou=scripts,o=gluu
