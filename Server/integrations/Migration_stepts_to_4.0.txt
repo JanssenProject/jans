@@ -1,5 +1,6 @@
-1. Replace:
-org.xdi
+# Steps to upgrade custom scripts to cope with new structure.
 
-with:
-org.gluu
+## Packages renamed
+   1. All packages starting **org.xdi** has been renamed to start with **org.gluu**.
+## Packages moved
+  1. The class named **GluuStatus** has been move from **org.gluu.ldap.model** to **org.gluu.model** 
