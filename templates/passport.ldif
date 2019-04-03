@@ -4,6 +4,7 @@ objectClass: oxAuthClient
 objectClass: top
 inum: %(passport_rp_ii_client_id)s
 displayName: Passport IDP-initiated flow Client
+oxAuthAppType: web
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthResponseType: code
