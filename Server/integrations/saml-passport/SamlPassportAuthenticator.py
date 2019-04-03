@@ -332,7 +332,7 @@ class PersonAuthentication(PersonAuthenticationType):
         entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
 
         config = LdapOxPassportConfiguration()
-        config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
+        config = entryManager.find(config.getClass(), passportDN).getPassportConfiguration()
         config = config.getProviders() if config != None else config
 
         if config != None and len(config) > 0:
