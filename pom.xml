@@ -25,7 +25,7 @@
 		<resteasy.version>3.0.21.Final</resteasy.version>
 		<jaxr.version>3.0.12.Final</jaxr.version>
 		
-		<activemq.version>5.15.7</activemq.version>
+		<activemq.version>5.15.9</activemq.version>
 
 		<httpcore.version>4.4.6</httpcore.version>
 		<httpclient.version>4.5.3</httpclient.version>
