@@ -7,5 +7,5 @@ gluuStatus: active
 displayName: Gluu Manager Group
 description: This group is for administrative purpose, with full acces to users
 gluuGroupVisibility: private
-member: inum=0000-A8F2.DE1E.D7FB,ou=people,o=gluu
+member: inum=0000-A8F2-DE1E.D7FB,ou=people,o=gluu
 
