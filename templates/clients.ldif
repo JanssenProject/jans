@@ -13,9 +13,9 @@ oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=0009-F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=0009-10B2,ou=scopes,o=gluu
-oxAuthScope: inum=0009-764C,ou=scopes,o=gluu
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
 oxAuthLogoutURI: https://%(hostname)s/identity/ssologout
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
@@ -42,9 +42,9 @@ oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=0009-F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=0009-10B2,ou=scopes,o=gluu
-oxAuthScope: inum=0009-764C,ou=scopes,o=gluu
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
 oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
