@@ -46,15 +46,15 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # Passport Scope
-dn: inum=0010-8CAD-B06E,ou=scopes,ou=uma,o=gluu
+dn: inum=8CAD-B06E,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: Passport Access
-inum: 0010-8CAD-B06E
+inum: 8CAD-B06E
 owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access
 oxRevision: 1
-oxPolicyScriptDn: inum=0011-2DAF-F9A5,ou=scripts,o=gluu
+oxPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=gluu
 
 # Passport Resource
 dn: oxId=0f963ecc-93f0-49c1-beae-ad2006abbb99,ou=resources,ou=uma,o=gluu
@@ -64,7 +64,7 @@ displayName: Passport Resource
 owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/passport_logo.png
 oxAssociatedClient: inum=%(passport_rs_client_id)s,ou=clients,o=gluu
-oxAuthUmaScope: inum=0010-8CAD-B06E,ou=scopes,ou=uma,o=gluu
+oxAuthUmaScope: inum=8CAD-B06E,ou=scopes,ou=uma,o=gluu
 oxId: 0f963ecc-93f0-49c1-beae-ad2006abbb99
 oxResource: https://%(hostname)s/identity/restv1/passport/config
 oxRevision: 1
