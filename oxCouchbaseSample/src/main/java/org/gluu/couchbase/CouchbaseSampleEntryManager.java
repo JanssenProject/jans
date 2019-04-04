@@ -37,6 +37,7 @@ public class CouchbaseSampleEntryManager {
 
     public CouchbaseEntryManager createCouchbaseEntryManager() {
         CouchbaseEntryManagerFactory couchbaseEntryManagerFactory = new CouchbaseEntryManagerFactory();
+        couchbaseEntryManagerFactory.create();
         Properties connectionProperties = getSampleConnectionProperties();
 
         CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerFactory.createEntryManager(connectionProperties);
