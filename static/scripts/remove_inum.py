@@ -47,10 +47,24 @@ inumApllience_inum = 'inum='+ ldif_parser.inumApllience
 processed_fp = open('gluu_noinum.ldif','w')
 ldif_writer = LDIFWriter(processed_fp)
 
+
+def checkIfAsimbaEntry(new_entry):
+    for objCls in ('oxAsimbaConfiguration', 'oxAsimbaIDP', 
+            'oxAsimbaRequestorPool', 'oxAsimbaSPRequestor', 
+            'oxAsimbaSelector'):
+        if objCls in new_entry['objectClass']:
+            return True
+
 for dn in ldif_parser.DNs:
+    
     dne = explode_dn(dn)
 
     new_entry = ldif_parser.entries[dn]
+
+    
+    #we won't have asimba, pass asimba related entries
+    if checkIfAsimbaEntry(new_entry):
+        continue
 
     if inumOrg_ou in dne:
         dne.remove(inumOrg_ou)
