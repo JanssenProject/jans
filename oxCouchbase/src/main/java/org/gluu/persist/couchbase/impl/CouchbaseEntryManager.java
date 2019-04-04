@@ -115,7 +115,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Update object classes if entry contains custom object classes
         if (!isSchemaUpdate) {
             String[] objectClasses = getObjectClasses(entry, entryClass);
-            String[] objectClassesFromDb = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase()).getValues();
+            AttributeData objectClassAttributeData = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase());
+            if (objectClassAttributeData == null) {
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses list! Entry is invalid: '%s'", entry));
+            }
+
+            String[] objectClassesFromDb = objectClassAttributeData.getValues();
 
             if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
