@@ -39,8 +39,6 @@ import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -51,15 +49,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
-
-import static org.gluu.oxauth.model.util.StringUtils.implode;
-
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
+
+import static org.gluu.oxauth.model.util.StringUtils.implode;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -124,12 +121,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
-            String requestSessionId, String sessionId, String accessToken, String originHeaders,
+            String requestSessionId, String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, HttpMethod.GET, originHeaders, codeChallenge,
+                requestSessionId, sessionId, HttpMethod.GET, originHeaders, codeChallenge,
                 codeChallengeMethod, customResponseHeaders, claims, httpRequest, httpResponse, securityContext);
     }
 
@@ -138,12 +135,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
-            String requestSessionId, String sessionId, String accessToken, String originHeaders,
+            String requestSessionId, String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, HttpMethod.POST, originHeaders, codeChallenge,
+                requestSessionId, sessionId, HttpMethod.POST, originHeaders, codeChallenge,
                 codeChallengeMethod, customResponseHeaders, claims, httpRequest, httpResponse, securityContext);
     }
 
@@ -151,7 +148,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String method, String originHeaders,
+            String sessionId, String method, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customRespHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
@@ -261,34 +258,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
                             && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         if (validRedirectUri) {
-
-                            if (StringUtils.isNotBlank(accessToken) && appConfiguration.getAllowAuthorizationByAccessToken()) {
-                                boolean onlyFromCache = ServerUtil.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects() && ResponseType.isImplicitFlow(responseType));
-                                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken, onlyFromCache);
-                                boolean denyAccess = true;
-
-                                if (authorizationGrant != null) {
-                                    final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
-                                    if (accessTokenObject != null && accessTokenObject.isValid()) {
-                                        denyAccess = false;
-                                    }
-                                }
-
-                                if (denyAccess) {
-                                    RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-                                    redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                            AuthorizeErrorResponseType.ACCESS_DENIED, state));
-
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
-                                } else {
-                                    oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
-                                    user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, user.getDn(), prompt);
-                                    sessionUser.addPermission(client.getClientId(), true);
-                                }
-                            }
 
                             if (StringUtils.isNotBlank(requestUri)) {
                                 boolean validRequestUri = false;
