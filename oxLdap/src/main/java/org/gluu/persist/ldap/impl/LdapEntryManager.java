@@ -816,6 +816,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return LDAP_SEARCH_SCOPE_CONVERTER.convertToLdapSearchScope(scope);
     }
 
+	@Override
+	public boolean hasBranchesSupport(String dn) {
+		return true;
+	}
+
     private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;

@@ -648,4 +648,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return decodedDate;
     }
 
+	@Override
+	public boolean hasBranchesSupport(String dn) {
+		return false;
+	}
+
 }
