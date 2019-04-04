@@ -104,6 +104,8 @@ public interface PersistenceEntryManager extends EntityManager {
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
+    boolean hasBranchesSupport(String dn);
+
     default void clear() {
         throw new UnsupportedOperationException("Method not implemented.");
     }
