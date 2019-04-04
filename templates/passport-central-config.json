@@ -18,7 +18,7 @@
         }
     },
 
-    "idpinitiated": {
+    "idpInitiated": {
         "openidclient": {
             "authorizationEndpoint": "https://%(hostname)s/oxauth/restv1/authorize",
             "clientId": "%(passport_rp_ii_client_id)s",
