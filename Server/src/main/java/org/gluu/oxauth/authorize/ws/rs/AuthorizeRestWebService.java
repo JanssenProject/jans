@@ -6,26 +6,16 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import com.wordnik.swagger.annotations.*;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * <p>
@@ -88,7 +78,6 @@ public interface AuthorizeRestWebService {
      * @param codeChallengeMethod PKCE code challenge method
      * @param requestSessionId    request session id
      * @param sessionId           session id
-     * @param accessToken         access token
      * @param httpRequest         http request
      * @param securityContext     An injectable interface that provides access to security
      *                            related information.
@@ -225,9 +214,6 @@ public interface AuthorizeRestWebService {
             @QueryParam("session_id")
             @ApiParam(value = "Session id of this call", required = false)
                     String sessionId,
-            @QueryParam("access_token")
-            @ApiParam(value = "Access token", required = false)
-                    String accessToken,
             @QueryParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
                     String originHeaders,
@@ -334,9 +320,6 @@ public interface AuthorizeRestWebService {
             @FormParam("session_id")
             @ApiParam(value = "Session id of this call", required = false)
                     String sessionId,
-            @FormParam("access_token")
-            @ApiParam(value = "Access token", required = false)
-                    String accessToken,
             @FormParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
                     String originHeaders,
