@@ -4,7 +4,7 @@ objectClass: organization
 o: site
 
 dn: ou=people,o=site
-objectclass: top
-objectclass: organizationalUnit
+objectClass: top
+objectClass: organizationalUnit
 ou: people
 
