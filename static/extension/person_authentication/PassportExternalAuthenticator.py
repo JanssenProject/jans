@@ -316,7 +316,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
-        passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
+        passportDN = CdiUtil.bean(ConfigurationFactory).getPersistenceConfiguration().getConfiguration().getString("oxpassport_ConfigurationEntryDN")
         entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
         
         config = LdapOxPassportConfiguration()
