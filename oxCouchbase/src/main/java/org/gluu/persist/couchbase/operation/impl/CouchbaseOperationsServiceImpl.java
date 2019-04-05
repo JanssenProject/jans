@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
+import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.EntryNotFoundException;
@@ -234,7 +235,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     @Override
     public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
-            CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount, int start, int count, int pageSize) throws SearchException {
+            CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
 
@@ -254,7 +255,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         if (scope == null) {
             scopeExpression = null;
         } else if (SearchScope.BASE == scope) {
-            scopeExpression = Expression.path("META().id").eq(Expression.s(key));
+            scopeExpression = Expression.path("META().id").like(Expression.s(key + "%")).and(Expression.path("META().id").notLike(Expression.s(key + "\\\\_%\\\\_")));
         } else {
             scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"));
         }
@@ -285,75 +286,77 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         List<N1qlQueryRow> searchResultList = new ArrayList<N1qlQueryRow>();
 
-        N1qlQueryResult lastResult;
-        if (pageSize > 0) {
-            boolean collectSearchResult;
-
-            Statement query = null;
-            int currentLimit;
-            try {
-                List<N1qlQueryRow> lastSearchResultList;
-                int resultCount = 0;
-                do {
-                    collectSearchResult = true;
-
-                    currentLimit = pageSize;
-                    if (count > 0) {
-                        currentLimit = Math.min(pageSize, count - resultCount);
-                    }
-
-                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
-                    LOG.debug("Execution query: '" + query + "'");
-                    lastResult = bucket.query(query);
-                    if (!lastResult.finalSuccess()) {
-                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
-                                lastResult.info().errorCount());
-                    }
-
-                    lastSearchResultList = lastResult.allRows();
-
-                    if (ldapBatchOperation != null) {
-                        collectSearchResult = ldapBatchOperation.collectSearchResult(lastSearchResultList.size());
-                    }
-                    if (collectSearchResult) {
-                        searchResultList.addAll(lastSearchResultList);
-                    }
-
-                    if (ldapBatchOperation != null) {
-                        List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
-                        ldapBatchOperation.performAction(entries);
-                    }
-
-                    resultCount += lastSearchResultList.size();
-
-                    if ((count > 0) && (resultCount >= count)) {
-                        break;
-                    }
-                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() > 0));
-            } catch (CouchbaseException ex) {
-                throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
-            }
-        } else {
-            try {
-                Statement query = baseQuery;
-                if (count > 0) {
-                    query = ((LimitPath) query).limit(count);
-                }
-                if (start > 0) {
-                    query = ((OffsetPath) query).offset(start);
-                }
-
-                LOG.debug("Execution query: '" + query + "'");
-                lastResult = bucket.query(query);
-                if (!lastResult.finalSuccess()) {
-                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
-                            lastResult.info().errorCount());
-                }
-
-                searchResultList.addAll(lastResult.allRows());
-            } catch (CouchbaseException ex) {
-                throw new SearchException("Failed to search entries. Query: '" + baseQuery.toString() + "'", ex);
-            }
+        if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
+	        N1qlQueryResult lastResult;
+	        if (pageSize > 0) {
+	            boolean collectSearchResult;
+	
+	            Statement query = null;
+	            int currentLimit;
+	            try {
+	                List<N1qlQueryRow> lastSearchResultList;
+	                int resultCount = 0;
+	                do {
+	                    collectSearchResult = true;
+	
+	                    currentLimit = pageSize;
+	                    if (count > 0) {
+	                        currentLimit = Math.min(pageSize, count - resultCount);
+	                    }
+	
+	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
+	                    LOG.debug("Execution query: '" + query + "'");
+	                    lastResult = bucket.query(query);
+	                    if (!lastResult.finalSuccess()) {
+	                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
+	                                lastResult.info().errorCount());
+	                    }
+	
+	                    lastSearchResultList = lastResult.allRows();
+	
+	                    if (ldapBatchOperation != null) {
+	                        collectSearchResult = ldapBatchOperation.collectSearchResult(lastSearchResultList.size());
+	                    }
+	                    if (collectSearchResult) {
+	                        searchResultList.addAll(lastSearchResultList);
+	                    }
+	
+	                    if (ldapBatchOperation != null) {
+	                        List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
+	                        ldapBatchOperation.performAction(entries);
+	                    }
+	
+	                    resultCount += lastSearchResultList.size();
+	
+	                    if ((count > 0) && (resultCount >= count)) {
+	                        break;
+	                    }
+	                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() > 0));
+	            } catch (CouchbaseException ex) {
+	                throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
+	            }
+	        } else {
+	            try {
+	                Statement query = baseQuery;
+	                if (count > 0) {
+	                    query = ((LimitPath) query).limit(count);
+	                }
+	                if (start > 0) {
+	                    query = ((OffsetPath) query).offset(start);
+	                }
+	
+	                LOG.debug("Execution query: '" + query + "'");
+	                lastResult = bucket.query(query);
+	                if (!lastResult.finalSuccess()) {
+	                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
+	                            lastResult.info().errorCount());
+	                }
+	
+	                searchResultList.addAll(lastResult.allRows());
+	            } catch (CouchbaseException ex) {
+	                throw new SearchException("Failed to search entries. Query: '" + baseQuery.toString() + "'", ex);
+	            }
+	        }
         }
 
         List<JsonObject> resultRows = new ArrayList<JsonObject>(searchResultList.size());
@@ -366,7 +369,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         result.setEntriesCount(resultRows.size());
         result.setStart(start);
 
-        if (returnCount) {
+        if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
             GroupByPath selectCountQuery = Select.select("COUNT(*) as TOTAL").from(Expression.i(bucketMapping.getBucketName()))
                     .where(finalExpression);
             try {
