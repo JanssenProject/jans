@@ -140,27 +140,6 @@ public class UmaResourceService {
         return Collections.emptyList();
     }
 
-    /**
-     * Get resource descriptions by example.
-     *
-     * Do not expose it outside because we want to involve cache where possible.
-     *
-     * @param resource Resource
-     * @return Resource which conform example
-     */
-    private List<UmaResource> findResources(UmaResource resource) {
-        return ldapEntryManager.findEntries(resource);
-    }
-
-    /**
-     * Check if LDAP server contains resource description with specified attributes
-     *
-     * @return True if resource description with specified attributes exist
-     */
-    public boolean containsResource(UmaResource resource) {
-        return ldapEntryManager.contains(resource);
-    }
-
     public Set<UmaResource> getResources(Set<String> ids) {
         Set<UmaResource> result = new HashSet<UmaResource>();
         if (ids != null) {
@@ -186,19 +165,17 @@ public class UmaResourceService {
 
         prepareBranch();
 
-        UmaResource ldapResource = new UmaResource();
-        ldapResource.setDn(getBaseDnForResource());
-        ldapResource.setId(id);
-
-        final List<UmaResource> result = findResources(ldapResource);
-        if (result.size() == 0) {
-            log.error("Failed to find resource set with id: " + id);
-            errorResponseFactory.throwUmaNotFoundException();
-        } else if (result.size() > 1) {
-            log.error("Multiple resource sets found with given id: " + id);
-            errorResponseFactory.throwUmaInternalErrorException();
+        try {
+            final UmaResource resource = ldapEntryManager.find(UmaResource.class, getDnForResource(id));
+            if (resource != null) {
+                return resource;
+            }
+        } catch (Exception e) {
+            log.error("Failed to find resource set with id: " + id, e);
         }
-        return result.get(0);
+        log.error("Failed to find resource set with id: " + id);
+        errorResponseFactory.throwUmaNotFoundException();
+        return null;
     }
 
     private void prepareBranch() {
