@@ -522,6 +522,7 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
+        self.couchbaseSystemChanges = False
         self.couchbaseClusterRamsize = 2048 #in MB
         
         self.couchebaseBucketClusterPort = 28091
@@ -2409,6 +2410,11 @@ class Setup(object):
 
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                     self.install_couchbase = True
+                    
+                    promptForSystemChanges = self.getPrompt("Couchbase needs THP to disabled and Swappiness is set to 0.\nDo these automatically?", "Yes")[0].lower()
+                    if promptForSystemChanges == 'y':
+                        self.couchbaseSystemChanges = True
+
 
         else:
             self.installLdap = False
@@ -3631,7 +3637,41 @@ class Setup(object):
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
 
+    def appy_couchbase_system_changes(self):
+
+        init_script_source = os.path.join(self.staticFolder, 'couchbase/disable-thp.init.d')
+        init_script_target = '/etc/init.d/disable-thp'
+
+        self.run(['cp', init_script_source, init_script_target])
+        self.run([self.cmd_chmod, '755', init_script_target])
+        
+        if self.os_type in ['centos', 'red', 'fedora']:
+            self.run(['chkconfig', 'disable-thp on'])
+            
+        else:
+            self.run(['update-rc.d', 'disable-thp', 'defaults'])
+
+
+        self.run([init_script_target, 'start'])
+
+        self.run(['echo 0 > /proc/sys/vm/swappiness'], shell=True)
+        
+        backup_str = time.ctime().replace(' ','_')
+        self.run(['cp', '-p', '/etc/sysctl.conf', '/etc/sysctl.conf.gluu_backup.'+backup_str])
+
+        self.logIt('Appending "vm.swappiness = 0" to /etc/sysctl.conf')
+        
+        with open('/etc/sysctl.conf', 'a') as w:
+            w.write('\n')
+            w.write('#Set swappiness to 0 to avoid swapping\n')
+            w.write('vm.swappiness = 0\n')
+
+
     def install_couchbase_server(self):
+        
+        if self.couchbaseSystemChanges:
+            self.appy_couchbase_system_changes()
+        
         self.couchbaseInstall()
         self.isCouchbaseStarted(18091)
         self.run_service_command('couchbase-server', 'stop')
