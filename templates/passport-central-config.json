@@ -25,12 +25,6 @@
             "acrValues": "passport_saml"
         },
         "authorizationParams": [
-            {
-                "provider" : "IPD id",
-                "redirect_uri": "",
-                "response_type": "code",
-                "scope": "openid user_name email"
-            }
         ]
     },
 
