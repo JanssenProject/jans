@@ -288,7 +288,7 @@ class PersonAuthentication(PersonAuthenticationType):
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
         oxAuthInitializer = CdiUtil.bean(AppInitializer)
         #This call does not create anything, it's like a getter (see oxAuth's AppInitializer)
-        ldapAuthConfigs = oxAuthInitializer.createLdapAuthConfigs()
+        ldapAuthConfigs = oxAuthInitializer.createPersistenceAuthConfigs()
         uid_attr = ldapAuthConfigs.get(0).getLocalPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
