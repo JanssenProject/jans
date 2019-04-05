@@ -3637,7 +3637,7 @@ class Setup(object):
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
 
-    def appy_couchbase_system_changes(self):
+    def apply_couchbase_system_changes(self):
 
         init_script_source = os.path.join(self.staticFolder, 'couchbase/disable-thp.init.d')
         init_script_target = '/etc/init.d/disable-thp'
@@ -3670,7 +3670,7 @@ class Setup(object):
     def install_couchbase_server(self):
         
         if self.couchbaseSystemChanges:
-            self.appy_couchbase_system_changes()
+            self.apply_couchbase_system_changes()
         
         self.couchbaseInstall()
         self.isCouchbaseStarted(18091)
