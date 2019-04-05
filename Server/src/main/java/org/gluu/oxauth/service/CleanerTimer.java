@@ -169,7 +169,7 @@ public class CleanerTimer {
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
 				} catch (Exception e) {
-					log.error("Failed to process clean up for baseDn: {}", baseDn);
+					log.error("Failed to process clean up for baseDn: " + baseDn, e);
 				}
 			}
 
