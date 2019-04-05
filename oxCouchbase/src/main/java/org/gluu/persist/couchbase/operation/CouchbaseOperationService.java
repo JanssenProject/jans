@@ -10,6 +10,7 @@ package org.gluu.persist.couchbase.operation;
 import java.util.List;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
+import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
@@ -54,7 +55,7 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     JsonObject lookup(String key, String... attributes) throws SearchException;
 
     <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope,
-            String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, boolean returnCount,
+            String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
     String[] createStoragePassword(String[] passwords);
