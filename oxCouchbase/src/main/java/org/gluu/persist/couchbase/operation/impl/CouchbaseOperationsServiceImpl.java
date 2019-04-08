@@ -103,7 +103,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: bind, duration: {}, key: {}", duration, key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: bind, duration: {}, key: {}", duration, key);
         
         return result;
     }
@@ -115,7 +115,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         boolean result = addEntryImpl(key, jsonObject);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: add, duration: {}, key: {}, json: {}", duration, key, jsonObject);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, key: {}, json: {}", duration, key, jsonObject);
         
         return result;
     }
@@ -164,7 +164,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         boolean result = updateEntryImpl(key, mods);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: modify, duration: {}, key: {}, mods: {}", duration, key, mods);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, key: {}, mods: {}", duration, key, mods);
 
         return result;
     }
@@ -213,7 +213,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         boolean result = deleteImpl(key);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: delete, duration: {}, key: {}", duration, key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: delete, duration: {}, key: {}", duration, key);
 
         return result;
     }
@@ -236,7 +236,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         boolean result = deleteRecursivelyImpl(key);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: delete_tree, duration: {}, key: {}", duration, key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: delete_tree, duration: {}, key: {}", duration, key);
 
         return result;
     }
@@ -266,7 +266,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         JsonObject result = lookupImpl(key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: lookup, duration: {}, key: {}, attributes: {}", duration, key, attributes);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, key: {}, attributes: {}", duration, key, attributes);
 
         return result;
     }
@@ -308,7 +308,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         PagedResult<JsonObject> result = searchImpl(key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: search, duration: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
         return result;
 	}
@@ -348,7 +348,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         if (select == null) {
             select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN };
         } else if ((select.length == 1) && StringHelper.isEmpty(select[0])) {
-        	// Compatibility with LDAP persistence layer when application pass filter new String[] { "" }
+        	// Compatibility with Couchbase persistence layer when application pass filter new String[] { "" }
             select = new String[] { CouchbaseOperationService.DN };
         } else {
             boolean hasDn = Arrays.asList(select).contains(CouchbaseOperationService.DN);
