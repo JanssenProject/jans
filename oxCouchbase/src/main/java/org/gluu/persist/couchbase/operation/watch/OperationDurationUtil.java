@@ -20,6 +20,11 @@ public class OperationDurationUtil extends DurationUtil {
     }
 
 	@Override
+	public void logDebug(String format, Object... arguments) {
+		super.logDebug(format, arguments);
+	}
+
+	@Override
 	public Logger getLog() {
 		return log;
 	}
