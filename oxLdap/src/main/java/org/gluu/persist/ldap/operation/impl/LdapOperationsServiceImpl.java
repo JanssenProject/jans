@@ -293,43 +293,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * (non-Javadoc)
      *
      * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
-     * com.unboundid.ldap.sdk.Filter, int, int)
-     */
-    @Override
-    public SearchResult search(String dn, Filter filter, int searchLimit, int count) throws SearchException {
-        return search(dn, filter, searchLimit, count, null, (String[]) null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
-     * com.unboundid.ldap.sdk.Filter, int, int, com.unboundid.ldap.sdk.Control[],
-     * java.lang.String)
-     */
-    @Override
-    public SearchResult search(String dn, Filter filter, int searchLimit, int count, Control[] controls, String... attributes)
-            throws SearchException {
-        return search(dn, filter, SearchScope.SUB, searchLimit, count, controls, attributes);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
-     * com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope, int, int,
-     * com.unboundid.ldap.sdk.Control[], java.lang.String)
-     */
-    @Override
-    public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int count, Control[] controls, String... attributes)
-            throws SearchException {
-        return search(dn, filter, scope, null, 0, searchLimit, count, controls, attributes);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String,
      * com.unboundid.ldap.sdk.Filter, org.gluu.ldap.model.SearchScope,
      * org.gluu.site.ldap.persistence.BatchOperation, int, int, int,
      * com.unboundid.ldap.sdk.Control[], java.lang.String)
@@ -692,16 +655,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
             searchRequest.setControls(newControls);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.gluu.site.ldap.PlatformOperationFacade#lookup(java.lang.String)
-     */
-    @Override
-    public SearchResultEntry lookup(String dn) throws ConnectionException {
-        return lookup(dn, (String[]) null);
     }
 
     /*

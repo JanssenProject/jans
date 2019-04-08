@@ -323,12 +323,16 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     private void removeSubtreeThroughIteration(String dn) {
-        SearchResult searchResult = null;
+    	SearchScope scope = SearchScope.SUB;
+
+    	SearchResult searchResult = null;
         try {
-            searchResult = this.operationService.search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), 0, 0, null, "dn");
+            searchResult = this.operationService.search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), toLdapSearchScope(scope), null, 0, 0, 0, null, "dn");
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
             }
+        } catch (SearchScopeException ex) {
+            throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
         }
@@ -517,12 +521,16 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             searchFilter = filter;
         }
 
+        SearchScope scope = SearchScope.SUB;
+
         SearchResult searchResult = null;
         try {
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), 1, 1, null, ldapReturnAttributes);
+            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, ldapReturnAttributes);
             if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
+        } catch (SearchScopeException ex) {
+            throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
             if (!(ResultCode.NO_SUCH_OBJECT_INT_VALUE == ex.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -648,9 +656,10 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public boolean authenticate(String baseDN, String userName, String password) {
+    	SearchScope scope = SearchScope.SUB;
         try {
             Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, userName);
-            SearchResult searchResult = operationService.search(baseDN, toLdapFilter(filter), 1, 1);
+            SearchResult searchResult = operationService.search(baseDN, toLdapFilter(filter), toLdapSearchScope(scope), null, 0, 1, 1, null, (String[]) null);
             if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
                 return false;
             }
@@ -660,6 +669,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return operationService.authenticate(bindDn, password);
         } catch (ConnectionException ex) {
             throw new AuthenticationException(String.format("Failed to authenticate user: %s", userName), ex);
+        } catch (SearchScopeException ex) {
+            throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
             throw new AuthenticationException(String.format("Failed to find user DN: %s", userName), ex);
         }
@@ -784,7 +795,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     public String[] exportEntry(String dn) {
         String[] ldif = null;
         try {
-            ldif = this.operationService.lookup(dn).toLDIF();
+            ldif = this.operationService.lookup(dn, (String[]) null).toLDIF();
         } catch (ConnectionException e) {
             LOG.error("Failed get ldif from " + dn, e);
         }
