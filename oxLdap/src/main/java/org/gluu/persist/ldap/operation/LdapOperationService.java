@@ -100,13 +100,11 @@ public interface LdapOperationService extends PersistenceOperationService {
      * This method is used to update set of attributes for an entry
      *
      * @param dn
-     * @param attrs
+     * @param modifications
      * @return
      * @throws ConnectionException
      * @throws DuplicateEntryException
      */
-    boolean updateEntry(String dn, Collection<Attribute> attrs) throws DuplicateEntryException, ConnectionException;
-
     boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException;
 
     /**
@@ -115,15 +113,16 @@ public interface LdapOperationService extends PersistenceOperationService {
      * @param dn
      * @throws ConnectionException
      */
-    void delete(String dn) throws ConnectionException;
+    boolean delete(String dn) throws ConnectionException;
 
     /**
      * Delete entry from the directory
      *
      * @param dn
+     * @return 
      * @throws ConnectionException
      */
-    void deleteWithSubtree(String dn) throws ConnectionException;
+    boolean deleteRecursively(String dn) throws ConnectionException;
 
     boolean processChange(LDIFChangeRecord ldifRecord) throws LDAPException;
 

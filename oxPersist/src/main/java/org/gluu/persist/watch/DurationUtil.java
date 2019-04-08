@@ -4,34 +4,34 @@ import java.time.Duration;
 import java.time.Instant;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Simple duration calculator helper
  *
  * @author Yuriy Movchan Date: 02/07/2019
  */
-public class DurationUtil {
+public abstract class DurationUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(DurationUtil.class);
-
-    public static Instant now() {
+    public Instant now() {
         return Instant.now();
     }
 
-    public static Duration duration(Instant start) {
+    public Duration duration(Instant start) {
         Instant end = Instant.now();
         return Duration.between(start, end);
     }
 
-    public static Duration duration(Instant start, Instant end) {
+    public Duration duration(Instant start, Instant end) {
         return Duration.between(start, end);
     }
 
-    public static void logDebug(String format, Object... arguments) {
+    public void logDebug(String format, Object... arguments) {
+    	Logger log = getLog();
         if (log.isDebugEnabled()) {
             log.debug(format, arguments);
         }
     }
+    
+    public abstract Logger getLog();
 
 }

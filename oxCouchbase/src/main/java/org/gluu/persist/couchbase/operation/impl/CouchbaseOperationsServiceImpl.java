@@ -6,6 +6,8 @@
 
 package org.gluu.persist.couchbase.operation.impl;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
+import org.gluu.persist.couchbase.operation.watch.OperationDurationUtil;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.EntryNotFoundException;
 import org.gluu.persist.exception.operation.PersistenceException;
@@ -80,43 +83,62 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     }
 
     private boolean authenticateImpl(final String key, final String password) throws SearchException {
-        if (password == null) {
-            return false;
+        Instant startTime = OperationDurationUtil.instance().now();
+        
+        boolean result = false;
+        if (password != null) {
+	        JsonObject entry = lookup(key, USER_PASSWORD);
+	        Object userPasswordObj = entry.get(USER_PASSWORD);
+	
+	        String userPassword = null;
+	        if (userPasswordObj instanceof JsonArray) {
+	            userPassword = ((JsonArray) userPasswordObj).getString(0);
+	        } else if (userPasswordObj instanceof String) {
+	            userPassword = (String) userPasswordObj;
+	        }
+	
+	        if (userPassword != null) {
+	        	result = PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
+	        }
         }
 
-        JsonObject entry = lookup(key, USER_PASSWORD);
-        Object userPasswordObj = entry.get(USER_PASSWORD);
-
-        String userPassword = null;
-        if (userPasswordObj instanceof JsonArray) {
-            userPassword = ((JsonArray) userPasswordObj).getString(0);
-        } else if (userPasswordObj instanceof String) {
-            userPassword = (String) userPasswordObj;
-        } else {
-            return false;
-        }
-
-        return PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: bind, duration: {}, key: {}", duration, key);
+        
+        return result;
     }
 
     @Override
     public boolean addEntry(String key, JsonObject jsonObject) throws DuplicateEntryException, PersistenceException {
-        try {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        boolean result = addEntryImpl(key, jsonObject);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: add, duration: {}, key: {}, json: {}", duration, key, jsonObject);
+        
+        return result;
+    }
+
+	private boolean addEntryImpl(String key, JsonObject jsonObject) throws PersistenceException {
+		try {
+
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument jsonDocument = JsonDocument.create(key, jsonObject);
             JsonDocument result = bucketMapping.getBucket().upsert(jsonDocument);
             if (result != null) {
                 return true;
             }
+
         } catch (CouchbaseException ex) {
             throw new PersistenceException("Failed to add entry", ex);
         }
 
         return false;
-    }
+	}
 
-    @Override
-    public boolean updateEntry(String key, JsonObject attrs) throws UnsupportedOperationException, SearchException {
+    @Deprecated
+    protected boolean updateEntry(String key, JsonObject attrs) throws UnsupportedOperationException, SearchException {
         List<MutationSpec> mods = new ArrayList<MutationSpec>();
 
         for (Entry<String, Object> attrEntry : attrs.toMap().entrySet()) {
@@ -137,7 +159,18 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     @Override
     public boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, SearchException {
-        try {
+        Instant startTime = OperationDurationUtil.instance().now();
+        
+        boolean result = updateEntryImpl(key, mods);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: modify, duration: {}, key: {}, mods: {}", duration, key, mods);
+
+        return result;
+    }
+
+	private boolean updateEntryImpl(String key, List<MutationSpec> mods) throws SearchException {
+		try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             MutateInBuilder builder = bucketMapping.getBucket().mutateIn(key);
 
@@ -145,7 +178,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         } catch (final CouchbaseException ex) {
             throw new SearchException("Failed to update entry", ex);
         }
-    }
+	}
 
     protected boolean modifyEntry(MutateInBuilder builder, List<MutationSpec> mods) throws UnsupportedOperationException, SearchException {
         try {
@@ -175,7 +208,18 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     @Override
     public boolean delete(String key) throws EntryNotFoundException {
-        try {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        boolean result = deleteImpl(key);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: delete, duration: {}, key: {}", duration, key);
+
+        return result;
+    }
+
+	private boolean deleteImpl(String key) throws EntryNotFoundException {
+		try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument result = bucketMapping.getBucket().remove(key);
 
@@ -183,11 +227,22 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         } catch (CouchbaseException ex) {
             throw new EntryNotFoundException("Failed to delete entry", ex);
         }
-    }
+	}
 
     @Override
     public boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException {
-        try {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        boolean result = deleteRecursivelyImpl(key);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: delete_tree, duration: {}, key: {}", duration, key);
+
+        return result;
+    }
+
+	private boolean deleteRecursivelyImpl(String key) throws SearchException, EntryNotFoundException {
+		try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
                     .where(Expression.path("META().id").like(Expression.s(key + "%")));
@@ -202,11 +257,22 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         } catch (CouchbaseException ex) {
             throw new EntryNotFoundException("Failed to delete entry", ex);
         }
-    }
+	}
 
     @Override
     public JsonObject lookup(String key, String... attributes) throws SearchException {
-        try {
+        Instant startTime = OperationDurationUtil.instance().now();
+        
+        JsonObject result = lookupImpl(key, attributes);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: lookup, duration: {}, key: {}, attributes: {}", duration, key, attributes);
+
+        return result;
+    }
+
+	private JsonObject lookupImpl(String key, String... attributes) throws SearchException {
+		try {
             BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             if (ArrayHelper.isEmpty(attributes)) {
                 JsonDocument doc = bucketMapping.getBucket().get(key);
@@ -231,10 +297,23 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         throw new SearchException("Failed to lookup entry");
-    }
+	}
 
-    @Override
+	@Override
     public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+            CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
+        Instant startTime = OperationDurationUtil.instance().now();
+        
+        
+        PagedResult<JsonObject> result = searchImpl(key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search, duration: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+
+        return result;
+	}
+
+    private <O> PagedResult<JsonObject> searchImpl(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
