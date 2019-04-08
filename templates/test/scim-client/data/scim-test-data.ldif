@@ -1,7 +1,7 @@
 ######################################
 # Custom attributes
 ######################################
-dn: inum=!0005!ADA6,ou=attributes,o=gluu
+dn: inum=ADA6,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim First custom attribute
@@ -14,11 +14,11 @@ gluuAttributeType: string
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomFirst
 gluuSAML2URI: urn:oid:scimCustomFirst
 gluuStatus: active
-inum: !0005!ADA6
+inum: ADA6
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true
 
-dn: inum=!0005!70F0,ou=attributes,o=gluu
+dn: inum=70F0,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim Second custom attribute
@@ -31,11 +31,11 @@ gluuAttributeType: generalizedTime
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomSecond
 gluuSAML2URI: urn:oid:scimCustomSecond
 gluuStatus: active
-inum: !0005!70F0
+inum: 70F0
 oxMultivaluedAttribute: true
 oxSCIMCustomAttribute: true
 
-dn: inum=!0005!653A,ou=attributes,o=gluu
+dn: inum=653A,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim Third custom attribute
@@ -48,18 +48,18 @@ gluuAttributeType: numeric
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomThird
 gluuSAML2URI: urn:oid:scimCustomThird
 gluuStatus: active
-inum: !0005!653A
+inum: 653A
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true
 
 ######################################
 # Filter search test data
 ######################################
-dn: inum=!0000!XXXX.AAAA.1111,ou=people,o=gluu
+dn: inum=XXXX.AAAA-1111,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.AAAA.1111
+inum: XXXX.AAAA-1111
 uid: aaaa1111
 givenName: Aaaa 1111
 sn: FilterTest
@@ -71,11 +71,11 @@ birthdate: 20140101000000Z
 oxTrustEmail: {"value":"aaaa1111@test.email","type":"work","primary":false,"display":null}
 mail: aaaa1111@test.email
 
-dn: inum=!0000!XXXX.AAAA.2222,ou=people,o=gluu
+dn: inum=XXXX.AAAA-2222,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.AAAA.2222
+inum: XXXX.AAAA-2222
 uid: aaaa2222
 givenName: Aaaa 2222
 sn: FilterTest
@@ -86,11 +86,11 @@ oxTrustExternalId: 12000
 birthdate: 20140210000000Z
 oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
 
-dn: inum=!0000!XXXX.AAAA.3333,ou=people,o=gluu
+dn: inum=XXXX.AAAA-3333,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.AAAA.3333
+inum: XXXX.AAAA-3333
 uid: aaaa3333
 givenName: Aaaa 3333
 sn: FilterTest
@@ -100,11 +100,11 @@ displayName: Test Aaaa 3333
 oxTrustExternalId: 13000
 birthdate: 20140307000000Z
 
-dn: inum=!0000!XXXX.AAAA.4444,ou=people,o=gluu
+dn: inum=XXXX.AAAA-4444,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.AAAA.4444
+inum: XXXX.AAAA-4444
 uid: aaaa4444
 givenName: Aaaa 4444
 sn: FilterTest
@@ -114,11 +114,11 @@ displayName: Test Aaaa 4444
 oxTrustExternalId: 14000
 birthdate: 20140425000000Z
 
-dn: inum=!0000!XXXX.AAAA.5555,ou=people,o=gluu
+dn: inum=XXXX.AAAA-5555,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.AAAA.5555
+inum: XXXX.AAAA-5555
 uid: aaaa5555
 givenName: Aaaa 5555
 sn: FilterTest
@@ -128,11 +128,11 @@ displayName: Test Aaaa 5555
 oxTrustExternalId: 15000
 birthdate: 20140518000000Z
 
-dn: inum=!0000!XXXX.BBBB.1111,ou=people,o=gluu
+dn: inum=XXXX.BBBB-1111,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.BBBB.1111
+inum: XXXX.BBBB-1111
 uid: bbbb1111
 givenName: Bbbb 1111
 sn: FilterTest
@@ -144,11 +144,11 @@ birthdate: 20150108000000Z
 oxTrustEmail: {"value":"bbbb1111@test.email","type":"home","primary":true,"display":null}
 mail: bbbb1111@test.email
 
-dn: inum=!0000!XXXX.BBBB.2222,ou=people,o=gluu
+dn: inum=XXXX.BBBB-2222,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.BBBB.2222
+inum: XXXX.BBBB-2222
 uid: bbbb2222
 givenName: Bbbb 2222
 sn: FilterTest
@@ -159,11 +159,11 @@ oxTrustExternalId: 22000
 birthdate: 20150214000000Z
 oxTrustAddresses: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 
-dn: inum=!0000!XXXX.BBBB.3333,ou=people,o=gluu
+dn: inum=XXXX.BBBB-3333,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.BBBB.3333
+inum: XXXX.BBBB-3333
 uid: bbbb3333
 givenName: Bbbb 3333
 sn: FilterTest
@@ -173,11 +173,11 @@ displayName: Test Bbbb 3333
 oxTrustExternalId: 23000
 birthdate: 20150321000000Z
 
-dn: inum=!0000!XXXX.BBBB.4444,ou=people,o=gluu
+dn: inum=XXXX.BBBB-4444,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.BBBB.4444
+inum: XXXX.BBBB-4444
 uid: bbbb4444
 givenName: Bbbb 4444
 sn: FilterTest
@@ -187,11 +187,11 @@ displayName: Test Bbbb 4444
 oxTrustExternalId: 24000
 birthdate: 20150420000000Z
 
-dn: inum=!0000!XXXX.BBBB.5555,ou=people,o=gluu
+dn: inum=XXXX.BBBB-5555,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.BBBB.5555
+inum: XXXX.BBBB-5555
 uid: bbbb5555
 givenName: Bbbb 5555
 sn: FilterTest
@@ -201,11 +201,11 @@ displayName: Test Bbbb 5555
 oxTrustExternalId: 25000
 birthdate: 20150530000000Z
 
-dn: inum=!0000!XXXX.CCCC.1111,ou=people,o=gluu
+dn: inum=XXXX.CCCC-1111,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.CCCC.1111
+inum: XXXX.CCCC-1111
 uid: cccc1111
 givenName: Cccc 1111
 sn: FilterTest
@@ -217,11 +217,11 @@ birthdate: 20160125000000Z
 oxTrustEmail: {"value":"cccc1111@test.email","type":"work","primary":true,"display":null}
 mail: cccc1111@test.email
 
-dn: inum=!0000!XXXX.CCCC.2222,ou=people,o=gluu
+dn: inum=XXXX.CCCC-2222,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.CCCC.2222
+inum: XXXX.CCCC-2222
 uid: cccc2222
 givenName: Cccc 2222
 sn: FilterTest
@@ -232,11 +232,11 @@ oxTrustExternalId: 32000
 birthdate: 20160119000000Z
 oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 
-dn: inum=!0000!XXXX.CCCC.3333,ou=people,o=gluu
+dn: inum=XXXX.CCCC-3333,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.CCCC.3333
+inum: XXXX.CCCC-3333
 uid: cccc3333
 givenName: Cccc 3333
 sn: FilterTest
@@ -246,11 +246,11 @@ displayName: Test Cccc 3333
 oxTrustExternalId: 33000
 birthdate: 20160229194603Z
 
-dn: inum=!0000!XXXX.CCCC.4444,ou=people,o=gluu
+dn: inum=XXXX.CCCC-4444,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.CCCC.4444
+inum: XXXX.CCCC-4444
 uid: cccc4444
 givenName: Cccc 4444
 sn: FilterTest
@@ -260,11 +260,11 @@ displayName: Test Cccc 4444
 oxTrustExternalId: 34000
 birthdate: 20160315000000Z
 
-dn: inum=!0000!XXXX.CCCC.5555,ou=people,o=gluu
+dn: inum=XXXX.CCCC-5555,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.CCCC.5555
+inum: XXXX.CCCC-5555
 uid: cccc5555
 givenName: Cccc 5555
 sn: FilterTest
@@ -276,44 +276,44 @@ birthdate: 20160413000000Z
 
 #Users with special chars filter handling
 
-dn: inum=!0000!XXXX.DDDD.1111,ou=people,o=gluu
+dn: inum=XXXX.DDDD-1111,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.DDDD.1111
+inum: XXXX.DDDD-1111
 uid: dddd1111 *char
 givenName: Dddd 1111
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 1111
 
-dn: inum=!0000!XXXX.DDDD.2222,ou=people,o=gluu
+dn: inum=XXXX.DDDD-2222,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.DDDD.2222
+inum: XXXX.DDDD-2222
 uid: dddd2222 * \ (char
 givenName: Dddd 2222
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 2222
 
-dn: inum=!0000!XXXX.DDDD.3333,ou=people,o=gluu
+dn: inum=XXXX.DDDD-3333,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.DDDD.3333
+inum: XXXX.DDDD-3333
 uid: dddd3333 * \ (char) /
 givenName: Dddd 3333
 sn: FilterTest
 gluuStatus: active
 displayName: Test Dddd 3333
 
-dn: inum=!0000!XXXX.DDDD.4444,ou=people,o=gluu
+dn: inum=XXXX.DDDD-4444,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
-inum: !0000!XXXX.DDDD.4444
+inum: XXXX.DDDD-4444
 uid: dddd4444
 givenName: (special chars\)/*
 sn: FilterTest
