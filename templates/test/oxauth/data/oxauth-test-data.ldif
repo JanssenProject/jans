@@ -1,7 +1,7 @@
 ######################################
 # Attributes
 ######################################
-dn: inum=!0005!18CC,ou=attributes,o=gluu
+dn: inum=18CC,ou=attributes,o=gluu
 objectClass: gluuAttribute
 objectClass: top
 description: oxAuth Client Application Type
@@ -14,10 +14,10 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthAppType
 gluuStatus: active
-inum: !0005!18CC
+inum: 18CC
 urn: urn:gluu:dir:attribute-def:oxAuthAppType
 
-dn: inum=!0005!18CD,ou=attributes,o=gluu
+dn: inum=18CD,ou=attributes,o=gluu
 objectClass: gluuAttribute
 objectClass: top
 description: oxAuth Client ID Token Signed Response Algorithm
@@ -30,10 +30,10 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
 gluuStatus: active
-inum: !0005!18CD
+inum: 18CD
 urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
 
-dn: inum=!0005!18CE,ou=attributes,o=gluu
+dn: inum=18CE,ou=attributes,o=gluu
 objectClass: gluuAttribute
 objectClass: top
 description: oxAuth Client Redirect URI
@@ -46,10 +46,10 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthRedirectURI
 gluuStatus: active
-inum: !0005!18CE
+inum: 18CE
 urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
 
-dn: inum=!0005!18CF,ou=attributes,o=gluu
+dn: inum=18CF,ou=attributes,o=gluu
 objectClass: gluuAttribute
 objectClass: top
 description: oxAuth Client Scope
@@ -62,110 +62,110 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthScope
 gluuStatus: active
-inum: !0005!18CF
+inum: 18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
 
 ######################################
 # Default Scopes
 ######################################
-dn: inum=!0009!43F1,ou=scopes,o=gluu
+dn: inum=43F1,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!764C,ou=scopes,o=gluu
+dn: inum=764C,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!C17A,ou=scopes,o=gluu
+dn: inum=C17A,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!D491,ou=scopes,o=gluu
+dn: inum=D491,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!341A,ou=scopes,o=gluu
+dn: inum=341A,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!341A,ou=scopes,o=gluu
+dn: inum=341A,ou=scopes,o=gluu
 changetype: modify
 add: oxAuthClaim
-oxAuthClaim: inum=!0005!18CC,ou=attributes,o=gluu
+oxAuthClaim: inum=18CC,ou=attributes,o=gluu
 
-dn: inum=!0009!10B2,ou=scopes,o=gluu
+dn: inum=10B2,ou=scopes,o=gluu
 changetype: modify
 replace: defaultScope
 defaultScope: true
 
-dn: inum=!0009!341A,ou=scopes,o=gluu
+dn: inum=341A,ou=scopes,o=gluu
 changetype: modify
 add: oxAuthClaim
-oxAuthClaim: inum=!0005!18CD,ou=attributes,o=gluu
-oxAuthClaim: inum=!0005!18CE,ou=attributes,o=gluu
-oxAuthClaim: inum=!0005!18CF,ou=attributes,o=gluu
+oxAuthClaim: inum=18CD,ou=attributes,o=gluu
+oxAuthClaim: inum=18CE,ou=attributes,o=gluu
+oxAuthClaim: inum=18CF,ou=attributes,o=gluu
 
 ######################################
 # Scopes
 ######################################
-dn: inum=!0009!7D01,ou=scopes,o=gluu
+dn: inum=7D01,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: org_name
-inum: !0009!7D01
+inum: 7D01
 description: Dynamic scope org_name
 defaultScope: true
 oxScopeType: dynamic
-oxScriptDn: inum=!0011!031C.5621,ou=scripts,o=gluu
+oxScriptDn: inum=031C-5621,ou=scripts,o=gluu
 
-dn: inum=!0009!7D02,ou=scopes,o=gluu
+dn: inum=7D02,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: work_phone
-inum: !0009!7D02
+inum: 7D02
 description: Dynamic scope work_phone
 defaultScope: true
 oxScopeType: dynamic
-oxScriptDn: inum=!0011!031C.5622,ou=scripts,o=gluu
+oxScriptDn: inum=031C-5622,ou=scripts,o=gluu
 
-dn: inum=!0009!0465.1DEA,ou=scopes,o=gluu
+dn: inum=0465-1DEA,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
 description: Custom scope for tests
 displayName: test
-inum: @!DBE5.84F8.631A.9172!0001!CD07.49BE!0009!0465.1DEA
-oxAuthClaim: inum=!0005!D2E0,ou=attributes,o=gluu
+inum: @DBE5-84F8-631A-9172CD07-49BE0465-1DEA
+oxAuthClaim: inum=D2E0,ou=attributes,o=gluu
 oxScopeType: openid
 
 ######################################
 # Groups
 ######################################
-dn: inum=!0003!7890,ou=groups,o=gluu
+dn: inum=7890,ou=groups,o=gluu
 objectClass: top
 objectClass: gluuGroup
 gluuGroupType: gluuTestGroup1
-inum: !0003!7890
+inum: 7890
 gluuStatus: active
 displayName: Gluu Test Group 1
 
-dn: inum=!0003!7891,ou=groups,o=gluu
+dn: inum=7891,ou=groups,o=gluu
 objectClass: top
 objectClass: gluuGroup
 gluuGroupType: gluuTestGroup2
-inum: !0003!7891
+inum: 7891
 gluuStatus: active
 displayName: Gluu Test Group 2
 
 ######################################
 # People
 ######################################
-dn: inum=!0000!B1F3.AEAE.B798,ou=people,o=gluu
+dn: inum=B1F3-AEAE-B798,ou=people,o=gluu
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
@@ -179,7 +179,7 @@ gender: Male
 givenName: Test
 gluuStatus: active
 iname: @test*person*test_user
-inum: !0000!B1F3.AEAE.B798
+inum: B1F3-AEAE-B798
 locale: en-US
 mail: test_user@test.org
 middleName: User
@@ -200,30 +200,30 @@ updatedAt: 20170213135512.220Z
 userPassword: test_user_password
 website: http://www.gluu.org
 zoneinfo: America/Chicago
-memberOf: inum=!0003!7890,ou=groups,o=gluu
-memberOf: inum=!0003!7891,ou=groups,o=gluu
+memberOf: inum=7890,ou=groups,o=gluu
+memberOf: inum=7891,ou=groups,o=gluu
 
 ######################################
 # Groups
 ######################################
-dn: inum=!0003!7890,ou=groups,o=gluu
+dn: inum=7890,ou=groups,o=gluu
 changetype: modify
 add: member
-member: inum=!0000!B1F3.AEAE.B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=gluu
 
-dn: inum=!0003!7891,ou=groups,o=gluu
+dn: inum=7891,ou=groups,o=gluu
 changetype: modify
 add: member
-member: inum=!0000!B1F3.AEAE.B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=gluu
 
 ######################################
 # Clients
 ######################################
-dn: inum=!0008!FF81!2D39,ou=clients,o=gluu
+dn: inum=FF81-2D39,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Client (don't remove)
-inum: !0008!FF81!2D39
+inum: FF81-2D39
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_4_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
@@ -239,21 +239,21 @@ oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
 oxAuthGrantType: client_credentials
-oxAuthScope: inum=!0009!F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!10B2,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!764C,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!43F1,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!341A,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!6D98,ou=scopes,o=gluu
-oxAuthScope: inum=!0009!6D99,ou=scopes,o=gluu
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
+oxAuthScope: inum=43F1,ou=scopes,o=gluu
+oxAuthScope: inum=341A,ou=scopes,o=gluu
+oxAuthScope: inum=6D98,ou=scopes,o=gluu
+oxAuthScope: inum=6D99,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
-dn: inum=!0008!AB77!1A2B,ou=clients,o=gluu
+dn: inum=AB77-1A2B,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Resource Server Client (don't remove)
-inum: !0008!AB77!1A2B
+inum: AB77-1A2B
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_2_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
@@ -265,15 +265,15 @@ oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
 oxAuthGrantType: client_credentials
-oxAuthScope: inum=!0009!6D99,ou=scopes,o=gluu
+oxAuthScope: inum=6D99,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
-dn: inum=!0008!0068.3E20,ou=clients,o=gluu
+dn: inum=3E20,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Requesting Party Client (don't remove)
-inum: !0008!0068.3E20
+inum: 3E20
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_3_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
@@ -284,38 +284,38 @@ oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
 oxAuthGrantType: client_credentials
-oxAuthScope: inum=!0009!6D98,ou=scopes,o=gluu
+oxAuthScope: inum=6D98,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
 ######################################
 # UMA
 ######################################
-dn: inum=!5214.40D1,ou=scopes,ou=uma,o=gluu
+dn: inum=5214-40D1,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: View
-inum: !5214.40D1
-owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+inum: 5214-40D1
+owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
 oxRevision: 0
 oxId: http://photoz.example.com/dev/scopes/view
-oxPolicyScriptDn: inum=!0011!2DAF.F995,ou=scripts,o=@!1736.179E.AA60.16B2!0001!8F7C.B9AB,o=gluu
+oxPolicyScriptDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=gluu
 
-dn: inum=!B6EA.B301,ou=scopes,ou=uma,o=gluu
+dn: inum=B6EA-B301,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: Add/Edit
-inum: !B6EA.B301
-owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+inum: B6EA-B301
+owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
 oxId: modify
 oxRevision: 0
 
-dn: inum=!03F8.EDD7,ou=scopes,ou=uma,o=gluu
+dn: inum=03F8-EDD7,ou=scopes,ou=uma,o=gluu
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 displayName: All
-inum: !03F8.EDD7
-owner: inum=!0000!A8F2.DE1E.D7FB,ou=people,o=gluu
+inum: 03F8-EDD7
+owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
 oxRevision: 0
 oxId: http://photoz.example.com/dev/scopes/all
 
@@ -346,12 +346,13 @@ oxAuthRedirectURI: https://example.com/bad_sector_identifier
 ######################################
 # Scripts - Dynamic scope
 ######################################
-dn: inum=!0011!031C.5621,ou=scripts,o=gluu
+dn: inum=031C-5621,ou=scripts,o=gluu
 changetype: modify
 replace: gluuStatus
 gluuStatus: true
 
-dn: inum=!0011!031C.5622,ou=scripts,o=gluu
+dn: inum=031C-5622,ou=scripts,o=gluu
 changetype: modify
 replace: gluuStatus
 gluuStatus: true
+
