@@ -26,12 +26,12 @@ import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.exception.InvalidSimplePageControlException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.LdapOperationService;
+import org.gluu.persist.ldap.operation.watch.OperationDurationUtil;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
-import org.gluu.persist.watch.DurationUtil;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
@@ -216,7 +216,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     private boolean authenticateImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        boolean result = false;
 
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
@@ -231,20 +233,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             PasswordEncryptionMethod storedPasswordMethod = PasswordEncryptionHelper.findAlgorithm(storedUserPassword);
             if (additionalPasswordMethods.contains(storedPasswordMethod)) {
                 LOG.debug("Authenticating '{}' using internal authentication mechanism '{}'", bindDn, storedPasswordMethod);
-                return PasswordEncryptionHelper.compareCredentials(password, storedUserPassword);
+                result = PasswordEncryptionHelper.compareCredentials(password, storedUserPassword);
             }
-        }
-
-        boolean result = false;
-
-        if (this.bindConnectionProvider == null) {
-            result = authenticateConnectionPoolImpl(bindDn, password);
         } else {
-            result = authenticateBindConnectionPoolImpl(bindDn, password);
+	        if (this.bindConnectionProvider == null) {
+	            result = authenticateConnectionPoolImpl(bindDn, password);
+	        } else {
+	            result = authenticateBindConnectionPoolImpl(bindDn, password);
+	        }
         }
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: bind, duration: {}, dn: {}", duration, bindDn);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: bind, duration: {}, dn: {}", duration, bindDn);
 
         return result;
     }
@@ -337,12 +337,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     @Override
     public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
             int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
         
         SearchResult result = searchImpl(dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: search, duration: {}, dn: {}, filter: {}, scope: {}, batchOperationWraper: {}, start: {}, searchLimit: {}, count: {}, controls: {}, attributes: {}", duration, dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search, duration: {}, dn: {}, filter: {}, scope: {}, batchOperationWraper: {}, start: {}, searchLimit: {}, count: {}, controls: {}, attributes: {}", duration, dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
 
         return result;
     }
@@ -357,7 +357,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         }
 
         if (LOG.isTraceEnabled()) {
-            // Find whole tree search
+            // Find whole tree search. This can be very slow
             if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
                 LOG.trace("Search in whole LDAP tree", new Exception());
             }
@@ -507,12 +507,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     public List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
                                                                int count, int pageSize, String sortBy, SortOrder sortOrder,
                                                                PagedResult vlvResponse, String... attributes) throws Exception {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
         
         List<SearchResultEntry> result = searchSearchResultEntryListImpl(dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
 
         return result;
 }
@@ -622,12 +622,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     @Deprecated
     public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
             SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws Exception {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
 
         SearchResult result = searchVirtualListViewImpl(dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: search_virtual_list_view, duration: {}, dn: {}, filter: {}, scope: {}, start: {}, count: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search_virtual_list_view, duration: {}, dn: {}, filter: {}, scope: {}, start: {}, count: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
 
         return result;
     }
@@ -712,12 +712,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
         
         SearchResultEntry result = lookupImpl(dn, attributes);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: lookup, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: lookup, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
 
         return result;
     }
@@ -742,12 +742,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public boolean addEntry(String dn, Collection<Attribute> attributes) throws DuplicateEntryException, ConnectionException {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
         
         boolean result = addEntryImpl(dn, attributes);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: add, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: add, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
         
         return result;
     }
@@ -785,8 +785,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * @see org.gluu.site.ldap.PlatformOperationFacade#updateEntry(java.lang.String,
      * java.util.Collection)
      */
-    @Override
-    public boolean updateEntry(String dn, Collection<Attribute> attrs) throws DuplicateEntryException, ConnectionException {
+    @Deprecated
+    protected boolean updateEntry(String dn, Collection<Attribute> attrs) throws DuplicateEntryException, ConnectionException {
         List<Modification> mods = new ArrayList<Modification>();
 
         for (Attribute attribute : attrs) {
@@ -814,12 +814,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      */
     @Override
     public boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException {
-        Instant startTime = DurationUtil.now();
+        Instant startTime = OperationDurationUtil.instance().now();
         
         boolean result = updateEntryImpl(dn, modifications);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: modify, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: modify, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
 
         return result;
     }
@@ -864,18 +864,22 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * @see org.gluu.site.ldap.PlatformOperationFacade#delete(java.lang.String)
      */
     @Override
-    public void delete(String dn) throws ConnectionException {
-        Instant startTime = DurationUtil.now();
+    public boolean delete(String dn) throws ConnectionException {
+        Instant startTime = OperationDurationUtil.instance().now();
 
-        deleteImpl(dn);
+        boolean result = deleteImpl(dn);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: delete, duration: {}, dn: {}", duration, dn);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: delete, duration: {}, dn: {}", duration, dn);
+
+        return result;
     }
 
-    private void deleteImpl(String dn) {
+    private boolean deleteImpl(String dn) {
         try {
-            getConnectionPool().delete(dn);
+            LDAPResult result = getConnectionPool().delete(dn);
+            
+            return ResultCode.SUCCESS.equals(result.getResultCode());
         } catch (Exception ex) {
             throw new ConnectionException("Failed to delete entry", ex);
         }
@@ -888,20 +892,24 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
      * String)
      */
     @Override
-    public void deleteWithSubtree(String dn) throws ConnectionException {
-        Instant startTime = DurationUtil.now();
+    public boolean deleteRecursively(String dn) throws ConnectionException {
+        Instant startTime = OperationDurationUtil.instance().now();
 
-        deleteWithSubtreeImpl(dn);
+        boolean result = deleteRecursivelyImpl(dn);
 
-        Duration duration = DurationUtil.duration(startTime);
-        DurationUtil.logDebug("LDAP operation: delete_tree, duration: {}, dn: {}", duration, dn);
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: delete_tree, duration: {}, dn: {}", duration, dn);
+
+        return result;
     }
 
-    protected void deleteWithSubtreeImpl(String dn) {
+    protected boolean deleteRecursivelyImpl(String dn) {
         try {
             final DeleteRequest deleteRequest = new DeleteRequest(dn);
             deleteRequest.addControl(new SubtreeDeleteRequestControl());
-            getConnectionPool().delete(deleteRequest);
+            LDAPResult result = getConnectionPool().delete(deleteRequest);
+
+            return ResultCode.SUCCESS.equals(result.getResultCode());
         } catch (Exception ex) {
             throw new ConnectionException("Failed to delete entry", ex);
         }

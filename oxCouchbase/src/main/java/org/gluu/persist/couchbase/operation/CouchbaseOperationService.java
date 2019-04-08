@@ -46,7 +46,6 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
 
     boolean addEntry(String key, JsonObject atts) throws DuplicateEntryException, PersistenceException;
 
-    boolean updateEntry(String key, JsonObject attrs) throws UnsupportedOperationException, PersistenceException;
     boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, PersistenceException;
 
     boolean delete(String key) throws EntryNotFoundException;

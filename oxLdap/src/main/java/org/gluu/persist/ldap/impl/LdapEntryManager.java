@@ -310,7 +310,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 for (DeleteNotifier subscriber : subscribers) {
                     subscriber.onBeforeRemove(dn);
                 }
-                this.operationService.deleteWithSubtree(dn);
+                this.operationService.deleteRecursively(dn);
                 for (DeleteNotifier subscriber : subscribers) {
                     subscriber.onAfterRemove(dn);
                 }
