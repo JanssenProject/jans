@@ -42,14 +42,6 @@ public interface LdapOperationService extends PersistenceOperationService {
 
     boolean authenticate(String bindDn, String password) throws ConnectionException;
 
-    SearchResult search(String dn, Filter filter, int searchLimit, int count) throws SearchException;
-
-    SearchResult search(String dn, Filter filter, int searchLimit, int count, Control[] controls,
-            String... attributes) throws SearchException;
-
-    SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int count, Control[] controls,
-            String... attributes) throws SearchException;
-
     <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
             int searchLimit, int count, Control[] controls, String... attributes) throws SearchException;
 
@@ -60,15 +52,6 @@ public interface LdapOperationService extends PersistenceOperationService {
     SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count,
             String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes)
             throws Exception;
-
-    /**
-     * Lookup entry in the directory
-     *
-     * @param dn
-     * @return SearchResultEntry
-     * @throws ConnectionException
-     */
-    SearchResultEntry lookup(String dn) throws ConnectionException;
 
     /**
      * Lookup entry in the directory
