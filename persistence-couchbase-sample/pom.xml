@@ -3,9 +3,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
-	<artifactId>oxcore-couchbase-sample</artifactId>
-	<name>persistence-ldapSample</name>
-	<description>Sample project to show persistence-ldap functionality</description>
+	<artifactId>oxcore-persistence-couchbase-sample</artifactId>
+	<name>Persistence Ñouchbase sample</name>
+	<description>Sample project to show persistence-couchbase functionality</description>
 
 	<parent>
 		<groupId>org.gluu</groupId>
@@ -20,7 +20,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-couchbase</artifactId>
+			<artifactId>oxcore-persistence-couchbase</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
@@ -31,7 +31,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-ldap-annotations</artifactId>
+			<artifactId>oxcore-persistence-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
         <dependency>

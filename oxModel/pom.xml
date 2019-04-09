@@ -15,12 +15,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-ldap-annotations</artifactId>
+			<artifactId>oxcore-persistence-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persist-model</artifactId>
+			<artifactId>oxcore-persistence-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

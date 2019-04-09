@@ -3,7 +3,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
-	<artifactId>oxcore-ldap-sample</artifactId>
+	<artifactId>oxcore-persistence-ldap-sample</artifactId>
 	<name>persistence-ldapSample</name>
 	<description>Sample project to show persistence-ldap functionality</description>
 
@@ -20,12 +20,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-ldap</artifactId>
+			<artifactId>oxcore-persistence-ldap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-ldap-annotations</artifactId>
+			<artifactId>oxcore-persistence-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
