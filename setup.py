@@ -3536,7 +3536,14 @@ class Setup(object):
                     else:
                         cur_bucket = 'gluu'
                     
-                    query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
+                    if 'changetype' in e[1]:
+                        if 'replace' in e[1]:
+                            query = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
+                        elif 'add' in e[1]:
+                            query = 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], e[1][e[1]['add']][0])
+                    else:
+                        query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
+
                     o.write(query)
 
             self.couchbaseExecQuery(tmp_file)
