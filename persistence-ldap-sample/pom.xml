@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
 	<artifactId>oxcore-ldap-sample</artifactId>
-	<name>oxLdapSample</name>
-	<description>Sample project to show oxLdap functionality</description>
+	<name>persistence-ldapSample</name>
+	<description>Sample project to show persistence-ldap functionality</description>
 
 	<parent>
 		<groupId>org.gluu</groupId>

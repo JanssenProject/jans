@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>oxcore-couchbase</artifactId>
+    <artifactId>oxcore-ldap</artifactId>
     <packaging>jar</packaging>
-    <name>oxCouchbase</name>
+    <name>persistence-ldap</name>
     
     <parent>
         <groupId>org.gluu</groupId>
@@ -48,10 +48,10 @@
             <version>${project.version}</version>
         </dependency>
 
-		<dependency>
-			<groupId>com.couchbase.client</groupId>
-			<artifactId>java-client</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.unboundid</groupId>
+            <artifactId>unboundid-ldapsdk</artifactId>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>
