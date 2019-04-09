@@ -167,17 +167,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.gluu</groupId>
-				<artifactId>oxcore-ldap-annotations</artifactId>
+				<artifactId>oxcore-persistence-annotation</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.gluu</groupId>
-				<artifactId>oxcore-ldap</artifactId>
+				<artifactId>oxcore-persistence-ldap</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.gluu</groupId>
-				<artifactId>oxcore-couchbase</artifactId>
+				<artifactId>oxcore-persistence-couchbase</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
