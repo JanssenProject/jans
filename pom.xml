@@ -72,9 +72,9 @@
 		<module>persistence-core</module>
 		<module>persistence-ldap</module>
 		<module>persistence-annotation</module>
-		<module>persistence-ldapSample</module>
+		<module>persistence-ldap-sample</module>
 		<module>persistence-couchbase</module>
-		<module>persistence-couchbaseSample</module>
+		<module>persistence-couchbase-sample</module>
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
