@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oxcore-ldap-annotations</artifactId>
+			<artifactId>oxcore-persistence-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		

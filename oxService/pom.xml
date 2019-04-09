@@ -36,7 +36,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>oxcore-ldap</artifactId>
+			<artifactId>oxcore-persistence-ldap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
