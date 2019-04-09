@@ -70,11 +70,11 @@
 		<module>oxFilter</module>
 		<module>persistence-model</module>
 		<module>persistence-core</module>
-		<module>oxLdap</module>
+		<module>persistence-ldap</module>
 		<module>persistence-annotation</module>
-		<module>oxLdapSample</module>
-		<module>oxCouchbase</module>
-		<module>oxCouchbaseSample</module>
+		<module>persistence-ldapSample</module>
+		<module>persistence-couchbase</module>
+		<module>persistence-couchbaseSample</module>
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
