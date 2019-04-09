@@ -10,6 +10,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.gluu.model.passport.config.Configuration;
 import org.gluu.model.passport.idpinitiated.IIConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
 public class PassportConfiguration {
 	private Configuration conf;
 	private IIConfiguration idpInitiated;
-	private List<Provider> providers;
+	private List<Provider> providers = new ArrayList<>();
 
 	public Configuration getConf() {
 		return conf;
