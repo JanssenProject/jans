@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>oxcore-ldap-annotations</artifactId>
 	<packaging>jar</packaging>
-	<name>oxLdap-annotations</name>
+	<name>persistence-annotation</name>
 
 	<parent>
 		<groupId>org.gluu</groupId>

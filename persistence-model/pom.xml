@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxcore-persist-model</artifactId>
     <packaging>jar</packaging>
-    <name>oxPersistModel</name>
+    <name>persistence-model</name>
     
     <parent>
         <groupId>org.gluu</groupId>
