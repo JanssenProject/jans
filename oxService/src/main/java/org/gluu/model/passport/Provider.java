@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,16 +19,16 @@ public class Provider {
 	private String type;
 	private String mapping;
 	private String passportStrategyId;
-	private boolean enabled;
+	private boolean enabled = true;
 
 	@JsonProperty("logo_img")
-	private String logoImg;
+	private String logoImg = null;
 
 	private boolean requestForEmail;
 	private boolean emailLinkingSafe;
-	private String passportAuthnParams;
+	private String passportAuthnParams = null;
 
-	private Map<String, String> options;
+	private Map<String, String> options = new HashMap<>();
 
 	public String getId() {
 		return id;
