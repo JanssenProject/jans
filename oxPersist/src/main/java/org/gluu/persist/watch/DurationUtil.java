@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple duration calculator helper
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 02/07/2019
  */
 public abstract class DurationUtil {
+
+	protected static final Logger log = LoggerFactory.getLogger(DurationUtil.class);
 
     public Instant now() {
         return Instant.now();
@@ -25,13 +28,6 @@ public abstract class DurationUtil {
         return Duration.between(start, end);
     }
 
-    public void logDebug(String format, Object... arguments) {
-    	Logger log = getLog();
-        if (log.isDebugEnabled()) {
-            log.debug(format, arguments);
-        }
-    }
-    
-    public abstract Logger getLog();
+    public abstract void logDebug(String format, Object... arguments);
 
 }
