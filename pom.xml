@@ -168,7 +168,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>org.gluu</groupId>
-                        <artifactId>oxcore-ldap</artifactId>
+                        <artifactId>oxcore-persistence-ldap</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.python</groupId>
