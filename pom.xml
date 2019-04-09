@@ -68,10 +68,10 @@
 	<modules>
 		<module>oxUtil</module>
 		<module>oxFilter</module>
-		<module>oxPersistModel</module>
-		<module>oxPersist</module>
+		<module>persistence-model</module>
+		<module>persistence-core</module>
 		<module>oxLdap</module>
-		<module>oxLdap-annotations</module>
+		<module>persistence-annotation</module>
 		<module>oxLdapSample</module>
 		<module>oxCouchbase</module>
 		<module>oxCouchbaseSample</module>
