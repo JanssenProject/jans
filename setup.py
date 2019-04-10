@@ -370,7 +370,7 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = None
-        self.opendj_type = None
+        self.opendj_type = 'opendj'
         self.install_couchbase = None
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
