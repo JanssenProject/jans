@@ -1,6 +1,6 @@
 %define name1 oxd-server
 Name:           oxd-server
-Version:        4.0.1
+Version:        4.0
 Release:        1.centos7
 Summary:        plugins for OpenID and UMA
 Group:          System Environment/Daemons
@@ -87,5 +87,5 @@ fi
 /lib/systemd/system/oxd-server.service
 
 %changelog
-* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0.1
-- Release 4.0.1
+* Mon Mar 07 2016 Adrian Alves <adrian@gluu.org> - 4.0
+- Release 4.0
