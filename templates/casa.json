@@ -7,7 +7,11 @@
   },
   "ldap_settings" : {
     "salt" : "%(configFolder)s/salt",
-    "ox-ldap_location" : "%(configFolder)s/ox-ldap.properties"
+    "persistence_type_file" : "%(configFolder)s/gluu.properties",
+    "persistence_config_file" : {
+        "couchbase" : "%(gluuCouchebaseProperties)s",
+        "ldap" : "%(ox_ldap_properties)s"
+    }
   },
   "log_level" : "INFO"
 }
