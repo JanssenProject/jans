@@ -1,9 +1,9 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2019, Gluu
 #
 # Author: Jose Gonzalez
 
-from java.util import Collections, HashMap, ArrayList, Arrays, Date
+from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
 
 from java.nio.charset import Charset
 
@@ -45,8 +45,8 @@ class PersonAuthentication(PersonAuthenticationType):
         self.uid_attr = self.getLocalPrimaryKey()
 
         custScriptService = CdiUtil.bean(CustomScriptService)
-        scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "gluuStatus")
-        dynamicMethods = self.computeMethods(scriptsList)
+        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "gluuStatus", "oxLevel")
+        dynamicMethods = self.computeMethods(self.scriptsList)
 
         if len(dynamicMethods) > 0:
             print "Casa. init. Loading scripts for dynamic modules: %s" % dynamicMethods
@@ -58,7 +58,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     module = external.PersonAuthentication(self.currentTimeMillis)
 
                     print "Casa. init. Got dynamic module for acr %s" % acr
-                    configAttrs = self.getConfigurationAttributes(acr, scriptsList)
+                    configAttrs = self.getConfigurationAttributes(acr, self.scriptsList)
 
                     if acr == self.ACR_U2F:
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
@@ -75,6 +75,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 except:
                     print "Casa. init. Failed to load module %s" % moduleName
                     print "Exception: ", sys.exc_info()[1]
+
+            mobile_methods = configurationAttributes.get("mobile_methods")
+            self.mobile_methods = [] if mobile_methods == None else StringHelper.split(mobile_methods.getValue2(), ",")
 
         print "Casa. init. Initialized successfully"
         return True
@@ -117,14 +120,17 @@ class PersonAuthentication(PersonAuthenticationType):
                 if foundUser == None:
                     print "Casa. authenticate for step 1. Unknown username"
                 else:
-                    acr = foundUser.getAttribute("oxPreferredMethod")
+                    platform_data = self.parsePlatformData(requestParameters)
+                    mfaOff = foundUser.getAttribute("oxPreferredMethod") == None
                     logged_in = False
 
-                    if acr == None:
+                    if mfaOff:
                         logged_in = authenticationService.authenticate(user_name, user_password)
-                    elif acr in self.authenticators:
-                        module = self.authenticators[acr]
-                        logged_in = module.authenticate(module.configAttrs, requestParameters, step)
+                    else:
+                        acr = self.getSuitableAcr(foundUser, platform_data['isMobile'])
+                        if acr != None:
+                            module = self.authenticators[acr]
+                            logged_in = module.authenticate(module.configAttrs, requestParameters, step)
 
                     if logged_in:
                         foundUser = authenticationService.getAuthenticatedUser()
@@ -132,11 +138,11 @@ class PersonAuthentication(PersonAuthenticationType):
                         if foundUser == None:
                             print "Casa. authenticate for step 1. Cannot retrieve logged user"
                         else:
-                            if acr == None:
+                            if mfaOff:
                                 identity.setWorkingParameter("skip2FA", True)
                             else:
                                 #Determine whether to skip 2FA based on policy defined (global or user custom)
-                                skip2FA = self.determineSkip2FA(userService, identity, foundUser, ServerUtil.getFirstValue(requestParameters, "loginForm:platform"))
+                                skip2FA = self.determineSkip2FA(userService, identity, foundUser, platform_data)
                                 identity.setWorkingParameter("skip2FA", skip2FA)
                                 identity.setWorkingParameter("ACR", acr)
 
@@ -162,7 +168,7 @@ class PersonAuthentication(PersonAuthenticationType):
             session_attributes = identity.getSessionId().getSessionAttributes()
             acr = session_attributes.get("ACR")
             #this working parameter is used in casa.xhtml
-            identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
+            identity.setWorkingParameter("methods", ArrayList(self.getAvailMethodsUser(user, acr)))
 
             success = False
             if acr in self.authenticators:
@@ -203,7 +209,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             acr = session_attributes.get("ACR")
             print "Casa. prepareForStep. ACR = %s" % acr
-            identity.setWorkingParameter("methods", self.getAvailMethodsUser(user, acr))
+            identity.setWorkingParameter("methods", ArrayList(self.getAvailMethodsUser(user, acr)))
 
             if acr in self.authenticators:
                 module = self.authenticators[acr]
@@ -297,8 +303,8 @@ class PersonAuthentication(PersonAuthenticationType):
     def computeMethods(self, scriptList):
 
         methods = []
+        f = open(self.configFileLocation, 'r')
         try:
-            f = open(self.configFileLocation, 'r')
             cmConfigs = json.loads(f.read())
             if 'acr_plugin_mapping' in cmConfigs:
                 mapping = cmConfigs['acr_plugin_mapping']
@@ -328,8 +334,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return configMap
 
 
-    def getAvailMethodsUser(self, user, skip):
-        methods = ArrayList()
+    def getAvailMethodsUser(self, user, skip=None):
+        methods = HashSet()
 
         for method in self.authenticators:
             try:
@@ -340,9 +346,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Casa. getAvailMethodsUser. hasEnrollments call could not be issued for %s module" % method
 
         try:
-            #skip is guaranteed to be a member of methods (if hasEnrollments routines are properly implemented).
-            #A call to remove strangely crashes if skip is absent
-            methods.remove(skip)
+            if skip != None:
+                # skip is guaranteed to be a member of methods (if hasEnrollments routines are properly implemented).
+                # A call to remove strangely crashes when skip is absent
+                methods.remove(skip)
         except:
             print "Casa. getAvailMethodsUser. methods list does not contain %s" % skip
 
@@ -364,6 +371,40 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
 # 2FA policy enforcement
+
+    def parsePlatformData(self, requestParameters):
+        try:
+            #Find device info passed in HTTP request params (see index.xhtml)
+            platform = ServerUtil.getFirstValue(requestParameters, "loginForm:platform")
+            deviceInf = json.loads(platform)
+        except:
+            print "Casa. parsePlatformData. Error parsing platform data"
+            deviceInf = None
+
+        return deviceInf
+
+
+    def getSuitableAcr(self, user, onMobile):
+
+        id = user.getUserId()
+        strongest = -1
+        acr = None
+        user_methods = self.getAvailMethodsUser(user)
+
+        for s in self.scriptsList:
+            name = s.getName()
+            if user_methods.contains(name) and name in self.authenticators and s.getLevel() > strongest and (not onMobile or name in self.mobile_methods):
+                acr = name
+                strongest = s.getLevel()
+
+        print "Casa. getSuitableAcr. On mobile = %s" % onMobile
+        if acr == None and onMobile:
+            print "Casa. getSuitableAcr. No mobile-friendly authentication method available for user %s" % id
+            # user_methods is not empty when this function is called, so just pick any
+            acr = user_methods.get(0)
+
+        print "Casa. getSuitableAcr. %s was selected for user %s" % (acr, id)
+        return acr
 
     def determineSkip2FA(self, userService, identity, foundUser, platform):
 
@@ -402,9 +443,9 @@ class PersonAuthentication(PersonAuthenticationType):
             deviceCriterion = 'DEVICE_UNKNOWN,' in policy
 
             if locationCriterion or deviceCriterion:
-                try:
-                    #Find device info passed in HTTP request params (see index.xhtml)
-                    deviceInf = json.loads(platform)
+                if deviceInf == None:
+                    print "Casa. determineSkip2FA. No user device data. Forcing 2FA to take place..."
+                else:
                     skip2FA = self.process2FAPolicy(identity, foundUser, deviceInf, locationCriterion, deviceCriterion)
 
                     if skip2FA:
@@ -414,9 +455,6 @@ class PersonAuthentication(PersonAuthenticationType):
                         if devInf != None:
                             foundUser.setAttribute("oxTrustedDevicesInfo", devInf)
                             userService.updateUser(foundUser)
-                except:
-                    print "Casa. determineSkip2FA. Error parsing current user device data. Forcing 2FA to take place..."
-
             else:
                 print "Casa. determineSkip2FA. Unknown %s policy: cannot skip 2FA" % policy
 
