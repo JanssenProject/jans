@@ -3535,7 +3535,7 @@ class Setup(object):
                     if 'changetype' in e[1]:
                         if 'replace' in e[1]:
                             query = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
-                        elif 'add' in e[1]:                            
+                        elif 'add' in e[1]:
                             for m in e[1][e[1]['add']]:
                                 query += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
                     else:
@@ -3719,11 +3719,12 @@ class Setup(object):
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
-        
-        self.import_ldif_couchebase(ldif_files)
-        
-        
-        
+
+        if self.ldap_type == 'opendj':
+            self.import_ldif_opendj(ldif_files)
+        elif self.ldap_type == 'couchbase':
+            self.import_ldif_couchebase(ldif_files)
+
 ############################   Main Loop   #################################################
 
 def print_help():
