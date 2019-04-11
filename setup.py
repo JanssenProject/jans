@@ -446,6 +446,8 @@ class Setup(object):
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
+        self.lidf_oxtrust_api = '%s/oxtrust_api.ldif' % self.outputFolder
+        
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
         
@@ -493,6 +495,15 @@ class Setup(object):
         self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
         self.scim_rp_client_jks_pass = 'secret'
         self.scim_resource_oxid = None
+
+        # oxTrust Api configuration
+        self.api_rs_client_jks_fn = '%s/api-rs-client.jks' % self.certFolder
+        self.api_rs_client_jks_pass = 'secret'
+        self.api_rs_client_jwks = None
+        self.api_rp_client_jks_fn = '%s/api-rp-client.jks' % self.certFolder
+        self.api_rp_client_jks_pass = 'secret'
+        self.api_rp_client_jwks = None
+        
 
         # oxPassport Configuration
         self.gluu_passport_base = '%s/passport' % self.node_base
@@ -549,6 +560,7 @@ class Setup(object):
                            self.ldif_scim,
                            self.ldif_passport,
                            self.ldif_idp,
+                           self.lidf_oxtrust_api,
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -580,6 +592,7 @@ class Setup(object):
                              self.network: False,
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
+                             self.lidf_oxtrust_api: False,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -1761,6 +1774,18 @@ class Setup(object):
         self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
         self.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(self.scim_rp_client_jwks, 1)
 
+
+    def generate_oxtrust_api_configuration(self):
+        self.api_rs_client_jks_pass_encoded = self.obscure(self.api_rs_client_jks_pass)
+        self.api_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.api_rs_client_jks_fn, self.api_rs_client_jks_pass)
+        self.templateRenderingDict['api_rs_client_base64_jwks'] = self.generate_base64_string(self.api_rs_client_jwks, 1)
+
+        self.api_rp_client_jks_pass_encoded = self.obscure(self.api_rp_client_jks_pass)
+        self.api_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.api_rp_client_jks_fn, self.api_rp_client_jks_pass)
+        self.templateRenderingDict['api_rp_client_base64_jwks'] = self.generate_base64_string(self.api_rp_client_jwks, 1)
+
+
+
     def generate_passport_configuration(self):
         self.passport_rs_client_jks_pass = self.getPW()
 
@@ -1846,7 +1871,7 @@ class Setup(object):
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
-
+        self.generate_oxtrust_api_configuration()
         self.generate_scim_configuration()
         self.generate_passport_configuration()
 
