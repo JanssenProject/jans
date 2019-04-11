@@ -127,7 +127,7 @@ public final class LdapEntryReporter extends ScheduledReporter {
 
     private LdapEntryReporter(MetricRegistry registry, Clock clock, TimeZone timeZone, TimeUnit rateUnit, TimeUnit durationUnit, MetricFilter filter,
             MetricService metricService) {
-        super(registry, "ldap-reporter", filter, rateUnit, durationUnit);
+        super(registry, "reporter", filter, rateUnit, durationUnit);
         this.clock = clock;
         this.metricService = metricService;
         this.startTime = new Date();
