@@ -1,8 +1,8 @@
 # API Resource Server Client
-dn: inum=%(api_rs_client_id)s,ou=clients,o=gluu
+dn: inum=800-9340-4274-986f-f7a37c8cc620,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
-inum: %(api_rs_client_id)s
+inum: 800-9340-4274-986f-f7a37c8cc620
 displayName: API Resource Server Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
@@ -15,10 +15,10 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # API Requesting Party Client
-dn: inum=%(api_rp_client_id)s,ou=clients,o=gluu
+dn: inum=800-b526-43a0-b5e5-e39c7a970386,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
-inum: %(api_rp_client_id)s
+inum: 800-b526-43a0-b5e5-e39c7a970386
 displayName: API Requesting Party Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
@@ -54,15 +54,15 @@ oxRevision: 1
 oxPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
 
 #API Resource
-dn: oxId=%(api_resource_oxid)s,ou=resources,ou=uma,o=gluu
+dn: oxId=800-e8ab-4207-9fab-2a27de921ac1,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: oxTrust api Resource
 owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/api_logo.png
-oxAssociatedClient: inum=%(api_rs_client_id)s,ou=clients,o=gluu
+oxAssociatedClient: inum=800-9340-4274-986f-f7a37c8cc620,ou=clients,o=gluu
 oxAuthUmaScope: inum=OO11-AABB,ou=scopes,ou=uma,o=gluu
 oxAuthUmaScope: inum=1122-BBCC,ou=scopes,ou=uma,o=gluu
-oxId: %(api_resource_oxid)s
+oxId: 800-e8ab-4207-9fab-2a27de921ac1
 oxResource: https://%(hostname)s/identity/restv1/api/v1
 oxRevision: 1
