@@ -156,6 +156,21 @@ oxScript::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
+dn: inum=OO11-BAFE,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Client authorization UMA RPT Policy for oxtrust api
+displayName: oxtrust_api_access_policy
+gluuStatus: false
+inum: OO11-BAFE
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(api_rp_client_id)s","description":""}
+oxLevel: 100
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(uma_rpt_policy_umaclientauthzrptpolicy)s
+oxScriptType: uma_rpt_policy
+programmingLanguage: python
+
 dn: inum=2DAF-F996,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
