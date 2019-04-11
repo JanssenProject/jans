@@ -30,7 +30,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String orgSupportEmail;
 
-    private String applicationInum;
     private String applicationUrl;
 
     private String baseEndpoint;
@@ -62,8 +61,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private boolean allowPersonModification;
 
     private String idpUrl;
-
-    private String velocityLog;
 
     private String spMetadataPath;
 
@@ -130,7 +127,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private String apiUmaClientId;
     private String apiUmaClientKeyId;
     private String apiUmaResourceId;
-    private String apiUmaScope;
+    private String[] apiUmaScopes;
     private String apiUmaClientKeyStoreFile;
     private String apiUmaClientKeyStorePassword;
 
@@ -206,14 +203,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setOrgSupportEmail(String orgSupportEmail) {
         this.orgSupportEmail = orgSupportEmail;
-    }
-
-    public String getApplicationInum() {
-        return applicationInum;
-    }
-
-    public void setApplicationInum(String applicationInum) {
-        this.applicationInum = applicationInum;
     }
 
     public String getApplicationUrl() {
@@ -374,14 +363,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setIdpUrl(String idpUrl) {
         this.idpUrl = idpUrl;
-    }
-
-    public String getVelocityLog() {
-        return velocityLog;
-    }
-
-    public void setVelocityLog(String velocityLog) {
-        this.velocityLog = velocityLog;
     }
 
     public String getSpMetadataPath() {
@@ -933,19 +914,12 @@ public class AppConfiguration implements Configuration, Serializable {
         this.apiUmaResourceId = apiUmaResourceId;
     }
 
-    /**
-     * @return the apiUmaScope
-     */
-    public String getApiUmaScope() {
-        return apiUmaScope;
+    public String[] getApiUmaScopes() {
+        return apiUmaScopes;
     }
 
-    /**
-     * @param apiUmaScope
-     *            the apiUmaScope to set
-     */
-    public void setApiUmaScope(String apiUmaScope) {
-        this.apiUmaScope = apiUmaScope;
+    public void setApiUmaScopes(String[] apiUmaScopes) {
+        this.apiUmaScopes = apiUmaScopes;
     }
 
     /**
