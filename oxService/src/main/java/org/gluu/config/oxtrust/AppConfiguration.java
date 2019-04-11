@@ -142,6 +142,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private boolean authenticationRecaptchaEnabled;
 
     private boolean scimTestMode;
+    private boolean oxTrustApiTestMode;
 
     private boolean rptConnectionPoolUseConnectionPooling;
     private int rptConnectionPoolMaxTotal;
@@ -757,6 +758,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setScimTestMode(boolean scimTestMode) {
         this.scimTestMode = scimTestMode;
+    }
+
+    public boolean isOxTrustApiTestMode() {
+        return oxTrustApiTestMode;
+    }
+
+    public void setOxTrustApiTestMode(boolean oxTrustApiTestMode) {
+        this.oxTrustApiTestMode = oxTrustApiTestMode;
     }
 
     public boolean isRptConnectionPoolUseConnectionPooling() {
