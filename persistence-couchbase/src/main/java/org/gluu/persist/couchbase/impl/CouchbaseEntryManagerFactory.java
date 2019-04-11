@@ -48,6 +48,10 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
     public String getDefaultConfigurationFileName() {
         return "gluu-couchbase.properties";
     }
+    
+    public CouchbaseEnvironment getCouchbaseEnvironment() {
+    	return couchbaseEnvironment;
+    }
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
