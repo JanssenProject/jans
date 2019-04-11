@@ -163,7 +163,7 @@ description: Client authorization UMA RPT Policy for oxtrust api
 displayName: oxtrust_api_access_policy
 gluuStatus: false
 inum: OO11-BAFE
-oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(api_rp_client_id)s","description":""}
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"800-b526-43a0-b5e5-e39c7a970386","description":""}
 oxLevel: 100
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
