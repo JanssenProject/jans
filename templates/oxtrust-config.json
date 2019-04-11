@@ -111,6 +111,13 @@
     "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
     "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
 
+    "apiUmaClientId":"%(api_rs_client_id)s",
+    "apiUmaClientKeyId":"",
+    "apiUmaResourceId":"64fb8798-2523-4531-9a86-c5b7a1f2c1c3",
+    "apiUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read",
+    "apiUmaClientKeyStoreFile":"%(api_rs_client_jks_fn)s",
+    "apiUmaClientKeyStorePassword":"%(api_rs_client_jks_pass_encoded)s",
+
     "cssLocation":"",
     "jsLocation":"",
 
@@ -131,6 +138,7 @@
     "clientBlackList": ["*.attacker.com/*"],
 
     "scimTestMode":false,
+    "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200
     },
