@@ -8,14 +8,14 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.DataEntry;
 
 /**
  * Person with custom attributes
  *
  * @author Yuriy Movchan Date: 07.13.2011
  */
-@Entry
+@DataEntry
 public class GluuDummyEntry extends Entry implements Serializable {
 
     private static final long serialVersionUID = -1111582184398161100L;

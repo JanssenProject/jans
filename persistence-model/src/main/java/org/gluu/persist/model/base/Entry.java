@@ -8,7 +8,7 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.DN;
 
 /**
  * Provides DN attribute

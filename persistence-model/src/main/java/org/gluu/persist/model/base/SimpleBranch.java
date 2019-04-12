@@ -8,22 +8,22 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Model for simple branch
  *
  * @author Yuriy Movchan Date: 11.01.2010
  */
-@Entry
+@DataEntry
 @ObjectClass(values = { "top", "organizationalUnit"})
 public class SimpleBranch extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -1311006812730222719L;
 
-    @Attribute(name = "ou")
+    @AttributeName(name = "ou")
     private String organizationalUnitName;
 
     public SimpleBranch() {

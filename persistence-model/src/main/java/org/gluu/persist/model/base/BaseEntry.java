@@ -6,7 +6,7 @@
 
 package org.gluu.persist.model.base;
 
-import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.DN;
 
 /**
  * Provides DN attribute

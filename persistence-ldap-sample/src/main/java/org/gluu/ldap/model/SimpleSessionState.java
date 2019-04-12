@@ -13,18 +13,18 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapDN;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapJsonObject;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Entry
+@DataEntry
 @ObjectClass(values = { "top", "oxAuthSessionId" })
 public class SimpleSessionState implements Serializable {
 
@@ -33,29 +33,29 @@ public class SimpleSessionState implements Serializable {
     @DN
     private String dn;
 
-    @Attribute(name = "uniqueIdentifier")
+    @AttributeName(name = "uniqueIdentifier")
     private String id;
 
-    @Attribute(name = "oxLastAccessTime")
+    @AttributeName(name = "oxLastAccessTime")
     private Date lastUsedAt;
 
-    @Attribute(name = "oxAuthUserDN")
+    @AttributeName(name = "oxAuthUserDN")
     private String userDn;
 
-    @Attribute(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
 
-    @Attribute(name = "oxAuthSessionState")
+    @AttributeName(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
-    @Attribute(name = "oxAsJwt")
+    @AttributeName(name = "oxAsJwt")
     private Boolean isJwt = false;
 
-    @Attribute(name = "oxJwt")
+    @AttributeName(name = "oxJwt")
     private String jwt;
 
     @JsonObject
-    @Attribute(name = "oxAuthSessionAttribute")
+    @AttributeName(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
 
     @Transient

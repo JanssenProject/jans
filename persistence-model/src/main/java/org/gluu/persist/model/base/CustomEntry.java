@@ -10,16 +10,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.persist.annotation.@AttributesList;
-import org.gluu.persist.annotation.LdapCustomObjectClass;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributesList;
+import org.gluu.persist.annotation.CustomObjectClass;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 04/08/2014
  */
-@Entry
+@DataEntry
 @ObjectClass(values = { "top" })
 public class CustomEntry extends BaseEntry implements Serializable {
 

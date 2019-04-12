@@ -1,29 +1,29 @@
 package org.gluu.service.cache;
 
 import org.gluu.persist.model.base.Deletable;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapDN;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
 import java.util.Date;
 
-@Entry
+@DataEntry
 @ObjectClass(values = {"top", "oxCacheEntity"})
 public class NativePersistenceCacheEntity implements Serializable, Deletable {
 
     @DN
     private String dn;
-    @Attribute(name = "uniqueIdentifier")
+    @AttributeName(name = "uniqueIdentifier")
     private String id;
-    @Attribute(name = "oxAuthCreation")
+    @AttributeName(name = "oxAuthCreation")
     private Date creationDate;
-    @Attribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
-    @Attribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
-    @Attribute(name = "oxData")
+    @AttributeName(name = "oxData")
     private String data;
 
     public String getDn() {

@@ -1,19 +1,19 @@
 package org.gluu.persist.model.base;
 
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
 
 import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
-@Entry
+@DataEntry
 public class DeletableEntity extends BaseEntry implements Deletable {
 
-    @Attribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
-    @Attribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
 
     @Override
