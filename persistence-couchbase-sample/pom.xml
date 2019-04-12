@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
 	<artifactId>oxcore-persistence-couchbase-sample</artifactId>
-	<name>Persistence Ñouchbase sample</name>
+	<name>Persistence Couchbase sample</name>
 	<description>Sample project to show persistence-couchbase functionality</description>
 
 	<parent>
