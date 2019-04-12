@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.model.uma.persistence;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -18,39 +18,39 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthUmaScopeDescription"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthUmaScopeDescription"})
 public class UmaScopeDescription {
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
     @NotNull
     @Size(min = 2, max = 2083, message = "Length of scope should be between 2 and 500")
 //    @Pattern(regexp = "^[a-zA-Z\\d_]{4,30}$", message = "Invalid Scope Id .Only alphanumeric and underscore are allowed.")
-    @LdapAttribute(name = "oxId")
+    @AttributeName(name = "oxId")
     private String id; // keep scope, id can be url or plain scope (edit, view, delete)
 
     @NotNull(message = "Display name should be not empty")
-    @LdapAttribute(name = "displayName")
+    @AttributeName(name = "displayName")
     private String displayName;
 
-    @LdapAttribute(name = "description")
+    @AttributeName(name = "description")
     private String description;
 
-    @LdapAttribute(name = "owner")
+    @AttributeName(name = "owner")
     private String owner;
 
-    @LdapAttribute(name = "oxFaviconImage")
+    @AttributeName(name = "oxFaviconImage")
     private String faviconImageAsXml;
 
-    @LdapAttribute(name = "oxIconUrl")
+    @AttributeName(name = "oxIconUrl")
     private String iconUrl;
 
-    @LdapAttribute(name = "oxPolicyScriptDn")
+    @AttributeName(name = "oxPolicyScriptDn")
     private List<String> authorizationPolicies;
 
     public UmaScopeDescription() {

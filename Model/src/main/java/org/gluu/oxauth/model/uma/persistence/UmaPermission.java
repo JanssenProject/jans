@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.uma.persistence;
 
 import com.google.common.collect.Maps;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.persist.annotation.*;
 
 import java.util.*;
 
@@ -17,32 +17,32 @@ import java.util.*;
  * @author Yuriy Zabrovarnyy
  * @version 2.0, date: 17/05/2017
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
+@DataEntry
+@ObjectClass(values = {"top", "oxUmaResourcePermission"})
 public class UmaPermission {
 
     public static final String PCT = "pct";
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "oxStatus")
+    @AttributeName(name = "oxStatus")
     private String status;
-    @LdapAttribute(name = "oxTicket")
+    @AttributeName(name = "oxTicket")
     private String ticket;
-    @LdapAttribute(name = "oxConfigurationCode")
+    @AttributeName(name = "oxConfigurationCode")
     private String configurationCode;
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
 
-    @LdapAttribute(name = "oxResourceSetId")
+    @AttributeName(name = "oxResourceSetId")
     private String resourceId;
-    @LdapAttribute(name = "oxAuthUmaScope")
+    @AttributeName(name = "oxAuthUmaScope")
     private List<String> scopeDns;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxAttributes")
+    @JsonObject
+    @AttributeName(name = "oxAttributes")
     private Map<String, String> attributes;
 
     private boolean expired;

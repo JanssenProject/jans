@@ -3,7 +3,7 @@ package org.gluu.oxauth.model.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -11,7 +11,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  * @version 0.9, 09/02/2015
  */
 
-public enum SessionIdState  implements LdapEnum {
+public enum SessionIdState  implements AttributeEnum {
 
     UNAUTHENTICATED("unauthenticated"), AUTHENTICATED("authenticated");
 
@@ -37,7 +37,7 @@ public enum SessionIdState  implements LdapEnum {
 		return mapByValues.get(value);
 	}
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
+	public Enum<? extends AttributeEnum> resolveByValue(String value) {
 		return getByValue(value);
 	}
 

@@ -1,9 +1,9 @@
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
 
@@ -11,20 +11,20 @@ import java.io.Serializable;
  * @author Javier Rojas Blum
  * @version October 16, 2015
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxClientAuthorizations"})
+@DataEntry
+@ObjectClass(values = {"top", "oxClientAuthorizations"})
 public class ClientAuthorizations implements Serializable {
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "oxId")
+    @AttributeName(name = "oxId")
     private String id;
 
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private String clientId;
 
-    @LdapAttribute(name = "oxAuthScope")
+    @AttributeName(name = "oxAuthScope")
     private String[] scopes;
 
     public String getDn() {

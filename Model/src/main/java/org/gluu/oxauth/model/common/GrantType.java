@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version July 18, 2017
  */
-public enum GrantType implements HasParamName, LdapEnum {
+public enum GrantType implements HasParamName, AttributeEnum {
 
     /**
      * The authorization code is obtained by using an authorization server as an
@@ -147,7 +147,7 @@ public enum GrantType implements HasParamName, LdapEnum {
         return mapByValues.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

@@ -7,10 +7,10 @@
 package org.gluu.oxauth.model.uma.persistence;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -22,57 +22,57 @@ import java.util.List;
  *
  * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxUmaResource"})
+@DataEntry
+@ObjectClass(values = {"top", "oxUmaResource"})
 public class UmaResource {
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @LdapAttribute(name = "oxId")
+    @AttributeName(name = "oxId")
     private String id;
 
     @NotNull(message = "Display name should be not empty")
-    @LdapAttribute(name = "displayName")
+    @AttributeName(name = "displayName")
     private String name;
 
-    @LdapAttribute(name = "oxFaviconImage")
+    @AttributeName(name = "oxFaviconImage")
     private String iconUri;
 
-    @LdapAttribute(name = "oxAuthUmaScope")
+    @AttributeName(name = "oxAuthUmaScope")
     private List<String> scopes;
 
-    @LdapAttribute(name = "oxScopeExpression")
+    @AttributeName(name = "oxScopeExpression")
     private String scopeExpression;
 
-    @LdapAttribute(name = "oxAssociatedClient")
+    @AttributeName(name = "oxAssociatedClient")
     private List<String> clients;
 
-    @LdapAttribute(name = "oxResource")
+    @AttributeName(name = "oxResource")
     private List<String> resources;
 
-    @LdapAttribute(name = "oxRevision")
+    @AttributeName(name = "oxRevision")
     private String rev;
 
-    @LdapAttribute(name = "owner")
+    @AttributeName(name = "owner")
     private String creator;
 
-    @LdapAttribute(name = "description")
+    @AttributeName(name = "description")
     private String description;
 
-    @LdapAttribute(name = "oxType")
+    @AttributeName(name = "oxType")
     private String type;
 
-    @LdapAttribute(name = "oxAuthCreation")
+    @AttributeName(name = "oxAuthCreation")
     private Date creationDate;
 
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
 
     public boolean isDeletable() {

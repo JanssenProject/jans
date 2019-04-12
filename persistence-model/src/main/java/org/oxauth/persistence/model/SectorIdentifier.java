@@ -4,27 +4,27 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2018
  */
-@LdapEntry(sortBy = {"id"})
-@LdapObjectClass(values = {"top", "oxSectorIdentifier"})
+@DataEntry(sortBy = {"id"})
+@ObjectClass(values = {"top", "oxSectorIdentifier"})
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -2812480357430436514L;
 
-    @LdapAttribute(name = "oxId", ignoreDuringUpdate = true)
+    @AttributeName(name = "oxId", ignoreDuringUpdate = true)
     private String id;
 
-    @LdapAttribute(name = "oxAuthRedirectURI")
+    @AttributeName(name = "oxAuthRedirectURI")
     private List<String> redirectUris;
 
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private List<String> clientIds;
 
     public String getId() {

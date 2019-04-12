@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.ldap;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.persist.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -19,59 +19,59 @@ import java.util.Date;
  * @version September 6, 2017
  */
 
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthToken"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthToken"})
 public class TokenLdap implements Serializable {
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "uniqueIdentifier")
+    @AttributeName(name = "uniqueIdentifier")
     private String id;
-    @LdapAttribute(name = "oxAuthGrantId")
+    @AttributeName(name = "oxAuthGrantId")
     private String grantId;
-    @LdapAttribute(name = "oxAuthUserId")
+    @AttributeName(name = "oxAuthUserId")
     private String userId;
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private String clientId;
-    @LdapAttribute(name = "oxAuthCreation")
+    @AttributeName(name = "oxAuthCreation")
     private Date creationDate;
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
-    @LdapAttribute(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
-    @LdapAttribute(name = "oxAuthScope")
+    @AttributeName(name = "oxAuthScope")
     private String scope;
-    @LdapAttribute(name = "oxAuthTokenCode")
+    @AttributeName(name = "oxAuthTokenCode")
     private String tokenCode;
-    @LdapAttribute(name = "oxAuthTokenType")
+    @AttributeName(name = "oxAuthTokenType")
     private String tokenType;
-    @LdapAttribute(name = "oxAuthGrantType")
+    @AttributeName(name = "oxAuthGrantType")
     private String grantType;
-    @LdapAttribute(name = "oxAuthJwtRequest")
+    @AttributeName(name = "oxAuthJwtRequest")
     private String jwtRequest;
-    @LdapAttribute(name = "oxAuthAuthorizationCode")
+    @AttributeName(name = "oxAuthAuthorizationCode")
     private String authorizationCode;
-    @LdapAttribute(name = "oxAuthNonce")
+    @AttributeName(name = "oxAuthNonce")
     private String nonce;
-    @LdapAttribute(name = "oxCodeChallenge")
+    @AttributeName(name = "oxCodeChallenge")
     private String codeChallenge;
-    @LdapAttribute(name = "oxCodeChallengeMethod")
+    @AttributeName(name = "oxCodeChallengeMethod")
     private String codeChallengeMethod;
-    @LdapAttribute(name = "oxAuthClaims")
+    @AttributeName(name = "oxAuthClaims")
     private String claims;
-    @LdapAttribute(name = "oxIdTokenTokenBindingCnf")
+    @AttributeName(name = "oxIdTokenTokenBindingCnf")
     private String tokenBindingHash;
 
-    @LdapAttribute(name = "oxAuthenticationMode")
+    @AttributeName(name = "oxAuthenticationMode")
     private String authMode;
 
-    @LdapAttribute(name = "oxAuthSessionDn")
+    @AttributeName(name = "oxAuthSessionDn")
     private String sessionDn;
 
-    @LdapAttribute(name = "oxAttributes")
-    @LdapJsonObject
+    @AttributeName(name = "oxAttributes")
+    @JsonObject
     private TokenAttributes attributes;
 
     private boolean isFromCache;
