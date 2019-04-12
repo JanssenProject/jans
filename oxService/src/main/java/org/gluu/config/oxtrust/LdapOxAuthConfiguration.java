@@ -8,11 +8,11 @@ package org.gluu.config.oxtrust;
 
 import org.gluu.config.oxauth.WebKeysSettings;
 import org.gluu.persist.model.base.Entry;
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapDN;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapJsonObject;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapJsonObject;
+import org.gluu.persist.annotation.LdapObjectClass;
 
 /**
  * @author Rahat Ali

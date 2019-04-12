@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapSchemaEntry;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapSchemaEntry;
 
 /**
  * Schema attribute

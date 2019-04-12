@@ -1,10 +1,10 @@
 package org.gluu.service.cache;
 
 import org.gluu.persist.model.base.Deletable;
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapDN;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapObjectClass;
 
 import java.io.Serializable;
 import java.util.Date;

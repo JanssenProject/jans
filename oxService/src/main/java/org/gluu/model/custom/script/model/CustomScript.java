@@ -17,10 +17,10 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.SimpleExtendedCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapJsonObject;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapJsonObject;
+import org.gluu.persist.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**

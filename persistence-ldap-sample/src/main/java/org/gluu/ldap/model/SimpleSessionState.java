@@ -13,11 +13,11 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapDN;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapJsonObject;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapJsonObject;
+import org.gluu.persist.annotation.LdapObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
