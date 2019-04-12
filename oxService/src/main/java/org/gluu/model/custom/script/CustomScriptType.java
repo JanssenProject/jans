@@ -35,7 +35,7 @@ import org.gluu.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyRptPolicyType;
 import org.gluu.model.custom.script.type.uma.UmaRptPolicyType;
 import org.gluu.model.custom.script.type.user.*;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.LdapEnum;
 
 import java.util.HashMap;
 import java.util.Map;

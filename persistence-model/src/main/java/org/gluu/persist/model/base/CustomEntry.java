@@ -10,25 +10,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.@AttributesList;
+import org.gluu.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 04/08/2014
  */
-@LdapEntry
-@LdapObjectClass(values = { "top" })
+@Entry
+@ObjectClass(values = { "top" })
 public class CustomEntry extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -7686468010219068788L;
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
     public List<CustomAttribute> getCustomAttributes() {

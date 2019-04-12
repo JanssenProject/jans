@@ -6,7 +6,7 @@
 
 package org.gluu.persist.model.base;
 
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapDN;
 
 /**
  * Provides DN attribute
@@ -15,7 +15,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
  */
 public class BaseEntry {
 
-    @LdapDN
+    @DN
     private String dn;
 
     public BaseEntry() {

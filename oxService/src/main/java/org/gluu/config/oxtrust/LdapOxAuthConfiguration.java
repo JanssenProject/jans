@@ -8,42 +8,42 @@ package org.gluu.config.oxtrust;
 
 import org.gluu.config.oxauth.WebKeysSettings;
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Rahat Ali
  * @version 2.1, 19/04/2015
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxAuthConfiguration" })
+@Entry
+@ObjectClass(values = { "top", "oxAuthConfiguration" })
 public class LdapOxAuthConfiguration extends Entry {
 
     private static final long serialVersionUID = 2453308522994526877L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "oxAuthConfDynamic")
+    @Attribute(name = "oxAuthConfDynamic")
     private String oxAuthConfigDynamic;
 
-    @LdapAttribute(name = "oxAuthConfStatic")
+    @Attribute(name = "oxAuthConfStatic")
     private String oxAuthConfstatic;
 
-    @LdapAttribute(name = "oxAuthConfErrors")
+    @Attribute(name = "oxAuthConfErrors")
     private String oxAuthConfErrors;
 
-    @LdapAttribute(name = "oxAuthConfWebKeys")
+    @Attribute(name = "oxAuthConfWebKeys")
     private String oxAuthConfWebKeys;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxWebKeysSettings")
+    @JsonObject
+    @Attribute(name = "oxWebKeysSettings")
     private WebKeysSettings oxWebKeysSettings;
 
-    @LdapAttribute(name = "oxRevision")
+    @Attribute(name = "oxRevision")
     private long revision;
 
     public LdapOxAuthConfiguration() {

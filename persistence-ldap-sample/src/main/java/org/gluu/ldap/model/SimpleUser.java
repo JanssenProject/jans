@@ -11,34 +11,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.@AttributesList;
+import org.gluu.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
  * Date: 11/03/2016
  */
-@LdapEntry
-@LdapObjectClass(values = {"gluuPerson", "top"})
+@Entry
+@ObjectClass(values = {"gluuPerson", "top"})
 public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "uid")
+    @Attribute(name = "uid")
     private String userId;
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
     public String getDn() {

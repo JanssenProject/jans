@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.site.ldap.persistence.annotation;
+package org.gluu.persistence.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LdapAttributesList {
+public @interface @AttributesList {
 
     /**
      * (Required) The class property name which contains LDAP attribute name.
