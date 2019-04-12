@@ -42,7 +42,7 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
             }
         }
 
-        return false;
+        return true;
     }
 
     private boolean executeExternalAuthenticate(CustomScriptConfiguration customScriptConfiguration, ExternalResourceOwnerPasswordCredentialsContext context) {
