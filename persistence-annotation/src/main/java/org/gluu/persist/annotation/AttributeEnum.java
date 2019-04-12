@@ -15,6 +15,6 @@ public interface AttributeEnum {
 
     String getValue();
 
-    Enum<? extends Enum> resolveByValue(String value);
+    Enum<? extends AttributeEnum> resolveByValue(String value);
 
 }
