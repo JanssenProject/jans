@@ -3,9 +3,9 @@ package org.gluu.oxauth.fido2.model.entry;
 import java.util.Date;
 
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Fido2 base persistence entry
@@ -13,26 +13,26 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
-@LdapEntry(sortBy = "creationDate")
-@LdapObjectClass(values = { "top", "oxFido2Entry" })
+@DataEntry(sortBy = "creationDate")
+@ObjectClass(values = { "top", "oxFido2Entry" })
 public class Fido2Entry extends BaseEntry {
 
-    @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
     private String id;
 
-    @LdapAttribute(name = "oxCodeChallenge")
+    @AttributeName(name = "oxCodeChallenge")
     private String challange;
 
-    @LdapAttribute(name = "oxCodeChallengeHash")
+    @AttributeName(name = "oxCodeChallengeHash")
     private String challangeHash;
 
-    @LdapAttribute(name = "creationDate")
+    @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @LdapAttribute(name = "oxSessionStateId")
+    @AttributeName(name = "oxSessionStateId")
     private String sessionId;
 
-    @LdapAttribute(name = "personInum")
+    @AttributeName(name = "personInum")
     private String userInum;
 
     public Fido2Entry() {

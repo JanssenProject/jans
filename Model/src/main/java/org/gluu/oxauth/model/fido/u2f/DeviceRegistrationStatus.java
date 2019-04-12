@@ -9,14 +9,14 @@ package org.gluu.oxauth.model.fido.u2f;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * Device registration types
  * 
  * @author Yuriy Movchan Date: 06/02/2015
  */
-public enum DeviceRegistrationStatus implements LdapEnum {
+public enum DeviceRegistrationStatus implements AttributeEnum {
 
     ACTIVE("active", "Active device registration"),
 	COMPROMISED("compromised", "Compromised device registration");
@@ -59,7 +59,7 @@ public enum DeviceRegistrationStatus implements LdapEnum {
 		return mapByValues.get(value);
 	}
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
+	public Enum<? extends AttributeEnum> resolveByValue(String value) {
 		return getByValue(value);
 	}
 

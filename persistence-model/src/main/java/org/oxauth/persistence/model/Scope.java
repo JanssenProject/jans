@@ -10,17 +10,17 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
  * @author Yuriy Movchan Date: 06/30/2015
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthCustomScope"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthCustomScope"})
 public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
@@ -28,30 +28,30 @@ public class Scope implements Serializable {
     private transient boolean isDefault;
     private transient boolean isGroupClaims;
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @LdapAttribute
+    @AttributeName
     private String displayName;
 
-    @LdapAttribute
+    @AttributeName
     private String description;
 
-    @LdapAttribute(name = "oxScopeType")
+    @AttributeName(name = "oxScopeType")
     private ScopeType scopeType;
  
-    @LdapAttribute(name = "oxAuthClaim")
+    @AttributeName(name = "oxAuthClaim")
     private List<String> oxAuthClaims;
 
-    @LdapAttribute(name = "defaultScope")
+    @AttributeName(name = "defaultScope")
     private String defaultScope;
 
-    @LdapAttribute(name = "oxAuthGroupClaims")
+    @AttributeName(name = "oxAuthGroupClaims")
     private String oxAuthGroupClaims;
 
-    @LdapAttribute(name = "oxScriptDn")
+    @AttributeName(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
 
     public String getDn() {

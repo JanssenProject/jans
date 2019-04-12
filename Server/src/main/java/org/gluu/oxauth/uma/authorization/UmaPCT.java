@@ -8,27 +8,27 @@ import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.uma.service.UmaPctService;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author yuriyz on 05/30/2017.
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthUmaPCT"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthUmaPCT"})
 public class UmaPCT extends AbstractToken {
 
     private final static Logger log = LoggerFactory.getLogger(UmaPCT.class);
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private String clientId;
-    @LdapAttribute(name = "oxClaimValues")
+    @AttributeName(name = "oxClaimValues")
     private String claimValuesAsJson;
 
     public UmaPCT() {

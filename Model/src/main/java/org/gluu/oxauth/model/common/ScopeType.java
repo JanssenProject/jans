@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version January 19, 2017
  */
-public enum ScopeType implements LdapEnum {
+public enum ScopeType implements AttributeEnum {
 
     /**
      * Specify what access privileges are being requested for Access Tokens.
@@ -100,7 +100,7 @@ public enum ScopeType implements LdapEnum {
         return mapByValues.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

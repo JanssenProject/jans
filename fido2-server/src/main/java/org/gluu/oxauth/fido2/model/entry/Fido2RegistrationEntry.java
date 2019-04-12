@@ -8,9 +8,9 @@ package org.gluu.oxauth.fido2.model.entry;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Fido2 registration entry
@@ -18,23 +18,23 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
-@LdapObjectClass(values = { "top", "oxFido2RegistrationEntry" })
+@ObjectClass(values = { "top", "oxFido2RegistrationEntry" })
 public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
-    @LdapAttribute(name = "oxPublicKeyId")
+    @AttributeName(name = "oxPublicKeyId")
     protected String publicKeyId;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxRegistrationData")
+    @JsonObject
+    @AttributeName(name = "oxRegistrationData")
     private Fido2RegistrationData registrationData;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxStatus")
+    @JsonObject
+    @AttributeName(name = "oxStatus")
     private Fido2RegistrationStatus registrationStatus;
 
-    @LdapAttribute(name = "oxDeviceNotificationConf")
+    @AttributeName(name = "oxDeviceNotificationConf")
     private String deviceNotificationConf;
 
     public Fido2RegistrationEntry() {

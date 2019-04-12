@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.common;
 
 import org.codehaus.jackson.annotate.JsonValue;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version January 16, 2019
  */
-public enum TokenTypeHint implements HasParamName, LdapEnum {
+public enum TokenTypeHint implements HasParamName, AttributeEnum {
 
     /**
      * An access token as defined in RFC6749, Section 1.4
@@ -62,7 +62,7 @@ public enum TokenTypeHint implements HasParamName, LdapEnum {
     }
 
     @Override
-    public Enum<? extends LdapEnum> resolveByValue(String s) {
+    public Enum<? extends AttributeEnum> resolveByValue(String s) {
         return getByValue(value);
     }
 
