@@ -9,12 +9,12 @@ package org.gluu.persist.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * @author Val Pecaoco
  */
-public enum SortOrder implements LdapEnum {
+public enum SortOrder implements AttributeEnum {
 
     ASCENDING("ascending"),
     DESCENDING("descending");

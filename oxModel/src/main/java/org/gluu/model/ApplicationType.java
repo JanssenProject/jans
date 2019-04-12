@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Metric application type
  *
  * @author Yuriy Movchan Date: 07/28/2015
  */
-public enum ApplicationType implements LdapEnum {
+public enum ApplicationType implements AttributeEnum {
 
     OX_AUTH("oxauth", "oxAuth"),
     OX_TRUST("oxtrust", "oxTrust");
@@ -49,7 +49,7 @@ public enum ApplicationType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Attribute Usage Type
  * 
  * @author Yuriy Movchan Date: 02/12/2014
  */
-public enum GluuAttributeUsageType implements LdapEnum {
+public enum GluuAttributeUsageType implements AttributeEnum {
 
 	OPENID("openid", "OpenID");
 
@@ -48,7 +48,7 @@ public enum GluuAttributeUsageType implements LdapEnum {
 		return mapByValues.get(value);
 	}
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
+	public Enum<? extends AttributeEnum> resolveByValue(String value) {
 		return getByValue(value);
 	}
 

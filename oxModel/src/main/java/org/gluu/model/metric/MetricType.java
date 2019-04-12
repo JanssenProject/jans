@@ -14,14 +14,14 @@ import org.gluu.model.metric.counter.CounterMetricEntry;
 import org.gluu.model.metric.ldap.MetricEntry;
 import org.gluu.model.metric.timer.TimerMetricData;
 import org.gluu.model.metric.timer.TimerMetricEntry;
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Metric event type declaration
  *
  * @author Yuriy Movchan Date: 07/30/2015
  */
-public enum MetricType implements LdapEnum {
+public enum MetricType implements AttributeEnum {
 
     OXAUTH_USER_AUTHENTICATION_SUCCESS("user_authentication_success",
             "Count successfull oxAuth user authentications", CounterMetricData.class, CounterMetricEntry.class),
@@ -68,7 +68,7 @@ public enum MetricType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

@@ -8,14 +8,14 @@ package org.gluu.persist.couchbase.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Couchbase search return data type
  *
  * @author Yuriy Movchan Date: 05/04/2019
  */
-public enum SearchReturnDataType implements LdapEnum {
+public enum SearchReturnDataType implements AttributeEnum {
 
     SEARCH("search"),
     COUNT("count"),

@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Status
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public enum GluuStatus implements LdapEnum {
+public enum GluuStatus implements AttributeEnum {
 
     ACTIVE("active", "Active"), INACTIVE("inactive", "Inactive"), EXPIRED("expired", "Expired"), REGISTER("register", "Register");
 
@@ -48,7 +48,7 @@ public enum GluuStatus implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 
