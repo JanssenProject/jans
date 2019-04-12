@@ -11,7 +11,7 @@ package org.gluu.persist.annotation;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public interface AttributeEnum {
+public @interface AttributeEnum {
 
     String getValue();
 
