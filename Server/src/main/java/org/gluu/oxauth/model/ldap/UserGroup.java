@@ -6,32 +6,32 @@
 
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 27/07/2012
  */
 
-@LdapEntry
+@DataEntry
 public class UserGroup {
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "displayName")
+    @AttributeName(name = "displayName")
     private String displayName;
-    @LdapAttribute(name = "member")
+    @AttributeName(name = "member")
     private String[] member;
-    @LdapAttribute(name = "gluuGroupType")
+    @AttributeName(name = "gluuGroupType")
     private String groupType;
-    @LdapAttribute(name = "gluuStatus")
+    @AttributeName(name = "gluuStatus")
     private String status;
-    @LdapAttribute(name = "iname")
+    @AttributeName(name = "iname")
     private String iname;
-    @LdapAttribute(name = "inum")
+    @AttributeName(name = "inum")
     private String inum;
-    @LdapAttribute(name = "owner")
+    @AttributeName(name = "owner")
     private String owner;
 
     public String getDisplayName() {

@@ -29,7 +29,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.model.common.HasParamName;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -91,7 +91,7 @@ public class Util {
         return result;
     }
 
-    public static <T extends LdapEnum> List<T> asEnumList(JSONArray p_array, Class<T> clazz)
+    public static <T extends AttributeEnum> List<T> asEnumList(JSONArray p_array, Class<T> clazz)
             throws JSONException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         final List<T> result = new ArrayList<T>();
         if (p_array != null) {

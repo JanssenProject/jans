@@ -11,10 +11,10 @@ import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
@@ -29,61 +29,61 @@ import java.util.TimeZone;
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-@LdapEntry(sortBy = "creationDate")
-@LdapObjectClass(values = {"top", "oxDeviceRegistration"})
+@DataEntry(sortBy = "creationDate")
+@ObjectClass(values = {"top", "oxDeviceRegistration"})
 public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;
 
-	@LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
+	@AttributeName(ignoreDuringUpdate = true, name = "oxId")
 	private String id;
 
-	@LdapAttribute
+	@AttributeName
 	private String displayName;
 
-	@LdapAttribute
+	@AttributeName
 	private String description;
 
-	@LdapAttribute(name = "oxNickName")
+	@AttributeName(name = "oxNickName")
 	private String nickname;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxDeviceRegistrationConf")
+    @JsonObject
+    @AttributeName(name = "oxDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxDeviceNotificationConf")
+    @JsonObject
+    @AttributeName(name = "oxDeviceNotificationConf")
     private String deviceNotificationConf;
 
-    @LdapAttribute(name = "oxCounter")
+    @AttributeName(name = "oxCounter")
 	private long counter;
 
-    @LdapAttribute(name = "oxStatus")
+    @AttributeName(name = "oxStatus")
 	private DeviceRegistrationStatus status;
 
-	@LdapAttribute(name = "oxApplication")
+	@AttributeName(name = "oxApplication")
 	private String application;
 
-	@LdapAttribute(name = "oxDeviceKeyHandle")
+	@AttributeName(name = "oxDeviceKeyHandle")
 	private String keyHandle;
 
-	@LdapAttribute(name = "oxDeviceHashCode")
+	@AttributeName(name = "oxDeviceHashCode")
 	private Integer keyHandleHashCode;
 
-    @LdapJsonObject
-	@LdapAttribute(name = "oxDeviceData")
+    @JsonObject
+	@AttributeName(name = "oxDeviceData")
 	private DeviceData deviceData;
 
-	@LdapAttribute(name = "creationDate")
+	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-    @LdapAttribute(name = "oxLastAccessTime")
+    @AttributeName(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
 	
 	public DeviceRegistration() {}

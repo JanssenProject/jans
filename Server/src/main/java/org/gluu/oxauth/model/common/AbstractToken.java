@@ -11,7 +11,7 @@ import org.gluu.oxauth.model.token.HandleTokenFactory;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.persist.model.base.Deletable;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.persist.annotation.AttributeName;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -37,18 +37,18 @@ import java.util.Date;
  */
 public abstract class AbstractToken implements Serializable, Deletable {
 
-    @LdapAttribute(name = "oxAuthTokenCode")
+    @AttributeName(name = "oxAuthTokenCode")
     private String code;
-    @LdapAttribute(name = "oxAuthCreation")
+    @AttributeName(name = "oxAuthCreation")
     private Date creationDate;
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
     private boolean revoked;
     private boolean expired;
 
-    @LdapAttribute(name = "oxAuthenticationMode")
+    @AttributeName(name = "oxAuthenticationMode")
     private String authMode;
 
     private String sessionDn;

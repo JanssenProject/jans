@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.HasParamName;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * This class define error handling methods
@@ -21,7 +21,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 12/07/2018
  */
-public enum ErrorHandlingMethod implements HasParamName, LdapEnum {
+public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
 
     INTERNAL("internal"),
 
@@ -98,7 +98,7 @@ public enum ErrorHandlingMethod implements HasParamName, LdapEnum {
         return mapByValues.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

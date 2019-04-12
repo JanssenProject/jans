@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.persist.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
@@ -25,52 +25,52 @@ import java.util.Map;
  * @version December 8, 2018
  */
 @Named("sessionUser")
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthSessionId"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthSessionId"})
 public class SessionId implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "oxAuthSessionId")
+    @AttributeName(name = "oxAuthSessionId")
     private String id;
 
-    @LdapAttribute(name = "oxLastAccessTime")
+    @AttributeName(name = "oxLastAccessTime")
     private Date lastUsedAt;
 
-    @LdapAttribute(name = "oxAuthUserDN")
+    @AttributeName(name = "oxAuthUserDN")
     private String userDn;
 
-    @LdapAttribute(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
 
-    @LdapAttribute(name = "oxState")
+    @AttributeName(name = "oxState")
     private SessionIdState state;
 
-    @LdapAttribute(name = "oxAuthSessionState")
+    @AttributeName(name = "oxAuthSessionState")
     private String sessionState;
 
-    @LdapAttribute(name = "oxAuthPermissionGranted")
+    @AttributeName(name = "oxAuthPermissionGranted")
     private Boolean permissionGranted;
 
-    @LdapAttribute(name = "oxAsJwt")
+    @AttributeName(name = "oxAsJwt")
     private Boolean isJwt = false;
 
-    @LdapAttribute(name = "oxJwt")
+    @AttributeName(name = "oxJwt")
     private String jwt;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxAuthPermissionGrantedMap")
+    @JsonObject
+    @AttributeName(name = "oxAuthPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxInvolvedClients")
+    @JsonObject
+    @AttributeName(name = "oxInvolvedClients")
     private SessionIdAccessMap involvedClients;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxAuthSessionAttribute")
+    @JsonObject
+    @AttributeName(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
 
     @Transient

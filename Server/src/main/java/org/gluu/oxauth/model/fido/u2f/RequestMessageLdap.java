@@ -1,9 +1,9 @@
 package org.gluu.oxauth.model.fido.u2f;
 
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -16,29 +16,29 @@ import java.util.TimeZone;
  * @author Yuriy Movchan
  * @version August 9, 2017
  */
-@LdapEntry(sortBy = "creationDate")
-@LdapObjectClass(values = {"top", "oxU2fRequest"})
+@DataEntry(sortBy = "creationDate")
+@ObjectClass(values = {"top", "oxU2fRequest"})
 public class RequestMessageLdap extends BaseEntry {
 
-    @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
     protected String id;
 
-    @LdapAttribute(name = "oxRequestId")
+    @AttributeName(name = "oxRequestId")
     protected String requestId;
 
-    @LdapAttribute(name = "creationDate")
+    @AttributeName(name = "creationDate")
     protected Date creationDate;
 
-    @LdapAttribute(name = "oxSessionStateId")
+    @AttributeName(name = "oxSessionStateId")
     protected String sessionId;
 
-    @LdapAttribute(name = "personInum")
+    @AttributeName(name = "personInum")
     protected String userInum;
 
-    @LdapAttribute(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @LdapAttribute(name = "oxDeletable")
+    @AttributeName(name = "oxDeletable")
     private boolean deletable = true;
 
     public RequestMessageLdap() {

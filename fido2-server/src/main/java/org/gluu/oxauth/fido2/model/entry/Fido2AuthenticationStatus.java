@@ -9,9 +9,9 @@ package org.gluu.oxauth.fido2.model.entry;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
-public enum Fido2AuthenticationStatus implements LdapEnum {
+public enum Fido2AuthenticationStatus implements AttributeEnum {
     pending("pending", "Pending"), authenticated("authenticated", "Authenticated");
 
     private String value;
@@ -42,7 +42,7 @@ public enum Fido2AuthenticationStatus implements LdapEnum {
         return mapByValues.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 
