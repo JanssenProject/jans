@@ -6,30 +6,30 @@
 
 package org.gluu.oxauth.model.config;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/01/2013
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthConfiguration"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthConfiguration"})
 public class Conf {
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "oxAuthConfDynamic")
+    @AttributeName(name = "oxAuthConfDynamic")
     private String dynamic;
-    @LdapAttribute(name = "oxAuthConfStatic")
+    @AttributeName(name = "oxAuthConfStatic")
     private String statics;
-    @LdapAttribute(name = "oxAuthConfErrors")
+    @AttributeName(name = "oxAuthConfErrors")
     private String errors;
-    @LdapAttribute(name = "oxAuthConfWebKeys")
+    @AttributeName(name = "oxAuthConfWebKeys")
     private String webKeys;
 
-    @LdapAttribute(name = "oxRevision")
+    @AttributeName(name = "oxRevision")
     private long revision;
 
     public Conf() {

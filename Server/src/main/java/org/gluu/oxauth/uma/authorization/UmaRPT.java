@@ -10,29 +10,29 @@ import java.util.Date;
 import java.util.List;
 
 import org.gluu.oxauth.model.common.AbstractToken;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Requesting Party Token.
  *
  * @author Yuriy Movchan Date: 10/16/2012
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthUmaRPT"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthUmaRPT"})
 public class UmaRPT extends AbstractToken {
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "uniqueIdentifier")
+    @AttributeName(name = "uniqueIdentifier")
     private String id;
-    @LdapAttribute(name = "oxAuthUserId")
+    @AttributeName(name = "oxAuthUserId")
     private String userId;
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private String clientId;
-    @LdapAttribute(name = "oxUmaPermission")
+    @AttributeName(name = "oxUmaPermission")
     private List<String> permissions;
 
     public UmaRPT() {

@@ -12,7 +12,7 @@ import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.persist.annotation.*;
 import org.gluu.oxauth.model.ref.ClientAttributes;
 import org.gluu.oxauth.model.ref.ClientReference;
 
@@ -25,194 +25,194 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @version December 4, 2018
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthClient"})
+@DataEntry
+@ObjectClass(values = {"top", "oxAuthClient"})
 public class Client extends DeletableEntity implements Serializable, ClientReference {
 
     private static final long serialVersionUID = -6832496019942067970L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "inum")
+    @AttributeName(name = "inum")
     private String clientId;
 
-    @LdapAttribute(name = "oxAuthClientSecret")
+    @AttributeName(name = "oxAuthClientSecret")
     private String encodedClientSecret;
 
-    @LdapAttribute(name = "oxAuthLogoutURI")
+    @AttributeName(name = "oxAuthLogoutURI")
     private String[] frontChannelLogoutUri;
 
-    @LdapAttribute(name = "oxAuthLogoutSessionRequired")
+    @AttributeName(name = "oxAuthLogoutSessionRequired")
     private Boolean frontChannelLogoutSessionRequired;
 
-    @LdapAttribute(name = "oxAuthRegistrationAccessToken")
+    @AttributeName(name = "oxAuthRegistrationAccessToken")
     private String registrationAccessToken;
 
-    @LdapAttribute(name = "oxAuthClientIdIssuedAt")
+    @AttributeName(name = "oxAuthClientIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @LdapAttribute(name = "oxAuthClientSecretExpiresAt")
+    @AttributeName(name = "oxAuthClientSecretExpiresAt")
     private Date clientSecretExpiresAt;
 
-    @LdapAttribute(name = "oxAuthRedirectURI")
+    @AttributeName(name = "oxAuthRedirectURI")
     private String[] redirectUris;
 
-    @LdapAttribute(name = "oxClaimRedirectURI")
+    @AttributeName(name = "oxClaimRedirectURI")
     private String[] claimRedirectUris;
 
-    @LdapAttribute(name = "oxAuthResponseType")
+    @AttributeName(name = "oxAuthResponseType")
     private ResponseType[] responseTypes;
 
-    @LdapAttribute(name = "oxAuthGrantType")
+    @AttributeName(name = "oxAuthGrantType")
     private GrantType[] grantTypes;
 
-    @LdapAttribute(name = "oxAuthAppType")
+    @AttributeName(name = "oxAuthAppType")
     private String applicationType;
 
-    @LdapAttribute(name = "oxAuthContact")
+    @AttributeName(name = "oxAuthContact")
     private String[] contacts;
 
-    @LdapAttribute(name = "displayName")
+    @AttributeName(name = "displayName")
     private String clientName;
 
-    @LdapAttribute(name = "oxIdTokenTokenBindingCnf")
+    @AttributeName(name = "oxIdTokenTokenBindingCnf")
     private String idTokenTokenBindingCnf;
 
-    @LdapAttribute(name = "oxAuthLogoURI")
+    @AttributeName(name = "oxAuthLogoURI")
     private String logoUri;
 
-    @LdapAttribute(name = "oxAuthClientURI")
+    @AttributeName(name = "oxAuthClientURI")
     private String clientUri;
 
-    @LdapAttribute(name = "oxAuthPolicyURI")
+    @AttributeName(name = "oxAuthPolicyURI")
     private String policyUri;
 
-    @LdapAttribute(name = "oxAuthTosURI")
+    @AttributeName(name = "oxAuthTosURI")
     private String tosUri;
 
-    @LdapAttribute(name = "oxAuthJwksURI")
+    @AttributeName(name = "oxAuthJwksURI")
     private String jwksUri;
 
-    @LdapAttribute(name = "oxAuthJwks")
+    @AttributeName(name = "oxAuthJwks")
     private String jwks;
 
-    @LdapAttribute(name = "oxAuthSectorIdentifierURI")
+    @AttributeName(name = "oxAuthSectorIdentifierURI")
     private String sectorIdentifierUri;
 
-    @LdapAttribute(name = "oxAuthSubjectType")
+    @AttributeName(name = "oxAuthSubjectType")
     private String subjectType;
 
-    @LdapAttribute(name = "oxAuthIdTokenSignedResponseAlg")
+    @AttributeName(name = "oxAuthIdTokenSignedResponseAlg")
     private String idTokenSignedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseAlg")
+    @AttributeName(name = "oxAuthIdTokenEncryptedResponseAlg")
     private String idTokenEncryptedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseEnc")
+    @AttributeName(name = "oxAuthIdTokenEncryptedResponseEnc")
     private String idTokenEncryptedResponseEnc;
 
-    @LdapAttribute(name = "oxAuthSignedResponseAlg")
+    @AttributeName(name = "oxAuthSignedResponseAlg")
     private String userInfoSignedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthUserInfoEncryptedResponseAlg")
+    @AttributeName(name = "oxAuthUserInfoEncryptedResponseAlg")
     private String userInfoEncryptedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthUserInfoEncryptedResponseEnc")
+    @AttributeName(name = "oxAuthUserInfoEncryptedResponseEnc")
     private String userInfoEncryptedResponseEnc;
 
-    @LdapAttribute(name = "oxAuthRequestObjectSigningAlg")
+    @AttributeName(name = "oxAuthRequestObjectSigningAlg")
     private String requestObjectSigningAlg;
 
-    @LdapAttribute(name = "oxAuthRequestObjectEncryptionAlg")
+    @AttributeName(name = "oxAuthRequestObjectEncryptionAlg")
     private String requestObjectEncryptionAlg;
 
-    @LdapAttribute(name = "oxAuthRequestObjectEncryptionEnc")
+    @AttributeName(name = "oxAuthRequestObjectEncryptionEnc")
     private String requestObjectEncryptionEnc;
 
-    @LdapAttribute(name = "oxAuthTokenEndpointAuthMethod")
+    @AttributeName(name = "oxAuthTokenEndpointAuthMethod")
     private String tokenEndpointAuthMethod;
 
-    @LdapAttribute(name = "oxAuthTokenEndpointAuthSigningAlg")
+    @AttributeName(name = "oxAuthTokenEndpointAuthSigningAlg")
     private String tokenEndpointAuthSigningAlg;
 
-    @LdapAttribute(name = "oxAuthDefaultMaxAge")
+    @AttributeName(name = "oxAuthDefaultMaxAge")
     private Integer defaultMaxAge;
 
-    @LdapAttribute(name = "oxAuthRequireAuthTime")
+    @AttributeName(name = "oxAuthRequireAuthTime")
     private boolean requireAuthTime;
 
-    @LdapAttribute(name = "oxAuthDefaultAcrValues")
+    @AttributeName(name = "oxAuthDefaultAcrValues")
     private String[] defaultAcrValues;
 
-    @LdapAttribute(name = "oxAuthInitiateLoginURI")
+    @AttributeName(name = "oxAuthInitiateLoginURI")
     private String initiateLoginUri;
 
-    @LdapAttribute(name = "oxAuthPostLogoutRedirectURI")
+    @AttributeName(name = "oxAuthPostLogoutRedirectURI")
     private String[] postLogoutRedirectUris;
 
-    @LdapAttribute(name = "oxAuthRequestURI")
+    @AttributeName(name = "oxAuthRequestURI")
     private String[] requestUris;
 
-    @LdapAttribute(name = "oxAuthScope")
+    @AttributeName(name = "oxAuthScope")
     private String[] scopes;
 
-    @LdapAttribute(name = "oxAuthClaim")
+    @AttributeName(name = "oxAuthClaim")
     private String[] claims;
 
-    @LdapAttribute(name = "oxAuthTrustedClient")
+    @AttributeName(name = "oxAuthTrustedClient")
     private boolean trustedClient;
 
-    @LdapAttribute(name = "oxLastAccessTime")
+    @AttributeName(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
-    @LdapAttribute(name = "oxLastLogonTime")
+    @AttributeName(name = "oxLastLogonTime")
     private Date lastLogonTime;
 
-    @LdapAttribute(name = "oxPersistClientAuthorizations")
+    @AttributeName(name = "oxPersistClientAuthorizations")
     private boolean persistClientAuthorizations;
 
-    @LdapAttribute(name = "oxIncludeClaimsInIdToken")
+    @AttributeName(name = "oxIncludeClaimsInIdToken")
     private boolean includeClaimsInIdToken;
 
-    @LdapAttribute(name = "oxRefreshTokenLifetime")
+    @AttributeName(name = "oxRefreshTokenLifetime")
     private Integer refreshTokenLifetime;
 
-    @LdapAttribute(name = "oxAccessTokenLifetime")
+    @AttributeName(name = "oxAccessTokenLifetime")
     private Integer accessTokenLifetime;
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
-    @LdapAttribute(name = "oxRptAsJwt")
+    @AttributeName(name = "oxRptAsJwt")
     private boolean rptAsJwt = false;
 
-    @LdapAttribute(name = "oxAccessTokenAsJwt")
+    @AttributeName(name = "oxAccessTokenAsJwt")
     private boolean accessTokenAsJwt = false;
 
-    @LdapAttribute(name = "oxAccessTokenSigningAlg")
+    @AttributeName(name = "oxAccessTokenSigningAlg")
     private String accessTokenSigningAlg;
 
-    @LdapAttribute(name = "oxDisabled")
+    @AttributeName(name = "oxDisabled")
     private boolean disabled;
 
-    @LdapAttribute(name = "oxAuthAuthorizedOrigins")
+    @AttributeName(name = "oxAuthAuthorizedOrigins")
     private String[] authorizedOrigins;
 
-    @LdapAttribute(name = "oxSoftwareId")
+    @AttributeName(name = "oxSoftwareId")
     private String softwareId;
 
-    @LdapAttribute(name = "oxSoftwareVersion")
+    @AttributeName(name = "oxSoftwareVersion")
     private String softwareVersion;
 
-    @LdapAttribute(name = "oxSoftwareStatement")
+    @AttributeName(name = "oxSoftwareStatement")
     private String softwareStatement;
 
-    @LdapAttribute(name = "oxAttributes")
-    @LdapJsonObject
+    @AttributeName(name = "oxAttributes")
+    @JsonObject
     private ClientAttributes attributes;
 
     public ClientAttributes getAttributes() {

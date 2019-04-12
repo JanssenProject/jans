@@ -6,7 +6,7 @@
 
 package org.oxauth.persistence.model.configuration;
 
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.persist.annotation.DN;
 
 /**
  * Provides DN attribute
@@ -15,7 +15,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
  */
 public class Entry {
 
-	@LdapDN
+	@DN
 	private String dn;
 
 	public Entry() {}

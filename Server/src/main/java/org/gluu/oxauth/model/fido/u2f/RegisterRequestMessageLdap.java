@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.JsonObject;
 
 /**
  * U2F registration requests
@@ -22,8 +22,8 @@ public class RegisterRequestMessageLdap extends RequestMessageLdap implements Se
 
     private static final long serialVersionUID = -2242931562244920584L;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxRequest")
+    @JsonObject
+    @AttributeName(name = "oxRequest")
     private RegisterRequestMessage registerRequestMessage;
 
     public RegisterRequestMessageLdap() {
