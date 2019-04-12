@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LdapAttribute {
+public @interface Attribute {
 
     /**
      * (Optional) The name of the LDAP attribute. Defaults to the field name.
