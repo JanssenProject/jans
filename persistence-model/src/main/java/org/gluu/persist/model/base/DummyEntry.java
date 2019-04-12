@@ -8,7 +8,7 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapEntry;
 
 /**
  * Dummy entry

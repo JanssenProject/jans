@@ -9,7 +9,7 @@ package org.gluu.persist.model.base;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.AttributeEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * Boolean value
