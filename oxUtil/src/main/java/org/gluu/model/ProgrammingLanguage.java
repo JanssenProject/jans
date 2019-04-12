@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Script languages
  *
  * @author Yuriy Movchan Date: 07/10/2013
  */
-public enum ProgrammingLanguage implements LdapEnum {
+public enum ProgrammingLanguage implements AttributeEnum {
 
     PYTHON("python", "Python"), JAVA_SCRIPT("javascript", "JavaScript");
 
@@ -48,7 +48,7 @@ public enum ProgrammingLanguage implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

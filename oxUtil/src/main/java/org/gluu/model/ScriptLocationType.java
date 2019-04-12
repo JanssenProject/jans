@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Specify type of script location
  *
  * @author Yuriy Movchan Date: 10/07/2015
  */
-public enum ScriptLocationType implements LdapEnum {
+public enum ScriptLocationType implements AttributeEnum {
 
     LDAP("ldap", "Ldap"), FILE("file", "File");
 
@@ -48,7 +48,7 @@ public enum ScriptLocationType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

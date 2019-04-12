@@ -7,14 +7,14 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * SCIM Custom Attribute
  * 
  * @author Reda Zerrad Date: 08.02.2012
  */
-public enum OxMultivalued implements LdapEnum {
+public enum OxMultivalued implements AttributeEnum {
 
 	TRUE("true", "True"), FALSE("false", "False");
 
@@ -46,7 +46,7 @@ public enum OxMultivalued implements LdapEnum {
 		return mapByValues.get(value);
 	}
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
+	public Enum<? extends AttributeEnum> resolveByValue(String value) {
 		return getByValue(value);
 	}
 

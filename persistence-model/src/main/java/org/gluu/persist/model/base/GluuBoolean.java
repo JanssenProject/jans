@@ -9,14 +9,14 @@ package org.gluu.persist.model.base;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Boolean value
  *
  * @author Yuriy Movchan Date: 11.20.2010
  */
-public enum GluuBoolean implements LdapEnum {
+public enum GluuBoolean implements AttributeEnum {
 
     DISABLED(false, "disabled", "Disabled"), ENABLED(true, "enabled", "Enabled"), FALSE(false, "false", "False"), TRUE(true, "true", "True"),
     INACTIVE(false, "inactive", "Inactive"), ACTIVE(true, "active", "Active");
@@ -55,7 +55,7 @@ public enum GluuBoolean implements LdapEnum {
         return displayName;
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

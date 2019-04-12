@@ -8,14 +8,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * User role
  *
  * @author Yuriy Movchan Date: 11.03.2010
  */
-public enum UserRole implements LdapEnum {
+public enum UserRole implements AttributeEnum {
 
     ADMIN("admin"), OWNER("owner"), MANAGER("manager"), USER("user"), WHITEPAGES("whitePages");
 
@@ -78,7 +78,7 @@ public enum UserRole implements LdapEnum {
         return false;
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

@@ -7,7 +7,7 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Attribute Data Type
@@ -17,7 +17,7 @@ import org.gluu.persistence.annotation.LdapEnum;
  *
  * @version September 27, 2017
  */
-public enum AttributeDataType implements LdapEnum {
+public enum AttributeDataType implements AttributeEnum {
 
     STRING("string", "Text"), NUMERIC("numeric", "Numeric"), BOOLEAN("boolean", "Boolean"), BINARY("binary", "Binary"), CERTIFICATE("certificate",
             "Certificate"), DATE("generalizedTime", "Date");
@@ -50,7 +50,7 @@ public enum AttributeDataType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 
