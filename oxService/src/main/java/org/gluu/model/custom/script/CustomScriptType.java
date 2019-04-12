@@ -35,7 +35,7 @@ import org.gluu.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyRptPolicyType;
 import org.gluu.model.custom.script.type.uma.UmaRptPolicyType;
 import org.gluu.model.custom.script.type.user.*;
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,7 @@ import java.util.Map;
  *
  * @author Yuriy Movchan Date: 11/11/2014
  */
-public enum CustomScriptType implements LdapEnum {
+public enum CustomScriptType implements AttributeEnum {
 
     PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class,
             "PersonAuthentication", new DummyPersonAuthenticationType()),
@@ -129,7 +129,7 @@ public enum CustomScriptType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 

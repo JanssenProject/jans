@@ -42,7 +42,7 @@ import org.gluu.persistence.annotation.@AttributesList;
 import org.gluu.persistence.annotation.LdapCustomObjectClass;
 import org.gluu.persistence.annotation.LdapDN;
 import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 import org.gluu.persistence.annotation.LdapJsonObject;
 import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.persistence.annotation.LdapSchemaEntry;
@@ -71,7 +71,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class,
-			LdapEnum.class };
+			AttributeEnum.class };
 	private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class,
 			double.class, Double.class };
 
@@ -1134,10 +1134,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					attributeValues[index++] = StringHelper.toString(tmpPropertyValue);
 				}
 			}
-		} else if (propertyValue instanceof LdapEnum) {
-			attributeValues[0] = ((LdapEnum) propertyValue).getValue();
-		} else if (propertyValue instanceof LdapEnum[]) {
-			LdapEnum[] propertyValues = (LdapEnum[]) propertyValue;
+		} else if (propertyValue instanceof AttributeEnum) {
+			attributeValues[0] = ((AttributeEnum) propertyValue).getValue();
+		} else if (propertyValue instanceof AttributeEnum[]) {
+			AttributeEnum[] propertyValues = (AttributeEnum[]) propertyValue;
 			attributeValues = new String[propertyValues.length];
 			for (int i = 0; i < propertyValues.length; i++) {
 				attributeValues[i] = (propertyValues[i] == null) ? null : propertyValues[i].getValue();
@@ -1146,7 +1146,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributeValues[0] = convertJsonToString(propertyValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
-					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List, LdapEnum or LdapEnum[]"
+					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List, AttributeEnum or AttributeEnum[]"
 					+ " return type or has annotation LdapJsonObject");
 		}
 
@@ -1403,14 +1403,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			} else {
 				propertyValueSetter.set(entry, Arrays.asList(attribute.getValues()));
 			}
-		} else if (ReflectHelper.assignableFrom(parameterType, LdapEnum.class)) {
+		} else if (ReflectHelper.assignableFrom(parameterType, AttributeEnum.class)) {
 			try {
 				propertyValueSetter.set(entry, parameterType.getMethod("resolveByValue", String.class)
 						.invoke(parameterType.getEnumConstants()[0], attribute.getValue()));
 			} catch (Exception ex) {
 				throw new MappingException("Failed to resolve Enum by value " + attribute.getValue(), ex);
 			}
-		} else if (ReflectHelper.assignableFrom(parameterType, LdapEnum[].class)) {
+		} else if (ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class)) {
 			Class<?> itemType = parameterType.getComponentType();
 			Method enumResolveByValue;
 			try {
@@ -1421,10 +1421,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			}
 
 			String[] attributeValues = attribute.getValues();
-			LdapEnum[] ldapEnums = (LdapEnum[]) ReflectHelper.createArray(itemType, attributeValues.length);
+			AttributeEnum[] ldapEnums = (AttributeEnum[]) ReflectHelper.createArray(itemType, attributeValues.length);
 			for (int i = 0; i < attributeValues.length; i++) {
 				try {
-					ldapEnums[i] = (LdapEnum) enumResolveByValue.invoke(itemType.getEnumConstants()[0],
+					ldapEnums[i] = (AttributeEnum) enumResolveByValue.invoke(itemType.getEnumConstants()[0],
 							attributeValues[i]);
 				} catch (Exception ex) {
 					throw new MappingException(
@@ -1438,7 +1438,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
-					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List, LdapEnum or LdapEnum[]"
+					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List, AttributeEnum or AttributeEnum[]"
 					+ " parameter type or has annotation LdapJsonObject");
 		}
 	}

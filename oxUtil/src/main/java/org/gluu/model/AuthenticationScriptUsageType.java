@@ -9,14 +9,14 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.AttributeEnum;
 
 /**
  * Authentication script type
  *
  * @author Yuriy Movchan Date: 05/06/2013
  */
-public enum AuthenticationScriptUsageType implements LdapEnum {
+public enum AuthenticationScriptUsageType implements AttributeEnum {
 
     INTERACTIVE("interactive", "Web"), SERVICE("service", "Native"), BOTH("both", "Both methods");
 
@@ -48,7 +48,7 @@ public enum AuthenticationScriptUsageType implements LdapEnum {
         return MAP_BY_VALUES.get(value);
     }
 
-    public Enum<? extends LdapEnum> resolveByValue(String value) {
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
         return getByValue(value);
     }
 
