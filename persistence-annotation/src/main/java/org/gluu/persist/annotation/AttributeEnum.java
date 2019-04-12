@@ -7,11 +7,11 @@
 package org.gluu.persist.annotation;
 
 /**
- * Base interface for LDAP enumerations
+ * Base interface for Persistance enumerations
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public interface Enum {
+public interface AttributeEnum {
 
     String getValue();
 
