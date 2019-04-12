@@ -8,9 +8,9 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapObjectClass;
 
 /**
  * Model for simple branch

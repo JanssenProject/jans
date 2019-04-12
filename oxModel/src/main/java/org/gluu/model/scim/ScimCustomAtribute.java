@@ -7,7 +7,7 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persistence.annotation.AttributeEnum;
+import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * SCIM Custom Attribute

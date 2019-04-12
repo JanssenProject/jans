@@ -7,10 +7,10 @@ package org.gluu.model.metric.ldap;
 
 import org.gluu.model.ApplicationType;
 import org.gluu.model.metric.MetricType;
-import org.gluu.persistence.annotation.LdapAttribute;
-import org.gluu.persistence.annotation.LdapDN;
-import org.gluu.persistence.annotation.LdapEntry;
-import org.gluu.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.LdapAttribute;
+import org.gluu.persist.annotation.LdapDN;
+import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.LdapObjectClass;
 
 import java.util.Date;
 
