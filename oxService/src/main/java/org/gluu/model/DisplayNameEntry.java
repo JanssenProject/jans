@@ -9,15 +9,15 @@ package org.gluu.model;
 import java.io.Serializable;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
 
 /**
  * Entry with display Name attribute
  *
  * @author Yuriy Movchan Date: 08/11/2010
  */
-@LdapEntry(sortBy = { "displayName" })
+@Entry(sortBy = { "displayName" })
 public class DisplayNameEntry extends Entry implements Serializable {
 
     private static final long serialVersionUID = 2536007777903091939L;
@@ -31,13 +31,13 @@ public class DisplayNameEntry extends Entry implements Serializable {
         this.displayName = displayName;
     }
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @Attribute(ignoreDuringUpdate = true)
     private String inum;
 
-    @LdapAttribute
+    @Attribute
     private String displayName;
 
-    @LdapAttribute
+    @Attribute
     private String uid;
 
     public String getInum() {

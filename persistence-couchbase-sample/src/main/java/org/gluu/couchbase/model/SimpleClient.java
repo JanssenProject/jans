@@ -11,30 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.@AttributesList;
+import org.gluu.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
  * Date: 02/08/2018
  */
-@LdapEntry
-@LdapObjectClass(values = {"oxAuthClient", "top"})
+@Entry
+@ObjectClass(values = {"oxAuthClient", "top"})
 public class SimpleClient implements Serializable {
 
     private static final long serialVersionUID = -2534191420188575733L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
     public String getDn() {

@@ -7,42 +7,42 @@
 package org.gluu.config.oxtrust;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Yuriy Movchan
  * @version 0.9, 05/16/2013
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxTrustConfiguration" })
+@Entry
+@ObjectClass(values = { "top", "oxTrustConfiguration" })
 public class LdapOxTrustConfiguration extends Entry {
 
     private static final long serialVersionUID = -15289347651306279L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxTrustConfApplication")
+    @JsonObject
+    @Attribute(name = "oxTrustConfApplication")
     private AppConfiguration application;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxTrustConfCacheRefresh")
+    @JsonObject
+    @Attribute(name = "oxTrustConfCacheRefresh")
     private CacheRefreshConfiguration cacheRefresh;
 
-    @LdapAttribute(name = "oxRevision")
+    @Attribute(name = "oxRevision")
     private long revision;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxTrustConfImportPerson")
+    @JsonObject
+    @Attribute(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxTrustConfAttributeResolver")
+    @JsonObject
+    @Attribute(name = "oxTrustConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;
 
     public LdapOxTrustConfiguration() {

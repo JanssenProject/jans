@@ -6,20 +6,20 @@
 
 package org.gluu.persist.model.base;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * Provides global inum search ability.
  *
  * @author Oleksiy Tataryn
  */
-@LdapEntry
-@LdapObjectClass(values = { "top" })
+@Entry
+@ObjectClass(values = { "top" })
 public class InumEntry extends Entry {
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @Attribute(ignoreDuringUpdate = true)
     private String inum;
 
     /**

@@ -2,10 +2,10 @@ package org.gluu.config.oxtrust;
 
 import org.gluu.model.passport.PassportConfiguration;
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Shekhar L.
@@ -13,14 +13,14 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @Date 07/17/2016
  */
 
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxPassportConfiguration" })
+@Entry
+@ObjectClass(values = { "top", "oxPassportConfiguration" })
 public class LdapOxPassportConfiguration extends Entry {
 
 	private static final long serialVersionUID = -8451013277721189767L;
 
-	@LdapJsonObject
-	@LdapAttribute(name = "gluuPassportConfiguration")
+	@JsonObject
+	@Attribute(name = "gluuPassportConfiguration")
 	private PassportConfiguration passportConfiguration;
 
 	public PassportConfiguration getPassportConfiguration() {

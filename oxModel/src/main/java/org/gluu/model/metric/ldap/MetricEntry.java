@@ -7,10 +7,10 @@ package org.gluu.model.metric.ldap;
 
 import org.gluu.model.ApplicationType;
 import org.gluu.model.metric.MetricType;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 import java.util.Date;
 
@@ -19,34 +19,34 @@ import java.util.Date;
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
-@LdapEntry(sortBy = "startDate")
-@LdapObjectClass(values = { "top", "oxMetric" })
+@Entry(sortBy = "startDate")
+@ObjectClass(values = { "top", "oxMetric" })
 public class MetricEntry {
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
+    @Attribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
     private String id;
 
-    @LdapAttribute(name = "oxStartDate")
+    @Attribute(name = "oxStartDate")
     private Date startDate;
 
-    @LdapAttribute(name = "oxEndDate")
+    @Attribute(name = "oxEndDate")
     private Date endDate;
 
-    @LdapAttribute(name = "oxApplicationType")
+    @Attribute(name = "oxApplicationType")
     private ApplicationType applicationType;
 
-    @LdapAttribute(name = "oxMetricType")
+    @Attribute(name = "oxMetricType")
     private MetricType metricType;
 
-    @LdapAttribute(name = "creationDate")
+    @Attribute(name = "creationDate")
     private Date creationDate;
 
-    @LdapAttribute(name = "oxAuthExpiration")
+    @Attribute(name = "oxAuthExpiration")
     private Date expirationDate;
-    @LdapAttribute(name = "oxDeletable")
+    @Attribute(name = "oxDeletable")
     private boolean deletable = true;
 
     public MetricEntry() {

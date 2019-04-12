@@ -8,30 +8,30 @@ package org.gluu.config.oxtrust;
 import java.io.Serializable;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * Shibboleth IDP CAS-related settings configuration entry.
  *
  * @author Dmitry Ognyannikov
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxShibbolethCASProtocolConfiguration" })
+@Entry
+@ObjectClass(values = { "top", "oxShibbolethCASProtocolConfiguration" })
 public class LdapShibbolethCASProtocolConfiguration extends Entry implements Serializable {
 
     private static final long serialVersionUID = -11887457695212971L;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @Attribute(ignoreDuringUpdate = true)
     private String inum;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxConfApplication")
+    @JsonObject
+    @Attribute(name = "oxConfApplication")
     private ShibbolethCASProtocolConfiguration casProtocolConfiguration;
 
-    @LdapAttribute(name = "oxRevision")
+    @Attribute(name = "oxRevision")
     private long revision;
 
     public LdapShibbolethCASProtocolConfiguration() {

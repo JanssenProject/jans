@@ -10,35 +10,35 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.@AttributesList;
+import org.gluu.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011
  */
-@LdapEntry
-@LdapObjectClass(values = {"top"})
+@Entry
+@ObjectClass(values = {"top"})
 public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;
 
-    @LdapDN
+    @DN
     private String dn;
-    @LdapAttribute(name = "uid")
+    @Attribute(name = "uid")
     private String userId;
 
-    @LdapAttribute(name = "oxAuthPersistentJWT")
+    @Attribute(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
     public String getDn() {

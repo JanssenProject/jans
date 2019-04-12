@@ -13,49 +13,49 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxAuthSessionId" })
+@Entry
+@ObjectClass(values = { "top", "oxAuthSessionId" })
 public class SimpleSessionState implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapAttribute(name = "uniqueIdentifier")
+    @Attribute(name = "uniqueIdentifier")
     private String id;
 
-    @LdapAttribute(name = "oxLastAccessTime")
+    @Attribute(name = "oxLastAccessTime")
     private Date lastUsedAt;
 
-    @LdapAttribute(name = "oxAuthUserDN")
+    @Attribute(name = "oxAuthUserDN")
     private String userDn;
 
-    @LdapAttribute(name = "oxAuthAuthenticationTime")
+    @Attribute(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
 
-    @LdapAttribute(name = "oxAuthSessionState")
+    @Attribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
-    @LdapAttribute(name = "oxAsJwt")
+    @Attribute(name = "oxAsJwt")
     private Boolean isJwt = false;
 
-    @LdapAttribute(name = "oxJwt")
+    @Attribute(name = "oxJwt")
     private String jwt;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxAuthSessionAttribute")
+    @JsonObject
+    @Attribute(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
 
     @Transient

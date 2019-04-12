@@ -8,7 +8,7 @@ package org.gluu.persist.couchbase.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.LdapEnum;
 
 /**
  * Couchbase search return data type

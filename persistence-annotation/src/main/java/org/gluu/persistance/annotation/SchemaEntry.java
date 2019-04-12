@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.site.ldap.persistence.annotation;
+package org.gluu.persistence.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,11 +12,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark that attribute contains password
+ * Mark POJO class as LDAP schema entry
  *
- * @author Yuriy Movchan Date: 05/15/2018
+ * @author Yuriy Movchan Date: 10.07.2010
  */
-@Target({ ElementType.FIELD })
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LdapPassword {
+public @interface LdapSchemaEntry {
 }
