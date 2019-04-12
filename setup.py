@@ -3522,7 +3522,29 @@ class Setup(object):
         self.couchbaseExecQuery(tmp_file)
 
 
+    def checkIfAttributeExists(self, key, atribute,  documents):
+        ka = key + '::' + atribute
+        retVal = False
+
+        if ka in self.processedKeys:
+            return True
+         
+        for d in documents:
+            if d[0] == key:
+                if 'changetype' in d[1]:
+                    continue
+                if atribute in d[1]:
+                    retVal = True
+                else:
+                    self.processedKeys.append(ka)
+                    return True
+                
+        return retVal
+
+
     def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
+        
+        self.processedKeys = []
         
         if not ldif_file_list:
             ldif_file_list = self.ldif_files[:]
@@ -3562,7 +3584,10 @@ class Setup(object):
                             query = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
                         elif 'add' in e[1]:
                             for m in e[1][e[1]['add']]:
-                                query += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
+                                if self.checkIfAttributeExists(e[0], e[1]['add'],  documents):
+                                    query += 'UPDATE `%s` USE KEYS "%s" SET %s=["%s"];\n' % (cur_bucket, e[0], e[1]['add'], m)
+                                else:
+                                    query += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
                     else:
                         query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
 
@@ -3737,9 +3762,9 @@ class Setup(object):
         
         self.import_ldif_couchebase()
         self.couchbaseProperties()
-        
+
+
     def loadTestData(self):
-        
         self.logIt("Loading test ldif files")
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
