@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persistence.annotation;
+package org.gluu.persist.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

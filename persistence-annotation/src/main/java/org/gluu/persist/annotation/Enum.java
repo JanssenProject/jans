@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.persistence.annotation;
+package org.gluu.persist.annotation;
 
 /**
  * Base interface for LDAP enumerations
