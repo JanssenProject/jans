@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * LDAP Json Object
+ * Persistance Json Object
  *
  * @author Yuriy Movchan Date: 01/31/2014
  */

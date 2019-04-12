@@ -13,7 +13,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * LDAP DN
+ * Persistance DN
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */

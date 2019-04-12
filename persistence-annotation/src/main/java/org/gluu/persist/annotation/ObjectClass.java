@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * LDAP Object Class
+ * Persistance Object Class
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */

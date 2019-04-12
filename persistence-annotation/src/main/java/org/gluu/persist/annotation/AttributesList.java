@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * LDAP Attributes List
+ * Persistance Attributes List
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
@@ -21,17 +21,17 @@ import java.lang.annotation.Target;
 public @interface AttributesList {
 
     /**
-     * (Required) The class property name which contains LDAP attribute name.
+     * (Required) The class property name which contains Persistance attribute name.
      */
     String name();
 
     /**
-     * (Required) The class property name which contains LDAP attribute value.
+     * (Required) The class property name which contains Persistance attribute value.
      */
     String value();
 
     /**
-     * (Optional) Holds additional configuration for LDAP attributes. Defaults
+     * (Optional) Holds additional configuration for Persistance attributes. Defaults
      * value not provides additional configuration.
      */
     Attribute[] attributesConfiguration() default {};

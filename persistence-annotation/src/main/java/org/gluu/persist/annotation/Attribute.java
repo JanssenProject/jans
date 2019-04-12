@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * LDAP Attribute
+ * Persistance Attribute
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
@@ -21,18 +21,18 @@ import java.lang.annotation.Target;
 public @interface Attribute {
 
     /**
-     * (Optional) The name of the LDAP attribute. Defaults to the field name.
+     * (Optional) The name of the Persistance attribute. Defaults to the field name.
      */
     String name() default "";
 
     /**
-     * (Optional) Specify that we ignore this LDAP attribute during read.
+     * (Optional) Specify that we ignore this Persistance attribute during read.
      * Defaults value is false.
      */
     boolean ignoreDuringRead() default false;
 
     /**
-     * (Optional) Specify that we ignore this LDAP attribute during update.
+     * (Optional) Specify that we ignore this Persistance attribute during update.
      * Defaults value is false.
      */
     boolean ignoreDuringUpdate() default false;

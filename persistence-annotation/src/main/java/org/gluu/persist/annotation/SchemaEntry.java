@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark POJO class as LDAP schema entry
+ * Mark POJO class as Persistance schema entry
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
