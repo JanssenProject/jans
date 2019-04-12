@@ -6,20 +6,20 @@
 
 package org.oxauth.persistence.model.configuration;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Provides global inum search ability.
  * @author Oleksiy Tataryn
  *
  */
-@LdapEntry
-@LdapObjectClass(values = { "top" })
+@DataEntry
+@ObjectClass(values = { "top" })
 public class InumEntry extends Entry {
 
-	@LdapAttribute(ignoreDuringUpdate = true)
+	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
 	/**

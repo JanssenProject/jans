@@ -3,25 +3,25 @@ package org.oxauth.persistence.model;
 import java.net.URI;
 
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Javier Rojas Blum
  * @version June 30, 2018
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "pairwiseIdentifier"})
+@DataEntry
+@ObjectClass(values = {"top", "pairwiseIdentifier"})
 public class PairwiseIdentifier extends BaseEntry {
 
-    @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
     private String id;
 
-    @LdapAttribute(name = "oxSectorIdentifier")
+    @AttributeName(name = "oxSectorIdentifier")
     private String sectorIdentifier;
 
-    @LdapAttribute(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId")
     private String clientId;
 
     public PairwiseIdentifier() {

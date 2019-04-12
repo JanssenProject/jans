@@ -11,23 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapSchemaEntry;
+import org.gluu.persist.annotation.AttributeName;
 
 /**
  * Schema attribute
  *
  * @author Yuriy Movchan Date: 10.14.2010
  */
-@LdapSchemaEntry
+@org.gluu.persist.annotation.SchemaEntry
 public final class SchemaEntry extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = 3819004894646725606L;
 
-	@LdapAttribute
+	@AttributeName
 	private List<String> attributeTypes = new ArrayList<String>();
 
-	@LdapAttribute
+	@AttributeName
 	private List<String> objectClasses = new ArrayList<String>();
 
 	public final List<String> getAttributeTypes() {

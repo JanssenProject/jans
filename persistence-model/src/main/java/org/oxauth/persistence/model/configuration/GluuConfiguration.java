@@ -11,10 +11,10 @@ import java.util.List;
 
 import org.gluu.persist.model.base.GluuBoolean;
 import org.gluu.persist.model.base.InumEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.model.SmtpConfiguration;
 import org.gluu.service.cache.CacheConfiguration;
 
@@ -23,30 +23,30 @@ import org.gluu.service.cache.CacheConfiguration;
  *
  * @author Yuriy Movchan Date: 08.27.2012
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "gluuConfiguration" })
+@DataEntry
+@ObjectClass(values = { "top", "gluuConfiguration" })
 public class GluuConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -2818003894646725601L;
 
-	@LdapAttribute(ignoreDuringUpdate = true)
+	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@LdapAttribute(name = "oxSmtpConfiguration")
-	@LdapJsonObject
+	@AttributeName(name = "oxSmtpConfiguration")
+	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@LdapAttribute(name = "oxCacheConfiguration")
-	@LdapJsonObject
+	@AttributeName(name = "oxCacheConfiguration")
+	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 	
-	@LdapAttribute(name = "oxIDPAuthentication")
+	@AttributeName(name = "oxIDPAuthentication")
 	private List<String> oxIDPAuthentication;
 
-	@LdapAttribute(name = "oxAuthenticationMode")
+	@AttributeName(name = "oxAuthenticationMode")
 	private String authenticationMode;
 	
-	@LdapAttribute(name = "gluuPassportEnabled")
+	@AttributeName(name = "gluuPassportEnabled")
 	private GluuBoolean passportEnabled;
 
 	public GluuBoolean getPassportEnabled() {
