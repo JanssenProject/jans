@@ -17,10 +17,10 @@ import org.gluu.model.GluuStatus;
 import org.gluu.model.attribute.AttributeValidation;
 import org.gluu.model.scim.ScimCustomAtribute;
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * Attribute Metadata
@@ -29,88 +29,88 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  * @author Javier Rojas Blum
  * @version February 9, 2015
  */
-@LdapEntry(sortBy = { "displayName" })
-@LdapObjectClass(values = { "top", "gluuAttribute" })
+@Entry(sortBy = { "displayName" })
+@ObjectClass(values = { "top", "gluuAttribute" })
 public class GluuAttribute extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 4817004894646725606L;
 
 	private transient boolean selected;
 
-	@LdapAttribute(ignoreDuringUpdate = true)
+	@Attribute(ignoreDuringUpdate = true)
 	private String inum;
 
-	@LdapAttribute(name = "oxAttributeType")
+	@Attribute(name = "oxAttributeType")
 	private String type;
 
-	@LdapAttribute
+	@Attribute
 	private String lifetime;
 
-	@LdapAttribute(name = "oxSourceAttribute")
+	@Attribute(name = "oxSourceAttribute")
 	private String sourceAttribute;
 
-	@LdapAttribute
+	@Attribute
 	private String salt;
 
-	@LdapAttribute(name = "oxNameIdType")
+	@Attribute(name = "oxNameIdType")
 	private String nameIdType;
 
 	@NotNull
 	@Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
 	@Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-	@LdapAttribute(name = "gluuAttributeName")
+	@Attribute(name = "gluuAttributeName")
 	private String name;
 
 	@NotNull
 	@Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
-	@LdapAttribute
+	@Attribute
 	private String displayName;
 
 	@NotNull
 	@Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
-	@LdapAttribute
+	@Attribute
 	private String description;
 
-	@LdapAttribute(name = "gluuAttributeOrigin")
+	@Attribute(name = "gluuAttributeOrigin")
 	private String origin;
 
 	@NotNull
-	@LdapAttribute(name = "gluuAttributeType")
+	@Attribute(name = "gluuAttributeType")
 	private GluuAttributeDataType dataType;
 
 	@NotNull
-	@LdapAttribute(name = "gluuAttributeEditType")
+	@Attribute(name = "gluuAttributeEditType")
 	private GluuUserRole[] editType;
 
 	@NotNull
-	@LdapAttribute(name = "gluuAttributeViewType")
+	@Attribute(name = "gluuAttributeViewType")
 	private GluuUserRole[] viewType;
 
-	@LdapAttribute(name = "gluuAttributeUsageType")
+	@Attribute(name = "gluuAttributeUsageType")
 	private GluuAttributeUsageType[] usageType;
 
-	@LdapAttribute(name = "oxAuthClaimName")
+	@Attribute(name = "oxAuthClaimName")
 	private String oxAuthClaimName;
 
-	@LdapAttribute(name = "seeAlso")
+	@Attribute(name = "seeAlso")
 	private String seeAlso;
 
-	@LdapAttribute(name = "gluuStatus")
+	@Attribute(name = "gluuStatus")
 	private GluuStatus status;
 
-	@LdapAttribute(name = "gluuSAML1URI")
+	@Attribute(name = "gluuSAML1URI")
 	private String saml1Uri;
 
-	@LdapAttribute(name = "gluuSAML2URI")
+	@Attribute(name = "gluuSAML2URI")
 	private String saml2Uri;
 
-	@LdapAttribute(ignoreDuringUpdate = true)
+	@Attribute(ignoreDuringUpdate = true)
 	private String urn;
 
-	@LdapAttribute(name = "oxSCIMCustomAttribute")
+	@Attribute(name = "oxSCIMCustomAttribute")
 	private ScimCustomAtribute oxSCIMCustomAttribute;
 
-	@LdapAttribute(name = "oxMultivaluedAttribute")
+	@Attribute(name = "oxMultivaluedAttribute")
 	private OxMultivalued oxMultivaluedAttribute;
 
 	@Transient
@@ -119,11 +119,11 @@ public class GluuAttribute extends Entry implements Serializable {
 	@Transient
 	private boolean requred;
 
-	@LdapJsonObject
-	@LdapAttribute(name = "oxValidation")
+	@JsonObject
+	@Attribute(name = "oxValidation")
 	private AttributeValidation attributeValidation;
 
-	@LdapAttribute(name = "gluuTooltip")
+	@Attribute(name = "gluuTooltip")
 	private String gluuTooltip;
 
 	public boolean isSelected() {

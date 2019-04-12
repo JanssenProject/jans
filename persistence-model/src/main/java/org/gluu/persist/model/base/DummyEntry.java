@@ -8,14 +8,14 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapEntry;
 
 /**
  * Dummy entry
  *
  * @author Yuriy Movchan Date: 07.13.2011
  */
-@LdapEntry
+@Entry
 public class DummyEntry extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -1111582184398161100L;

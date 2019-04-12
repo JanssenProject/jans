@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.LdapEnum;
 
 /**
  * User role

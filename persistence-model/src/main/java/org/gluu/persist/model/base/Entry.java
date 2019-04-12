@@ -8,7 +8,7 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapDN;
 
 /**
  * Provides DN attribute
@@ -19,7 +19,7 @@ public class Entry implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 6602706707181973761L;
 
-    @LdapDN
+    @DN
     private String dn;
 
     public Entry() {

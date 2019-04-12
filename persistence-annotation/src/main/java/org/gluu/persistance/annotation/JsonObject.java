@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.site.ldap.persistence.annotation;
+package org.gluu.persistence.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,12 +12,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * LDAP Object Class
+ * LDAP Json Object
  *
- * @author Yuriy Movchan Date: 10.07.2010
+ * @author Yuriy Movchan Date: 01/31/2014
  */
-@Target({ ElementType.TYPE })
+@Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LdapObjectClass {
-    String[] values();
+public @interface LdapJsonObject {
 }

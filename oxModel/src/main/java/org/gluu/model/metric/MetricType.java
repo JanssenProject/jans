@@ -14,7 +14,7 @@ import org.gluu.model.metric.counter.CounterMetricEntry;
 import org.gluu.model.metric.ldap.MetricEntry;
 import org.gluu.model.metric.timer.TimerMetricData;
 import org.gluu.model.metric.timer.TimerMetricEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.gluu.persistence.annotation.LdapEnum;
 
 /**
  * Metric event type declaration

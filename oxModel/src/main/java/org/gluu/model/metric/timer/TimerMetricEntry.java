@@ -7,8 +7,8 @@
 import java.util.Date;
 
 import org.gluu.model.metric.ldap.MetricEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapJsonObject;
 
 /**
  * Timer entry which represents timer value
@@ -17,8 +17,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
  */
 public class TimerMetricEntry extends MetricEntry {
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxData")
+    @JsonObject
+    @Attribute(name = "oxData")
     private TimerMetricData metricData;
 
     public TimerMetricEntry() { }

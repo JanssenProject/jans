@@ -5,27 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.@AttributesList;
+import org.gluu.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.persistence.annotation.LdapDN;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * Created by eugeniuparvan on 1/12/17.
  */
-@LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthToken"})
+@Entry
+@ObjectClass(values = {"top", "oxAuthToken"})
 public class SimpleTokenLdap implements Serializable {
 
-    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
-    @LdapDN
+    @DN
     private String dn;
 
-    @LdapCustomObjectClass
+    @CustomObjectClass
     private String[] customObjectClasses;
 
     public String getDn() {

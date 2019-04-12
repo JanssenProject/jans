@@ -6,27 +6,27 @@
 package org.gluu.config.oxtrust;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 
 /**
  * Asimba LDAP settings configuration entry.
  *
  * @author Dmitry Ognyannikov
  */
-@LdapEntry
-@LdapObjectClass(values = { "top", "oxAsimbaConfiguration" })
+@Entry
+@ObjectClass(values = { "top", "oxAsimbaConfiguration" })
 public class LdapOxAsimbaConfiguration extends Entry {
 
     private static final long serialVersionUID = -12489397651302948L;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxConfApplication")
+    @JsonObject
+    @Attribute(name = "oxConfApplication")
     private AsimbaConfiguration applicationConfiguration;
 
-    @LdapAttribute(name = "oxRevision")
+    @Attribute(name = "oxRevision")
     private long revision;
 
     public LdapOxAsimbaConfiguration() {

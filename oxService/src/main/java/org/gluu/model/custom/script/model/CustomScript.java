@@ -17,10 +17,10 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.SimpleExtendedCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.persistence.annotation.LdapAttribute;
+import org.gluu.persistence.annotation.LdapEntry;
+import org.gluu.persistence.annotation.LdapJsonObject;
+import org.gluu.persistence.annotation.LdapObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
@@ -28,52 +28,52 @@ import org.gluu.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@LdapEntry(sortBy = "level")
-@LdapObjectClass(values = { "top", "oxCustomScript" })
+@Entry(sortBy = "level")
+@ObjectClass(values = { "top", "oxCustomScript" })
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
     public static final String LOCATION_PATH_MODEL_PROPERTY = "location_path";
 
-    @LdapAttribute(ignoreDuringUpdate = true)
+    @Attribute(ignoreDuringUpdate = true)
     private String inum;
 
-    @LdapAttribute(name = "displayName")
+    @Attribute(name = "displayName")
     @Pattern(regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$", message = "Name should contain only letters, digits and underscores")
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
 
-    @LdapAttribute(name = "description")
+    @Attribute(name = "description")
     private String description;
 
-    @LdapAttribute(name = "oxScript")
+    @Attribute(name = "oxScript")
     private String script;
 
-    @LdapAttribute(name = "oxScriptType")
+    @Attribute(name = "oxScriptType")
     private CustomScriptType scriptType;
 
-    @LdapAttribute(name = "programmingLanguage")
+    @Attribute(name = "programmingLanguage")
     private ProgrammingLanguage programmingLanguage;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxModuleProperty")
+    @JsonObject
+    @Attribute(name = "oxModuleProperty")
     private List<SimpleCustomProperty> moduleProperties;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxConfigurationProperty")
+    @JsonObject
+    @Attribute(name = "oxConfigurationProperty")
     private List<SimpleExtendedCustomProperty> configurationProperties;
 
-    @LdapAttribute(name = "oxLevel")
+    @Attribute(name = "oxLevel")
     private int level;
 
-    @LdapAttribute(name = "oxRevision")
+    @Attribute(name = "oxRevision")
     private long revision;
 
-    @LdapAttribute(name = "gluuStatus")
+    @Attribute(name = "gluuStatus")
     private boolean enabled;
 
-    @LdapJsonObject
-    @LdapAttribute(name = "oxScriptError")
+    @JsonObject
+    @Attribute(name = "oxScriptError")
     private ScriptError scriptError;
 
     @Transient
