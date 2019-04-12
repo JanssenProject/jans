@@ -34,7 +34,7 @@ public @interface AttributesList {
      * (Optional) Holds additional configuration for Persistance attributes. Defaults
      * value not provides additional configuration.
      */
-    Attribute[] attributesConfiguration() default {};
+    AttributeName[] attributesConfiguration() default {};
 
     /**
      * (Optional) Specify if attributes should be sorted by property name value.

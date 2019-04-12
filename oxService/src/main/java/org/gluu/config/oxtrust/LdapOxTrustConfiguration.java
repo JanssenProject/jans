@@ -7,17 +7,17 @@
 package org.gluu.config.oxtrust;
 
 import org.gluu.persist.model.base.Entry;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapDN;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapJsonObject;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * @author Yuriy Movchan
  * @version 0.9, 05/16/2013
  */
-@Entry
+@DataEntry
 @ObjectClass(values = { "top", "oxTrustConfiguration" })
 public class LdapOxTrustConfiguration extends Entry {
 
@@ -27,22 +27,22 @@ public class LdapOxTrustConfiguration extends Entry {
     private String dn;
 
     @JsonObject
-    @Attribute(name = "oxTrustConfApplication")
+    @AttributeName(name = "oxTrustConfApplication")
     private AppConfiguration application;
 
     @JsonObject
-    @Attribute(name = "oxTrustConfCacheRefresh")
+    @AttributeName(name = "oxTrustConfCacheRefresh")
     private CacheRefreshConfiguration cacheRefresh;
 
-    @Attribute(name = "oxRevision")
+    @AttributeName(name = "oxRevision")
     private long revision;
 
     @JsonObject
-    @Attribute(name = "oxTrustConfImportPerson")
+    @AttributeName(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig;
 
     @JsonObject
-    @Attribute(name = "oxTrustConfAttributeResolver")
+    @AttributeName(name = "oxTrustConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;
 
     public LdapOxTrustConfiguration() {

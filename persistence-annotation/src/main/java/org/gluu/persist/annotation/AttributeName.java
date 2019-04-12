@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Attribute {
+public @interface AttributeName {
 
     /**
      * (Optional) The name of the Persistance attribute. Defaults to the field name.
