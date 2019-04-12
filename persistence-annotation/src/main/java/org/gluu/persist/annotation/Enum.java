@@ -11,10 +11,10 @@ package org.gluu.persist.annotation;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public interface LdapEnum {
+public interface Enum {
 
     String getValue();
 
-    Enum<? extends LdapEnum> resolveByValue(String value);
+    Enum<? extends Enum> resolveByValue(String value);
 
 }

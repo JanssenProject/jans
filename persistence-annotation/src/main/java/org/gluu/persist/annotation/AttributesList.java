@@ -34,7 +34,7 @@ public @interface @AttributesList {
      * (Optional) Holds additional configuration for LDAP attributes. Defaults
      * value not provides additional configuration.
      */
-    LdapAttribute[] attributesConfiguration() default {};
+    Attribute[] attributesConfiguration() default {};
 
     /**
      * (Optional) Specify if attributes should be sorted by property name value.
