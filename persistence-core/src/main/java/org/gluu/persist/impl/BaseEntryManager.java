@@ -37,15 +37,15 @@ import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.property.Setter;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.@AttributesList;
-import org.gluu.persist.annotation.LdapCustomObjectClass;
-import org.gluu.persist.annotation.LdapDN;
-import org.gluu.persist.annotation.LdapEntry;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.AttributesList;
+import org.gluu.persist.annotation.CustomObjectClass;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.AttributeEnum;
-import org.gluu.persist.annotation.LdapJsonObject;
-import org.gluu.persist.annotation.LdapObjectClass;
-import org.gluu.persist.annotation.LdapSchemaEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.SchemaEntry;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
@@ -60,12 +60,12 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
-	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { LdapEntry.class, LdapSchemaEntry.class,
-			LdapObjectClass.class };
-	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { LdapAttribute.class, @AttributesList.class,
-			LdapJsonObject.class };
-	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { LdapCustomObjectClass.class };
-	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { LdapDN.class };
+	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
+			ObjectClass.class };
+	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
+			JsonObject.class };
+	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { CustomObjectClass.class };
+	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { DN.class };
 
 	public static final String OBJECT_CLASS = "objectClass";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -213,7 +213,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			// attributes from LDAP
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
-			List<String> currentLdapReturnAttributesList = get@AttributesList(entry, propertiesAnnotations, false);
+			List<String> currentLdapReturnAttributesList = getAttributesList(entry, propertiesAnnotations, false);
 			currentLdapReturnAttributesList.add("objectClass");
 
 			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
@@ -222,7 +222,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		// Prepare list of modifications
 
-		// Process properties with LdapAttribute annotation
+		// Process properties with Attribute annotation
 		List<AttributeDataModification> attributeDataModifications = collectAttributeModifications(
 				propertiesAnnotations, attributesToPersistMap, attributesFromLdapMap, isSchemaUpdate,
 				schemaModificationType);
@@ -251,9 +251,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			Annotation ldapAttribute;
 
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					LdapAttribute.class);
+					AttributeName.class);
 			if (ldapAttribute != null) {
-				String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+				String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 				if (StringHelper.isEmpty(ldapAttributeName)) {
 					ldapAttributeName = propertyName;
 				}
@@ -266,7 +266,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				attributesToPersistMap.remove(ldapAttributeName);
 				attributesFromLdapMap.remove(ldapAttributeName);
 
-				LdapAttribute ldapAttributeAnnotation = (LdapAttribute) ldapAttribute;
+				AttributeName ldapAttributeAnnotation = (AttributeName) ldapAttribute;
 				if (ldapAttributeAnnotation.ignoreDuringUpdate()) {
 					continue;
 				}
@@ -314,10 +314,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			Annotation ldapAttribute;
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					@AttributesList.class);
+					AttributesList.class);
 			if (ldapAttribute != null) {
-				Map<String, LdapAttribute> ldapAttributesConfiguration = new HashMap<String, LdapAttribute>();
-				for (LdapAttribute ldapAttributeConfiguration : ((@AttributesList) ldapAttribute)
+				Map<String, AttributeName> ldapAttributesConfiguration = new HashMap<String, AttributeName>();
+				for (AttributeName ldapAttributeConfiguration : ((AttributesList) ldapAttribute)
 						.attributesConfiguration()) {
 					ldapAttributesConfiguration.put(ldapAttributeConfiguration.name(), ldapAttributeConfiguration);
 				}
@@ -329,7 +329,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 						continue;
 					}
 
-					LdapAttribute ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName);
+					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName);
 					if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringUpdate()) {
 						continue;
 					}
@@ -349,7 +349,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				for (AttributeData attributeToPersist : attributesToPersistMap.values()) {
 					String attributeName = attributeToPersist.getName();
 
-					LdapAttribute ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName);
+					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName);
 					if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringUpdate()) {
 						continue;
 					}
@@ -424,7 +424,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
-		String[] ldapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 
 		return contains(dnValue.toString(), attributes, objectClasses, ldapReturnAttributes);
 	}
@@ -450,7 +450,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		checkEntryClass(entryClass, false);
 		String[] objectClasses = getTypeObjectClasses(entryClass);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-		String[] ldapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 
 		return contains(baseDN, filter, objectClasses, ldapReturnAttributes);
 	}
@@ -491,9 +491,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return find(entryClass, primaryKey, ldapReturnAttributes, propertiesAnnotations);
 	}
 
-	protected <T> String[] getLdapAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations,
-			boolean isIgnore@AttributesList) {
-		List<String> attributes = get@AttributesList(entry, propertiesAnnotations, isIgnore@AttributesList);
+	protected <T> String[] getAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations,
+			boolean isIgnoreAttributesList) {
+		List<String> attributes = getAttributesList(entry, propertiesAnnotations, isIgnoreAttributesList);
 
 		if (attributes == null) {
 			return null;
@@ -502,24 +502,24 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return attributes.toArray(new String[0]);
 	}
 
-	private <T> List<String> get@AttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
-			boolean isIgnore@AttributesList) {
+	private <T> List<String> getAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
+			boolean isIgnoreAttributesList) {
 		List<String> attributes = new ArrayList<String>();
 
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
 
-			if (!isIgnore@AttributesList) {
+			if (!isIgnoreAttributesList) {
 				ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-						@AttributesList.class);
+						AttributesList.class);
 				if (ldapAttribute != null) {
 					if (entry == null) {
 						return null;
 					} else {
-						List<AttributeData> @AttributesList = getAttributesFrom@AttributesList(entry,
+						List<AttributeData> attributesList = getAttributesFromAttributesList(entry,
 								ldapAttribute, propertyName);
-						for (AttributeData attributeData : @AttributesList) {
+						for (AttributeData attributeData : attributesList) {
 							String ldapAttributeName = attributeData.getName();
 							if (!attributes.contains(ldapAttributeName)) {
 								attributes.add(ldapAttributeName);
@@ -529,11 +529,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				}
 			}
 
-			// Process properties with LdapAttribute annotation
+			// Process properties with AttributeName annotation
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					LdapAttribute.class);
+					AttributeName.class);
 			if (ldapAttribute != null) {
-				String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+				String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 				if (StringHelper.isEmpty(ldapAttributeName)) {
 					ldapAttributeName = propertyName;
 				}
@@ -557,7 +557,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		String[] currentLdapReturnAttributes = ldapReturnAttributes;
 		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+			currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 		}
 
 		List<AttributeData> ldapAttributes = find(primaryKey.toString(), currentLdapReturnAttributes);
@@ -577,22 +577,22 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		// Check if entry is LDAP Entry
 		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
 
-		Annotation ldapSchemaEntry = ReflectHelper.getAnnotationByType(entryAnnotations, LdapSchemaEntry.class);
-		Annotation ldapEntry = ReflectHelper.getAnnotationByType(entryAnnotations, LdapEntry.class);
+		Annotation ldapSchemaEntry = ReflectHelper.getAnnotationByType(entryAnnotations, SchemaEntry.class);
+		Annotation ldapEntry = ReflectHelper.getAnnotationByType(entryAnnotations, DataEntry.class);
 		if (isAllowSchemaEntry) {
 			if ((ldapSchemaEntry == null) && (ldapEntry == null)) {
-				throw new MappingException("Entry should has LdapEntry or LdapSchemaEntry annotation");
+				throw new MappingException("Entry should has DataEntry or SchemaEntry annotation");
 			}
 		} else {
 			if (ldapEntry == null) {
-				throw new MappingException("Entry should has LdapEntry annotation");
+				throw new MappingException("Entry should has DataEntry annotation");
 			}
 		}
 
 		return true;
 	}
 
-	protected boolean isLdapSchemaEntry(Class<?> entryClass) {
+	protected boolean isSchemaEntry(Class<?> entryClass) {
 		if (entryClass == null) {
 			throw new MappingException("Entry class is null");
 		}
@@ -600,7 +600,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		// Check if entry is LDAP Entry
 		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
 
-		return ReflectHelper.getAnnotationByType(entryAnnotations, LdapSchemaEntry.class) != null;
+		return ReflectHelper.getAnnotationByType(entryAnnotations, SchemaEntry.class) != null;
 	}
 
 	protected String[] getEntrySortBy(Class<?> entryClass) {
@@ -610,13 +610,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		// Check if entry is LDAP Entry
 		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
-		Annotation annotation = ReflectHelper.getAnnotationByType(entryAnnotations, LdapEntry.class);
+		Annotation annotation = ReflectHelper.getAnnotationByType(entryAnnotations, DataEntry.class);
 
 		if (annotation == null) {
 			return null;
 		}
 
-		return ((LdapEntry) annotation).sortBy();
+		return ((DataEntry) annotation).sortBy();
 	}
 
 	@Override
@@ -639,12 +639,12 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
 
 		// Get object classes
-		Annotation ldapObjectClass = ReflectHelper.getAnnotationByType(entryAnnotations, LdapObjectClass.class);
+		Annotation ldapObjectClass = ReflectHelper.getAnnotationByType(entryAnnotations, ObjectClass.class);
 		if (ldapObjectClass == null) {
 			return EMPTY_STRING_ARRAY;
 		}
 
-		return ((LdapObjectClass) ldapObjectClass).values();
+		return ((ObjectClass) ldapObjectClass).values();
 	}
 
 	protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {
@@ -743,15 +743,15 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			// Set loaded properties to entry
 
-			// Process properties with LdapAttribute annotation
+			// Process properties with AttributeName annotation
 			for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 				String propertyName = propertiesAnnotation.getPropertyName();
 				Annotation ldapAttribute;
 
 				ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-						LdapAttribute.class);
+						AttributeName.class);
 				if (ldapAttribute != null) {
-					String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+					String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 					if (StringHelper.isEmpty(ldapAttributeName)) {
 						ldapAttributeName = propertyName;
 					}
@@ -762,7 +762,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					// Remove processed attributes
 					attributesMap.remove(ldapAttributeName);
 
-					if (((LdapAttribute) ldapAttribute).ignoreDuringRead()) {
+					if (((AttributeName) ldapAttribute).ignoreDuringRead()) {
 						continue;
 					}
 
@@ -772,7 +772,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					}
 
 					Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-							LdapJsonObject.class);
+							JsonObject.class);
 					boolean jsonObject = ldapJsonObject != null;
 
 					setPropertyValue(propertyName, setter, entry, attributeData, jsonObject);
@@ -785,10 +785,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				Annotation ldapAttribute;
 
 				ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-						@AttributesList.class);
+						AttributesList.class);
 				if (ldapAttribute != null) {
-					Map<String, LdapAttribute> ldapAttributesConfiguration = new HashMap<String, LdapAttribute>();
-					for (LdapAttribute ldapAttributeConfiguration : ((@AttributesList) ldapAttribute)
+					Map<String, AttributeName> ldapAttributesConfiguration = new HashMap<String, AttributeName>();
+					for (AttributeName ldapAttributeConfiguration : ((AttributesList) ldapAttribute)
 							.attributesConfiguration()) {
 						ldapAttributesConfiguration.put(ldapAttributeConfiguration.name(), ldapAttributeConfiguration);
 					}
@@ -807,14 +807,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 								"Entry property " + propertyName + " should has setter with specified element type");
 					}
 
-					String entryPropertyName = ((@AttributesList) ldapAttribute).name();
+					String entryPropertyName = ((AttributesList) ldapAttribute).name();
 					Setter entryPropertyNameSetter = getSetter(entryItemType, entryPropertyName);
 					if (entryPropertyNameSetter == null) {
 						throw new MappingException(
 								"Entry should has setter for property " + propertyName + "." + entryPropertyName);
 					}
 
-					String entryPropertyValue = ((@AttributesList) ldapAttribute).value();
+					String entryPropertyValue = ((AttributesList) ldapAttribute).value();
 					Setter entryPropertyValueSetter = getSetter(entryItemType, entryPropertyValue);
 					if (entryPropertyValueSetter == null) {
 						throw new MappingException(
@@ -847,7 +847,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 							continue;
 						}
 
-						LdapAttribute ldapAttributeConfiguration = ldapAttributesConfiguration
+						AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration
 								.get(entryAttribute.getName());
 						if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringRead()) {
 							continue;
@@ -861,7 +861,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					}
 
 					if (doSort) {
-						sort@AttributesListIfNeeded((@AttributesList) ldapAttribute, entryItemType,
+						sortAttributesListIfNeeded((AttributesList) ldapAttribute, entryItemType,
 								propertyValue);
 					}
 				}
@@ -884,7 +884,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void sort@AttributesListIfNeeded(@AttributesList ldapAttribute, Class<T> entryItemType,
+	private <T> void sortAttributesListIfNeeded(AttributesList ldapAttribute, Class<T> entryItemType,
 			List<?> list) {
 		if (!ldapAttribute.sortByName()) {
 			return;
@@ -1147,7 +1147,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List, AttributeEnum or AttributeEnum[]"
-					+ " return type or has annotation LdapJsonObject");
+					+ " return type or has annotation JsonObject");
 		}
 
 		if (LOG.isDebugEnabled()) {
@@ -1183,11 +1183,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
 
-			// Process properties with LdapAttribute annotation
+			// Process properties with AttributeName annotation
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					LdapAttribute.class);
+					AttributeName.class);
 			if (ldapAttribute != null) {
-				AttributeData attribute = getAttributeFromLdapAttribute(entry, ldapAttribute, propertiesAnnotation,
+				AttributeData attribute = getAttributeFromAttribute(entry, ldapAttribute, propertiesAnnotation,
 						propertyName);
 				if (attribute != null) {
 					attributes.add(attribute);
@@ -1198,9 +1198,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			// Process properties with @AttributesList annotation
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					@AttributesList.class);
+					AttributesList.class);
 			if (ldapAttribute != null) {
-				List<AttributeData> listAttributes = getAttributesFrom@AttributesList(entry, ldapAttribute,
+				List<AttributeData> listAttributes = getAttributesFromAttributesList(entry, ldapAttribute,
 						propertyName);
 				if (listAttributes != null) {
 					attributes.addAll(listAttributes);
@@ -1213,11 +1213,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return attributes;
 	}
 
-	private AttributeData getAttributeFromLdapAttribute(Object entry, Annotation ldapAttribute,
+	private AttributeData getAttributeFromAttribute(Object entry, Annotation ldapAttribute,
 			PropertyAnnotation propertiesAnnotation, String propertyName) {
 		Class<?> entryClass = entry.getClass();
 
-		String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+		String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 		if (StringHelper.isEmpty(ldapAttributeName)) {
 			ldapAttributeName = propertyName;
 		}
@@ -1228,14 +1228,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-				LdapJsonObject.class);
+				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
 		AttributeData attribute = getAttribute(propertyName, ldapAttributeName, getter, entry, jsonObject);
 
 		return attribute;
 	}
 
-	private List<AttributeData> getAttributesFrom@AttributesList(Object entry, Annotation ldapAttribute,
+	private List<AttributeData> getAttributesFromAttributesList(Object entry, Annotation ldapAttribute,
 			String propertyName) {
 		Class<?> entryClass = entry.getClass();
 		List<AttributeData> listAttributes = new ArrayList<AttributeData>();
@@ -1256,14 +1256,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Class<?> elementType = ReflectHelper.getListType(getter);
 
-		String entryPropertyName = ((@AttributesList) ldapAttribute).name();
+		String entryPropertyName = ((AttributesList) ldapAttribute).name();
 		Getter entryPropertyNameGetter = getGetter(elementType, entryPropertyName);
 		if (entryPropertyNameGetter == null) {
 			throw new MappingException(
 					"Entry should has getter for property " + propertyName + "." + entryPropertyName);
 		}
 
-		String entryPropertyValue = ((@AttributesList) ldapAttribute).value();
+		String entryPropertyValue = ((AttributesList) ldapAttribute).value();
 		Getter entryPropertyValueGetter = getGetter(elementType, entryPropertyValue);
 		if (entryPropertyValueGetter == null) {
 			throw new MappingException(
@@ -1439,7 +1439,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List, AttributeEnum or AttributeEnum[]"
-					+ " parameter type or has annotation LdapJsonObject");
+					+ " parameter type or has annotation JsonObject");
 		}
 	}
 
@@ -1525,12 +1525,12 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Map<String, AttributeData> attributesDataMap = getAttributesDataMap(attributesData);
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
-					LdapAttribute.class);
+					AttributeName.class);
 			if (ldapAttribute == null) {
 				continue;
 			}
 
-			String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+			String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 			if (StringHelper.isEmpty(ldapAttributeName)) {
 				ldapAttributeName = propertiesAnnotation.getPropertyName();
 			}

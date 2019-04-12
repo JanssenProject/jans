@@ -11,19 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.@AttributesList;
-import org.gluu.persist.annotation.LdapCustomObjectClass;
-import org.gluu.persist.annotation.LdapDN;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.AttributesList;
+import org.gluu.persist.annotation.CustomObjectClass;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
  * Date: 11/03/2016
  */
-@Entry
+@DataEntry
 @ObjectClass(values = {"gluuPerson", "top"})
 public class SimpleUser implements Serializable {
 
@@ -32,10 +32,10 @@ public class SimpleUser implements Serializable {
     @DN
     private String dn;
 
-    @Attribute(name = "uid")
+    @AttributeName(name = "uid")
     private String userId;
 
-    @Attribute(name = "userPassword")
+    @AttributeName(name = "userPassword")
     private String userPassword;
 
     @AttributesList(name = "name", value = "values", sortByName = true)

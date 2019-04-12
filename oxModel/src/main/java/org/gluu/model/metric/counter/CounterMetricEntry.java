@@ -7,8 +7,8 @@
 import java.util.Date;
 
 import org.gluu.model.metric.ldap.MetricEntry;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapJsonObject;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.JsonObject;
 
 /**
  * Metric entry which represents numeric value
@@ -18,7 +18,7 @@ import org.gluu.persist.annotation.LdapJsonObject;
 public class CounterMetricEntry extends MetricEntry {
 
     @JsonObject
-    @Attribute(name = "oxData")
+    @AttributeName(name = "oxData")
     private CounterMetricData metricData;
 
     public CounterMetricEntry() { }

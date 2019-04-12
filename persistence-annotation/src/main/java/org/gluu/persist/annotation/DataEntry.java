@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Entry {
+public @interface DataEntry {
 
     /**
      * (Optional) Specify that this entry contains schema definition.

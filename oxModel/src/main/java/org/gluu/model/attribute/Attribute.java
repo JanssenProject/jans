@@ -17,10 +17,10 @@ import org.gluu.model.GluuStatus;
 import org.gluu.model.scim.ScimCustomAtribute;
 import org.gluu.model.user.UserRole;
 import org.gluu.persist.model.base.Entry;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapJsonObject;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 
 /**
  * Attribute Metadata
@@ -29,94 +29,94 @@ import org.gluu.persist.annotation.LdapObjectClass;
  * @author Javier Rojas Blum
  * @version February 9, 2015
  */
-@Entry(sortBy = { "displayName" })
+@DataEntry(sortBy = { "displayName" })
 @ObjectClass(values = { "top", "Attribute" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Attribute extends Entry implements Serializable {
 
     private static final long serialVersionUID = 4817004894646725606L;
 
-    @Attribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @Attribute(name = "oxAttributeType")
+    @AttributeName(name = "oxAttributeType")
     private String type;
 
-    @Attribute
+    @AttributeName
     private String lifetime;
 
-    @Attribute(name = "oxSourceAttribute")
+    @AttributeName(name = "oxSourceAttribute")
     private String sourceAttribute;
 
-    @Attribute
+    @AttributeName
     private String salt;
 
-    @Attribute(name = "oxNameIdType")
+    @AttributeName(name = "oxNameIdType")
     private String nameIdType;
 
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
     @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-    @Attribute(name = "gluuAttributeName")
+    @AttributeName(name = "gluuAttributeName")
     private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
-    @Attribute
+    @AttributeName
     private String displayName;
 
     @NotNull
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
-    @Attribute
+    @AttributeName
     private String description;
 
-    @Attribute(name = "gluuAttributeOrigin")
+    @AttributeName(name = "gluuAttributeOrigin")
     private String origin;
 
     @NotNull
-    @Attribute(name = "gluuAttributeType")
+    @AttributeName(name = "gluuAttributeType")
     private AttributeDataType dataType;
 
     @NotNull
-    @Attribute(name = "gluuAttributeEditType")
+    @AttributeName(name = "gluuAttributeEditType")
     private UserRole[] editType;
 
     @NotNull
-    @Attribute(name = "gluuAttributeViewType")
+    @AttributeName(name = "gluuAttributeViewType")
     private UserRole[] viewType;
 
-    @Attribute(name = "gluuAttributeUsageType")
+    @AttributeName(name = "gluuAttributeUsageType")
     private AttributeUsageType[] usageType;
 
-    @Attribute(name = "oxAuthClaimName")
+    @AttributeName(name = "oxAuthClaimName")
     private String oxAuthClaimName;
 
-    @Attribute(name = "seeAlso")
+    @AttributeName(name = "seeAlso")
     private String seeAlso;
 
-    @Attribute(name = "gluuStatus")
+    @AttributeName(name = "gluuStatus")
     private GluuStatus status;
 
-    @Attribute(name = "gluuSAML1URI")
+    @AttributeName(name = "gluuSAML1URI")
     private String saml1Uri;
 
-    @Attribute(name = "gluuSAML2URI")
+    @AttributeName(name = "gluuSAML2URI")
     private String saml2Uri;
 
-    @Attribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String urn;
 
-    @Attribute(name = "oxSCIMCustomAttribute")
+    @AttributeName(name = "oxSCIMCustomAttribute")
     private ScimCustomAtribute oxSCIMCustomAttribute;
 
-    @Attribute(name = "oxMultivaluedAttribute")
+    @AttributeName(name = "oxMultivaluedAttribute")
     private Multivalued multivaluedAttribute;
 
     @JsonObject
-    @Attribute(name = "oxValidation")
+    @AttributeName(name = "oxValidation")
     private AttributeValidation attributeValidation;
 
-    @Attribute(name = "gluuTooltip")
+    @AttributeName(name = "gluuTooltip")
     private String gluuTooltip;
 
     public String getInum() {

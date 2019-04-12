@@ -17,10 +17,10 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.SimpleExtendedCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.persist.annotation.LdapAttribute;
-import org.gluu.persist.annotation.LdapEntry;
-import org.gluu.persist.annotation.LdapJsonObject;
-import org.gluu.persist.annotation.LdapObjectClass;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.util.StringHelper;
 
 /**
@@ -28,52 +28,52 @@ import org.gluu.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@Entry(sortBy = "level")
+@DataEntry(sortBy = "level")
 @ObjectClass(values = { "top", "oxCustomScript" })
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
     public static final String LOCATION_PATH_MODEL_PROPERTY = "location_path";
 
-    @Attribute(ignoreDuringUpdate = true)
+    @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @Attribute(name = "displayName")
+    @AttributeName(name = "displayName")
     @Pattern(regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$", message = "Name should contain only letters, digits and underscores")
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
 
-    @Attribute(name = "description")
+    @AttributeName(name = "description")
     private String description;
 
-    @Attribute(name = "oxScript")
+    @AttributeName(name = "oxScript")
     private String script;
 
-    @Attribute(name = "oxScriptType")
+    @AttributeName(name = "oxScriptType")
     private CustomScriptType scriptType;
 
-    @Attribute(name = "programmingLanguage")
+    @AttributeName(name = "programmingLanguage")
     private ProgrammingLanguage programmingLanguage;
 
     @JsonObject
-    @Attribute(name = "oxModuleProperty")
+    @AttributeName(name = "oxModuleProperty")
     private List<SimpleCustomProperty> moduleProperties;
 
     @JsonObject
-    @Attribute(name = "oxConfigurationProperty")
+    @AttributeName(name = "oxConfigurationProperty")
     private List<SimpleExtendedCustomProperty> configurationProperties;
 
-    @Attribute(name = "oxLevel")
+    @AttributeName(name = "oxLevel")
     private int level;
 
-    @Attribute(name = "oxRevision")
+    @AttributeName(name = "oxRevision")
     private long revision;
 
-    @Attribute(name = "gluuStatus")
+    @AttributeName(name = "gluuStatus")
     private boolean enabled;
 
     @JsonObject
-    @Attribute(name = "oxScriptError")
+    @AttributeName(name = "oxScriptError")
     private ScriptError scriptError;
 
     @Transient

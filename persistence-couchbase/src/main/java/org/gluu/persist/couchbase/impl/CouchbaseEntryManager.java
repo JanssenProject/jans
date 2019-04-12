@@ -103,7 +103,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public <T> T merge(T entry) {
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
-        if (isLdapSchemaEntry(entryClass)) {
+        if (isSchemaEntry(entryClass)) {
             throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
         } else {
             return merge(entry, false, null);
@@ -134,7 +134,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public void remove(Object entry) {
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
-        if (isLdapSchemaEntry(entryClass)) {
+        if (isSchemaEntry(entryClass)) {
             throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
         }
 
@@ -328,7 +328,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         String[] currentLdapReturnAttributes = ldapReturnAttributes;
         if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+            currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
         }
 
         // Find entries

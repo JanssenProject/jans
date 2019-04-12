@@ -105,7 +105,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     public <T> T merge(T entry) {
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
-        if (isLdapSchemaEntry(entryClass)) {
+        if (isSchemaEntry(entryClass)) {
             if (getSupportedLDAPVersion() > 2) {
                 return merge(entry, true, AttributeModificationType.ADD);
             } else {
@@ -137,7 +137,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     public void remove(Object entry) {
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
-        if (isLdapSchemaEntry(entryClass)) {
+        if (isSchemaEntry(entryClass)) {
             if (getSupportedLDAPVersion() > 2) {
                 merge(entry, true, AttributeModificationType.REMOVE);
             } else {
@@ -378,7 +378,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         String[] currentLdapReturnAttributes = ldapReturnAttributes;
         if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+            currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
         }
 
         // Find entries
@@ -428,7 +428,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         String[] currentLdapReturnAttributes = ldapReturnAttributes;
         if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+            currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
         }
 
         // Find entries
@@ -472,7 +472,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         String[] currentLdapReturnAttributes = ldapReturnAttributes;
         if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+            currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
         }
 
         // Find entries
