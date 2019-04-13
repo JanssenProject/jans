@@ -74,7 +74,7 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.PRESENCE == type) {
-            return Expression.path(Expression.path(genericFilter.getAttributeName())).exists();
+            return Expression.path(Expression.path(genericFilter.getAttributeName())).isMissing();
         }
 
         if (FilterType.APPROXIMATE_MATCH == type) {
