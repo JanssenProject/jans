@@ -2,23 +2,20 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
+import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.service.Rp;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -86,14 +83,12 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             LOG.trace("Scope: " + response.getScope());
 
-            final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
-
             final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
             opResponse.setAccessToken(response.getAccessToken());
             opResponse.setIdToken(response.getIdToken());
             opResponse.setRefreshToken(response.getRefreshToken());
             opResponse.setExpiresIn(response.getExpiresIn() != null ? response.getExpiresIn() : -1);
-            opResponse.setIdTokenClaims(claims);
+            opResponse.setIdTokenClaims(CoreUtils.createJsonMapper().readTree(response.getIdToken()));
             return opResponse;
         } else {
             if (response.getStatus() == 400) {
