@@ -2,14 +2,14 @@ package org.gluu.oxd.server;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.codehaus.jettison.json.JSONException;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
+import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.params.GetUserInfoParams;
-import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
@@ -27,7 +27,7 @@ public class GetUserInfoTest {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-        final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
+        final GetTokensByCodeResponse2 tokens = requestTokens(client, site, userId, userSecret);
 
         GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
@@ -38,7 +38,7 @@ public class GetUserInfoTest {
         assertNotNull(resp.get("sub"));
     }
 
-    private GetTokensByCodeResponse requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
+    private GetTokensByCodeResponse2 requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
 
         final String state = CoreUtils.secureRandomString();
         final String nonce = CoreUtils.secureRandomString();
@@ -48,7 +48,7 @@ public class GetUserInfoTest {
         params.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
