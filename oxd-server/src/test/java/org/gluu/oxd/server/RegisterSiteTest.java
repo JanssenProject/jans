@@ -57,7 +57,7 @@ public class RegisterSiteTest {
 
     @Parameters({"host"})
     @Test(dependsOnMethods = {"register"})
-    public void update(String host) throws IOException {
+    public void update(String host) {
         notEmpty(oxdId);
 
         Calendar calendar = Calendar.getInstance();
