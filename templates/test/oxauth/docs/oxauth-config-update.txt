@@ -1,0 +1,31 @@
+These changes should be applied to oxAuth config.
+
+1. "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+
+2. "dynamicRegistrationCustomAttributes":[
+       "oxAuthTrustedClient",
+       "myCustomAttr1",
+       "myCustomAttr2",
+       "oxIncludeClaimsInIdToken"
+   ],
+
+3. "dynamicRegistrationExpirationTime":86400,
+
+4. "dynamicGrantTypeDefault":[
+      "authorization_code",
+      "implicit",
+      "password",
+      "client_credentials",
+      "refresh_token",
+      "urn:ietf:params:oauth:grant-type:uma-ticket"
+   ],
+
+5. "legacyIdTokenClaims":true,
+6. "authenticationFiltersEnabled":true,
+7. "clientAuthenticationFiltersEnabled":true,
+
+
+Next custom scripts should be enabled:
+
+1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
+2. Enable basic and basic_lock Person Authentication scripts.
