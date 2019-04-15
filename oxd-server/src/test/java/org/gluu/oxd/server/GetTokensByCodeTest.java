@@ -9,8 +9,6 @@ import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -28,18 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 public class GetTokensByCodeTest {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
-    @BeforeClass
-    public static void beforeClass(String host, String opHost, String redirectUrl) {
-        SetUpTest.beforeSuite(host, opHost, redirectUrl);
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        SetUpTest.afterSuite();
-    }
-
-
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
     public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
@@ -49,8 +35,6 @@ public class GetTokensByCodeTest {
         refreshToken(tokensResponse, client, site.getOxdId());
     }
 
-
-
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
     public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
@@ -58,9 +42,6 @@ public class GetTokensByCodeTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
         tokenByInvalidCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
     }
-
-
-
 
     public static GetClientTokenResponse refreshToken(GetTokensByCodeResponse2 resp, ClientInterface client, String oxdId) {
         notEmpty(resp.getRefreshToken());
@@ -100,7 +81,6 @@ public class GetTokensByCodeTest {
         notEmpty(resp.getRefreshToken());
         return resp;
     }
-
 
     public static GetTokensByCodeResponse2 tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
@@ -142,5 +122,4 @@ public class GetTokensByCodeTest {
 
         return client.getAuthorizationCode(Tester.getAuthorization(), params).getCode();
     }
-
 }
