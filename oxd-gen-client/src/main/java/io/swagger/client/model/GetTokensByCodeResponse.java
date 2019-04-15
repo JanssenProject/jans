@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * GetTokensByCodeResponse
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-03-15T09:55:53.588Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-04-15T08:35:22.406Z")
 public class GetTokensByCodeResponse {
   @SerializedName("access_token")
   private String accessToken = null;
@@ -36,7 +36,7 @@ public class GetTokensByCodeResponse {
   private String refreshToken = null;
 
   @SerializedName("id_token_claims")
-  private GetTokensByCodeResponseIdTokenClaims idTokenClaims = null;
+  private Object idTokenClaims = null;
 
   public GetTokensByCodeResponse accessToken(String accessToken) {
     this.accessToken = accessToken;
@@ -110,7 +110,7 @@ public class GetTokensByCodeResponse {
     this.refreshToken = refreshToken;
   }
 
-  public GetTokensByCodeResponse idTokenClaims(GetTokensByCodeResponseIdTokenClaims idTokenClaims) {
+  public GetTokensByCodeResponse idTokenClaims(Object idTokenClaims) {
     this.idTokenClaims = idTokenClaims;
     return this;
   }
@@ -120,11 +120,11 @@ public class GetTokensByCodeResponse {
    * @return idTokenClaims
   **/
   @ApiModelProperty(required = true, value = "")
-  public GetTokensByCodeResponseIdTokenClaims getIdTokenClaims() {
+  public Object getIdTokenClaims() {
     return idTokenClaims;
   }
 
-  public void setIdTokenClaims(GetTokensByCodeResponseIdTokenClaims idTokenClaims) {
+  public void setIdTokenClaims(Object idTokenClaims) {
     this.idTokenClaims = idTokenClaims;
   }
 
