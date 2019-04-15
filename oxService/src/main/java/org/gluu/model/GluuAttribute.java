@@ -13,14 +13,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.gluu.model.GluuStatus;
+import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.attribute.AttributeValidation;
 import org.gluu.model.scim.ScimCustomAtribute;
-import org.gluu.persist.model.base.Entry;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.Entry;
 
 /**
  * Attribute Metadata
@@ -76,7 +76,7 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	@NotNull
 	@AttributeName(name = "gluuAttributeType")
-	private GluuAttributeDataType dataType;
+	private AttributeDataType dataType;
 
 	@NotNull
 	@AttributeName(name = "gluuAttributeEditType")
@@ -214,11 +214,11 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.origin = origin;
 	}
 
-	public GluuAttributeDataType getDataType() {
+	public AttributeDataType getDataType() {
 		return dataType;
 	}
 
-	public void setDataType(GluuAttributeDataType dataType) {
+	public void setDataType(AttributeDataType dataType) {
 		this.dataType = dataType;
 	}
 
