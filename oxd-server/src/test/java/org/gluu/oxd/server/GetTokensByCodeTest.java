@@ -1,23 +1,25 @@
 package org.gluu.oxd.server;
 
 import com.google.common.collect.Lists;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
+import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
-import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
 import java.io.IOException;
 
 import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -26,13 +28,24 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 public class GetTokensByCodeTest {
 
+    @Parameters({"host", "opHost", "redirectUrl"})
+    @BeforeClass
+    public static void beforeClass(String host, String opHost, String redirectUrl) {
+        SetUpTest.beforeSuite(host, opHost, redirectUrl);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        SetUpTest.afterSuite();
+    }
+
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
     public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
         ClientInterface client = Tester.newClient(host);
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
+        GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
         refreshToken(tokensResponse, client, site.getOxdId());
     }
 
@@ -49,7 +62,7 @@ public class GetTokensByCodeTest {
 
 
 
-    public static GetClientTokenResponse refreshToken(GetTokensByCodeResponse resp, ClientInterface client, String oxdId) {
+    public static GetClientTokenResponse refreshToken(GetTokensByCodeResponse2 resp, ClientInterface client, String oxdId) {
         notEmpty(resp.getRefreshToken());
 
         // refresh token
@@ -67,7 +80,7 @@ public class GetTokensByCodeTest {
         return refreshResponse;
     }
 
-    public static GetTokensByCodeResponse tokenByCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
+    public static GetTokensByCodeResponse2 tokenByCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
 
@@ -80,7 +93,7 @@ public class GetTokensByCodeTest {
         params.setCode(code);
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -89,7 +102,7 @@ public class GetTokensByCodeTest {
     }
 
 
-    public static GetTokensByCodeResponse tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
+    public static GetTokensByCodeResponse2 tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
         codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce);
@@ -103,7 +116,7 @@ public class GetTokensByCodeTest {
         params.setCode(code);
         params.setState(state);
 
-        GetTokensByCodeResponse resp = null;
+        GetTokensByCodeResponse2 resp = null;
 
         try {
             resp = client.getTokenByCode(Tester.getAuthorization(), params);

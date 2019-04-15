@@ -88,7 +88,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             opResponse.setIdToken(response.getIdToken());
             opResponse.setRefreshToken(response.getRefreshToken());
             opResponse.setExpiresIn(response.getExpiresIn() != null ? response.getExpiresIn() : -1);
-            opResponse.setIdTokenClaims(CoreUtils.createJsonMapper().readTree(response.getIdToken()));
+            opResponse.setIdTokenClaims(CoreUtils.createJsonMapper().readTree(idToken.getClaims().toJsonString()));
             return opResponse;
         } else {
             if (response.getStatus() == 400) {

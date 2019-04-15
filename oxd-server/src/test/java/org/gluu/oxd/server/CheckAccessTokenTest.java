@@ -1,13 +1,13 @@
 package org.gluu.oxd.server;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
+import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.CheckAccessTokenParams;
 import org.gluu.oxd.common.response.CheckAccessTokenResponse;
-import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -25,7 +25,7 @@ public class CheckAccessTokenTest {
         ClientInterface client = Tester.newClient(host);
         String nonce = CoreUtils.secureRandomString();
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-        GetTokensByCodeResponse response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
+        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
 
         final CheckAccessTokenParams params = new CheckAccessTokenParams();
         params.setAccessToken(response.getAccessToken());
