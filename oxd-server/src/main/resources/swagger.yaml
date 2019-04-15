@@ -650,57 +650,7 @@ paths:
                 example: 33d7988e-6ffb-4fe5-8c2a-0e158691d446
               id_token_claims:
                 type: object
-                required:
-                  - at_hash
-                  - aud
-                  - sub
-                  - auth_time
-                  - iss
-                  - exp
-                  - iat
-                  - nonce
-                  - oxOpenIDConnectVersion
-                properties:
-                  at_hash:
-                    type: array
-                    items:
-                      type: string
-                    example: ["Cx2dz5Wvw_kBXAcTs3mFA"]
-                  aud:
-                    type: array
-                    items:
-                      type: string
-                    example: ["l238j323ds-23ij4"]
-                  sub:
-                    type: array
-                    items:
-                      type: string
-                    example: ["jblack"]
-                  auth_time:
-                    type: array
-                    items:
-                      type: string
-                  iss:
-                    type: array
-                    items:
-                      type: string
-                    example: ["https://as.gluu.org/"]
-                  exp:
-                    type: array
-                    items:
-                      type: string
-                  iat:
-                    type: array
-                    items:
-                      type: string
-                  nonce:
-                    type: array
-                    items:
-                      type: string
-                  oxOpenIDConnectVersion:
-                    type: array
-                    items:
-                      type: string
+                additionalProperties: true
         400:
           description: Invalid parameters are provided to endpoint.
         403:
