@@ -996,7 +996,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return
 
                 remote_loc = "%s, %s, %s" % ( remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'] )
-                remote_loc_encoded = urllib.quote(remote_loc)
+                remote_loc_encoded = urllib.quote(remote_loc.encode('utf-8'))
                 super_gluu_request_dictionary['req_loc'] = remote_loc_encoded
 
     def determineGeolocationData(self, remote_ip):
