@@ -815,7 +815,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             pushSnsService = CdiUtil.bean(PushSnsService)
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
                             if targetEndpointArn == None:
-                            	return
+                                return
 
                             send_notification = True
     
@@ -868,7 +868,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             pushSnsService = CdiUtil.bean(PushSnsService)
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.GCM, user, u2f_device)
                             if targetEndpointArn == None:
-                            	return
+                                return
 
                             send_notification = True
     
@@ -944,8 +944,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 targetEndpointArn = registerDeviceResponse.getEndpointArn()
         
         if StringHelper.isEmpty(targetEndpointArn):
-	        print "Super-Gluu. Failed to get endpoint ARN for user: '%s'" % user.getUserId()
-        	return None
+            print "Super-Gluu. Failed to get endpoint ARN for user: '%s'" % user.getUserId()
+            return None
 
         print "Super-Gluu. Get target endpoint ARN. Create target endpoint ARN '%s' for user: '%s'" % (targetEndpointArn, user.getUserId())
         
@@ -996,7 +996,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return
 
                 remote_loc = "%s, %s, %s" % ( remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'] )
-                remote_loc_encoded = urllib.quote(remote_loc)
+                remote_loc_encoded = urllib.quote(remote_loc.encode('utf-8'))
                 super_gluu_request_dictionary['req_loc'] = remote_loc_encoded
 
     def determineGeolocationData(self, remote_ip):
