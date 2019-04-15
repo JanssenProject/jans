@@ -6,16 +6,44 @@
 
 package org.gluu.oxauth.userinfo.ws.rs;
 
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.model.GluuAttribute;
-import org.gluu.model.GluuAttributeDataType;
+import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AbstractToken;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
+import org.gluu.oxauth.model.common.AuthorizationGrantType;
+import org.gluu.oxauth.model.common.DefaultScope;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -42,7 +70,11 @@ import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.AttributeService;
+import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.PairwiseIdentifierService;
+import org.gluu.oxauth.service.ScopeService;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.oxauth.util.ServerUtil;
@@ -51,21 +83,6 @@ import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
@@ -512,9 +529,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
-                    } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
-                    } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
                         Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                         if (attributeValue != null) {

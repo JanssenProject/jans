@@ -6,18 +6,40 @@
 
 package org.gluu.oxauth.model.token;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.model.GluuAttribute;
-import org.gluu.model.GluuAttributeDataType;
+import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AbstractToken;
+import org.gluu.oxauth.model.common.AccessToken;
+import org.gluu.oxauth.model.common.AuthorizationCode;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -37,7 +59,6 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.AttributeService;
@@ -51,16 +72,9 @@ import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -557,9 +571,9 @@ public class IdTokenFactory {
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
-                    } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
-                    } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                    } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
                         Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                         if (attributeValue != null) {
