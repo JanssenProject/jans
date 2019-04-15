@@ -143,6 +143,13 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             rp.setRedirectUris(Lists.newArrayList(redirectUris));
         }
 
+        if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
+            rp.setAcrValues(params.getAcrValues());
+            request.setDefaultAcrValues(params.getAcrValues());
+        } else {
+            request.setDefaultAcrValues(rp.getAcrValues());
+        }
+
         if (params.getAccessTokenAsJwt() != null) {
             rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
             request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
