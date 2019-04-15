@@ -1,5 +1,14 @@
-These changes should be applied to oxAuth config.
+I. Client keys deployment.
+- cd /var/www/html/
+- wget --no-check-certificate https://raw.githubusercontent.com/GluuFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
+- unzip oxauth_test_client_keys.zip
+- rm -rf oxauth_test_client_keys.zip
+- chown -R root.www-data oxauth-client
+- Load testing data test /install/community-edition-setup/output/test/oxauth/data/oxauth-test-data.ldif into LDAP.
+- Load testing data test /install/community-edition-setup/output/test/scim-client/data/scim-test-data.ldif into LDAP.
 
+
+II. These changes should be applied to oxAuth config.
 1. "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
 
 2. "dynamicRegistrationCustomAttributes":[
@@ -24,8 +33,23 @@ These changes should be applied to oxAuth config.
 6. "authenticationFiltersEnabled":true,
 7. "clientAuthenticationFiltersEnabled":true,
 
-
-Next custom scripts should be enabled:
-
+III. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
 2. Enable basic and basic_lock Person Authentication scripts.
+
+IV. Restart oxAuth server
+
+V. Prepare for tests run
+- git clone https://github.com/GluuFederation/oxAuth
+- Download and unzip file test_data.zip from CE server.
+- Create test profile folders oxAuth/Client/profiles/ce_test and oxAuth/Server/profiles/ce_test
+- Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
+- Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
+- Import HTTP SSL CE Server cert (/etc/certs/httpd.crt) into default java truststore.
+  Sample command: keytool -import -alias seed22.gluu.org_httpd -keystore cacerts -file httpd.crt
+- Import OpenDJ SSL CE Server cert (/etc/certs/opendj.crt) into default java truststore.
+  Sample command: keytool -import -alias seed22.gluu.org_opendj -keystore cacerts -file opendj.crt
+
+VI. Run oxAuth client tests
+- cd into oxAuth/Client
+- mvn package -Dcfg=ce_test
