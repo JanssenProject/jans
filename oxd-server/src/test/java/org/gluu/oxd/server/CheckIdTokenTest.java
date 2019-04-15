@@ -1,13 +1,13 @@
 package org.gluu.oxd.server;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
+import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.CheckIdTokenParams;
 import org.gluu.oxd.common.response.CheckIdTokenResponse;
-import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +31,7 @@ public class CheckIdTokenTest {
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
         String nonce = CoreUtils.secureRandomString();
-        GetTokensByCodeResponse response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
+        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
 
         final CheckIdTokenParams params = new CheckIdTokenParams();
         params.setOxdId(site.getOxdId());
