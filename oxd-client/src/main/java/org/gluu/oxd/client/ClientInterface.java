@@ -71,7 +71,7 @@ public interface ClientInterface {
     @Path("/get-tokens-by-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    GetTokensByCodeResponse getTokenByCode(@HeaderParam("Authorization") String authorization, GetTokensByCodeParams params);
+    GetTokensByCodeResponse2 getTokenByCode(@HeaderParam("Authorization") String authorization, GetTokensByCodeParams params);
 
     @POST
     @Path("/get-user-info")
