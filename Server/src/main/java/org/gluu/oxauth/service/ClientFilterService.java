@@ -37,7 +37,7 @@ public class ClientFilterService extends BaseAuthFilterService {
     private AppConfiguration appConfiguration;
 
 	@Inject
-	protected LdapFilterConverter ldapFilterConverter;
+	private LdapFilterConverter ldapFilterConverter;
 
     @PostConstruct
     public void init() {
