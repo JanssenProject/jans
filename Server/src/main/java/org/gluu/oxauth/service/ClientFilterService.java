@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.operation.SearchException;
-import org.gluu.persist.ldap.impl.LdapFilterConverter;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,9 +34,6 @@ public class ClientFilterService extends BaseAuthFilterService {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-	@Inject
-	private LdapFilterConverter ldapFilterConverter;
 
     @PostConstruct
     public void init() {
