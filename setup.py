@@ -2416,6 +2416,7 @@ class Setup(object):
             self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
             self.couchebaseClusterAdmin = self.getPrompt("Couchbase Admin user")
             self.ldapPass = self.getPrompt("Couchbase Admin password")
+            
 
         else:
             promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
@@ -3725,7 +3726,7 @@ class Setup(object):
 
         prop_dict = {
                     'couchbase_servers': self.ldap_hostname,
-                    'couchbase_server_user': 'admin',
+                    'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
