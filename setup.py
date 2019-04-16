@@ -536,7 +536,7 @@ class Setup(object):
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
         self.couchbaseClusterRamsize = 2048 #in MB
-        
+        self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
 
@@ -2348,17 +2348,21 @@ class Setup(object):
             
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
-        ldapPass = self.getPW(special='.*=!%&+/-')
 
-        while True:
-            ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
 
-            if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
-                break
-            else:
-                print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
-        
-        self.ldapPass = ldapPass
+        if not self.remoteCouchbase:
+
+            ldapPass = self.getPW(special='.*=!%&+/-')
+
+            while True:
+                ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
+
+                if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
+                    break
+                else:
+                    print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+            
+            self.ldapPass = ldapPass
 
         if setupOptions['allowPreReleasedApplications'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
             while True:
@@ -2391,69 +2395,88 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
-        if promptForLDAP == 'y':
-            
-            backend_types = []
 
-            if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
-                backend_types.append(('Gluu OpenDj','opendj'))
-            
-            if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
-                backend_types.append(('Wren:DS','wrends'))
-            
-            
-            if self.os_type in ('ubuntu', 'debian'):
-                suffix = 'deb'
+        if self.os_type in ('ubuntu', 'debian'):
+            suffix = 'deb'
 
-            elif self.os_type in ('centos', 'red', 'fedora'):
-                suffix = 'rpm'
+        elif self.os_type in ('centos', 'red', 'fedora'):
+            suffix = 'rpm'
 
-            if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
-                backend_types.append(('Couchbase','couchbase'))
 
+        if self.remoteCouchbase:
             self.installLdap = True
-            option = None
-            
-            if len(backend_types) == 1:
-                self.ldap_type = backend_types[0][1] 
-            
-            else:
-                prompt_text = 'Install '
-                options = []
-                for i, backend in enumerate(backend_types):
-                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
-                    options.append(str(i+1))
+            self.ldap_type = 'couchbase'
+            self.install_couchbase = True
 
-                prompt_text += '[{0}]'.format('|'.join(options))
-                option=None
+            if not glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+                sys.exit('Couchbase package not found, exiting.')
 
-                while not option in options:
-                    option=self.getPrompt(prompt_text, options[0])
-                    if not option in options:
-                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
-
-                self.ldap_type = backend_types[int(option)-1][1]
-
-                if self.ldap_type == 'wrends':
-                    self.ldap_type = 'opendj'
-                    self.opendj_type = 'wrends'
-
-                elif self.ldap_type == 'opendj':
-                    self.opendj_type = 'opendj'
-
-                elif self.ldap_type == 'couchbase':
-                    self.cache_provider_type = 'NATIVE_PERSISTENCE'
-                    print ('  Please note that you have to update your firewall configuration to\n'
-                            '  allow connections to the following ports:\n'
-                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                    self.install_couchbase = True
+            self.ldap_hostname = self.getPrompt("Couchbase host")
+            self.couchebaseBucketClusterPort = self.getPrompt("Couchbase port","8091")
+            self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
+            self.couchebaseClusterAdmin = self.getPrompt("Couchbase Admin user")
+            self.ldapPass = self.getPrompt("Couchbase Admin password")
 
         else:
-            self.installLdap = False
+            promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
+            if promptForLDAP == 'y':
+                
+                backend_types = []
+
+                if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
+                    backend_types.append(('Gluu OpenDj','opendj'))
+                
+                if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
+                    backend_types.append(('Wren:DS','wrends'))
+                
+                
+
+
+                if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+                    backend_types.append(('Couchbase','couchbase'))
+
+                self.installLdap = True
+                option = None
+                
+                if len(backend_types) == 1:
+                    self.ldap_type = backend_types[0][1] 
+                
+                else:
+                    prompt_text = 'Install '
+                    options = []
+                    for i, backend in enumerate(backend_types):
+                        prompt_text += '({0}) {1} '.format(i+1, backend[0])
+                        options.append(str(i+1))
+
+                    prompt_text += '[{0}]'.format('|'.join(options))
+                    option=None
+
+                    while not option in options:
+                        option=self.getPrompt(prompt_text, options[0])
+                        if not option in options:
+                            print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
+
+                    self.ldap_type = backend_types[int(option)-1][1]
+
+                    if self.ldap_type == 'wrends':
+                        self.ldap_type = 'opendj'
+                        self.opendj_type = 'wrends'
+
+                    elif self.ldap_type == 'opendj':
+                        self.opendj_type = 'opendj'
+
+                    elif self.ldap_type == 'couchbase':
+                        self.cache_provider_type = 'NATIVE_PERSISTENCE'
+                        print ('  Please note that you have to update your firewall configuration to\n'
+                                '  allow connections to the following ports:\n'
+                                '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                                '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
+                        sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
+                        self.install_couchbase = True
+
+            else:
+                self.installLdap = False
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
@@ -3701,7 +3724,7 @@ class Setup(object):
         prop = open(os.path.join(self.templateFolder, prop_file)).read()
 
         prop_dict = {
-                    'couchbase_servers': 'localhost',
+                    'couchbase_servers': self.ldap_hostname,
                     'couchbase_server_user': 'admin',
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
@@ -3728,19 +3751,27 @@ class Setup(object):
     def install_couchbase_server(self):
 
         self.couchbaseInstall()
-        self.isCouchbaseStarted(18091)
-        self.run_service_command('couchbase-server', 'stop')
-        self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-        self.run_service_command('couchbase-server', 'start')
-
-        #wait for couchbase start successfully
-        if not self.isCouchbaseStarted():
-            log_line = "Couchbase was not started in a minute. Terminating installation."
-            self.logIt(log_line, True)
-            print (log_line)
-            sys.exit(log_line)
         
-        self.couchebaseCreateCluster(clusterRamsize=self.couchbaseClusterRamsize)
+        
+        if not self.remoteCouchbase:
+            self.isCouchbaseStarted()
+            self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
+            self.run_service_command('couchbase-server', 'start')
+
+            #wait for couchbase start successfully
+            if not self.isCouchbaseStarted():
+                log_line = "Couchbase was not started in a minute. Terminating installation."
+                self.logIt(log_line, True)
+                print (log_line)
+                sys.exit(log_line)
+            
+            self.couchebaseCreateCluster(clusterRamsize=self.couchbaseClusterRamsize)
+
+
+        else:
+            self.run_service_command('couchbase-server', 'stop')
+            self.run_service_command('couchbase-server', 'disable')
+        
         self.couchbaseSSL()
 
         #TO DO: calculations of bucketRamsize is neaded
@@ -3801,7 +3832,15 @@ def print_help():
     
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif','listen_all_interfaces'])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", 
+                                        [
+                                        'allow_pre_released_applications', 
+                                        'allow_deprecated_applications', 
+                                        'import-ldif',
+                                        'listen_all_interfaces',
+                                        'remote-couchbase',
+                                        ]
+                                    )
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -3846,6 +3885,8 @@ def getOpts(argv, setupOptions):
             setupOptions['allowDeprecatedApplications'] = True
         elif opt == '--listen_all_interfaces':
             setupOptions['listenAllInterfaces'] = True
+        elif opt == '--remote-couchbase':
+            setupOptions['remoteCouchbase'] = True
         elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
@@ -3872,7 +3913,8 @@ if __name__ == '__main__':
         'loadTestData': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
-        'listenAllInterfaces': False
+        'listenAllInterfaces': False,
+        'remoteCouchbase': False,
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -3895,6 +3937,7 @@ if __name__ == '__main__':
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
     installObject.listenAllInterfaces = setupOptions['listenAllInterfaces']
+    installObject.remoteCouchbase = setupOptions['remoteCouchbase']
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
