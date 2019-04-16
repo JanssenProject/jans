@@ -216,18 +216,22 @@ public class Filter {
             sb.append(this.attributeName).append(this.type.getSign());
             if (this.subInitial != null) {
                 sb.append(this.subInitial);
-            }
-            sb.append('*');
-            for (final String s : subAny) {
-                sb.append(s);
                 sb.append('*');
             }
+            if (this.subAny != null) {
+                sb.append('*');
+                for (final String s : subAny) {
+                    sb.append(s);
+                    sb.append('*');
+                }
+            }
             if (this.subFinal != null) {
+                sb.append('*');
                 sb.append(this.subFinal);
             }
             sb.append(')');
 
-            return sb.toString();
+            return sb.toString().replaceAll("\\*\\*","*");
         }
 
         return super.toString();
