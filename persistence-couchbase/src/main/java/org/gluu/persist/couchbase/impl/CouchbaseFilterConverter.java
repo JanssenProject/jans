@@ -7,6 +7,8 @@
 
 package org.gluu.persist.couchbase.impl;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.search.filter.Filter;
@@ -21,6 +23,7 @@ import com.couchbase.client.java.query.dsl.Expression;
  *
  * @author Yuriy Movchan Date: 05/15/2018
  */
+@ApplicationScoped
 public class CouchbaseFilterConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseFilterConverter.class);
