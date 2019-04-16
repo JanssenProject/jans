@@ -43,6 +43,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>oxcore-persistence-ldap</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxcore-persistence-annotation</artifactId>
             <version>${project.version}</version>

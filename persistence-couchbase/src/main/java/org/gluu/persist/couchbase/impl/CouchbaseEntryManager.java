@@ -594,7 +594,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     private Expression toCouchbaseFilter(Filter genericFilter) throws SearchException {
-        return FILTER_CONVERTER.convertToLdapFilter(genericFilter);
+        return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter);
     }
 
     private ParsedKey toCouchbaseKey(String dn) {
