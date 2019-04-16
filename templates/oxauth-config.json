@@ -210,13 +210,13 @@
             "filter":"(&(mail=*{0}*)(inum={1}))",
             "bind":false,
             "bindPasswordAttribute":"",
-            "baseDn":"o=gluu"
+            "baseDn":"ou=people,o=gluu"
         },
         {
             "filter":"uid={0}",
             "bind":true,
             "bindPasswordAttribute":"pwd",
-            "baseDn":"o=gluu"
+            "baseDn":"ou=people,o=gluu"
         }
     ],
     "clientAuthenticationFilters":[
