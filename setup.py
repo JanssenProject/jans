@@ -480,7 +480,7 @@ class Setup(object):
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
-        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
         self.default_key_expiration = 2
 
         # oxTrust SCIM configuration
