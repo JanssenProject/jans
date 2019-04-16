@@ -90,14 +90,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: resources
 
-################################
-
-# OX UMA Hosts - LEVEL 2
-# Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
-dn: ou=hosts,o=gluu
+# UMA pct  - LEVEL 3
+dn: ou=pct,ou=uma,o=gluu
 objectClass: top
 objectClass: organizationalUnit
-ou: hosts
+ou: pct
 
 ################################
 
