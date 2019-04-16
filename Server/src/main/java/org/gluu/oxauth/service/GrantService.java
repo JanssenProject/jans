@@ -6,32 +6,36 @@
 
 package org.gluu.oxauth.service;
 
+import static org.gluu.oxauth.util.ServerUtil.isTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.CacheGrant;
 import org.gluu.oxauth.model.common.ClientTokens;
 import org.gluu.oxauth.model.common.SessionTokens;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import static org.gluu.oxauth.util.ServerUtil.isTrue;
-
-import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -49,7 +53,7 @@ public class GrantService {
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-    private ApplicationAuditLogger applicationAuditLogger;
+	protected LdapFilterConverter ldapFilterConverter;
 
     @Inject
     private ClientService clientService;
@@ -225,7 +229,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsOfClient(String p_clientId) {
         try {
             final String baseDn = clientService.buildClientDn(p_clientId);
-            return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.create("oxAuthTokenCode=*"));
+            return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("oxAuthTokenCode"));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -286,7 +290,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
         List<TokenLdap> grants = new ArrayList<TokenLdap>();
         try {
-            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, Filter.create(String.format("oxAuthSessionDn=%s", sessionDn)));
+            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthSessionDn", sessionDn));
             if (ldapGrants != null) {
                 grants.addAll(ldapGrants);
             }
