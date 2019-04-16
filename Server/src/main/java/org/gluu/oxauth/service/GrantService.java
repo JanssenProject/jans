@@ -53,9 +53,6 @@ public class GrantService {
     private PersistenceEntryManager ldapEntryManager;
 
     @Inject
-	protected LdapFilterConverter ldapFilterConverter;
-
-    @Inject
     private ClientService clientService;
 
     @Inject
