@@ -17,6 +17,8 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.persist.ldap.impl.LdapFilterConverter;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,12 +36,15 @@ public class ClientFilterService extends BaseAuthFilterService {
     @Inject
     private AppConfiguration appConfiguration;
 
+	@Inject
+	protected LdapFilterConverter ldapFilterConverter;
+
     @PostConstruct
     public void init() {
         super.init(appConfiguration.getClientAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled()), false);
     }
 
-    public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) {
+    public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) throws SearchException {
         if (attributeValues == null) {
             return null;
         }

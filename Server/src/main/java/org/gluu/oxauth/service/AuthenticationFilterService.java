@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.util.StringHelper;
 
 /**
@@ -41,7 +42,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
         super.init(appConfiguration.getAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getAuthenticationFiltersEnabled()), true);
     }
 
-    public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) {
+    public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) throws SearchException {
         if (attributeValues == null) {
             return null;
         }
