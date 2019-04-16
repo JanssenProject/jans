@@ -21,12 +21,14 @@ import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.HttpMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -118,7 +120,15 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_AS_JWT.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()), registerResponse.getClaims().get(ACCESS_TOKEN_SIGNING_ALG.toString()));
         assertEquals(clientUpdateResponse.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()), registerResponse.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
-        assertEquals(clientUpdateResponse.getClaims().get(SCOPE.toString()), registerResponse.getClaims().get(SCOPE.toString()));
+
+        assertNotNull(clientUpdateResponse.getClaims().get(SCOPE.toString()));
+        assertNotNull(registerResponse.getClaims().get(SCOPE.toString()));
+
+        List<String> clientUpdateResponseScopes = Util.splittedStringAsList(clientUpdateResponse.getClaims().get(SCOPE.toString()), " ");
+        List<String> registerResponseScopes = Util.splittedStringAsList(registerResponse.getClaims().get(SCOPE.toString()), " ");
+        Collections.sort(clientUpdateResponseScopes);
+        Collections.sort(registerResponseScopes);
+		assertEquals(clientUpdateResponseScopes,registerResponseScopes);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
