@@ -1,5 +1,7 @@
 package org.gluu.persist.ldap.impl;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
@@ -9,6 +11,7 @@ import org.gluu.search.filter.FilterType;
  *
  * @author Yuriy Movchan Date: 12/15/2017
  */
+@ApplicationScoped
 public class LdapFilterConverter {
 
     public com.unboundid.ldap.sdk.Filter convertToLdapFilter(Filter genericFilter) throws SearchException {
