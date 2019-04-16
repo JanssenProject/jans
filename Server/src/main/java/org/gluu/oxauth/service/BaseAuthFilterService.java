@@ -20,6 +20,8 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.model.configuration.BaseFilter;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -37,6 +39,9 @@ public abstract class BaseAuthFilterService {
 	
 	@Inject
 	protected Logger log;
+
+	@Inject
+	protected LdapFilterConverter ldapFilterConverter;
 
     public static final Pattern PARAM_VALUE_PATTERN = Pattern.compile("([\\w]+)[\\s]*\\=[\\*\\s]*(\\{[\\s]*[\\d]+[\\s]*\\})[\\*\\s]*");
 
@@ -213,10 +218,10 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public String loadEntryDN(PersistenceEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
+    public String loadEntryDN(PersistenceEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
-        Filter ldapFilter = Filter.create(filter);
+        Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter);
         List<DummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), DummyEntry.class, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
@@ -231,7 +236,7 @@ public abstract class BaseAuthFilterService {
         return foundEntries.get(0).getDn();
     }
 
-    public String processAuthenticationFilters(Map<?, ?> attributeValues) {
+    public String processAuthenticationFilters(Map<?, ?> attributeValues) throws SearchException {
         if (attributeValues == null) {
             return null;
         }
@@ -250,7 +255,7 @@ public abstract class BaseAuthFilterService {
         return null;
     }
 
-    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters p_allowed, Map<?, ?> p_attributeValues);
+    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters p_allowed, Map<?, ?> p_attributeValues) throws SearchException;
 
     public List<AuthenticationFilterWithParameters> getFilterWithParameters() {
         return filterWithParameters;
