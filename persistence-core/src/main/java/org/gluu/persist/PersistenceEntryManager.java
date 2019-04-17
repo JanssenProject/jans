@@ -32,56 +32,39 @@ import javax.persistence.Query;
  */
 public interface PersistenceEntryManager extends EntityManager {
 
-    void addDeleteSubscriber(DeleteNotifier subscriber);
-
     boolean authenticate(String bindDn, String password);
-
     boolean authenticate(String baseDN, String userName, String password);
 
-    <T> boolean contains(Class<T> entryClass, String primaryKey);
+	void persist(Object entry);
 
+	<T> T merge(T entry);
+
+    <T> boolean contains(String primaryKey, Class<T> entryClass);
     <T> boolean contains(String primaryKey, Class<T> entryClass, Filter filter);
 
     <T> int countEntries(Object entry);
-
     <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter);
-
     <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter,  SearchScope scope);
 
     <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
 
-    Date decodeTime(String date);
-
-    boolean destroy();
-
-    String encodeTime(Date date);
-
-    String[] exportEntry(String dn);
-
     <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
-
-    <T> List<T> findEntries(Object entry);
 
     /**
      * Search by sample
      *
      * @param entry Sample
-     * @param count Maximum result set size
      * @return Result entries
      */
+    <T> List<T> findEntries(Object entry);
     <T> List<T> findEntries(Object entry, int count);
 
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
-
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int count);
-
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
-
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int count);
-
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             int start, int count, int chunkSize);
-
     <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             BatchOperation<T> batchOperation, int start, int count, int chunkSize);
 
@@ -89,22 +72,30 @@ public interface PersistenceEntryManager extends EntityManager {
     <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
                                         SortOrder sortOrder, int start, int count, int chunkSize);
 
+	void remove(Object entry);
+    void removeRecursively(String dn);
+    boolean hasBranchesSupport(String dn);
+
+    Date decodeTime(String date);
+    String encodeTime(Date date);
+
     int getHashCode(Object entry);
 
     String[] getObjectClasses(Object entry, Class<?> entryClass);
 
-    PersistenceOperationService getOperationService();
-
     <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties,
                                               String sumByProperties);
 
+    void addDeleteSubscriber(DeleteNotifier subscriber);
     void removeDeleteSubscriber(DeleteNotifier subscriber);
-
-    void removeRecursively(String dn);
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
-    boolean hasBranchesSupport(String dn);
+    String[] exportEntry(String dn);
+
+    PersistenceOperationService getOperationService();
+
+    boolean destroy();
 
     default void clear() {
         throw new UnsupportedOperationException("Method not implemented.");
