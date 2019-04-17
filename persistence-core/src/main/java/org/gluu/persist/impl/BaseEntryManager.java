@@ -189,8 +189,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return countEntries(dnValue.toString(), entryClass, searchFilter);
 	}
 
-	public abstract <T> T merge(T entry);
-
 	@SuppressWarnings("unchecked")
 	protected <T> T merge(T entry, boolean isSchemaUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
@@ -402,11 +400,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications);
 
-	public abstract void remove(Object entry);
-
 	protected abstract void remove(String dn);
-
-	public abstract void removeRecursively(String dn);
 
 	@Override
 	public boolean contains(Object entry) {
@@ -470,7 +464,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			String[] ldapReturnAttributes);
 
 	@Override
-	public <T> boolean contains(Class<T> entryClass, String primaryKey) {
+	public <T> boolean contains(String primaryKey, Class<T> entryClass) {
 		return contains(entryClass, primaryKey, (String[]) null);
 	}
 
@@ -1471,10 +1465,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		return result;
 	}
-
-	public abstract String encodeTime(Date date);
-
-	public abstract Date decodeTime(String date);
 
 	protected <T> Object getDNValue(Object entry, Class<T> entryClass) {
 		// Check if entry has DN property

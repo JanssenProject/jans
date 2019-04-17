@@ -45,7 +45,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             }
 
             String branchDn = String.format("ou=cache,%s", baseDn);
-            if (!ldapEntryManager.contains(SimpleBranch.class, branchDn)) {
+            if (!ldapEntryManager.contains(branchDn, SimpleBranch.class)) {
                 SimpleBranch branch = new SimpleBranch();
                 branch.setOrganizationalUnitName("cache");
                 branch.setDn(branchDn);

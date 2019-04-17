@@ -90,7 +90,7 @@ public abstract class MetricService implements Serializable {
     }
 
     public boolean containsBranch(String branchDn) {
-        return getEntryManager().contains(SimpleBranch.class, branchDn);
+        return getEntryManager().contains(branchDn, SimpleBranch.class);
     }
 
     public void createBranch(String branchDn, String ou) {
