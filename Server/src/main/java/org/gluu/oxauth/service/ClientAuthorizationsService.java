@@ -50,7 +50,7 @@ public class ClientAuthorizationsService {
     }
 
     public void prepareBranch(final String clientId) { // Create client authorizations branch if needed
-        if (!ldapEntryManager.contains(SimpleBranch.class, getBaseDnForClientAuthorizations(clientId))) {
+        if (!ldapEntryManager.contains(getBaseDnForClientAuthorizations(clientId), SimpleBranch.class)) {
             addBranch(clientId);
         }
     }
