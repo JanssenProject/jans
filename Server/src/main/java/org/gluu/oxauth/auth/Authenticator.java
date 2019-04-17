@@ -6,6 +6,20 @@
 
 package org.gluu.oxauth.auth;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.jsf2.message.FacesMessages;
@@ -17,32 +31,22 @@ import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.AuthenticationService;
+import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.ErrorHandlerService;
+import org.gluu.oxauth.service.RequestParameterService;
+import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Authenticator component
