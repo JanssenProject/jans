@@ -56,7 +56,7 @@ public class DeviceRegistrationService {
 	}
 
 	public boolean containsBranch(final String userInum) {
-		return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForU2fUserDevices(userInum));
+		return ldapEntryManager.contains(getBaseDnForU2fUserDevices(userInum), SimpleBranch.class);
 	}
 
 	public void prepareBranch(final String userInum) {
