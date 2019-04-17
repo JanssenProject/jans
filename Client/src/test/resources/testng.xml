@@ -17,12 +17,13 @@
     </test>
 
     <!-- Token binding -->
+<!--
     <test name="Token Binding test (HTTP)" enabled="true">
         <classes>
             <class name="org.gluu.oxauth.ws.rs.TokenBindingHttpTest"/>
         </classes>
     </test>
-
+-->
     <!-- Access Token as JWT -->
     <test name="Access Token as JWT test (HTTP)" enabled="true">
         <classes>
