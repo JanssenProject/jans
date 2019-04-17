@@ -27,6 +27,7 @@ import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.common.User;
 
@@ -313,12 +314,12 @@ public class Authenticator {
             }
 
             int overridenNextStep = -1;
-            logger.info("#########################################################################");
-            logger.info("#########################################################################");
-            logger.info("#########################################################################");
-            logger.info("#########################################################################");
-            logger.info("++++++++++++++++++++++++++++++++++++++++++CURRENT ACR:" + this.authAcr);
-            logger.info("++++++++++++++++++++++++++++++++++++++++++CURRENT STEP:" + this.authStep);
+            logger.trace("#########################################################################");
+            logger.trace("#########################################################################");
+            logger.trace("#########################################################################");
+            logger.trace("#########################################################################");
+            logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT ACR:" + this.authAcr);
+            logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT STEP:" + this.authStep);
             int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
             if (apiVersion > 1) {
                 logger.trace("According to API version script supports steps overriding");
@@ -515,6 +516,7 @@ public class Authenticator {
         Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
 
         if (extraParameters != null) {
+        	logger.trace("Attempting to store extraParameters: {}", extraParameters);
             for (String extraParameter : extraParameters) {
                 if (authenticationService.isParameterExists(extraParameter)) {
                     Pair<String, String> extraParameterValueWithType = requestParameterService
@@ -533,6 +535,8 @@ public class Authenticator {
 
         // Store identity working parameters in session
         setExternalScriptExtraParameters(sessionIdAttributes, authExternalAttributes);
+    	logger.trace("Storing sessionIdAttributes: {}", sessionIdAttributes);
+    	logger.trace("Storing authExternalAttributes: {}", authExternalAttributes);
     }
 
     private Map<String, String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
