@@ -43,7 +43,7 @@ cmd_list =[]
 cur_dir=os.path.dirname(os.path.realpath(__file__))
 
 if not os.path.exists(os.path.join(cur_dir, 'ldif.py')):
-    cmd_list.append(("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/ldif.py"))
+    cmd_list.append(("Downloading ldif.py", "wget -c https://raw.githubusercontent.com/GluuFederation/community-edition-setup/version_3.1.6/ldif.py"))
 
 for message, cmd in cmd_list:
     print message
