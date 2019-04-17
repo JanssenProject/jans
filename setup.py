@@ -26,7 +26,7 @@ import readline
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.realpath(sys.argv[0]),'pylib'))
+sys.path.append(os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'pylib'))
 
 import os.path
 import Properties
