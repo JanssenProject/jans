@@ -293,7 +293,7 @@ public class UmaRptService {
     }
 
     public boolean containsBranch(String clientDn) {
-        return ldapEntryManager.contains(SimpleBranch.class, branchDn(clientDn));
+        return ldapEntryManager.contains(branchDn(clientDn), SimpleBranch.class);
     }
 
 //    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
