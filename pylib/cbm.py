@@ -1,7 +1,12 @@
 import os
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.auth import HTTPBasicAuth
 requests.packages.urllib3.disable_warnings()
+
+class FakeResult:
+    ok = False
 
 class CBM:
 
@@ -15,7 +20,11 @@ class CBM:
     def _get(self, endpoint):
         api = os.path.join(self.api_root, endpoint)
 
-        result = requests.get(api, auth=self.auth, verify=False)
+        try:
+            result = requests.get(api, auth=self.auth, verify=False)
+        except:
+            result = FakeResult()
+            result.reason = 'Connection failed'
 
         return result
 
@@ -32,6 +41,7 @@ class CBM:
         
     
     def get_buckets(self):
+        
         return self._get('pools/default/buckets')
 
 
