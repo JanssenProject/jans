@@ -64,7 +64,7 @@ class CBM:
         result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=False)
         return result
 
-    def tes_connection(self):
+    def test_connection(self):
         result = self._get('pools/')
 
         return result.ok
