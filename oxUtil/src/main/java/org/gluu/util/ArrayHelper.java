@@ -68,20 +68,20 @@ public final class ArrayHelper {
         return clonedArray;
     }
 
-    public static String[] sortAndClone(String[] array) {
+    public static <T> T[] sortAndClone(T[] array) {
         if (array == null) {
             return array;
         }
 
-        String[] clonedArray = arrayClone(array);
+        T[] clonedArray = arrayClone(array);
         Arrays.sort(clonedArray);
 
         return clonedArray;
     }
 
-    public static boolean equalsIgnoreOrder(String[] values1, String[] values2) {
-        String[] valuesSorted1 = sortAndClone(values1);
-        String[] valuesSorted2 = sortAndClone(values2);
+    public static <T> boolean equalsIgnoreOrder(T[] values1, T[] values2) {
+        T[] valuesSorted1 = sortAndClone(values1);
+        T[] valuesSorted2 = sortAndClone(values2);
 
         return Arrays.equals(valuesSorted1, valuesSorted2);
     }
