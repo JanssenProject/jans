@@ -353,7 +353,7 @@ public class GrantService {
     }
 
     private void prepareBranch(final String clientId) {
-        if (!ldapEntryManager.contains(SimpleBranch.class, tokenBaseDn(clientId))) {
+        if (!ldapEntryManager.contains(tokenBaseDn(clientId), SimpleBranch.class)) {
             SimpleBranch branch = new SimpleBranch();
             branch.setOrganizationalUnitName("token");
             branch.setDn(tokenBaseDn(clientId));

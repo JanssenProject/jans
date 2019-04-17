@@ -180,7 +180,7 @@ public class UmaPermissionService {
     }
 
     public boolean containsBranch(String clientDn) {
-        return ldapEntryManager.contains(SimpleBranch.class, getBranchDn(clientDn));
+        return ldapEntryManager.contains(getBranchDn(clientDn), SimpleBranch.class);
     }
 
     public String changeTicket(List<UmaPermission> permissions, Map<String, String> attributes) {

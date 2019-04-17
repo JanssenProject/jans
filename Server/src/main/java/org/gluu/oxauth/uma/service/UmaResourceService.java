@@ -180,7 +180,7 @@ public class UmaResourceService {
 
     private void prepareBranch() {
         // Create resource description branch if needed
-        if (!ldapEntryManager.contains(SimpleBranch.class, getDnForResource(null))) {
+        if (!ldapEntryManager.contains(getDnForResource(null), SimpleBranch.class)) {
             addBranch();
         }
     }
