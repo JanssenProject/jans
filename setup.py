@@ -201,6 +201,7 @@ class Setup(object):
         self.os_type = None
         self.os_initdaemon = None
 
+        self.persistence_type = 'ldap'
         self.shibboleth_version = 'v3'
 
         self.distFolder = '/opt/dist'
@@ -2261,9 +2262,11 @@ class Setup(object):
         self.makeFolders()
 
         if self.install_couchbase:
-            self.writePersistType('couchbase')
+            self.persistence_type = 'couchbase'
         else:
-            self.writePersistType('ldap')
+            self.persistence_type = 'ldap'
+
+        self.writePersistType()
 
     def make_salt(self):
         try:
@@ -2281,10 +2284,10 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
 
-    def writePersistType(self, ptype):
+    def writePersistType(self):
         self.logIt("Writing persist type")
         fname = os.path.join(self.configFolder, 'gluu.properties')
-        fcontent = 'persistence.type={0}'.format(ptype)
+        fcontent = 'persistence.type={0}'.format(self.persistence_type)
         self.writeFile(fname, fcontent)
 
     def promptForProperties(self):
