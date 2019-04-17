@@ -26,7 +26,7 @@ import readline
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'pylib'))
+sys.path.insert(0, os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'pylib'))
 
 import os.path
 import Properties
@@ -2416,15 +2416,19 @@ class Setup(object):
             self.ldap_type = 'couchbase'
             self.install_couchbase = True
 
-            if not glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
-                sys.exit('Couchbase package not found, exiting.')
-
-            self.ldap_hostname = self.getPrompt("Couchbase host")
-            self.couchebaseBucketClusterPort = self.getPrompt("Couchbase port","8091")
-            self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
-            self.couchebaseClusterAdmin = self.getPrompt("Couchbase Admin user")
-            self.ldapPass = self.getPrompt("Couchbase Admin password")
-            
+            while True:
+                self.ldap_hostname = self.getPrompt("    Couchbase host")
+                self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
+                self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
+                self.ldapPass = self.getPrompt("    Couchbase Admin password")
+                
+                self.cbm = CBM(self.ldap_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+                print "    Checking Couchbase connection"
+                if self.cbm.test_connection():
+                    print ("    Successfully connected to Couchbase server")
+                    break
+                else:
+                    print ("    Cant establish connection to Couchbase server with given parameters.")
 
         else:
             promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
@@ -2437,9 +2441,6 @@ class Setup(object):
                 
                 if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
                     backend_types.append(('Wren:DS','wrends'))
-                
-                
-
 
                 if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
                     backend_types.append(('Couchbase','couchbase'))
@@ -3479,51 +3480,28 @@ class Setup(object):
 
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
-        cmd_args = [
-                self.couchbaseCli, 'bucket-create',
-                '--cluster', self.couchebaseHost,
-                '--username', self.couchebaseClusterAdmin,
-                '--password', self.ldapPass,
-                '--bucket', bucketName,
-                '--bucket-type', bucketType,
-                '--bucket-ramsize', str(bucketRamsize),
-                '--wait'
-            ]
-        
-        self.run(cmd_args)
+        result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
+        self.logIt("Creating bucket {0} with type {1} and ramszie {2}".format(bucketName, bucketType, bucketRamsize))
+        if result.ok:
+            self.couchbaseBuckets.append(bucketName)
+            self.logIt("Bucket {} successfully created".format(bucketName))
+        else:
+            self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.reason), errorLog=True)
 
-        self.couchbaseBuckets.append(bucketName)
-
-    def couchbaseImportJson(self, bucket, jsonFile, keyGen=None):
-        self.logIt("Importing Couchebase json file %s to bucket %s" % (jsonFile, bucket))
-        cmd_args = [
-                self.couchebaseCbImport, 'json',
-                '--cluster', self.couchebaseHost,
-                '--username', self.couchebaseClusterAdmin,
-                '--password', self.ldapPass,
-                '--bucket', bucket,
-                '--dataset', jsonFile,
-                '--format', 'list',
-                '--threads', '4'
-            ]
-
-        if keyGen:
-            cmd_args += ['--generate-key', keyGen]
-    
-        self.run(cmd_args)
 
     def couchbaseExecQuery(self, queryFile):
         self.logIt("Running Couchbase query from file " + queryFile)
-        cmd_args = [
-                self.couchebaseCbq,
-                '--user', self.couchebaseClusterAdmin,
-                '--password', self.ldapPass,
-                '--engine', self.couchebaseHost,
-                '--file', queryFile
-            ]
-
-        self.run(cmd_args)
-
+        
+        query_file = open(queryFile)
+        
+        for line in query_file:
+            query = line.strip()
+            if query:
+                result = self.cbm.exec_query(query)
+                if result.ok:
+                    self.logIt("Query execution was successful: {}".format(query))
+                else:
+                    self.logIt("Failed to execute query {}, reason:".format(query, result.reason), errorLog=True)
 
     def couchebaseCreateIndexes(self, bucket):
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
@@ -3710,16 +3688,10 @@ class Setup(object):
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
-        cmd_args = [
-                self.couchbaseCli, 'ssl-manage',
-                '--cluster', self.couchebaseHost,
-                '--username', self.couchebaseClusterAdmin,
-                '--password', self.ldapPass,
-                '--cluster-cert-info', '>', self.couchebaseCert
-            ]
-
-        self.logIt("Running command: " + ' '.join(cmd_args))
-        os.system(' '.join(cmd_args))
+        
+        cert = self.cbm.get_certificate()
+        with open(self.couchebaseCert, 'w') as w:
+            w.write(cert)
         
         cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % self.hostname, \
                   "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
@@ -3733,7 +3705,7 @@ class Setup(object):
         prop = open(os.path.join(self.templateFolder, prop_file)).read()
 
         prop_dict = {
-                    'couchbase_servers': self.ldap_hostname,
+                    'hostname': self.ldap_hostname,
                     'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
@@ -3758,11 +3730,9 @@ class Setup(object):
 
 
     def install_couchbase_server(self):
-
-        self.couchbaseInstall()
-        
         
         if not self.remoteCouchbase:
+            self.couchbaseInstall()
             self.isCouchbaseStarted()
             self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
             self.run_service_command('couchbase-server', 'start')
@@ -3790,8 +3760,9 @@ class Setup(object):
         self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
         self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
 
-        if not self.checkIfGluuBucketReady():
-            sys.exit("Couchbase was not ready")
+        if not self.remoteCouchbase:
+            if not self.checkIfGluuBucketReady():
+                sys.exit("Couchbase was not ready")
             
         #TO DO: what indexes should be created in each bucket?
         self.couchebaseCreateIndexes('gluu')
@@ -3956,7 +3927,8 @@ if __name__ == '__main__':
     installObject.check_and_install_packages()
     #it is time to import pyDes library
     from pyDes import *
-    
+    from cbm import CBM
+
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
 
