@@ -112,7 +112,7 @@ public class AuthenticationPersistenceService {
     }
 
     public boolean containsBranch(final String baseDn) {
-        return ldapEntryManager.contains(SimpleBranch.class, baseDn);
+        return ldapEntryManager.contains(baseDn, SimpleBranch.class);
     }
 
     public void prepareBranch(final String userInum) {

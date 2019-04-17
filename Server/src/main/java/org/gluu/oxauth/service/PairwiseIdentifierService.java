@@ -47,7 +47,7 @@ public class PairwiseIdentifierService {
     }
 
     public boolean containsBranch(final String userInum) {
-        return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForPairwiseIdentifiers(userInum));
+        return ldapEntryManager.contains(getBaseDnForPairwiseIdentifiers(userInum), SimpleBranch.class);
     }
 
     public void prepareBranch(final String userInum) {
