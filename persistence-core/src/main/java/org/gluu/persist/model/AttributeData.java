@@ -18,9 +18,9 @@ import org.gluu.util.StringHelper;
  */
 public class AttributeData {
     private final String name;
-    private final String[] values;
+    private final Object[] values;
 
-    public AttributeData(String name, String[] values) {
+    public AttributeData(String name, Object[] values) {
         this.name = name;
         this.values = values;
     }
@@ -35,29 +35,16 @@ public class AttributeData {
         return name;
     }
 
-    public final String[] getValues() {
+    public final Object[] getValues() {
         return values;
     }
 
-    public String getValue() {
+    public Object getValue() {
         if ((this.values == null) || (this.values.length == 0)) {
             return null;
         }
 
         return this.values[0];
-    }
-
-    public boolean isEmpty() {
-        if ((this.values == null) || (this.values.length == 0)) {
-            return true;
-        }
-        for (String val : values) {
-            if (StringHelper.isEmpty(val)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     @Override

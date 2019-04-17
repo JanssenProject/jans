@@ -392,7 +392,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	protected boolean isEmptyAttributeValues(AttributeData attributeData) {
-		String[] attributeToPersistValues = attributeData.getValues();
+		String[] attributeToPersistValues = (String[]) attributeData.getValues();
 
 		return ArrayHelper.isEmpty(attributeToPersistValues)
 				|| ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0]));
@@ -655,7 +655,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			AttributeData attribute = getAttribute(propertyName, propertyName, getter, entry, false);
 			if (attribute != null) {
-				for (String objectClass : attribute.getValues()) {
+				for (String objectClass : (String[]) attribute.getValues()) {
 					if (objectClass != null) {
 						result.add(objectClass);
 					}
@@ -817,7 +817,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 					for (AttributeData entryAttribute : attributesMap.values()) {
 						if (OBJECT_CLASS.equalsIgnoreCase(entryAttribute.getName())) {
-							String[] objectClasses = entryAttribute.getValues();
+							String[] objectClasses = (String[]) entryAttribute.getValues();
 							if (ArrayHelper.isEmpty(objectClasses)) {
 								continue;
 							}
@@ -1105,7 +1105,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			return null;
 		}
 
-		String[] attributeValues = new String[1];
+		Object[] attributeValues = new String[1];
 		if (propertyValue instanceof String) {
 			attributeValues[0] = StringHelper.toString(propertyValue);
 		} else if (propertyValue instanceof Boolean) {
@@ -1151,7 +1151,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		if (attributeValues.length == 0) {
 			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && StringHelper.isEmpty(attributeValues[0])) {
+		} else if ((attributeValues.length == 1) && StringHelper.isEmpty((String) attributeValues[0])) {
 			return null;
 		}
 
@@ -1375,18 +1375,18 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (parameterType.equals(String.class)) {
 			propertyValueSetter.set(entry, attribute.getValue());
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf(attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf((String) attribute.getValue()));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf(attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf((String) attribute.getValue()));
 		} else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf(attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf((String) attribute.getValue()));
 		} else if (parameterType.equals(Date.class)) {
-			propertyValueSetter.set(entry, decodeTime(attribute.getValue()));
+			propertyValueSetter.set(entry, decodeTime((String) attribute.getValue()));
 		} else if (parameterType.equals(String[].class)) {
 			propertyValueSetter.set(entry, attribute.getValues());
 		} else if (ReflectHelper.assignableFrom(parameterType, List.class)) {
 			if (jsonObject) {
-				String[] stringValues = attribute.getValues();
+				String[] stringValues = (String[]) attribute.getValues();
 				List<Object> jsonValues = new ArrayList<Object>(stringValues.length);
 
 				for (String stringValue : stringValues) {
@@ -1414,7 +1414,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 						ex);
 			}
 
-			String[] attributeValues = attribute.getValues();
+			Object[] attributeValues = attribute.getValues();
 			AttributeEnum[] ldapEnums = (AttributeEnum[]) ReflectHelper.createArray(itemType, attributeValues.length);
 			for (int i = 0; i < attributeValues.length; i++) {
 				try {
@@ -1427,7 +1427,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			}
 			propertyValueSetter.set(entry, ldapEnums);
 		} else if (jsonObject) {
-			String stringValue = attribute.getValue();
+			Object stringValue = attribute.getValue();
 			Object jsonValue = convertStringToJson(parameterType, stringValue);
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
@@ -1437,9 +1437,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 	}
 
-	private Object convertStringToJson(Class<?> parameterType, String stringValue) {
+	private Object convertStringToJson(Class<?> parameterType, Object stringValue) {
 		try {
-			Object jsonValue = JSON_OBJECT_MAPPER.readValue(stringValue, parameterType);
+			Object jsonValue = JSON_OBJECT_MAPPER.readValue((String) stringValue, parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
 			LOG.error("Failed to convert json value '{}' to object: ", stringValue, ex);
@@ -1531,7 +1531,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			AttributeData attributeData = attributesDataMap.get(ldapAttributeName);
 			if ((attributeData != null) && (attributeData.getValues() != null)) {
-				values = attributeData.getValues().clone();
+				values = (String[]) attributeData.getValues().clone();
 				Arrays.sort(values);
 			}
 
@@ -1553,7 +1553,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 	}
 
-	private void addPropertyWithValuesToKey(StringBuilder sb, String propertyName, String[] values) {
+	private void addPropertyWithValuesToKey(StringBuilder sb, String propertyName, Object[] values) {
 		sb.append(':').append(propertyName).append('=');
 		if (values == null) {
 			sb.append("null");
@@ -1561,7 +1561,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			if (values.length == 1) {
 				sb.append(values[0]);
 			} else {
-				String[] tmpValues = values.clone();
+				Object[] tmpValues = values.clone();
 				Arrays.sort(tmpValues);
 
 				for (int i = 0; i < tmpValues.length; i++) {
@@ -1625,7 +1625,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		for (AttributeData attribute : attributes) {
 			String attributeName = attribute.getName();
-			for (String value : attribute.getValues()) {
+			for (String value : (String[]) attribute.getValues()) {
 				Filter filter = Filter.createEqualityFilter(attributeName, value);
 				results.add(filter);
 			}
