@@ -503,10 +503,10 @@ class Setup(object):
         self.scim_resource_oxid = None
 
         # oxTrust Api configuration
-        self.api_rs_client_jks_fn = '%s/api-rs-client.jks' % self.certFolder
+        self.api_rs_client_jks_fn = '%s/api-rs.jks' % self.certFolder
         self.api_rs_client_jks_pass = 'secret'
         self.api_rs_client_jwks = None
-        self.api_rp_client_jks_fn = '%s/api-rp-client.jks' % self.certFolder
+        self.api_rp_client_jks_fn = '%s/api-rp.jks' % self.certFolder
         self.api_rp_client_jks_pass = 'secret'
         self.api_rp_client_jwks = None
         
