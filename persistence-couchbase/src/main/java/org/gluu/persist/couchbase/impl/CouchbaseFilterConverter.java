@@ -69,22 +69,22 @@ public class CouchbaseFilterConverter {
 
         if (FilterType.EQUALITY == type) {
             if (currentGenericFilter.isArrayAttribute()) {
-                return Expression.path(Expression.s(currentGenericFilter.getAssertionValue()).in(Expression.path(currentGenericFilter.getAttributeName())));
+                return Expression.path(Expression.s((String) currentGenericFilter.getAssertionValue()).in(Expression.path(currentGenericFilter.getAttributeName())));
             } else {
                 Expression exp1 = Expression
-                        .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(Expression.s(currentGenericFilter.getAssertionValue())));
+                        .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(Expression.s((String) currentGenericFilter.getAssertionValue())));
                 Expression exp2 = Expression
-                        .par(Expression.path(Expression.s(currentGenericFilter.getAssertionValue())).in(Expression.path(currentGenericFilter.getAttributeName())));
+                        .par(Expression.path(Expression.s((String) currentGenericFilter.getAssertionValue())).in(Expression.path(currentGenericFilter.getAttributeName())));
                 return Expression.par(exp1.or(exp2));
             }
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).lte(Expression.s(currentGenericFilter.getAssertionValue()));
+            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).lte(Expression.s((String) currentGenericFilter.getAssertionValue()));
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).gte(Expression.s(currentGenericFilter.getAssertionValue()));
+            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).gte(Expression.s((String) currentGenericFilter.getAssertionValue()));
         }
 
         if (FilterType.PRESENCE == type) {
