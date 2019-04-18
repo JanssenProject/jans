@@ -3726,7 +3726,7 @@ class Setup(object):
         
         if not self.remoteCouchbase:
             
-            self.cbm = CBM(self.ldap_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
             
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
