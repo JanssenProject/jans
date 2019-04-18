@@ -23,8 +23,6 @@ displayName: API Requesting Party Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=OO11-AABB,ou=scopes,o=gluu
-oxAuthScope: inum=1122-BBCC,ou=scopes,o=gluu
 oxAuthJwks:: %(api_rp_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
