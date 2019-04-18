@@ -244,7 +244,6 @@ oxAuthScope: inum=10B2,ou=scopes,o=gluu
 oxAuthScope: inum=764C,ou=scopes,o=gluu
 oxAuthScope: inum=43F1,ou=scopes,o=gluu
 oxAuthScope: inum=341A,ou=scopes,o=gluu
-oxAuthScope: inum=6D98,ou=scopes,o=gluu
 oxAuthScope: inum=6D99,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
@@ -284,7 +283,6 @@ oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
 oxAuthGrantType: client_credentials
-oxAuthScope: inum=6D98,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 

@@ -38,7 +38,6 @@ inum: %(passport_rp_client_id)s
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=6D98,ou=scopes,o=gluu
 oxAuthJwks:: %(passport_rp_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
