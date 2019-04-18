@@ -44,15 +44,15 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-            return com.unboundid.ldap.sdk.Filter.createEqualityFilter(genericFilter.getAttributeName(), (String) genericFilter.getAssertionValue());
+            return com.unboundid.ldap.sdk.Filter.createEqualityFilter(genericFilter.getAttributeName(), String.valueOf(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return com.unboundid.ldap.sdk.Filter.createLessOrEqualFilter(genericFilter.getAttributeName(), (String) genericFilter.getAssertionValue());
+            return com.unboundid.ldap.sdk.Filter.createLessOrEqualFilter(genericFilter.getAttributeName(), String.valueOf(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return com.unboundid.ldap.sdk.Filter.createGreaterOrEqualFilter(genericFilter.getAttributeName(), (String) genericFilter.getAssertionValue());
+            return com.unboundid.ldap.sdk.Filter.createGreaterOrEqualFilter(genericFilter.getAttributeName(), String.valueOf(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.PRESENCE == type) {
@@ -60,7 +60,7 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.APPROXIMATE_MATCH == type) {
-            return com.unboundid.ldap.sdk.Filter.createApproximateMatchFilter(genericFilter.getAttributeName(), (String) genericFilter.getAssertionValue());
+            return com.unboundid.ldap.sdk.Filter.createApproximateMatchFilter(genericFilter.getAttributeName(), String.valueOf(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.SUBSTRING == type) {
