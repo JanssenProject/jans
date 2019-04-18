@@ -582,3 +582,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 values = profile[attr]
                 print "%s = %s" % (attr, values)
                 foundUser.setAttribute(attr, values)
+
+                if attr == "mail":
+                    oxtrustMails = []
+                    for mail in values:
+                        oxtrustMails.append('{"value":"%s","primary":false}' % mail)
+                    foundUser.setAttribute("oxTrustEmail", oxtrustMails)
