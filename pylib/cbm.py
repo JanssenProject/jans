@@ -14,12 +14,16 @@ class FakeResult:
 
 class CBM:
 
-    def __init__(self, host, admin, password):
-
+    def __init__(self, host, admin, password, port=18091, n1qlport=18093):
+        self.host = host
+        self.port = port
+        self.n1qlport = n1qlport
         self.auth = HTTPBasicAuth(admin, password)
-        self.api_root = 'https://{}:18091/'.format(host)
-        self.n1ql_api = 'https://{}:18093/query/service'.format(host)
+        self.set_api_root()
 
+    def set_api_root(self):
+        self.api_root = 'https://{}:{}/'.format(self.host, self.port)
+        self.n1ql_api = 'https://{}:18093/query/service'.format(self.host, self.n1qlport)
 
     def _get(self, endpoint):
         api = os.path.join(self.api_root, endpoint)
