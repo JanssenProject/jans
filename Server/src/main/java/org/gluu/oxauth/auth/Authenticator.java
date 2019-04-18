@@ -643,6 +643,17 @@ public class Authenticator {
             return Constants.RESULT_FAILURE;
         }
 
+        // Check if all previous steps had passed
+        boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
+        if (!passedPreviousSteps) {
+            logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'",
+                    this.authAcr, this.authStep);
+            return Constants.RESULT_FAILURE;
+        }
+
+        // Restore identity working parameters from session
+        setIdentityWorkingParameters(sessionIdAttributes);
+
         String currentauthAcr = customScriptConfiguration.getName();
 
         customScriptConfiguration = externalAuthenticationService.determineExternalAuthenticatorForWorkflow(
@@ -692,17 +703,6 @@ public class Authenticator {
                 return Constants.RESULT_SUCCESS;
             }
         }
-
-        // Check if all previous steps had passed
-        boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
-        if (!passedPreviousSteps) {
-            logger.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'",
-                    this.authAcr, this.authStep);
-            return Constants.RESULT_FAILURE;
-        }
-
-        // Restore identity working parameters from session
-        setIdentityWorkingParameters(sessionIdAttributes);
 
         Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
                 externalContext.getRequestParameterValuesMap(), this.authStep);
