@@ -23,7 +23,7 @@ class CBM:
 
     def set_api_root(self):
         self.api_root = 'https://{}:{}/'.format(self.host, self.port)
-        self.n1ql_api = 'https://{}:18093/query/service'.format(self.host, self.n1qlport)
+        self.n1ql_api = 'https://{}:{}/query/service'.format(self.host, self.n1qlport)
 
     def _get(self, endpoint):
         api = os.path.join(self.api_root, endpoint)
@@ -104,7 +104,14 @@ class CBM:
 
         return result
 
-    def setup_services(self, services=['data', 'index', 'query', 'fts']):
+    def set_index_storage_mode(self, mode='memory_optimized'):
+        data = {'storageMode': mode}
+        result = self._post('settings/indexes', data)
+
+        return result
+
+
+    def setup_services(self, services=['kv','n1ql','index','fts']):
         data = {'services': ','.join(services)}
         result = self._post('node/controller/setupServices', data)
 
