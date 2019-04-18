@@ -535,7 +535,6 @@ class Setup(object):
         self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
-        self.couchbaseCli = '/opt/couchbase/bin/couchbase-cli'
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
@@ -544,14 +543,11 @@ class Setup(object):
         self.couchbaseClusterRamsize = 2048 #in MB
         self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
-        self.couchbaseInstallOutput = ''
-
-        self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
-        self.couchebaseCbImport = '/opt/couchbase/bin/cbimport'
-        self.couchebaseCbq = '/opt/couchbase/bin/cbq'
+        self.couchbaseInstallOutput = ''    
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
+        self.cbm = None
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -2418,12 +2414,12 @@ class Setup(object):
 
             while True:
                 self.ldap_hostname = self.getPrompt("    Couchbase host")
-                self.couchebaseHost = self.ldap_hostname+':'+ str(self.couchebaseBucketClusterPort)
                 self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
                 self.ldapPass = self.getPrompt("    Couchbase Admin password")
-                
+
                 self.cbm = CBM(self.ldap_hostname, self.couchebaseClusterAdmin, self.ldapPass)
                 print "    Checking Couchbase connection"
+
                 if self.cbm.test_connection():
                     print ("    Successfully connected to Couchbase server")
                     break
@@ -3463,21 +3459,39 @@ class Setup(object):
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
             
 
-    def couchebaseCreateCluster(self, clusterRamsize=1024, clusterName=None):
-        cmd_args = [
-                self.couchbaseCli, 'cluster-init',
-                '--cluster', self.couchebaseHost,
-                '--cluster-username', self.couchebaseClusterAdmin,
-                '--cluster-password', self.ldapPass,
-                '--services', 'data,index,query,fts',
-                '--cluster-ramsize', str(clusterRamsize),
-                ]
+    def couchebaseCreateCluster(self):
+        
+        self.logIt("Initializing Couchbase Node")
+        result = self.cbm.initialize_node()
+        if result.ok:
+            self.logIt("Couchbase Node was initialized")
+        else:
+            self.logIt("Failed to initilize Couchbase Node, reason: "+ result.reason, errorLog=True)
+        
 
-        if clusterName:
-            cmd_args += ['--cluster-name', clusterName]
+        self.logIt("Renaming Couchbase Node")
+        result = self.cbm.rename_node()
+        if result.ok:
+            self.logIt("Couchbase Node was renamed")
+        else:
+            self.logIt("Failed to rename Couchbase Node, reason: "+ result.reason, errorLog=True)
 
-        self.run(cmd_args)
 
+        self.logIt("Setting up Couchbase Services")
+        result = self.cbm.setup_services()
+        if result.ok:
+            self.logIt("Couchbase services were set up")
+        else:
+            self.logIt("Failed to setup Couchbase services, reason: "+ result.reason, errorLog=True)
+
+
+        self.logIt("Setting Couchbase Admin password")
+        result = self.cbm.set_admin_password()
+        if result.ok:
+            self.logIt("Couchbase admin password  was set")
+        else:
+            self.logIt("Failed to set Couchbase admin password, reason: "+ result.reason, errorLog=True)
+            
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
         result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
@@ -3660,26 +3674,14 @@ class Setup(object):
 
 
     def checkIfGluuBucketReady(self):
-            
-        args = [
-                self.couchebaseCbq, 
-                '-q', '-s', 'select 1', 
-                '-e', 'http://{0}'.format(self.couchebaseHost), 
-                '-u', self.couchebaseClusterAdmin, 
-                '-p', self.ldapPass
-                ]
 
         for i in range(12):
             self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
             try:
-                self.logIt("Running command: " + ' '.join(args))
-                child = subprocess.Popen(args,  stdout=subprocess.PIPE)
-                result = child.communicate()[0]
-                rs_js = json.loads(result)
-                
-                if rs_js['status']=='success':
-                    self.logIt("Bucket is ready for N1QL queries")
+                if self.cbm.test_connection():
                     return True
+                else:
+                    time.sleep(5)
             except:
                 self.logIt("Connection to N1QL service failed. Rerty im 5 seconds ...")
                 time.sleep(5)
@@ -3732,19 +3734,22 @@ class Setup(object):
     def install_couchbase_server(self):
         
         if not self.remoteCouchbase:
+            
+            self.cbm = CBM(self.ldap_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+            
             self.couchbaseInstall()
-            self.isCouchbaseStarted()
+            self.checkIfGluuBucketReady()
             self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
             self.run_service_command('couchbase-server', 'start')
 
             #wait for couchbase start successfully
-            if not self.isCouchbaseStarted():
+            if not self.checkIfGluuBucketReady():
                 log_line = "Couchbase was not started in a minute. Terminating installation."
                 self.logIt(log_line, True)
                 print (log_line)
                 sys.exit(log_line)
             
-            self.couchebaseCreateCluster(clusterRamsize=self.couchbaseClusterRamsize)
+            self.couchebaseCreateCluster()
 
 
         else:
