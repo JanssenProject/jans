@@ -3478,6 +3478,14 @@ class Setup(object):
             self.logIt("Failed to rename Couchbase Node, reason: "+ result.reason, errorLog=True)
 
 
+        self.logIt("Setting Couchbase index storage mode")
+        result = self.cbm.set_index_storage_mode()
+        if result.ok:
+            self.logIt("Couchbase index storage mode was set")
+        else:
+            self.logIt("Failed to set Couchbase index storage mode, reason: "+ result.reason, errorLog=True)
+
+
         self.logIt("Setting up Couchbase Services")
         result = self.cbm.setup_services()
         if result.ok:
@@ -3722,15 +3730,6 @@ class Setup(object):
             
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
-            self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-
-            #wait for couchbase start successfully
-            if not self.checkIfGluuBucketReady():
-                log_line = "Couchbase was not started in a minute. Terminating installation."
-                self.logIt(log_line, True)
-                print (log_line)
-                sys.exit(log_line)
-            
             self.couchebaseCreateCluster()
 
         self.couchbaseSSL()
@@ -3755,6 +3754,10 @@ class Setup(object):
         
         self.import_ldif_couchebase()
         self.couchbaseProperties()
+
+        if not self.remoteCouchbase:
+            self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
+            self.checkIfGluuBucketReady()
 
 
     def loadTestData(self):
