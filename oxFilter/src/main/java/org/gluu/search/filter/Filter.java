@@ -15,7 +15,7 @@ public class Filter {
 
     private String filterString;
     private String attributeName;
-    private String assertionValue;
+    private Object assertionValue;
 
     private String subInitial;
     private String[] subAny;
@@ -137,11 +137,11 @@ public class Filter {
         this.attributeName = attributeName;
     }
 
-    public final String getAssertionValue() {
+    public final Object getAssertionValue() {
         return assertionValue;
     }
 
-    public final void setAssertionValue(String assertionValue) {
+    public final void setAssertionValue(Object assertionValue) {
         this.assertionValue = assertionValue;
     }
 
