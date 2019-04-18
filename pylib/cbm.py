@@ -100,7 +100,7 @@ class CBM:
 
         return result
 
-    def setup_services(self, services=['kv','n1ql','index','fts']):
+    def setup_services(self, services=['data', 'index', 'query', 'fts']):
         data = {'services': ','.join(services)}
         result = self._post('node/controller/setupServices', data)
 
