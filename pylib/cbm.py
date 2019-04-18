@@ -35,8 +35,9 @@ class CBM:
 
 
     def _post(self, endpoint, data):
-        api = os.path.join(self.api_root, endpoint)
-        result = requests.post(api, data=data, auth=self.auth, verify=False)
+        url = os.path.join(self.api_root, endpoint)
+        print(url)
+        result = requests.post(url, data=data, auth=self.auth, verify=False)
         return result
         
     
@@ -72,9 +73,43 @@ class CBM:
     def exec_query(self, query):
         data = {'statement': query}
         result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=False)
+
         return result
 
     def test_connection(self):
         result = self._get('pools/')
 
         return result.ok
+
+
+    def initialize_node(self, path='/opt/couchbase/var/lib/couchbase/data',
+                            index_path='/opt/couchbase/var/lib/couchbase/data'):
+
+        data = {'path':path, 'index_path':index_path}
+        result = self._post('nodes/self/controller/settings', data)
+
+        return result
+
+
+    def rename_node(self, hostname='127.0.0.1'):
+        data = {'hostname': hostname}
+        result = self._post('node/controller/rename', data)
+
+        return result
+
+    def setup_services(self, services=['kv','n1ql','index','fts']):
+        data = {'services': ','.join(services)}
+        result = self._post('node/controller/setupServices', data)
+
+        return result
+
+    def set_admin_password(self):
+        data = {
+                    'password': self.auth.password,
+                    'username': self.auth.username,
+                     'port': 'SAME',
+                 }
+
+        result = self._post('settings/web', data)
+
+        return result
