@@ -40,7 +40,6 @@ class CBM:
 
     def _post(self, endpoint, data):
         url = os.path.join(self.api_root, endpoint)
-        print(url)
         result = requests.post(url, data=data, auth=self.auth, verify=False)
         return result
         
