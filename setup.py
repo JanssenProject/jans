@@ -3750,14 +3750,9 @@ class Setup(object):
         self.couchebaseCreateIndexes('gluu_user')
         self.couchebaseCreateIndexes('gluu_statistic')
         self.couchebaseCreateIndexes('gluu_site')
-        
-        
+
         self.import_ldif_couchebase()
         self.couchbaseProperties()
-
-        if not self.remoteCouchbase:
-            self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-            self.checkIfGluuBucketReady()
 
 
     def loadTestData(self):
