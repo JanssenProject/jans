@@ -486,7 +486,7 @@ class Setup(object):
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
-        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
+        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         self.default_key_expiration = 2
 
         # oxTrust SCIM configuration
@@ -1745,7 +1745,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def generate_oxauth_openid_keys(self):
-        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass)
+        key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_algs=key_algs)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
@@ -3621,6 +3622,8 @@ class Setup(object):
 
     def changeCouchbasePort(self, service, port):
         self.logIt("Changing Couchbase service %s port to %s from file " % (service, str(port)))
+        
+        self.run_service_command('couchbase-server', 'stop')
         couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
         couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
 
@@ -3651,27 +3654,7 @@ class Setup(object):
         if os.path.exists(couchebaseDatConfigFile):
             self.run(['rm', '-f', couchebaseDatConfigFile])
 
-
-    def isCouchbaseStarted(self, port=None):
-
-        if not port:
-            port = self.couchebaseBucketClusterPort
-
-        # check couchbase in every 5 secs for 12 times.
-        cmd = "netstat -lnp | grep {0}".format(port)
-        for i in range(12):
-            self.logIt("Checking if couchbase was started. Try {0} with command {1}".format(i+1, cmd))
-            result = os.popen(cmd).read()
-            if result.strip().endswith('beam.smp'):
-                #still need to wait couple of seconds
-                time.sleep(5)
-                return True
-            else:
-                self.logIt("Couchbase was not started. Will retry after 5 seconds.")
-                time.sleep(5)
-                
-        self.logIt("Couchbase was not started in a minute. Giving up.", True)
-
+        self.run_service_command('couchbase-server', 'start')
 
     def checkIfGluuBucketReady(self):
 
@@ -3740,7 +3723,6 @@ class Setup(object):
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.changeCouchbasePort('rest_port', self.couchebaseBucketClusterPort)
-            self.run_service_command('couchbase-server', 'start')
 
             #wait for couchbase start successfully
             if not self.checkIfGluuBucketReady():
@@ -3751,11 +3733,6 @@ class Setup(object):
             
             self.couchebaseCreateCluster()
 
-
-        else:
-            self.run_service_command('couchbase-server', 'stop')
-            self.run_service_command('couchbase-server', 'disable')
-        
         self.couchbaseSSL()
 
         #TO DO: calculations of bucketRamsize is neaded
