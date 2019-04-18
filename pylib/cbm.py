@@ -3,7 +3,11 @@ import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.auth import HTTPBasicAuth
-requests.packages.urllib3.disable_warnings()
+
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 class FakeResult:
     ok = False
