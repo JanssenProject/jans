@@ -122,6 +122,24 @@ public final class StringHelper {
         return buf.append(array[len - 1]).toString();
     }
 
+    public static String[] toStringArray(Object[] array) {
+        if (array == null) {
+            return null;
+        }
+        
+        if (array.length == 0) {
+        	return new String[0];
+        }
+        
+        String[] result = new String[array.length];
+        
+        for (int i = 0; i < result.length; i++) {
+        	result[i] = String.valueOf(array[i]);
+        }
+
+        return result;
+    }
+
     public static boolean isNotEmpty(final String str) {
         return !StringHelper.isEmpty(str);
     }
