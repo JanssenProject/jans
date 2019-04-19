@@ -111,7 +111,7 @@
     "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
     "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
 
-    "apiUmaClientId":"800-b526-43a0-b5e5-e39c7a970386",
+    "apiUmaClientId":"800-9340-4274-986f-f7a37c8cc620",
     "apiUmaClientKeyId":"",
     "apiUmaResourceId":"800-e8ab-4207-9fab-2a27de921ac1",
     "apiUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read",
