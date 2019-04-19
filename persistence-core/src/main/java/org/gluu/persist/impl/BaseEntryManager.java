@@ -86,6 +86,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
 	protected static final String[] NO_STRINGS = new String[0];
+	protected static final Object[] NO_OBJECTS = new Object[0];
 
 	protected static final Comparator<String> LINE_LENGHT_COMPARATOR = new LineLenghtComparator<String>(false);
 
@@ -657,7 +658,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			if (attribute != null) {
 				for (String objectClass : attribute.getStringValues()) {
 					if (objectClass != null) {
-						result.add(String.valueOf(objectClass));
+						result.add(objectClass);
 					}
 				}
 			}
@@ -1383,13 +1384,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else if (parameterType.equals(Date.class)) {
 			propertyValueSetter.set(entry, decodeTime(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(String[].class)) {
-			propertyValueSetter.set(entry, attribute.getValues());
+			propertyValueSetter.set(entry, attribute.getStringValues());
 		} else if (ReflectHelper.assignableFrom(parameterType, List.class)) {
 			if (jsonObject) {
-				String[] stringValues = (String[]) attribute.getValues();
+				Object[] stringValues = attribute.getValues();
 				List<Object> jsonValues = new ArrayList<Object>(stringValues.length);
 
-				for (String stringValue : stringValues) {
+				for (Object stringValue : stringValues) {
 					Object jsonValue = convertStringToJson(ReflectHelper.getListType(propertyValueSetter), stringValue);
 					jsonValues.add(jsonValue);
 				}
