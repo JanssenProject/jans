@@ -283,7 +283,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				} else if ((attributeFromLdap == null) && (attributeToPersist != null)) {
 					// Add entry attribute or change schema
 					if (isSchemaUpdate && (attributeToPersist.getValue() == null
-							&& Arrays.equals(attributeToPersist.getValues(), new String[] {}))) {
+							&& Arrays.equals(attributeToPersist.getValues(), new Object[] {}))) {
 						continue;
 					}
 					AttributeModificationType modType = isSchemaUpdate ? schemaModificationType
@@ -392,10 +392,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	protected boolean isEmptyAttributeValues(AttributeData attributeData) {
-		String[] attributeToPersistValues = (String[]) attributeData.getValues();
+		Object[] attributeToPersistValues = attributeData.getValues();
 
 		return ArrayHelper.isEmpty(attributeToPersistValues)
-				|| ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0]));
+				|| ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(String.valueOf(attributeToPersistValues[0])));
 	}
 
 	protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications);
@@ -655,9 +655,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, false);
 			if (attribute != null) {
-				for (String objectClass : (String[]) attribute.getValues()) {
+				for (String objectClass : attribute.getStringValues()) {
 					if (objectClass != null) {
-						result.add(objectClass);
+						result.add(String.valueOf(objectClass));
 					}
 				}
 			}
@@ -817,7 +817,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 					for (AttributeData entryAttribute : attributesMap.values()) {
 						if (OBJECT_CLASS.equalsIgnoreCase(entryAttribute.getName())) {
-							String[] objectClasses = (String[]) entryAttribute.getValues();
+							String[] objectClasses = entryAttribute.getStringValues();
 							if (ArrayHelper.isEmpty(objectClasses)) {
 								continue;
 							}
@@ -1566,11 +1566,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			processedProperties.add(ldapAttributeName);
 
-			String[] values = null;
+			Object[] values = null;
 
 			AttributeData attributeData = attributesDataMap.get(ldapAttributeName);
 			if ((attributeData != null) && (attributeData.getValues() != null)) {
-				values = (String[]) attributeData.getValues().clone();
+				values = attributeData.getValues().clone();
 				Arrays.sort(values);
 			}
 
@@ -1664,7 +1664,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		for (AttributeData attribute : attributes) {
 			String attributeName = attribute.getName();
-			for (String value : (String[]) attribute.getValues()) {
+			for (Object value : attribute.getValues()) {
 				Filter filter = Filter.createEqualityFilter(attributeName, value);
 				results.add(filter);
 			}
