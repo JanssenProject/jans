@@ -56,13 +56,12 @@
         },
         {
             "desc": "Track the default scope for an custom OAuth2 Scope.",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "defaultScope"
             ],
             "oid": "oxAttribute:6",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -627,13 +626,12 @@
         },
         {
             "desc": "Maximum Log File Size",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "gluuMaxLogSize"
             ],
             "oid": "oxAttribute:58",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1056,13 +1054,12 @@
         },
         {
             "desc": "Status of the entry, used by many objectclasses",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuStatus"
             ],
             "oid": "oxAttribute:97",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1417,13 +1414,12 @@
         },
         {
             "desc": "oxAuth Group Attribute Claims (true or false)",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthGroupClaims"
             ],
             "oid": "oxAttribute:131",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1758,13 +1754,12 @@
         },
         {
             "desc": "oxAuth Policy URI",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthLogoutSessionRequired"
             ],
             "oid": "oxAttribute:162",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1857,13 +1852,12 @@
         },
         {
             "desc": "oxAuth Require Authentication Time",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthRequireAuthTime"
             ],
             "oid": "oxAttribute:171",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -2000,13 +1994,12 @@
         },
         {
             "desc": "oxAuth Trusted Client",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthTrustedClient"
             ],
             "oid": "oxAttribute:184",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -2402,13 +2395,12 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxMultivaluedAttribute"
             ],
             "oid": "oxAttribute:221",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -2706,34 +2698,31 @@
         },
         {
             "desc": "Revision",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxRevision"
             ],
             "oid": "oxAttribute:249",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
             "desc": "Level",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxLevel"
             ],
             "oid": "oxAttribute:250",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxSCIMCustomAttribute"
             ],
             "oid": "oxAttribute:251",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3516,13 +3505,12 @@
         },
         {
             "desc": "True if the e-mail address of the person has been verified; otherwise false",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "emailVerified"
             ],
             "oid": "oxAttribute:324",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "OpenID Connect 1.0 Standard Claim"
         },
         {
@@ -3573,13 +3561,12 @@
         },
         {
             "desc": "True if the phone number of the person has been verified, otherwise false",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "phoneNumberVerified"
             ],
             "oid": "oxAttribute:329",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3760,13 +3747,12 @@
         },
         {
             "desc": "ox Persist Client Authorizations",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxPersistClientAuthorizations"
             ],
             "oid": "oxAttribute:346",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
