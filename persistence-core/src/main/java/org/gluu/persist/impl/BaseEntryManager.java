@@ -653,7 +653,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				throw new MappingException("Entry should has getter for property " + propertyName);
 			}
 
-			AttributeData attribute = getAttribute(propertyName, propertyName, getter, entry, false);
+			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, false);
 			if (attribute != null) {
 				for (String objectClass : (String[]) attribute.getValues()) {
 					if (objectClass != null) {
@@ -1098,7 +1098,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return attributesMap;
 	}
 
-	private AttributeData getAttribute(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
+	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
 			Object entry, boolean jsonObject) {
 		Object propertyValue = propertyValueGetter.get(entry);
 		if (propertyValue == null) {
@@ -1109,11 +1109,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (propertyValue instanceof String) {
 			attributeValues[0] = StringHelper.toString(propertyValue);
 		} else if (propertyValue instanceof Boolean) {
-			attributeValues[0] = propertyValue.toString();
+			attributeValues[0] = propertyValue;
 		} else if (propertyValue instanceof Integer) {
-			attributeValues[0] = propertyValue.toString();
+			attributeValues[0] = propertyValue;
 		} else if (propertyValue instanceof Long) {
-			attributeValues[0] = propertyValue.toString();
+			attributeValues[0] = propertyValue;
 		} else if (propertyValue instanceof Date) {
 			attributeValues[0] = encodeTime((Date) propertyValue);
 		} else if (propertyValue instanceof String[]) {
@@ -1140,7 +1140,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributeValues[0] = convertJsonToString(propertyValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
-					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List, AttributeEnum or AttributeEnum[]"
+					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
 					+ " return type or has annotation JsonObject");
 		}
 
@@ -1224,7 +1224,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
-		AttributeData attribute = getAttribute(propertyName, ldapAttributeName, getter, entry, jsonObject);
+		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, jsonObject);
 
 		return attribute;
 	}
@@ -1265,7 +1265,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		for (Object entryAttribute : (List<?>) propertyValue) {
-			AttributeData attribute = getAttribute(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
+			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
 					entryAttribute, false);
 			if (attribute != null) {
 				listAttributes.add(attribute);
@@ -1352,14 +1352,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return setter;
 	}
 
-	private AttributeData getAttribute(String propertyName, Getter propertyNameGetter, Getter propertyValueGetter,
+	private AttributeData getAttributeData(String propertyName, Getter propertyNameGetter, Getter propertyValueGetter,
 			Object entry, boolean jsonObject) {
 		Object ldapAttributeName = propertyNameGetter.get(entry);
 		if (ldapAttributeName == null) {
 			return null;
 		}
 
-		return getAttribute(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, jsonObject);
+		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, jsonObject);
 	}
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
@@ -1375,11 +1375,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (parameterType.equals(String.class)) {
 			propertyValueSetter.set(entry, attribute.getValue());
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf(String.valueOf(attribute.getValue())));
+			propertyValueSetter.set(entry, toBooleanValue(attribute));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf(String.valueOf(attribute.getValue())));
+			propertyValueSetter.set(entry, toIntegerValue(attribute));
 		} else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf(String.valueOf(attribute.getValue())));
+			propertyValueSetter.set(entry, toLongValue(attribute));
 		} else if (parameterType.equals(Date.class)) {
 			propertyValueSetter.set(entry, decodeTime(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(String[].class)) {
@@ -1432,9 +1432,48 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
-					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List, AttributeEnum or AttributeEnum[]"
+					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List<String>, AttributeEnum or AttributeEnum[]"
 					+ " parameter type or has annotation JsonObject");
 		}
+	}
+
+	private Boolean toBooleanValue(AttributeData attribute) {
+		Boolean propertyValue = null;
+		Object propertyValueObject = attribute.getValue();
+		if (propertyValueObject != null) {
+			if (propertyValueObject instanceof Boolean) {
+				propertyValue = (Boolean) propertyValueObject;
+			} else {
+				propertyValue = Boolean.valueOf(String.valueOf(propertyValueObject));
+			}
+		}
+		return propertyValue;
+	}
+
+	private Integer toIntegerValue(AttributeData attribute) {
+		Integer propertyValue = null;
+		Object propertyValueObject = attribute.getValue();
+		if (propertyValueObject != null) {
+			if (propertyValueObject instanceof Long) {
+				propertyValue = (Integer) propertyValueObject;
+			} else {
+				propertyValue = Integer.valueOf(String.valueOf(propertyValueObject));
+			}
+		}
+		return propertyValue;
+	}
+
+	private Long toLongValue(AttributeData attribute) {
+		Long propertyValue = null;
+		Object propertyValueObject = attribute.getValue();
+		if (propertyValueObject != null) {
+			if (propertyValueObject instanceof Long) {
+				propertyValue = (Long) propertyValueObject;
+			} else {
+				propertyValue = Long.valueOf(String.valueOf(propertyValueObject));
+			}
+		}
+		return propertyValue;
 	}
 
 	private Object convertStringToJson(Class<?> parameterType, Object stringValue) {
