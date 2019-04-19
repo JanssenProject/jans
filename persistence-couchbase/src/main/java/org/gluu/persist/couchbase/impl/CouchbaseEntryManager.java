@@ -451,17 +451,21 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (String attributeName : entry.getNames()) {
             Object attributeObject = entry.get(attributeName);
 
-            String[] attributeValueStrings;
+            Object[] attributeValueObjects;
             if (attributeObject == null) {
-                attributeValueStrings = NO_STRINGS;
+                attributeValueObjects = NO_STRINGS;
             }
             if (attributeObject instanceof JsonArray) {
-                attributeValueStrings = ((JsonArray) attributeObject).toList().toArray(NO_STRINGS);
+                attributeValueObjects = ((JsonArray) attributeObject).toList().toArray(NO_STRINGS);
             } else {
-                attributeValueStrings = new String[] { attributeObject.toString() };
+            	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long)) {
+                    attributeValueObjects = new Object[] { attributeObject };
+            	} else {
+            		attributeValueObjects = new String[] { attributeObject.toString() };
+            	}
             }
 
-            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings);
+            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueObjects);
             result.add(tmpAttribute);
         }
 

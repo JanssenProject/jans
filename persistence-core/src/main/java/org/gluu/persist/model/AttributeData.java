@@ -25,9 +25,9 @@ public class AttributeData {
         this.values = values;
     }
 
-    public AttributeData(String name, String value) {
+    public AttributeData(String name, Object value) {
         this.name = name;
-        this.values = new String[1];
+        this.values = new Object[1];
         this.values[0] = value;
     }
 

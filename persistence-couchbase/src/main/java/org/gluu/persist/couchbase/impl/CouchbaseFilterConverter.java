@@ -69,22 +69,22 @@ public class CouchbaseFilterConverter {
 
         if (FilterType.EQUALITY == type) {
             if (currentGenericFilter.isArrayAttribute()) {
-                return Expression.path(Expression.s(String.valueOf(currentGenericFilter.getAssertionValue())).in(Expression.path(currentGenericFilter.getAttributeName())));
+                return Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(currentGenericFilter.getAttributeName())));
             } else {
                 Expression exp1 = Expression
-                        .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(Expression.s(String.valueOf(currentGenericFilter.getAssertionValue()))));
+                        .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter)));
                 Expression exp2 = Expression
-                        .par(Expression.path(Expression.s(String.valueOf(currentGenericFilter.getAssertionValue()))).in(Expression.path(currentGenericFilter.getAttributeName())));
+                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(Expression.path(currentGenericFilter.getAttributeName())));
                 return Expression.par(exp1.or(exp2));
             }
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).lte(Expression.s(String.valueOf(currentGenericFilter.getAssertionValue())));
+            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).lte(buildTypedExpression(currentGenericFilter));
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).gte(Expression.s(String.valueOf(currentGenericFilter.getAssertionValue())));
+            return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).gte(buildTypedExpression(currentGenericFilter));
         }
 
         if (FilterType.PRESENCE == type) {
@@ -118,5 +118,17 @@ public class CouchbaseFilterConverter {
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));
     }
+
+	private Expression buildTypedExpression(Filter currentGenericFilter) {
+		if (currentGenericFilter.getAssertionValue() instanceof Boolean) {
+			return Expression.x((Boolean) currentGenericFilter.getAssertionValue());
+		} else if (currentGenericFilter.getAssertionValue() instanceof Integer) {
+			return Expression.x((Integer) currentGenericFilter.getAssertionValue());
+		} else if (currentGenericFilter.getAssertionValue() instanceof Long) {
+			return Expression.x((Long) currentGenericFilter.getAssertionValue());
+		}
+
+		return Expression.s(String.valueOf(currentGenericFilter.getAssertionValue()));
+	}
 
 }
