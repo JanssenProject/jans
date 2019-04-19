@@ -48,6 +48,8 @@ import platform
 from ldif import LDIFParser
 import copy
 
+from attribute_data_types import ATTRUBUTEDATATYPES
+
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
 if file_max < 64000:
@@ -86,6 +88,23 @@ class ProgressBar:
         sys.stdout.flush()
 
 listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
+
+
+def getTypedValue(dtype, val):
+    retVal = val
+    if dtype == 'integer':
+        try:
+            retVal = int(retVal)
+        except:
+            pass
+    elif dtype == 'boolean':
+        if retVal.lower() in ('true', 'yes', '1', 'on'):
+            retVal = True
+        else:
+            retVal = False
+
+    return retVal
+    
 
 def get_key_from(dn):
     dns = dn.split(",")
@@ -131,6 +150,19 @@ def get_documents_from_ldif(ldif_file):
                 if len(entry[k]) == 1:
                     if not k in listAttrib:
                         entry[k] = entry[k][0]
+
+            for k in entry:
+                dtype = attribDataTypes.getAttribDataType(k)
+                if dtype != 'string':
+
+                    if type(entry[k]) == list():
+                        for i in range(len(entry[k])):
+                            entry[k][i] = getTypedValue(dtype, entry[k][i])
+                            if entry[k][i]=='true':
+                                print k
+                    else:
+                        entry[k] = getTypedValue(dtype, entry[k])
+
             documents.append((key, entry))
 
     return documents
@@ -3876,8 +3908,13 @@ if __name__ == '__main__':
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
     }
+
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
+
+
+    attribDataTypes = ATTRUBUTEDATATYPES(setupOptions['install_dir'])
+
 
     installObject = Setup(setupOptions['install_dir'])
 
