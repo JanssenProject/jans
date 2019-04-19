@@ -1566,11 +1566,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			processedProperties.add(ldapAttributeName);
 
-			Object[] values = null;
+			String[] values = null;
 
 			AttributeData attributeData = attributesDataMap.get(ldapAttributeName);
 			if ((attributeData != null) && (attributeData.getValues() != null)) {
-				values = attributeData.getValues().clone();
+				values = attributeData.getStringValues();
 				Arrays.sort(values);
 			}
 
@@ -1582,7 +1582,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				continue;
 			}
 
-			addPropertyWithValuesToKey(sb, attributeData.getName(), attributeData.getValues());
+			addPropertyWithValuesToKey(sb, attributeData.getName(), attributeData.getStringValues());
 		}
 
 		if (caseSensetive) {
@@ -1592,7 +1592,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 	}
 
-	private void addPropertyWithValuesToKey(StringBuilder sb, String propertyName, Object[] values) {
+	private void addPropertyWithValuesToKey(StringBuilder sb, String propertyName, String[] values) {
 		sb.append(':').append(propertyName).append('=');
 		if (values == null) {
 			sb.append("null");
@@ -1600,7 +1600,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			if (values.length == 1) {
 				sb.append(values[0]);
 			} else {
-				Object[] tmpValues = values.clone();
+				String[] tmpValues = values.clone();
 				Arrays.sort(tmpValues);
 
 				for (int i = 0; i < tmpValues.length; i++) {
