@@ -150,12 +150,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
-            String[] attributeValues = attribute.getStringValues();
+            Object[] attributeValues = attribute.getValues();
 
-            if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
-                String[] realValues = attributeValues;
+            if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
+                Object[] realValues = attributeValues;
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = operationService.createStoragePassword(attributeValues);
+                    realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
                 if (realValues.length > 1) {
                     jsonObject.put(attributeName, JsonArray.from(realValues));
@@ -187,17 +187,17 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 AttributeData oldAttribute = attributeDataModification.getOldAttribute();
 
                 String attributeName = null;
-                String[] attributeValues = null;
+                Object[] attributeValues = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
-                    attributeValues = attribute.getStringValues();
+                    attributeValues = attribute.getValues();
                 }
 
                 String oldAttributeName = null;
-                String[] oldAttributeValues = null;
+                Object[] oldAttributeValues = null;
                 if (oldAttribute != null) {
                     oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = oldAttribute.getStringValues();
+                    oldAttributeValues = oldAttribute.getValues();
                 }
 
                 MutationSpec modification = null;
@@ -537,12 +537,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return searchResult.getTotalEntriesCount();
     }
 
-    private MutationSpec createModification(final Mutation type, final String attributeName, final String... attributeValues) {
+    private MutationSpec createModification(final Mutation type, final String attributeName, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
-        String[] realValues = attributeValues;
+        Object[] realValues = attributeValues;
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
-            realValues = operationService.createStoragePassword(attributeValues);
+            realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
         }
 
         if (realValues.length == 1) {
