@@ -123,7 +123,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         if (getSupportedLDAPVersion() > 2) {
             if (!isSchemaUpdate) {
                 String[] objectClasses = getObjectClasses(entry, entryClass);
-                String[] objectClassesFromLdap = (String[]) attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getValues();
+                String[] objectClassesFromLdap = attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getStringValues();
 
                 if (!Arrays.equals(objectClassesFromLdap, objectClasses)) {
                     attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
@@ -158,7 +158,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
-            String[] attributeValues = (String[]) attribute.getValues();
+            String[] attributeValues = attribute.getStringValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
                 if (operationService.isCertificateAttribute(attributeName)) {
@@ -197,14 +197,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 String[] attributeValues = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
-                    attributeValues = (String[]) attribute.getValues();
+                    attributeValues = attribute.getStringValues();
                 }
 
                 String oldAttributeName = null;
                 String[] oldAttributeValues = null;
                 if (oldAttribute != null) {
                     oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = (String[]) oldAttribute.getValues();
+                    oldAttributeValues = oldAttribute.getStringValues();
                 }
 
                 Modification modification = null;

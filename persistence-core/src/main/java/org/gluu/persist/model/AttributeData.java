@@ -39,6 +39,24 @@ public class AttributeData {
         return values;
     }
 
+    public final String[] getStringValues() {
+        if (this.values == null) {
+            return null;
+        }
+        
+        if (this.values.length == 0) {
+        	return new String[0];
+        }
+        
+        String[] result = new String[this.values.length];
+        
+        for (int i = 0; i < result.length; i++) {
+        	result[i] = String.valueOf(this.values[i]);
+        }
+
+        return result;
+    }
+
     public Object getValue() {
         if ((this.values == null) || (this.values.length == 0)) {
             return null;
