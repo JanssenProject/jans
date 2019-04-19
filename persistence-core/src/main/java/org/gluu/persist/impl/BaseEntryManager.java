@@ -1105,7 +1105,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			return null;
 		}
 
-		Object[] attributeValues = new String[1];
+		Object[] attributeValues = new Object[1];
 		if (propertyValue instanceof String) {
 			attributeValues[0] = StringHelper.toString(propertyValue);
 		} else if (propertyValue instanceof Boolean) {
