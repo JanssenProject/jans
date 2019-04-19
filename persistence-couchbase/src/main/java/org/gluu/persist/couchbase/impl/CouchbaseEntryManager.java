@@ -121,7 +121,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses list! Entry is invalid: '%s'", entry));
             }
 
-            String[] objectClassesFromDb = (String[]) objectClassAttributeData.getValues();
+            String[] objectClassesFromDb = objectClassAttributeData.getStringValues();
 
             if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
@@ -150,7 +150,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
-            String[] attributeValues = (String[]) attribute.getValues();
+            String[] attributeValues = attribute.getStringValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
                 String[] realValues = attributeValues;
@@ -190,14 +190,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 String[] attributeValues = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
-                    attributeValues = (String[]) attribute.getValues();
+                    attributeValues = attribute.getStringValues();
                 }
 
                 String oldAttributeName = null;
                 String[] oldAttributeValues = null;
                 if (oldAttribute != null) {
                     oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = (String[]) oldAttribute.getValues();
+                    oldAttributeValues = oldAttribute.getStringValues();
                 }
 
                 MutationSpec modification = null;
@@ -453,15 +453,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
             Object[] attributeValueObjects;
             if (attributeObject == null) {
-                attributeValueObjects = NO_STRINGS;
+                attributeValueObjects = NO_OBJECTS;
             }
             if (attributeObject instanceof JsonArray) {
-                attributeValueObjects = ((JsonArray) attributeObject).toList().toArray(NO_STRINGS);
+                attributeValueObjects = ((JsonArray) attributeObject).toList().toArray(NO_OBJECTS);
             } else {
             	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long)) {
                     attributeValueObjects = new Object[] { attributeObject };
             	} else {
-            		attributeValueObjects = new String[] { attributeObject.toString() };
+            		attributeValueObjects = new Object[] { attributeObject.toString() };
             	}
             }
 
