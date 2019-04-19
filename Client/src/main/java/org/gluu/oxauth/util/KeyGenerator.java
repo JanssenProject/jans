@@ -19,6 +19,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.*;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.util.StringHelper;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -49,6 +50,7 @@ public class KeyGenerator {
     private static final String OXELEVEN_ACCESS_TOKEN = "at";
     private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
     private static final String EXPIRATION = "expiration";
+    private static final String EXPIRATION_HOURS = "expiration_hours";
     private static final String HELP = "h";
     private static final Logger log;
 
@@ -84,6 +86,7 @@ public class KeyGenerator {
             options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token");
             options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
+            options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
             options.addOption(HELP, false, "Show help.");
         }
 
@@ -100,12 +103,13 @@ public class KeyGenerator {
                 if ((cmd.hasOption(SIGNING_KEYS) || cmd.hasOption(ENCRYPTION_KEYS))
                         && cmd.hasOption(OXELEVEN_ACCESS_TOKEN)
                         && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)
-                        && cmd.hasOption(EXPIRATION)) {
+                        && (cmd.hasOption(EXPIRATION) || (cmd.hasOption(EXPIRATION_HOURS)) )) {
                     String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
                     String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
                     String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
                     String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
-                    int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
+                    int expiration = StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0);
+                    int expiration_hours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
 
                     List<Algorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ?
                             Algorithm.fromString(sigAlgorithms, Use.SIGNATURE) : new ArrayList<Algorithm>();
@@ -121,6 +125,7 @@ public class KeyGenerator {
 
                             Calendar calendar = new GregorianCalendar();
                             calendar.add(Calendar.DATE, expiration);
+                            calendar.add(Calendar.HOUR, expiration_hours);
 
                             for (Algorithm algorithm : signatureAlgorithms) {
                                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
