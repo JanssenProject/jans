@@ -37,7 +37,7 @@ public class Filter {
         this.filterString = filterString;
     }
 
-    public Filter(FilterType type, String attributeName, String assertionValue) {
+    public Filter(FilterType type, String attributeName, Object assertionValue) {
         this(type);
         this.attributeName = attributeName;
         this.assertionValue = assertionValue;
@@ -64,7 +64,7 @@ public class Filter {
         return new Filter(FilterType.PRESENCE, attributeName, null);
     }
 
-    public static Filter createEqualityFilter(final String attributeName, final String assertionValue) {
+    public static Filter createEqualityFilter(final String attributeName, final Object assertionValue) {
         return new Filter(FilterType.EQUALITY, attributeName, assertionValue);
     }
 
@@ -72,11 +72,11 @@ public class Filter {
         return new Filter(FilterType.NOT, filter);
     }
 
-    public static Filter createLessOrEqualFilter(final String attributeName, final String assertionValue) {
+    public static Filter createLessOrEqualFilter(final String attributeName, final Object assertionValue) {
         return new Filter(FilterType.LESS_OR_EQUAL, attributeName, assertionValue);
     }
 
-    public static Filter createGreaterOrEqualFilter(final String attributeName, final String assertionValue) {
+    public static Filter createGreaterOrEqualFilter(final String attributeName, final Object assertionValue) {
         return new Filter(FilterType.GREATER_OR_EQUAL, attributeName, assertionValue);
     }
 
