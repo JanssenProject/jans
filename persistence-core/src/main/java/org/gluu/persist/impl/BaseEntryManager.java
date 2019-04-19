@@ -1151,7 +1151,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		if (attributeValues.length == 0) {
 			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && StringHelper.isEmpty((String) attributeValues[0])) {
+		} else if ((attributeValues.length == 1) && StringHelper.isEmpty(String.valueOf(attributeValues[0]))) {
 			return null;
 		}
 
@@ -1375,13 +1375,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (parameterType.equals(String.class)) {
 			propertyValueSetter.set(entry, attribute.getValue());
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf((String) attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf((String) attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
-			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf((String) attribute.getValue()));
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(Date.class)) {
-			propertyValueSetter.set(entry, decodeTime((String) attribute.getValue()));
+			propertyValueSetter.set(entry, decodeTime(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(String[].class)) {
 			propertyValueSetter.set(entry, attribute.getValues());
 		} else if (ReflectHelper.assignableFrom(parameterType, List.class)) {
@@ -1439,7 +1439,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	private Object convertStringToJson(Class<?> parameterType, Object stringValue) {
 		try {
-			Object jsonValue = JSON_OBJECT_MAPPER.readValue((String) stringValue, parameterType);
+			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(stringValue), parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
 			LOG.error("Failed to convert json value '{}' to object: ", stringValue, ex);
@@ -1509,7 +1509,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	private String getEntryKey(Object dnValue, boolean caseSensetive, List<PropertyAnnotation> propertiesAnnotations,
 			List<AttributeData> attributesData) {
-		StringBuilder sb = new StringBuilder("_HASH__").append(((String) dnValue).toLowerCase()).append("__");
+		StringBuilder sb = new StringBuilder("_HASH__").append((String.valueOf(dnValue)).toLowerCase()).append("__");
 
 		List<String> processedProperties = new ArrayList<String>();
 		Map<String, AttributeData> attributesDataMap = getAttributesDataMap(attributesData);
