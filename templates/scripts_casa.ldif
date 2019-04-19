@@ -25,7 +25,7 @@ gluuStatus: true
 inum: DAA9-F7F8
 oxLevel: 1
 oxConfigurationProperty: {"value1":"client_redirect_uris","value2":"https://%(hostname)s/casa","description":""}
-oxConfigurationProperty: {"value1":"scopes","value2":"openid, profile, user_name, clientinfo, uma_protection","description":""}
+oxConfigurationProperty: {"value1":"scopes","value2":"openid, profile, user_name, clientinfo, oxd","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
 oxScript::%(client_registration_casa)s
