@@ -110,6 +110,12 @@ class CBM:
 
         return result
 
+    def set_index_memory_quta(self, ram_quota=1024):
+        data = {'indexMemoryQuota': ram_quota}
+        result = self._post('pools/default', data)
+
+        return result
+
 
     def setup_services(self, services=['kv','n1ql','index','fts']):
         data = {'services': ','.join(services)}
