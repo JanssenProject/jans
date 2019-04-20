@@ -276,7 +276,7 @@ public class KeyGenerator {
             HelpFormatter formatter = new HelpFormatter();
 
             formatter.printHelp(
-                    "KeyGenerator -sig_keys alg ... -enc_keys alg ... -expiration n_days [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
+                    "KeyGenerator -sig_keys alg ... -enc_keys alg ... -expiration n_days [-expiration_hours n_hours] [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
                     options);
             System.exit(0);
         }
