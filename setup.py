@@ -3520,6 +3520,14 @@ class Setup(object):
             self.logIt("Failed to set Couchbase index storage mode, reason: "+ result.reason, errorLog=True)
 
 
+        self.logIt("Setting Couchbase indexer memory quota to 1GB")
+        result = self.cbm.set_index_memory_quta()
+        if result.ok:
+            self.logIt("Couchbase indexer memory quota was set to 1GB")
+        else:
+            self.logIt("Failed to set Couchbase indexer memory quota, reason: "+ result.reason, errorLog=True)
+
+
         self.logIt("Setting up Couchbase Services")
         result = self.cbm.setup_services()
         if result.ok:
