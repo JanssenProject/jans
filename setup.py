@@ -519,7 +519,7 @@ class Setup(object):
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
         self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
-        self.default_key_expiration = 2
+        self.default_key_expiration = 365
 
         # oxTrust SCIM configuration
         self.scim_rs_client_id = None
@@ -1778,7 +1778,9 @@ class Setup(object):
 
     def generate_oxauth_openid_keys(self):
         key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
-        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_algs=key_algs)
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=key_algs)
+        
+        
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
