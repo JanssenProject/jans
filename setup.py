@@ -23,14 +23,9 @@
 # SOFTWARE.
 
 import readline
-
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'pylib'))
-
 import os.path
-import Properties
-import random
 import shutil
 import socket
 import string
@@ -47,8 +42,10 @@ import base64
 import platform
 from ldif import LDIFParser
 import copy
+import random
 
-from attribute_data_types import ATTRUBUTEDATATYPES
+from pylib.attribute_data_types import ATTRUBUTEDATATYPES
+from pylib import Properties
 
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
@@ -3954,7 +3951,7 @@ if __name__ == '__main__':
     installObject.check_and_install_packages()
     #it is time to import pyDes library
     from pyDes import *
-    from cbm import CBM
+    from pylib.cbm import CBM
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
