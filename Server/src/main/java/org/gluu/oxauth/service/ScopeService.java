@@ -57,7 +57,7 @@ public class ScopeService {
         List<String> defaultScopes = new ArrayList<String>();
 
         for (org.oxauth.persistence.model.Scope scope : getAllScopesList()) {
-            if (scope.getIsDefault()) {
+            if (Boolean.TRUE.equals(scope.isDefaultScope())) {
                 defaultScopes.add(scope.getDn());
             }
         }
