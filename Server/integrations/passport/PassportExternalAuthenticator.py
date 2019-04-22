@@ -469,7 +469,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 email = None
             else:
                 email = email[0]
-                user_profile["mail"] = email
+                user_profile["mail"] = [ email ]
 
         if email == None and self.registeredProviders[provider]["requestForEmail"]:
             print "Passport. attemptAuthentication. Email was not received"
@@ -479,7 +479,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 email = userByUid.getAttribute("mail")
                 if email != None:
                     print "Passport. attemptAuthentication. Filling missing email value with %s" % email
-                    user_profile["mail"] = email
+                    user_profile["mail"] = [ email ]
 
             if email == None:
                 # Store user profile in session and abort this routine
