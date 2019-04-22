@@ -6,19 +6,18 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.gluu.model.GluuAttribute;
+import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.service.CacheService;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.gluu.model.GluuAttribute;
-import org.gluu.oxauth.model.config.Constants;
-import org.gluu.service.CacheService;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -32,8 +31,6 @@ public class AttributeService extends org.gluu.service.AttributeService {
 	 * 
 	 */
 	private static final long serialVersionUID = -990409035168814270L;
-
-	private static final String CACHE_ATTRIBUTE = "AttributeCache";
 
     @Inject
     private Logger log;
@@ -50,11 +47,11 @@ public class AttributeService extends org.gluu.service.AttributeService {
      * @return GluuAttribute
      */
     public GluuAttribute getAttributeByDn(String dn) {
-        GluuAttribute gluuAttribute = (GluuAttribute) cacheService.get(CACHE_ATTRIBUTE, dn);
+        GluuAttribute gluuAttribute = (GluuAttribute) cacheService.get(dn);
 
         if (gluuAttribute == null) {
             gluuAttribute = ldapEntryManager.find(GluuAttribute.class, dn);
-            cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
+            cacheService.put(60, dn, gluuAttribute, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } else {
             log.trace("Get attribute from cache by Dn '{}'", dn);
         }
