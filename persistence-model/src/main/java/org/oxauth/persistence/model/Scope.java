@@ -25,9 +25,6 @@ public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
-    private transient boolean isDefault;
-    private transient boolean isGroupClaims;
-
     @DN
     private String dn;
     @AttributeName(ignoreDuringUpdate = true)
@@ -46,10 +43,10 @@ public class Scope implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private String defaultScope;
+    private Boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
-    private String oxAuthGroupClaims;
+    private Boolean oxAuthGroupClaims;
 
     @AttributeName(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
@@ -102,44 +99,20 @@ public class Scope implements Serializable {
         this.oxAuthClaims = oxAuthClaims;
     }
 
-    public String getDefaultScope() {
+    public Boolean isDefaultScope() {
         return this.defaultScope;
     }
 
-    public void setDefaultScope(String defaultScope) {
+    public void setDefaultScope(Boolean defaultScope) {
         this.defaultScope = defaultScope;
     }
 
-    public boolean getIsDefault() {
-        if (this.defaultScope == null) {
-            return false;
-        }
-        if (this.defaultScope.equalsIgnoreCase("true")) {
-            this.isDefault = true;
-            return this.isDefault;
-        }
-        this.isDefault = false;
-        return this.isDefault;
-    }
-
-    public String getOxAuthGroupClaims() {
+    public boolean isOxAuthGroupClaims() {
         return oxAuthGroupClaims;
     }
 
-    public void setOxAuthGroupClaims(String oxAuthGroupClaims) {
+    public void setOxAuthGroupClaims(boolean oxAuthGroupClaims) {
         this.oxAuthGroupClaims = oxAuthGroupClaims;
-    }
-
-    public boolean getIsOxAuthGroupClaims() {
-        if (this.oxAuthGroupClaims == null) {
-            return false;
-        }
-        if (this.oxAuthGroupClaims.equalsIgnoreCase("true")) {
-            this.isGroupClaims = true;
-            return this.isGroupClaims;
-        }
-        this.isGroupClaims = false;
-        return this.isGroupClaims;
     }
 
     public List<String> getDynamicScopeScripts() {
