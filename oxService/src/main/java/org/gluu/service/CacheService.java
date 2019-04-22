@@ -5,14 +5,15 @@
  */
 package org.gluu.service;
 
+import org.gluu.service.cache.CacheInterface;
+import org.gluu.service.cache.CacheProvider;
+import org.gluu.service.cache.CacheProviderType;
+import org.slf4j.Logger;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.gluu.service.cache.CacheProvider;
-import org.gluu.service.cache.CacheProviderType;
-import org.gluu.service.cache.NativePersistenceCacheProvider;
-import org.slf4j.Logger;
+import java.util.Date;
 
 /**
  * Provides operations with cache
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
  */
 @ApplicationScoped
 @Named
-public class CacheService {
+public class CacheService implements CacheInterface {
 
     @Inject
     private CacheProvider cacheProvider;
@@ -30,38 +31,33 @@ public class CacheService {
     @Inject
     private Logger log;
 
-    public Object get(String region, String key) {
+    public Object get(String key) {
         if (cacheProvider == null) {
             return null;
         }
 
-        return cacheProvider.get(region, key);
+        return cacheProvider.get(key);
     }
 
-	public void put(String region, String key, Object object, boolean skipPutOnNativePersistence) {
+    public void put(int expirationInSeconds, String key, Object object) {
+        put(expirationInSeconds, key, object, false);
+    }
+
+	public void put(int expirationInSeconds, String key, Object object, boolean skipPutOnNativePersistence) {
 		if (skipPutOnNativePersistence && (CacheProviderType.NATIVE_PERSISTENCE == cacheProvider.getProviderType())) {
 			return;
 		}
 		if (cacheProvider != null) {
-			cacheProvider.put(region, key, object);
+			cacheProvider.put(expirationInSeconds, key, object);
 		}
 	}
 
-	public void put(String region, String key, Object object) {
-		put(region, key, object, false);
-	}
-
-	public void remove(String region, String key) {
+	public void remove(String key) {
 		if (cacheProvider == null) {
 			return;
 		}
 		
-		cacheProvider.remove(region, key);
-	}
-
-	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
-	public void removeAll(String name) {
-		cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
+		cacheProvider.remove(key);
 	}
 
 	public void clear() {
@@ -70,4 +66,25 @@ public class CacheService {
 		}
 	}
 
+    @Override
+    public void cleanup(Date now) {
+        if (cacheProvider != null) {
+            cacheProvider.cleanup(now);
+        }
+    }
+
+    @Deprecated // we keep it only for back-compatibility of scripts code
+    public Object get(String region, String key) {
+        return get(key);
+    }
+
+    @Deprecated // we keep it only for back-compatibility of scripts code
+    public void put(String expirationInSeconds, String key, Object object) {
+        put(Integer.parseInt(expirationInSeconds), key, object);
+    }
+
+    @Deprecated // we keep it only for back-compatibility of scripts code
+    public void remove(String region, String key) {
+        remove(key);
+    }
 }

@@ -72,15 +72,14 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     }
 
     @Override
-    public Object get(String region, String key) {
-        String originalKey = key;
+    public Object get(String key) {
         try {
             key = hashKey(key);
             NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
-                    remove("", key);
+                    remove(key);
                     return null;
                 }
                 Object o = fromString(entity.getData());
@@ -103,16 +102,18 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     }
 
     @Override
-    public void put(String expirationInSeconds, String key, Object object) {
+    public void put(int expirationInSeconds, String key, Object object) {
         String originalKey = key;
 
         try {
             key = hashKey(key);
             Date creationDate = new Date();
 
+            expirationInSeconds = expirationInSeconds > 0 ? expirationInSeconds : cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
+
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.setTime(creationDate);
-            expirationDate.add(Calendar.SECOND, putExpiration(expirationInSeconds));
+            expirationDate.add(Calendar.SECOND, expirationInSeconds);
 
             NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
             entity.setData(asString(object));
@@ -145,16 +146,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         return expiredAt == null || expiredAt.before(new Date());
     }
 
-    private int putExpiration(String expirationInSeconds) {
-        try {
-            return Integer.parseInt(expirationInSeconds);
-        } catch (Exception e) {
-            return cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
-        }
-    }
-
     @Override
-    public void remove(String region, String key) {
+    public void remove(String key) {
         if (silentlyRemoveEntityIfExists(createDn(hashKey(key)))) {
             log.trace("Removed entity, key: " + key);
         }
