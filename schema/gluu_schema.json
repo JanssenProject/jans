@@ -1556,13 +1556,12 @@
         },
         {
             "desc": "oxAuth Default Max Age",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxAuthDefaultMaxAge"
             ],
             "oid": "oxAttribute:144",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -2231,13 +2230,12 @@
         },
         {
             "desc": "Boolean field to indicate whether object is used as JWT",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAsJwt"
             ],
             "oid": "oxAttribute:206",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -2319,13 +2317,12 @@
         },
         {
             "desc": "Is Link Moderated?",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxLinkModerated"
             ],
             "oid": "oxAttribute:214",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3965,13 +3962,12 @@
         },
         {
             "desc": "Lifetime of refresh token",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxRefreshTokenLifetime"
             ],
             "oid": "oxAttribute:369",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3987,13 +3983,12 @@
         },
         {
             "desc": "oxAuth Permission Granted",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthPermissionGranted"
             ],
             "oid": "oxAttribute:371",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4229,13 +4224,12 @@
         },
         {
             "desc": "Lifetime of access token",
-            "equality": "caseIgnoreMatch",
+            "equality": "integerMatch",
             "names": [
                 "oxAccessTokenLifetime"
             ],
             "oid": "oxAttribute:394",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
             "x_origin": "Gluu created attribute"
         },
         {
