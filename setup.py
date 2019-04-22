@@ -3489,6 +3489,16 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
+        elif self.os_type == 'ubuntu' and self.os_version == '18':
+            oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+            oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
+            oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
+            oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
+
+            with open(oxauth_systemd_script_fn, 'w') as w:
+                w.write(oxauth_systemd_script)
+            self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
+            self.run(['systemctl', 'daemon-reload'])
             
 
     def couchebaseCreateCluster(self):
