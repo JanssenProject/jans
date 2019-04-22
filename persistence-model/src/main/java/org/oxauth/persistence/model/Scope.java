@@ -46,7 +46,7 @@ public class Scope implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private String defaultScope;
+    private boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
     private String oxAuthGroupClaims;
@@ -102,24 +102,12 @@ public class Scope implements Serializable {
         this.oxAuthClaims = oxAuthClaims;
     }
 
-    public String getDefaultScope() {
+    public boolean isDefaultScope() {
         return this.defaultScope;
     }
 
-    public void setDefaultScope(String defaultScope) {
+    public void setDefaultScope(boolean defaultScope) {
         this.defaultScope = defaultScope;
-    }
-
-    public boolean getIsDefault() {
-        if (this.defaultScope == null) {
-            return false;
-        }
-        if (this.defaultScope.equalsIgnoreCase("true")) {
-            this.isDefault = true;
-            return this.isDefault;
-        }
-        this.isDefault = false;
-        return this.isDefault;
     }
 
     public String getOxAuthGroupClaims() {
