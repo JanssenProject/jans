@@ -220,7 +220,7 @@ public class UmaResourceService {
         }
 
         try {
-            cacheService.put(Integer.toString(RESOURCE_CACHE_EXPIRATION_IN_SECONDS), resource.getDn(), resource, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
+            cacheService.put(RESOURCE_CACHE_EXPIRATION_IN_SECONDS, resource.getDn(), resource, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } catch (Exception e) {
             log.error("Failed to put client in cache, client:" + resource, e);
         }
