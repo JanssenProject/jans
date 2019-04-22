@@ -175,7 +175,7 @@ public class IdTokenFactory {
 
                 Map<String, Object> claims = getClaims(user, scope);
 
-                if (scope.isOxAuthGroupClaims()) {
+                if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
                     groupClaim.setName(scope.getDisplayName());
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
@@ -374,7 +374,7 @@ public class IdTokenFactory {
 
                 Map<String, Object> claims = getClaims(user, scope);
 
-                if (scope.isOxAuthGroupClaims()) {
+                if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
                     groupClaim.setName(scope.getDisplayName());
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
