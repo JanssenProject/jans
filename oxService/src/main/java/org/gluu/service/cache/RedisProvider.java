@@ -9,8 +9,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-
 /**
  * @author yuriyz on 02/23/2017.
  */
@@ -83,29 +81,20 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     }
 
     @Override
-    public Object get(String region, String key) {
+    public Object get(String key) {
         if (key == null) {
             return null;
         }
         return redisProvider.get(key);
     }
 
-    @Override // it is so weird but we use as workaround "region" field to pass "expiration"
-              // for put operation
-    public void put(String expirationInSeconds, String key, Object object) {
-        redisProvider.put(putExpiration(expirationInSeconds), key, object);
-    }
-
-    private int putExpiration(String expirationInSeconds) {
-        try {
-            return Integer.parseInt(expirationInSeconds);
-        } catch (Exception e) {
-            return defaultPutExpiration;
-        }
+    @Override
+    public void put(int expirationInSeconds, String key, Object object) {
+        redisProvider.put(expirationInSeconds > 0 ? expirationInSeconds : defaultPutExpiration, key, object);
     }
 
     @Override
-    public void remove(String region, String key) {
+    public void remove(String key) {
         redisProvider.remove(key);
     }
 

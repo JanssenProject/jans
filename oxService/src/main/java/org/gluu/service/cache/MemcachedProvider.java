@@ -1,19 +1,14 @@
 package org.gluu.service.cache;
 
+import net.spy.memcached.*;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
+import org.slf4j.Logger;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
-import net.spy.memcached.AddrUtil;
-import net.spy.memcached.BinaryConnectionFactory;
-import net.spy.memcached.ConnectionFactory;
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.
@@ -60,7 +55,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     }
 
     private void testConnection() {
-        put("2", "connectionTest", "connectionTestValue");
+        put(2, "connectionTest", "connectionTestValue");
         if (!"connectionTestValue".equals(get("connectionTest"))) {
             throw new IllegalStateException("Error starting MemcachedProvider. Please check memcached configuration: " + memcachedConfiguration);
         }
@@ -84,7 +79,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     }
 
     @Override
-    public Object get(String region, String key) {
+    public Object get(String key) {
         try {
             if (key == null) {
                 return null;
@@ -98,11 +93,10 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         }
     }
 
-    @Override // it is so weird but we use as workaround "region" field to pass "expiration"
-              // for put operation
-    public void put(String expirationInSeconds, String key, Object object) {
+    @Override
+    public void put(int expirationInSeconds, String key, Object object) {
         try {
-            int expiration = putExpiration(expirationInSeconds);
+            int expiration = expirationInSeconds > 0 ? expirationInSeconds : memcachedConfiguration.getDefaultPutExpiration();
             OperationFuture<Boolean> set = client.set(key, expiration, object);
             OperationStatus status = set.getStatus(); // block
             log.trace("set - key:" + key + ", expiration: " + expiration + ", status:" + status + ", get:" + get(key));
@@ -111,16 +105,8 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         }
     }
 
-    private int putExpiration(String expirationInSeconds) {
-        try {
-            return Integer.parseInt(expirationInSeconds);
-        } catch (Exception e) {
-            return memcachedConfiguration.getDefaultPutExpiration();
-        }
-    }
-
     @Override
-    public void remove(String region, String key) {
+    public void remove(String key) {
         try {
             client.delete(key);
             log.trace("delete - key:" + key);
