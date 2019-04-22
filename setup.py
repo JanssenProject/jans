@@ -463,7 +463,7 @@ class Setup(object):
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.gluu_python_base = '%s/python' % self.gluuOptFolder
         self.gluu_python_readme = '%s/libs/python.txt' % self.gluuOptPythonFolder
-        self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
+        self.ox_ldap_properties = '%s/gluu-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
