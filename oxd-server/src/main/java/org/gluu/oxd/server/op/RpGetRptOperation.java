@@ -40,6 +40,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
             String entity = (String) ex.getResponse().getEntity(String.class);
             final UmaNeedInfoResponse needInfo = parseNeedInfoSilently(entity);
             if (needInfo != null) {
+                LOG.trace("Need info: " + entity);
                 throw new WebApplicationException(Response
                         .status(Response.Status.FORBIDDEN)
                         .type(MediaType.APPLICATION_JSON_TYPE)
