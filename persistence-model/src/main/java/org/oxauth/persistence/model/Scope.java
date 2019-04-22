@@ -25,9 +25,6 @@ public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
-    private transient boolean isDefault;
-    private transient boolean isGroupClaims;
-
     @DN
     private String dn;
     @AttributeName(ignoreDuringUpdate = true)
@@ -49,7 +46,7 @@ public class Scope implements Serializable {
     private boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
-    private String oxAuthGroupClaims;
+    private boolean oxAuthGroupClaims;
 
     @AttributeName(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
@@ -110,24 +107,12 @@ public class Scope implements Serializable {
         this.defaultScope = defaultScope;
     }
 
-    public String getOxAuthGroupClaims() {
+    public boolean isOxAuthGroupClaims() {
         return oxAuthGroupClaims;
     }
 
-    public void setOxAuthGroupClaims(String oxAuthGroupClaims) {
+    public void setOxAuthGroupClaims(boolean oxAuthGroupClaims) {
         this.oxAuthGroupClaims = oxAuthGroupClaims;
-    }
-
-    public boolean getIsOxAuthGroupClaims() {
-        if (this.oxAuthGroupClaims == null) {
-            return false;
-        }
-        if (this.oxAuthGroupClaims.equalsIgnoreCase("true")) {
-            this.isGroupClaims = true;
-            return this.isGroupClaims;
-        }
-        this.isGroupClaims = false;
-        return this.isGroupClaims;
     }
 
     public List<String> getDynamicScopeScripts() {
