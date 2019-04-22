@@ -29,7 +29,7 @@ public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     @Override
     public String getDefaultConfigurationFileName() {
-        return "ox-ldap.properties";
+        return "gluu-ldap.properties";
     }
 
     @Override
