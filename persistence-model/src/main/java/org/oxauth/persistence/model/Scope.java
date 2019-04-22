@@ -43,10 +43,10 @@ public class Scope implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private boolean defaultScope;
+    private Boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
-    private boolean oxAuthGroupClaims;
+    private Boolean oxAuthGroupClaims;
 
     @AttributeName(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
@@ -99,11 +99,11 @@ public class Scope implements Serializable {
         this.oxAuthClaims = oxAuthClaims;
     }
 
-    public boolean isDefaultScope() {
+    public Boolean isDefaultScope() {
         return this.defaultScope;
     }
 
-    public void setDefaultScope(boolean defaultScope) {
+    public void setDefaultScope(Boolean defaultScope) {
         this.defaultScope = defaultScope;
     }
 
