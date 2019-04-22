@@ -194,7 +194,9 @@ public class UmaPermissionService {
             permission.setDn(dn);
             permission.setAttributes(attributes);
             ldapEntryManager.persist(permission);
+            log.trace("New ticket: " + newTicket + ", old permission: " + dn);
         }
+
         return newTicket;
     }
 }
