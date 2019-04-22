@@ -73,6 +73,10 @@ public class CacheService implements CacheInterface {
         }
     }
 
+    public void put(String key, Object object) {
+        put(60, key, object, false);
+    }
+
     @Deprecated // we keep it only for back-compatibility of scripts code
     public Object get(String region, String key) {
         return get(key);
