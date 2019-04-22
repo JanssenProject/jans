@@ -1,17 +1,15 @@
 package org.gluu.service.cache;
 
-import java.util.concurrent.TimeUnit;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -63,31 +61,23 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
     }
 
     @Override
-    public Object get(String region, String key) {
+    public Object get(String key) {
         return map.get(key);
     }
 
-    @Override // it is so weird but we use as workaround "region" field to pass "expiration"
-              // for put operation
-    public void put(String expirationInSeconds, String key, Object object) {
+    @Override
+    public void put(int expirationInSeconds, String key, Object object) {
         // if key already exists and hash is the same for value then expiration time is
         // not updated
         // net.jodah.expiringmap.ExpiringMap.putInternal()
         // therefore we first remove entry and then put it
         map.remove(key);
-        map.put(key, object, ExpirationPolicy.CREATED, putExpiration(expirationInSeconds), TimeUnit.SECONDS);
-    }
-
-    private int putExpiration(String expirationInSeconds) {
-        try {
-            return Integer.parseInt(expirationInSeconds);
-        } catch (Exception e) {
-            return inMemoryConfiguration.getDefaultPutExpiration();
-        }
+        expirationInSeconds = expirationInSeconds >= 0 ? expirationInSeconds : inMemoryConfiguration.getDefaultPutExpiration();
+        map.put(key, object, ExpirationPolicy.CREATED, expirationInSeconds, TimeUnit.SECONDS);
     }
 
     @Override
-    public void remove(String region, String key) {
+    public void remove(String key) {
         map.remove(key);
     }
 
