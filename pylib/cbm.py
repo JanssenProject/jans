@@ -104,13 +104,13 @@ class CBM:
 
         return result
 
-    def set_index_storage_mode(self, mode='memory_optimized'):
+    def set_index_storage_mode(self, mode='plasma'):
         data = {'storageMode': mode}
         result = self._post('settings/indexes', data)
 
         return result
 
-    def set_index_memory_quta(self, ram_quota=1024):
+    def set_index_memory_quta(self, ram_quota=256):
         data = {'indexMemoryQuota': ram_quota}
         result = self._post('pools/default', data)
 
