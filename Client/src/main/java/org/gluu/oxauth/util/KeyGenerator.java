@@ -103,7 +103,7 @@ public class KeyGenerator {
                 if ((cmd.hasOption(SIGNING_KEYS) || cmd.hasOption(ENCRYPTION_KEYS))
                         && cmd.hasOption(OXELEVEN_ACCESS_TOKEN)
                         && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)
-                        && (cmd.hasOption(EXPIRATION) || (cmd.hasOption(EXPIRATION_HOURS)) )) {
+                        && (cmd.hasOption(EXPIRATION) || cmd.hasOption(EXPIRATION_HOURS))) {
                     String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
                     String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
                     String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
@@ -184,13 +184,15 @@ public class KeyGenerator {
                         && cmd.hasOption(KEY_STORE_FILE)
                         && cmd.hasOption(KEY_STORE_PASSWORD)
                         && cmd.hasOption(DN_NAME)
-                        && cmd.hasOption(EXPIRATION)) {
+                        && (cmd.hasOption(EXPIRATION) || cmd.hasOption(EXPIRATION_HOURS))) {
                     String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
                     String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
                     String keystore = cmd.getOptionValue(KEY_STORE_FILE);
                     String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
                     String dnName = cmd.getOptionValue(DN_NAME);
-                    int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
+
+                    int expiration = StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0);
+                    int expiration_hours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
 
                     List<Algorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ?
                             Algorithm.fromString(sigAlgorithms, Use.SIGNATURE) : new ArrayList<Algorithm>();
@@ -207,6 +209,7 @@ public class KeyGenerator {
 
                             Calendar calendar = new GregorianCalendar();
                             calendar.add(Calendar.DATE, expiration);
+                            calendar.add(Calendar.HOUR, expiration_hours);
 
                             for (Algorithm algorithm : signatureAlgorithms) {
                                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
