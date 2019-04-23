@@ -33,6 +33,7 @@ def opendjSchemaDataTypes(schemaDir):
                     'string': [],
                     'boolean': [],
                     'integer': [],
+                    "json": []
                 }
    
    
@@ -76,8 +77,13 @@ class ATTRUBUTEDATATYPES:
         gluuSchema = json.load(open(gluuSchemaFn))
         gluuAtrribs = gluuSchema['attributeTypes']
 
+        if 'json' not in self.attribTypes:
+            self.attribTypes['json'] = []
+
         for attrib in gluuAtrribs:
-            if  attrib['syntax'] in syntaxType:
+            if attrib.get('json'):
+                atype = 'json'
+            elif  attrib['syntax'] in syntaxType:
                 atype = syntaxType[attrib['syntax']]
             else:
                 atype = 'string'
