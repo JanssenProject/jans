@@ -11,10 +11,12 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.model.config.Conf;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.Scheduled;
@@ -100,18 +102,18 @@ public class KeyGeneratorTimer {
         }
     }
 
-    public String updateKeys() throws JSONException, Exception {
+    public void updateKeys() throws JSONException, Exception {
         String dn = configurationFactory.getPersistenceConfiguration().getConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
-        JSONObject jwks = new JSONObject(conf.getWebKeys());
-        conf.setWebKeys(updateKeys(jwks).toString());
+        JSONObject jwks = conf.getWebKeys().toJSONObject();
+        JSONObject updatedJwks =  updateKeys(jwks);
+
+        conf.setWebKeys(ServerUtil.createJsonMapper().readValue(updatedJwks.toString(), WebKeysConfiguration.class));
 
         long nextRevision = conf.getRevision() + 1;
         conf.setRevision(nextRevision);
         ldapEntryManager.merge(conf);
-
-        return conf.getWebKeys();
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
