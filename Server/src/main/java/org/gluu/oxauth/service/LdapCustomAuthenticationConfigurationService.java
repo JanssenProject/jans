@@ -18,10 +18,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.config.CustomAuthenticationConfiguration;
-import org.gluu.oxauth.model.config.CustomProperty;
-import org.gluu.oxauth.model.config.oxIDPAuthConf;
 import org.gluu.util.StringHelper;
+import org.oxauth.persistence.model.configuration.CustomProperty;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
 /**
@@ -47,24 +47,18 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {
 		GluuConfiguration gluuConfiguration = configurationService.getConfiguration();
-		List<String> configurationJsons = gluuConfiguration.getOxIDPAuthentication();
+		List<oxIDPAuthConf> authConfigurations = gluuConfiguration.getOxIDPAuthentication();
 		
 		List<CustomAuthenticationConfiguration> customAuthenticationConfigurations = new ArrayList<CustomAuthenticationConfiguration>();
 		
-		if (configurationJsons == null) {
+		if (authConfigurations == null) {
 			return customAuthenticationConfigurations;
 		}
 
-		for (String configurationJson : configurationJsons) {
-			oxIDPAuthConf configuration;
-			try {
-				configuration = (oxIDPAuthConf) jsonToObject(configurationJson, oxIDPAuthConf.class);
-				if (configuration.getEnabled() && configuration.getType().equalsIgnoreCase("customAuthentication")) {
-					CustomAuthenticationConfiguration customAuthenticationConfiguration = mapCustomAuthentication(configuration);
-					customAuthenticationConfigurations.add(customAuthenticationConfiguration);
-				}
-			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{}'", configurationJson, ex);
+		for (oxIDPAuthConf authConfiguration : authConfigurations) {
+			if (authConfiguration.getEnabled() && authConfiguration.getType().equalsIgnoreCase("customAuthentication")) {
+				CustomAuthenticationConfiguration customAuthenticationConfiguration = mapCustomAuthentication(authConfiguration);
+				customAuthenticationConfigurations.add(customAuthenticationConfiguration);
 			}
 		}
 
