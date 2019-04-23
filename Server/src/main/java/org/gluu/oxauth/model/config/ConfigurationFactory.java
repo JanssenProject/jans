@@ -7,7 +7,6 @@
 package org.gluu.oxauth.model.config;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,8 +22,6 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -47,8 +44,6 @@ import org.gluu.service.timer.schedule.TimerSchedule;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.BaseDnConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -412,86 +407,55 @@ public class ConfigurationFactory {
 	}
 
 	private void init(Conf p_conf) {
-		initConfigurationFromJson(p_conf.getDynamic());
-		initStaticConfigurationFromJson(p_conf.getStatics());
-		initWebKeysFromJson(p_conf.getWebKeys());
-		initErrorsFromJson(p_conf.getErrors());
+		initConfigurationConf(p_conf);
+
 		this.loadedRevision = p_conf.getRevision();
 	}
 
-	private void initWebKeysFromJson(String p_webKeys) {
-		try {
-			initJwksFromString(p_webKeys);
-		} catch (Exception ex) {
-			log.error("Failed to load JWKS. Attempting to generate new JWKS...", ex);
-
-			String newWebKeys = null;
-			try {
-				// Generate new JWKS
-				JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
-						getAppConfiguration().getKeyRegenerationInterval(), getAppConfiguration().getIdTokenLifetime(),
-						getAppConfiguration());
-				newWebKeys = jsonObject.toString();
-
-				// Attempt to load new JWKS
-				initJwksFromString(newWebKeys);
-
-				// Store new JWKS in LDAP
-				Conf conf = loadConfigurationFromLdap();
-				conf.setWebKeys(newWebKeys);
-
-				long nextRevision = conf.getRevision() + 1;
-				conf.setRevision(nextRevision);
-
-				final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-				ldapManager.merge(conf);
-
-				log.info("New JWKS generated successfully");
-			} catch (Exception ex2) {
-				log.error("Failed to re-generate JWKS keys", ex2);
-			}
+	private void initConfigurationConf(Conf p_conf) {
+		if (p_conf.getDynamic() != null) {
+			conf = p_conf.getDynamic();
+		}
+		if (p_conf.getStatics() != null) {
+			staticConf = p_conf.getStatics();
+		}
+		if (p_conf.getWebKeys() != null) {
+			jwks = p_conf.getWebKeys();
+		} else {
+			generateWebKeys();
+		}
+		if (p_conf.getErrors() != null) {
+			errorResponseFactory = new ErrorResponseFactory(p_conf.getErrors());
 		}
 	}
 
-	public void initJwksFromString(String p_webKeys) throws IOException, JsonParseException, JsonMappingException {
-		final WebKeysConfiguration k = ServerUtil.createJsonMapper().readValue(p_webKeys, WebKeysConfiguration.class);
-		if (k != null) {
-			jwks = k;
-		}
-	}
+	private void generateWebKeys() {
+		log.error("Failed to load JWKS. Attempting to generate new JWKS...");
 
-	private void initStaticConfigurationFromJson(String p_statics) {
+		String newWebKeys = null;
 		try {
-			final StaticConfiguration c = ServerUtil.createJsonMapper().readValue(p_statics, StaticConfiguration.class);
-			if (c != null) {
-				staticConf = c;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+			// Generate new JWKS
+			JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
+					getAppConfiguration().getKeyRegenerationInterval(), getAppConfiguration().getIdTokenLifetime(),
+					getAppConfiguration());
+			newWebKeys = jsonObject.toString();
 
-	private void initConfigurationFromJson(String p_configurationJson) {
-		try {
-			final AppConfiguration c = ServerUtil.createJsonMapper().readValue(p_configurationJson,
-					AppConfiguration.class);
-			if (c != null) {
-				conf = c;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-	}
+			// Attempt to load new JWKS
+			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, WebKeysConfiguration.class);
 
-	private void initErrorsFromJson(String p_errosAsJson) {
-		try {
-			final ErrorMessages errorMessages = ServerUtil.createJsonMapper().readValue(p_errosAsJson,
-					ErrorMessages.class);
-			if (errorMessages != null) {
-				errorResponseFactory = new ErrorResponseFactory(errorMessages);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			// Store new JWKS in LDAP
+			Conf conf = loadConfigurationFromLdap();
+			conf.setWebKeys(jwks);
+
+			long nextRevision = conf.getRevision() + 1;
+			conf.setRevision(nextRevision);
+
+			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
+			ldapManager.merge(conf);
+
+			log.info("New JWKS generated successfully");
+		} catch (Exception ex2) {
+			log.error("Failed to re-generate JWKS keys", ex2);
 		}
 	}
 
