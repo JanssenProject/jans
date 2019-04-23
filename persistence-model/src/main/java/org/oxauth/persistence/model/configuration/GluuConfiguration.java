@@ -41,7 +41,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	private CacheConfiguration cacheConfiguration;
 	
 	@AttributeName(name = "oxIDPAuthentication")
-	private List<String> oxIDPAuthentication;
+	@JsonObject
+	private List<oxIDPAuthConf> oxIDPAuthentication;
 
 	@AttributeName(name = "oxAuthenticationMode")
 	private String authenticationMode;
@@ -81,11 +82,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.smtpConfiguration = smtpConfiguration;
 	}
 
-	public List<String> getOxIDPAuthentication(){
+	public List<oxIDPAuthConf> getOxIDPAuthentication(){
 		return this.oxIDPAuthentication;
 	}
 	
-	public void setOxIDPAuthentication(List<String> oxIDPAuthentication){
+	public void setOxIDPAuthentication(List<oxIDPAuthConf> oxIDPAuthentication){
 		this.oxIDPAuthentication = oxIDPAuthentication;
 	}
 
