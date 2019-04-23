@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.model.config;
+package org.oxauth.persistence.model.configuration;
 
 import java.util.ArrayList;
 import java.util.List;

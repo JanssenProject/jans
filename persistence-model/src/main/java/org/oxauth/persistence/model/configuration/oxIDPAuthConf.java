@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.model.config;
+package org.oxauth.persistence.model.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import org.gluu.model.ldap.GluuLdapConfiguration;
 
 /**
  * oxIDPAuthConf
@@ -36,7 +37,7 @@ public class oxIDPAuthConf {
 	private List<CustomProperty> fields;
 	private int version;
 
-	private String config;
+	private GluuLdapConfiguration config;
 
 	public oxIDPAuthConf() {
 		this.fields = new ArrayList<CustomProperty>();
@@ -98,11 +99,11 @@ public class oxIDPAuthConf {
 		this.version = version;
 	}
 
-	public String getConfig() {
+	public GluuLdapConfiguration getConfig() {
 		return config;
 	}
 
-	public void setConfig(String config) {
+	public void setConfig(GluuLdapConfiguration config) {
 		this.config = config;
 	}
 
