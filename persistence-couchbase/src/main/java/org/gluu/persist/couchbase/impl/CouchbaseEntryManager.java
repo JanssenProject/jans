@@ -59,7 +59,7 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  */
 public class CouchbaseEntryManager extends BaseEntryManager implements Serializable {
 
-    private static final long serialVersionUID = 2127241817126412574L;
+	private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
@@ -458,7 +458,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             if (attributeObject instanceof JsonArray) {
                 attributeValueObjects = ((JsonArray) attributeObject).toList().toArray(NO_OBJECTS);
             } else {
-            	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long)) {
+            	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long) ||
+            		(attributeObject instanceof JsonObject)) {
                     attributeValueObjects = new Object[] { attributeObject };
             	} else {
             		attributeValueObjects = new Object[] { attributeObject.toString() };
@@ -654,6 +655,23 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	@Override
 	public boolean hasBranchesSupport(String dn) {
 		return false;
+	}
+
+    @Override
+	protected Object convertValueToJson(Object propertyValue) {
+    	String jsonStringPropertyValue = (String) super.convertValueToJson(propertyValue);
+    	return JsonObject.fromJson(jsonStringPropertyValue);
+	}
+
+	@Override
+	protected Object convertJsonToValue(Class<?> parameterType, Object propertyValue) {
+    	Object jsonStringPropertyValue = propertyValue;
+    	if (propertyValue instanceof JsonObject) {
+    		JsonObject jsonObject = (JsonObject) propertyValue;
+    		jsonStringPropertyValue = jsonObject.toString();
+    	}
+
+    	return super.convertJsonToValue(parameterType, jsonStringPropertyValue);
 	}
 
 }
