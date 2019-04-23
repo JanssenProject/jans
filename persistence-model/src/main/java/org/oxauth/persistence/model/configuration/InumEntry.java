@@ -9,6 +9,7 @@ package org.oxauth.persistence.model.configuration;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.oxauth.persistence.model.base.Entry;
 
 /**
  * Provides global inum search ability.
