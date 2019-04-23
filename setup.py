@@ -89,6 +89,13 @@ listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationP
 
 def getTypedValue(dtype, val):
     retVal = val
+    
+    if dtype == 'json':
+        try:
+            retVal = json.loads(val)
+        except Exception as e:
+            pass
+
     if dtype == 'integer':
         try:
             retVal = int(retVal)
@@ -151,12 +158,13 @@ def get_documents_from_ldif(ldif_file):
             for k in entry:
                 dtype = attribDataTypes.getAttribDataType(k)
                 if dtype != 'string':
-
-                    if type(entry[k]) == list():
+                    if type(entry[k]) == type([]):
                         for i in range(len(entry[k])):
                             entry[k][i] = getTypedValue(dtype, entry[k][i])
-                            if entry[k][i]=='true':
-                                print k
+                            if entry[k][i] == 'true':
+                                entry[k][i] = True
+                            elif entry[k][i] == 'false':
+                                entry[k][i] = False
                     else:
                         entry[k] = getTypedValue(dtype, entry[k])
 
