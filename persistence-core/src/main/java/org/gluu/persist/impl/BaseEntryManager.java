@@ -1124,7 +1124,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			int index = 0;
 			for (Object tmpPropertyValue : (List<?>) propertyValue) {
 				if (jsonObject) {
-					attributeValues[index++] = convertJsonToString(tmpPropertyValue);
+					attributeValues[index++] = convertValueToJson(tmpPropertyValue);
 				} else {
 					attributeValues[index++] = StringHelper.toString(tmpPropertyValue);
 				}
@@ -1138,7 +1138,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				attributeValues[i] = (propertyValues[i] == null) ? null : propertyValues[i].getValue();
 			}
 		} else if (jsonObject) {
-			attributeValues[0] = convertJsonToString(propertyValue);
+			attributeValues[0] = convertValueToJson(propertyValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
@@ -1159,7 +1159,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return new AttributeData(ldapAttributeName, attributeValues);
 	}
 
-	private String convertJsonToString(Object propertyValue) {
+	protected Object convertValueToJson(Object propertyValue) {
 		try {
 			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
 
@@ -1387,11 +1387,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			propertyValueSetter.set(entry, attribute.getStringValues());
 		} else if (ReflectHelper.assignableFrom(parameterType, List.class)) {
 			if (jsonObject) {
-				Object[] stringValues = attribute.getValues();
-				List<Object> jsonValues = new ArrayList<Object>(stringValues.length);
+				Object[] values = attribute.getValues();
+				List<Object> jsonValues = new ArrayList<Object>(values.length);
 
-				for (Object stringValue : stringValues) {
-					Object jsonValue = convertStringToJson(ReflectHelper.getListType(propertyValueSetter), stringValue);
+				for (Object value : values) {
+					Object jsonValue = convertJsonToValue(ReflectHelper.getListType(propertyValueSetter), value);
 					jsonValues.add(jsonValue);
 				}
 				propertyValueSetter.set(entry, jsonValues);
@@ -1429,7 +1429,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			propertyValueSetter.set(entry, ldapEnums);
 		} else if (jsonObject) {
 			Object stringValue = attribute.getValue();
-			Object jsonValue = convertStringToJson(parameterType, stringValue);
+			Object jsonValue = convertJsonToValue(parameterType, stringValue);
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
@@ -1477,14 +1477,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return propertyValue;
 	}
 
-	private Object convertStringToJson(Class<?> parameterType, Object stringValue) {
+	protected Object convertJsonToValue(Class<?> parameterType, Object propertyValue) {
 		try {
-			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(stringValue), parameterType);
+			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
-			LOG.error("Failed to convert json value '{}' to object: ", stringValue, ex);
+			LOG.error("Failed to convert json value '{}' to object: ", propertyValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to object of type %s",
-					stringValue, parameterType));
+					propertyValue, parameterType));
 		}
 	}
 
