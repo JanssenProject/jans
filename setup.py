@@ -89,6 +89,13 @@ listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationP
 
 def getTypedValue(dtype, val):
     retVal = val
+    
+    if dtype == 'json':
+        try:
+            retVal = json.loads(val)
+        except Exception as e:
+            pass
+
     if dtype == 'integer':
         try:
             retVal = int(retVal)
@@ -151,12 +158,13 @@ def get_documents_from_ldif(ldif_file):
             for k in entry:
                 dtype = attribDataTypes.getAttribDataType(k)
                 if dtype != 'string':
-
-                    if type(entry[k]) == list():
+                    if type(entry[k]) == type([]):
                         for i in range(len(entry[k])):
                             entry[k][i] = getTypedValue(dtype, entry[k][i])
-                            if entry[k][i]=='true':
-                                print k
+                            if entry[k][i] == 'true':
+                                entry[k][i] = True
+                            elif entry[k][i] == 'false':
+                                entry[k][i] = False
                     else:
                         entry[k] = getTypedValue(dtype, entry[k])
 
@@ -463,7 +471,7 @@ class Setup(object):
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.gluu_python_base = '%s/python' % self.gluuOptFolder
         self.gluu_python_readme = '%s/libs/python.txt' % self.gluuOptPythonFolder
-        self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
+        self.ox_ldap_properties = '%s/gluu-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
@@ -629,7 +637,7 @@ class Setup(object):
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                         'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
                                         'jackson-core-*.jar', 'jackson-core-asl-*.jar', 'jackson-mapper-asl-*.jar', 'jackson-xc-*.jar',
-                                        'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
+                                        'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar', "oxcore-util-*.jar" ]
 
  
         self.service_requirements = {
@@ -3489,6 +3497,16 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
+        elif self.os_type == 'ubuntu' and self.os_version == '18':
+            oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+            oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
+            oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
+            oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
+
+            with open(oxauth_systemd_script_fn, 'w') as w:
+                w.write(oxauth_systemd_script)
+            self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
+            self.run(['systemctl', 'daemon-reload'])
             
 
     def couchebaseCreateCluster(self):
