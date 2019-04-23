@@ -87,7 +87,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 except AuthenticationException:
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 
-            if not logged_in:
+            if logged_in:
+                self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
+            else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
                 userSatus = self.getUserAttributeValue(user_name, "gluuStatus")
                 print "Current user '%s' status is '%s'" % ( user_name, userSatus )
