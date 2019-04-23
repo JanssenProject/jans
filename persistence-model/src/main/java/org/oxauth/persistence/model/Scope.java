@@ -6,14 +6,14 @@
 
 package org.oxauth.persistence.model;
 
-import java.io.Serializable;
-import java.util.List;
-
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -107,7 +107,7 @@ public class Scope implements Serializable {
         this.defaultScope = defaultScope;
     }
 
-    public boolean isOxAuthGroupClaims() {
+    public Boolean isOxAuthGroupClaims() {
         return oxAuthGroupClaims;
     }
 
