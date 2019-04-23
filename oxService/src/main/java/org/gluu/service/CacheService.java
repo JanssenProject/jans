@@ -24,6 +24,8 @@ import java.util.Date;
 @ApplicationScoped
 @Named
 public class CacheService implements CacheInterface {
+	
+	private static int DEFAULT_EXPIRATION = 60;
 
     @Inject
     private CacheProvider cacheProvider;
@@ -84,7 +86,14 @@ public class CacheService implements CacheInterface {
 
     @Deprecated // we keep it only for back-compatibility of scripts code
     public void put(String expirationInSeconds, String key, Object object) {
-        put(Integer.parseInt(expirationInSeconds), key, object);
+    	int expiration = DEFAULT_EXPIRATION; 
+    	try {
+			expiration = Integer.parseInt(expirationInSeconds);
+		} catch (NumberFormatException ex) {
+			// Use default expiration
+			log.trace("Using default expiration instead of expirationInSeconds: {}", expirationInSeconds);
+		}
+        put(expiration, key, object);
     }
 
     @Deprecated // we keep it only for back-compatibility of scripts code
