@@ -18,7 +18,10 @@ import org.apache.commons.io.IOUtils;
 import org.gluu.oxauth.ConfigurableTest;
 import org.gluu.oxauth.model.config.Conf;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.testng.Assert;
@@ -67,14 +70,19 @@ public class ConfigurationTest extends ConfigurableTest {
 		final String errorsJson = IOUtils.toString(new FileInputStream(errorsFile));
 		final String staticConfJson = IOUtils.toString(new FileInputStream(staticFile));
 		final String webKeysJson = IOUtils.toString(new FileInputStream(webKeysFile));
-		final String configJson = ServerUtil.createJsonMapper().writeValueAsString(loadConfFromFile(configFile));
+		
+		final StaticConfiguration staticConf = ServerUtil.createJsonMapper().readValue(staticConfJson, StaticConfiguration.class);
+		final ErrorMessages errorConf = ServerUtil.createJsonMapper().readValue(errorsJson, ErrorMessages.class);
+		final WebKeysConfiguration webKeys = ServerUtil.createJsonMapper().readValue(webKeysJson, WebKeysConfiguration.class);
+
+		final AppConfiguration configJson = loadConfFromFile(configFile);
 
 		final Conf c = new Conf();
 		c.setDn("ou=testconfiguration,o=gluu");
 		c.setDynamic(configJson);
-		c.setErrors(errorsJson);
-		c.setStatics(staticConfJson);
-		c.setWebKeys(webKeysJson);
+		c.setErrors(errorConf);
+		c.setStatics(staticConf);
+		c.setWebKeys(webKeys);
 		ldapEntryManager.persist(c);
 	}
 
