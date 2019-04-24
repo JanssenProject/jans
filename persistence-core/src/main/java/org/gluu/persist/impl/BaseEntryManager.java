@@ -1374,7 +1374,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
 		if (parameterType.equals(String.class)) {
-			propertyValueSetter.set(entry, attribute.getValue());
+			propertyValueSetter.set(entry, String.valueOf(attribute.getValue()));
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
 			propertyValueSetter.set(entry, toBooleanValue(attribute));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
