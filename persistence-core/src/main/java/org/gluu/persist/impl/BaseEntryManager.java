@@ -1120,7 +1120,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else if (propertyValue instanceof String[]) {
 			attributeValues = (String[]) propertyValue;
 		} else if (propertyValue instanceof List<?>) {
-			attributeValues = new String[((List<?>) propertyValue).size()];
+			attributeValues = new Object[((List<?>) propertyValue).size()];
 			int index = 0;
 			for (Object tmpPropertyValue : (List<?>) propertyValue) {
 				if (jsonObject) {
@@ -1482,7 +1482,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
-			LOG.error("Failed to convert json value '{}' to object: ", propertyValue, ex);
+			LOG.error("Failed to convert json value '{}' to object `{}`", propertyValue, parameterType, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to object of type %s",
 					propertyValue, parameterType));
 		}

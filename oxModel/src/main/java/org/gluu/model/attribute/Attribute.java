@@ -14,13 +14,12 @@ import javax.validation.constraints.Size;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.gluu.model.GluuStatus;
-import org.gluu.model.scim.ScimCustomAtribute;
 import org.gluu.model.user.UserRole;
-import org.gluu.persist.model.base.Entry;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.Entry;
 
 /**
  * Attribute Metadata
@@ -107,10 +106,10 @@ public class Attribute extends Entry implements Serializable {
     private String urn;
 
     @AttributeName(name = "oxSCIMCustomAttribute")
-    private ScimCustomAtribute oxSCIMCustomAttribute;
+    private Boolean oxSCIMCustomAttribute;
 
     @AttributeName(name = "oxMultivaluedAttribute")
-    private Multivalued multivaluedAttribute;
+    private Boolean multivaluedAttribute;
 
     @JsonObject
     @AttributeName(name = "oxValidation")
@@ -279,19 +278,19 @@ public class Attribute extends Entry implements Serializable {
         this.urn = urn;
     }
 
-    public ScimCustomAtribute getOxSCIMCustomAttribute() {
+    public Boolean getOxSCIMCustomAttribute() {
         return oxSCIMCustomAttribute;
     }
 
-    public void setOxSCIMCustomAttribute(ScimCustomAtribute oxSCIMCustomAttribute) {
+    public void setOxSCIMCustomAttribute(Boolean oxSCIMCustomAttribute) {
         this.oxSCIMCustomAttribute = oxSCIMCustomAttribute;
     }
 
-    public Multivalued getMultivaluedAttribute() {
+    public Boolean getMultivaluedAttribute() {
         return multivaluedAttribute;
     }
 
-    public void setMultivaluedAttribute(Multivalued multivaluedAttribute) {
+    public void setMultivaluedAttribute(Boolean multivaluedAttribute) {
         this.multivaluedAttribute = multivaluedAttribute;
     }
 

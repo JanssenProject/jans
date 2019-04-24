@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -456,7 +457,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 attributeValueObjects = NO_OBJECTS;
             }
             if (attributeObject instanceof JsonArray) {
-                attributeValueObjects = ((JsonArray) attributeObject).toList().toArray(NO_OBJECTS);
+            	JsonArray jsonArray = (JsonArray) attributeObject;
+            	ArrayList<Object> resultList = new ArrayList<Object>(jsonArray.size());
+            	for (Iterator<Object> it = jsonArray.iterator(); it.hasNext();) {
+            		resultList.add(it.next());
+				}
+                attributeValueObjects = resultList.toArray(NO_OBJECTS);
             } else {
             	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long) ||
             		(attributeObject instanceof JsonObject)) {
