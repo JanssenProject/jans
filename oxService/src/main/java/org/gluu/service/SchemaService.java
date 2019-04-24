@@ -49,9 +49,14 @@ public class SchemaService {
      * @return Schema
      */
     public SchemaEntry getSchema() {
-        SchemaEntry schemaEntry = ldapEntryManager.find(SchemaEntry.class, getDnForSchema(), null);
+    	String shemaDn = getDnForSchema();
+    	if (StringHelper.isNotEmpty(shemaDn)) { 
+    		SchemaEntry schemaEntry = ldapEntryManager.find(SchemaEntry.class, getDnForSchema(), null);
+            return schemaEntry;
+    	}
+    	
+    	return null;
 
-        return schemaEntry;
     }
 
     /**
@@ -490,7 +495,11 @@ public class SchemaService {
      * @return DN string for DS schema
      */
     public String getDnForSchema() {
-        return ((LdapOperationService) ldapEntryManager.getOperationService()).getSubschemaSubentry();
+    	if (ldapEntryManager.getOperationService() instanceof LdapOperationService) {
+            return ((LdapOperationService) ldapEntryManager.getOperationService()).getSubschemaSubentry();
+    	} else {
+    		return "";
+    	}
     }
 
 }
