@@ -52,12 +52,14 @@ public abstract class AttributeService implements Serializable {
 
     public String getDefaultSaml2Uri(String name) {
         SchemaEntry schemaEntry = schemaService.getSchema();
-        List<String> attributeNames = new ArrayList<String>();
-        attributeNames.add(name);
-        List<AttributeTypeDefinition> attributeTypes = schemaService.getAttributeTypeDefinitions(schemaEntry, attributeNames);
-        AttributeTypeDefinition attributeTypeDefinition = schemaService.getAttributeTypeDefinition(attributeTypes, name);
-        if (attributeTypeDefinition != null) {
-            return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+        if (schemaEntry == null) {
+	        List<String> attributeNames = new ArrayList<String>();
+	        attributeNames.add(name);
+	        List<AttributeTypeDefinition> attributeTypes = schemaService.getAttributeTypeDefinitions(schemaEntry, attributeNames);
+	        AttributeTypeDefinition attributeTypeDefinition = schemaService.getAttributeTypeDefinition(attributeTypes, name);
+	        if (attributeTypeDefinition != null) {
+	            return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+	        }
         }
 
         return "";

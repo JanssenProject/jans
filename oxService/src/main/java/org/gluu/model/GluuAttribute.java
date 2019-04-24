@@ -15,7 +15,6 @@ import javax.validation.constraints.Size;
 
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.attribute.AttributeValidation;
-import org.gluu.model.scim.ScimCustomAtribute;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.JsonObject;
@@ -108,10 +107,10 @@ public class GluuAttribute extends Entry implements Serializable {
 	private String urn;
 
 	@AttributeName(name = "oxSCIMCustomAttribute")
-	private ScimCustomAtribute oxSCIMCustomAttribute;
+	private Boolean oxSCIMCustomAttribute;
 
 	@AttributeName(name = "oxMultivaluedAttribute")
-	private OxMultivalued oxMultivaluedAttribute;
+	private Boolean oxMultivaluedAttribute;
 
 	@Transient
 	private boolean custom;
@@ -294,19 +293,19 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.urn = urn;
 	}
 
-	public ScimCustomAtribute getOxSCIMCustomAttribute() {
+	public Boolean getOxSCIMCustomAttribute() {
 		return oxSCIMCustomAttribute;
 	}
 
-	public void setOxSCIMCustomAttribute(ScimCustomAtribute oxSCIMCustomAttribute) {
+	public void setOxSCIMCustomAttribute(Boolean oxSCIMCustomAttribute) {
 		this.oxSCIMCustomAttribute = oxSCIMCustomAttribute;
 	}
 
-	public OxMultivalued getOxMultivaluedAttribute() {
+	public Boolean getOxMultivaluedAttribute() {
 		return oxMultivaluedAttribute;
 	}
 
-	public void setOxMultivaluedAttribute(OxMultivalued oxMultivaluedAttribute) {
+	public void setOxMultivaluedAttribute(Boolean oxMultivaluedAttribute) {
 		this.oxMultivaluedAttribute = oxMultivaluedAttribute;
 	}
 
