@@ -318,9 +318,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.53 NAME 'gluuLogoImage'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.54 NAME 'gluuManageIdentityPermission'
   DESC 'TODO - in use?'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.55 NAME 'gluuManagedOrganizations'
   DESC 'Used to track with which organizations a person is associated'
@@ -352,9 +351,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.59 NAME 'gluuOptOuts'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.60 NAME 'gluuOrgProfileMgt'
   DESC 'enable or disable profile management feature in oxTrust'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.61 NAME 'gluuOrgShortName'
   DESC 'Short description, as few letters as possible, no spaces.'
@@ -472,9 +470,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.79 NAME 'gluuSAMLspMetaDataURL'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.80 NAME 'gluuSLAManager'
   DESC 'Specifies if the person has the SLA manager role'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.81 NAME 'gluuSPTR'
   DESC 'TODO - in use?'
@@ -486,7 +483,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.82 NAME 'gluuScimEnabled'
   DESC 'oxTrust SCIM feature - enabled or disabled'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.83 NAME 'gluuShibAssertionsIssued'
   DESC 'Monitors activity of Gluu Server Shibboleth IDP'
@@ -643,9 +640,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.108 NAME 'gluuValidationStatus'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.109 NAME 'gluuVdsCacheRefreshEnabled'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.110 NAME 'gluuVdsCacheRefreshLastUpdate'
   EQUALITY generalizedTimeMatch
@@ -925,9 +921,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.157 NAME 'oxSessionState'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.158 NAME 'oxAuthPermissionGrantedMap'
   DESC 'oxAuth Permission Granted Map'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.159 NAME 'oxAuthPersistentJWT'
   DESC 'oxAuth Persistent JWT'
@@ -1682,9 +1677,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.289 NAME 'oxX509URL'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.290 NAME 'passwordResetAllowed'
   DESC 'Is password reset mechanics allowed'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.291 NAME 'persistentId'
   DESC 'PersistentId'
@@ -2056,9 +2050,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.356 NAME 'gluuPassportConfiguration'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.357 NAME 'gluuPassportEnabled'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.358 NAME 'oxValidation'
   DESC 'This data has information about attribute Validation'
@@ -2098,9 +2091,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.363 NAME 'oxLogConfigLocation'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.364 NAME 'oxIncludeClaimsInIdToken'
   DESC 'ox Include Claims In Id Token'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.365 NAME 'oxClaimValues'
   DESC 'Claim Values'
@@ -2162,9 +2154,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.374 NAME 'oxAuthClaims'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.375 NAME 'oxDisabled'
   DESC 'Status of client'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.376 NAME 'oxWebKeysSettings'
   DESC 'oxAuth Web Keys Configuration'
@@ -2240,9 +2231,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.388 NAME 'oxUnlinkedExternalUids'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.389 NAME 'oxAccessTokenAsJwt'
   DESC 'oxauth - indicator whether to return access token as JWT'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.390 NAME 'oxAccessTokenSigningAlg'
   DESC 'oxauth - access token signing algorithm'
@@ -2293,9 +2283,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.397 NAME 'oxSoftwareStatement'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.398 NAME 'oxRptAsJwt'
   DESC 'oxRptAsJwt'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.399 NAME 'oxCodeChallengeHash'
   DESC 'OX code challenge hash'
@@ -2304,8 +2293,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.399 NAME 'oxCodeChallengeHash'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.400 NAME 'oxDeletable'
   DESC 'oxDeletable'
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
   SUP ( top )
