@@ -16,6 +16,8 @@ import org.gluu.persist.annotation.AttributeEnum;
  *
  * @author Yuriy Movchan Date: 11.20.2010
  */
+
+@Deprecated // We need ot remove true/false from it at 
 public enum GluuBoolean implements AttributeEnum {
 
     DISABLED(false, "disabled", "Disabled"), ENABLED(true, "enabled", "Enabled"), FALSE(false, "false", "False"), TRUE(true, "true", "True"),
