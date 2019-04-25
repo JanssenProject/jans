@@ -24,14 +24,15 @@ def collectDataTypes(jdir):
                             if la.startswith('private'):
                                 if 'string ' in la.lower():
                                     dtype = 'string'                            
-                                elif ' boolean ' in la.lower():
+                                elif 'boolean ' in la.lower():
                                     dtype = 'boolean'
                                     dataTypes['boolean'].append(aname)
-                                elif ' integer ' in la:
+                                elif 'integer ' in la:
                                     dtype = 'integer'
-
-                                if dtype and not aname in dataTypes[dtype]:
-                                    dataTypes[dtype].append(aname)
+                        
+                                if dtype:
+                                    if not aname in dataTypes[dtype]:
+                                        dataTypes[dtype].append(aname)
 
 collectDataTypes('/tmp/oxTrust-master')
 collectDataTypes('/tmp/oxAuth-master')

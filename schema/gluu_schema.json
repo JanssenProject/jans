@@ -583,13 +583,12 @@
         },
         {
             "desc": "TODO - in use?",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuManageIdentityPermission"
             ],
             "oid": "oxAttribute:54",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -647,13 +646,12 @@
         },
         {
             "desc": "enable or disable profile management feature in oxTrust",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuOrgProfileMgt"
             ],
             "oid": "oxAttribute:60",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -867,13 +865,12 @@
         },
         {
             "desc": "Specifies if the person has the SLA manager role",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuSLAManager"
             ],
             "oid": "oxAttribute:80",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -895,7 +892,7 @@
             ],
             "oid": "oxAttribute:82",
             "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1183,13 +1180,12 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuVdsCacheRefreshEnabled"
             ],
             "oid": "oxAttribute:109",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -1715,13 +1711,12 @@
         },
         {
             "desc": "oxAuth Permission Granted Map",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAuthPermissionGrantedMap"
             ],
             "oid": "oxAttribute:158",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3143,13 +3138,12 @@
         },
         {
             "desc": "Is password reset mechanics allowed",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "passwordResetAllowed"
             ],
             "oid": "oxAttribute:290",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3846,13 +3840,12 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuPassportEnabled"
             ],
             "oid": "oxAttribute:357",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -3924,13 +3917,12 @@
         },
         {
             "desc": "ox Include Claims In Id Token",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxIncludeClaimsInIdToken"
             ],
             "oid": "oxAttribute:364",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4043,13 +4035,12 @@
         },
         {
             "desc": "Status of client",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxDisabled"
             ],
             "oid": "oxAttribute:375",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4186,13 +4177,12 @@
         },
         {
             "desc": "oxauth - indicator whether to return access token as JWT",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxAccessTokenAsJwt"
             ],
             "oid": "oxAttribute:389",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4284,13 +4274,12 @@
         },
         {
             "desc": "oxRptAsJwt",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxRptAsJwt"
             ],
             "oid": "oxAttribute:398",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4305,12 +4294,12 @@
         },
         {
             "desc": "oxDeletable",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "oxDeletable"
             ],
             "oid": "oxAttribute:400",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         }
     ],
