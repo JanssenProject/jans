@@ -1403,7 +1403,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				propertyValueSetter.set(entry, parameterType.getMethod("resolveByValue", String.class)
 						.invoke(parameterType.getEnumConstants()[0], attribute.getValue()));
 			} catch (Exception ex) {
-				throw new MappingException("Failed to resolve Enum by value " + attribute.getValue(), ex);
+				throw new MappingException("Failed to resolve Enum '" + parameterType + "' by value '" + attribute.getValue() + "'", ex);
 			}
 		} else if (ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class)) {
 			Class<?> itemType = parameterType.getComponentType();
@@ -1411,7 +1411,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			try {
 				enumResolveByValue = itemType.getMethod("resolveByValue", String.class);
 			} catch (Exception ex) {
-				throw new MappingException("Failed to resolve Enum by value " + Arrays.toString(attribute.getValues()),
+				throw new MappingException("Failed to resolve Enum '" + parameterType + "' by value '" + Arrays.toString(attribute.getValues()) + "'",
 						ex);
 			}
 
@@ -1423,7 +1423,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 							attributeValues[i]);
 				} catch (Exception ex) {
 					throw new MappingException(
-							"Failed to resolve Enum by value " + Arrays.toString(attribute.getValues()), ex);
+							"Failed to resolve Enum '" + parameterType + "' by value '" + Arrays.toString(attribute.getValues()) + "'", ex);
 				}
 			}
 			propertyValueSetter.set(entry, ldapEnums);
