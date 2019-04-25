@@ -48,13 +48,13 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	private String authenticationMode;
 	
 	@AttributeName(name = "gluuPassportEnabled")
-	private GluuBoolean passportEnabled;
+	private Boolean passportEnabled;
 
-	public GluuBoolean getPassportEnabled() {
+	public Boolean getPassportEnabled() {
 		return passportEnabled;
 	}
 
-	public void setPassportEnabled(GluuBoolean passportEnabled) {
+	public void setPassportEnabled(Boolean passportEnabled) {
 		this.passportEnabled = passportEnabled;
 	}
 
