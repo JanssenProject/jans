@@ -2440,7 +2440,7 @@
             "desc": "OX policy script Dn",
             "equality": "distinguishedNameMatch",
             "names": [
-                "oxPolicyScriptDn"
+                "oxUmaPolicyScriptDn"
             ],
             "oid": "oxAttribute:225",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
@@ -4973,7 +4973,10 @@
                 "oxScopeType",
                 "oxAuthClaim",
                 "oxScriptDn",
-                "oxAuthGroupClaims"
+                "oxAuthGroupClaims",
+                "oxId",
+                "oxIconUrl",
+                "oxUmaPolicyScriptDn"
             ],
             "must": [
                 "objectclass"
@@ -5106,31 +5109,6 @@
                 "oxUmaResource"
             ],
             "oid": "oxObjectClass:23",
-            "sup": [
-                "top"
-            ],
-            "x_origin": "Gluu created objectclass"
-        },
-        {
-            "kind": "STRUCTURAL",
-            "may": [
-                "displayName",
-                "inum",
-                "owner",
-                "oxFaviconImage",
-                "oxIconUrl",
-                "oxId",
-                "oxPolicyScriptDn",
-                "oxRevision",
-                "description"
-            ],
-            "must": [
-                "objectclass"
-            ],
-            "names": [
-                "oxAuthUmaScopeDescription"
-            ],
-            "oid": "oxObjectClass:24",
             "sup": [
                 "top"
             ],
