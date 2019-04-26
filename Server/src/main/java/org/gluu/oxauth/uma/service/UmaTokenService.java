@@ -6,19 +6,6 @@
 
 package org.gluu.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -27,19 +14,22 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.UmaTokenResponse;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.service.token.TokenService;
-import org.gluu.oxauth.uma.authorization.Claims;
-import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
-import org.gluu.oxauth.uma.authorization.UmaPCT;
-import org.gluu.oxauth.uma.authorization.UmaRPT;
-import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import org.gluu.oxauth.uma.authorization.UmaWebException;
+import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * UMA Token Service
@@ -95,7 +85,7 @@ public class UmaTokenService {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
-            Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
+            Map<Scope, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
             Client client = identity.getSessionClient().getClient();
 
             if (client != null && client.isDisabled()) {
@@ -159,12 +149,12 @@ public class UmaTokenService {
         }
     }
 
-    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
+    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<Scope, Boolean> scopes) {
         log.trace("Updating permissions with requested scopes ...");
         for (UmaPermission permission : permissions) {
             Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
 
-            for (Map.Entry<UmaScopeDescription, Boolean> entry : scopes.entrySet()) {
+            for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
                 log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
                 scopeDns.add(entry.getKey().getDn());
             }

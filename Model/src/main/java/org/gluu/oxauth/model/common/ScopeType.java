@@ -55,6 +55,8 @@ public enum ScopeType implements AttributeEnum {
      */
     DYNAMIC("dynamic", "Dynamic"),
 
+    UMA("uma", "UMA"),
+
     /**
      * OAuth 2.0 Scopes for any of their API's.
      * This scope type would only have a description, but no claims.
