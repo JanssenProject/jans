@@ -2649,7 +2649,7 @@ class Setup(object):
 
                     self.backupFile(fullOutputFile)
                     newFn = open(fullOutputFile, 'w+')
-                    newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict, coucbase_dict))
+                    newFn.write(template_text % self.merge_dicts(coucbase_dict, self.templateRenderingDict, self.__dict__))
                     newFn.close()
                 except:
                     self.logIt("Error writing template %s" % fullPath, True)
