@@ -116,7 +116,7 @@ oxAuthClaim: inum=18CF,ou=attributes,o=gluu
 dn: inum=7D01,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: org_name
+oxId: org_name
 inum: 7D01
 description: Dynamic scope org_name
 defaultScope: true
@@ -126,7 +126,7 @@ oxScriptDn: inum=031C-5621,ou=scripts,o=gluu
 dn: inum=7D02,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: work_phone
+oxId: work_phone
 inum: 7D02
 description: Dynamic scope work_phone
 defaultScope: true
@@ -138,7 +138,7 @@ objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
 description: Custom scope for tests
-displayName: test
+oxId: test
 inum: @DBE5-84F8-631A-9172CD07-49BE0465-1DEA
 oxAuthClaim: inum=D2E0,ou=attributes,o=gluu
 oxScopeType: openid
@@ -290,32 +290,29 @@ oxAuthTrustedClient: true
 # UMA
 ######################################
 dn: inum=5214-40D1,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: View
 inum: 5214-40D1
-owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
-oxRevision: 0
 oxId: http://photoz.example.com/dev/scopes/view
-oxPolicyScriptDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=gluu
+oxUmaPolicyScriptDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=gluu
+oxScopeType: uma
 
 dn: inum=B6EA-B301,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: Add/Edit
 inum: B6EA-B301
-owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
 oxId: modify
-oxRevision: 0
+oxScopeType: uma
 
 dn: inum=03F8-EDD7,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: All
 inum: 03F8-EDD7
-owner: inum=A8F2-DE1E-D7FB,ou=people,o=gluu
-oxRevision: 0
 oxId: http://photoz.example.com/dev/scopes/all
+oxScopeType: uma
 
 ######################################
 # Sector Identifier
