@@ -184,12 +184,12 @@ class Setup(object):
         self.pbar = ProgressBar(tty_columns)
 
         # Used only if -w (get wars) options is given to setup.py
-        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
-        self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
+        self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.idp3_war = 'http://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
+        self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
@@ -2628,6 +2628,8 @@ class Setup(object):
     def render_templates_folder(self, templatesFolder):
         self.logIt("Rendering templates folder: %s" % templatesFolder)
 
+        coucbase_dict = self.couchbaseDict()
+
         for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
             for templateFile in templateFiles:
                 fullPath = '%s/%s' % (templateBase, templateFile)
@@ -2647,7 +2649,7 @@ class Setup(object):
 
                     self.backupFile(fullOutputFile)
                     newFn = open(fullOutputFile, 'w+')
-                    newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
+                    newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict, coucbase_dict))
                     newFn.close()
                 except:
                     self.logIt("Error writing template %s" % fullPath, True)
@@ -3748,12 +3750,8 @@ class Setup(object):
                   "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
                 
         self.run(cmd_args)
-        
-        
-    def couchbaseProperties(self):
-        prop_file = os.path.basename(self.gluuCouchebaseProperties)
-        prop = open(os.path.join(self.templateFolder, prop_file)).read()
 
+    def couchbaseDict(self):
         prop_dict = {
                     'hostname': self.ldap_hostname,
                     'couchbase_server_user': self.couchebaseClusterAdmin,
@@ -3772,12 +3770,19 @@ class Setup(object):
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
+        return prop_dict
+        
+    def couchbaseProperties(self):
+        prop_file = os.path.basename(self.gluuCouchebaseProperties)
+        prop = open(os.path.join(self.templateFolder, prop_file)).read()
+
+        prop_dict = self.couchbaseDict()
+
         prop = prop % prop_dict
         
         out_file = os.path.join(self.outputFolder, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
-
 
     def install_couchbase_server(self):
         
