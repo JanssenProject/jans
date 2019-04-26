@@ -6,24 +6,8 @@
 
 package org.gluu.oxauth.model.token;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.codehaus.jettison.json.JSONArray;
@@ -33,13 +17,7 @@ import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.AbstractToken;
-import org.gluu.oxauth.model.common.AccessToken;
-import org.gluu.oxauth.model.common.AuthorizationCode;
-import org.gluu.oxauth.model.common.IAuthorizationGrant;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -73,8 +51,14 @@ import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -167,7 +151,7 @@ public class IdTokenFactory {
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
                 if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
@@ -177,7 +161,7 @@ public class IdTokenFactory {
 
                 if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                    groupClaim.setName(scope.getDisplayName());
+                    groupClaim.setName(scope.getId());
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
@@ -189,7 +173,7 @@ public class IdTokenFactory {
                         }
                     }
 
-                    jwt.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                    jwt.getClaims().setClaim(scope.getId(), groupClaim);
                 } else {
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
                         String key = entry.getKey();
@@ -366,7 +350,7 @@ public class IdTokenFactory {
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
                 if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                     dynamicScopes.add(scope);
                     continue;
@@ -376,7 +360,7 @@ public class IdTokenFactory {
 
                 if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                    groupClaim.setName(scope.getDisplayName());
+                    groupClaim.setName(scope.getId());
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
@@ -388,7 +372,7 @@ public class IdTokenFactory {
                         }
                     }
 
-                    jwe.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                    jwe.getClaims().setClaim(scope.getId(), groupClaim);
                 } else {
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
                         String key = entry.getKey();
@@ -542,7 +526,7 @@ public class IdTokenFactory {
             }
 
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
 
                 if (scope != null && scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {

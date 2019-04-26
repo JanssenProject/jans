@@ -318,7 +318,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Claims
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
-            org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+            org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
             if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                 dynamicScopes.add(scope);
                 continue;
@@ -328,7 +328,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                 JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                groupClaim.setName(scope.getDisplayName());
+                groupClaim.setName(scope.getId());
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
@@ -340,7 +340,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
 
-                jsonWebResponse.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                jsonWebResponse.getClaims().setClaim(scope.getId(), groupClaim);
             } else {
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
@@ -481,7 +481,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
 
                 if (scope != null && scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {

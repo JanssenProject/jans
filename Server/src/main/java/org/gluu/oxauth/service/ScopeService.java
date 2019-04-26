@@ -69,7 +69,7 @@ public class ScopeService {
         List<String> scopes = new ArrayList<String>();
 
         for (String scopeName : scopeNames) {
-            org.oxauth.persistence.model.Scope scope = getScopeByDisplayName(scopeName);
+            org.oxauth.persistence.model.Scope scope = getScopeById(scopeName);
             if (scope != null) {
                 scopes.add(scope.getDn());
             }
@@ -110,17 +110,17 @@ public class ScopeService {
     /**
      * Get scope by DisplayName
      *
-     * @param displayName
+     * @param id
      * @return scope
      */
-    public org.oxauth.persistence.model.Scope getScopeByDisplayName(String displayName) {
-        org.oxauth.persistence.model.Scope scope = fromCacheByName(displayName);
+    public org.oxauth.persistence.model.Scope getScopeById(String id) {
+        org.oxauth.persistence.model.Scope scope = fromCacheByName(id);
         if (scope == null) {
 	        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 	
 	        org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
 	        scopeExample.setDn(scopesBaseDN);
-	        scopeExample.setDisplayName(displayName);
+	        scopeExample.setId(id);
 	
 	        List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
 	        if ((scopes != null) && (scopes.size() > 0)) {
@@ -172,7 +172,7 @@ public class ScopeService {
     	}
 
     	try {
-            cacheService.put(60, getScopeNameCacheKey(scope.getDisplayName()), scope, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
+            cacheService.put(60, getScopeNameCacheKey(scope.getId()), scope, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
             cacheService.put(60,getScopeDnCacheKey(scope.getDn()), scope, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
         } catch (Exception ex) {
             log.error("Failed to put scope in cache, scope: '{}'", scope, ex);

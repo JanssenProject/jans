@@ -847,7 +847,7 @@ public class AuthorizeAction {
     }
 
     private boolean hasOnlyOpenidScope() {
-        return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getDisplayName().equals("openid");
+        return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getId().equals("openid");
     }
 
     protected void handleSessionInvalid() {
