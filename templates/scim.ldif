@@ -31,14 +31,13 @@ oxAuthRequireAuthTime: false
 
 # SCIM Scope
 dn: inum=8CAD-B06D,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: SCIM Access
 inum: 8CAD-B06D
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/scim_access
-oxRevision: 1
-oxPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=gluu
+oxUmaPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=gluu
+oxScopeType: uma
 
 # SCIM Resource
 dn: oxId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=gluu

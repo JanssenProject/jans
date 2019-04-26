@@ -5,7 +5,7 @@
 dn: inum=F0C4,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: openid
+oxId: openid
 inum: F0C4
 defaultScope: true
 description: Authenticate using OpenID Connect.
@@ -14,7 +14,7 @@ oxScopeType: openid
 dn: inum=43F1,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: profile
+oxId: profile
 inum: 43F1
 defaultScope: false
 description: View your basic profile info.
@@ -38,7 +38,7 @@ oxScopeType: openid
 dn: inum=764C,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: email
+oxId: email
 inum: 764C
 defaultScope: false
 description: View your email address.
@@ -49,7 +49,7 @@ oxScopeType: openid
 dn: inum=C17A,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: address
+oxId: address
 inum: C17A
 description: View your address.
 defaultScope: false
@@ -67,7 +67,7 @@ oxScopeType: openid
 dn: inum=D491,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: phone
+oxId: phone
 inum: D491
 description: View your phone number.
 defaultScope: false
@@ -80,7 +80,7 @@ objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: false
 description: View the client info.
-displayName: clientinfo
+oxId: clientinfo
 inum: 341A
 oxAuthClaim: inum=2B29,ou=attributes,o=gluu
 oxAuthClaim: inum=29DA,ou=attributes,o=gluu
@@ -89,7 +89,7 @@ oxScopeType: openid
 dn: inum=10B2,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: user_name
+oxId: user_name
 inum: 10B2
 description: View your local username in the Gluu Server.
 defaultScope: false
@@ -99,7 +99,7 @@ oxScopeType: openid
 dn: inum=6D99,ou=scopes,o=gluu
 defaultScope: true
 description: Obtain UMA PAT.
-displayName: uma_protection
+oxId: uma_protection
 inum: 6D99
 objectClass: oxAuthCustomScope
 objectClass: top
@@ -108,7 +108,7 @@ oxScopeType: uma
 dn: inum=6D90,ou=scopes,o=gluu
 defaultScope: true
 description: oxd scope which is required to call oxd API
-displayName: oxd
+oxId: oxd
 inum: 6D90
 objectClass: oxAuthCustomScope
 objectClass: top
@@ -117,7 +117,7 @@ oxScopeType: openid
 dn: inum=8A01,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: mobile_phone
+oxId: mobile_phone
 inum: 8A01
 description: View your mobile phone number.
 defaultScope: false
@@ -129,7 +129,7 @@ objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
 description: View your user permission and roles.
-displayName: permission
+oxId: permission
 inum: C4F5
 oxScopeType: dynamic
 oxScriptDn: inum=CB5B-3211,ou=scripts,o=gluu

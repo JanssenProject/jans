@@ -31,25 +31,23 @@ oxAuthRequireAuthTime: false
 
 # API Scope
 dn: inum=OO11-AABB,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Read Access
 inum: OO11-AABB
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read
-oxRevision: 1
-oxPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
+oxUmaPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
+oxScopeType: uma
 
 # API Scope
 dn: inum=1122-BBCC,ou=scopes,ou=uma,o=gluu
-objectClass: oxAuthUmaScopeDescription
+objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Write Access
 inum: 1122-BBCC
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-write
-oxRevision: 1
-oxPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
+oxUmaPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
+oxScopeType: uma
 
 #API Resource
 dn: oxId=800-e8ab-4207-9fab-2a27de921ac1,ou=resources,ou=uma,o=gluu
