@@ -33,6 +33,12 @@ public class Scope implements Serializable {
     @AttributeName
     private String displayName;
 
+    @AttributeName(name = "oxId")
+    private String id;
+
+    @AttributeName(name = "oxIconUrl")
+    private String iconUrl;
+
     @AttributeName
     private String description;
 
@@ -50,6 +56,9 @@ public class Scope implements Serializable {
 
     @AttributeName(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
+
+    @AttributeName(name = "oxUmaPolicyScriptDn")
+    private List<String> umaAuthorizationPolicies;
 
     public String getDn() {
         return dn;
@@ -123,10 +132,45 @@ public class Scope implements Serializable {
         this.dynamicScopeScripts = dynamicScopeScripts;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public List<String> getUmaAuthorizationPolicies() {
+        return umaAuthorizationPolicies;
+    }
+
+    public void setUmaAuthorizationPolicies(List<String> umaAuthorizationPolicies) {
+        this.umaAuthorizationPolicies = umaAuthorizationPolicies;
+    }
+
     @Override
     public String toString() {
-        return String.format(
-                "Scope [description=%s, displayName=%s, inum=%s, oxAuthClaims=%s, defaultScope=%s, oxAuthGroupClaims=%s, toString()=%s]",
-                description, displayName, inum, oxAuthClaims, defaultScope, oxAuthGroupClaims, super.toString());
+        return "Scope{" +
+                "dn='" + dn + '\'' +
+                ", inum='" + inum + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", id='" + id + '\'' +
+                ", iconUrl='" + iconUrl + '\'' +
+                ", description='" + description + '\'' +
+                ", scopeType=" + scopeType +
+                ", oxAuthClaims=" + oxAuthClaims +
+                ", defaultScope=" + defaultScope +
+                ", oxAuthGroupClaims=" + oxAuthGroupClaims +
+                ", dynamicScopeScripts=" + dynamicScopeScripts +
+                ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
+                '}';
     }
 }

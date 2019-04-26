@@ -1,20 +1,5 @@
 package org.gluu.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.uma.ClaimDefinition;
@@ -23,17 +8,21 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
-import org.gluu.oxauth.uma.authorization.Claims;
-import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
-import org.gluu.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
-import org.gluu.oxauth.uma.authorization.UmaPCT;
-import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import org.gluu.oxauth.util.ServerUtil;
-import org.slf4j.Logger;
 import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
+import org.gluu.oxauth.uma.authorization.*;
+import org.gluu.oxauth.util.ServerUtil;
+import org.oxauth.persistence.model.Scope;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * @author yuriyz on 06/16/2017.
@@ -59,7 +48,7 @@ public class UmaNeedsInfoService {
     @Inject
     private UserService userService;
 
-    public Map<UmaScriptByScope, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
+    public Map<UmaScriptByScope, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<Scope, Boolean> requestedScopes,
                                                                                   List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
                                                                                   Client client) {
 
@@ -73,8 +62,8 @@ public class UmaNeedsInfoService {
                 sessionService, userService, permissionService, client);
 
 
-        for (UmaScopeDescription scope : requestedScopes.keySet()) {
-            List<String> authorizationPolicies = scope.getAuthorizationPolicies();
+        for (Scope scope : requestedScopes.keySet()) {
+            List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
             if (authorizationPolicies != null && !authorizationPolicies.isEmpty()) {
                 for (String scriptDN : authorizationPolicies) { //log.trace("Loading UMA script: " + scriptDN + ", scope: " + scope + " ...");
                     CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
@@ -147,11 +136,11 @@ public class UmaNeedsInfoService {
         return result;
     }
 
-    public static Set<String> getScriptDNs(List<UmaScopeDescription> scopes) {
+    public static Set<String> getScriptDNs(List<Scope> scopes) {
         HashSet<String> result = new HashSet<String>();
 
-        for (UmaScopeDescription scope : scopes) {
-            List<String> authorizationPolicies = scope.getAuthorizationPolicies();
+        for (Scope scope : scopes) {
+            List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
             if (authorizationPolicies != null) {
                 result.addAll(authorizationPolicies);
             }
