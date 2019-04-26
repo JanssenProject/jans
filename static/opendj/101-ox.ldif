@@ -1309,7 +1309,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.224 NAME 'oxPolicyRule'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.225 NAME 'oxPolicyScriptDn'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.225 NAME 'oxUmaPolicyScriptDn'
   DESC 'OX policy script Dn'
   EQUALITY distinguishedNameMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
@@ -2402,7 +2402,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.18 NAME 'oxAuthCustomScope'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxScriptDn $ oxAuthGroupClaims )
+  MAY ( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxScriptDn $ oxAuthGroupClaims $ oxId $ oxIconUrl $ oxUmaPolicyScriptDn )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.19 NAME 'oxAuthSessionId'
   SUP ( top )
@@ -2433,12 +2433,6 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.23 NAME 'oxUmaResource'
   STRUCTURAL
   MUST ( objectclass )
   MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxScopeExpression $ oxAuthCreation $ oxAuthExpiration $ oxDeletable $ description )
-  X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'oxAuthUmaScopeDescription'
-  SUP ( top )
-  STRUCTURAL
-  MUST ( objectclass )
-  MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyScriptDn $ oxRevision $ description )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.25 NAME 'oxUmaResourcePermission'
   SUP ( top )
