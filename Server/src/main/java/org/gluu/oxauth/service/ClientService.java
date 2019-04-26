@@ -354,7 +354,7 @@ public class ClientService {
 				for (String scopeDN : client.getScopes()) {
 					Scope s = scopeService.getScopeByDn(scopeDN);
 					if (s != null) {
-						String scopeName = s.getDisplayName();
+						String scopeName = s.getId();
 						array.put(scopeName);
 					}
 				}

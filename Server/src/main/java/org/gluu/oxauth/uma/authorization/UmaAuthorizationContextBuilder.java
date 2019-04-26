@@ -1,23 +1,22 @@
 package org.gluu.oxauth.uma.authorization;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.service.AttributeService;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.gluu.oxauth.service.UserService;
+import org.oxauth.persistence.model.Scope;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 06/06/2017.
@@ -27,7 +26,7 @@ public class UmaAuthorizationContextBuilder {
     private final AttributeService attributeService;
     private final UmaResourceService resourceService;
     private final List<UmaPermission> permissions;
-    private final Map<UmaScopeDescription, Boolean> scopes;
+    private final Map<Scope, Boolean> scopes;
     private final Claims claims;
     private final HttpServletRequest httpRequest;
     private final AppConfiguration configuration;
@@ -37,7 +36,7 @@ public class UmaAuthorizationContextBuilder {
     private final Client client;
 
     public UmaAuthorizationContextBuilder(AppConfiguration configuration, AttributeService attributeService, UmaResourceService resourceService,
-                                          List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes,
+                                          List<UmaPermission> permissions, Map<Scope, Boolean> scopes,
                                           Claims claims, HttpServletRequest httpRequest,
                                           UmaSessionService sessionService, UserService userService, UmaPermissionService permissionService, Client client) {
         this.configuration = configuration;

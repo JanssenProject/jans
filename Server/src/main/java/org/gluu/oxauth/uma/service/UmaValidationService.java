@@ -6,35 +6,7 @@
 
 package org.gluu.oxauth.uma.service;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_PCT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_SCOPE;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RPT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TICKET;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -57,7 +29,6 @@ import org.gluu.oxauth.model.uma.UmaPermissionList;
 import org.gluu.oxauth.model.uma.UmaScopeType;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.service.token.TokenService;
@@ -67,11 +38,20 @@ import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
+import org.oxauth.persistence.model.Scope;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
-import com.google.common.base.Joiner;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.*;
+
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -370,19 +350,19 @@ public class UmaValidationService {
      * @param permissions permissions
      * @return map of loaded scope and boolean, true - if client requested scope and false if it is permission ticket scope
      */
-    public Map<UmaScopeDescription, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
+    public Map<Scope, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
-        final Map<UmaScopeDescription, Boolean> result = new HashMap<UmaScopeDescription, Boolean>();
+        final Map<Scope, Boolean> result = new HashMap<Scope, Boolean>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-            for (UmaScopeDescription s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
+            for (Scope s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
                 result.put(s, true);
             }
         }
         for (UmaPermission permission : permissions) {
-            for (UmaScopeDescription s : umaScopeService.getScopesByDns(permission.getScopeDns())) {
+            for (Scope s : umaScopeService.getScopesByDns(permission.getScopeDns())) {
                 result.put(s, false);
             }
         }
@@ -390,10 +370,10 @@ public class UmaValidationService {
             log.error("There are no any scopes requested in give request.");
             throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
         }
-        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<UmaScopeDescription, String>() {
+        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<Scope, String>() {
             @Override
-            public String apply(UmaScopeDescription umaScopeDescription) {
-                return umaScopeDescription.getId();
+            public String apply(Scope scope) {
+                return scope.getId();
             }
         })));
         return result;

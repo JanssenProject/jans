@@ -6,26 +6,19 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.ArrayUtils;
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.GluuImage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.uma.service.UmaScopeService;
-import org.gluu.service.XmlService;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.net.URI;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -45,9 +38,6 @@ public class UmaScopeIconWS {
     @Inject
     private UmaScopeService umaScopeService;
 
-    @Inject
-    private XmlService xmlService;
-
     @GET
     @Path("{id}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
@@ -55,18 +45,9 @@ public class UmaScopeIconWS {
         log.trace("UMA - get scope's icon : id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
-                final UmaScopeDescription scope = umaScopeService.getScope(id);
-                if (scope != null && StringUtils.isNotBlank(scope.getFaviconImageAsXml())) {
-                    final GluuImage gluuImage = xmlService.getGluuImageFromXML(scope.getFaviconImageAsXml());
-
-                    if (gluuImage != null && ArrayUtils.isNotEmpty(gluuImage.getData())) {
-                        // todo yuriyz : it must be clarified how exactly content of image must be shared between oxTrust and oxAuth
-                        // currently oxTrust save content on disk however oxAuth expects it in ldap as we must support clustering!
-
-                        // send non-streamed image as it's anyway picked up in memory (i know it's not nice...)
-
-                        return Response.status(Response.Status.OK).entity(gluuImage.getData()).build();
-                    }
+                final Scope scope = umaScopeService.getScope(id);
+                if (scope != null && StringUtils.isNotBlank(scope.getIconUrl())) {
+                    return Response.temporaryRedirect(new URI(scope.getIconUrl())).build();
                 }
             }
         } catch (Exception e) {

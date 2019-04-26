@@ -22,7 +22,6 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;
@@ -224,7 +223,7 @@ public class AuthorizeService {
         if (scopes != null && !scopes.isEmpty()) {
             String[] scopesName = scopes.split(" ");
             for (String scopeName : scopesName) {
-                org.oxauth.persistence.model.Scope s = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope s = scopeService.getScopeById(scopeName);
                 if (s != null && s.getDescription() != null) {
                     result.add(s);
                 }
