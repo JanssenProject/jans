@@ -28,13 +28,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+
+import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.gluu.oxauth.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum
@@ -314,8 +313,8 @@ public class OpenIdConfiguration extends HttpServlet {
 			for (Scope scope : scopeService.getAllScopesList()) {
 				final JSONArray claimsList = new JSONArray();
 				final JSONObject mapping = new JSONObject();
-				mapping.put(scope.getDisplayName(), claimsList);
-				scopes.add(scope.getDisplayName());
+				mapping.put(scope.getId(), claimsList);
+				scopes.add(scope.getId());
 
 				scopeToClaimMapping.put(mapping);
 

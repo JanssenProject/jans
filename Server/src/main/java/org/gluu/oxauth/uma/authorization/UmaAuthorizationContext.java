@@ -6,31 +6,25 @@
 
 package org.gluu.oxauth.uma.authorization;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.service.AttributeService;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.service.external.context.ExternalScriptContext;
 import org.gluu.oxauth.uma.service.RedirectParameters;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
+import org.oxauth.persistence.model.Scope;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -41,7 +35,7 @@ import com.google.common.collect.Maps;
 public class UmaAuthorizationContext extends ExternalScriptContext {
 
     private final Claims claims;
-    private final Map<UmaScopeDescription, Boolean> scopes; // scope and boolean, true - if client requested scope and false if it is permission ticket scope
+    private final Map<Scope, Boolean> scopes; // scope and boolean, true - if client requested scope and false if it is permission ticket scope
     private final Set<UmaResource> resources;
     private final String scriptDn;
     private final Map<String, SimpleCustomProperty> configurationAttributes;
@@ -54,7 +48,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final UmaPermissionService permissionService;
     private final Client client;
 
-    public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
+    public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<Scope, Boolean> scopes,
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
                                    Map<String, SimpleCustomProperty> configurationAttributes, UmaSessionService sessionService,
                                    UserService userService, UmaPermissionService permissionService, Client client) {
@@ -66,7 +60,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         this.userService = userService;
         this.permissionService = permissionService;
         this.client = client;
-        this.scopes = new HashMap<UmaScopeDescription, Boolean>(scopes);
+        this.scopes = new HashMap<Scope, Boolean>(scopes);
         this.resources = resources;
         this.claims = claims;
         this.scriptDn = scriptDn;
@@ -99,7 +93,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
 
     public Set<String> getScopes() {
         Set<String> result = new HashSet<String>();
-        for (UmaScopeDescription scope : getScopeMap().keySet()) {
+        for (Scope scope : getScopeMap().keySet()) {
             result.add(scope.getId());
         }
         return result;
@@ -110,15 +104,15 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
      */
     public Set<String> getScriptScopes() {
         Set<String> result = new HashSet<String>();
-        for (UmaScopeDescription scope : getScopeMap().keySet()) {
-            if (scope.getAuthorizationPolicies() != null && scope.getAuthorizationPolicies().contains(scriptDn)) {
+        for (Scope scope : getScopeMap().keySet()) {
+            if (scope.getUmaAuthorizationPolicies() != null && scope.getUmaAuthorizationPolicies().contains(scriptDn)) {
                 result.add(scope.getId());
             }
         }
         return result;
     }
 
-    public Map<UmaScopeDescription, Boolean> getScopeMap() {
+    public Map<Scope, Boolean> getScopeMap() {
         return Maps.newHashMap(scopes);
     }
 

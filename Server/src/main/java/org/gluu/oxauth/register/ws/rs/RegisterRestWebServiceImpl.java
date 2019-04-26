@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
@@ -44,8 +45,6 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.InumService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -56,14 +55,13 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.util.*;
 
 import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
 import static org.gluu.oxauth.model.util.StringUtils.implode;
 import static org.gluu.oxauth.model.util.StringUtils.toList;
-
-import java.net.URI;
-import java.util.*;
 
 /**
  * Implementation for register REST web services.
@@ -720,7 +718,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             scopeNames = new String[scopeDns.length];
             for (int i = 0; i < scopeDns.length; i++) {
                 Scope scope = scopeService.getScopeByDn(scopeDns[i]);
-                scopeNames[i] = scope.getDisplayName();
+                scopeNames[i] = scope.getId();
             }
         }
 
@@ -806,7 +804,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             String[] scopeNames = new String[scopeDns.length];
             for (int i = 0; i < scopeDns.length; i++) {
                 Scope scope = scopeService.getScopeByDn(scopeDns[i]);
-                scopeNames[i] = scope.getDisplayName();
+                scopeNames[i] = scope.getId();
             }
             return StringUtils.join(scopeNames, " ");
         }

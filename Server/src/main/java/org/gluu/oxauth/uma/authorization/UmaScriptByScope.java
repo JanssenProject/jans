@@ -1,30 +1,30 @@
 package org.gluu.oxauth.uma.authorization;
 
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
+import org.oxauth.persistence.model.Scope;
 
 /**
  * @author yuriyz
  */
 public class UmaScriptByScope {
 
-    private UmaScopeDescription scope;
+    private Scope scope;
 
     private CustomScriptConfiguration script;
 
     public UmaScriptByScope() {
     }
 
-    public UmaScriptByScope(UmaScopeDescription scope, CustomScriptConfiguration script) {
+    public UmaScriptByScope(Scope scope, CustomScriptConfiguration script) {
         this.scope = scope;
         this.script = script;
     }
 
-    public UmaScopeDescription getScope() {
+    public Scope getScope() {
         return scope;
     }
 
-    public void setScope(UmaScopeDescription scope) {
+    public void setScope(Scope scope) {
         this.scope = scope;
     }
 
