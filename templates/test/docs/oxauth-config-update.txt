@@ -1,14 +1,15 @@
-I. Client keys deployment.
+I. Install CE with `-t` option to load data
+
+II. Client keys deployment.
 - cd /var/www/html/
 - wget --no-check-certificate https://raw.githubusercontent.com/GluuFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
 - unzip oxauth_test_client_keys.zip
 - rm -rf oxauth_test_client_keys.zip
 - chown -R root.www-data oxauth-client
-- Load testing data test /install/community-edition-setup/output/test/oxauth/data/oxauth-test-data.ldif into LDAP.
-- Load testing data test /install/community-edition-setup/output/test/scim-client/data/scim-test-data.ldif into LDAP.
+not needed - Load testing data test /install/community-edition-setup/output/test/oxauth/data/oxauth-test-data.ldif into LDAP.
+not needed - Load testing data test /install/community-edition-setup/output/test/scim-client/data/scim-test-data.ldif into LDAP.
 
-
-II. These changes should be applied to oxAuth config.
+III. These changes should be applied to oxAuth config.
 1. "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
 
 2. "dynamicRegistrationCustomAttributes":[
@@ -33,13 +34,24 @@ II. These changes should be applied to oxAuth config.
 6. "authenticationFiltersEnabled":true,
 7. "clientAuthenticationFiltersEnabled":true,
 
-III. Next custom scripts should be enabled:
+IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
 2. Enable basic and basic_lock Person Authentication scripts.
 
-IV. Restart oxAuth server
+V. Restart oxAuth server
 
-V. Prepare for tests run
+VI. Update LDAP schema (this is not needed for Couchbase)
+1. cp ./output/test/oxauth/schema/102-oxauth_test.ldif /opt/opendj/config/schema/
+2. cp ./output/test/scim-client/schema/103-scim_test.ldif /opt/opendj/config/schema/
+3. Apply manual schema changes described in ./output/test/scim-client/schema/scim_test_manual_update.schema
+4. Restart OpenDJ
+5. Create /home/ldap/.pw with LDAP admin user pwd
+6. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr1 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
+7. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
+8. Remove /home/ldap/.pw
+
+
+VII. Prepare for tests run
 - git clone https://github.com/GluuFederation/oxAuth
 - Download and unzip file test_data.zip from CE server.
 - Create test profile folders oxAuth/Client/profiles/ce_test and oxAuth/Server/profiles/ce_test
@@ -50,6 +62,6 @@ V. Prepare for tests run
 - Import OpenDJ SSL CE Server cert (/etc/certs/opendj.crt) into default java truststore.
   Sample command: keytool -import -alias seed22.gluu.org_opendj -keystore cacerts -file opendj.crt
 
-VI. Run oxAuth client tests
+VIII. Run oxAuth client tests
 - cd into oxAuth/Client
 - mvn package -Dcfg=ce_test
