@@ -95,7 +95,7 @@ public class KeyGeneratorTimer {
         }
 
         try {
-        	processInt();
+        	updateKeys();
         } catch (Exception ex) {
 			log.error("Exception happened while executing keys update", ex);
         } finally {
@@ -103,33 +103,29 @@ public class KeyGeneratorTimer {
         }
     }
 
-	public void processInt() throws JSONException, Exception {
+	private void updateKeys() throws JSONException, Exception {
 		if (!isStartUpdateKeys()) {
 			return;
 		}
 
-		updateKeys();
+		updateKeysImpl();
 		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	private boolean isStartUpdateKeys() {
-		if (!appConfiguration.getKeyRegenerationEnabled()) {
-			return false;
-		}
-
 		int poolingInterval = appConfiguration.getKeyRegenerationInterval();
         if (poolingInterval <= 0) {
         	poolingInterval = DEFAULT_INTERVAL;
         }
 
-        poolingInterval = poolingInterval * 3600;
+        poolingInterval = poolingInterval * 3600 * 1000;
 
 		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
 
 		return timeDiffrence >= poolingInterval;
 	}
 
-    public void updateKeys() throws JSONException, Exception {
+    private void updateKeysImpl() throws JSONException, Exception {
         String dn = configurationFactory.getPersistenceConfiguration().getConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
