@@ -30,7 +30,7 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # SCIM Scope
-dn: inum=8CAD-B06D,ou=scopes,ou=uma,o=gluu
+dn: inum=8CAD-B06D,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 displayName: SCIM Access
@@ -47,7 +47,7 @@ displayName: SCIM Resource
 owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/scim_logo.png
 oxAssociatedClient: inum=%(scim_rs_client_id)s,ou=clients,o=gluu
-oxAuthUmaScope: inum=8CAD-B06D,ou=scopes,ou=uma,o=gluu
+oxAuthUmaScope: inum=8CAD-B06D,ou=scopes,o=gluu
 oxId: %(scim_resource_oxid)s
 oxResource: https://%(hostname)s/identity/restv1/scim/v2
 oxRevision: 1
