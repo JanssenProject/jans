@@ -44,6 +44,7 @@ public class CustomScript extends BaseEntry {
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
     
+    @AttributeName(name = "oxAlias")
     private List<String> aliases;
 
     @AttributeName(name = "description")
