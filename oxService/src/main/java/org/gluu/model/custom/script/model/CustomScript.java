@@ -4,6 +4,7 @@
  * Copyright (c) 2014, Gluu
  */package org.gluu.model.custom.script.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,6 +43,8 @@ public class CustomScript extends BaseEntry {
     @Pattern(regexp = "^[a-zA-Z0-9_\\-\\:\\/\\.]+$", message = "Name should contain only letters, digits and underscores")
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
+    
+    private List<String> aliases;
 
     @AttributeName(name = "description")
     private String description;
@@ -106,6 +109,10 @@ public class CustomScript extends BaseEntry {
         this.enabled = customScript.enabled;
         this.modified = customScript.modified;
         this.internal = customScript.internal;
+        
+        if (customScript.aliases != null) {
+        	this.aliases = new ArrayList<String>(customScript.aliases);
+        }
     }
 
     public String getInum() {
@@ -124,7 +131,15 @@ public class CustomScript extends BaseEntry {
         this.name = name;
     }
 
-    public String getDescription() {
+    public List<String> getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(List<String> aliases) {
+		this.aliases = aliases;
+	}
+
+	public String getDescription() {
         return description;
     }
 
