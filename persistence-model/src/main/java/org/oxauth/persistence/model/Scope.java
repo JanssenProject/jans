@@ -11,6 +11,7 @@ import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.oxauth.persistence.model.base.Entry;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(values = {"top", "oxAuthCustomScope"})
-public class Scope implements Serializable {
+public class Scope extends Entry implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
