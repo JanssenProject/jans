@@ -37,6 +37,9 @@ public class Scope extends Entry implements Serializable {
     @AttributeName(name = "oxId")
     private String id;
 
+    @AttributeName(name = "oxFaviconImage")
+    private String faviconImageAsXml;
+
     @AttributeName(name = "oxIconUrl")
     private String iconUrl;
 
@@ -149,6 +152,14 @@ public class Scope extends Entry implements Serializable {
         this.iconUrl = iconUrl;
     }
 
+    public String getFaviconImageAsXml() {
+        return faviconImageAsXml;
+    }
+
+    public void setFaviconImageAsXml(String p_faviconImageAsXml) {
+        faviconImageAsXml = p_faviconImageAsXml;
+    }
+
     public List<String> getUmaAuthorizationPolicies() {
         return umaAuthorizationPolicies;
     }
@@ -169,6 +180,7 @@ public class Scope extends Entry implements Serializable {
                 ", scopeType=" + scopeType +
                 ", oxAuthClaims=" + oxAuthClaims +
                 ", defaultScope=" + defaultScope +
+                ", faviconImageAsXml=" + faviconImageAsXml +
                 ", oxAuthGroupClaims=" + oxAuthGroupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
