@@ -99,6 +99,7 @@ oxScopeType: openid
 dn: inum=6D99,ou=scopes,o=gluu
 defaultScope: true
 description: Obtain UMA PAT.
+displayName: UMA Protection
 oxId: uma_protection
 inum: 6D99
 objectClass: oxAuthCustomScope
@@ -109,6 +110,7 @@ dn: inum=6D90,ou=scopes,o=gluu
 defaultScope: true
 description: oxd scope which is required to call oxd API
 oxId: oxd
+displayName: oxd
 inum: 6D90
 objectClass: oxAuthCustomScope
 objectClass: top
