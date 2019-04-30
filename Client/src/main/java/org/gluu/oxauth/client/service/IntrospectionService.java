@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.client.service;
 
+import org.gluu.oxauth.model.common.IntrospectionResponse;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-
-import org.gluu.oxauth.model.common.IntrospectionResponse;
 
 /**
  * Introspection service.
@@ -31,4 +31,10 @@ public interface IntrospectionService {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     IntrospectionResponse introspectToken(@HeaderParam("Authorization") String p_authorization, @FormParam("token") String p_token);
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    String introspectTokenWithResponseAsJwt(@HeaderParam("Authorization") String p_authorization, @FormParam("token") String p_token, @FormParam("response_as_jwt") boolean responseAsJwt);
+
 }
