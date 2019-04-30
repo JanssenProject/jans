@@ -15,8 +15,11 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.uma.UmaScopeType;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.AttributeService;
@@ -27,7 +30,6 @@ import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.Pair;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -70,6 +73,8 @@ public class IntrospectionWebService {
     private ExternalIntrospectionService externalIntrospectionService;
     @Inject
     private AttributeService attributeService;
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -81,10 +86,11 @@ public class IntrospectionWebService {
     public Response introspectGet(@HeaderParam("Authorization") String p_authorization,
                                   @QueryParam("token") String p_token,
                                   @QueryParam("token_type_hint") String tokenTypeHint,
+                                  @QueryParam("response_as_jwt") String responseAsJwt,
                                   @Context HttpServletRequest httpRequest,
                                   @Context HttpServletResponse httpResponse
     ) {
-        return introspect(p_authorization, p_token, tokenTypeHint, httpRequest, httpResponse);
+        return introspect(p_authorization, p_token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
     }
 
     @POST
@@ -92,12 +98,13 @@ public class IntrospectionWebService {
     public Response introspectPost(@HeaderParam("Authorization") String p_authorization,
                                    @FormParam("token") String p_token,
                                    @FormParam("token_type_hint") String tokenTypeHint,
+                                   @FormParam("response_as_jwt") String responseAsJwt,
                                    @Context HttpServletRequest httpRequest,
                                    @Context HttpServletResponse httpResponse) {
-        return introspect(p_authorization, p_token, tokenTypeHint, httpRequest, httpResponse);
+        return introspect(p_authorization, p_token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
     }
 
-    private Response introspect(String p_authorization, String p_token, String tokenTypeHint, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private Response introspect(String p_authorization, String p_token, String tokenTypeHint, String responseAsJwt, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             log.trace("Introspect token, authorization: {}, token to introsppect: {}, tokenTypeHint:", p_authorization, p_token, tokenTypeHint);
             if (StringUtils.isNotBlank(p_authorization) && StringUtils.isNotBlank(p_token)) {
@@ -149,6 +156,10 @@ public class IntrospectionWebService {
                             log.trace("Canceled changes made by external introspection script since method returned `false`.");
                         }
 
+                        if (Boolean.TRUE.toString().equalsIgnoreCase(responseAsJwt)) {
+                            return Response.status(Response.Status.OK).entity(createResponseAsJwt(responseAsJsonObject, authorizationGrant)).build();
+                        }
+
                         return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).build();
                     } else {
                         log.error("Access token is not valid. Valid: " + (authorizationAccessToken != null && authorizationAccessToken.isValid()));
@@ -165,6 +176,26 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+    }
+
+    private String createResponseAsJwt(JSONObject response, AuthorizationGrant grant) throws Exception {
+        final JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
+        final Jwt jwt = jwtSigner.newJwt();
+
+        Iterator<String> keysIter = response.keys();
+        while (keysIter.hasNext()) {
+            String key = keysIter.next();
+            Object value = response.opt(key);
+            if (value != null) {
+                try {
+                    jwt.getClaims().setClaimObject(key, value, false);
+                } catch (Exception e) {
+                    log.error("Failed to put claims into jwt. Key: " + key + ", response: " + response.toString(), e);
+                }
+            }
+        }
+
+        return jwtSigner.sign().toString();
     }
 
     private static JSONObject createResponseAsJsonObject(IntrospectionResponse response, AbstractToken tokenToIntrospect) throws JSONException, IOException {
