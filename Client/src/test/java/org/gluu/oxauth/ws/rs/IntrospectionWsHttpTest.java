@@ -14,6 +14,7 @@ import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.common.IntrospectionResponse;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.uma.wrapper.Token;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -40,10 +41,11 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void bearerWithResponseAsJwt(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
+        final ClientExecutor clientExecutor = clientExecutor(false);
+        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
+        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
 
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint);
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor);
         final String jwtAsString = introspectionService.introspectTokenWithResponseAsJwt("Bearer " + authorization.getAccessToken(), tokenToIntrospect.getAccessToken(), true);
         final Jwt jwt = Jwt.parse(jwtAsString);
         assertTrue(Boolean.parseBoolean(jwt.getClaims().getClaimAsString("active")));
