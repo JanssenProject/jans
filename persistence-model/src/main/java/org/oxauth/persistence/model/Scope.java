@@ -11,7 +11,6 @@ import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
-import org.oxauth.persistence.model.base.Entry;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(values = {"top", "oxAuthCustomScope"})
-public class Scope extends Entry implements Serializable {
+public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
@@ -36,9 +35,6 @@ public class Scope extends Entry implements Serializable {
 
     @AttributeName(name = "oxId")
     private String id;
-
-    @AttributeName(name = "oxFaviconImage")
-    private String faviconImageAsXml;
 
     @AttributeName(name = "oxIconUrl")
     private String iconUrl;
@@ -152,14 +148,6 @@ public class Scope extends Entry implements Serializable {
         this.iconUrl = iconUrl;
     }
 
-    public String getFaviconImageAsXml() {
-        return faviconImageAsXml;
-    }
-
-    public void setFaviconImageAsXml(String p_faviconImageAsXml) {
-        faviconImageAsXml = p_faviconImageAsXml;
-    }
-
     public List<String> getUmaAuthorizationPolicies() {
         return umaAuthorizationPolicies;
     }
@@ -180,7 +168,6 @@ public class Scope extends Entry implements Serializable {
                 ", scopeType=" + scopeType +
                 ", oxAuthClaims=" + oxAuthClaims +
                 ", defaultScope=" + defaultScope +
-                ", faviconImageAsXml=" + faviconImageAsXml +
                 ", oxAuthGroupClaims=" + oxAuthGroupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
