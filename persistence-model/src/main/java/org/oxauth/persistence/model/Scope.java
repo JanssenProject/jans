@@ -156,6 +156,21 @@ public class Scope implements Serializable {
         this.umaAuthorizationPolicies = umaAuthorizationPolicies;
     }
 
+    public Boolean getOxAuthGroupClaims() {
+        return oxAuthGroupClaims;
+    }
+
+    public Boolean getDefaultScope() {
+        return defaultScope;
+    }
+
+    public boolean isUmaType(){
+        return scopeType.getValue().equalsIgnoreCase(ScopeType.UMA.getValue());
+    }
+    public boolean isNotUmaType(){
+        return !(scopeType.getValue().equalsIgnoreCase(ScopeType.UMA.getValue()));
+    }
+
     @Override
     public String toString() {
         return "Scope{" +
