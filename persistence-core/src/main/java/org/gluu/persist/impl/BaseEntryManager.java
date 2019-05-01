@@ -1152,7 +1152,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		if (attributeValues.length == 0) {
 			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && StringHelper.isEmpty(String.valueOf(attributeValues[0]))) {
+		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
 			return null;
 		}
 
