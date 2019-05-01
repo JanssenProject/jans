@@ -83,8 +83,8 @@ public class ExternalScriptService implements Serializable {
     public CustomScriptConfiguration determineDefaultCustomScriptConfiguration(List<CustomScriptConfiguration> customScriptConfigurations) {
         CustomScriptConfiguration defaultExternalCustomScript = null;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-            // Determine default script. It has lower level than others
-            if ((defaultExternalCustomScript == null) || (defaultExternalCustomScript.getLevel() >= customScriptConfiguration.getLevel())) {
+            // Determine default script. It has bigger level than others
+            if ((defaultExternalCustomScript == null) || (defaultExternalCustomScript.getLevel() < customScriptConfiguration.getLevel())) {
                 defaultExternalCustomScript = customScriptConfiguration;
             }
         }
