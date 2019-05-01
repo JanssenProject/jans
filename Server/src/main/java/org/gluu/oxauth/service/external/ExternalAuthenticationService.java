@@ -111,9 +111,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		for (AuthenticationScriptUsageType usageType : AuthenticationScriptUsageType.values()) {
 			CustomScriptConfiguration defaultExternalAuthenticator = null;
 			for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurationsMapByUsageType.get(usageType)) {
-				// Determine default authenticator
-				if ((defaultExternalAuthenticator == null) ||
-						(defaultExternalAuthenticator.getLevel() < customScriptConfiguration.getLevel())) {
+				// Determine default authenticator. It has bigger level than others
+				if ((defaultExternalAuthenticator == null)
+						|| (defaultExternalAuthenticator.getLevel() < customScriptConfiguration.getLevel())) {
 					defaultExternalAuthenticator = customScriptConfiguration;
 				}
 			}
