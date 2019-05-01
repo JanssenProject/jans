@@ -164,11 +164,8 @@ public class Scope implements Serializable {
         return defaultScope;
     }
 
-    public boolean isUmaType(){
-        return scopeType.getValue().equalsIgnoreCase(ScopeType.UMA.getValue());
-    }
-    public boolean isNotUmaType(){
-        return !(scopeType.getValue().equalsIgnoreCase(ScopeType.UMA.getValue()));
+    public boolean isUmaType() {
+        return scopeType != null && ScopeType.UMA.getValue().equalsIgnoreCase(scopeType.getValue());
     }
 
     @Override
