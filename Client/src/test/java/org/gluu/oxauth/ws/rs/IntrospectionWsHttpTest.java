@@ -41,7 +41,7 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void bearerWithResponseAsJwt(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        final ClientExecutor clientExecutor = clientExecutor(false);
+        final ClientExecutor clientExecutor = clientExecutor(true);
         final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
         final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
 
