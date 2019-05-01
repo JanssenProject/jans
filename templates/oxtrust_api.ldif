@@ -30,7 +30,7 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # API Scope
-dn: inum=OO11-AABB,ou=scopes,ou=uma,o=gluu
+dn: inum=OO11-AABB,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Read Access
@@ -40,7 +40,7 @@ oxUmaPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
 oxScopeType: uma
 
 # API Scope
-dn: inum=1122-BBCC,ou=scopes,ou=uma,o=gluu
+dn: inum=1122-BBCC,ou=scopes,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Write Access
@@ -57,8 +57,8 @@ displayName: oxTrust api Resource
 owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/api_logo.png
 oxAssociatedClient: inum=800-9340-4274-986f-f7a37c8cc620,ou=clients,o=gluu
-oxAuthUmaScope: inum=OO11-AABB,ou=scopes,ou=uma,o=gluu
-oxAuthUmaScope: inum=1122-BBCC,ou=scopes,ou=uma,o=gluu
+oxAuthUmaScope: inum=OO11-AABB,ou=scopes,o=gluu
+oxAuthUmaScope: inum=1122-BBCC,ou=scopes,o=gluu
 oxId: 800-e8ab-4207-9fab-2a27de921ac1
 oxResource: https://%(hostname)s/identity/restv1/api/v1
 oxRevision: 1

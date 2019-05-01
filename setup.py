@@ -3609,7 +3609,7 @@ class Setup(object):
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
                 index_names.append(index_name)
 
-            W.write('BUILD INDEX ON `gluu` (%s) USING GSI;\n' % (','.join(index_names)))
+            W.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
 
         self.couchbaseExecQuery(tmp_file)
 
