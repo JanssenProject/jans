@@ -78,12 +78,6 @@ objectClass: top
 objectClass: organizationalUnit
 ou: uma
 
-# UMA scope data - LEVEL 3
-dn: ou=scopes,ou=uma,o=gluu
-objectClass: top
-objectClass: organizationalUnit
-ou: scopes
-
 # UMA resources - LEVEL 3
 dn: ou=resources,ou=uma,o=gluu
 objectClass: top

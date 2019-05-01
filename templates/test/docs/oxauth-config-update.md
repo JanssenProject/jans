@@ -37,9 +37,16 @@ IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
 2. Enable basic and basic_lock Person Authentication scripts.
 
-V. Restart oxAuth server
+V. Update system configuration
+1. Diable token binding module
+```
+  a2dismod mod_token_binding
+  systemctl restart apache2
+```
 
-VI. Update LDAP schema (this is not needed for Couchbase)
+VI. Restart oxAuth server
+
+VII. Update LDAP schema (this is not needed for Couchbase)
 1. cp ./output/test/oxauth/schema/102-oxauth_test.ldif /opt/opendj/config/schema/
 2. cp ./output/test/scim-client/schema/103-scim_test.ldif /opt/opendj/config/schema/
 3. Apply manual schema changes described in ./output/test/scim-client/schema/scim_test_manual_update.schema
@@ -50,7 +57,7 @@ VI. Update LDAP schema (this is not needed for Couchbase)
 8. Remove /home/ldap/.pw
 
 
-VII. Prepare for tests run
+VIII. Prepare for tests run
 - git clone https://github.com/GluuFederation/oxAuth
 - Download and unzip file test_data.zip from CE server.
 - Create test profile folders oxAuth/Client/profiles/ce_test and oxAuth/Server/profiles/ce_test
@@ -61,6 +68,6 @@ VII. Prepare for tests run
 - Import OpenDJ SSL CE Server cert (/etc/certs/opendj.crt) into default java truststore.
   Sample command: keytool -import -alias seed22.gluu.org_opendj -keystore cacerts -file opendj.crt
 
-VIII. Run oxAuth client tests
+IX. Run oxAuth client tests
 - cd into oxAuth/Client
 - mvn package -Dcfg=ce_test
