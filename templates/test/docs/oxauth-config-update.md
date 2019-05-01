@@ -6,8 +6,6 @@ II. Client keys deployment.
 - unzip oxauth_test_client_keys.zip
 - rm -rf oxauth_test_client_keys.zip
 - chown -R root.www-data oxauth-client
-not needed - Load testing data test /install/community-edition-setup/output/test/oxauth/data/oxauth-test-data.ldif into LDAP.
-not needed - Load testing data test /install/community-edition-setup/output/test/scim-client/data/scim-test-data.ldif into LDAP.
 
 III. These changes should be applied to oxAuth config.
 1. "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
@@ -33,6 +31,7 @@ III. These changes should be applied to oxAuth config.
 5. "legacyIdTokenClaims":true,
 6. "authenticationFiltersEnabled":true,
 7. "clientAuthenticationFiltersEnabled":true,
+8. "keyRegenerationEnabled":true,
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies UMA Claims Gathering scripts.

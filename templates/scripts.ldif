@@ -13,7 +13,7 @@ oxConfigurationProperty: {"value1":"use_path_validator","value2":"true","descrip
 oxConfigurationProperty: {"value1":"use_ocsp_validator","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"use_crl_validator","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"crl_max_response_size","value2":"10485760","description":""}
-oxLevel: 25
+oxLevel: 30
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -30,7 +30,7 @@ gluuStatus: false
 inum: 2FDB-CF02
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
-oxLevel: 60
+oxLevel: 40
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -118,7 +118,7 @@ inum: 24FD-B96E
 oxConfigurationProperty: {"value1":"yubicloud_uri","value2":"api.yubico.com","description":""}
 oxConfigurationProperty: {"value1":"yubicloud_api_key","value2":"","description":""}
 oxConfigurationProperty: {"value1":"yubicloud_id","value2":"","description":""}
-oxLevel: 90
+oxLevel: 40
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -223,7 +223,7 @@ inum: 4BBE-C6A8
 oxConfigurationProperty: {"value1":"invalid_login_count_attribute","value2":"oxCountInvalidLogin","description":""}
 oxConfigurationProperty: {"value1":"maximum_invalid_login_attemps","value2":"3","description":""}
 oxConfigurationProperty: {"value1":"lock_expiration_time","value2":"120","description":""}
-oxLevel: 100
+oxLevel: 20
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -243,7 +243,7 @@ oxConfigurationProperty: {"value1":"uaf_policy_name","value2":"default","descrip
 oxConfigurationProperty: {"value1":"qr_options","value2":"{ width: 400, height: 400 }","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 oxConfigurationProperty: {"value1":"send_push_notifaction","value2":"false","description":""}
-oxLevel: 90
+oxLevel: 70
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -264,7 +264,7 @@ oxConfigurationProperty: {"value1":"issuer","value2":"Gluu Inc","description":""
 oxConfigurationProperty: {"value1":"label","value2":"Gluu OTP","description":""}
 oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 400, mSize: 0.05 }","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
-oxLevel: 50
+oxLevel: 40
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -281,7 +281,7 @@ gluuStatus: false
 inum: 5018-F9CF
 oxConfigurationProperty: {"value1":"duo_creds_file","value2":"/etc/certs/duo_creds.json","description":""}
 oxConfigurationProperty: {"value1":"duo_host","value2":"api-random.duosecurity.com","description":""}
-oxLevel: 20
+oxLevel: 50
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -341,7 +341,7 @@ gluuStatus: false
 inum: 8BAF-80D6
 oxConfigurationProperty: {"value1":"u2f_application_id","value2":"https://%(hostname)s","description":""}
 oxConfigurationProperty: {"value1":"u2f_server_uri","value2":"https://%(hostname)s","description":""}
-oxLevel: 10
+oxLevel: 50
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -357,7 +357,7 @@ displayName: fido2
 gluuStatus: false
 inum: 8BAF-80D7
 oxConfigurationProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","hide":false,"description":""}
-oxLevel: 10
+oxLevel: 70
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -380,7 +380,7 @@ oxConfigurationProperty: {"value1":"notification_service_mode","value2":"gluu","
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 oxConfigurationProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
-oxLevel: 15
+oxLevel: 60
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -398,7 +398,7 @@ inum: 92F0-759E
 oxConfigurationProperty: {"value1":"ts_host","value2":"https://ts.host.com","description":""}
 oxConfigurationProperty: {"value1":"ts_apiKey","value2":"ts_api_key","description":""}
 oxConfigurationProperty: {"value1":"ts_apiSecret","value2":"ts_api_secret","description":""}
-oxLevel: 15
+oxLevel: 50
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
@@ -413,7 +413,7 @@ description: Sample authentication module
 displayName: basic
 gluuStatus: false
 inum: A51E-76DA
-oxLevel: 100
+oxLevel: 10
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -446,7 +446,7 @@ gluuStatus: false
 inum: D40C-1CA4
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
-oxLevel: 50
+oxLevel: 60
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
@@ -479,7 +479,7 @@ inum: 09A0-93D6
 oxConfigurationProperty: {"value1":"twilio_sid","value2":"","description":"Twilio account SID"}
 oxConfigurationProperty: {"value1":"twilio_token","value2":"","description":"Twilio API token"}
 oxConfigurationProperty: {"value1":"from_number","value2":"","description":"Twilio phone number with SMS capabilities"}
-oxLevel: 60
+oxLevel: 50
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
