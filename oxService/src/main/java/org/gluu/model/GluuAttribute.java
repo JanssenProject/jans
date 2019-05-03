@@ -26,7 +26,7 @@ import org.gluu.persist.model.base.Entry;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version February 9, 2015
+ * @version May 2, 2019
  */
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(values = { "top", "gluuAttribute" })
@@ -302,7 +302,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	}
 
 	public Boolean getOxMultivaluedAttribute() {
-		return oxMultivaluedAttribute;
+		return oxMultivaluedAttribute == null ? false : oxMultivaluedAttribute;
 	}
 
 	public void setOxMultivaluedAttribute(Boolean oxMultivaluedAttribute) {
