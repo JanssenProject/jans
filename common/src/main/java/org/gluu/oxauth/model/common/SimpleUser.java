@@ -14,27 +14,28 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.util.StringHelper;
 
 /**
- * @author Javier Rojas Blum Date: 11.25.2011
+ * @author Javier Rojas Blum
+ * @version May 3, 2019
  */
 public class SimpleUser extends org.gluu.persist.model.base.SimpleUser {
 
     private static final long serialVersionUID = -2634191420188575733L;
 
-    public Object getAttribute(String userAttribute, boolean optional) throws InvalidClaimException {
+    public Object getAttribute(String userAttribute, boolean optional, boolean multivalued) throws InvalidClaimException {
         Object attribute = null;
 
         for (org.gluu.persist.model.base.CustomAttribute customAttribute : customAttributes) {
             if (customAttribute.getName().equals(userAttribute)) {
                 List<String> values = customAttribute.getValues();
                 if (values != null) {
-                    if (values.size() == 1) {
-                        attribute = values.get(0);
-                    } else {
+                    if (multivalued) {
                         JSONArray array = new JSONArray();
                         for (String v : values) {
                             array.put(v);
                         }
                         attribute = array;
+                    } else {
+                        attribute = values.get(0);
                     }
                 }
 
