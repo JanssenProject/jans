@@ -70,7 +70,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 14, 2019
+ * @version May 3, 2019
  */
 @Stateless
 @Named
@@ -206,7 +206,7 @@ public class IdTokenFactory {
 
                     if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
+                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -405,7 +405,7 @@ public class IdTokenFactory {
 
                     if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
+                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -556,15 +556,15 @@ public class IdTokenFactory {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
                     } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                        attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
+                        attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute()));
                     } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
                         if (attributeValue != null) {
                             attribute = format.parse(attributeValue.toString());
                         }
                     } else {
-                        attribute = user.getAttribute(gluuAttribute.getName(), true);
+                        attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
                     }
 
                     if (attribute != null) {
