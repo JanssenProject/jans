@@ -6,9 +6,9 @@
 
 package org.gluu.model.metric;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Base metric data class

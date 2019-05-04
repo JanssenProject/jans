@@ -1,6 +1,7 @@
 package org.gluu.model.passport.idpinitiated;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 

@@ -6,14 +6,14 @@
 
 package org.gluu.model;
 
-import java.util.Arrays;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.util.Arrays;
+import java.util.Date;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Hold Image specific information

@@ -6,13 +6,13 @@
 
 package org.gluu.config.oxtrust;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.enterprise.inject.Vetoed;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.enterprise.inject.Vetoed;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * oxTrust configuration

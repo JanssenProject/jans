@@ -6,12 +6,11 @@
 
 package org.gluu.config.oxtrust;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.gluu.model.ldap.GluuLdapConfiguration;
 
 import javax.enterprise.inject.Vetoed;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.gluu.model.ldap.GluuLdapConfiguration;
+import java.util.List;
 
 /**
  * Cache refresh configuration
