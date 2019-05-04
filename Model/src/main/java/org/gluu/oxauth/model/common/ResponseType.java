@@ -75,7 +75,15 @@ public enum ResponseType implements HasParamName, AttributeEnum {
      */
     @JsonCreator
     public static ResponseType fromString(String param) {
-        return getByValue(param);
+        if (param != null) {
+            for (ResponseType rt : ResponseType.values()) {
+                if (param.equals(rt.value)) {
+                    return rt;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
