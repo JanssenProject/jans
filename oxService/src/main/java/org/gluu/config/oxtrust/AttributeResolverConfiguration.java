@@ -6,11 +6,11 @@
 
 package org.gluu.config.oxtrust;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.enterprise.inject.Vetoed;
+import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Attribute resolver configurations

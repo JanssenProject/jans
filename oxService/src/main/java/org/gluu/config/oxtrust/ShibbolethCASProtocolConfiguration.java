@@ -5,12 +5,12 @@
  */
 package org.gluu.config.oxtrust;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Shibboleth IDP CAS-related settings configuration entry.

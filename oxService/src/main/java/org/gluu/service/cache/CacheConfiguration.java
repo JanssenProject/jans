@@ -1,10 +1,10 @@
 package org.gluu.service.cache;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.enterprise.inject.Vetoed;
+import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/21/2017.

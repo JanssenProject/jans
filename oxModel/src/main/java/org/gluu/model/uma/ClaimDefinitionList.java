@@ -1,9 +1,9 @@
 package org.gluu.model.uma;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.Collections;
-
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * @author yuriyz on 06/16/2017.

@@ -4,19 +4,18 @@
  * Copyright (c) 2014, Gluu
  */package org.gluu.service;
 
-import java.io.IOException;
-import java.io.Serializable;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Service class to work with JSON strings
