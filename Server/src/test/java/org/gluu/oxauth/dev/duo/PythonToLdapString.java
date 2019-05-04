@@ -14,10 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.oxauth.persistence.model.configuration.CustomProperty;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Yuriy Zabrovarnyy

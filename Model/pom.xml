@@ -86,16 +86,12 @@
 			<artifactId>resteasy-jaxrs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-json-org </artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>

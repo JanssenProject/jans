@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;

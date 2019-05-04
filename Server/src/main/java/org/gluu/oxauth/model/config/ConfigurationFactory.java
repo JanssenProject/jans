@@ -22,7 +22,7 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
@@ -400,6 +400,7 @@ public class ConfigurationFactory {
 
 			return conf;
 		} catch (BasePersistenceException ex) {
+			ex.printStackTrace();
 			log.error(ex.getMessage());
 		}
 

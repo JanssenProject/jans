@@ -9,8 +9,8 @@ package org.gluu.oxauth.model.error;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.HasParamName;
 import org.gluu.persist.annotation.AttributeEnum;

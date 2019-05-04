@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.model.error;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.gluu.oxauth.model.configuration.Configuration;

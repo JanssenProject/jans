@@ -24,12 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.service.ApplicationFactory;
 import org.gluu.oxauth.uma.service.UmaScopeService;
@@ -40,6 +34,13 @@ import org.gluu.util.ArrayHelper;
 import org.gluu.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -72,12 +73,12 @@ public class ServerUtil {
     }
 
     public static String asPrettyJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
     }
 
     public static String asJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writeValueAsString(p_object);
     }
 
@@ -98,20 +99,20 @@ public class ServerUtil {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
-        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+        mapper.getDeserializationConfig().with(pair);
+        mapper.getSerializationConfig().with(pair);
         return mapper;
     }
 
     public static ObjectMapper jsonMapperWithWrapRoot() {
-        return createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
+        return createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, true);
     }
 
     public static ObjectMapper jsonMapperWithUnwrapRoot() {
-        return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
+        return createJsonMapper().configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
     }
 
     public static PersistenceEntryManager getLdapManager() {

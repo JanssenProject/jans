@@ -9,10 +9,11 @@ package org.gluu.oxauth.model.fido.u2f.protocol;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.util.Base64Util;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * FIDO U2F client data
