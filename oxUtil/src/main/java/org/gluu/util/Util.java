@@ -127,7 +127,7 @@ public final class Util {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.setAnnotationIntrospector(pair);
