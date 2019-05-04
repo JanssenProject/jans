@@ -6,9 +6,9 @@
 
 package org.gluu.oxeleven.client;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.ws.rs.core.MultivaluedMap;
 

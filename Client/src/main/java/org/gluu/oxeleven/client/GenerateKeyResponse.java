@@ -6,9 +6,9 @@
 
 package org.gluu.oxeleven.client;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.util.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONObject;
 
 import java.util.List;
 
