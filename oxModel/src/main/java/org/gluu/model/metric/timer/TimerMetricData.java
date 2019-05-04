@@ -6,7 +6,7 @@
 
 package org.gluu.model.metric.timer;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.model.metric.MetricData;
 
 /**

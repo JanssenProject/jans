@@ -6,11 +6,11 @@
 
 package org.gluu.config.oxtrust;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.enterprise.inject.Vetoed;
+import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Saml NameId coxTrust configuration

@@ -1,6 +1,6 @@
 package org.gluu.model.passport.config;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.model.passport.config.logging.LoggingConfig;
 
 /**

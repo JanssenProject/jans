@@ -1,6 +1,7 @@
 package org.gluu.model.passport.idpinitiated;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by jgomer on 2019-02-21.

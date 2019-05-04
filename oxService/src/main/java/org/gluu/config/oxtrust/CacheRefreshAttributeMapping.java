@@ -6,9 +6,10 @@
 
 package org.gluu.config.oxtrust;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
  * Attribute mapping

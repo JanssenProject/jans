@@ -6,7 +6,7 @@
 
 package org.gluu.model.passport;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.model.passport.config.Configuration;
 import org.gluu.model.passport.idpinitiated.IIConfiguration;
 

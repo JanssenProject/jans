@@ -5,14 +5,7 @@
  */
 package org.gluu.model.attribute;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.model.GluuStatus;
 import org.gluu.model.user.UserRole;
 import org.gluu.persist.annotation.AttributeName;
@@ -20,6 +13,12 @@ import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.persist.model.base.Entry;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Attribute Metadata

@@ -6,22 +6,14 @@
 
 package org.gluu.util;
 
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import java.util.*;
 
 public final class Util {
 
@@ -108,7 +100,7 @@ public final class Util {
      * @throws IOException
      */
     public static String asJson(Object object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = createJsonMapper().disable(SerializationFeature.WRAP_ROOT_VALUE);
         return mapper.writeValueAsString(object);
     }
 
@@ -121,7 +113,7 @@ public final class Util {
      * @throws IOException
      */
     public static String asPrettyJson(Object object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = createJsonMapper().disable(SerializationFeature.WRAP_ROOT_VALUE);
         final ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
         return writer.writeValueAsString(object);
     }
@@ -138,8 +130,7 @@ public final class Util {
         final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
-        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+        mapper.setAnnotationIntrospector(pair);
         return mapper;
     }
 

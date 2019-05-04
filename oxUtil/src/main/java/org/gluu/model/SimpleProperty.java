@@ -6,11 +6,10 @@
 
 package org.gluu.model;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import java.io.Serializable;
 
 /**
  * Simple property to hold value
