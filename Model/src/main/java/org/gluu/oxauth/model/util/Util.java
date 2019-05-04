@@ -20,14 +20,16 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+
 import org.gluu.oxauth.model.common.HasParamName;
 import org.gluu.persist.annotation.AttributeEnum;
 
@@ -47,11 +49,11 @@ public class Util {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
-        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+        mapper.getDeserializationConfig().with(pair);
+        mapper.getSerializationConfig().with(pair);
         return mapper;
     }
 
@@ -65,12 +67,12 @@ public class Util {
     }
 
     public static String asPrettyJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
     }
 
     public static String asJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writeValueAsString(p_object);
     }
 

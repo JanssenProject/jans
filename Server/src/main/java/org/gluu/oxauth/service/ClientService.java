@@ -7,7 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
-import org.codehaus.jettison.json.JSONArray;
+import org.json.JSONArray;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;

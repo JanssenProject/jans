@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONException;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;

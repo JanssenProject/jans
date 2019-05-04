@@ -21,7 +21,7 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONException;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.AuthenticationScriptUsageType;

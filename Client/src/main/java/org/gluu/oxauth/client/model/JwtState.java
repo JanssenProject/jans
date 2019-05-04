@@ -8,8 +8,8 @@ package org.gluu.oxauth.client.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;

@@ -7,8 +7,8 @@
 package org.gluu.oxauth.model.error;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

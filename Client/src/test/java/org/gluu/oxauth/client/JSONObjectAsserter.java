@@ -2,7 +2,7 @@ package org.gluu.oxauth.client;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;

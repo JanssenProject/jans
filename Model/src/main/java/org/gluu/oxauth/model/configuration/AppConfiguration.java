@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.configuration;
 
 import com.google.common.collect.Lists;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.WebKeyStorage;

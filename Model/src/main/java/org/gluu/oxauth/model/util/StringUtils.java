@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.model.util;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.gluu.oxauth.model.common.HasParamName;
 
 import java.io.UnsupportedEncodingException;

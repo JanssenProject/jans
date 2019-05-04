@@ -1,6 +1,6 @@
 package org.gluu.oxauth.service.external;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.introspection.IntrospectionType;

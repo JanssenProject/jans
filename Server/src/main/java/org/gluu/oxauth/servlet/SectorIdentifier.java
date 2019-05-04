@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.gluu.oxauth.service.SectorIdentifierService;
 import org.slf4j.Logger;
 

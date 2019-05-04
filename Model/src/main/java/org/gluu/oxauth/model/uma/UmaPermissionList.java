@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.uma;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import java.util.ArrayList;

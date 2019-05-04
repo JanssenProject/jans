@@ -7,9 +7,9 @@
 package org.gluu.oxauth.model.jwk;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 
