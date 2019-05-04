@@ -9,6 +9,7 @@ package org.gluu.oxauth.model.common;
 import org.gluu.persist.annotation.AttributeEnum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.ArrayList;
@@ -37,14 +38,17 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     /**
      * Used for the authorization code grant type.
      */
+	@JsonProperty("code")
     CODE("code", "Authorization Code Grant Type"),
     /**
      * Used for the implicit grant type.
      */
+	@JsonProperty("token")
     TOKEN("token", "Implicit Grant Type"),
     /**
      * Include an ID Token in the authorization response.
      */
+	@JsonProperty("id_token")
     ID_TOKEN("id_token", "ID Token");
 
     private final String value;
