@@ -8,9 +8,9 @@ package org.gluu.oxauth.register.ws.rs;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;

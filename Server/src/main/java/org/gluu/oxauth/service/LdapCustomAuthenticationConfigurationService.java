@@ -14,7 +14,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.config.CustomAuthenticationConfiguration;
@@ -23,6 +22,8 @@ import org.oxauth.persistence.model.configuration.CustomProperty;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides service methods methods with LDAP configuration

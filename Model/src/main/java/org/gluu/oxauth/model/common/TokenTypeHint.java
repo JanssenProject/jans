@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.gluu.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;

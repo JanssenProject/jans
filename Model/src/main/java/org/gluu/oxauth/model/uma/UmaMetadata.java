@@ -8,8 +8,8 @@ package org.gluu.oxauth.model.uma;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.model.discovery.OAuth2Discovery;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 

@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.crypto;
 
 import org.apache.commons.httpclient.HttpStatus;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxeleven.client.*;

@@ -7,8 +7,8 @@
 package org.gluu.oxauth.userinfo.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;

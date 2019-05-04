@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.configuration;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Brute Force authentication configuration

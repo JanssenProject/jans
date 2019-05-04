@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.action;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.AuthorizeClient;
 import org.gluu.oxauth.client.model.authorize.Claim;
@@ -23,6 +22,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;

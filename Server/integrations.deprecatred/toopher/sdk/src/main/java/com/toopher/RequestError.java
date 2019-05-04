@@ -3,7 +3,7 @@ package com.toopher;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONException;
 
 /**
  * Request errors from API calls
