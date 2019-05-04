@@ -21,7 +21,7 @@
 		<json.version>20180813</json.version>
 		<jackson.version>2.9.8</jackson.version>
 		<jettison.version>1.3.2</jettison.version>
-		<resteasy.version>3.6.3.SP1</resteasy.version>
+		<resteasy.version>3.0.26.Final</resteasy.version>
 		<jaxr.version>3.0.12.Final</jaxr.version>
 		
 		<activemq.version>5.15.9</activemq.version>
@@ -560,6 +560,11 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.datatype</groupId>
 				<artifactId>jackson-datatype-json-org </artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.module</groupId>
+				<artifactId>jackson-module-jaxb-annotations</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
