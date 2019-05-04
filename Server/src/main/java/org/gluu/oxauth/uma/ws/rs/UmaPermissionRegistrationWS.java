@@ -17,10 +17,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -32,18 +31,13 @@ import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -127,7 +121,7 @@ public class UmaPermissionRegistrationWS {
      * @return uma permission list
      */
     private UmaPermissionList parseRequest(String requestAsString) {
-        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         try {
             org.gluu.oxauth.model.uma.UmaPermission permission = mapper.readValue(requestAsString, org.gluu.oxauth.model.uma.UmaPermission.class);
             return new UmaPermissionList().addPermission(permission);

@@ -9,8 +9,6 @@ package org.gluu.oxauth.model.util;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.model.crypto.Certificate;
 import org.gluu.oxauth.model.crypto.PublicKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
@@ -19,6 +17,8 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 

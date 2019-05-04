@@ -16,7 +16,7 @@ import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
+import org.json.JSONArray;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;

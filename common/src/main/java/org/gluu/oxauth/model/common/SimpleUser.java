@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import java.util.List;
 
-import org.codehaus.jettison.json.JSONArray;
+import org.json.JSONArray;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.util.StringHelper;

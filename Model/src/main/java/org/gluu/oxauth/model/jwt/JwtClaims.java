@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 
 /**

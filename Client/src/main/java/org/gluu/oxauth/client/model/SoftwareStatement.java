@@ -7,7 +7,7 @@
 package org.gluu.oxauth.client.model;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidJwtException;

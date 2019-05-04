@@ -7,7 +7,7 @@
 package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
-import org.codehaus.jettison.json.JSONArray;
+import org.json.JSONArray;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.SoftwareStatement;

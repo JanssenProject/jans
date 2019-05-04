@@ -3,8 +3,8 @@ package org.gluu.oxauth.model.fido.u2f;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.crypto.cert.CertificateParser;
 import org.gluu.oxauth.model.util.Base64Util;
 

@@ -7,8 +7,8 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.AuthorizationMethod;
 import org.gluu.oxauth.model.util.Util;
