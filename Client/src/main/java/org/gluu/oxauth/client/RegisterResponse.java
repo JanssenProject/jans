@@ -120,7 +120,7 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
 
                 for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
                     String key = it.next();
-                    getClaims().put(key, jsonObj.getString(key));
+                    getClaims().put(key, String.valueOf(jsonObj.get(key)));
                 }
             } catch (JSONException e) {
                 LOG.error(e.getMessage(), e);
