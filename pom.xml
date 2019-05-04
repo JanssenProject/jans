@@ -18,26 +18,22 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<resteasy.version>3.0.24.Final</resteasy.version>
+		<resteasy.version>3.6.3.SP1</resteasy.version>
 
-		<weld.version>3.0.5.Final</weld.version>
+		<weld.version>3.1.0.Final</weld.version>
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 		<prettyfaces.version>3.4.2.Final</prettyfaces.version>
 
-		<jsf-api.version>2.2.16</jsf-api.version>
-		<jsf-impl.version>2.2.16</jsf-impl.version>
+		<jsf-api.version>2.2.19</jsf-api.version>
+		<jsf-impl.version>2.2.19</jsf-impl.version>
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
-		<jackson.version>2.2.4</jackson.version>
-		<log4j.version>2.11.0</log4j.version>
-		<slf4j.version>1.7.25</slf4j.version>
+		<jackson.version>2.9.8</jackson.version>
+		<log4j.version>2.11.2</log4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 
-		<gxt.version>3.1.1</gxt.version>
-		<gwt.version>2.8.20160720</gwt.version>
-		<tomcat.version>7.0.67</tomcat.version>
-		<guava.version>18.0</guava.version>
-
+		<guava.version>27.1-jre</guava.version>
 	</properties>
 
 	<repositories>
@@ -150,7 +146,7 @@
 			<dependency>
 				<groupId>net.jodah</groupId>
 				<artifactId>expiringmap</artifactId>
-				<version>0.5.8</version>
+				<version>0.5.9</version>
 			</dependency>
 
 			<dependency>
@@ -161,7 +157,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -221,7 +217,7 @@
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
 				<artifactId>ehcache-core</artifactId>
-				<version>2.6.11</version>
+				<version>2.10.6</version>
 			</dependency>
 
 			<!-- Jackson -->
@@ -276,19 +272,19 @@
 			<dependency>
 				<groupId>redis.clients</groupId>
 				<artifactId>jedis</artifactId>
-				<version>2.9.0</version>
+				<version>2.10.2</version>
 			</dependency>
 
 			<!-- HTTP client -->
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.9</version>
+				<version>4.4.11</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.5</version>
+				<version>4.5.8</version>
 			</dependency>
 
 			<!-- SAML -->
@@ -316,7 +312,7 @@
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
-				<version>4.0.2</version>
+				<version>4.0.5</version>
 			</dependency>
 
 			<!-- Tests -->
@@ -351,7 +347,7 @@
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.0</version>
+				<version>2.3.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
