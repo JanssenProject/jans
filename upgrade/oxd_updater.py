@@ -42,7 +42,8 @@ os_commands = {
                 ],
 
             '7': [
-                'wget https://repo.gluu.org/centos/Gluu-centos7.repo -O /etc/yum.repos.d/Gluu.repo'
+                 'wget https://repo.gluu.org/centos/Gluu-centos-7-testing.repo -O /etc/yum.repos.d/Gluu.repo' #testing
+                 #'wget https://repo.gluu.org/centos/Gluu-centos7.repo -O /etc/yum.repos.d/Gluu.repo'
                 ],
             },
     'red': {
@@ -103,7 +104,7 @@ if package_type == 'deb':
     commands += [
             'curl https://repo.gluu.org/debian/gluu-apt.key | apt-key add -',
             'apt-get update',
-            'apt-get install -y oxd-server-4.0.beta',
+            'apt-get install -y oxd-server-4.0',
         ]
 
 elif package_type == 'rpm':
@@ -112,7 +113,7 @@ elif package_type == 'rpm':
             'wget https://repo.gluu.org/rhel/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'yum clean all',
-            'yum install -y oxd-server-4.0.beta',
+            'yum install -y oxd-server-4.0',
         ]
 
 add_commands = []
@@ -165,7 +166,7 @@ def _byteify(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
-current_version = '4.0.beta'
+current_version = '4.0'
 oxd_base_dir = '/opt/oxd-server'
 oxd_data_dir = os.path.join(oxd_base_dir, 'conf')
 oxd_conf_dir = '/etc/oxd/oxd-server' if os.path.exists('/etc/oxd/oxd-server') else '/opt/oxd-server/conf'
@@ -226,7 +227,7 @@ if update_required:
 
     current_dbFile = current_dbFileLocation+'.mv.db'
 
-    commands.append('wget https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0.beta/upgrade/oxd-server.yml.temp  -O oxd-server.yml.temp')
+    commands.append('wget https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/upgrade/oxd-server.yml.temp  -O oxd-server.yml.temp')
 
 
     for b_file in ( 
@@ -311,18 +312,18 @@ if update_required:
 
     categories = log4j_xml_root.findall('category') 
     org_xdi_attrib = get_by_attrib(categories,  'org.gluu', False)
+
+    if not org_xdi_attrib:
+        org_xdi_attrib = get_by_attrib(categories,  'org.xdi', False)
+
+
     org_xdi = org_xdi_attrib.find('priority').get('value')
     oxd4_server_yaml['logging']['loggers']['org.gluu'] = org_xdi
 
-
     root = log4j_xml_root.find('root')
-
     priority = root.find('priority').get('value')
 
     oxd4_server_yaml['logging']['level'] = priority
-
-
-
     oxd4_server_yaml['migration_source_folder_path'] = oxd_data_backup_dir
 
     yaml_temp = open(conf_yaml_template).read()
