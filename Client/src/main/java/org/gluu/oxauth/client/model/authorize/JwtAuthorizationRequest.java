@@ -8,9 +8,6 @@ package org.gluu.oxauth.client.model.authorize;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.model.common.Display;
 import org.gluu.oxauth.model.common.Prompt;
@@ -27,6 +24,9 @@ import org.gluu.oxauth.model.jwt.JwtHeader;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

@@ -1,7 +1,7 @@
 package org.gluu.oxauth.model.crypto.signature;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author Javier Rojas Blum
