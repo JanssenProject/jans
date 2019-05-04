@@ -62,6 +62,12 @@ public class Cli {
             RpService rpService = injector.getInstance(RpService.class);
             rpService.load();
 
+            //check multiple options
+            if(Cli.checkForMultipleOptions(cmd)) {
+                System.out.println("Multiple options in command is not allowed.");
+                printHelpAndExit();
+                return;
+            }
             // list
             if (cmd.hasOption("l")) {
                 final Collection<Rp> values = rpService.getRps().values();
@@ -249,7 +255,7 @@ public class Cli {
             }
             printHelpAndExit();
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
+            System.out.println("Failed to execute command against oxd-server on port " + port + ". Check if access_token passed with -a parameter is correct, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -293,4 +299,24 @@ public class Cli {
 
         return options;
     }
+
+    private static boolean checkForMultipleOptions(CommandLine cmd){
+        int optionsCount = 0;
+        if (cmd.hasOption("l")) {
+            optionsCount ++;
+        }
+        if (cmd.hasOption("oxd_id")) {
+            optionsCount ++;
+        }
+        if (cmd.hasOption("d")) {
+            optionsCount ++;
+        }
+        if(optionsCount > 1)
+            return true;
+        else
+            return false;
+    }
+
 }
+
+
