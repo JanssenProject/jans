@@ -221,6 +221,7 @@ inum: D2E0
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:memberOf
+oxMultivaluedAttribute: true
 
 dn: inum=A901,ou=attributes,o=gluu
 displayName: Time zone info
