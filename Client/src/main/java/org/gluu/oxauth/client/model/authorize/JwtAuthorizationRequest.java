@@ -360,8 +360,8 @@ public class JwtAuthorizationRequest {
 
             JSONObject headerJsonObject = headerToJSONObject();
             JSONObject payloadJsonObject = payloadToJSONObject();
-            String headerString = headerJsonObject.toString();
-            String payloadString = payloadJsonObject.toString();
+            String headerString = toPrettyJson(headerJsonObject);
+            String payloadString = toPrettyJson(payloadJsonObject);
             String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
             String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
             String signingInput = encodedHeader + "." + encodedPayload;
