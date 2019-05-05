@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * An ASCII string value that specifies how the Authorization Server displays
  * the authentication and consent user interface pages to the End-User.
@@ -61,6 +64,7 @@ public enum Display implements HasParamName {
      * @param param The parameter.
      * @return The corresponding response type if found, otherwise <code>null</code>.
      */
+    @JsonCreator
     public static Display fromString(String param) {
         if (param != null) {
             for (Display rt : Display.values()) {
@@ -76,6 +80,7 @@ public enum Display implements HasParamName {
      * Returns a string representation of the object. In this case the parameter name.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }
