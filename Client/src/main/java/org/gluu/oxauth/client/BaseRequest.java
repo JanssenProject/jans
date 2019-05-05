@@ -9,6 +9,11 @@ package org.gluu.oxauth.client;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.AuthorizationMethod;
 import org.gluu.oxauth.model.util.Util;
@@ -140,6 +145,12 @@ public abstract class BaseRequest {
     public JSONObject getJSONParameters() throws JSONException {
         return EMPTY_JSON_OBJECT;
     }
+
+	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+	}
 
     public abstract String getQueryString();
 }

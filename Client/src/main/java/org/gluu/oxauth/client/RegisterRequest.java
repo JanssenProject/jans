@@ -10,6 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -1541,10 +1544,12 @@ public class RegisterRequest extends BaseRequest {
         String jsonQueryString = null;
 
         try {
-            jsonQueryString = getJSONParameters().toString(4).replace("\\/", "/");
+            jsonQueryString = toPrettyJson(getJSONParameters()).replace("\\/", "/");
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        } catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
         return jsonQueryString;
     }

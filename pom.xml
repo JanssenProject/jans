@@ -559,7 +559,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-json-org </artifactId>
+				<artifactId>jackson-datatype-json-org</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>

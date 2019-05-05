@@ -255,7 +255,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                         }
                     }
                 }
-                clientRequest.body(MediaType.APPLICATION_JSON, requestBody.toString(4));
+                clientRequest.body(MediaType.APPLICATION_JSON, toPrettyJson(requestBody));
             } else { // GET, Client Read
                 clientRequest.accept(MediaType.APPLICATION_JSON);
 
