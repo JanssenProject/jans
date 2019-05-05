@@ -264,10 +264,4 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         return headers;
     }
 
-	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JsonOrgModule());
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-	}
-
 }

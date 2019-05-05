@@ -146,11 +146,5 @@ public abstract class BaseRequest {
         return EMPTY_JSON_OBJECT;
     }
 
-	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JsonOrgModule());
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-	}
-
     public abstract String getQueryString();
 }
