@@ -9,6 +9,7 @@ package org.gluu.oxauth.model.common;
 import org.gluu.persist.annotation.AttributeEnum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
