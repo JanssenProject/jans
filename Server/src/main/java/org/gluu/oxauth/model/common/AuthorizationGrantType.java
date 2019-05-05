@@ -8,6 +8,9 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.common.HasParamName;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * An authorization grant is a credential representing the resource owner's
  * authorization (to access its protected resources) used by the client to
@@ -73,6 +76,7 @@ public enum AuthorizationGrantType implements HasParamName {
      * @return The corresponding authorization grant type if found, otherwise
      *         <code>null</code>.
      */
+    @JsonCreator
     public static AuthorizationGrantType fromString(String param) {
         if (param != null) {
             for (AuthorizationGrantType agt : AuthorizationGrantType.values()) {
@@ -89,6 +93,7 @@ public enum AuthorizationGrantType implements HasParamName {
      * name for the authorization grant type parameter.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }
