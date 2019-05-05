@@ -66,3 +66,4 @@ defaultSiteConfig:
   ui_locales: ['en']
   claims_locales: ['en']
   contacts: []
+
