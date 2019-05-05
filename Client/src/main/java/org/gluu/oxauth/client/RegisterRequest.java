@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterRequestParam;
+import org.gluu.oxauth.util.ClientUtil;
 
 import javax.ws.rs.core.MediaType;
 
@@ -1544,7 +1545,7 @@ public class RegisterRequest extends BaseRequest {
         String jsonQueryString = null;
 
         try {
-            jsonQueryString = toPrettyJson(getJSONParameters()).replace("\\/", "/");
+            jsonQueryString = ClientUtil.toPrettyJson(getJSONParameters()).replace("\\/", "/");
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (JsonProcessingException e) {
