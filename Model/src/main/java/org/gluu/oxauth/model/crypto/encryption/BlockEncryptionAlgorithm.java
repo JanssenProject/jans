@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.crypto.encryption;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
@@ -80,6 +83,7 @@ public enum BlockEncryptionAlgorithm {
         return cekLength;
     }
 
+    @JsonCreator
     public static BlockEncryptionAlgorithm fromName(String name) {
         if (name != null) {
             for (BlockEncryptionAlgorithm a : BlockEncryptionAlgorithm.values()) {
@@ -92,6 +96,7 @@ public enum BlockEncryptionAlgorithm {
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return name;
     }

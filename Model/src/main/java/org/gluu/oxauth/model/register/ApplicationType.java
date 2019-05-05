@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.register;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum Date: 01.12.2012
  */
@@ -40,6 +43,7 @@ public enum ApplicationType {
      * @param param The string value to convert.
      * @return The corresponding {@link ApplicationType}, otherwise <code>null</code>.
      */
+    @JsonCreator
     public static ApplicationType fromString(String param) {
         if (param != null) {
             for (ApplicationType at : ApplicationType.values()) {
@@ -57,6 +61,7 @@ public enum ApplicationType {
      * @return The string representation of the object.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }
