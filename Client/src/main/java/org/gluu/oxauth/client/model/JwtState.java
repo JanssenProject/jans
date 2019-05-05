@@ -27,6 +27,7 @@ import org.gluu.oxauth.model.jwt.JwtHeader;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.util.ClientUtil;
 
 import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
 
@@ -410,10 +411,10 @@ public class JwtState {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
             }
 
-            String header = toPrettyJson(headerToJSONObject());
+            String header = ClientUtil.toPrettyJson(headerToJSONObject());
             String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
-            String claims = toPrettyJson(payloadToJSONObject());
+            String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
             String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
             Jwe jwe = new Jwe();
@@ -429,8 +430,8 @@ public class JwtState {
 
             JSONObject headerJsonObject = headerToJSONObject();
             JSONObject payloadJsonObject = payloadToJSONObject();
-            String headerString = headerJsonObject.toString();
-            String payloadString = payloadJsonObject.toString();
+            String headerString = ClientUtil.toPrettyJson(headerJsonObject);
+            String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
             String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
             String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
             String signingInput = encodedHeader + "." + encodedPayload;
@@ -507,11 +508,5 @@ public class JwtState {
 
         return obj;
     }
-
-	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JsonOrgModule());
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-	}
 
 }
