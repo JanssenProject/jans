@@ -33,10 +33,7 @@ import org.gluu.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author yuriyz
@@ -64,12 +61,15 @@ public class Cli {
 
             //check multiple options
             if(Cli.checkForMultipleOptions(cmd)) {
-                System.out.println("Multiple options in command is not allowed.");
+                System.out.println("Multiple parameters in command is not allowed.");
                 printHelpAndExit();
                 return;
             }
             // list
             if (cmd.hasOption("l")) {
+                if(Cli.checkForArgsAfterListParameter(args)){
+                    System.out.println("Arguments after list parameter is not required, hence will be ignored.");
+                }
                 final Collection<Rp> values = rpService.getRps().values();
                 if (values.isEmpty()) {
                     System.out.println("There are no any entries yet in database.");
@@ -315,6 +315,17 @@ public class Cli {
             return true;
         else
             return false;
+    }
+
+    private static boolean checkForArgsAfterListParameter(String[] args){
+
+        String[] parameterList = {"-d", "-oxd_id", "-a"};
+        int listIndex = Arrays.asList(args).indexOf("-l");
+
+        if((args.length-1) > listIndex){
+            return !(Arrays.stream(parameterList).anyMatch(args[listIndex+1]::equals));
+        }
+        return false;
     }
 
 }
