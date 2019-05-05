@@ -10,6 +10,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -405,10 +410,10 @@ public class JwtState {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
             }
 
-            String header = headerToJSONObject().toString();
+            String header = toPrettyJson(headerToJSONObject());
             String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
-            String claims = payloadToJSONObject().toString();
+            String claims = toPrettyJson(payloadToJSONObject());
             String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
             Jwe jwe = new Jwe();
@@ -502,4 +507,11 @@ public class JwtState {
 
         return obj;
     }
+
+	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+	}
+
 }
