@@ -255,7 +255,7 @@ public class Cli {
             }
             printHelpAndExit();
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ". Check if correct access_token passed with -a parameter, error: " + e.getMessage());
+            System.out.println("Failed to execute command against oxd-server on port " + port + ". Check if correct access_token is passed with -a parameter, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
