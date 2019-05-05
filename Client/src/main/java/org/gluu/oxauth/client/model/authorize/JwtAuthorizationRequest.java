@@ -28,6 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.PublicKey;
@@ -376,10 +380,12 @@ public class JwtAuthorizationRequest {
     public String getDecodedJwt() {
         String decodedJwt = null;
         try {
-            decodedJwt = payloadToJSONObject().toString(4);
+            decodedJwt = toPrettyJson(payloadToJSONObject());
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        } catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
         return decodedJwt;
     }
@@ -492,4 +498,11 @@ public class JwtAuthorizationRequest {
 
         return obj;
     }
+
+	public String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+	}
+
 }
