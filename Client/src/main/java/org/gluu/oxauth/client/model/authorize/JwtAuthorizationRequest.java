@@ -341,10 +341,10 @@ public class JwtAuthorizationRequest {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
             }
 
-            String header = headerToJSONObject().toString();
+            String header = toPrettyJson(headerToJSONObject());
             String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
-            String claims = payloadToJSONObject().toString();
+            String claims = toPrettyJson(payloadToJSONObject());
             String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
             Jwe jwe = new Jwe();
