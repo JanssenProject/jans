@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.comp;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
@@ -18,8 +20,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.codec.Charsets;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -46,9 +46,12 @@ import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
@@ -174,7 +177,7 @@ public class CrossEncryptionTest {
             encryptedJwt.decrypt(decrypter);
             final String decryptedPayload = new String(Base64Util.base64urldecode(encryptedJwt.getPayload().toString()));
             System.out.println("Nimbusds decrypt succeed: " + decryptedPayload);
-            if (decryptedPayload.equals(PAYLOAD)) {
+            if (isJsonEqual(decryptedPayload, PAYLOAD)) {
                 return true;
             }
         } catch (Exception e) {
@@ -182,6 +185,13 @@ public class CrossEncryptionTest {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static boolean isJsonEqual(String json1, String json2) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode tree1 = mapper.readTree(json1);
+        JsonNode tree2 = mapper.readTree(json2);
+        return tree1.equals(tree2);
     }
 
     public boolean testDecryptWithJose4J(String jwe) {
@@ -202,7 +212,7 @@ public class CrossEncryptionTest {
             receiverJwe.setCompactSerialization(jwe);
             final String decryptedPayload = new String(Base64Util.base64urldecode(receiverJwe.getPlaintextString()));
             System.out.println("Jose4j decrypt succeed: " + decryptedPayload);
-            if (decryptedPayload.equals(PAYLOAD)) {
+            if (isJsonEqual(decryptedPayload, PAYLOAD)) {
                 return true;
             }
         } catch (Exception e) {
@@ -224,7 +234,7 @@ public class CrossEncryptionTest {
             decrypter.setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.A128GCM);
             final String decryptedPayload = decrypter.decrypt(jwe).getClaims().toJsonString().toString();
             System.out.println("Gluu decrypt succeed: " + decryptedPayload);
-            if (decryptedPayload.equals(PAYLOAD)) {
+            if (isJsonEqual(decryptedPayload, PAYLOAD)) {
                 return true;
             }
         } catch (Exception e) {
