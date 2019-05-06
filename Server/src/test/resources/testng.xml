@@ -283,7 +283,7 @@
 	<parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2" />
 	<parameter name="postLogoutRedirectUri" value="https://client.example.com/pl" />
 	<parameter name="ldapAdminPassword" value="${ldap.admin.password}" />
-	<parameter name="audience" value="${test.server.url}/restv1/token" />
+	<parameter name="audience" value="${test.server.issuer}/restv1/token" />
 	<parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth/sectoridentifier/${sector.identifier.id}" />
 	<!-- By enabling this block, you require a place to publish files via HTTP or HTTPS -->
 	<!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/> -->
