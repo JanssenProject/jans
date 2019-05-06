@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.fido.u2f.RequestService;
 import org.gluu.oxauth.uma.service.UmaPctService;
@@ -21,6 +22,7 @@ import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.CacheService;
 import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.cache.CacheProvider;
 import org.gluu.service.cache.CacheProviderType;
@@ -30,7 +32,6 @@ import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
@@ -90,6 +91,9 @@ public class CleanerTimer {
 
 	@Inject
 	private CacheConfiguration cacheConfiguration;
+
+    @Inject
+    private CacheService cacheService;
 
 	@Inject
 	private Event<TimerEvent> cleanerEvent;
@@ -151,6 +155,7 @@ public class CleanerTimer {
 								try {
 									ldapEntryManager.removeRecursively(entity.getDn());
 									log.trace("Removed {}", entity.getDn());
+                                    cacheService.remove(entity.getDn());
 								} catch (Exception e) {
 									log.error("Failed to remove entry, dn: " + entity.getDn(), e);
 								}
