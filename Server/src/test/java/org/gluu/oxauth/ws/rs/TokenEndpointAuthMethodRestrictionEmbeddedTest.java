@@ -17,6 +17,7 @@ import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISS
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import org.gluu.oxauth.util.ServerUtil;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -108,7 +109,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -196,7 +197,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -509,7 +510,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -824,7 +825,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -1138,7 +1139,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);

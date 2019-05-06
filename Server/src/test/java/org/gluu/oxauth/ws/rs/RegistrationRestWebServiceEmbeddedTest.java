@@ -42,6 +42,7 @@ import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -74,7 +75,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
             registerRequest.setClaimsRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -122,7 +123,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -214,7 +215,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             registerRequest.setClientUri(clientUriNewValue);
 
             request.header("Authorization", "Bearer " + registrationAccessToken1);
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -248,7 +249,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         try {
             RegisterRequest registerRequest = new RegisterRequest(null, null, null);
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -274,7 +275,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             // redirect
             // URIs
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -300,7 +301,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());

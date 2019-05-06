@@ -20,10 +20,14 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import javax.ws.rs.HttpMethod;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -226,7 +230,7 @@ public class JwtUtil {
                 log.debug(String.format("Status: %n%d", status));
 
                 if (status == 200) {
-                    jwks = new JSONObject(clientResponse.getEntity(String.class));
+                    jwks = fromJson(clientResponse.getEntity(String.class));
                     log.debug(String.format("JWK: %s", jwks));
                 }
             }
@@ -236,4 +240,11 @@ public class JwtUtil {
 
         return jwks;
     }
+
+	public static JSONObject fromJson(String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.readValue(json, JSONObject.class);
+	}
+
 }

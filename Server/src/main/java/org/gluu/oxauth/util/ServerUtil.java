@@ -32,14 +32,17 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.Util;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 /**
@@ -114,6 +117,12 @@ public class ServerUtil {
     public static ObjectMapper jsonMapperWithUnwrapRoot() {
         return createJsonMapper().configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
     }
+
+    public static String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+	}
 
     public static PersistenceEntryManager getLdapManager() {
         return CdiUtil.bean(PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
