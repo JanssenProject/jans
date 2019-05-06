@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum Date: 03.23.2012
  */
@@ -75,6 +78,7 @@ public enum AuthenticationMethod {
      * @return The corresponding authentication method if found, otherwise
      *         <code>null</code>.
      */
+    @JsonCreator
     public static AuthenticationMethod fromString(String param) {
         if (param != null) {
             for (AuthenticationMethod rt : AuthenticationMethod.values()) {
@@ -91,6 +95,7 @@ public enum AuthenticationMethod {
      * name for the authentication method parameter.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }

@@ -19,6 +19,7 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
+import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -282,7 +283,7 @@ public class OpenIdConfiguration extends HttpServlet {
 			jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED,
 					appConfiguration.getFrontChannelLogoutSessionSupported());
 
-			out.println(jsonObj.toString(4).replace("\\/", "/"));
+			out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
 		} catch (JSONException e) {
 			log.error(e.getMessage(), e);
 		} catch (Exception e) {
