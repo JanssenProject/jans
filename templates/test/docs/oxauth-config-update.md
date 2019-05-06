@@ -56,8 +56,11 @@ VII. Update LDAP schema (this is not needed for Couchbase)
 7. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
 8. Remove /home/ldap/.pw
 
+VIII. Update oxIDPAuthentication
+1. Update property https://github.com/GluuFederation/community-edition-setup/blob/master/templates/configuration.ldif#L26 in DB.
+   We need to put DNS name instead of localhost to allow access it remotelly. This needed if we are plannign to run server side on another server.
 
-VIII. Prepare for tests run
+IX. Prepare for tests run
 - git clone https://github.com/GluuFederation/oxAuth
 - Download and unzip file test_data.zip from CE server.
 - Create test profile folders oxAuth/Client/profiles/ce_test and oxAuth/Server/profiles/ce_test
@@ -68,6 +71,6 @@ VIII. Prepare for tests run
 - Import OpenDJ SSL CE Server cert (/etc/certs/opendj.crt) into default java truststore.
   Sample command: keytool -import -alias seed22.gluu.org_opendj -keystore cacerts -file opendj.crt
 
-IX. Run oxAuth client tests
+X. Run oxAuth client tests
 - cd into oxAuth/Client
 - mvn package -Dcfg=ce_test
