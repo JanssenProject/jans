@@ -39,6 +39,7 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -79,7 +80,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -183,7 +184,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -287,7 +288,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -391,7 +392,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -496,7 +497,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -600,7 +601,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

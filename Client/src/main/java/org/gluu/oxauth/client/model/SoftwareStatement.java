@@ -8,12 +8,18 @@ package org.gluu.oxauth.client.model;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtHeader;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.util.ClientUtil;
 
 /**
  * @author Javier Rojas Blum
@@ -95,8 +101,8 @@ public class SoftwareStatement {
 
         JSONObject headerJsonObject = headerToJSONObject();
         JSONObject payloadJsonObject = getClaims();
-        String headerString = headerJsonObject.toString();
-        String payloadString = payloadJsonObject.toString();
+        String headerString = ClientUtil.toPrettyJson(headerJsonObject);
+        String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
         String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
         String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
         String signingInput = encodedHeader + "." + encodedPayload;
@@ -119,4 +125,5 @@ public class SoftwareStatement {
 
         return jwtHeader.toJsonObject();
     }
+
 }

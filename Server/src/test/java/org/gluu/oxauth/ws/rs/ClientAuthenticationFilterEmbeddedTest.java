@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -75,7 +76,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 			);
 			registerRequest.setGrantTypes(grantTypes);
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

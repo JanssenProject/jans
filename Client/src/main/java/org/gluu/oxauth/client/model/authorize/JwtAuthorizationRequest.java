@@ -24,9 +24,14 @@ import org.gluu.oxauth.model.jwt.JwtHeader;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.util.ClientUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -337,10 +342,10 @@ public class JwtAuthorizationRequest {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
             }
 
-            String header = headerToJSONObject().toString();
+            String header = ClientUtil.toPrettyJson(headerToJSONObject());
             String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
-            String claims = payloadToJSONObject().toString();
+            String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
             String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
             Jwe jwe = new Jwe();
@@ -356,8 +361,8 @@ public class JwtAuthorizationRequest {
 
             JSONObject headerJsonObject = headerToJSONObject();
             JSONObject payloadJsonObject = payloadToJSONObject();
-            String headerString = headerJsonObject.toString();
-            String payloadString = payloadJsonObject.toString();
+            String headerString = ClientUtil.toPrettyJson(headerJsonObject);
+            String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
             String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
             String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
             String signingInput = encodedHeader + "." + encodedPayload;
@@ -376,10 +381,12 @@ public class JwtAuthorizationRequest {
     public String getDecodedJwt() {
         String decodedJwt = null;
         try {
-            decodedJwt = payloadToJSONObject().toString(4);
+            decodedJwt = ClientUtil.toPrettyJson(payloadToJSONObject());
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        } catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
         return decodedJwt;
     }
@@ -492,4 +499,5 @@ public class JwtAuthorizationRequest {
 
         return obj;
     }
+
 }
