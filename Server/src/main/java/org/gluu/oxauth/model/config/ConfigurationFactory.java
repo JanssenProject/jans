@@ -20,6 +20,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -154,7 +155,12 @@ public class ConfigurationFactory {
         this.contextPath = context.getContextPath();
 
         this.facesMapping = "";
-        String[] mappings = context.getServletRegistration("Faces Servlet").getMappings().toArray(new String[0]);
+        ServletRegistration servletRegistration = context.getServletRegistration("Faces Servlet");
+        if (servletRegistration == null) {
+        	return;
+        }
+
+        String[] mappings = servletRegistration.getMappings().toArray(new String[0]);
         if (mappings.length == 0) {
             return;
         }

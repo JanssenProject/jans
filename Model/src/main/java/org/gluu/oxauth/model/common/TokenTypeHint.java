@@ -6,11 +6,13 @@
 
 package org.gluu.oxauth.model.common;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.gluu.persist.annotation.AttributeEnum;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.gluu.persist.annotation.AttributeEnum;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author Javier Rojas Blum
@@ -55,6 +57,18 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
     @Override
     public String getValue() {
         return value;
+    }
+
+    @JsonCreator
+    public static TokenTypeHint fromString(String param) {
+        if (param != null) {
+            for (TokenTypeHint tth : TokenTypeHint.values()) {
+                if (param.equals(tth.value)) {
+                    return tth;
+                }
+            }
+        }
+        return null;
     }
 
     public static TokenTypeHint getByValue(String value) {

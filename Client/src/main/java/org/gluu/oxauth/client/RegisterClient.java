@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.util.ClientUtil;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 
@@ -255,7 +256,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                         }
                     }
                 }
-                clientRequest.body(MediaType.APPLICATION_JSON, requestBody.toString(4));
+                clientRequest.body(MediaType.APPLICATION_JSON, ClientUtil.toPrettyJson(requestBody));
             } else { // GET, Client Read
                 clientRequest.accept(MediaType.APPLICATION_JSON);
 

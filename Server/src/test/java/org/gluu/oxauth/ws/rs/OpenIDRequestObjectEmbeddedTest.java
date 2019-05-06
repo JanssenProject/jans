@@ -11,6 +11,7 @@ import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import org.gluu.oxauth.util.ServerUtil;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -100,7 +101,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -140,7 +141,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -298,7 +299,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -1069,7 +1070,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

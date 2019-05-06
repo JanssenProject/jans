@@ -9,6 +9,9 @@ package org.gluu.oxauth.model.common;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * An ASCII string values that specifies whether the Authorization Server
  * prompts the End-User for re-authentication and consent.
@@ -82,6 +85,7 @@ public enum Prompt implements HasParamName {
      * @param separator The separator of the string list.
      * @return A list of the recognized response types.
      */
+    @JsonCreator
     public static List<Prompt> fromString(String paramList, String separator) {
         List<Prompt> prompts = new ArrayList<Prompt>();
 
@@ -105,6 +109,7 @@ public enum Prompt implements HasParamName {
      * Returns a string representation of the object. In this case the parameter name.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }
