@@ -293,8 +293,8 @@ public class ClientService {
 			String clientId = client.getClientId();
 			String clientDn = client.getDn();
 
-			cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
-			cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+			cacheService.remove(getClientIdCacheKey(clientId));
+			cacheService.remove(getClientDnCacheKey(clientDn));
 		} catch (Exception e) {
 			log.error("Failed to remove client from cache.", e);
 		}
