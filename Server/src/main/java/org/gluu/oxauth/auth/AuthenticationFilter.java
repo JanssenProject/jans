@@ -173,7 +173,7 @@ public class AuthenticationFilter implements Filter {
      * @return whether successful or not
      */
     private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws Exception {
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        AbstractCryptoProvider cryptoProvider = createCryptoProvider();
         if (cryptoProvider == null) {
             log.debug("Unable to create cryptoProvider.");
             return false;
@@ -194,6 +194,15 @@ public class AuthenticationFilter implements Filter {
             }
         }
         return false;
+    }
+
+    private AbstractCryptoProvider createCryptoProvider() {
+        try {
+            return CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        } catch (Exception e) {
+            log.error("Failed to create crypto provider.", e);
+            return null;
+        }
     }
 
     private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
