@@ -16,6 +16,7 @@ import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.ws.rs.ClientTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -61,7 +62,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -960,7 +961,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                     Arrays.asList(redirectUri));
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());

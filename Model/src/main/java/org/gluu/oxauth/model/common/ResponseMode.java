@@ -9,6 +9,9 @@ package org.gluu.oxauth.model.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum
  * @version October 1, 2015
@@ -50,12 +53,26 @@ public enum ResponseMode implements HasParamName {
         return mapByValues.get(value);
     }
 
+    @JsonCreator
+    public static ResponseMode fromString(String param) {
+        if (param != null) {
+            for (ResponseMode rm : ResponseMode.values()) {
+                if (param.equals(rm.value)) {
+                    return rm;
+                }
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public String getParamName() {
         return value;
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }
