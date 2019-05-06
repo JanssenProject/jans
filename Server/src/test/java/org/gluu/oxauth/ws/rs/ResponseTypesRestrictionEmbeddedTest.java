@@ -16,6 +16,7 @@ import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISS
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import org.gluu.oxauth.util.ServerUtil;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -98,7 +99,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -348,7 +349,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -601,7 +602,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage());
