@@ -1,7 +1,8 @@
 {
 	"configurationEndpoint": "https://%(hostname)s/identity/restv1/passport/config",
 	"failureRedirectUrl": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
-	"logLevel" : "info",
+	"logLevel": "info",
+	"consoleLogOnly": false,
 	"clientId": "%(passport_rp_client_id)s",
 	"keyPath": "%(passport_rp_client_cert_fn)s",
 	"keyId": "%(passport_rp_client_cert_alias)s",
