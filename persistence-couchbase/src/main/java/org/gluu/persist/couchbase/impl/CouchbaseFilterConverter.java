@@ -9,6 +9,7 @@ package org.gluu.persist.couchbase.impl;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.search.filter.Filter;
@@ -128,7 +129,11 @@ public class CouchbaseFilterConverter {
 			return Expression.x((Long) currentGenericFilter.getAssertionValue());
 		}
 
-		return Expression.s(String.valueOf(currentGenericFilter.getAssertionValue()));
+		return Expression.s(escapeSql(currentGenericFilter.getAssertionValue()));
+	}
+
+	private String escapeSql(Object str) {
+		return StringEscapeUtils.escapeSql(String.valueOf(str));
 	}
 
 }
