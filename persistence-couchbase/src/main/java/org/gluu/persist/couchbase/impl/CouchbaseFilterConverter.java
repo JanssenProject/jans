@@ -9,12 +9,11 @@ package org.gluu.persist.couchbase.impl;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,11 +129,7 @@ public class CouchbaseFilterConverter {
 			return Expression.x((Long) currentGenericFilter.getAssertionValue());
 		}
 
-		return Expression.s(escapeSql(currentGenericFilter.getAssertionValue()));
-	}
-
-	private String escapeSql(Object str) {
-		return StringUtils.replace(StringEscapeUtils.escapeSql(String.valueOf(str)), "\"", "\\\"");
+		return Expression.s(StringHelper.escapeSql(currentGenericFilter.getAssertionValue()));
 	}
 
 }
