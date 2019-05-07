@@ -60,15 +60,15 @@ public class Cli {
             rpService.load();
 
             //check multiple options
-            if(Cli.checkForMultipleOptions(cmd)) {
+            if(hasMultipleActionOptions(cmd)) {
                 System.out.println("Multiple parameters in command is not allowed.");
                 printHelpAndExit();
                 return;
             }
             // list
             if (cmd.hasOption("l")) {
-                if(Cli.checkForArgsAfterListParameter(args)){
-                    System.out.println("Arguments after list parameter is not required, hence will be ignored.");
+                if(hasListParameterValue(args)) {
+                    System.out.println("Warning: Arguments after list parameter is not required, hence will be ignored.");
                 }
                 final Collection<Rp> values = rpService.getRps().values();
                 if (values.isEmpty()) {
@@ -255,7 +255,7 @@ public class Cli {
             }
             printHelpAndExit();
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ". Check if correct access_token is passed with -a parameter, error: " + e.getMessage());
+            System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -300,7 +300,7 @@ public class Cli {
         return options;
     }
 
-    private static boolean checkForMultipleOptions(CommandLine cmd){
+    private static boolean hasMultipleActionOptions(CommandLine cmd) {
         int optionsCount = 0;
         if (cmd.hasOption("l")) {
             optionsCount ++;
@@ -311,19 +311,21 @@ public class Cli {
         if (cmd.hasOption("d")) {
             optionsCount ++;
         }
-        if(optionsCount > 1)
+        if(optionsCount > 1) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
-    private static boolean checkForArgsAfterListParameter(String[] args){
+    private static boolean hasListParameterValue(String[] args) {
+        List<Option> options = new ArrayList<>(options().getOptions());
+        options.remove(options().getOption("l"));
 
-        String[] parameterList = {"-d", "-oxd_id", "-a"};
         int listIndex = Arrays.asList(args).indexOf("-l");
 
-        if((args.length-1) > listIndex){
-            return !(Arrays.stream(parameterList).anyMatch(args[listIndex+1]::equals));
+        if((args.length-1) > listIndex) {
+            return !options.stream().anyMatch(opt -> "-".concat(opt.getOpt()).equals(args[listIndex+1]));
         }
         return false;
     }
