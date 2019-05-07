@@ -246,6 +246,7 @@
     "pairwiseIdType":"${config.oxauth.pairwiseIdType}",
     "pairwiseCalculationKey":"${config.oxauth.pairwiseCalculationKey}",
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
+    "shareSubjectIdBetweenClientsWithSameSectorId": false,
     "webKeysStorage": "keystore",
     "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=oxAuth CA Certificates",
