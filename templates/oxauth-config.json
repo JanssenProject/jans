@@ -241,6 +241,7 @@
     "pairwiseIdType":"algorithmic",
     "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
     "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
+    "shareSubjectIdBetweenClientsWithSameSectorId": false,
     "webKeysStorage": "keystore",
     "dnName": "%(default_openid_jks_dn_name)s",
     "keyStoreFile": "%(oxauth_openid_jks_fn)s",
