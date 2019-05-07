@@ -70,14 +70,14 @@ class ClientRegistration(ClientRegistrationType):
         if requiredScopes == None:
             print "Casa client registration. No list of scopes was passed in script parameters"
             return
-        
+
         requiredScopes = StringHelper.split(requiredScopes.getValue2(), ",")
         newScopes = client.getScopes()
         scopeService = CdiUtil.bean(ScopeService)
-        
+
         for scopeName in requiredScopes:
-            scope = scopeService.getScopeByDisplayName(scopeName)
-            if not scope.getIsDefault():
+            scope = scopeService.getScopeById(scopeName)
+            if not scope.isDefaultScope():
                 print "Casa client registration. Adding scope '%s'" % scopeName
                 newScopes = ArrayHelper.addItemToStringArray(newScopes, scope.getDn())
 
