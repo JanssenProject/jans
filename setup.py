@@ -637,7 +637,7 @@ class Setup(object):
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                         'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
                                         'jackson-core-*.jar', 'jackson-annotations-*.jar', 'jackson-databind-*.jar', 'jackson-datatype-json-org-*.jar',
-                                        'jackson-module-jaxb-annotations-*.jar', 'json-*.jar', 'jettison-*.jar', 'oxauth-model-*.jar',
+                                        'jackson-module-jaxb-annotations-*.jar', 'json-20180813*.jar', 'jettison-*.jar', 'oxauth-model-*.jar',
                                         'oxauth-client-*.jar', "oxcore-util-*.jar" ]
 
  
