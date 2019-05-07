@@ -10,6 +10,7 @@ package org.gluu.persist.couchbase.impl;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.search.filter.Filter;
@@ -133,7 +134,7 @@ public class CouchbaseFilterConverter {
 	}
 
 	private String escapeSql(Object str) {
-		return StringEscapeUtils.escapeSql(String.valueOf(str));
+		return StringUtils.replace(StringEscapeUtils.escapeSql(String.valueOf(str)), "\"", "\\\"");
 	}
 
 }
