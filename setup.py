@@ -204,6 +204,7 @@ class Setup(object):
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
         self.opensslCommand = '/usr/bin/openssl'
+        self.systemctl = os.popen('which systemctl').read().strip()
 
         self.sysemProfile = "/etc/profile"
 
@@ -857,9 +858,13 @@ class Setup(object):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
-                self.run(["/usr/bin/systemctl", 'enable', serviceName])
+                self.run([self.systemctl, 'enable', serviceName])
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on"])
+                
+        elif self.os_type+self.os_version == 'ubuntu18':
+            self.run([self.systemctl, 'enable', serviceName])
+                
         elif self.os_type in ['ubuntu', 'debian']:
             cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
             
@@ -1943,7 +1948,7 @@ class Setup(object):
         return certificate_text
 
     def install_oxauth(self):
-        self.logIt("Copying identity.war into jetty webapps folder...")
+        self.logIt("Copying oxauth.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
@@ -1952,7 +1957,7 @@ class Setup(object):
         self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
 
     def install_oxtrust(self):
-        self.logIt("Copying oxauth.war into jetty webapps folder...")
+        self.logIt("Copying identity.war into jetty webapps folder...")
 
         jettyServiceName = 'identity'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
@@ -3129,7 +3134,7 @@ class Setup(object):
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
 
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -3192,8 +3197,10 @@ class Setup(object):
 
     def detect_service_path(self):
         service_path = '/sbin/service'
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-            service_path = '/usr/bin/systemctl'
+
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
+            service_path = self.systemctl
+            
         elif self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
 
@@ -3203,12 +3210,12 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
         except:
-            self.logIt("Error starting Jetty service '%s'" % operation)
+            self.logIt("Error starting service '%s'" % operation)
             self.logIt(traceback.format_exc(), True)
 
     def start_services(self):
@@ -3509,7 +3516,7 @@ class Setup(object):
             with open(oxauth_systemd_script_fn, 'w') as w:
                 w.write(oxauth_systemd_script)
             self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
-            self.run(['systemctl', 'daemon-reload'])
+            self.run([self.systemctl, 'daemon-reload'])
             
 
     def couchebaseCreateCluster(self):
