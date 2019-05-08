@@ -37,7 +37,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
     // Run this test with both pairwiseIdType persistent and algorithmic
     // And ensure shareSubjectIdBetweenClientsWithSameSectorId is set to false
     @Parameters({"redirectUris", "sectorIdentifierUri", "redirectUri", "userId", "userSecret"})
-    @Test
+    @Test(enabled = false)
     public void pairwiseSectorIdentifierTypeToPreventSubjectIdentifierCorrelation(
             final String redirectUris, final String sectorIdentifierUri, final String redirectUri,
             final String userId, final String userSecret) throws Exception {
@@ -73,7 +73,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
     // Run this test with both pairwiseIdType persistent and algorithmic
     // And ensure shareSubjectIdBetweenClientsWithSameSectorId is set to true
     @Parameters({"redirectUris", "sectorIdentifierUri", "redirectUri", "userId", "userSecret"})
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void shareSubjectIdBetweenClientsWithSameSectorId(
             final String redirectUris, final String sectorIdentifierUri, final String redirectUri,
             final String userId, final String userSecret) throws Exception {
