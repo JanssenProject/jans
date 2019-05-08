@@ -862,7 +862,7 @@ class Setup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on"])
                 
-        elif self.os_type+self.os_version == 'ubuntu18':
+        elif self.os_type+self.os_version in ('ubuntu18','ubuntu9'):
             self.run([self.systemctl, 'enable', serviceName])
                 
         elif self.os_type in ['ubuntu', 'debian']:
@@ -3134,7 +3134,7 @@ class Setup(object):
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -3198,7 +3198,7 @@ class Setup(object):
     def detect_service_path(self):
         service_path = '/sbin/service'
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
             service_path = self.systemctl
             
         elif self.os_type in ['debian', 'ubuntu']:
@@ -3210,7 +3210,7 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version == 'ubuntu18'):
+            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
