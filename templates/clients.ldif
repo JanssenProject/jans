@@ -16,14 +16,12 @@ oxAuthGrantType: refresh_token
 oxAuthScope: inum=F0C4,ou=scopes,o=gluu
 oxAuthScope: inum=10B2,ou=scopes,o=gluu
 oxAuthScope: inum=764C,ou=scopes,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/identity/ssologout
+oxAuthLogoutURI: https://%(hostname)s/identity/ssologout.htm
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
-oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
-oxAuthRedirectURI: https://%(hostname)s/identity/authentication/getauthcode
-oxAuthRedirectURI: https://%(hostname)s/cas/login
+oxAuthRedirectURI: https://%(hostname)s/identity/authcode.htm
 oxAuthRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims?authentication=true
 oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
-oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finishlogout
+oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/finishlogout.htm
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthTrustedClient: true
