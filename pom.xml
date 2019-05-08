@@ -22,7 +22,6 @@
 
 		<weld.version>3.1.0.Final</weld.version>
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
-		<prettyfaces.version>3.4.2.Final</prettyfaces.version>
 
 		<jsf-api.version>2.2.19</jsf-api.version>
 		<jsf-impl.version>2.2.19</jsf-impl.version>
@@ -129,18 +128,6 @@
 				<groupId>org.richfaces</groupId>
 				<artifactId>richfaces-core</artifactId>
 				<version>${richfaces.version}</version>
-			</dependency>
-
-			<!-- Prettyfaces -->
-			<dependency>
-				<groupId>org.ocpsoft.rewrite</groupId>
-				<artifactId>rewrite-servlet</artifactId>
-				<version>${prettyfaces.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ocpsoft.rewrite</groupId>
-				<artifactId>rewrite-config-prettyfaces</artifactId>
-				<version>${prettyfaces.version}</version>
 			</dependency>
 
 			<dependency>
