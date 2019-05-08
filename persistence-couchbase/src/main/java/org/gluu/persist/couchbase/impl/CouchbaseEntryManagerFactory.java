@@ -7,18 +7,27 @@
 
 package org.gluu.persist.couchbase.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import org.apache.commons.io.IOUtils;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.util.FileUtil;
+import org.gluu.util.init.Initializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 
@@ -28,16 +37,35 @@ import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
  * @author Yuriy Movchan Date: 05/31/2018
  */
 @ApplicationScoped
-public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFactory {
+public class CouchbaseEntryManagerFactory extends Initializable implements PersistenceEntryManagerFactory{
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
 
+    private DefaultCouchbaseEnvironment.Builder builder;
     private CouchbaseEnvironment couchbaseEnvironment;
+
+	private Properties couchbaseConnectionProperties;
 
     @PostConstruct
     public void create() {
-        this.couchbaseEnvironment = DefaultCouchbaseEnvironment.create();
+    	this.builder = DefaultCouchbaseEnvironment.builder().mutationTokensEnabled(true).computationPoolSize(5);
     }
+
+	@Override
+	protected void initInternal() {
+        // SSL settings
+        boolean useSSL = Boolean.valueOf(couchbaseConnectionProperties.getProperty("ssl.trustStore.enable")).booleanValue();
+        if (useSSL) {
+            String sslTrustStoreFile = couchbaseConnectionProperties.getProperty("ssl.trustStore.file");
+            String sslTrustStorePin = couchbaseConnectionProperties.getProperty("ssl.trustStore.pin");
+
+            this.couchbaseEnvironment = builder.sslEnabled(true).sslTruststoreFile(sslTrustStoreFile).sslTruststorePassword(sslTrustStorePin).build();
+        } else {
+        	this.couchbaseEnvironment = builder.sslEnabled(false).build();
+        }
+
+        this.builder = null;
+	}
 
     @Override
     public String getPersistenceType() {
@@ -55,7 +83,14 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
-        CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(conf, couchbaseEnvironment);
+    	this.couchbaseConnectionProperties = conf;
+    	init();
+    	
+    	if (!isInitialized()) {
+            throw new ConfigurationException("Failed to create Couchbase environment !");
+    	}
+
+    	CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(conf, couchbaseEnvironment);
         connectionProvider.create();
         if (!connectionProvider.isCreated()) {
             throw new ConfigurationException(
@@ -68,5 +103,18 @@ public class CouchbaseEntryManagerFactory implements PersistenceEntryManagerFact
 
         return couchbaseEntryManager;
     }
-
+/*
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+    	Properties prop = new Properties();
+    	prop.load(new FileInputStream(new File("D:/Temp/gluu-couchbase.properties")));
+    	
+    	CouchbaseEntryManagerFactory cemf = new CouchbaseEntryManagerFactory();
+    	cemf.create();
+    	
+    	CouchbaseEntryManager cem = cemf.createEntryManager(prop);
+        
+        System.out.println(cem.getOperationService().getConnectionProvider().isCreated());
+        
+	}
+*/
 }

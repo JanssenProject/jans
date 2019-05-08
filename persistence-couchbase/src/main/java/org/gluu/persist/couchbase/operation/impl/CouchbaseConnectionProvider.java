@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.core.CouchbaseException;
+import com.couchbase.client.core.RequestCancelledException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
@@ -79,6 +80,7 @@ public class CouchbaseConnectionProvider {
             }
 
             LOG.error("Failed to create connection with properties: '{}'. Exception: {}", clonedProperties, ex);
+            ex.printStackTrace();
         }
     }
 
@@ -298,17 +300,5 @@ public class CouchbaseConnectionProvider {
     public PasswordEncryptionMethod getPasswordEncryptionMethod() {
         return passwordEncryptionMethod;
     }
-
-    public static void main(String[] args) {
-    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment.Builder builder = com.couchbase.client.java.env.DefaultCouchbaseEnvironment.builder().bootstrapHttpDirectPort(38091);
-    	
-    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment couchbaseEnvironment = builder.build();
-    	CouchbaseCluster cluster = CouchbaseCluster.create(couchbaseEnvironment, "u164.gluu.info");
-        cluster.authenticate("admin", "secret");
-        
-        Bucket bucket = cluster.openBucket("gluu");
-        System.out.println(bucket.exists("_"));
-        
-	}
 }
 
