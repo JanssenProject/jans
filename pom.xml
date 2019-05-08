@@ -75,6 +75,7 @@
 		<module>oxService</module>
 		<module>oxServer</module>
 		<module>oxJsfUtil</module>
+		<module>oxRadius</module>
 	</modules>
 
 
