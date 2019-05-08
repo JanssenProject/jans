@@ -92,8 +92,8 @@
     "oxAuthClientPassword":"%(oxauthClient_encoded_pw)s",
     "oxAuthClientScope":"openid+profile+email+user_name",
 
-    "loginRedirectUrl":"https://%(hostname)s/identity/authentication/getauthcode",
-    "logoutRedirectUrl":"https://%(hostname)s/identity/authentication/finishlogout",
+    "loginRedirectUrl":"https://%(hostname)s/identity/authcode.htm",
+    "logoutRedirectUrl":"https://%(hostname)s/identity/finishlogout.htm",
 
     "umaIssuer":"https://%(hostname)s",
 
