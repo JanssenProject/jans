@@ -29,15 +29,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.ocpsoft.rewrite</groupId>
-			<artifactId>rewrite-servlet</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ocpsoft.rewrite</groupId>
-			<artifactId>rewrite-config-prettyfaces</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
 			<version>${project.version}</version>
