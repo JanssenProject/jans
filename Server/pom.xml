@@ -316,16 +316,6 @@
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.ocpsoft.rewrite</groupId>
-					<artifactId>rewrite-config-prettyfaces</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.ocpsoft.rewrite</groupId>
-					<artifactId>rewrite-servlet</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- oxEleven -->
