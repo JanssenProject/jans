@@ -186,6 +186,8 @@ paths:
                 example: 1501941343
         400:
           description: Invalid parameters are provided to endpoint.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         403:
           description: Forbidden. Invalid access token provided in Authorization header.
         500:
@@ -1285,4 +1287,17 @@ definitions:
       x5t#S256:
         type: string
       x5u:
+        type: string
+
+  ErrorResponse:
+    type: object
+    required:
+      - error
+      - error_description
+    properties:
+      error:
+        type: string
+      error_description:
+        type: string
+      details:
         type: string
