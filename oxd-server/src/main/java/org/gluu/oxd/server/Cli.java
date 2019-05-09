@@ -17,7 +17,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.OxdClient;
 import org.gluu.oxd.common.CoreUtils;
@@ -30,6 +29,7 @@ import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.RpService;
 import org.gluu.util.Pair;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,14 +60,14 @@ public class Cli {
             rpService.load();
 
             //check multiple options
-            if(hasMultipleActionOptions(cmd)) {
+            if (hasMultipleActionOptions(cmd)) {
                 System.out.println("Multiple parameters in command is not allowed.");
                 printHelpAndExit();
                 return;
             }
             // list
             if (cmd.hasOption("l")) {
-                if(hasListParameterValue(args)) {
+                if (hasListParameterValue(args)) {
                     System.out.println("Warning: Arguments after list parameter is not required, hence will be ignored.");
                 }
                 final Collection<Rp> values = rpService.getRps().values();
@@ -303,15 +303,15 @@ public class Cli {
     private static boolean hasMultipleActionOptions(CommandLine cmd) {
         int optionsCount = 0;
         if (cmd.hasOption("l")) {
-            optionsCount ++;
+            optionsCount++;
         }
         if (cmd.hasOption("oxd_id")) {
-            optionsCount ++;
+            optionsCount++;
         }
         if (cmd.hasOption("d")) {
-            optionsCount ++;
+            optionsCount++;
         }
-        if(optionsCount > 1) {
+        if (optionsCount > 1) {
             return true;
         } else {
             return false;
@@ -324,8 +324,8 @@ public class Cli {
 
         int listIndex = Arrays.asList(args).indexOf("-l");
 
-        if((args.length-1) > listIndex) {
-            return !options.stream().anyMatch(opt -> "-".concat(opt.getOpt()).equals(args[listIndex+1]));
+        if ((args.length - 1) > listIndex) {
+            return !options.stream().anyMatch(opt -> "-".concat(opt.getOpt()).equals(args[listIndex + 1]));
         }
         return false;
     }
