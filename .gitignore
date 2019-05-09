@@ -10,3 +10,6 @@
 
 # Maven
 target
+
+# Visual Studio Code project files 
+*.factorypath
