@@ -6,12 +6,9 @@
 
 package org.gluu.oxauth.model.error;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.gluu.oxauth.model.configuration.Configuration;
-import org.gluu.oxauth.model.error.IErrorType;
 import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.gluu.oxauth.model.register.RegisterErrorResponseType;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
@@ -22,6 +19,8 @@ import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +79,8 @@ public class ErrorResponseFactory implements Configuration {
             }
         }
 
-        log.debug("Error not found, id: {}", type);
-        return null;
+        log.error("Error not found, id: {}", type);
+        return new ErrorMessage(type.getParameter(), type.getParameter(), null);
     }
 
     public String getErrorAsJson(IErrorType p_type) {
