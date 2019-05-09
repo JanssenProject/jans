@@ -1386,7 +1386,7 @@ class Setup(object):
 
         self.run([self.cmd_chmod, '+x', service_init_script_fn])
 
-    def installJettyService(self, serviceConfiguration, supportCustomizations=False):
+    def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
@@ -1404,10 +1404,12 @@ class Setup(object):
         if supportCustomizations:
             if not os.path.exists("%s/custom" % jettyServiceBase):
                 self.run([self.cmd_mkdir, '-p', "%s/custom" % jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', "%s/custom/i18n" % jettyServiceBase])
             self.run([self.cmd_mkdir, '-p', "%s/custom/pages" % jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', "%s/custom/libs" % jettyServiceBase])
+
+            if not supportOnlyPageCustomizations:
+                self.run([self.cmd_mkdir, '-p', "%s/custom/i18n" % jettyServiceBase])
+                self.run([self.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
+                self.run([self.cmd_mkdir, '-p', "%s/custom/libs" % jettyServiceBase])
 
         self.logIt("Preparing %s service base configuration" % serviceName)
         jettyEnv = os.environ.copy()
@@ -2029,7 +2031,7 @@ class Setup(object):
             jettyIdpServiceName = 'idp'
             jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)
 
-            self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
+            self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName], True, True)
             self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
 
             # Prepare libraries needed to for command line IDP3 utilities
