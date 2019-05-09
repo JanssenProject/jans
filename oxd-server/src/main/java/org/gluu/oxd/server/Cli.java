@@ -33,10 +33,7 @@ import org.gluu.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author yuriyz
@@ -62,8 +59,17 @@ public class Cli {
             RpService rpService = injector.getInstance(RpService.class);
             rpService.load();
 
+            //check multiple options
+            if(hasMultipleActionOptions(cmd)) {
+                System.out.println("Multiple parameters in command is not allowed.");
+                printHelpAndExit();
+                return;
+            }
             // list
             if (cmd.hasOption("l")) {
+                if(hasListParameterValue(args)) {
+                    System.out.println("Warning: Arguments after list parameter is not required, hence will be ignored.");
+                }
                 final Collection<Rp> values = rpService.getRps().values();
                 if (values.isEmpty()) {
                     System.out.println("There are no any entries yet in database.");
@@ -249,7 +255,7 @@ public class Cli {
             }
             printHelpAndExit();
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
+            System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -293,4 +299,37 @@ public class Cli {
 
         return options;
     }
+
+    private static boolean hasMultipleActionOptions(CommandLine cmd) {
+        int optionsCount = 0;
+        if (cmd.hasOption("l")) {
+            optionsCount ++;
+        }
+        if (cmd.hasOption("oxd_id")) {
+            optionsCount ++;
+        }
+        if (cmd.hasOption("d")) {
+            optionsCount ++;
+        }
+        if(optionsCount > 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean hasListParameterValue(String[] args) {
+        List<Option> options = new ArrayList<>(options().getOptions());
+        options.remove(options().getOption("l"));
+
+        int listIndex = Arrays.asList(args).indexOf("-l");
+
+        if((args.length-1) > listIndex) {
+            return !options.stream().anyMatch(opt -> "-".concat(opt.getOpt()).equals(args[listIndex+1]));
+        }
+        return false;
+    }
+
 }
+
+
