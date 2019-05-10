@@ -307,6 +307,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-cdi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
