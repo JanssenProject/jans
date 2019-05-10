@@ -39,6 +39,11 @@ public enum AuthorizeErrorResponseType implements IErrorType {
     ACCESS_DENIED("access_denied"),
 
     /**
+     * AS requires RP to re-send authorization request.
+     */
+    RETRY("retry"),
+
+    /**
      * The authorization server does not support obtaining an access token using
      * this method.
      */
