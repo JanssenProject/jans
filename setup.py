@@ -223,6 +223,8 @@ class Setup(object):
         self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
+        self.groupMappings = ('base', 'user', 'cache', 'statistic', 'site')
+        self.mappingLocations = { group: 'opendj' for group in self.groupMappings }  #default locations are OpenDJ
 
         # Gluu components installation status
         self.installOxAuth = True
@@ -235,6 +237,7 @@ class Setup(object):
 
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
+        self.enableHybridStorage = False
 
         self.currentGluuVersion = '4.0.0'
 
@@ -602,6 +605,28 @@ class Setup(object):
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
                            ]
+
+        self.mappingsLdif = {   
+                                'base': [
+                                        self.ldif_base, 
+                                         self.ldif_attributes,
+                                         self.ldif_scopes,
+                                         self.ldif_clients,
+                                         self.ldif_scripts,
+                                         self.ldif_configuration,
+                                         self.ldif_scim,
+                                         #self.ldif_passport,
+                                         self.ldif_idp,
+                                         self.lidf_oxtrust_api,
+                                         ],
+                                'user': [self.ldif_people, self.ldif_groups],
+                                'cache': [],
+                                'statistic': [self.ldif_metric],
+                                'site': [self.ldif_site],
+                            }
+                                
+
+            
 
         self.ce_templates = {self.oxauth_config_json: False,
                              self.gluu_python_readme: True,
@@ -1874,8 +1899,7 @@ class Setup(object):
         else:
             ndigit = random.randint(1, 3)
             nspecial = random.randint(1, 2)
-            ndigit = random.randint(1,3)
-            nspecial = random.randint(1,2)
+
 
             ncletter = random.randint(2, 5)
             nsletter = size - ndigit - nspecial - ncletter
@@ -2310,7 +2334,9 @@ class Setup(object):
         self.createUsers()
         self.makeFolders()
 
-        if self.install_couchbase:
+        if self.enableHybridStorage:
+            self.persistence_type = 'hybrid'
+        elif self.install_couchbase:
             self.persistence_type = 'couchbase'
         else:
             self.persistence_type = 'ldap'
@@ -2338,6 +2364,107 @@ class Setup(object):
         fname = os.path.join(self.configFolder, 'gluu.properties')
         fcontent = 'persistence.type={0}'.format(self.persistence_type)
         self.writeFile(fname, fcontent)
+
+
+    def promptBackendType(self, backend_types):
+
+        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
+        
+        if promptForLDAP == 'y':
+            
+
+
+            self.installLdap = True
+            option = None
+            
+            if len(backend_types) == 1:
+                self.ldap_type = backend_types[0][1] 
+            
+            else:
+                prompt_text = 'Install '
+                options = []
+                for i, backend in enumerate(backend_types):
+                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
+                    options.append(str(i+1))
+
+                prompt_text += '[{0}]'.format('|'.join(options))
+                option=None
+
+                while not option in options:
+                    option=self.getPrompt(prompt_text, options[0])
+                    if not option in options:
+                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
+
+                self.ldap_type = backend_types[int(option)-1][1]
+
+                if self.ldap_type == 'wrends':
+                    self.ldap_type = 'opendj'
+                    self.opendj_type = 'wrends'
+
+                elif self.ldap_type == 'opendj':
+                    self.opendj_type = 'opendj'
+
+                elif self.ldap_type == 'couchbase':
+                    self.cache_provider_type = 'NATIVE_PERSISTENCE'
+                    print ('  Please note that you have to update your firewall configuration to\n'
+                            '  allow connections to the following ports:\n'
+                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
+                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
+                    self.install_couchbase = True
+        else:
+            self.installLdap = False
+
+
+    def getBackendTypes(self):
+
+        if self.os_type in ('ubuntu', 'debian'):
+            suffix = 'deb'
+
+        elif self.os_type in ('centos', 'red', 'fedora'):
+            suffix = 'rpm'
+
+        backend_types = []
+
+        if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
+            backend_types.append(('Gluu OpenDj','opendj'))
+        
+        if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
+            backend_types.append(('Wren:DS','wrends'))
+
+        if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+            backend_types.append(('Couchbase','couchbase'))
+
+        return backend_types
+
+    def promptForBackendMappings(self, backend_types):
+        
+        
+        
+        options = []
+        
+        backend_type_str_list = []
+
+        for i, backend in enumerate(backend_types):
+            backend_type_str_list.append('{0}:{1}'.format(i+1, backend[0]))
+            options.append(str(i+1))
+
+        backend_type_str = '[{}]'.format(" " .join(backend_type_str_list))
+        
+        for group in self.groupMappings:
+            while True:
+                prompt = self.getPrompt("Location of {0} {1}".format(group, backend_type_str))
+                if prompt in options:
+                    backendType = backend_types[int(prompt)-1][1]
+                    if backendType == 'couchbase':
+                        self.install_couchbase = True
+                    elif backendType == 'ldap':
+                        self.installLdap = True
+
+                    self.mappingLocations[group] = backendType
+                    break
+                print "Please select one of {}.".format(", ".join(options))
 
     def promptForProperties(self):
 
@@ -2447,14 +2574,6 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-
-        if self.os_type in ('ubuntu', 'debian'):
-            suffix = 'deb'
-
-        elif self.os_type in ('centos', 'red', 'fedora'):
-            suffix = 'rpm'
-
-
         if self.remoteCouchbase:
             self.installLdap = True
             self.ldap_type = 'couchbase'
@@ -2475,62 +2594,14 @@ class Setup(object):
                     print ("    Cant establish connection to Couchbase server with given parameters.")
 
         else:
-            promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
-            if promptForLDAP == 'y':
-                
-                backend_types = []
 
-                if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
-                    backend_types.append(('Gluu OpenDj','opendj'))
-                
-                if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
-                    backend_types.append(('Wren:DS','wrends'))
-
-                if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
-                    backend_types.append(('Couchbase','couchbase'))
-
-                self.installLdap = True
-                option = None
-                
-                if len(backend_types) == 1:
-                    self.ldap_type = backend_types[0][1] 
-                
-                else:
-                    prompt_text = 'Install '
-                    options = []
-                    for i, backend in enumerate(backend_types):
-                        prompt_text += '({0}) {1} '.format(i+1, backend[0])
-                        options.append(str(i+1))
-
-                    prompt_text += '[{0}]'.format('|'.join(options))
-                    option=None
-
-                    while not option in options:
-                        option=self.getPrompt(prompt_text, options[0])
-                        if not option in options:
-                            print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
-
-                    self.ldap_type = backend_types[int(option)-1][1]
-
-                    if self.ldap_type == 'wrends':
-                        self.ldap_type = 'opendj'
-                        self.opendj_type = 'wrends'
-
-                    elif self.ldap_type == 'opendj':
-                        self.opendj_type = 'opendj'
-
-                    elif self.ldap_type == 'couchbase':
-                        self.cache_provider_type = 'NATIVE_PERSISTENCE'
-                        print ('  Please note that you have to update your firewall configuration to\n'
-                                '  allow connections to the following ports:\n'
-                                '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                                '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-                        sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                        self.install_couchbase = True
-
+            backend_types = self.getBackendTypes()
+            
+            if self.enableHybridStorage:
+                self.promptForBackendMappings(backend_types)
             else:
-                self.installLdap = False
+                self.promptBackendType(backend_types)
+
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
@@ -3292,6 +3363,7 @@ class Setup(object):
         self.opendj_version = self.determineOpenDJVersion()
 
         self.createLdapPw()
+        
         try:
             self.pbar.progress("OpenDJ: installing", False)
             self.install_opendj()
@@ -3308,7 +3380,19 @@ class Setup(object):
                 self.pbar.progress("OpenDJ: creating indexes", False)
                 self.index_opendj()
                 self.pbar.progress("OpenDJ: importing Ldif files", False)
-                self.import_ldif_opendj()
+                
+                ldif_files = []
+                base_ldif = False
+                for group in self.groupMappings:
+                    if self.mappingLocations[group] == 'opendj':
+                        ldif_files += self.mappingsLdif[group]
+                        if group=='base':
+                            base_ldif = True
+                        
+                if not base_ldif:
+                    ldif_files.insert(0, self.ldif_base)
+
+                self.import_ldif_opendj(ldif_files)
                 
             self.pbar.progress("OpenDJ: post installation", False)
             self.post_install_opendj()
@@ -3768,10 +3852,6 @@ class Setup(object):
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
-                    'user_mapping': 'people, groups',
-                    'session_mapping': 'cache',
-                    'static_mapping': 'statistic',
-                    'site_mapping': 'site',
                     'encryption_method': 'SSHA-256',
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
@@ -3779,6 +3859,22 @@ class Setup(object):
                     'certFolder': self.certFolder,
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
+
+
+        bucketMappings = {
+                            'user': 'people, groups',
+                            'cache': 'cache',
+                            'static': 'statistic',
+                            'site': 'site',
+                        }
+
+        couchbase_mappings = []
+
+        for group in self.groupMappings[1:]:
+            if self.mappingLocations[group] == 'couchbase':
+                couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, bucketMappings[group]))
+
+        prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
 
         return prop_dict
         
@@ -3806,26 +3902,29 @@ class Setup(object):
 
         self.couchbaseSSL()
 
-        #TO DO: calculations of bucketRamsize is neaded
-        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_user', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_statistic', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_site', bucketRamsize=self.couchbaseClusterRamsize/5)
-        self.couchebaseCreateBucket('gluu_cache', bucketRamsize=self.couchbaseClusterRamsize/5)
+        bucketNumber = 1
+        
+        for group in self.mappingLocations:
+            if self.mappingLocations[group] == 'couchbase':
+                bucketNumber += 1
 
+
+        #TO DO: calculations of bucketRamsize is neaded
+        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+
+        for group in self.mappingLocations:
+            if self.mappingLocations[group] == 'couchbase':
+                bucket = 'gluu_{0}'.format(group)
+                self.couchebaseCreateBucket(bucket, bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+                self.couchebaseCreateIndexes(bucket)
+                
+                self.import_ldif_couchebase(self.mappingsLdif[group])
+                
         if not self.remoteCouchbase:
             if not self.checkIfGluuBucketReady():
                 sys.exit("Couchbase was not ready")
-            
-        #TO DO: what indexes should be created in each bucket?
-        self.couchebaseCreateIndexes('gluu')
-        self.couchebaseCreateIndexes('gluu_user')
-        self.couchebaseCreateIndexes('gluu_statistic')
-        self.couchebaseCreateIndexes('gluu_site')
 
-        self.import_ldif_couchebase()
         self.couchbaseProperties()
-
 
     def loadTestData(self):
         self.logIt("Loading test ldif files")
@@ -3859,6 +3958,7 @@ def print_help():
     print "    -t   Load test data"
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
+    print "    --enable-hybrid-storage"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
     
@@ -3871,6 +3971,7 @@ def getOpts(argv, setupOptions):
                                         'import-ldif',
                                         'listen_all_interfaces',
                                         'remote-couchbase',
+                                        'enable-hybrid-storage',
                                         ]
                                     )
     except getopt.GetoptError:
@@ -3919,6 +4020,8 @@ def getOpts(argv, setupOptions):
             setupOptions['listenAllInterfaces'] = True
         elif opt == '--remote-couchbase':
             setupOptions['remoteCouchbase'] = True
+        elif opt == '--enable-hybrid-storage':
+            setupOptions['enableHybridStorage'] = True
         elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
@@ -3947,6 +4050,7 @@ if __name__ == '__main__':
         'allowDeprecatedApplications': False,
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
+        'enableHybridStorage': False,
     }
 
     if len(sys.argv) > 1:
