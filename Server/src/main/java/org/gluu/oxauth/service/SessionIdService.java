@@ -731,6 +731,10 @@ public class SessionIdService {
         return getFromCache(sessionId);
     }
 
+    public SessionId getSessionId(HttpServletRequest request) {
+        return getSessionId(getSessionIdFromCookie(request));
+    }
+
     public SessionId getSessionId(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
             return null;

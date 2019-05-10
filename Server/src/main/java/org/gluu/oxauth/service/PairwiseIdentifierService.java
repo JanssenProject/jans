@@ -20,7 +20,7 @@ import org.gluu.oxauth.service.UserService;
 
 /**
  * @author Javier Rojas Blum
- * @version June 30, 2018
+ * @version May 7, 2019
  */
 @Stateless
 @Named
@@ -65,10 +65,16 @@ public class PairwiseIdentifierService {
             prepareBranch(userInum);
 
             String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
-            Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
-            Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
 
-            Filter filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter);
+            Filter filter = null;
+            if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
+                filter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
+            } else {
+                Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
+                Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
+
+                filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter);
+            }
 
             List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
             if (entries != null && !entries.isEmpty()) {
@@ -84,7 +90,8 @@ public class PairwiseIdentifierService {
         } else { // PairwiseIdType.ALGORITHMIC
             String key = appConfiguration.getPairwiseCalculationKey();
             String salt = appConfiguration.getPairwiseCalculationSalt();
-            String localAccountId = userInum + clientId;
+            String localAccountId = appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId() ?
+                    userInum : userInum + clientId;
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
                     sectorIdentifierUri, localAccountId, key, salt, appConfiguration);
