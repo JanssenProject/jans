@@ -38,7 +38,16 @@ public class ErrorMessage {
 	private String description;
 	private String uri;
 
-	@XmlAttribute(name = "id")
+    public ErrorMessage() {
+    }
+
+    public ErrorMessage(String id, String description, String uri) {
+        this.id = id;
+        this.description = description;
+        this.uri = uri;
+    }
+
+    @XmlAttribute(name = "id")
 	public String getId() {
 		return id;
 	}
