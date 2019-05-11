@@ -2429,6 +2429,7 @@ class Setup(object):
 
         if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
             backend_types.append(('Gluu OpenDj','opendj'))
+            self.ldap_type = 'opendj'
         
         if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
             backend_types.append(('Wren:DS','wrends'))
@@ -2439,9 +2440,7 @@ class Setup(object):
         return backend_types
 
     def promptForBackendMappings(self, backend_types):
-        
-        
-        
+
         options = []
         
         backend_type_str_list = []
@@ -2454,17 +2453,19 @@ class Setup(object):
         
         for group in self.groupMappings:
             while True:
-                prompt = self.getPrompt("Location of {0} {1}".format(group, backend_type_str))
+                prompt = self.getPrompt("Location of {0} {1}".format(group, backend_type_str), options[0])
                 if prompt in options:
                     backendType = backend_types[int(prompt)-1][1]
                     if backendType == 'couchbase':
                         self.install_couchbase = True
-                    elif backendType == 'ldap':
+                    elif backendType == 'opendj':
                         self.installLdap = True
 
                     self.mappingLocations[group] = backendType
                     break
                 print "Please select one of {}.".format(", ".join(options))
+
+        self.installLdap
 
     def promptForProperties(self):
 
@@ -2596,6 +2597,8 @@ class Setup(object):
         else:
 
             backend_types = self.getBackendTypes()
+            
+            print 'enableHybridStorage', self.enableHybridStorage
             
             if self.enableHybridStorage:
                 self.promptForBackendMappings(backend_types)
@@ -3680,9 +3683,15 @@ class Setup(object):
                     self.logIt("Failed to execute query {}, reason:".format(query, result.reason), errorLog=True)
 
     def couchebaseCreateIndexes(self, bucket):
+        
+        couchbase_index = json.load(open(self.couchbaseIndexJson))
+        
+        if not bucket in couchbase_index:
+            return
+        
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
-        couchbase_index = json.load(open(self.couchbaseIndexJson))
+        
 
         if not os.path.exists(self.n1qlOutputFolder):
             os.mkdir(self.n1qlOutputFolder)
@@ -3860,11 +3869,12 @@ class Setup(object):
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
+        
 
         bucketMappings = {
                             'user': 'people, groups',
                             'cache': 'cache',
-                            'static': 'statistic',
+                            'statistic': 'statistic',
                             'site': 'site',
                         }
 
@@ -4079,6 +4089,7 @@ if __name__ == '__main__':
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
     installObject.listenAllInterfaces = setupOptions['listenAllInterfaces']
     installObject.remoteCouchbase = setupOptions['remoteCouchbase']
+    installObject.enableHybridStorage = setupOptions['enableHybridStorage']
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
