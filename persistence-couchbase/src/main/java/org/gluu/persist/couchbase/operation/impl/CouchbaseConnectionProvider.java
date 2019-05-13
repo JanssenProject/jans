@@ -34,7 +34,6 @@ import com.couchbase.client.java.query.Statement;
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
-// TODO: getBucketMappingByKey
 public class CouchbaseConnectionProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
@@ -90,7 +89,7 @@ public class CouchbaseConnectionProvider {
         this.userName = props.getProperty("auth.userName");
         this.userPassword = props.getProperty("auth.userPassword");
 
-        this.defaultBucket = props.getProperty("bucket.default");
+        this.defaultBucket = props.getProperty("bucket.default", null);
         if (StringHelper.isEmpty(defaultBucket)) {
             throw new ConfigurationException("Default bucket is not defined!");
         }
@@ -254,11 +253,11 @@ public class CouchbaseConnectionProvider {
         }
 
         BucketMapping bucketMapping = baseNameToBucketMapping.get(baseNameParts[0]);
-        if (bucketMapping == null) {
-            return defaultBucketMapping;
+        if (bucketMapping != null) {
+            return bucketMapping;
         }
 
-        return bucketMapping;
+        return defaultBucketMapping;
     }
 
     public int getCreationResultCode() {

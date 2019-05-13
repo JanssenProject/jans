@@ -24,7 +24,7 @@ public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     public static final String LDAP_DEFAULT_PROPERTIES_FILE = "gluu-ldap.properties";
 
-	private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManager.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManagerFactory.class);
 
 	private Properties ldapConnectionProperties;
 

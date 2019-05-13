@@ -5,18 +5,18 @@
  * Copyright (c) 2018, Gluu
  */
 
-package org.gluu.persist.couchbase.impl;
+package org.gluu.persist.key.impl;
 
-import org.gluu.persist.couchbase.model.ParsedKey;
 import org.gluu.persist.exception.KeyConversionException;
+import org.gluu.persist.key.impl.model.ParsedKey;
 import org.gluu.util.StringHelper;
 
 /**
- * DN to Couchbase key convert
+ * DN to Generic key convert
  *
  * @author Yuriy Movchan Date: 05/30/2018
  */
-public class CouchbaseKeyConverter {
+public class GenericKeyConverter {
 
     public ParsedKey convertToKey(String dn) {
         if (StringHelper.isEmpty(dn)) {

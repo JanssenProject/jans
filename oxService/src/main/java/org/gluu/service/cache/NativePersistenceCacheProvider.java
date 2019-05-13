@@ -217,7 +217,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                     }
                 }
             };
-            Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now));
+            Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now));
             ldapEntryManager.findEntries(baseDn, NativePersistenceCacheEntity.class, filter, SearchScope.SUB, null, batchOperation, 0, 0, batchSize);
             log.debug("End NATIVE_PERSISTENCE clean up");
         } catch (Exception e) {
