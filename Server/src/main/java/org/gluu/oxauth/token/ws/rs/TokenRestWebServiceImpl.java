@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
@@ -128,7 +129,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             if (!TokenParamsValidator.validateParams(grantType, code, redirectUri, username, password,
                     scope, assertion, refreshToken)) {
                 log.trace("Failed to validate request parameters");
-                builder = error(400, TokenErrorResponseType.INVALID_REQUEST);
+                builder = error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters");
             } else {
                 log.trace("Request parameters are right");
                 GrantType gt = GrantType.fromString(grantType);
@@ -144,10 +145,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (client != null) {
                     log.debug("Get client from session: '{}'", client.getClientId());
                     if (client.isDisabled()) {
-                        return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT), oAuth2AuditLog);
+                        return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), oAuth2AuditLog);
                     }
                 } else {
-                    return response(error(401, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
+                    return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find client."), oAuth2AuditLog);
                 }
 
                 final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
@@ -155,7 +156,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                     }
 
                     log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
@@ -215,11 +216,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         log.debug("AuthorizationCodeGrant is empty by clinetId: '{}', code: '{}'", client.getClientId(), code);
                         // if authorization code is not found then code was already used = remove all grants with this auth code
                         grantService.removeAllByAuthorizationCode(code);
-                        builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code.");
                     }
                 } else if (gt == GrantType.REFRESH_TOKEN) {
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                     }
 
                     AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
@@ -249,11 +250,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 null));
                         oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                     } else {
-                        builder = error(401, TokenErrorResponseType.INVALID_GRANT);
+                        builder = error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token.");
                     }
                 } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                     }
 
                     ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
@@ -281,7 +282,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             idToken));
                 } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT,"grant_type is not present in client."), oAuth2AuditLog);
                     }
 
                     User user = null;
@@ -343,7 +344,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 idToken));
                     } else {
                         log.error("Invalid user", new RuntimeException("User is empty"));
-                        builder = error(401, TokenErrorResponseType.INVALID_CLIENT);
+                        builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                     }
                 }
             }
@@ -368,7 +369,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         if (!CodeVerifier.matched(grant.getCodeChallenge(), grant.getCodeChallengeMethod(), codeVerifier)) {
             log.error("PKCE check fails. Code challenge does not match to request code verifier, " +
                     "grantId:" + grant.getGrantId() + ", codeVerifier: " + codeVerifier);
-            throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog));
+            throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
         }
     }
 
@@ -384,8 +385,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return builder.build();
     }
 
-    private ResponseBuilder error(int p_status, TokenErrorResponseType p_type) {
-        return Response.status(p_status).entity(errorResponseFactory.getErrorAsJson(p_type));
+    private ResponseBuilder error(int p_status, TokenErrorResponseType p_type, String reason) {
+        return Response.status(p_status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(p_type, reason));
     }
 
     /**

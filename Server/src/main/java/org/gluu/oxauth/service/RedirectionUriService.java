@@ -6,17 +6,9 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -25,10 +17,17 @@ import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -136,7 +135,7 @@ public class RedirectionUriService {
         }
 
         if (!isBlank) {
-            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, "`post_logout_redirect_uri` is not added to associated client.");
         }
 
         return null;
@@ -144,12 +143,10 @@ public class RedirectionUriService {
 
 	public String validatePostLogoutRedirectUri(SessionId sessionId, String postLogoutRedirectUri) {
         if (sessionId == null) {
-            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.SESSION_NOT_PASSED);
-            return null;
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.SESSION_NOT_PASSED, "Session object is not found.");
         }
         if (Strings.isNullOrEmpty(postLogoutRedirectUri)) {
-            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_PASSED);
-            return null;
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_PASSED, "`post_logout_redirect_uri` is empty.");
         }
 
         final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null
@@ -172,8 +169,7 @@ public class RedirectionUriService {
             }
         }
 
-        errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT);
-        return null;
+        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, "Unable to validate `post_logout_redirect_uri`");
     }
 
     public static Map<String, String> getParams(String uri) {
