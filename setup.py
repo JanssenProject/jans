@@ -259,6 +259,8 @@ class Setup(object):
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
         self.savedProperties = '%s/setup.properties.last' % self.install_dir
+        
+        
 
         self.gluuOptFolder = '/opt/gluu'
         self.gluuOptBinFolder = '%s/bin' % self.gluuOptFolder
@@ -268,6 +270,9 @@ class Setup(object):
         self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.fido2ConfigFolder = '%s/fido2' % self.configFolder
         self.certFolder = '/etc/certs'
+        
+        self.gluu_hybrid_roperties = '%s/gluu-hybrid.properties.last' % self.configFolder
+
 
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
@@ -932,6 +937,7 @@ class Setup(object):
         return inFilePathText
 
     def writeFile(self, outFilePath, text):
+        self.logIt("Writing file %s" % outFilePath)
         inFilePathText = None
         self.backupFile(outFilePath)
         try:
@@ -2450,7 +2456,10 @@ class Setup(object):
             options.append(str(i+1))
 
         backend_type_str = '[{}]'.format(" " .join(backend_type_str_list))
-        
+        used_backend_types = []
+        ldap_mappings = []
+        couchbase_mappings = []
+
         for group in self.groupMappings:
             while True:
                 prompt = self.getPrompt("Location of {0} {1}".format(group, backend_type_str), options[0])
@@ -2458,14 +2467,36 @@ class Setup(object):
                     backendType = backend_types[int(prompt)-1][1]
                     if backendType == 'couchbase':
                         self.install_couchbase = True
+                        if group == 'base':
+                            default_mapping = 'couchbase'
+                        else:
+                            couchbase_mappings.append(group)
                     elif backendType == 'opendj':
                         self.installLdap = True
+                        if group == 'base':
+                            default_mapping = 'ldap'
+                        else:
+                            ldap_mappings.append(group)
+
+                    if not backendType in used_backend_types:
+                        used_backend_types.append(backendType)
 
                     self.mappingLocations[group] = backendType
                     break
-                print "Please select one of {}.".format(", ".join(options))
+                print "Please select one of {0}.".format(", ".join(options))
 
-        self.installLdap
+        gluu_hybrid_roperties = [
+                        'managers: {0}'.format(', '.join(used_backend_types)),
+                        'storage.default: {0}'.format(default_mapping),
+                        ]
+
+        if ldap_mappings:
+            gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
+        if couchbase_mappings:
+            gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(', '.join(couchbase_mappings)))
+        
+        self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
+
 
     def promptForProperties(self):
 
@@ -2597,9 +2628,7 @@ class Setup(object):
         else:
 
             backend_types = self.getBackendTypes()
-            
-            print 'enableHybridStorage', self.enableHybridStorage
-            
+
             if self.enableHybridStorage:
                 self.promptForBackendMappings(backend_types)
             else:
@@ -2870,22 +2899,27 @@ class Setup(object):
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
-
+        
         def getString(value):
             if isinstance(value, str):
                 return value.strip()
             elif isinstance(value, bool):
                 return str(value)
             else:
-                return ""
+                return ''
         try:
             p = Properties.Properties()
             keys = self.__dict__.keys()
             keys.sort()
             for key in keys:
-                value = getString(self.__dict__[key])
-                if value != '':
-                    p[key] = value
+                
+                if key == 'mappingLocations':
+                    p[key] = json.dumps(self.__dict__[key])
+                else:
+                    value = getString(self.__dict__[key])
+                    if value != '':
+                        p[key] = value
+
             p.store(open(self.savedProperties, 'w'))
         except:
             self.logIt("Error saving properties", True)
@@ -3295,6 +3329,10 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def start_services(self):
+        
+        #write hybrid properties
+        self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
+        
         # Detect service path and apache service name
         service_path = self.detect_service_path()
         apache_service_name = 'httpd'
@@ -3389,7 +3427,7 @@ class Setup(object):
                 for group in self.groupMappings:
                     if self.mappingLocations[group] == 'opendj':
                         ldif_files += self.mappingsLdif[group]
-                        if group=='base':
+                        if group == 'base':
                             base_ldif = True
                         
                 if not base_ldif:
@@ -3830,13 +3868,9 @@ class Setup(object):
 
         for i in range(12):
             self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
-            try:
-                if self.cbm.test_connection():
-                    return True
-                else:
-                    time.sleep(5)
-            except:
-                self.logIt("Connection to N1QL service failed. Rerty im 5 seconds ...")
+            if self.cbm.test_connection():
+                return True
+            else:
                 time.sleep(5)
 
         sys.exit("Couchbase server was not ready. Giving up")
