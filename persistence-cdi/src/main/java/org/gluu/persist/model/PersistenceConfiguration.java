@@ -1,5 +1,7 @@
 package org.gluu.persist.model;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.util.properties.FileConfiguration;
 
@@ -8,6 +10,7 @@ import org.gluu.util.properties.FileConfiguration;
  *
  * @author Yuriy Movchan Date: 05/10/2019
  */
+@Vetoed
 public class PersistenceConfiguration {
 
 	private final String fileName;
