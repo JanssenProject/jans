@@ -75,13 +75,13 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {
             builder = Response.status(400);
-            builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_REQUEST));
+            builder.entity(errorResponseFactory.errorAsJson(ClientInfoErrorResponseType.INVALID_REQUEST, "Failed to validate access token."));
         } else {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
             if (authorizationGrant == null) {
                 builder = Response.status(400);
-                builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN));
+                builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN, "","Unable to find grant object associated with access token."));
             } else {
                 CacheControl cacheControl = new CacheControl();
                 cacheControl.setPrivate(true);

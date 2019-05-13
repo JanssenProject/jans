@@ -89,7 +89,7 @@ public class UmaTokenService {
             Client client = identity.getSessionClient().getClient();
 
             if (client != null && client.isDisabled()) {
-                throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.DISABLED_CLIENT);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.DISABLED_CLIENT, "Client is disabled.");
             }
 
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
@@ -106,7 +106,7 @@ public class UmaTokenService {
                     log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
                 } else {
                     log.warn("Access denied because there are no any protection. Make sure it is intentional behavior.");
-                    throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Access denied because there are no any protection. Make sure it is intentional behavior.");
                 }
             }
 
@@ -139,7 +139,7 @@ public class UmaTokenService {
         }
 
         log.error("Failed to handle request to UMA Token Endpoint.");
-        throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
+        throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Failed to handle request to UMA Token Endpoint.");
     }
 
     private void addPctToPermissions(List<UmaPermission> permissions, UmaPCT pct) {
