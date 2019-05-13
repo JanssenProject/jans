@@ -1133,6 +1133,9 @@ class Setup(object):
             for prop in properties_list:
                 try:
                     self.__dict__[prop] = p[prop]
+                    
+                    if prop == 'mappingLocations':
+                        self.__dict__[prop] = json.loads(p[prop])                    
                     if p[prop] == 'True':
                         self.__dict__[prop] = True
                     elif p[prop] == 'False':
