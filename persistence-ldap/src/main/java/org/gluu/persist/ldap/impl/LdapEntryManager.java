@@ -117,7 +117,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    protected <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
+    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
             List<AttributeDataModification> attributeDataModifications) {
         // Update object classes if entry contains custom object classes
         if (getSupportedLDAPVersion() > 2) {
@@ -753,7 +753,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public String encodeTime(Date date) {
+    public String encodeTime(String baseDN, Date date) {
         if (date == null) {
             return null;
         }
@@ -761,7 +761,13 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return StaticUtils.encodeGeneralizedTime(date);
     }
 
-    public Date decodeTime(String date) {
+    @Override
+	protected String encodeTime(Date date) {
+		return encodeTime(null, date);
+	}
+
+    @Override
+    public Date decodeTime(String baseDN, String date) {
         if (date == null) {
             return null;
         }
@@ -773,6 +779,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
 
         return null;
+    }
+
+    @Override
+    protected Date decodeTime(String date) {
+		return decodeTime(null, date);
     }
 
     public boolean loadLdifFileContent(String ldifFileContent) {

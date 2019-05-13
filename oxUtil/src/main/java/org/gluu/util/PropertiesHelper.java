@@ -35,4 +35,23 @@ public final class PropertiesHelper {
         return resultConf;
     }
 
+    public static Properties findProperties(Properties conf, String prefix) {
+    	String findKey = prefix + ".";
+
+    	Properties resultConf = new Properties();
+
+    	Iterator<?> keys = conf.keySet().iterator();
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+            
+            if (key.startsWith(findKey)) {
+                String value = (String) conf.getProperty(key);
+
+                resultConf.put(key, value);
+            }
+        }
+        
+        return resultConf;
+    }
+
 }
