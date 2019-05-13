@@ -49,7 +49,7 @@ public final class CouchbaseSampleBatchJob {
             public void performAction(List<SimpleTokenCouchbase> objects) {
                 for (SimpleTokenCouchbase simpleTokenCouchbase : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, "oxAuthExpiration",
+                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleTokenCouchbase.getDn(), "oxAuthExpiration",
                                 simpleTokenCouchbase.getAttribute("oxAuthExpiration"));
                         simpleTokenCouchbase.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         couchbaseEntryManager.merge(simpleTokenCouchbase);
@@ -74,7 +74,7 @@ public final class CouchbaseSampleBatchJob {
             public void performAction(List<SimpleSession> objects) {
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, "oxLastAccessTime",
+                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleSession.getDn(), "oxLastAccessTime",
                                 simpleSession.getAttribute("oxLastAccessTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         couchbaseEntryManager.merge(simpleSession);
@@ -131,7 +131,7 @@ public final class CouchbaseSampleBatchJob {
         LOG.info("Result count (with collecting results): " + result4.size());
     }
 
-    private static CustomAttribute getUpdatedAttribute(CouchbaseEntryManager couchbaseEntryManager, String attributeName, String attributeValue) {
+    private static CustomAttribute getUpdatedAttribute(CouchbaseEntryManager couchbaseEntryManager, String baseDn, String attributeName, String attributeValue) {
         try {
             Calendar calendar = Calendar.getInstance();
             Date oxLastAccessTimeDate = new Date(); //TODO: Fix it StaticUtils.decodeGeneralizedTime(attributeValue);
@@ -140,7 +140,7 @@ public final class CouchbaseSampleBatchJob {
 
             CustomAttribute customAttribute = new CustomAttribute();
             customAttribute.setName(attributeName);
-            customAttribute.setValue(couchbaseEntryManager.encodeTime(calendar.getTime()));
+            customAttribute.setValue(couchbaseEntryManager.encodeTime(baseDn, calendar.getTime()));
             return customAttribute;
         } catch (Exception ex) {
             LOG.error("Can't parse attribute", ex);

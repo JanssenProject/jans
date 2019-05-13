@@ -76,21 +76,22 @@ public class PersistanceFactoryService {
 		try {
 			// Determine persistence type
 			FileConfiguration gluuFileConf = new FileConfiguration(gluuFileName);
+			if (!gluuFileConf.isLoaded()) {
+				log.error("Unable to load configuration file '{}'", gluuFileName);
+				return null;
+			}
+
 			String persistenceType = gluuFileConf.getString("persistence.type");
+			PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory(persistenceType);
+			if (persistenceEntryManagerFactory == null) {
+				log.error("Unable to get Persistence Entry Manager Factory by type '{}'", persistenceType);
+				return null;
+			}
 
 			// Determine configuration file name and factory class type
-			Map<String, String> persistenceFileNames = null;
-			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = null;
-
-			for (PersistenceEntryManagerFactory persistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
-				log.debug("Found Persistence Entry Manager Factory with type '{}'", persistenceEntryManagerFactory);
-				if (StringHelper.equalsIgnoreCase(persistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
-					persistenceFileNames = persistenceEntryManagerFactory.getConfigurationFileNames();
-					persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory
-							.getClass().getSuperclass();
-					break;
-				}
-			}
+			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory
+					.getClass().getSuperclass();
+			Map<String, String> persistenceFileNames = persistenceEntryManagerFactory.getConfigurationFileNames();
 
 			PersistenceConfiguration persistenceConfiguration = createPersistenceConfiguration(persistenceType, persistenceEntryManagerFactoryType,
 					persistenceFileNames);
@@ -192,5 +193,17 @@ public class PersistanceFactoryService {
 
         return persistenceEntryManagerFactory;
     }
+
+	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(String persistenceType) {
+		// Get persistence entry manager factory
+		for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
+			log.debug("Found Persistence Entry Manager Factory with type '{}'", currentPersistenceEntryManagerFactory);
+			if (StringHelper.equalsIgnoreCase(currentPersistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
+				return currentPersistenceEntryManagerFactory;
+			}
+		}
+
+		return null;
+	}
 
 }

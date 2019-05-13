@@ -52,7 +52,7 @@ public final class LdapSampleBatchJob {
             public void performAction(List<SimpleTokenLdap> objects) {
                 for (SimpleTokenLdap simpleTokenLdap : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxAuthExpiration",
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleTokenLdap.getDn(), "oxAuthExpiration",
                                 simpleTokenLdap.getAttribute("oxAuthExpiration"));
                         simpleTokenLdap.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         ldapEntryManager.merge(simpleTokenLdap);
@@ -77,7 +77,7 @@ public final class LdapSampleBatchJob {
             public void performAction(List<SimpleSession> objects) {
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxLastAccessTime",
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleSession.getDn(), "oxLastAccessTime",
                                 simpleSession.getAttribute("oxLastAccessTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         ldapEntryManager.merge(simpleSession);
@@ -134,7 +134,7 @@ public final class LdapSampleBatchJob {
         LOG.info("Result count (with collecting results): " + result4.size());
     }
 
-    private static CustomAttribute getUpdatedAttribute(LdapEntryManager ldapEntryManager, String attributeName, String attributeValue) {
+    private static CustomAttribute getUpdatedAttribute(LdapEntryManager ldapEntryManager, String baseDn, String attributeName, String attributeValue) {
         try {
             Calendar calendar = Calendar.getInstance();
             Date oxLastAccessTimeDate = StaticUtils.decodeGeneralizedTime(attributeValue);
@@ -143,7 +143,7 @@ public final class LdapSampleBatchJob {
 
             CustomAttribute customAttribute = new CustomAttribute();
             customAttribute.setName(attributeName);
-            customAttribute.setValue(ldapEntryManager.encodeTime(calendar.getTime()));
+            customAttribute.setValue(ldapEntryManager.encodeTime(baseDn, calendar.getTime()));
             return customAttribute;
         } catch (ParseException e) {
             LOG.error("Can't parse attribute", e);
