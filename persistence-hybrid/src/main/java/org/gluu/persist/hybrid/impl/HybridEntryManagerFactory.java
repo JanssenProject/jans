@@ -59,16 +59,16 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 
 		FileConfiguration fileConf = new FileConfiguration(PersistanceFactoryService.DIR + confFileName);
 		if (!fileConf.isLoaded()) {
-			LOG.error("Unable to load configuration file '{}'", fileConf);
+			LOG.error("Unable to load configuration file '{}'", PersistanceFactoryService.DIR + confFileName);
             throw new ConfigurationException(String.format("Unable to load configuration file: '%s'", fileConf));
 		}
 
-		String managersList = fileConf.getString("managers", null);
-		if (StringHelper.isEmpty(managersList)) {
-            throw new ConfigurationException("'managers' key not exists or value is empty!");
+		String storagesList = fileConf.getString("storages", null);
+		if (StringHelper.isEmpty(storagesList)) {
+            throw new ConfigurationException("'storages' key not exists or value is empty!");
 		}
 		
-		this.persistenceTypes = StringHelper.split(managersList, ",");
+		this.persistenceTypes = StringHelper.split(storagesList, ",");
 		for (String persistenceType : persistenceTypes) {
 			PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceType);
 			if (persistenceEntryManagerFactory == null) {
@@ -105,7 +105,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     		this.сonnectionProperties.put(persistenceType, persistenceConnectionProperties);
     	}
 
-		Properties hybridMappingProperties = PropertiesHelper.filterProperties(conf, "manager");
+		Properties hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
 		
 		HybridPersistenceOperationService hybridOperationService = new HybridPersistenceOperationService(operationServices);
     	
