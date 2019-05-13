@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
@@ -222,9 +223,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                 } else {
-                    builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+                    builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
                     builder.entity(errorResponseFactory.getErrorAsJson(
-                            AuthorizeErrorResponseType.INVALID_REQUEST, state));
+                            AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."));
                 }
             } else {
                 Client client = clientService.getClient(clientId);
@@ -237,8 +238,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 if (client != null) {
                     if (client.isDisabled()) {
-                        builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()); // 403
-                        builder.entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state));
+                        builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 403
+                        builder.entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state, "Client is disabled."));
 
                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
 
@@ -633,7 +634,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     } else { // Invalid responseTypes
                         builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
                         builder.entity(errorResponseFactory.getErrorAsJson(
-                                AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state));
+                                AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""));
                     }
                 } else {
                     builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
@@ -705,7 +706,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
-        return Response.status(p_status.getStatusCode()).entity(errorResponseFactory.getErrorAsJson(p_type, p_state));
+        return Response.status(p_status.getStatusCode()).entity(errorResponseFactory.getErrorAsJson(p_type, p_state, "")).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
     private void redirectToAuthorizationPage(

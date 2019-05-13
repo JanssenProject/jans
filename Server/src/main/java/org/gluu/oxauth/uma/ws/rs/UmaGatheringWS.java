@@ -6,30 +6,6 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.FOUND;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.SessionId;
@@ -38,6 +14,7 @@ import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.gluu.oxauth.uma.authorization.UmaWebException;
@@ -46,7 +23,22 @@ import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.FOUND;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
 
 /**
  * Claims-Gathering Endpoint.
@@ -88,7 +80,7 @@ public class UmaGatheringWS {
                 log.debug("Authentication redirect, restoring parameters from session ...");
                 if (session == null) {
                     log.error("Session is null however authentication=true. Wrong workflow! Please correct custom Glaims-Gathering Script.");
-                    throw new UmaWebException(BAD_REQUEST, errorResponseFactory, INVALID_SESSION);
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_SESSION, "Session is null however authentication=true. Wrong workflow! Please correct custom Glaims-Gathering Script.");
                 }
                 clientId = sessionService.getClientId(session);
                 ticket = sessionService.getTicket(session);
@@ -140,7 +132,7 @@ public class UmaGatheringWS {
         }
 
         log.error("Failed to handle call to UMA Claims Gathering Endpoint.");
-        throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
+        throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Failed to handle call to UMA Claims Gathering Endpoint.");
     }
 
     private static String getScriptNames(List<UmaPermission> permissions) {
