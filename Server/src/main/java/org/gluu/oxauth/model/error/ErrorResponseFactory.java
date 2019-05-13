@@ -14,18 +14,15 @@ import org.gluu.oxauth.model.register.RegisterErrorResponseType;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenRevocationErrorResponseType;
-import org.gluu.oxauth.model.uma.UmaErrorResponse;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
@@ -83,53 +80,32 @@ public class ErrorResponseFactory implements Configuration {
         return new ErrorMessage(type.getParameter(), type.getParameter(), null);
     }
 
-    public String getErrorAsJson(IErrorType p_type) {
-        return getErrorResponse(p_type).toJSonString();
-    }
-
     public String errorAsJson(IErrorType p_type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(p_type);
         error.setReason(reason);
         return error.toJSonString();
     }
 
-    public void throwUnauthorizedException(IErrorType type) throws WebApplicationException {
-        throwWebApplicationException(Response.Status.UNAUTHORIZED, type);
+    public WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason) throws WebApplicationException {
+        return new WebApplicationException(Response
+                .status(status)
+                .entity(errorAsJson(type, reason))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
-    public void throwBadRequestException(IErrorType type) throws WebApplicationException {
-        throwWebApplicationException(Response.Status.BAD_REQUEST, type);
-    }
-
-    public void throwWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
-        final Response response = Response.status(status).entity(getErrorAsJson(type)).build();
-        throw new WebApplicationException(response);
-    }
-
-    public void throwUmaNotFoundException() throws WebApplicationException {
-        throwUmaWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND);
-    }
-
-    public void throwUmaInternalErrorException() throws WebApplicationException {
-        throwUmaWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR);
-    }
-
-    public <T> T throwUmaWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
-        final Response response = Response.status(status).entity(getUmaJsonErrorResponse(type)).build();
-        throw new WebApplicationException(response);
-    }
-
-    public String getErrorAsJson(IErrorType p_type, String p_state) {
-        return getErrorResponse(p_type, p_state).toJSonString();
+    public String getErrorAsJson(IErrorType p_type, String p_state, String reason) {
+        return getErrorResponse(p_type, p_state, reason).toJSonString();
     }
 
     public String getErrorAsQueryString(IErrorType p_type, String p_state) {
-        return getErrorResponse(p_type, p_state).toQueryString();
+        return getErrorResponse(p_type, p_state, "").toQueryString();
     }
 
-    public DefaultErrorResponse getErrorResponse(IErrorType type, String p_state) {
+    public DefaultErrorResponse getErrorResponse(IErrorType type, String p_state, String reason) {
         final DefaultErrorResponse response = getErrorResponse(type);
         response.setState(p_state);
+        response.setReason(reason);
         return response;
     }
 
@@ -168,46 +144,6 @@ public class ErrorResponseFactory implements Configuration {
 
         return response;
     }
-
-    public UmaErrorResponse getUmaErrorResponse(IErrorType type) {
-        final UmaErrorResponse response = new UmaErrorResponse();
-
-        final ErrorMessage errorMessage = getError(messages.getUma(), type);
-        response.setError(errorMessage.getId());
-        response.setErrorDescription(errorMessage.getDescription());
-        response.setErrorUri(errorMessage.getUri());
-
-        return response;
-    }
-
-    public String getUmaJsonErrorResponse(IErrorType type) {
-        final UmaErrorResponse response = getUmaErrorResponse(type);
-
-        JSONObject jsonObj = new JSONObject();
-
-        try {
-            jsonObj.put("error", response.getError());
-
-            if (StringHelper.isNotEmpty(response.getStatus())) {
-                jsonObj.put("status", response.getStatus());
-            }
-
-            if (StringHelper.isNotEmpty(response.getErrorDescription())) {
-                jsonObj.put("error_description", response.getErrorDescription());
-            }
-
-
-            if (StringHelper.isNotEmpty(response.getErrorUri())) {
-                jsonObj.put("error_uri", response.getErrorUri());
-            }
-        } catch (JSONException ex) {
-            log.error("Failed to generate error response", ex);
-            return null;
-        }
-
-        return jsonObj.toString();
-    }
-
 
     public String getJsonErrorResponse(IErrorType type) {
         final DefaultErrorResponse response = getErrorResponse(type);

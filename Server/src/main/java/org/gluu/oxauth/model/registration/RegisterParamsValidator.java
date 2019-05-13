@@ -6,32 +6,33 @@
 
 package org.gluu.oxauth.model.registration;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.util.Pair;
+import org.gluu.oxauth.model.util.URLPatternList;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.util.ServerUtil;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterErrorResponseType;
-import org.gluu.oxauth.model.util.URLPatternList;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.util.ServerUtil;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.slf4j.Logger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the register web service.
@@ -64,16 +65,22 @@ public class RegisterParamsValidator {
      *                            The URL contains a file with a single JSON array of redirect_uri values.
      * @return Whether the parameters of client register is valid or not.
      */
-    public boolean validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
-                                                List<String> redirectUris, String sectorIdentifierUrl) {
-        boolean valid = applicationType != null && redirectUris != null && !redirectUris.isEmpty();
+    public Pair<Boolean, String> validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
+                                                              List<String> redirectUris, String sectorIdentifierUrl) {
+        if (applicationType == null) {
+            return new Pair<>(false, "application_type is not valid.");
+        }
+
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return new Pair<>(false, "Redirect uris are empty.");
+        }
 
         if (subjectType == null || !appConfiguration.getSubjectTypesSupported().contains(subjectType.toString())) {
             log.debug("Parameter subject_type is not valid.");
-            valid = false;
+            return new Pair<>(false, "Parameter subject_type is not valid.");
         }
 
-        return valid;
+        return new Pair<>(true, "");
     }
 
     /**
@@ -264,7 +271,8 @@ public class RegisterParamsValidator {
     private void throwInvalidLogoutUri(ErrorResponseFactory errorResponseFactory) throws WebApplicationException {
         throw new WebApplicationException(
                 Response.status(Response.Status.BAD_REQUEST.getStatusCode()).
-                        entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI)).
+                        type(MediaType.APPLICATION_JSON_TYPE).
+                        entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI, "Failed to valide logout uri.")).
                         cacheControl(ServerUtil.cacheControl(true, false)).
                         header("Pragma", "no-cache").
                         build());
