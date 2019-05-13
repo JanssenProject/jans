@@ -7,6 +7,8 @@
 
 package org.gluu.persist.couchbase.impl;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +18,7 @@ import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.util.PropertiesHelper;
 import org.gluu.util.init.Initializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +32,7 @@ import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
  * @author Yuriy Movchan Date: 05/31/2018
  */
 @ApplicationScoped
-public class CouchbaseEntryManagerFactory extends Initializable implements PersistenceEntryManagerFactory{
+public class CouchbaseEntryManagerFactory extends Initializable implements PersistenceEntryManagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
 
@@ -65,8 +68,11 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
     }
 
     @Override
-    public String getDefaultConfigurationFileName() {
-        return "gluu-couchbase.properties";
+    public HashMap<String, String> getConfigurationFileNames() {
+    	HashMap<String, String> confs = new HashMap<String, String>();
+    	confs.put("couchbase", "gluu-couchbase.properties");
+
+    	return confs;
     }
     
     public CouchbaseEnvironment getCouchbaseEnvironment() {
@@ -75,14 +81,15 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
-    	this.couchbaseConnectionProperties = conf;
+    	this.couchbaseConnectionProperties = PropertiesHelper.filterProperties(conf, "couchbase");
+
     	init();
     	
     	if (!isInitialized()) {
-            throw new ConfigurationException("Failed to create Couchbase environment !");
+            throw new ConfigurationException("Failed to create Couchbase environment!");
     	}
 
-    	CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(conf, couchbaseEnvironment);
+    	CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(this.couchbaseConnectionProperties, couchbaseEnvironment);
         connectionProvider.create();
         if (!connectionProvider.isCreated()) {
             throw new ConfigurationException(

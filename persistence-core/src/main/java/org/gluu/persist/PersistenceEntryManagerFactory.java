@@ -6,6 +6,7 @@
 
 package org.gluu.persist;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -17,7 +18,7 @@ public interface PersistenceEntryManagerFactory {
 
     String getPersistenceType();
 
-    String getDefaultConfigurationFileName();
+    Map<String, String> getConfigurationFileNames();
 
     PersistenceEntryManager createEntryManager(Properties conf);
 
