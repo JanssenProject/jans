@@ -165,7 +165,7 @@ public class CleanerTimer {
 
 					Filter filter = Filter.createANDFilter(
 					        Filter.createEqualityFilter("oxDeletable", "true"),
-							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(now))
+							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now))
                     );
 
 					ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB,
