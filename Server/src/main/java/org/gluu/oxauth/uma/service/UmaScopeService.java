@@ -13,7 +13,6 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.service.InumService;
-import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.oxauth.persistence.model.Scope;
@@ -151,7 +150,7 @@ public class UmaScopeService {
         return result;
     }
 
-    public Scope addScope(String scopeId) {
+    private Scope addScope(String scopeId) {
         final Boolean addAutomatically = appConfiguration.getUmaAddScopesAutomatically();
         if (addAutomatically != null && addAutomatically) {
             final String inum = inumService.generateInum();
@@ -169,7 +168,7 @@ public class UmaScopeService {
             }
         }
 
-        throw new UmaWebException(Response.Status.BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Failed to persist scope.");
     }
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {

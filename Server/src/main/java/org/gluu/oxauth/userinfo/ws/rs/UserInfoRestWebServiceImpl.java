@@ -133,7 +133,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         try {
             if (!UserInfoParamsValidator.validateParams(accessToken)) {
                 builder = Response.status(400);
-                builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INVALID_REQUEST));
+                builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INVALID_REQUEST, "access token is not valid."));
             } else {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
@@ -150,17 +150,17 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Grant object has client_credentials grant_type which is not valid."));
                 } else if (appConfiguration.getOpenidScopeBackwardCompatibility()
                         && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())
                         && !authorizationGrant.getScopes().contains(DefaultScope.PROFILE.toString())) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Both openid and profile scopes are not present."));
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
                 } else if (!appConfiguration.getOpenidScopeBackwardCompatibility()
                         && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Missed openid scope."));
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
                 } else {
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
@@ -217,7 +217,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     private Response response(int status, UserInfoErrorResponseType errorResponseType) {
-        return Response.status(status).entity(errorResponseFactory.getErrorAsJson(errorResponseType)).build();
+        return Response.status(status).entity(errorResponseFactory.errorAsJson(errorResponseType, "")). type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,

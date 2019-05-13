@@ -9,7 +9,9 @@ package org.gluu.oxauth.uma.service;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
@@ -17,11 +19,11 @@ import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -174,8 +176,7 @@ public class UmaResourceService {
             log.error("Failed to find resource set with id: " + id, e);
         }
         log.error("Failed to find resource set with id: " + id);
-        errorResponseFactory.throwUmaNotFoundException();
-        return null;
+        throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND, "Failed to find resource set with id: " + id);
     }
 
     private void prepareBranch() {
