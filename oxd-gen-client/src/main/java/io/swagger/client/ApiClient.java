@@ -725,8 +725,7 @@ public class ApiClient {
                         response.code(),
                         response.headers().toMultimap());
             }
-
-            throw new ApiException (
+            throw new ApiException(
                     "Content type \"" + contentType + "\" is not supported for type: " + returnType,
                     response.code(),
                     response.headers().toMultimap(),

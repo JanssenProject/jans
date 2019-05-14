@@ -11,7 +11,6 @@ import io.swagger.client.model.GetClientTokenResponse;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.gluu.oxd.common.CoreUtils;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
