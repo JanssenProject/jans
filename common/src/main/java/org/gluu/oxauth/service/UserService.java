@@ -19,6 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.model.GluuStatus;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.PersistenceEntryManager;
@@ -27,8 +29,6 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * Provides operations with users.
@@ -424,11 +424,13 @@ public class UserService {
 	}
 
 	public String encodeGeneralizedTime(Date date) {
-		return ldapEntryManager.encodeTime(date);
+		String baseDn = getDnForUser(null);
+		return ldapEntryManager.encodeTime(baseDn, date);
 	}
 
 	public Date decodeGeneralizedTime(String date) {
-		return ldapEntryManager.decodeTime(date);
+		String baseDn = getDnForUser(null);
+		return ldapEntryManager.decodeTime(baseDn, date);
 	}
 
 }

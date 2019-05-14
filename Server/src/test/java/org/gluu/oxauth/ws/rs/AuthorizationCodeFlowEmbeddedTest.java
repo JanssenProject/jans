@@ -52,7 +52,7 @@ import org.testng.annotations.Test;
  * Test cases for the authorization code flow (embedded)
  *
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version May 14, 2019
  */
 public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
@@ -572,7 +572,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         showResponse("revokeTokensStep5", response, entity);
 
-        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertEquals(response.getStatus(), 401, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
