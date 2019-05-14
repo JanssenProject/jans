@@ -70,11 +70,11 @@ public class RegisterSiteTest {
         assertNotNull(resp);
     }
 
-    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl) throws Exception {
+    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl) throws ApiException {
         return registerSite(apiClient, opHost, redirectUrl, redirectUrl, "", "", "");
     }
 
-    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri, String clientJwksUri, String accessTokenSigningAlg) throws ApiException {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
