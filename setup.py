@@ -270,8 +270,8 @@ class Setup(object):
         self.fido2ConfigFolder = '%s/fido2' % self.configFolder
         self.certFolder = '/etc/certs'
         
+        self.gluu_properties_fn = '%s/gluu.properties' % self.configFolder
         self.gluu_hybrid_roperties = '%s/gluu-hybrid.properties' % self.configFolder
-
 
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
@@ -630,9 +630,7 @@ class Setup(object):
                                 'statistic': [self.ldif_metric],
                                 'site': [self.ldif_site],
                             }
-                                
 
-            
 
         self.ce_templates = {self.oxauth_config_json: False,
                              self.gluu_python_readme: True,
@@ -664,6 +662,7 @@ class Setup(object):
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
                              self.lidf_oxtrust_api: False,
+                             self.gluu_properties_fn: True,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -2347,13 +2346,6 @@ class Setup(object):
         return location
 
 
-    def writePersistType(self):
-        self.logIt("Writing persist type")
-        fname = os.path.join(self.configFolder, 'gluu.properties')
-        fcontent = 'persistence.type={0}'.format(self.persistence_type)
-        self.writeFile(fname, fcontent)
-
-
     def writeHybridProperties(self):
 
         ldap_mappings = self.getMappingType('ldap')
@@ -2384,7 +2376,6 @@ class Setup(object):
         self.createUsers()
         self.makeFolders()
 
-        self.writePersistType()
         self.writeHybridProperties()
 
     def make_salt(self):
@@ -2412,7 +2403,8 @@ class Setup(object):
             option = None
             
             if len(backend_types) == 2:
-                self.ldap_type = backend_types[0][1] 
+                self.ldap_type = backend_types[0][1]
+                self.installLdap = True
             
             else:
                 prompt_text = 'Install '
