@@ -47,7 +47,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version August 1, 2018
+ * @version May 14, 2019
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -368,7 +368,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestUserInfoInvalidToken", response, entity);
 
-        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertEquals(response.getStatus(), 401, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);

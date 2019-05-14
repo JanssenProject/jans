@@ -188,7 +188,7 @@
     "authorizationCodeLifetime":${config.client.authorization-code-lifetime},
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
-    "accessTokenLifetime":3600,
+    "accessTokenLifetime":300,
     "umaRptLifetime":${config.uma.requester-permission-token-lifetime},
     "umaPctLifetime":${config.uma.requester-permission-token-lifetime},
     "umaAddScopesAutomatically":false,
