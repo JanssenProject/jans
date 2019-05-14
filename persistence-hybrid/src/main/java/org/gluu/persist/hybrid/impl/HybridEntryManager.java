@@ -65,6 +65,23 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	init();
 	}
 
+    protected void init() {
+        String defaultPersistenceType = mappingProperties.getProperty("default", null);
+        if (StringHelper.isEmpty(defaultPersistenceType) || (persistenceEntryManagers.get(defaultPersistenceType) == null)) {
+            throw new ConfigurationException("Default persistence type is not defined!");
+        }
+        this.defaultPersistenceEntryManager = persistenceEntryManagers.get(defaultPersistenceType);
+
+        this.baseNameToEntryManagerMapping = new HashMap<String, PersistenceEntryManager>();
+        for (Entry<String, PersistenceEntryManager> persistenceTypeEntry : persistenceEntryManagers.entrySet()) {
+        	String mapping = mappingProperties.getProperty(persistenceTypeEntry.getKey() + ".mapping", "");
+            String[] baseNames = StringHelper.split(mapping, ",");
+            for (String baseName : baseNames) {
+            	baseNameToEntryManagerMapping.put(baseName, persistenceTypeEntry.getValue());
+            }
+        }
+    }
+
     @Override
     public void addDeleteSubscriber(DeleteNotifier subscriber) {
         if (this.persistenceEntryManagers == null) {
@@ -108,11 +125,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 		return persistenceEntryManager.contains(baseDN, entryClass, filter);
 	}
 
-    @Override
-	protected boolean contains(String baseDN, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
-
 	@Override
     public <T> int countEntries(Object entry) {
         Class<?> entryClass = entry.getClass();
@@ -133,11 +145,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
     	return persistenceEntryManager.countEntries(baseDN, entryClass, filter, scope);
     }
-
-    @Override
-	protected Date decodeTime(String date) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
 
 	@Override
     public Date decodeTime(String baseDN, String date) {
@@ -164,11 +171,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
 	@Override
-	protected String encodeTime(Date date) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
-
-	@Override
     public String encodeTime(String baseDN, Date date) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
     	return persistenceEntryManager.encodeTime(baseDN, date);
@@ -190,11 +192,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	public <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
     	return persistenceEntryManager.find(entryClass, primaryKey, ldapReturnAttributes);
-	}
-
-	@Override
-	protected List<AttributeData> find(String dn, String... attributes) {
-        throw new UnsupportedOperationException("Method not implemented.");
 	}
 
     @Override
@@ -262,7 +259,13 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	            sortOrder, start, count, chunkSize);
     }
 
-    private PersistenceEntryManager getBucketMappingByKey(String key) {
+	@Override
+	public boolean hasBranchesSupport(String dn) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
+    	return persistenceEntryManager.hasBranchesSupport(dn);
+	}
+
+    private PersistenceEntryManager getPersistenceEntryManagerByKey(String key) {
         if ("_".equals(key)) {
             return defaultPersistenceEntryManager;
         }
@@ -294,44 +297,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
         }
 
         ParsedKey parsedKey = KEY_CONVERTER.convertToKey(baseDn);
-		return getBucketMappingByKey(parsedKey.getKey());
+		return getPersistenceEntryManagerByKey(parsedKey.getKey());
 	}
 
 	public HybridPersistenceOperationService getOperationService() {
         return operationService;
     }
-
-	@Override
-	public boolean hasBranchesSupport(String dn) {
-		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
-    	return persistenceEntryManager.hasBranchesSupport(dn);
-	}
-
-    protected void init() {
-        String defaultPersistenceType = mappingProperties.getProperty("default", null);
-        if (StringHelper.isEmpty(defaultPersistenceType) || (persistenceEntryManagers.get(defaultPersistenceType) == null)) {
-            throw new ConfigurationException("Default persistence type is not defined!");
-        }
-        this.defaultPersistenceEntryManager = persistenceEntryManagers.get(defaultPersistenceType);
-
-        this.baseNameToEntryManagerMapping = new HashMap<String, PersistenceEntryManager>();
-        for (Entry<String, PersistenceEntryManager> persistenceTypeEntry : persistenceEntryManagers.entrySet()) {
-        	String mapping = mappingProperties.getProperty(persistenceTypeEntry.getKey() + ".mapping", "");
-            String[] baseNames = StringHelper.split(mapping, ",");
-            for (String baseName : baseNames) {
-            	baseNameToEntryManagerMapping.put(baseName, persistenceTypeEntry.getValue());
-            }
-        }
-    }
-
-    @Override
-	protected void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
-
-    //*************************************************************************
-    // Internal methods which not needed in Hybrid Entry Manager
-    //*************************************************************************
 
     @Override
     public <T> T merge(T entry) {
@@ -352,11 +323,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	protected void persist(String dn, List<AttributeData> attributes) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
-
-	@Override
     public void remove(Object entry) {
         Class<?> entryClass = entry.getClass();
         Object dnValue = getDNValue(entry, entryClass);
@@ -364,11 +330,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dnValue);
     	persistenceEntryManager.remove(entry);
     }
-
-	@Override
-	protected void remove(String dn) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
 
 	@Override
     public void removeDeleteSubscriber(DeleteNotifier subscriber) {
@@ -386,6 +347,45 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
     	persistenceEntryManager.removeRecursively(dn);
     }
+
+    //*************************************************************************
+    // Internal methods which not needed in Hybrid Entry Manager
+    //*************************************************************************
+
+	@Override
+	protected void persist(String dn, List<AttributeData> attributes) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+    @Override
+	protected void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	protected void remove(String dn) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	protected List<AttributeData> find(String dn, String... attributes) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+    @Override
+	protected boolean contains(String baseDN, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+    @Override
+	protected Date decodeTime(String date) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	@Override
+	protected String encodeTime(Date date) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
 
 	@Override
 	protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass,

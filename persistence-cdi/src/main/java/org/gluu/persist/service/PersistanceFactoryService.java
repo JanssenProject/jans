@@ -120,7 +120,7 @@ public class PersistanceFactoryService {
 			
 			// Build merged file name
 			if (mergedPersistenceFileName.length() > 0) {
-				mergedPersistenceFileName.append("_");
+				mergedPersistenceFileName.append("!");
 			}
 			mergedPersistenceFileName.append(persistenceFileName);
 
