@@ -36,7 +36,9 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 	private PersistanceFactoryService persistanceFactoryService;
 
 	private String[] persistenceTypes;
+
 	private HashMap<String, Properties> сonnectionProperties;
+	private Properties hybridMappingProperties;
 
     @Override
     public String getPersistenceType() {
@@ -105,7 +107,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     		this.сonnectionProperties.put(persistenceType, persistenceConnectionProperties);
     	}
 
-		Properties hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
+		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
 		
 		HybridPersistenceOperationService hybridOperationService = new HybridPersistenceOperationService(operationServices);
     	
