@@ -223,7 +223,7 @@ class Setup(object):
         self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
-        self.groupMappings = ['base', 'user', 'cache', 'statistic', 'site']
+        self.groupMappings = ['default', 'user', 'cache', 'statistic', 'site']
         self.mappingLocations = { group: 'ldap' for group in self.groupMappings }  #default locations are OpenDJ
 
         # Gluu components installation status
@@ -613,7 +613,7 @@ class Setup(object):
                            ]
 
         self.mappingsLdif = {   
-                                'base': [
+                                'default': [
                                         self.ldif_base, 
                                          self.ldif_attributes,
                                          self.ldif_scopes,
@@ -2352,7 +2352,7 @@ class Setup(object):
         couchbase_mappings = self.getMappingType('couchbase')
         
         for group in self.mappingLocations:
-            if group == 'base':
+            if group == 'default':
                 default_mapping = self.mappingLocations[group]
 
         storages = set(self.mappingLocations.values())
@@ -2368,6 +2368,8 @@ class Setup(object):
             gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(', '.join(couchbase_mappings)))
         
         self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
+        
+        self.gluu_hybrid_roperties_content  = self.gluu_hybrid_roperties_content.replace('user','people, groups')
 
         self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
 
@@ -3429,7 +3431,7 @@ class Setup(object):
                 for group in self.groupMappings:
                     if self.mappingLocations[group] == 'ldap':
                         ldif_files += self.mappingsLdif[group]
-                        if group == 'base':
+                        if group == 'default':
                             base_ldif = True
                         
                 if not base_ldif:
