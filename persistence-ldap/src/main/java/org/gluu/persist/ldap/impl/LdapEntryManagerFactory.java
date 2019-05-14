@@ -22,37 +22,36 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
+    public static final String PERSISTANCE_TYPE = "ldap";
     public static final String LDAP_DEFAULT_PROPERTIES_FILE = "gluu-ldap.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManagerFactory.class);
 
-	private Properties ldapConnectionProperties;
-
     @Override
     public String getPersistenceType() {
-        return "ldap";
+        return PERSISTANCE_TYPE;
     }
 
     @Override
     public HashMap<String, String> getConfigurationFileNames() {
     	HashMap<String, String> confs = new HashMap<String, String>();
-    	confs.put("ldap", LDAP_DEFAULT_PROPERTIES_FILE);
+    	confs.put(PERSISTANCE_TYPE, LDAP_DEFAULT_PROPERTIES_FILE);
 
     	return confs;
     }
 
-    @Override
+	@Override
     public LdapEntryManager createEntryManager(Properties conf) {
-    	this.ldapConnectionProperties = PropertiesHelper.filterProperties(conf, "ldap");
+		Properties entryManagerConf = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
 
-    	LdapConnectionProvider connectionProvider = new LdapConnectionProvider(this.ldapConnectionProperties);
+		LdapConnectionProvider connectionProvider = new LdapConnectionProvider(entryManagerConf);
         if (!connectionProvider.isCreated()) {
             throw new ConfigurationException(
                     String.format("Failed to create LDAP connection pool! Result code: '%s'", connectionProvider.getCreationResultCode()));
         }
         LOG.debug("Created connectionProvider '{}' with code '{}'", connectionProvider, connectionProvider.getCreationResultCode());
 
-        LdapConnectionProvider bindConnectionProvider = new LdapAuthConnectionProvider(this.ldapConnectionProperties);
+        LdapConnectionProvider bindConnectionProvider = new LdapAuthConnectionProvider(entryManagerConf);
         if (!bindConnectionProvider.isCreated()) {
             throw new ConfigurationException(
                     String.format("Failed to create LDAP bind connection pool! Result code: '%s'", bindConnectionProvider.getCreationResultCode()));

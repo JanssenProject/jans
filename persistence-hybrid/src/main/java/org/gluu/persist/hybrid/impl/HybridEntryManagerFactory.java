@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory {
 
+    public static final String PERSISTANCE_TYPE = "hybrid";
     public static final String PROPERTIES_FILE = "gluu-hybrid.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(HybridEntryManagerFactory.class);
@@ -37,18 +38,17 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 
 	private String[] persistenceTypes;
 
-	private HashMap<String, Properties> сonnectionProperties;
 	private Properties hybridMappingProperties;
 
     @Override
     public String getPersistenceType() {
-        return "hybrid";
+        return PERSISTANCE_TYPE;
     }
 
     @Override
     public HashMap<String, String> getConfigurationFileNames() {
     	HashMap<String, String> confs = new HashMap<String, String>();
-    	confs.put("hybrid", PROPERTIES_FILE);
+    	confs.put(PERSISTANCE_TYPE, PROPERTIES_FILE);
 
     	HashMap<String, String> allConfs = getAllConfigurationFileNames(PROPERTIES_FILE);
     	confs.putAll(allConfs);
@@ -84,10 +84,9 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 		return allConfs;
 	}
 
-
     @Override
     public HybridEntryManager createEntryManager(Properties conf) {
-    	this.сonnectionProperties = new HashMap<String, Properties>();
+    	HashMap<String, Properties> сonnectionProperties = new HashMap<String, Properties>();
 
     	HashMap<String, PersistenceEntryManager> persistenceEntryManagers = new HashMap<String, PersistenceEntryManager>();
     	List<PersistenceOperationService> operationServices = new ArrayList<PersistenceOperationService>();
@@ -98,13 +97,13 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 				throw new ConfigurationException(String.format("Unable to get Persistence Entry Manager Factory by type '%s'", persistenceType));
 			}
 
-    		Properties persistenceConnectionProperties = PropertiesHelper.findProperties(conf, persistenceType);
-    		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(persistenceConnectionProperties);
+			Properties entryManagerConf = PropertiesHelper.filterProperties(conf, persistenceType);
+    		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(entryManagerConf);
     		
     		persistenceEntryManagers.put(persistenceType, persistenceEntryManager);
     		operationServices.add(persistenceEntryManager.getOperationService());
 
-    		this.сonnectionProperties.put(persistenceType, persistenceConnectionProperties);
+    		сonnectionProperties.put(persistenceType, entryManagerConf);
     	}
 
 		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
