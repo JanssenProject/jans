@@ -13,6 +13,7 @@
 
 package io.swagger.client;
 
+import com.google.gson.Gson;
 import com.squareup.okhttp.*;
 import com.squareup.okhttp.internal.http.HttpMethod;
 import com.squareup.okhttp.logging.HttpLoggingInterceptor;
@@ -21,6 +22,7 @@ import io.swagger.client.auth.ApiKeyAuth;
 import io.swagger.client.auth.Authentication;
 import io.swagger.client.auth.HttpBasicAuth;
 import io.swagger.client.auth.OAuth;
+import io.swagger.client.model.ErrorResponse;
 import okio.BufferedSink;
 import okio.Okio;
 import org.threeten.bp.LocalDate;
@@ -712,11 +714,23 @@ public class ApiClient {
             // Expecting string, return the raw response body.
             return (T) respBody;
         } else {
-            throw new ApiException(
+            Gson gson = JSON.createGson().setPrettyPrinting().create();
+            ErrorResponse errorResponse = null;
+            try {
+                errorResponse = gson.fromJson(respBody, ErrorResponse.class);
+            } catch (Exception e) {
+                throw new ApiException(
+                        "Content type \"" + contentType + "\" is not supported for type: " + returnType,
+                        e,
+                        response.code(),
+                        response.headers().toMultimap());
+            }
+
+            throw new ApiException (
                     "Content type \"" + contentType + "\" is not supported for type: " + returnType,
                     response.code(),
                     response.headers().toMultimap(),
-                    respBody);
+                    errorResponse);
         }
     }
 
@@ -921,7 +935,18 @@ public class ApiClient {
                     throw new ApiException(response.message(), e, response.code(), response.headers().toMultimap());
                 }
             }
-            throw new ApiException(response.message(), response.code(), response.headers().toMultimap(), respBody);
+            Gson gson = JSON.createGson().setPrettyPrinting().create();
+            ErrorResponse errorResponse = null;
+            try {
+                errorResponse = gson.fromJson(respBody, ErrorResponse.class);
+            } catch (Exception e) {
+                throw new ApiException(
+                        respBody,
+                        e,
+                        response.code(),
+                        response.headers().toMultimap());
+            }
+            throw new ApiException(response.message(), response.code(), response.headers().toMultimap(), errorResponse);
         }
     }
 
@@ -958,7 +983,7 @@ public class ApiClient {
      * @param formParams The form parameters
      * @param authNames The authentications to apply
      * @param progressRequestListener Progress request listener
-     * @return The HTTP request 
+     * @return The HTTP request
      * @throws ApiException If fail to serialize the request body object
      */
     public Request buildRequest(String path, String method, List<Pair> queryParams, List<Pair> collectionQueryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames, ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
