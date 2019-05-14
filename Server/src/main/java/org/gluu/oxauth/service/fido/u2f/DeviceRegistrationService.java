@@ -110,7 +110,7 @@ public class DeviceRegistrationService {
 
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
-
+        deviceRegistration.setDeletable(false);
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
