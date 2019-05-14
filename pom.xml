@@ -17,6 +17,7 @@
 
 		<weld.version>3.0.0.Final</weld.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
+		<jackson1.version>1.9.13</jackson1.version>
 		<jackson.version>2.8.11</jackson.version>
 
 		<log4j.version>2.8.2</log4j.version>
@@ -115,6 +116,11 @@
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-core-asl</artifactId>
+				<version>${jackson1.version}</version>
 			</dependency>
 
 			<!-- Logging -->

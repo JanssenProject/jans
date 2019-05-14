@@ -15,7 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Yuriy Movchan
  * @version September 15, 2017
  */
-@JsonPropertyOrder({ "version", "issuer", "register_endpoint", "notify_endpoint" })
+@JsonPropertyOrder({ "version", "issuer", "notify_endpoint" })
+@org.codehaus.jackson.annotate.JsonPropertyOrder({ "version", "issuer", "notify_endpoint" })
 public class NotifyMetadata {
 
 	@JsonProperty(value = "version")
