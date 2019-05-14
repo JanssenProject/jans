@@ -69,7 +69,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version May 3, 2019
+ * @version May 14, 2019
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -139,13 +139,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 if (authorizationGrant == null) {
                     log.trace("Failed to find authorization grant by access_token: " + accessToken);
-                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                    return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
                 }
 
                 final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
                 if (accessTokenObject == null || !accessTokenObject.isValid()) {
                     log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, accessTokenObject.isValid());
-                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                    return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
                 }
 
                 if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
