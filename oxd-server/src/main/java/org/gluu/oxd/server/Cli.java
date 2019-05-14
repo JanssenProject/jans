@@ -31,6 +31,7 @@ import org.gluu.oxd.server.service.RpService;
 import org.gluu.util.Pair;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.BadRequestException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -254,8 +255,12 @@ public class Cli {
                 return;
             }
             printHelpAndExit();
-        } catch (Exception e) {
+        } catch (BadRequestException e) {
             System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            System.out.println("Failed to execute command against oxd-server on port " + port + ", error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
