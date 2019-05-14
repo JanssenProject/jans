@@ -172,9 +172,6 @@ public class PersistanceFactoryService {
             String key = (String) keys.next();
             Object value = appendConfiguration.getProperty(key);
             mergedConfiguration.setProperty(prefix + "." + key, value);
-            
-            // We need to remove this after moving generic properties to gluu.properties
-            mergedConfiguration.setProperty(key, value);
         }
 	}
 
