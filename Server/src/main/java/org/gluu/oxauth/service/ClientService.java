@@ -312,7 +312,7 @@ public class ClientService {
 		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-		String nowDateString = ldapEntryManager.encodeTime(now);
+		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
 
 		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttributeLastAccessTime);

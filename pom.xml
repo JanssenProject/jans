@@ -181,6 +181,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.gluu</groupId>
+				<artifactId>oxcore-persistence-hybrid</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.gluu</groupId>
 				<artifactId>oxcore-persistence-cdi</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
