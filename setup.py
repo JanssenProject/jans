@@ -223,13 +223,13 @@ class Setup(object):
         self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
-        self.groupMappings = ('base', 'user', 'cache', 'statistic', 'site')
-        self.mappingLocations = { group: 'opendj' for group in self.groupMappings }  #default locations are OpenDJ
+        self.groupMappings = ['base', 'user', 'cache', 'statistic', 'site']
+        self.mappingLocations = { group: 'ldap' for group in self.groupMappings }  #default locations are OpenDJ
 
         # Gluu components installation status
         self.installOxAuth = True
         self.installOxTrust = True
-        self.installLdap = True
+        self.installLdap = False
         self.installHttpd = True
         self.installSaml = False
         self.installOxAuthRP = False
@@ -237,7 +237,6 @@ class Setup(object):
 
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
-        self.enableHybridStorage = False
 
         self.currentGluuVersion = '4.0.0'
 
@@ -271,7 +270,7 @@ class Setup(object):
         self.fido2ConfigFolder = '%s/fido2' % self.configFolder
         self.certFolder = '/etc/certs'
         
-        self.gluu_hybrid_roperties = '%s/gluu-hybrid.properties.last' % self.configFolder
+        self.gluu_hybrid_roperties = '%s/gluu-hybrid.properties' % self.configFolder
 
 
         self.oxBaseDataFolder = "/var/ox"
@@ -421,9 +420,11 @@ class Setup(object):
         self.opendj_p12_fn = '%s/opendj.pkcs12' % self.certFolder
         self.opendj_p12_pass = None
 
-        self.ldap_type = None
+        self.ldap_type = 'opendj'
         self.opendj_type = 'opendj'
         self.install_couchbase = None
+        self.persistence_type = 'opendj'
+
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
@@ -1963,8 +1964,6 @@ class Setup(object):
 
         if self.installLdap:
             if self.ldap_type == 'opendj':
-
-
                 self.ldapCertFn = self.opendj_cert_fn
                 self.ldapTrustStoreFn = self.opendj_p12_fn
                 self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
@@ -2177,6 +2176,7 @@ class Setup(object):
         self.enable_service_at_start('passport')
 
     def install_gluu_components(self):
+        
         if self.installLdap:
             if self.ldap_type == 'opendj':
                 self.pbar.progress("Installing Gluu components: LDAP", False)
@@ -2338,19 +2338,54 @@ class Setup(object):
         # Fix new file permissions
         self.run([self.cmd_chmod, '644', self.sysemProfile])
 
+
+    def getMappingType(self, mtype):
+        location = []
+        for group in self.mappingLocations:
+            if self.mappingLocations[group] == mtype:
+                location.append(group)
+        return location
+
+
+    def writePersistType(self):
+        self.logIt("Writing persist type")
+        fname = os.path.join(self.configFolder, 'gluu.properties')
+        fcontent = 'persistence.type={0}'.format(self.persistence_type)
+        self.writeFile(fname, fcontent)
+
+
+    def writeHybridProperties(self):
+
+        ldap_mappings = self.getMappingType('ldap')
+        couchbase_mappings = self.getMappingType('couchbase')
+        
+        for group in self.mappingLocations:
+            if group == 'base':
+                default_mapping = self.mappingLocations[group]
+
+        storages = set(self.mappingLocations.values())
+        
+        gluu_hybrid_roperties = [
+                        'storages: {0}'.format(', '.join(storages)),
+                        'storage.default: {0}'.format(default_mapping),
+                        ]
+
+        if ldap_mappings:
+            gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
+        if couchbase_mappings:
+            gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(', '.join(couchbase_mappings)))
+        
+        self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
+
+        self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
+
     def configureSystem(self):
         self.customiseSystem()
         self.createUsers()
         self.makeFolders()
 
-        if self.enableHybridStorage:
-            self.persistence_type = 'hybrid'
-        elif self.install_couchbase:
-            self.persistence_type = 'couchbase'
-        else:
-            self.persistence_type = 'ldap'
-
         self.writePersistType()
+        self.writeHybridProperties()
 
     def make_salt(self):
         try:
@@ -2368,25 +2403,15 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
 
-    def writePersistType(self):
-        self.logIt("Writing persist type")
-        fname = os.path.join(self.configFolder, 'gluu.properties')
-        fcontent = 'persistence.type={0}'.format(self.persistence_type)
-        self.writeFile(fname, fcontent)
-
-
     def promptBackendType(self, backend_types):
 
         promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
         
         if promptForLDAP == 'y':
-            
 
-
-            self.installLdap = True
             option = None
             
-            if len(backend_types) == 1:
+            if len(backend_types) == 2:
                 self.ldap_type = backend_types[0][1] 
             
             else:
@@ -2404,16 +2429,15 @@ class Setup(object):
                     if not option in options:
                         print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
 
-                self.ldap_type = backend_types[int(option)-1][1]
+                self.persistence_type = backend_types[int(option)-1][1]
 
-                if self.ldap_type == 'wrends':
-                    self.ldap_type = 'opendj'
+                if self.persistence_type == 'wrends':
                     self.opendj_type = 'wrends'
 
-                elif self.ldap_type == 'opendj':
-                    self.opendj_type = 'opendj'
+                if self.persistence_type in ('opendj', 'wrends', 'hybrid'):
+                    self.installLdap = True
 
-                elif self.ldap_type == 'couchbase':
+                if self.persistence_type in ('couchbase', 'hybrid'):
                     self.cache_provider_type = 'NATIVE_PERSISTENCE'
                     print ('  Please note that you have to update your firewall configuration to\n'
                             '  allow connections to the following ports:\n'
@@ -2422,6 +2446,10 @@ class Setup(object):
 
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                     self.install_couchbase = True
+                
+                if self.persistence_type == 'couchbase':
+                    self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
+                
         else:
             self.installLdap = False
 
@@ -2446,59 +2474,40 @@ class Setup(object):
         if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
             backend_types.append(('Couchbase','couchbase'))
 
+        
+        backend_types.append(('Hybrid', 'hybrid'))
+
         return backend_types
 
     def promptForBackendMappings(self, backend_types):
 
         options = []
+        options_text = []
         
-        backend_type_str_list = []
-
-        for i, backend in enumerate(backend_types):
-            backend_type_str_list.append('{0}:{1}'.format(i+1, backend[0]))
+        for i, m in enumerate(self.groupMappings):
+            options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
-        backend_type_str = '[{}]'.format(" " .join(backend_type_str_list))
-        used_backend_types = []
-        ldap_mappings = []
-        couchbase_mappings = []
+        options_text = 'Use {0} to store {1}'.format(backend_types[0][0], ' '.join(options_text))
 
-        for group in self.groupMappings:
-            while True:
-                prompt = self.getPrompt("Location of {0} {1}".format(group, backend_type_str), options[0])
-                if prompt in options:
-                    backendType = backend_types[int(prompt)-1][1]
-                    if backendType == 'couchbase':
-                        self.install_couchbase = True
-                        if group == 'base':
-                            default_mapping = 'couchbase'
-                        else:
-                            couchbase_mappings.append(group)
-                    elif backendType == 'opendj':
-                        self.installLdap = True
-                        if group == 'base':
-                            default_mapping = 'ldap'
-                        else:
-                            ldap_mappings.append(group)
+        re_pattern = '^[1-{0}]+$'.format(len(self.groupMappings))
 
-                    if not backendType in used_backend_types:
-                        used_backend_types.append(backendType)
-
-                    self.mappingLocations[group] = backendType
-                    break
+        while True:
+            prompt = self.getPrompt(options_text)
+            if re.match(re_pattern, prompt):
+                break
+            else:
                 print "Please select one of {0}.".format(", ".join(options))
 
-        gluu_hybrid_roperties = [
-                        'managers: {0}'.format(', '.join(used_backend_types)),
-                        'storage.default: {0}'.format(default_mapping),
-                        ]
+        couchbase_mappings = self.groupMappings[:]
 
-        if ldap_mappings:
-            gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
-        if couchbase_mappings:
-            gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(', '.join(couchbase_mappings)))
-        
-        self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
+        for i in prompt:
+            m = self.groupMappings[int(i)-1]
+            couchbase_mappings.remove(m)
+
+        for m in couchbase_mappings:
+            self.mappingLocations[m] = 'couchbase'
+            
 
 
     def promptForProperties(self):
@@ -2610,9 +2619,9 @@ class Setup(object):
             self.installOxTrust = False
 
         if self.remoteCouchbase:
-            self.installLdap = True
-            self.ldap_type = 'couchbase'
-            self.install_couchbase = True
+            self.installLdap = False
+            self.persistence_type = 'couchbase'
+            self.install_couchbase = False
 
             while True:
                 self.ldap_hostname = self.getPrompt("    Couchbase host")
@@ -2632,10 +2641,10 @@ class Setup(object):
 
             backend_types = self.getBackendTypes()
 
-            if self.enableHybridStorage:
+            self.promptBackendType(backend_types)
+
+            if self.persistence_type == 'hybrid':
                 self.promptForBackendMappings(backend_types)
-            else:
-                self.promptBackendType(backend_types)
 
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
@@ -2645,7 +2654,7 @@ class Setup(object):
             self.installHttpd = False
 
         
-        if self.ldap_type != 'couchbase':
+        if self.persistence_type != 'couchbase':
             promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
             if promptForShibIDP == 'y':
                 self.shibboleth_version = 'v3'
@@ -2915,7 +2924,8 @@ class Setup(object):
             keys = self.__dict__.keys()
             keys.sort()
             for key in keys:
-                
+                if key == 'couchbaseInstallOutput':
+                    continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(self.__dict__[key])
                 else:
@@ -3332,10 +3342,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def start_services(self):
-        
-        #write hybrid properties
-        self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
-        
+
         # Detect service path and apache service name
         service_path = self.detect_service_path()
         apache_service_name = 'httpd'
@@ -3428,7 +3435,7 @@ class Setup(object):
                 ldif_files = []
                 base_ldif = False
                 for group in self.groupMappings:
-                    if self.mappingLocations[group] == 'opendj':
+                    if self.mappingLocations[group] == 'ldap':
                         ldif_files += self.mappingsLdif[group]
                         if group == 'base':
                             base_ldif = True
@@ -3637,7 +3644,7 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
-        elif self.os_type == 'ubuntu' and self.os_version == '18':
+        elif self.os_type+ self.os_version != 'ubuntu14':
             oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
             oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
             oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
@@ -3979,9 +3986,9 @@ class Setup(object):
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
 
-        if self.ldap_type == 'opendj':
+        if self.persistence_type in ('opendj', 'hybrid'):
             self.import_ldif_opendj(ldif_files)
-        elif self.ldap_type == 'couchbase':
+        elif self.persistence_type in ('couchbase', 'hybrid'):
             self.import_ldif_couchebase(ldif_files)
 
 ############################   Main Loop   #################################################
@@ -4067,8 +4074,6 @@ def getOpts(argv, setupOptions):
             setupOptions['listenAllInterfaces'] = True
         elif opt == '--remote-couchbase':
             setupOptions['remoteCouchbase'] = True
-        elif opt == '--enable-hybrid-storage':
-            setupOptions['enableHybridStorage'] = True
         elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
@@ -4087,7 +4092,7 @@ if __name__ == '__main__':
         'downloadWars': False,
         'installOxAuth': True,
         'installOxTrust': True,
-        'installLDAP': True,
+        'installLDAP': False,
         'installHTTPD': True,
         'installSaml': False,
         'installOxAuthRP': False,
@@ -4097,7 +4102,6 @@ if __name__ == '__main__':
         'allowDeprecatedApplications': False,
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
-        'enableHybridStorage': False,
     }
 
     if len(sys.argv) > 1:
@@ -4126,7 +4130,6 @@ if __name__ == '__main__':
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
     installObject.listenAllInterfaces = setupOptions['listenAllInterfaces']
     installObject.remoteCouchbase = setupOptions['remoteCouchbase']
-    installObject.enableHybridStorage = setupOptions['enableHybridStorage']
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
