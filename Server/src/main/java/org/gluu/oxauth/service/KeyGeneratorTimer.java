@@ -126,7 +126,7 @@ public class KeyGeneratorTimer {
 	}
 
     private void updateKeysImpl() throws JSONException, Exception {
-        String dn = configurationFactory.getPersistenceConfiguration().getConfiguration().getString("oxauth_ConfigurationEntryDN");
+        String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
         JSONObject jwks = conf.getWebKeys().toJSONObject();
