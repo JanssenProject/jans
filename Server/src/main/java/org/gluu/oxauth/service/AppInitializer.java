@@ -173,7 +173,7 @@ public class AppInitializer {
 		setDefaultAuthenticationMethod(localPersistenceEntryManager);
 
 		// Initialize python interpreter
-		pythonService.initPythonInterpreter(configurationFactory.getPersistenceConfiguration().getConfiguration()
+		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration()
 				.getString("pythonModulesDir", null));
 
 		// Initialize script manager
