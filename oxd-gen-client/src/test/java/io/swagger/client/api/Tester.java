@@ -5,11 +5,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
+import io.swagger.client.model.ErrorResponse;
 import io.swagger.client.model.GetClientTokenParams;
 import io.swagger.client.model.GetClientTokenResponse;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.common.ErrorResponse;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -52,7 +53,7 @@ public class Tester {
         assertTrue(str != null && !str.isEmpty() && str.get(0) != null && !str.get(0).isEmpty());
     }
 
-    public static String getAuthorization() throws Exception {
+    public static String getAuthorization() throws ApiException {
         Preconditions.checkNotNull(setupData);
         if (Strings.isNullOrEmpty(AUTHORIZATION)) {
             AUTHORIZATION = getAuthorization(setupData);
@@ -114,6 +115,6 @@ public class Tester {
     }
 
     public static ErrorResponse asError(ApiException e) throws IOException {
-        return asError(e.getResponseBody());
+        return e.getResponseBody();
     }
 }
