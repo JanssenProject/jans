@@ -36,6 +36,8 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
 
+    public static final String PERSISTANCE_TYPE = "couchbase";
+
     private DefaultCouchbaseEnvironment.Builder builder;
     private CouchbaseEnvironment couchbaseEnvironment;
 
@@ -64,13 +66,13 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     @Override
     public String getPersistenceType() {
-        return "couchbase";
+        return PERSISTANCE_TYPE;
     }
 
     @Override
     public HashMap<String, String> getConfigurationFileNames() {
     	HashMap<String, String> confs = new HashMap<String, String>();
-    	confs.put("couchbase", "gluu-couchbase.properties");
+    	confs.put(PERSISTANCE_TYPE, "gluu-couchbase.properties");
 
     	return confs;
     }
@@ -81,7 +83,12 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     @Override
     public CouchbaseEntryManager createEntryManager(Properties conf) {
-    	this.couchbaseConnectionProperties = PropertiesHelper.filterProperties(conf, "couchbase");
+		Properties entryManagerConf = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
+
+		// Allow proper initialization
+		if (this.couchbaseConnectionProperties == null) {
+			this.couchbaseConnectionProperties = entryManagerConf;
+		}
 
     	init();
     	
@@ -89,7 +96,7 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
             throw new ConfigurationException("Failed to create Couchbase environment!");
     	}
 
-    	CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(this.couchbaseConnectionProperties, couchbaseEnvironment);
+    	CouchbaseConnectionProvider connectionProvider = new CouchbaseConnectionProvider(entryManagerConf, couchbaseEnvironment);
         connectionProvider.create();
         if (!connectionProvider.isCreated()) {
             throw new ConfigurationException(
