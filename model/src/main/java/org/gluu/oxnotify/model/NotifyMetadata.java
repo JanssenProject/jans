@@ -20,12 +20,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class NotifyMetadata {
 
 	@JsonProperty(value = "version")
+	@org.codehaus.jackson.annotate.JsonProperty(value = "version")
 	private String version;
 
 	@JsonProperty(value = "issuer")
+	@org.codehaus.jackson.annotate.JsonProperty(value = "issuer")
 	private String issuer;
 
 	@JsonProperty(value = "notify_endpoint")
+	@org.codehaus.jackson.annotate.JsonProperty(value = "notify_endpoint")
 	private String notifyEndpoint;
 
 	public String getVersion() {
