@@ -29,13 +29,15 @@ public class ServerConfiguration implements Serializable {
 		@DN
 		private String dn;
 
+		@AttributeName(name="oxId")
+		private String id;
+
 		@AttributeName(name="displayName")
 		private String name;
 
+
 		public AuthScope() {
 
-			this.dn = null;
-			this.name = null;
 		}
 
 		public String getDn() {
@@ -47,6 +49,17 @@ public class ServerConfiguration implements Serializable {
 
 			this.dn = dn;
 			return this; 
+		}
+
+		public String getId() {
+
+			return this.id;
+		}
+
+		public AuthScope setId(String id) {
+
+			this.id = id;
+			return this;
 		}
 
 		public String getName() {
