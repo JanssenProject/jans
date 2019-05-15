@@ -21,13 +21,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FileUtil {
 
     private FileUtil() { }
 
-    private static final Logger LOG = Logger.getLogger(FileUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileUtil.class);
 
     /**
      * Writes data in a file on specified position

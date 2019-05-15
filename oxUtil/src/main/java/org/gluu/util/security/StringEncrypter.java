@@ -20,8 +20,9 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DESedeKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
 import org.gluu.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encryption algorithms
@@ -30,7 +31,7 @@ import org.gluu.util.Util;
  */
 public class StringEncrypter {
 
-    private static final Logger LOG = Logger.getLogger(StringEncrypter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StringEncrypter.class);
 
     private final ReentrantLock lock = new ReentrantLock();
 
