@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.unboundid.ldap.sdk.ChangeType;
 import com.unboundid.ldap.sdk.Entry;
@@ -40,7 +41,7 @@ import com.unboundid.ldif.LDIFReader;
  */
 public final class LdifDataUtility {
 
-    private static final Logger LOG = Logger.getLogger(LdifDataUtility.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LdifDataUtility.class);
 
     // Just define the singleton as a static field in a separate class.
     // The semantics of Java guarantee that the field will not be initialized until

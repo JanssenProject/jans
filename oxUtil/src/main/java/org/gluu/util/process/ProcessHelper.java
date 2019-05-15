@@ -18,8 +18,9 @@ import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.log4j.Logger;
 import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility to execute external processes
@@ -28,7 +29,7 @@ import org.gluu.util.StringHelper;
  */
 public final class ProcessHelper {
 
-    private static Logger LOG = Logger.getLogger(ProcessHelper.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProcessHelper.class);
 
     private static final long PRINT_JOB_TIMEOUT = 100 * 1000;
 
