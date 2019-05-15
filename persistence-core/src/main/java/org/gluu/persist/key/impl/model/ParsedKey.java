@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2018, Gluu
  */
-package org.gluu.persist.couchbase.model;
+package org.gluu.persist.key.impl.model;
 
 /**
  * Couchbase key with inum

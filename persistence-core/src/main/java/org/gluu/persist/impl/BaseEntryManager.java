@@ -208,7 +208,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				propertiesAnnotations, attributesToPersistMap, attributesFromLdapMap, isSchemaUpdate,
 				schemaModificationType);
 
-		updateMergeChanges(entry, isSchemaUpdate, entryClass, attributesFromLdapMap, attributeDataModifications);
+		updateMergeChanges(dnValue.toString(), entry, isSchemaUpdate, entryClass, attributesFromLdapMap, attributeDataModifications);
 
 		LOG.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
 
@@ -217,7 +217,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations);
 	}
 
-	protected abstract <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass,
+	protected abstract <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass,
 			Map<String, AttributeData> attributesFromLdapMap,
 			List<AttributeDataModification> attributeDataModifications);
 
@@ -1671,6 +1671,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 		return searchFilter;
 	}
+
+	protected abstract Date decodeTime(String date);
+
+	protected abstract String encodeTime(Date date);
 
 	protected static final class PropertyComparator<T> implements Comparator<T>, Serializable {
 

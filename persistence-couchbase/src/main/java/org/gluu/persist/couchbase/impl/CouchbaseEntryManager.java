@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.gluu.persist.couchbase.model.ParsedKey;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
@@ -31,6 +30,8 @@ import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
+import org.gluu.persist.key.impl.GenericKeyConverter;
+import org.gluu.persist.key.impl.model.ParsedKey;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
@@ -65,7 +66,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
     private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
-    private static final CouchbaseKeyConverter KEY_CONVERTER = new CouchbaseKeyConverter();
+    private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter();
 
     private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -112,7 +113,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
+    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
             List<AttributeDataModification> attributeDataModifications) {
         // Update object classes if entry contains custom object classes
         if (!isSchemaUpdate) {
@@ -632,7 +633,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public String encodeTime(Date date) {
+    public String encodeTime(String baseDN, Date date) {
         if (date == null) {
             return null;
         }
@@ -641,7 +642,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public Date decodeTime(String date) {
+	protected String encodeTime(Date date) {
+		return encodeTime(null, date);
+	}
+
+    @Override
+    public Date decodeTime(String baseDN, String date) {
         if (StringHelper.isEmpty(date)) {
             return null;
         }
@@ -657,6 +663,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         return decodedDate;
     }
+
+    @Override
+    public Date decodeTime(String date) {
+		return decodeTime(null, date);
+	}
 
 	@Override
 	public boolean hasBranchesSupport(String dn) {

@@ -182,8 +182,8 @@ public abstract class MetricService implements Serializable {
 
                 Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
                 Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
-                Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", getEntryManager().encodeTime((startDate)));
-                Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", getEntryManager().encodeTime(endDate));
+                Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", getEntryManager().encodeTime(metricDn, (startDate)));
+                Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", getEntryManager().encodeTime(metricDn, endDate));
 
                 metricTypeFilters.add(applicationTypeFilter);
                 metricTypeFilters.add(eventTypeTypeFilter);
@@ -207,7 +207,7 @@ public abstract class MetricService implements Serializable {
 
     public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
             int count, int chunkSize) {
-        Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", getEntryManager().encodeTime(expirationDate));
+        Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
 
         List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
                 new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);
