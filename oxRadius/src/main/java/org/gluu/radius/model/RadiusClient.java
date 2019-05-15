@@ -36,20 +36,16 @@ public class RadiusClient implements Serializable {
 	@AttributeName(name="oxRadiusClientSecret")
 	private String secret;
 
+	@AttributeName(name="oxRadiusClientSortPriority")
+	private Integer priority;
+
 
 	public RadiusClient() {
 
-		this.dn = null;
-		this.inum = null;
-		this.name = null;
-		this.ipAddress = null;
-		this.secret = null;
 	}
 
 	public RadiusClient(String name,String ipaddress,String secret) {
 
-		this.dn = null;
-		this.inum = null;
 		this.name = name;
 		this.ipAddress = ipaddress;
 		this.secret = secret;
@@ -112,6 +108,17 @@ public class RadiusClient implements Serializable {
 	public RadiusClient setSecret(String secret) {
 
 		this.secret = secret;
+		return this;
+	}
+
+	public Integer getPriority() {
+
+		return this.priority;
+	}
+
+	public RadiusClient setPriority(Integer priority) {
+
+		this.priority = priority;
 		return this;
 	}
 }
