@@ -6,12 +6,7 @@
     "authz_redirect_uri" : "https://%(hostname)s/casa"
   },
   "ldap_settings" : {
-    "salt" : "%(configFolder)s/salt",
-    "persistence_type_file" : "%(configFolder)s/gluu.properties",
-    "persistence_config_file" : {
-        "couchbase" : "%(gluuCouchebaseProperties)s",
-        "ldap" : "%(ox_ldap_properties)s"
-    }
+    "salt" : "%(configFolder)s/salt"
   },
   "log_level" : "INFO"
 }
