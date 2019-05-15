@@ -51,6 +51,14 @@ public class FileConfiguration {
         }
     }
 
+    public FileConfiguration(String fileName, PropertiesConfiguration propertiesConfiguration) {
+        this.fileName = fileName;
+        this.isResource = false;
+		this.propertiesConfiguration = propertiesConfiguration;
+
+		this.loaded = true;
+    }
+
 	protected void loadProperties() {
 		try {
 			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);

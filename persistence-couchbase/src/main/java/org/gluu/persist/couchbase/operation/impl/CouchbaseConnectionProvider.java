@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.core.CouchbaseException;
+import com.couchbase.client.core.RequestCancelledException;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
@@ -33,7 +34,6 @@ import com.couchbase.client.java.query.Statement;
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
-// TODO: getBucketMappingByKey
 public class CouchbaseConnectionProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
@@ -79,6 +79,7 @@ public class CouchbaseConnectionProvider {
             }
 
             LOG.error("Failed to create connection with properties: '{}'. Exception: {}", clonedProperties, ex);
+            ex.printStackTrace();
         }
     }
 
@@ -88,7 +89,7 @@ public class CouchbaseConnectionProvider {
         this.userName = props.getProperty("auth.userName");
         this.userPassword = props.getProperty("auth.userPassword");
 
-        this.defaultBucket = props.getProperty("bucket.default");
+        this.defaultBucket = props.getProperty("bucket.default", null);
         if (StringHelper.isEmpty(defaultBucket)) {
             throw new ConfigurationException("Default bucket is not defined!");
         }
@@ -252,11 +253,11 @@ public class CouchbaseConnectionProvider {
         }
 
         BucketMapping bucketMapping = baseNameToBucketMapping.get(baseNameParts[0]);
-        if (bucketMapping == null) {
-            return defaultBucketMapping;
+        if (bucketMapping != null) {
+            return bucketMapping;
         }
 
-        return bucketMapping;
+        return defaultBucketMapping;
     }
 
     public int getCreationResultCode() {
@@ -298,17 +299,5 @@ public class CouchbaseConnectionProvider {
     public PasswordEncryptionMethod getPasswordEncryptionMethod() {
         return passwordEncryptionMethod;
     }
-
-    public static void main(String[] args) {
-    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment.Builder builder = com.couchbase.client.java.env.DefaultCouchbaseEnvironment.builder().bootstrapHttpDirectPort(38091);
-    	
-    	com.couchbase.client.java.env.DefaultCouchbaseEnvironment couchbaseEnvironment = builder.build();
-    	CouchbaseCluster cluster = CouchbaseCluster.create(couchbaseEnvironment, "u164.gluu.info");
-        cluster.authenticate("admin", "secret");
-        
-        Bucket bucket = cluster.openBucket("gluu");
-        System.out.println(bucket.exists("_"));
-        
-	}
 }
 

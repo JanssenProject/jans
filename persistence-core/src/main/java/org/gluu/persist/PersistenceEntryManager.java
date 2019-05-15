@@ -76,8 +76,8 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String dn);
     boolean hasBranchesSupport(String dn);
 
-    Date decodeTime(String date);
-    String encodeTime(Date date);
+    Date decodeTime(String baseDN, String date);
+    String encodeTime(String baseDN, Date date);
 
     int getHashCode(Object entry);
 
