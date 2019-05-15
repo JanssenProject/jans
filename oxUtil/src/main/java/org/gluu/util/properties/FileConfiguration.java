@@ -15,15 +15,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
 import org.gluu.util.ArrayHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Movchan Date: 03.29.2011
  */
 public class FileConfiguration {
 
-    private static final Logger log = Logger.getLogger(FileConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(FileConfiguration.class);
 
     private String fileName;
     private boolean isResource;
