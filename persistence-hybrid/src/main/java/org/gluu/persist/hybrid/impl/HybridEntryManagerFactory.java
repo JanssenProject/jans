@@ -106,7 +106,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     		сonnectionProperties.put(persistenceType, entryManagerConf);
     	}
 
-		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
+		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
 		
 		HybridPersistenceOperationService hybridOperationService = new HybridPersistenceOperationService(operationServices);
     	

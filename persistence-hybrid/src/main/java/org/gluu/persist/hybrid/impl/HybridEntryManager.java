@@ -66,7 +66,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
     protected void init() {
-        String defaultPersistenceType = mappingProperties.getProperty("default", null);
+        String defaultPersistenceType = mappingProperties.getProperty("storage.default", null);
         if (StringHelper.isEmpty(defaultPersistenceType) || (persistenceEntryManagers.get(defaultPersistenceType) == null)) {
             throw new ConfigurationException("Default persistence type is not defined!");
         }
@@ -74,7 +74,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 
         this.baseNameToEntryManagerMapping = new HashMap<String, PersistenceEntryManager>();
         for (Entry<String, PersistenceEntryManager> persistenceTypeEntry : persistenceEntryManagers.entrySet()) {
-        	String mapping = mappingProperties.getProperty(persistenceTypeEntry.getKey() + ".mapping", "");
+        	String mapping = mappingProperties.getProperty(String.format("storage.%s.mapping", persistenceTypeEntry.getKey()), "");
             String[] baseNames = StringHelper.split(mapping, ",");
             for (String baseName : baseNames) {
             	baseNameToEntryManagerMapping.put(baseName, persistenceTypeEntry.getValue());
