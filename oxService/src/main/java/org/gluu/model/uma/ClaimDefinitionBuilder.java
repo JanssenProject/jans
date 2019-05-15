@@ -3,17 +3,18 @@ package org.gluu.model.uma;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.gluu.model.uma.ClaimDefinition;
 import org.gluu.model.uma.ClaimDefinitionList;
 import org.gluu.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yuriyz on 06/16/2017.
  */
 public final class ClaimDefinitionBuilder {
 
-    private static final Logger LOG = Logger.getLogger(ClaimDefinitionBuilder.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClaimDefinitionBuilder.class);
 
     private ClaimDefinitionBuilder() {
     }

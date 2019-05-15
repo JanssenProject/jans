@@ -32,7 +32,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.saml.ext.OpenSAMLUtil;
 import org.gluu.zip.CompressionHelper;
@@ -46,6 +45,8 @@ import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.signature.SignatureConstants;
 import org.opensaml.xml.signature.Signer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -57,7 +58,7 @@ import org.xml.sax.InputSource;
  */
 public class AuthRequest {
 
-    private static final Logger LOG = Logger.getLogger(AuthRequest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AuthRequest.class);
     private static final SimpleDateFormat SIMPLE_DATA_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'H:mm:ss");
 
     static {

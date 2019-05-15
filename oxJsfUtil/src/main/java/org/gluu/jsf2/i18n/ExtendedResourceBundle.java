@@ -22,7 +22,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Custom i18n resource loader
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public class ExtendedResourceBundle extends ResourceBundle {
 
-    private static final Logger LOG = Logger.getLogger(ExtendedResourceBundle.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExtendedResourceBundle.class);
 
     private static final String BASE_NAME = "messages";
     private static final Control CONTROL = new CustomControl();

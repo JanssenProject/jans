@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(FileConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileConfiguration.class);
 
     private String fileName;
     private boolean isResource;
@@ -65,23 +65,23 @@ public class FileConfiguration {
 			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
-			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
 		} catch (Exception e) {
-			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
-			log.error(e.getMessage(), e);
+			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
 	protected void loadResourceProperties() {
-		log.debug(String.format("Loading '%s' configuration file from resources", this.fileName));
+		LOG.debug(String.format("Loading '%s' configuration file from resources", this.fileName));
 		try {
 			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
-			log.error(String.format("Failed to load '%s' configuration file from resources", this.fileName));
+			LOG.error(String.format("Failed to load '%s' configuration file from resources", this.fileName));
 		} catch (Exception e) {
-			log.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
-			log.error(e.getMessage(), e);
+			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class FileConfiguration {
         try {
             this.propertiesConfiguration.save();
         } catch (ConfigurationException ex) {
-            log.debug(String.format("Failed to save '%s' configuration file to tomcat config folder", this.fileName));
+            LOG.debug(String.format("Failed to save '%s' configuration file to tomcat config folder", this.fileName));
         }
     }
 

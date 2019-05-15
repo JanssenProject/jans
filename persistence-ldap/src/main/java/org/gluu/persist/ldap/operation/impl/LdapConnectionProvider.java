@@ -11,11 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.FailoverServerSet;
@@ -35,7 +36,7 @@ import com.unboundid.util.ssl.TrustStoreTrustManager;
  */
 public class LdapConnectionProvider {
 
-    private static final Logger LOG = Logger.getLogger(LdapConnectionProvider.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LdapConnectionProvider.class);
 
     private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
     private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
