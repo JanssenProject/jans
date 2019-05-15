@@ -1,7 +1,6 @@
 package io.swagger.client.api;
 
 import com.google.common.base.Preconditions;
-import io.swagger.client.ApiException;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +33,7 @@ public class SetUpTest {
             LOG.debug("Tester's authorization is set.");
 
             LOG.debug("Finished beforeSuite!");
-        } catch (ApiException e) {
-            LOG.error("Code :"+ e.getCode());
-            LOG.error("Message :"+ e.getMessage());
-            LOG.error("Error :"+ e.getResponseBody().getError());
-            LOG.error("Error Description :"+ e.getResponseBody().getErrorDescription());
-            LOG.error("Details :"+ e.getResponseBody().getDetails());
+        } catch (Exception e) {
             LOG.error("Failed to start swagger suite.", e);
             throw new AssertionError("Failed to start suite.");
         }
