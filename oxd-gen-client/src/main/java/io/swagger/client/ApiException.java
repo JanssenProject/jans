@@ -13,8 +13,6 @@
 
 package io.swagger.client;
 
-import io.swagger.client.model.ErrorResponse;
-
 import java.util.Map;
 import java.util.List;
 
@@ -22,7 +20,7 @@ import java.util.List;
 public class ApiException extends Exception {
     private int code = 0;
     private Map<String, List<String>> responseHeaders = null;
-    private ErrorResponse responseBody = null;
+    private String responseBody = null;
 
     public ApiException() {}
 
@@ -34,14 +32,14 @@ public class ApiException extends Exception {
         super(message);
     }
 
-    public ApiException(String message, Throwable throwable, int code, Map<String, List<String>> responseHeaders, ErrorResponse responseBody) {
+    public ApiException(String message, Throwable throwable, int code, Map<String, List<String>> responseHeaders, String responseBody) {
         super(message, throwable);
         this.code = code;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
     }
 
-    public ApiException(String message, int code, Map<String, List<String>> responseHeaders, ErrorResponse responseBody) {
+    public ApiException(String message, int code, Map<String, List<String>> responseHeaders, String responseBody) {
         this(message, (Throwable) null, code, responseHeaders, responseBody);
     }
 
@@ -49,7 +47,7 @@ public class ApiException extends Exception {
         this(message, throwable, code, responseHeaders, null);
     }
 
-    public ApiException(int code, Map<String, List<String>> responseHeaders, ErrorResponse responseBody) {
+    public ApiException(int code, Map<String, List<String>> responseHeaders, String responseBody) {
         this((String) null, (Throwable) null, code, responseHeaders, responseBody);
     }
 
@@ -58,7 +56,7 @@ public class ApiException extends Exception {
         this.code = code;
     }
 
-    public ApiException(int code, String message, Map<String, List<String>> responseHeaders, ErrorResponse responseBody) {
+    public ApiException(int code, String message, Map<String, List<String>> responseHeaders, String responseBody) {
         this(code, message);
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
@@ -87,7 +85,7 @@ public class ApiException extends Exception {
      *
      * @return Response body in the form of string
      */
-    public ErrorResponse getResponseBody() {
+    public String getResponseBody() {
         return responseBody;
     }
 }
