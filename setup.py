@@ -2341,8 +2341,9 @@ class Setup(object):
     def getMappingType(self, mtype):
         location = []
         for group in self.mappingLocations:
-            if self.mappingLocations[group] == mtype:
+            if group != 'default' and self.mappingLocations[group] == mtype:
                 location.append(group)
+
         return location
 
 
@@ -2354,6 +2355,7 @@ class Setup(object):
         for group in self.mappingLocations:
             if group == 'default':
                 default_mapping = self.mappingLocations[group]
+                break
 
         storages = set(self.mappingLocations.values())
         
