@@ -41,5 +41,11 @@
     "oxStartDate", 
     "oxDeletable", 
     "oxAuthExpiration"
+  ],
+  "clients": [
+  "objectClass",
+  "dn",
+  "inum",
+  "oxAuthScope"
   ]
 }
