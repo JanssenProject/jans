@@ -35,6 +35,7 @@ import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.BaseConfigurationReload;
 import org.gluu.service.cdi.event.ConfigurationEvent;
 import org.gluu.service.cdi.event.ConfigurationUpdate;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
@@ -81,6 +82,7 @@ public class ConfigurationFactory {
 	private Instance<Configuration> configurationInstance;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
+	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
 
 	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
@@ -101,6 +103,7 @@ public class ConfigurationFactory {
 	private static final String BASE_DIR;
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
+	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
 	private static final String LDAP_PROPERTIES_FILE = DIR + "oxauth-ldap.properties";
 
 	private final String CONFIG_FILE_NAME = "oxauth-config.json";
@@ -112,6 +115,8 @@ public class ConfigurationFactory {
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
 	private boolean loaded = false;
+
+	private FileConfiguration baseConfiguration;
     
     private PersistenceConfiguration persistenceConfiguration;
 	private AppConfiguration conf;
@@ -125,6 +130,8 @@ public class ConfigurationFactory {
 
 	private AtomicBoolean isActive;
 
+	private long baseConfigurationFileLastModifiedTime;
+
 	private long loadedRevision = -1;
 	private boolean loadedFromLdap = true;
 
@@ -133,13 +140,15 @@ public class ConfigurationFactory {
 		this.isActive = new AtomicBoolean(true);
 		try {
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(LDAP_PROPERTIES_FILE);
+			loadBaseConfiguration();
+
 			this.confDir = confDir();
 
 			this.configFilePath = confDir + CONFIG_FILE_NAME;
 			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
 			this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
 
-			String certsDir = this.persistenceConfiguration.getConfiguration().getString("certsDir");
+			String certsDir = this.baseConfiguration.getString("certsDir");
 			if (StringHelper.isEmpty(certsDir)) {
 				certsDir = confDir;
 			}
@@ -219,6 +228,17 @@ public class ConfigurationFactory {
 			}
 		}
 
+        // Reload Base configuration if needed
+		File baseConfiguration = new File(BASE_PROPERTIES_FILE);
+		if (baseConfiguration.exists()) {
+			final long lastModified = baseConfiguration.lastModified();
+			if (lastModified > baseConfigurationFileLastModifiedTime) {
+				// Reload configuration only if it was modified
+				loadBaseConfiguration();
+				event.select(BaseConfigurationReload.Literal.INSTANCE).fire(BASE_CONFIGUARION_RELOAD_EVENT_TYPE);
+			}
+		}
+
 		if (!loadedFromLdap) {
 			return;
 		}
@@ -236,12 +256,16 @@ public class ConfigurationFactory {
 	}
 
 	private String confDir() {
-		final String confDir = this.persistenceConfiguration.getConfiguration().getString("confDir", null);
+		final String confDir = this.baseConfiguration.getString("confDir", null);
 		if (StringUtils.isNotBlank(confDir)) {
 			return confDir;
 		}
 
 		return DIR;
+	}
+
+	public FileConfiguration getBaseConfiguration() {
+		return baseConfiguration;
 	}
 
 	@Produces
@@ -383,7 +407,7 @@ public class ConfigurationFactory {
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-		final String dn = this.persistenceConfiguration.getConfiguration().getString("oxauth_ConfigurationEntryDN");
+		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
 
@@ -483,6 +507,13 @@ public class ConfigurationFactory {
 			log.warn(e.getMessage(), e);
 		}
 		return null;
+	}
+
+	private void loadBaseConfiguration() {
+		this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
+
+		File baseConfiguration = new File(BASE_PROPERTIES_FILE);
+		this.baseConfigurationFileLastModifiedTime = baseConfiguration.lastModified();
 	}
 
 	public void loadCryptoConfigurationSalt() {
