@@ -354,23 +354,30 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
         }
 
+        ParsedKey keyWithInum = toCouchbaseKey(baseDN);
+        Expression expression;
+		try {
+			expression = toCouchbaseFilter(searchFilter);
+		} catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+		}
+
         PagedResult<JsonObject> searchResult = null;
         try {
             CouchbaseBatchOperationWraper<T> batchOperationWraper = null;
             if (batchOperation != null) {
                 batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            ParsedKey keyWithInum = toCouchbaseKey(baseDN);
             searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+                throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), expression));
             }
 
             return searchResult;
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+            throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), expression), ex);
         }
     }
 
