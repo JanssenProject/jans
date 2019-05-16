@@ -107,43 +107,47 @@ public class RegisterParamsValidator {
         boolean valid = true;
         Set<String> redirectUriHosts = new HashSet<String>();
 
-        try {
-            if (redirectUris != null && !redirectUris.isEmpty()) {
-                for (String redirectUri : redirectUris) {
-                    if (redirectUri == null || redirectUri.contains("#")) {
+        if (redirectUris != null && !redirectUris.isEmpty()) {
+            for (String redirectUri : redirectUris) {
+                if (redirectUri == null || redirectUri.contains("#")) {
+                    valid = false;
+                } else {
+                    URI uri = null;
+                    try {
+                        uri = new URI(redirectUri);
+                    } catch (URISyntaxException e) {
+                        log.error("Failed to parse redirect_uri: {}, error: {}", redirectUri, e.getMessage());
                         valid = false;
-                    } else {
-                        URI uri = new URI(redirectUri);
-                        redirectUriHosts.add(uri.getHost());
-                        switch (applicationType) {
-                            case WEB:
-                                if (HTTP.equalsIgnoreCase(uri.getScheme())) {
-                                    if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                        log.error("Invalid protocol for redirect_uri: " +
-                                                redirectUri +
-                                                " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
-                                        valid = false;
-                                    }
+                        continue;
+                    }
+                    redirectUriHosts.add(uri.getHost());
+                    switch (applicationType) {
+                        case WEB:
+                            if (HTTP.equalsIgnoreCase(uri.getScheme())) {
+                                if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
+                                    log.error("Invalid protocol for redirect_uri: " +
+                                            redirectUri +
+                                            " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
+                                    valid = false;
                                 }
-                                break;
-                            case NATIVE:
-                                // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
-                                // we allow registration with custom schema for native apps.
+                            }
+                            break;
+                        case NATIVE:
+                            // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
+                            // we allow registration with custom schema for native apps.
 //                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
 //                                    valid = false;
 //                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
 //                                    valid = false;
 //                                }
-                                break;
-                        }
+                            break;
                     }
                 }
-            } else {
-                valid = false;
             }
-        } catch (URISyntaxException e) {
+        } else {
             valid = false;
         }
+
 
         /*
          * Providers that use pairwise sub (subject) values SHOULD utilize the sector_identifier_uri value
@@ -183,7 +187,7 @@ public class RegisterParamsValidator {
                     valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
                 }
             } catch (Exception e) {
-                log.trace(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 valid = false;
             }
         }
@@ -278,7 +282,7 @@ public class RegisterParamsValidator {
                         build());
     }
 
-    private Set<String> collectUriHosts(List<String> uriList) throws URISyntaxException {
+    private static Set<String> collectUriHosts(List<String> uriList) throws URISyntaxException {
         Set<String> hosts = new HashSet<String>();
 
         for (String redirectUri : uriList) {

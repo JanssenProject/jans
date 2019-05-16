@@ -190,7 +190,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             if (!registerParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(),
                     r.getRedirectUris(), r.getSectorIdentifierUri())) {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Redirect uris are not valid.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Failed to validate redirect uris.");
             }
 
             registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
@@ -270,7 +270,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             log.error(e.getMessage(), e);
             throw e;
         } catch (InvalidJwtException e) {
-            builder = badRequestResponse("Invalid jwt.");
+            builder = Response.status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Invalid jwt."));
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = internalErrorResponse("Unknown.");
@@ -286,12 +288,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     public Response.ResponseBuilder internalErrorResponse(String reason) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, reason));
-    }
-
-    public Response.ResponseBuilder badRequestResponse(String reason) {
-        return Response.status(Response.Status.BAD_REQUEST)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, reason));
     }
@@ -619,7 +615,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder.entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client"));
                     }
                 } else {
-                    log.trace("Client parameters are invalid.");
+                    log.trace("Client ID or Access Token is not valid.");
                     throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Client ID or Access Token is not valid.");
                 }
             } else {
