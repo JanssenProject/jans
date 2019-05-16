@@ -366,7 +366,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean createFromLdap(boolean recoverFromFiles) {
-		log.info("Loading configuration from LDAP...");
+		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
 			final Conf c = loadConfigurationFromLdap();
 			if (c != null) {
