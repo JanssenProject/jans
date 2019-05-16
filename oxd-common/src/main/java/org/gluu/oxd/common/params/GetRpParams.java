@@ -7,12 +7,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetRpParams implements IParams {
+public class GetRpParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "list")
     private Boolean list;
+    @JsonProperty(value = "protection_access_token")
+    private String protection_access_token;
 
     public GetRpParams() {
     }
@@ -37,10 +39,19 @@ public class GetRpParams implements IParams {
         this.list = list;
     }
 
+    public String getProtectionAccessToken() {
+        return protection_access_token;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protection_access_token = protectionAccessToken;
+    }
+
     @Override
     public String toString() {
         return "GetRpParams{" +
                 "oxdId='" + oxd_id + '\'' +
+                "list='" + list + '\'' +
                 '}';
     }
 }
