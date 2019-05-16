@@ -47,7 +47,8 @@ public class ConfigurationTest extends ConfigurableTest {
 	 */
 	@Test
 	public void configurationPresence() {
-		Assert.assertTrue((configurationFactory != null) && (configurationFactory.getPersistenceConfiguration().getConfiguration() != null)
+		Assert.assertTrue((configurationFactory != null) && (configurationFactory.getBaseConfiguration() != null)
+				&& (configurationFactory.getPersistenceConfiguration().getConfiguration() != null)
 				&& (configurationFactory.getAppConfiguration() != null)
 				&& (configurationFactory.getErrorResponseFactory() != null)
 				&& (configurationFactory.getStaticConfiguration() != null)
