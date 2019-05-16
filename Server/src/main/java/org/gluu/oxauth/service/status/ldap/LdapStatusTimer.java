@@ -54,7 +54,7 @@ public class LdapStatusTimer {
     private AtomicBoolean isActive;
 
     public void initTimer() {
-        log.info("Initializing Ldap Status Timer");
+        log.info("Initializing Persistance Layer Status Timer");
         this.isActive = new AtomicBoolean(false);
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new LdapStatusEvent(),
