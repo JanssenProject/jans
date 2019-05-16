@@ -617,8 +617,8 @@ class Setup(object):
                                         self.ldif_base, 
                                          self.ldif_attributes,
                                          self.ldif_scopes,
-                                         self.ldif_clients,
                                          self.ldif_scripts,
+                                         self.ldif_clients,
                                          self.ldif_configuration,
                                          self.ldif_scim,
                                          #self.ldif_passport,
@@ -2113,7 +2113,11 @@ class Setup(object):
         self.renderTemplate(self.passport_central_config_json)
         self.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
         self.renderTemplate(self.ldif_passport_config)
-        self.import_ldif_opendj([self.ldif_passport_config])
+        
+        if self.mappingLocations['default'] == 'ldap':
+            self.import_ldif_opendj([self.ldif_passport_cofig])
+        else:
+            self.import_ldif_couchebase([self.ldif_passport_cofig])
 
 
         self.logIt("Preparing passport service base folders")
@@ -2503,7 +2507,6 @@ class Setup(object):
 
         for m in couchbase_mappings:
             self.mappingLocations[m] = 'couchbase'
-            
 
 
     def promptForProperties(self):
@@ -3429,14 +3432,16 @@ class Setup(object):
                 self.pbar.progress("OpenDJ: importing Ldif files", False)
                 
                 ldif_files = []
-                base_ldif = False
-                for group in self.groupMappings:
-                    if self.mappingLocations[group] == 'ldap':
-                        ldif_files += self.mappingsLdif[group]
-                        if group == 'default':
-                            base_ldif = True
-                        
-                if not base_ldif:
+
+                if self.mappingLocations['default'] == 'ldap':
+                    ldif_files += self.mappingsLdif['default']
+
+                ldap_mappings = self.getMappingType('ldap')
+  
+                for group in ldap_mappings:
+                    ldif_files += self.mappingsLdif[group]
+  
+                if not self.ldif_base in ldif_files:
                     ldif_files.insert(0, self.ldif_base)
 
                 self.import_ldif_opendj(ldif_files)
@@ -3710,7 +3715,8 @@ class Setup(object):
             self.logIt("Bucket {} successfully created".format(bucketName))
         else:
             self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.reason), errorLog=True)
-
+        #wait 1 second 
+        time.sleep(1)
 
     def couchbaseExecQuery(self, queryFile):
         self.logIt("Running Couchbase query from file " + queryFile)
@@ -3729,13 +3735,8 @@ class Setup(object):
     def couchebaseCreateIndexes(self, bucket):
         
         couchbase_index = json.load(open(self.couchbaseIndexJson))
-        
-        if not bucket in couchbase_index:
-            return
-        
-        self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
-        
+        self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
         if not os.path.exists(self.n1qlOutputFolder):
             os.mkdir(self.n1qlOutputFolder)
@@ -3745,7 +3746,7 @@ class Setup(object):
         with open(tmp_file, 'w') as W:
 
             W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
-            index_list = couchbase_index[bucket]
+            index_list = couchbase_index.get(bucket,[])
 
             if not 'dn' in index_list:
                 index_list.insert(0, 'dn')
@@ -3789,9 +3790,9 @@ class Setup(object):
             ldif_file_list = self.ldif_files[:]
         
         for ldif in ldif_file_list:
-            self.logIt("Importing ldif file %s to Couchebase" % ldif)
+            self.logIt("Importing ldif file %s to Couchebase bucket %s" % (ldif, bucket))
             documents = get_documents_from_ldif(ldif)
-            
+
             ldif_base_name = os.path.basename(ldif)
             name, ext = os.path.splitext(ldif_base_name)
 
@@ -3802,7 +3803,6 @@ class Setup(object):
             
             with open(tmp_file, 'w') as o:
                 for e in documents:
-
                     if bucket:
                         cur_bucket = bucket
                     elif e[0].startswith('site_'):
@@ -3815,9 +3815,9 @@ class Setup(object):
                         cur_bucket = 'gluu_cache'
                     else:
                         cur_bucket = 'gluu'
-                    
+
                     query = ''
-                    
+
                     if 'changetype' in e[1]:
                         if 'replace' in e[1]:
                             query = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
@@ -3951,28 +3951,24 @@ class Setup(object):
             self.couchebaseCreateCluster()
 
         self.couchbaseSSL()
-
-        bucketNumber = 1
         
-        for group in self.mappingLocations:
-            if self.mappingLocations[group] == 'couchbase':
-                bucketNumber += 1
+        couchbase_mappings = self.getMappingType('couchbase')
 
+        bucketNumber = len(couchbase_mappings)
 
         #TO DO: calculations of bucketRamsize is neaded
-        self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+        
+        if self.mappingLocations['default'] == 'couchbase':
+            self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+            self.couchebaseCreateIndexes('gluu')
+            self.import_ldif_couchebase(self.mappingsLdif['default'], 'gluu')
 
-        for group in self.mappingLocations:
-            if self.mappingLocations[group] == 'couchbase':
-                bucket = 'gluu_{0}'.format(group)
-                self.couchebaseCreateBucket(bucket, bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
-                self.couchebaseCreateIndexes(bucket)
-                
-                self.import_ldif_couchebase(self.mappingsLdif[group])
-                
-        if not self.remoteCouchbase:
-            if not self.checkIfGluuBucketReady():
-                sys.exit("Couchbase was not ready")
+        for group in couchbase_mappings:
+            bucket = 'gluu_{0}'.format(group)
+            self.couchebaseCreateBucket(bucket, bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+            self.couchebaseCreateIndexes(bucket)
+            if self.mappingsLdif[group]:
+                self.import_ldif_couchebase(self.mappingsLdif[group], bucket)
 
         self.couchbaseProperties()
 
