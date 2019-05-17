@@ -427,6 +427,7 @@ class Setup(object):
 
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
+        self.couchbase_hostname = "localhost"
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
@@ -2115,9 +2116,9 @@ class Setup(object):
         self.renderTemplate(self.ldif_passport_config)
         
         if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport_cofig])
+            self.import_ldif_opendj([self.ldif_passport_config])
         else:
-            self.import_ldif_couchebase([self.ldif_passport_cofig])
+            self.import_ldif_couchebase([self.ldif_passport_config])
 
 
         self.logIt("Preparing passport service base folders")
@@ -2620,14 +2621,14 @@ class Setup(object):
         if self.remoteCouchbase:
             self.installLdap = False
             self.persistence_type = 'couchbase'
-            self.install_couchbase = False
+            self.install_couchbase = True
 
             while True:
-                self.ldap_hostname = self.getPrompt("    Couchbase host")
+                self.couchbase_hostname = self.getPrompt("    Couchbase host")
                 self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
                 self.ldapPass = self.getPrompt("    Couchbase Admin password")
 
-                self.cbm = CBM(self.ldap_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+                self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
                 print "    Checking Couchbase connection"
 
                 if self.cbm.test_connection():
@@ -2636,6 +2637,13 @@ class Setup(object):
                 else:
                     print ("    Cant establish connection to Couchbase server with given parameters.")
 
+            use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
+            if use_hybrid[0].lower() in 'yt':
+                self.installLdap = True
+                self.persistence_type = 'hybrid'
+                backend_types = self.getBackendTypes()
+                backend_types.insert(1,'couchbase')
+                self.promptForBackendMappings(backend_types)
         else:
 
             backend_types = self.getBackendTypes()
@@ -3896,7 +3904,7 @@ class Setup(object):
 
     def couchbaseDict(self):
         prop_dict = {
-                    'hostname': self.ldap_hostname,
+                    'hostname': self.couchbase_hostname,
                     'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
@@ -4007,7 +4015,6 @@ def print_help():
     print "    -t   Load test data"
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
-    print "    --enable-hybrid-storage"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
     
