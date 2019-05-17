@@ -3957,8 +3957,11 @@ class Setup(object):
         bucketNumber = len(couchbase_mappings)
 
         #TO DO: calculations of bucketRamsize is neaded
-        
-        if self.mappingLocations['default'] == 'couchbase':
+
+        if self.mappingLocations['default'] != 'couchbase':
+            self.couchbaseClusterRamsize -= 100
+            self.couchebaseCreateBucket('gluu', bucketRamsize=100)
+        else:
             self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.mappingsLdif['default'], 'gluu')
