@@ -243,7 +243,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().setAudience(authorizationGrant.getClientId());
+        jwt.getClaims().addAudience(authorizationGrant.getClientId());
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -272,7 +272,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwe.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwe.getClaims().setAudience(authorizationGrant.getClientId());
+        jwe.getClaims().addAudience(authorizationGrant.getClientId());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
