@@ -6,21 +6,17 @@
 
 package org.gluu.oxauth.model.jwt;
 
-import static org.gluu.oxauth.model.jwt.JwtClaimName.AUDIENCE;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.EXPIRATION_TIME;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.ISSUED_AT;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.ISSUER;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.JWT_ID;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.NOT_BEFORE;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.SUBJECT_IDENTIFIER;
-import static org.gluu.oxauth.model.jwt.JwtClaimName.TYPE;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.json.JSONObject;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
-import org.json.JSONObject;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
+import static org.gluu.oxauth.model.jwt.JwtClaimName.*;
 
 /**
  * @author Javier Rojas Blum Date: 11.09.2012
@@ -90,6 +86,28 @@ public class JwtClaims extends JwtClaimSet {
             setClaim(ISSUER, issuer.toString());
         }
     }
+
+    public void addAudience(String audience) {
+        if (StringUtils.isBlank(audience)) {
+            return;
+        }
+
+        if (!hasClaim(AUDIENCE)) {
+            setAudience(audience);
+            return;
+        }
+
+        Object currentAudience = getClaim(AUDIENCE);
+        List<String> value = Lists.newArrayList(audience);
+        if (currentAudience instanceof String) {
+            value.add((String) currentAudience);
+        } else if (currentAudience instanceof List){
+            value.addAll((List) currentAudience);
+        }
+
+        setClaim(AUDIENCE, value);
+    }
+
 
     /**
      * Identifies the audience that the JWT is intended for.
