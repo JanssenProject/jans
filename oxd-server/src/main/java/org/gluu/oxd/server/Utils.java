@@ -97,4 +97,13 @@ public class Utils {
     public static List<String> stringToList(String source) {
         return Arrays.asList(source.split("\\s+"));
     }
+
+    public static boolean hasAuthorizationRedirectUri(List<String> redirectUris, String authorizationRedirectUri) {
+        if (!redirectUris.isEmpty() && authorizationRedirectUri != null) {
+            if (redirectUris.contains(authorizationRedirectUri)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

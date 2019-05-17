@@ -28,6 +28,8 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
     private String protection_access_token;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
+    @JsonProperty(value = "authorization_redirect_uri")
+    private String authorization_redirect_uri;
 
     public GetAuthorizationUrlParams() {
     }
@@ -88,6 +90,14 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
         this.acr_values = acrValues;
     }
 
+    public String getAuthorizationRedirectUri() {
+        return authorization_redirect_uri;
+    }
+
+    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
+        this.authorization_redirect_uri = authorizationRedirectUri;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -116,6 +126,7 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
                 ", hd='" + hd + '\'' +
                 ", protection_access_token='" + protection_access_token + '\'' +
                 ", custom_parameters=" + custom_parameters +
+                ", authorization_redirect_uri=" + authorization_redirect_uri +
                 '}';
     }
 }
