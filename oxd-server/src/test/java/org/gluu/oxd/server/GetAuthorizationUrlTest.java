@@ -7,6 +7,8 @@ import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
 import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 
+import java.io.IOException;
+
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
@@ -25,6 +27,20 @@ public class GetAuthorizationUrlTest {
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
 
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+    }
+
+    @Parameters({"host", "redirectUrl", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl"})
+    @Test
+    public void testWithParameterAuthorizationUrl(String host, String redirectUrl, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerWithMultipleRedirectUrls(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl, redirectUrls);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setAuthorizationRedirectUri(paramRedirectUrl);
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
