@@ -95,4 +95,27 @@ public class RegisterSiteTest {
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
     }
+
+    public static RegisterSiteResponse registerWithMultipleRedirectUrls(ClientInterface client, String opHost, String authorizationRedirectUrl, String postLogoutRedirectUrl, String logoutUrl, String redirectUrls) throws IOException {
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(authorizationRedirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(",")));
+        params.setTrustedClient(true);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(",")));
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        return resp;
+
+    }
 }
