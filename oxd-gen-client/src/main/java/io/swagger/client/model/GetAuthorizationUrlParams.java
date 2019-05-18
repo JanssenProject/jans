@@ -23,7 +23,7 @@ import java.util.Objects;
 /**
  * GetAuthorizationUrlParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-03-15T09:55:53.588Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-17T12:08:18.906Z")
 public class GetAuthorizationUrlParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -36,6 +36,9 @@ public class GetAuthorizationUrlParams {
 
   @SerializedName("prompt")
   private String prompt = null;
+
+  @SerializedName("authorization_redirect_uri")
+  private String authorizationRedirectUri = null;
 
   @SerializedName("custom_parameters")
   private GetauthorizationurlCustomParameters customParameters = null;
@@ -128,6 +131,24 @@ public class GetAuthorizationUrlParams {
     this.prompt = prompt;
   }
 
+  public GetAuthorizationUrlParams authorizationRedirectUri(String authorizationRedirectUri) {
+    this.authorizationRedirectUri = authorizationRedirectUri;
+    return this;
+  }
+
+  /**
+   * Get authorizationRedirectUri
+   * @return authorizationRedirectUri
+   **/
+  @ApiModelProperty(example = "https://client.example.org/cb", value = "")
+  public String getAuthorizationRedirectUri() {
+    return authorizationRedirectUri;
+  }
+
+  public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
+    this.authorizationRedirectUri = authorizationRedirectUri;
+  }
+
   public GetAuthorizationUrlParams customParameters(GetauthorizationurlCustomParameters customParameters) {
     this.customParameters = customParameters;
     return this;
@@ -157,15 +178,16 @@ public class GetAuthorizationUrlParams {
     }
     GetAuthorizationUrlParams getAuthorizationUrlParams = (GetAuthorizationUrlParams) o;
     return Objects.equals(this.oxdId, getAuthorizationUrlParams.oxdId) &&
-        Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
-        Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
-        Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
-        Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters);
+            Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
+            Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
+            Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
+            Objects.equals(this.authorizationRedirectUri, getAuthorizationUrlParams.authorizationRedirectUri) &&
+            Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, scope, acrValues, prompt, customParameters);
+    return Objects.hash(oxdId, scope, acrValues, prompt, authorizationRedirectUri, customParameters);
   }
 
 
@@ -173,11 +195,12 @@ public class GetAuthorizationUrlParams {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAuthorizationUrlParams {\n");
-    
+
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
     sb.append("    prompt: ").append(toIndentedString(prompt)).append("\n");
+    sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
     sb.append("    customParameters: ").append(toIndentedString(customParameters)).append("\n");
     sb.append("}");
     return sb.toString();

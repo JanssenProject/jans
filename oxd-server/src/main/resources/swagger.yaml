@@ -591,6 +591,9 @@ paths:
                 example: ["basic"]
               prompt:
                 type: string
+              authorization_redirect_uri:
+                type: string
+                example: https://client.example.org/cb
               custom_parameters:
                 type: object
                 required:
