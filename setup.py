@@ -3258,7 +3258,9 @@ class Setup(object):
 
     def index_opendj(self):
         self.index_opendj_backend('userRoot')
-        self.index_opendj_backend('site')
+        if self.mappingLocations['site'] == 'ldap':
+            self.index_opendj_backend('site')
+
 
     def prepare_opendj_schema(self):
         self.logIt("Copying OpenDJ schema")
