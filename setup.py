@@ -43,6 +43,7 @@ import platform
 from ldif import LDIFParser
 import copy
 import random
+import ssl
 
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
@@ -3073,52 +3074,28 @@ class Setup(object):
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
-        self.logIt("Reading OpenDJ truststore")
+        self.logIt("Getting OpenDJ certificate")
 
-        openDjPinFn = '%s/config/keystore.pin' % self.ldapBaseFolder
-        openDjTruststoreFn = '%s/config/truststore' % self.ldapBaseFolder
-
-        openDjPin = None
-        try:
-            f = open(openDjPinFn)
-            openDjPin = f.read().splitlines()[0]
-            f.close()
-        except:
-            self.logIt("Error reding OpenDJ truststore", True)
-            self.logIt(traceback.format_exc(), True)
-
-        # Export public OpenDJ certificate
-        self.logIt("Exporting OpenDJ certificate")
-        self.run([self.cmd_keytool,
-                  '-exportcert',
-                  '-keystore',
-                  openDjTruststoreFn,
-                  '-storepass',
-                  openDjPin,
-                  '-file',
-                  self.opendj_cert_fn,
-                  '-alias',
-                  'server-cert',
-                  '-rfc'])
+        opendj_cert = ssl.get_server_certificate((self.ldap_hostname, self.ldaps_port))
+        with open(self.opendj_cert_fn,'w') as w:
+            w.write(opendj_cert)
 
         # Convert OpenDJ certificate to PKCS12
-        self.logIt("Converting OpenDJ truststore")
+        self.logIt("Importing OpenDJ certificate to truststore")
         self.run([self.cmd_keytool,
-                  '-importkeystore',
-                  '-srckeystore',
-                  openDjTruststoreFn,
-                  '-srcstoretype',
-                  'jks',
-                  '-srcstorepass',
-                  openDjPin,
-                  '-destkeystore',
+                  '-importcert',
+                  '-noprompt',
+                  '-alias',
+                  'server-cert',
+                  '-file',
+                  self.opendj_cert_fn,
+                  '-keystore',
                   self.opendj_p12_fn,
-                  '-deststoretype',
-                  'pkcs12',
-                  '-deststorepass',
-                  self.opendj_p12_pass,
-                  '-srcalias',
-                  'server-cert'])
+                  '-storetype',
+                  'PKCS12',
+                  '-storepass',
+                  self.opendj_p12_pass
+                  ])
 
         # Import OpenDJ certificate into java truststore
         self.logIt("Import OpenDJ certificate")
