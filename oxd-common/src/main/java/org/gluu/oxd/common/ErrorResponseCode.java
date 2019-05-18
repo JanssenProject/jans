@@ -68,8 +68,8 @@ public enum ErrorResponseCode {
     UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS(400, "uma_protection_exists", "Server already has UMA Resources registered for this oxd_id. It is possible to overwrite it if provide overwrite=true for uma_rs_protect command (existing resources will be removed and new UMA Resources added)."),
     FAILED_TO_GET_END_SESSION_ENDPOINT(500, "no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_RPT(500, "internal_error", "Failed to get RPT."),
-    FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site.");
-
+    FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site."),
+    REDIRECT_URI_IS_NOT_REGISTERED(400, "redirect_uri_is_not_registered", "The authorization redirect uri is not registered.");
 
     private final int httpStatus;
     private final String code;

@@ -5,6 +5,8 @@
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
+    <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
+    <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
     <parameter name="logoutUrl" value="https://client.example.com/logout"/>
     <parameter name="userId" value="${auth.user.uid}"/>

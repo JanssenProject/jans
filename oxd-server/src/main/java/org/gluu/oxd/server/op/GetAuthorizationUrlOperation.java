@@ -3,6 +3,9 @@ package org.gluu.oxd.server.op;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.server.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
@@ -48,9 +51,15 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             scope.addAll(site.getScope());
         }
 
+        if (StringUtils.isNotBlank(params.getAuthorizationRedirectUri()) && !site.getRedirectUris().contains(params.getAuthorizationRedirectUri())) {
+            throw new HttpException(ErrorResponseCode.REDIRECT_URI_IS_NOT_REGISTERED);
+        }
+
+        String redirectUri = StringUtils.isNotBlank(params.getAuthorizationRedirectUri()) ? params.getAuthorizationRedirectUri() : site.getAuthorizationRedirectUri();
+
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();
-        authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
+        authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + getStateService().generateState();
         authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
