@@ -496,11 +496,6 @@
 
 			<!-- RestEasy -->
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>jaxrs-api</artifactId>
-				<version>${jaxr.version}</version>
-			</dependency>
-			<dependency>
 			    <groupId>org.jboss.resteasy</groupId>
 			    <artifactId>resteasy-cdi</artifactId>
 				<version>${resteasy.version}</version>
