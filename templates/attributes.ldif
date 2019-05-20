@@ -46,6 +46,8 @@ gluuAttributeViewType: user
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 oxAuthClaimName: user_name
+gluuSAML1URI: urn:mace:dir:attribute-def:uid
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.1
 gluuStatus: active
 inum: 42E0
 objectClass: top
