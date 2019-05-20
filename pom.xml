@@ -18,7 +18,6 @@
 
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.5.1.Final</resteasy.version>
-		<jaxr.version>3.0.12.Final</jaxr.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
 		<guava.version>19.0</guava.version>
 
@@ -158,11 +157,6 @@
 			</dependency>
 
 			<!-- RestEasy -->
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>jaxrs-api</artifactId>
-				<version>${jaxr.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-cdi</artifactId>
