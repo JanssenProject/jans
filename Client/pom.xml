@@ -70,7 +70,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
+			<artifactId>resteasy-client</artifactId>
 		</dependency>
 
 		<dependency>

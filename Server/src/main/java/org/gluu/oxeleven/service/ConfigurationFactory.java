@@ -14,9 +14,10 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxeleven.model.Configuration;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Javier Rojas Blum
