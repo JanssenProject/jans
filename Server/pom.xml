@@ -935,12 +935,6 @@
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>jaxrs-api</artifactId>
-					<version>3.0.12.Final</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-servlet-initializer</artifactId>
 					<version>3.0.21.Final</version>
 					<scope>test</scope>
