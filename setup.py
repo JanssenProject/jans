@@ -2590,7 +2590,7 @@ class Setup(object):
             
             self.ldapPass = ldapPass
 
-        else:
+        elif self.remoteLdap:
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
@@ -2656,12 +2656,16 @@ class Setup(object):
                     print ("    Cant establish connection to Couchbase server with given parameters.")
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
+
             if use_hybrid[0].lower() in 'yt':
                 self.installLdap = True
                 self.persistence_type = 'hybrid'
                 backend_types = self.getBackendTypes()
                 backend_types.insert(1,'couchbase')
                 self.promptForBackendMappings(backend_types)
+            else:
+                self.persistence_type = 'couchbase'
+                self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
         else:
 
             backend_types = self.getBackendTypes()
