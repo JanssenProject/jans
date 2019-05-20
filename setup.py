@@ -2743,7 +2743,7 @@ class Setup(object):
     def render_templates(self):
         self.logIt("Rendering templates")
 
-        if self.remoteLdap or self.persistence_type=='couchbase':
+        if self.persistence_type=='couchbase':
             self.ce_templates[self.ox_ldap_properties] = False
 
         for fullPath in self.ce_templates.keys():
@@ -3666,17 +3666,6 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
-        elif self.os_type+ self.os_version != 'ubuntu14':
-            oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
-            oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
-            oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
-            oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
-
-            with open(oxauth_systemd_script_fn, 'w') as w:
-                w.write(oxauth_systemd_script)
-            self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
-            self.run([self.systemctl, 'daemon-reload'])
-            
 
     def couchebaseCreateCluster(self):
         
@@ -4007,6 +3996,29 @@ class Setup(object):
         elif self.persistence_type in ('couchbase', 'hybrid'):
             self.import_ldif_couchebase(ldif_files)
 
+
+    def fix_systemd_script(self):
+        if self.os_type+ self.os_version != 'ubuntu14':
+            oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+            oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
+            changed = False
+            
+            if self.install_couchbase and not self.remoteCouchbase:
+                oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
+                oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
+                changed = True
+            
+            elif self.remoteLdap or self.remoteCouchbase:
+                oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', '')
+                oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', '')
+                changed = True
+                
+            if changed:
+                with open(oxauth_systemd_script_fn, 'w') as w:
+                    w.write(oxauth_systemd_script)
+                self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
+                self.run([self.systemctl, 'daemon-reload'])
+
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -4253,6 +4265,7 @@ if __name__ == '__main__':
             installObject.render_test_templates()
             installObject.pbar.progress("Copying static")
             installObject.copy_static()
+            installObject.fix_systemd_script()
             installObject.pbar.progress("Setting ownerships")
             installObject.set_ownership()
             installObject.pbar.progress("Setting permissions")
