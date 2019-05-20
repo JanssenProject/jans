@@ -1963,11 +1963,10 @@ class Setup(object):
         self.ldap_binddn = self.opendj_ldap_binddn
         self.ldap_site_binddn = self.opendj_ldap_binddn
 
-        if self.installLdap:
-            if self.ldap_type == 'opendj':
-                self.ldapCertFn = self.opendj_cert_fn
-                self.ldapTrustStoreFn = self.opendj_p12_fn
-                self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
+
+        self.ldapCertFn = self.opendj_cert_fn
+        self.ldapTrustStoreFn = self.opendj_p12_fn
+        self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
 
         if self.installSaml:
             self.oxTrustConfigGeneration = "true"
