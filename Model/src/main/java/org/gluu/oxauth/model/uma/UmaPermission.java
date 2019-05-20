@@ -55,7 +55,6 @@ public class UmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "resource_id")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "resource_id")
     @XmlElement(name = "resource_id")
     public String getResourceId() {
         return resourceId;
@@ -66,7 +65,6 @@ public class UmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "resource_scopes")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "resource_scopes")
     @XmlElement(name = "resource_scopes")
     public List<String> getScopes() {
         return scopes;
@@ -77,7 +75,6 @@ public class UmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "exp")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "exp")
     @XmlElement(name = "exp")
     public Integer getExpiresAt() {
         return expiresAt;
@@ -88,7 +85,6 @@ public class UmaPermission implements Serializable {
     }
 
     @JsonProperty(value = "params")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "params")
     @XmlElement(name = "params")
     public Map<String, String> getParams() {
         return params;
