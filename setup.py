@@ -4107,17 +4107,8 @@ if __name__ == '__main__':
 
     installObject.downloadWars = setupOptions['downloadWars']
 
-    installObject.installOxAuth = setupOptions['installOxAuth']
-    installObject.installOxTrust = setupOptions['installOxTrust']
-    installObject.installLdap = setupOptions['installLDAP']
-    installObject.installHttpd = setupOptions['installHTTPD']
-    installObject.installSaml = setupOptions['installSaml']
-    installObject.installOxAuthRP = setupOptions['installOxAuthRP']
-    installObject.installPassport = setupOptions['installPassport']
-    installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
-    installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
-    installObject.listenAllInterfaces = setupOptions['listenAllInterfaces']
-    installObject.remoteCouchbase = setupOptions['remoteCouchbase']
+    for option in setupOptions:
+        setattr(installObject, option, setupOptions[option]
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
