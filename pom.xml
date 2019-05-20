@@ -21,7 +21,7 @@
 		<json.version>20180813</json.version>
 		<jackson.version>2.9.8</jackson.version>
 		<jettison.version>1.3.2</jettison.version>
-		<resteasy.version>3.7.0.Final</resteasy.version>
+		<resteasy.version>3.5.1.Final</resteasy.version>
 		<jaxr.version>3.0.12.Final</jaxr.version>
 		
 		<activemq.version>5.15.9</activemq.version>

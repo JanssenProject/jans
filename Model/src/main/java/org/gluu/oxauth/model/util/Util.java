@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -68,11 +69,13 @@ public class Util {
 
     public static String asPrettyJson(Object p_object) throws IOException {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        mapper.setDefaultPropertyInclusion(Include.NON_EMPTY);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
     }
 
     public static String asJson(Object p_object) throws IOException {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        mapper.setDefaultPropertyInclusion(Include.NON_EMPTY);
         return mapper.writeValueAsString(p_object);
     }
 
