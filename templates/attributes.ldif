@@ -1,24 +1,25 @@
-#########################
-# Gluu Person Attributes
-#########################
-
 dn: inum=29DA,ou=attributes,o=gluu
+description: XRI i-number, persistent non-reassignable identifier
 displayName: Inum
+gluuAttributeEditType: admin
 gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-oxAuthClaimName: inum
+gluuSAML1URI: urn:mace:dir:attribute-def:inum
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.117
 gluuStatus: active
 inum: 29DA
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: inum
 urn: urn:gluu:dir:attribute-def:inum
-description: XRI i-number, persistent non-reassignable identifier
 
 dn: inum=B4B0,ou=attributes,o=gluu
+description: Given name(s) or first name(s) of the End-User.Note that in som
+ e cultures, people can have multiple given names;all can be present, with t
+ he names being separated by space characters.
 displayName: First Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -27,242 +28,282 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: given_name
+gluuSAML1URI: urn:mace:dir:attribute-def:givenName
+gluuSAML2URI: urn:oid:2.5.4.42
 gluuStatus: active
 inum: B4B0
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: given_name
 urn: urn:mace:dir:attribute-def:givenName
-description: Given name(s) or first name(s) of the End-User.
- Note that in some cultures, people can have multiple given names;
- all can be present, with the names being separated by space characters.
 
 dn: inum=42E0,ou=attributes,o=gluu
+description: A domain issued and managed identifier for the person.Subject -
+  Identifier for the End-User at the Issuer.
 displayName: Username
+gluuAttributeEditType: admin
 gluuAttributeName: uid
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-oxAuthClaimName: user_name
 gluuSAML1URI: urn:mace:dir:attribute-def:uid
 gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.1
 gluuStatus: active
 inum: 42E0
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: user_name
 urn: urn:mace:dir:attribute-def:uid
-description: A domain issued and managed identifier for the person.
- Subject - Identifier for the End-User at the Issuer.
 
 dn: inum=B52A,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
+description: A domain issued and managed identifier for the person.Subject -
+  Identifier for the End-User at the Issuer.
 displayName: Preferred Username
+gluuAttributeEditType: admin
 gluuAttributeName: preferredUsername
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:preferredUsername
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.320
 gluuStatus: active
-oxAuthClaimName: preferred_username
 inum: B52A
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferred_username
-description: A domain issued and managed identifier for the person.
- Subject - Identifier for the End-User at the Issuer.
-
-dn: inum=64A0,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: preferred_username
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pre
+ ferred_username
+
+dn: inum=64A0,ou=attributes,o=gluu
+description: URL of the End-User's profile page. The contents of this Web pa
+ ge SHOULD be about the End-User.
 displayName: Profile URL
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: profile
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:profile
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.321
 gluuStatus: active
-oxAuthClaimName: profile
 inum: 64A0
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile
-description: URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.
-
-dn: inum=3B47,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: profile
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pro
+ file
+
+dn: inum=3B47,ou=attributes,o=gluu
+description: URL of the End-User's Web page or blog.
 displayName: Website URL
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: website
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:website
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.323
 gluuStatus: active
-oxAuthClaimName: website
 inum: 3B47
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/website
-description: URL of the End-User's Web page or blog.
-
-dn: inum=8F88,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: website
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/web
+ site
+
+dn: inum=8F88,ou=attributes,o=gluu
+description: True if the End-User's e-mail address has been verified; otherw
+ ise false
 displayName: Email Verified
+gluuAttributeEditType: admin
 gluuAttributeName: emailVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: boolean
-gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:emailVerified
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.324
 gluuStatus: active
-oxAuthClaimName: email_verified
 inum: 8F88
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/email_verified
-description: True if the End-User's e-mail address has been verified; otherwise false
-
-
-dn: inum=B17A,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: email_verified
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/ema
+ il_verified
+
+dn: inum=B17A,ou=attributes,o=gluu
+description: True if the End-User's phone number has been verified; otherwis
+ e false
 displayName: Phone Number Verified
+gluuAttributeEditType: admin
 gluuAttributeName: phoneNumberVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: boolean
-gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:phoneNumberVerified
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.329
 gluuStatus: active
-oxAuthClaimName: phone_number_verified
 inum: B17A
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/phone_number_verified
-description: True if the End-User's phone number has been verified; otherwise false
-
-dn: inum=C8D5,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: phone_number_verified
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pho
+ ne_number_verified
+
+dn: inum=C8D5,ou=attributes,o=gluu
+description: End-User's preferred postal address. The value of the address m
+ ember is aJSON [RFC4627] structure containing some or all of the members de
+ fined inOpenID Connect 1.0 Core Standard Section 5.1.1
 displayName: OpenID Connect JSON formatted address
+gluuAttributeEditType: admin
 gluuAttributeName: address
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:address
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.330
 gluuStatus: active
 inum: C8D5
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
-description: End-User's preferred postal address. The value of the address member is a
- JSON [RFC4627] structure containing some or all of the members defined in
- OpenID Connect 1.0 Core Standard Section 5.1.1
-
-dn: inum=BE64,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/add
+ ress
+
+dn: inum=BE64,ou=attributes,o=gluu
+description: Time the End-User's information was last updated. Its value is 
+ aJSON number representing the number of seconds from 1970-01-01T0:0:0Z as m
+ easured inUTC until the date/time.
 displayName: Last Updated
+gluuAttributeEditType: admin
 gluuAttributeName: updatedAt
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: generalizedTime
-gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:updatedAt
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.331
 gluuStatus: active
-oxAuthClaimName: updated_at
 inum: BE64
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
-description: Time the End-User's information was last updated. Its value is a
- JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in
- UTC until the date/time.
-
-dn: inum=3692,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: updated_at
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/add
+ ress
+
+dn: inum=3692,ou=attributes,o=gluu
+description: Gender of the person, either male or female
 displayName: Gender, male or female
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: gender
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:gender
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.325
 gluuStatus: active
-oxAuthClaimName: gender
 inum: 3692
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
-description: Gender of the person, either male or female
-
-dn: inum=98FC,ou=attributes,o=gluu
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: gender
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gen
+ der
+
+dn: inum=98FC,ou=attributes,o=gluu
+description:: RW5kLVVzZXIncyBiaXJ0aGRheSwgcmVwcmVzZW50ZWQgYXMgYW4gSVNPIDg2MD
+ E6MjAwNCBbSVNPODYwMeKAkTIwMDRdIFlZWVktTU0tREQgZm9ybWF0Lg==
 displayName: Birthdate
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: birthdate
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:birthdate
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.326
 gluuStatus: active
-oxAuthClaimName: birthdate
 inum: 98FC
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate
-description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.
+objectClass: top
+objectClass: gluuAttribute
+oxAuthClaimName: birthdate
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/bir
+ thdate
 
 dn: inum=D2E0,ou=attributes,o=gluu
 description: memberOf
 displayName: memberOf
+gluuAttributeEditType: admin
 gluuAttributeName: memberOf
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:memberOf
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.121
 gluuStatus: active
-oxAuthClaimName: member_of
 inum: D2E0
 objectClass: top
 objectClass: gluuAttribute
-urn: urn:gluu:dir:attribute-def:memberOf
+oxAuthClaimName: member_of
 oxMultivaluedAttribute: true
+urn: urn:gluu:dir:attribute-def:memberOf
 
 dn: inum=A901,ou=attributes,o=gluu
+description: String from time zone database representing the End-User's time
+  zone. For example,Europe/Paris or America/Los_Angeles.
 displayName: Time zone info
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: zoneinfo
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
-oxAuthClaimName: zoneinfo
+gluuSAML1URI: urn:mace:dir:attribute-def:zoneinfo
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.327
 gluuStatus: active
 inum: A901
 objectClass: top
 objectClass: gluuAttribute
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zoneinfo
-description: String from time zone database representing the End-User's time zone. For example,
- Europe/Paris or America/Los_Angeles.
+oxAuthClaimName: zoneinfo
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zon
+ einfo
 
 dn: inum=36D9,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
+description:: RW5kLVVzZXIncyBsb2NhbGUsIHJlcHJlc2VudGVkIGFzIGEgQkNQNDcgKFJGQz
+ U2NDYpIGxhbmd1YWdlIHRhZy4gVGhpcyBpcyB0eXBpY2FsbHkgYW5JU08gNjM5LTEgQWxwaGEtM
+ iBbSVNPNjM54oCRMV0gbGFuZ3VhZ2UgY29kZSBpbiBsb3dlcmNhc2UgYW5kIGFuIElTTyAzMTY2
+ LTEgQWxwaGEtMmNvdW50cnkgY29kZSBpbiB1cHBlcmNhc2UsIHNlcGFyYXRlZCBieSBhIGRhc2g
+ uIEZvciBleGFtcGxlLCBlbi1VUyBvciBmci1DQS4gQXMgYSBjb21wYXRpYmlsaXR5IG5vdGUsc2
+ 9tZSBpbXBsZW1lbnRhdGlvbnMgaGF2ZSB1c2VkIGFuIHVuZGVyc2NvcmUgYXMgdGhlIHNlcGFyY
+ XRvciByYXRoZXIgdGhhbiBhIGRhc2gsIGZvciBleGFtcGxlLCBlbl9VUztSZWx5aW5nIFBhcnRp
+ ZXMgTUFZIGNob29zZSB0byBhY2NlcHQgdGhpcyBsb2NhbGUgc3ludGF4IGFzIHdlbGwu
 displayName: Locale
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: locale
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:locale
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.328
 gluuStatus: active
-oxAuthClaimName: locale
 inum: 36D9
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/locale
-description: End-User's locale, represented as a BCP47 (RFC5646) language tag. This is typically an
- ISO 639-1 Alpha-2 [ISO639‑1] language code in lowercase and an ISO 3166-1 Alpha-2
- country code in uppercase, separated by a dash. For example, en-US or fr-CA. As a compatibility note,
- some implementations have used an underscore as the separator rather than a dash, for example, en_US;
- Relying Parties MAY choose to accept this locale syntax as well.
+objectClass: top
+objectClass: gluuAttribute
+oxAuthClaimName: locale
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/loc
+ ale
 
 dn: inum=8A11,ou=attributes,o=gluu
 description: Secret Question
@@ -274,6 +315,8 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:secretQuestion
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.306
 gluuStatus: active
 inum: 8A11
 objectClass: top
@@ -290,6 +333,8 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:secretAnswer
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.305
 gluuStatus: active
 inum: C703
 objectClass: top
@@ -307,6 +352,8 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuAttributeViewType: whitePages
+gluuSAML1URI: urn:mace:dir:attribute-def:preferredLanguage
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.39
 gluuStatus: active
 inum: 6493
 objectClass: top
@@ -316,16 +363,18 @@ urn: urn:mace:dir:attribute-def:preferredLanguage
 dn: inum=5CA2,ou=attributes,o=gluu
 description: iname
 displayName: iname
+gluuAttributeEditType: admin
 gluuAttributeName: iname
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-oxAuthClaimName: iname
+gluuSAML1URI: urn:mace:dir:attribute-def:iname
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.116
 gluuStatus: active
 inum: 5CA2
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: iname
 urn: urn:gluu:dir:attribute-def:iname
 
 dn: inum=CAE3,ou=attributes,o=gluu
@@ -338,14 +387,20 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: email
+gluuSAML1URI: urn:mace:dir:attribute-def:mail
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.3
 gluuStatus: active
 inum: CAE3
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: email
 urn: urn:mace:dir:attribute-def:mail
 
 dn: inum=A0E8,ou=attributes,o=gluu
+description: Middle name(s) of the End-User. Note that in some cultures,peop
+ le can have multiple middle names; all can be present, with the namesbeing 
+ separated by space characters. Also note that in some cultures,middle names
+  are not used.
 displayName: Middle Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -354,20 +409,20 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:middleName
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.318
 gluuStatus: active
-oxAuthClaimName: middle_name
 inum: A0E8
 objectClass: top
 objectClass: gluuAttribute
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/middle_username
-description: Middle name(s) of the End-User. Note that in some cultures,
- people can have multiple middle names; all can be present, with the names
- being separated by space characters. Also note that in some cultures,
- middle names are not used.
+oxAuthClaimName: middle_name
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/mid
+ dle_username
 
 dn: inum=5EC6,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
+description: Casual name of the End-User that may or may not be the same as 
+ the given_name.For instance, a nickname value of Mike might be returned alo
+ ngside a given_name value of Michael.
 displayName: Nickname
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -376,33 +431,37 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: nickname
+gluuSAML1URI: urn:mace:dir:attribute-def:nickname
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.319
 gluuStatus: active
 inum: 5EC6
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nickname
-description: Casual name of the End-User that may or may not be the same as the given_name.
- For instance, a nickname value of Mike might be returned alongside a given_name value 
- of Michael.
+objectClass: top
+objectClass: gluuAttribute
+oxAuthClaimName: nickname
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nic
+ kname
 
 dn: inum=0C85,ou=attributes,o=gluu
 description: Last Name
+description: Surname(s) or last name(s) of the End-User. Note that in somecu
+ ltures, people can have multiple family names or no family name; all canbe 
+ present, with the names being separated by space characters.
 displayName: Last Name
-oxAuthClaimName: family_name
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: sn
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:sn
+gluuSAML2URI: urn:oid:2.5.4.4
 gluuStatus: active
 inum: 0C85
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: family_name
 urn: urn:mace:dir:attribute-def:sn
-description: Surname(s) or last name(s) of the End-User. Note that in some
- cultures, people can have multiple family names or no family name; all can
- be present, with the names being separated by space characters.
 
 dn: inum=BCA8,ou=attributes,o=gluu
 description: TransientId
@@ -414,8 +473,8 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuSAML1URI: urn:mace:shibboleth:1.0:nameIdentifier
-gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+gluuSAML1URI: urn:mace:dir:attribute-def:transientId
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.312
 gluuStatus: active
 inum: BCA8
 objectClass: top
@@ -432,8 +491,8 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuSAML1URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
-gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+gluuSAML1URI: urn:mace:dir:attribute-def:persistentId
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.291
 gluuStatus: active
 inum: BCB8
 objectClass: top
@@ -450,16 +509,19 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: country
-gluuSAML1URI: urn:urn:mace:dir:attribute-def:c
+gluuSAML1URI: urn:mace:dir:attribute-def:c
 gluuSAML2URI: urn:oid:2.5.4.6
 gluuStatus: active
 inum: BCE8
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: country
 urn: urn:gluu:dir:attribute-def:c
 
 dn: inum=2B29,ou=attributes,o=gluu
+description: End-User's full name in displayable formincluding all name part
+ s, possibly including titles andsuffixes, ordered according to the End-User
+ 's locale and preferences.
 displayName: Display Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
@@ -468,46 +530,50 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: name
+gluuSAML1URI: urn:mace:dir:attribute-def:displayName
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.241
 gluuStatus: active
 inum: 2B29
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: name
 urn: urn:mace:dir:attribute-def:displayName
-description: End-User's full name in displayable form
- including all name parts, possibly including titles and
- suffixes, ordered according to the End-User's locale and preferences.
 
 dn: inum=EC3A,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
-inum: EC3A
 description: URL of the End-User's profile picture
 displayName: Picture URL
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
 gluuAttributeName: picture
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: binary
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuAttributeEditType: user
-gluuAttributeEditType: admin
-oxAuthClaimName: picture
+gluuSAML1URI: urn:mace:dir:attribute-def:picture
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.322
 gluuStatus: active
-urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
+inum: EC3A
+objectClass: top
+objectClass: gluuAttribute
+oxAuthClaimName: picture
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pic
+ ture
 
 dn: inum=D03E,ou=attributes,o=gluu
 description: Organization
 displayName: Organization
+gluuAttributeEditType: admin
 gluuAttributeName: o
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-oxAuthClaimName: o
+gluuSAML1URI: urn:mace:dir:attribute-def:o
+gluuSAML2URI: urn:oid:2.5.4.10
 gluuStatus: active
 inum: D03E
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: o
 urn: urn:mace:dir:attribute-def:o
 
 dn: inum=AAEE,ou=attributes,o=gluu
@@ -520,15 +586,13 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:userPassword
+gluuSAML2URI: urn:oid:2.5.4.35
 gluuStatus: active
 inum: AAEE
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:userPassword
-
-############################
-# InetOrgPerson Attributes
-#############################
 
 dn: inum=C001,ou=attributes,o=gluu
 description: Organizational Title
@@ -539,6 +603,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:title
+gluuSAML2URI: urn:oid:2.5.4.12
 gluuStatus: inactive
 inum: C001
 objectClass: top
@@ -555,6 +621,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:carLicense
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.1
 gluuStatus: inactive
 inum: 4502
 objectClass: top
@@ -571,6 +639,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:facsimileTelephoneNumber
+gluuSAML2URI: urn:oid:2.5.4.23
 gluuStatus: inactive
 inum: BD22
 objectClass: top
@@ -586,6 +656,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:departmentNumber
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.2
 gluuStatus: inactive
 inum: 08E2
 objectClass: top
@@ -600,6 +672,8 @@ gluuAttributeName: employeeType
 gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:employeeType
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.4
 gluuStatus: inactive
 inum: 3D44
 objectClass: top
@@ -616,6 +690,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:cn
+gluuSAML2URI: urn:oid:2.5.4.3
 gluuStatus: inactive
 inum: D054
 objectClass: top
@@ -632,11 +708,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:mobile
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.41
 gluuStatus: inactive
-oxAuthClaimName: phone_mobile_number
 inum: 6DA6
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: phone_mobile_number
 urn: urn:mace:dir:attribute-def:mobile
 
 dn: inum=0C18,ou=attributes,o=gluu
@@ -649,11 +727,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:telephoneNumber
+gluuSAML2URI: urn:oid:2.5.4.20
 gluuStatus: inactive
-oxAuthClaimName: phone_number
 inum: 0C18
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: phone_number
 urn: urn:mace:dir:attribute-def:phone_number
 
 dn: inum=E6B8,ou=attributes,o=gluu
@@ -666,11 +746,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: region
+gluuSAML1URI: urn:mace:dir:attribute-def:st
+gluuSAML2URI: urn:oid:2.5.4.8
 gluuStatus: inactive
 inum: E6B8
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: region
 urn: urn:mace:dir:attribute-def:st
 
 dn: inum=42D8,ou=attributes,o=gluu
@@ -681,6 +763,8 @@ gluuAttributeName: manager
 gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:manager
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.10
 gluuStatus: inactive
 inum: 42D8
 objectClass: top
@@ -697,11 +781,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: street_address
+gluuSAML1URI: urn:mace:dir:attribute-def:street
+gluuSAML2URI: urn:oid:2.5.4.9
 gluuStatus: inactive
 inum: 6609
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: street_address
 urn: urn:mace:dir:attribute-def:street
 
 dn: inum=E999,ou=attributes,o=gluu
@@ -714,6 +800,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:postOfficeBox
+gluuSAML2URI: urn:oid:2.5.4.18
 gluuStatus: inactive
 inum: E999
 objectClass: top
@@ -728,6 +816,8 @@ gluuAttributeName: employeeNumber
 gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:employeeNumber
+gluuSAML2URI: urn:oid:2.16.840.1.113730.3.1.3
 gluuStatus: inactive
 inum: D0C9
 objectClass: top
@@ -742,6 +832,8 @@ gluuAttributeName: preferredDeliveryMethod
 gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:preferredDeliveryMethod
+gluuSAML2URI: urn:oid:2.5.4.28
 gluuStatus: inactive
 inum: 894A
 objectClass: top
@@ -758,6 +850,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:telephoneNumber
+gluuSAML2URI: urn:oid:2.5.4.20
 gluuStatus: inactive
 inum: 570B
 objectClass: top
@@ -774,6 +868,8 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:roomNumber
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.6
 gluuStatus: inactive
 inum: D90B
 objectClass: top
@@ -788,6 +884,8 @@ gluuAttributeName: secretary
 gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:secretary
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.21
 gluuStatus: inactive
 inum: AC0B
 objectClass: top
@@ -795,18 +893,20 @@ objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretary
 
 dn: inum=4649,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
-gluuAttributeName: gluuStatus
 description: User status to allow/disable user access
 displayName: User Status
+gluuAttributeEditType: admin
+gluuAttributeName: gluuStatus
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: boolean
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
+gluuSAML1URI: urn:mace:dir:attribute-def:gluuStatus
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.97
 gluuStatus: active
 inum: 4649
+objectClass: top
+objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:status
 
 dn: inum=27DB,ou=attributes,o=gluu
@@ -819,11 +919,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: formatted
+gluuSAML1URI: urn:mace:dir:attribute-def:homePostalAddress
+gluuSAML2URI: urn:oid:0.9.2342.19200300.100.1.39
 gluuStatus: inactive
 inum: 27DB
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: formatted
 urn: urn:mace:dir:attribute-def:homePostalAddress
 
 dn: inum=6EEB,ou=attributes,o=gluu
@@ -836,11 +938,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: locality
+gluuSAML1URI: urn:mace:dir:attribute-def:l
+gluuSAML2URI: urn:oid:2.5.4.7
 gluuStatus: inactive
 inum: 6EEB
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: locality
 urn: urn:mace:dir:attribute-def:l
 
 dn: inum=2A3D,ou=attributes,o=gluu
@@ -853,11 +957,13 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-oxAuthClaimName: postal_code
+gluuSAML1URI: urn:mace:dir:attribute-def:postalCode
+gluuSAML2URI: urn:oid:2.5.4.17
 gluuStatus: inactive
 inum: 2A3D
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: postal_code
 urn: urn:mace:dir:attribute-def:postalCode
 
 dn: inum=48EE,ou=attributes,o=gluu
@@ -870,275 +976,306 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:description
+gluuSAML2URI: urn:oid:2.5.4.13
 gluuStatus: inactive
 inum: 48EE
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:description
 
-#########################
-# eduPerson Attributes
-#########################
-
 dn: inum=4E0C,ou=attributes,o=gluu
+description: Specifies the person's relationship(s) to the institutionin bro
+ ad categories such as student, faculty, staff, alum, etc.
+displayName: eduPersonAffiliation
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonAffiliation
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.1
+gluuStatus: inactive
 inum: 4E0C
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonAffiliation
-description: Specifies the person's relationship(s) to the institution
- in broad categories such as student, faculty, staff, alum, etc.
-displayName: eduPersonAffiliation
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.1
 
 dn: inum=E7BC,ou=attributes,o=gluu
+description: Person's nickname, or the informal name by which the End-User i
+ s accustomedto be hailed. A casual name that may or may not be the same as 
+ the given_name. For instance,a nickname value of Mike might be returned alo
+ ngside a given_name value of Michael.
+displayName: eduPersonNickName
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonNickName
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonNickName
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.2
+gluuStatus: inactive
 inum: E7BC
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonNickName
-displayName: eduPersonNickName
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.2
-description: Person's nickname, or the informal name by which the End-User is accustomed
- to be hailed. A casual name that may or may not be the same as the given_name. For instance,
- a nickname value of Mike might be returned alongside a given_name value of Michael.
 
 dn: inum=6366,ou=attributes,o=gluu
+description: The distinguished name (DN) of the directory entryrepresenting 
+ the institution with which the person is associated.
+displayName: eduPersonOrgDN
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonOrgDN
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgDN
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.3
+gluuStatus: inactive
 inum: 6366
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonOrgDN
-description: The distinguished name (DN) of the directory entry
- representing the institution with which the person is associated.
-displayName: eduPersonOrgDN
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.3
 
 dn: inum=ED0D,ou=attributes,o=gluu
+description: The distinguished name(s) (DN) of the directory entriesrepresen
+ ting the person's Organizational Unit(s). May be multivalued,as for example
+ , in the case of a faculty member with appointments inmultiple departments 
+ or a person who is a student in one departmentand an employee in another.
+displayName: eduPersonOrgUnitDN
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonOrgUnitDN
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgUnitDN
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.4
+gluuStatus: inactive
 inum: ED0D
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonOrgUnitDN
-description: The distinguished name(s) (DN) of the directory entries
- representing the person's Organizational Unit(s). May be multivalued,
- as for example, in the case of a faculty member with appointments in
- multiple departments or a person who is a student in one department
- and an employee in another.
-displayName: eduPersonOrgUnitDN
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.4
 
 dn: inum=91E7,ou=attributes,o=gluu
+description: Specifies the person's primary relationship to theinstitution i
+ n broad categories such as student, faculty, staff,alum, etc. (See controll
+ ed vocabulary).
+displayName: eduPersonPrimaryAffiliation
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonPrimaryAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryAffiliation
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.5
+gluuStatus: inactive
 inum: 91E7
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonPrimaryAffiliation
-description: Specifies the person's primary relationship to the
- institution in broad categories such as student, faculty, staff,
- alum, etc. (See controlled vocabulary).
-displayName: eduPersonPrimaryAffiliation
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
-urn:oid:1.3.6.1.4.1.5923.1.1.1.5
+urn: oid:1.3.6.1.4.1.5923.1.1.1.5
 
 dn: inum=096B,ou=attributes,o=gluu
+description: A scoped identifier for a person. It should berepresented in th
+ e form "user@scope" where 'user' is aname-based identifier for the person a
+ nd where 'scope'defines a local security domain. Each value of 'scope' defi
+ nesa namespace within which the assigned identifiers MUST be unique.Given t
+ his rule, if two eduPersonPrincipalName (ePPN) values arethe same at a give
+ n point in time, they refer to the same person.
+displayName: eduPersonPrincipalName
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonPrincipalName
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalName
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.6
+gluuStatus: inactive
 inum: 096B
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonPrincipalName
-description: A scoped identifier for a person. It should be
- represented in the form "user@scope" where 'user' is a
- name-based identifier for the person and where 'scope'
- defines a local security domain. Each value of 'scope' defines
- a namespace within which the assigned identifiers MUST be unique.
- Given this rule, if two eduPersonPrincipalName (ePPN) values are
- the same at a given point in time, they refer to the same person.
-displayName: eduPersonPrincipalName
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.6
 
 dn: inum=BF03,ou=attributes,o=gluu
+description: URI (either URN or URL) that indicates a set of rights to speci
+ fic resources.
+displayName: eduPersonEntitlement
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonEntitlement
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonEntitlement
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.7
+gluuStatus: inactive
 inum: BF03
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonEntitlement
-description: URI (either URN or URL) that indicates a set of rights to specific resources.
-displayName: eduPersonEntitlement
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.7
 
 dn: inum=0247,ou=attributes,o=gluu
-inum: 0247
-objectClass: top
-objectClass: gluuAttribute
-gluuAttributeName: eduPersonPrimaryOrgUnitDN
 description: The distinguished name (DN) of the directory entry representing
  the person's primary Organizational Unit(s).
 displayName: eduPersonPrimaryOrgUnitDN
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonPrimaryOrgUnitDN
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
-gluuAttributeEditType: admin
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryOrgUnitDN
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.8
 gluuStatus: inactive
+inum: 0247
+objectClass: top
+objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
 dn: inum=002A,ou=attributes,o=gluu
+description: Specifies the person's affiliation within a particular security
+  domainin broad categories such as student, faculty, staff, alum, etc. The 
+ values consistof a left and right component separated by an "@" sign. The l
+ eft component is one ofthe values from the eduPersonAffiliation controlled 
+ vocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intenti
+ onally matches that used for the right-hand sidevalues for eduPersonPrincip
+ alName since both identify a security domain. Multiple "@" signsare not rec
+ ommended, but in any case, the first occurrence of the "@" sign starting fr
+ om theleft is to be taken as the delimiter between components. Thus, user i
+ dentifier is to the left,security domain to the right of the first "@". Thi
+ s parsing rule conforms to the POSIX "greedy"disambiguation method in regul
+ ar expression processing.
+displayName: eduPersonScopedAffiliation
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonScopedAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonScopedAffiliation
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.9
+gluuStatus: inactive
 inum: 002A
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonScopedAffiliation
-description: Specifies the person's affiliation within a particular security domain
- in broad categories such as student, faculty, staff, alum, etc. The values consist
- of a left and right component separated by an "@" sign. The left component is one of
- the values from the eduPersonAffiliation controlled vocabulary.This right-hand side syntax
- of eduPersonScopedAffiliation intentionally matches that used for the right-hand side
- values for eduPersonPrincipalName since both identify a security domain. Multiple "@" signs
- are not recommended, but in any case, the first occurrence of the "@" sign starting from the
- left is to be taken as the delimiter between components. Thus, user identifier is to the left,
- security domain to the right of the first "@". This parsing rule conforms to the POSIX "greedy"
- disambiguation method in regular expression processing.
-displayName: eduPersonScopedAffiliation
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.9
 
 dn: inum=8FF3,ou=attributes,o=gluu
+description: A persistent, non-reassigned, opaque identifier for a principal
+ .
+displayName: eduPersonTargetedID
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonTargetedID
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonTargetedID
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.10
+gluuStatus: inactive
 inum: 8FF3
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonTargetedID
-description: A persistent, non-reassigned, opaque identifier for a principal.
-displayName: eduPersonTargetedID
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.10
 
 dn: inum=4B0F,ou=attributes,o=gluu
+description: Set of URIs that assert compliance with specific standardsfor i
+ dentity assurance.
+displayName: eduPersonAssurance
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonAssurance
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonAssurance
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.11
+gluuStatus: inactive
 inum: 4B0F
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonAssurance
-description: Set of URIs that assert compliance with specific standards
- for identity assurance.
-displayName: eduPersonAssurance
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
 
 dn: inum=4A0A,ou=attributes,o=gluu
+description: Person principal name prior
+displayName: eduPersonPrincipalNamePrior
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonPrincipalNamePrior
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalNamePrior
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.12
+gluuStatus: inactive
 inum: 4A0A
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonPrincipalNamePrior
-description: Person principal name prior
-displayName: eduPersonPrincipalNamePrior
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.12
 
 dn: inum=4A0B,ou=attributes,o=gluu
+description: Person unique Id
+displayName: eduPersonUniqueId
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonUniqueId
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonUniqueId
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.13
+gluuStatus: inactive
 inum: 4A0B
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonUniqueId
-description: Person unique Id
-displayName: eduPersonUniqueId
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.13
 
 dn: inum=4A0C,ou=attributes,o=gluu
+description: ORCID researcher identifiers belonging to the principal
+displayName: eduPersonOrcid
+gluuAttributeEditType: admin
+gluuAttributeName: eduPersonOrcid
+gluuAttributeOrigin: eduPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:eduPersonOrcid
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.16
+gluuStatus: inactive
 inum: 4A0C
 objectClass: top
 objectClass: gluuAttribute
-gluuAttributeName: eduPersonOrcid
-description: ORCID researcher identifiers belonging to the principal
-displayName: eduPersonOrcid
-gluuAttributeOrigin: eduPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: admin
-gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.16
 
 dn: inum=5039,ou=attributes,o=gluu
+description: oxEnrollmentCode
+description: Enrollment code, non-reassignable code
+displayName: Enrollment code
+gluuAttributeEditType: admin
+gluuAttributeName: oxEnrollmentCode
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:oxEnrollmentCode
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.239
+gluuStatus: active
+inum: 5039
 objectClass: top
 objectClass: gluuAttribute
-inum: 5039
-displayName: Enrollment code
-gluuAttributeOrigin: gluuPerson
-gluuAttributeName: oxEnrollmentCode
-description: oxEnrollmentCode
-gluuAttributeViewType: admin
-gluuAttributeEditType: admin
-gluuAttributeType: string
-gluuStatus: active
-urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
-description: Enrollment code, non-reassignable code
 oxSCIMCustomAttribute: true
+urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
 
 dn: inum=42E1,ou=attributes,o=gluu
+description: IMAP Data
 displayName: IMAP Data
+gluuAttributeEditType: admin
+gluuAttributeEditType: user
 gluuAttributeName: gluuIMAPData
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: imapdata
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
-gluuAttributeEditType: admin
-gluuAttributeEditType: user
-oxAuthClaimName: imap_data
+gluuSAML1URI: urn:mace:dir:attribute-def:gluuIMAPData
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.355
 gluuStatus: active
 inum: 42E1
 objectClass: top
 objectClass: gluuAttribute
+oxAuthClaimName: imap_data
 urn: urn:mace:dir:attribute-def:gluuIMAPData
-description: IMAP Data
 
 dn: inum=6049,ou=attributes,o=gluu
-objectClass: gluuAttribute
-objectClass: top
 description: gluuPermission
 description: User permission or role
 displayName: User Permission
@@ -1147,24 +1284,31 @@ gluuAttributeName: role
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
+gluuSAML1URI: urn:mace:dir:attribute-def:role
+gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
 gluuStatus: active
 inum: 6049
-urn: urn:gluu:dir:attribute-def:role
+objectClass: gluuAttribute
+objectClass: top
 oxMultivaluedAttribute: true
+urn: urn:gluu:dir:attribute-def:role
 
 dn: inum=CACA,ou=attributes,o=gluu
-objectClass: top
-objectClass: gluuAttribute
-inum: CACA
-displayName: User certificate
-gluuAttributeOrigin: gluuPerson
-gluuAttributeName: userCertificate
 description: User certificate
-gluuAttributeViewType: admin
-gluuAttributeViewType: user
+displayName: User certificate
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
+gluuAttributeName: userCertificate
+gluuAttributeOrigin: gluuPerson
 gluuAttributeType: certificate
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuSAML1URI: urn:mace:dir:attribute-def:userCertificate
+gluuSAML2URI: urn:oid:2.5.4.36
 gluuStatus: active
-urn: urn:mace:dir:attribute-def:userCertificate
+inum: CACA
+objectClass: top
+objectClass: gluuAttribute
 oxValidation: {"minLength":null,"maxLength":2048,"regexp":""}
+urn: urn:mace:dir:attribute-def:userCertificate
+
