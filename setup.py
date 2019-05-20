@@ -2592,7 +2592,7 @@ class Setup(object):
 
         else:
             while True:
-                ldapHost = self.getPrompt("    WrenDS hostname")
+                ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
                 conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
                 try:
