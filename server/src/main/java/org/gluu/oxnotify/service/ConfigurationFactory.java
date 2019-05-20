@@ -15,12 +15,13 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxnotify.exception.ConfigurationException;
 import org.gluu.oxnotify.model.conf.AccessConfiguration;
 import org.gluu.oxnotify.model.conf.Configuration;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Yuriy Movchan
@@ -32,6 +33,9 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Logger log;
+
+	@Inject
+	private ApplicationService applicationService;
 
 	static {
 		if (System.getProperty("gluu.base") != null) {
@@ -80,7 +84,7 @@ public class ConfigurationFactory {
 
 	private Configuration loadConfiguration() {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
+			ObjectMapper mapper = applicationService.createJsonMapper();
 			this.configuration = mapper.readValue(new File(this.configFilePath), Configuration.class);
 			this.accessConfiguration = mapper.readValue(new File(this.accessFilePath), AccessConfiguration.class);
 

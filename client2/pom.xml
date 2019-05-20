@@ -14,7 +14,6 @@
 	</parent>
 
 	<properties>
-		<resteasy.version>2.3.7.Final</resteasy.version>
 		<httpcore.version>4.3.3</httpcore.version>
 		<httpclient.version>4.3.6</httpclient.version>
 	</properties>
@@ -41,13 +40,7 @@
 		<!-- Resteasy -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
-			<version>${resteasy.version}</version>
+			<artifactId>resteasy-client</artifactId>
 		</dependency>
 	</dependencies>
 </project>

@@ -8,8 +8,6 @@ package org.gluu.oxnotify.model.conf;
 
 import javax.enterprise.inject.Vetoed;
 
-import org.gluu.oxnotify.model.PushPlatform;
-
 /**
  * @author Yuriy Movchan
  * @version September 15, 2017

@@ -23,9 +23,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpStatus;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxnotify.model.NotificationResponse;
 import org.gluu.oxnotify.model.PushPlatform;
 import org.gluu.oxnotify.model.RegisterDeviceResponse;
@@ -47,7 +44,7 @@ import com.amazonaws.services.sns.model.InvalidParameterException;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
-import com.amazonaws.services.sns.model.SetEndpointAttributesResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Yuriy Movchan
@@ -250,7 +247,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 			Map<String, String> messageMap = new HashMap<String, String>();
 			messageMap.put(platform.toString(), message);
 
-			final ObjectMapper objectMapper = new ObjectMapper();
+			final ObjectMapper objectMapper = applicationService.createJsonMapper();
 			String pushMessage = objectMapper.writeValueAsString(messageMap);
 
 			PublishRequest publishRequest = new PublishRequest();
