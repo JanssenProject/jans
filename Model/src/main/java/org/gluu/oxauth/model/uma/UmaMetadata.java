@@ -29,31 +29,26 @@ public class UmaMetadata extends OAuth2Discovery {
 
     @ApiModelProperty(required = false, value = "Static endpoint URI at which the authorization server declares that it interacts with end-user requesting parties to gather claims. If the authorization server also provides a claims interaction endpoint URI as part of its redirect_user hint in a need_info response to a client on authorization failure (see Section 3.3.6), that value overrides this metadata value. Providing the static endpoint URI is useful for enabling interactive claims gathering prior to any pushed-claims flows taking place, so that, for example, it is possible to gather requesting party authorization interactively for collecting all other claims in a \"silent\" fashion.")
     @JsonProperty(value = "claims_interaction_endpoint")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "claims_interaction_endpoint")
     @XmlElement(name = "claims_interaction_endpoint")
     private String claimsInteractionEndpoint;
 
     @ApiModelProperty(required = false, value = "UMA profiles supported by this authorization server. The value is an array of string values, where each string value is a URI identifying an UMA profile")
     @JsonProperty(value = "uma_profiles_supported")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "uma_profiles_supported")
     @XmlElement(name = "uma_profiles_supported")
     private String[] umaProfilesSupported;
 
     @ApiModelProperty(required = true, value = "The endpoint URI at which the resource server requests permissions on the client's behalf.")
     @JsonProperty(value = "permission_endpoint")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "permission_endpoint")
     @XmlElement(name = "permission_endpoint")
     private String permissionEndpoint;
 
     @ApiModelProperty(required = true, value = "The endpoint URI at which the resource server registers resources to put them under authorization manager protection.")
     @JsonProperty(value = "resource_registration_endpoint")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "resource_registration_endpoint")
     @XmlElement(name = "resource_registration_endpoint")
     private String resourceRegistrationEndpoint;
 
     @ApiModelProperty(required = true, value = "The Scope endpoint URI.")
     @JsonProperty(value = "scope_endpoint")
-    @org.codehaus.jackson.annotate.JsonProperty(value = "scope_endpoint")
     @XmlElement(name = "scope_endpoint")
     private String scopeEndpoint;
 
