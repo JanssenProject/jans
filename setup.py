@@ -44,9 +44,12 @@ from ldif import LDIFParser
 import copy
 import random
 import ssl
+import ldap
 
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
+
+ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
@@ -433,6 +436,7 @@ class Setup(object):
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
+        self.remoteLdap = False
 
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
@@ -2572,8 +2576,7 @@ class Setup(object):
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
 
-
-        if not self.remoteCouchbase:
+        if not (self.remoteCouchbase or self.remoteLdap):
 
             ldapPass = self.getPW(special='.*=!%&+/-')
 
@@ -2586,6 +2589,21 @@ class Setup(object):
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
             
             self.ldapPass = ldapPass
+
+        else:
+            while True:
+                ldapHost = self.getPrompt("    WrenDS hostname")
+                ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
+                conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
+                try:
+                    conn.simple_bind_s(self.opendj_ldap_binddn, ldapPass)
+                    break
+                except Exception as e:
+                    print "Error connecting to LDAP server:", e
+
+            self.ldapPass = ldapPass
+            self.ldap_hostname = ldapHost
+            self.installLdap = True
 
         if setupOptions['allowPreReleasedApplications'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
             while True:
@@ -4003,6 +4021,7 @@ def print_help():
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
+    print "    --remote-ldap"
     
 def getOpts(argv, setupOptions):
     try:
@@ -4014,6 +4033,7 @@ def getOpts(argv, setupOptions):
                                         'listen_all_interfaces',
                                         'remote-couchbase',
                                         'enable-hybrid-storage',
+                                        'remote-ldap',
                                         ]
                                     )
     except getopt.GetoptError:
@@ -4062,6 +4082,8 @@ def getOpts(argv, setupOptions):
             setupOptions['listenAllInterfaces'] = True
         elif opt == '--remote-couchbase':
             setupOptions['remoteCouchbase'] = True
+        elif opt == '--remote-ldap':
+            setupOptions['remoteLdap'] = True
         elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
@@ -4090,6 +4112,7 @@ if __name__ == '__main__':
         'allowDeprecatedApplications': False,
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
+        'remoteLdap': False,
     }
 
     if len(sys.argv) > 1:
@@ -4108,7 +4131,7 @@ if __name__ == '__main__':
     installObject.downloadWars = setupOptions['downloadWars']
 
     for option in setupOptions:
-        setattr(installObject, option, setupOptions[option]
+        setattr(installObject, option, setupOptions[option])
 
     # Get the OS type
     installObject.os_type, installObject.os_version = installObject.detect_os_type()
