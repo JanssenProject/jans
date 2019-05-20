@@ -2389,7 +2389,8 @@ class Setup(object):
         self.createUsers()
         self.makeFolders()
 
-        self.writeHybridProperties()
+        if self.persistence_type == 'hybrid':
+            self.writeHybridProperties()
 
     def make_salt(self):
         try:
@@ -2741,6 +2742,10 @@ class Setup(object):
 
     def render_templates(self):
         self.logIt("Rendering templates")
+
+        if self.remoteLdap or self.persistence_type=='couchbase':
+            self.ce_templates[self.ox_ldap_properties] = False
+
         for fullPath in self.ce_templates.keys():
             try:
                 self.renderTemplate(fullPath)
