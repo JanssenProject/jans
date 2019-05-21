@@ -409,7 +409,7 @@ public class ConfigurationFactory {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
 		try {
-			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
+			final Conf conf = ldapManager.find(dn, Conf.class, returnAttributes);
 
 			return conf;
 		} catch (BasePersistenceException ex) {
