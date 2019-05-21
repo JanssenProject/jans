@@ -15,8 +15,9 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.log4j.Logger;
 import org.gluu.util.EasySSLProtocolSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author: Yuriy Movchan Date: 11.21.2010
@@ -25,7 +26,7 @@ public final class HTTPFileDownloader {
 
     private HTTPFileDownloader() { }
 
-    private static Logger LOG = Logger.getLogger(HTTPFileDownloader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTTPFileDownloader.class);
     private static Protocol EASY_HTTPS;
 
     public static String getResource(String path, String contentType, String user, String password) {

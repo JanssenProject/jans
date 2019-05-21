@@ -45,7 +45,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
     public CustomScript getCustomScriptByDn(String customScriptDn, String... returnAttributes) {
-        return ldapEntryManager.find(CustomScript.class, customScriptDn, returnAttributes);
+        return ldapEntryManager.find(customScriptDn, CustomScript.class, returnAttributes);
     }
 
     public CustomScript getCustomScriptByDn(Class<?> customScriptType, String customScriptDn) {
