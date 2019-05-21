@@ -2,7 +2,8 @@ package org.gluu.persist.ldap.operation.impl;
 
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.unboundid.ldap.sdk.ResultCode;
 
@@ -13,7 +14,7 @@ import com.unboundid.ldap.sdk.ResultCode;
  */
 public class LdapAuthConnectionProvider extends LdapConnectionProvider {
 
-    private static final Logger LOG = Logger.getLogger(LdapAuthConnectionProvider.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LdapAuthConnectionProvider.class);
 
     public LdapAuthConnectionProvider(Properties connectionProperties) {
         Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);

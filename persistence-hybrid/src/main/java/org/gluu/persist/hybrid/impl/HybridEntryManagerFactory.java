@@ -97,7 +97,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 				throw new ConfigurationException(String.format("Unable to get Persistence Entry Manager Factory by type '%s'", persistenceType));
 			}
 
-			Properties entryManagerConf = PropertiesHelper.filterProperties(conf, persistenceType);
+			Properties entryManagerConf = PropertiesHelper.findProperties(conf, persistenceType);
     		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(entryManagerConf);
     		
     		persistenceEntryManagers.put(persistenceType, persistenceEntryManager);
@@ -106,7 +106,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     		сonnectionProperties.put(persistenceType, entryManagerConf);
     	}
 
-		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, "storage");
+		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
 		
 		HybridPersistenceOperationService hybridOperationService = new HybridPersistenceOperationService(operationServices);
     	
