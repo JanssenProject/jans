@@ -176,7 +176,17 @@ def get_documents_from_ldif(ldif_file):
 
     return documents
 
+def get_ram_size():
+    mem_total = None
 
+    with open('/proc/meminfo') as f:
+        meminfo = f.read()
+    matched = re.search(r'^MemTotal:\s+(\d+)', meminfo)
+
+    if matched: 
+        mem_total = int(matched.groups()[0]) / 1024
+
+    return mem_total
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -596,11 +606,17 @@ class Setup(object):
         self.couchbaseClusterRamsize = 2048 #in MB
         self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
-        self.couchbaseInstallOutput = ''    
+        self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
         self.cbm = None
+
+        #Todo: This should be calculated according to couchbase system information. 
+        ramsize = get_ram_size()
+        if ramsize and ramsize < 4096:
+            self.couchbaseClusterRamsize = 1600
+
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
