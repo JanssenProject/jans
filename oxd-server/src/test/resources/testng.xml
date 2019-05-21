@@ -4,6 +4,7 @@
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
+    <parameter name="opDiscoveryPath" value=""/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
@@ -32,6 +33,11 @@
     <test name="HealthCheckTest" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.HealthCheckTest"></class>
+        </classes>
+    </test>
+    <test name="Get OpDiscovery" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetOpDiscoveryConfigTest"></class>
         </classes>
     </test>
     <test name="Register site" enabled="true">
