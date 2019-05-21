@@ -4014,8 +4014,8 @@ class Setup(object):
 
 
     def fix_systemd_script(self):
-        if self.os_type+ self.os_version != 'ubuntu14':
-            oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+        oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+        if os.path.exists(oxauth_systemd_script_fn):
             oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
             changed = False
             
