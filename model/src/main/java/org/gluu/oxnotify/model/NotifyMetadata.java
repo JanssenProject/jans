@@ -6,6 +6,7 @@
 
 package org.gluu.oxnotify.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -15,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Yuriy Movchan
  * @version September 15, 2017
  */
-@JsonPropertyOrder({ "version", "issuer", "notify_endpoint" })
+@JsonPropertyOrder({ "version", "issuer", "notifyEndpoint" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NotifyMetadata {
 
 	@JsonProperty(value = "version")
@@ -24,7 +26,7 @@ public class NotifyMetadata {
 	@JsonProperty(value = "issuer")
 	private String issuer;
 
-	@JsonProperty(value = "notify_endpoint")
+	@JsonProperty(value = "notifyEndpoint")
 	private String notifyEndpoint;
 
 	public String getVersion() {
