@@ -682,6 +682,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 
     @Override
+	public String getPersistenceType(String primaryKey) {
+		return CouchbaseEntryManagerFactory.PERSISTANCE_TYPE;
+	}
+
+    @Override
 	protected Object convertValueToJson(Object propertyValue) {
     	String jsonStringPropertyValue = (String) super.convertValueToJson(propertyValue);
     	return JsonObject.fromJson(jsonStringPropertyValue);
