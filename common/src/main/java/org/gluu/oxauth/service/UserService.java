@@ -66,7 +66,7 @@ public class UserService {
         if (Util.isNullOrEmpty(dn)) {
             return null;
         }
-        return ldapEntryManager.find(User.class, dn, returnAttributes);
+        return ldapEntryManager.find(dn, User.class, returnAttributes);
     }
 
 	public User getUserByInum(String inum, String... returnAttributes) {
