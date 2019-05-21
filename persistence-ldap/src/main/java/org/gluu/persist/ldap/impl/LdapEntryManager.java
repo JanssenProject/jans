@@ -843,7 +843,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return true;
 	}
 
-    private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
+    @Override
+	public String getPersistenceType(String primaryKey) {
+		return LdapEntryManagerFactory.PERSISTANCE_TYPE;
+	}
+
+	private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;
 

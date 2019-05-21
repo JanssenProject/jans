@@ -13,10 +13,12 @@ import org.gluu.util.properties.FileConfiguration;
 @Vetoed
 public class PersistenceConfiguration {
 
-	private final String fileName;
-	private final FileConfiguration configuration;
-	private final Class<? extends PersistenceEntryManagerFactory> entryManagerFactoryType;
-	private final long lastModifiedTime;
+	private String fileName;
+	private FileConfiguration configuration;
+	private Class<? extends PersistenceEntryManagerFactory> entryManagerFactoryType;
+	private long lastModifiedTime;
+
+	public PersistenceConfiguration() {}
 
 	public PersistenceConfiguration(String fileName, FileConfiguration configuration,
 			Class<? extends PersistenceEntryManagerFactory> entryManagerFactoryType, long lastModifiedTime) {
@@ -26,19 +28,19 @@ public class PersistenceConfiguration {
 		this.lastModifiedTime = lastModifiedTime;
 	}
 
-	public final String getFileName() {
+	public String getFileName() {
 		return fileName;
 	}
 
-	public final FileConfiguration getConfiguration() {
+	public FileConfiguration getConfiguration() {
 		return configuration;
 	}
 
-	public final Class<? extends PersistenceEntryManagerFactory> getEntryManagerFactoryType() {
+	public Class<? extends PersistenceEntryManagerFactory> getEntryManagerFactoryType() {
 		return entryManagerFactoryType;
 	}
 
-	public final long getLastModifiedTime() {
+	public long getLastModifiedTime() {
 		return lastModifiedTime;
 	}
 
