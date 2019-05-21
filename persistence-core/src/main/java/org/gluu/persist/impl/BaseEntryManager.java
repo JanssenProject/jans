@@ -453,11 +453,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	@Override
 	public <T> T find(Class<T> entryClass, Object primaryKey) {
-		return find(entryClass, primaryKey, null);
+		return find(primaryKey, entryClass, null);
 	}
 
 	@Override
-	public <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes) {
+	public <T> T find(Object primaryKey, Class<T> entryClass, String[] ldapReturnAttributes) {
 		if (StringHelper.isEmptyString(primaryKey)) {
 			throw new MappingException("DN to find entry is null");
 		}
@@ -539,7 +539,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		List<AttributeData> ldapAttributes = find(primaryKey.toString(), currentLdapReturnAttributes);
 
-		entriesAttributes.put(primaryKey.toString(), ldapAttributes);
+		entriesAttributes.put(String.valueOf(primaryKey), ldapAttributes);
 		List<T> results = createEntities(entryClass, propertiesAnnotations, entriesAttributes);
 		return results.get(0);
 	}

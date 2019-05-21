@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.MappingException;
@@ -189,9 +190,9 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	public <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes) {
+	public <T> T find(Object primaryKey, Class<T> entryClass, String[] ldapReturnAttributes) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
-    	return persistenceEntryManager.find(entryClass, primaryKey, ldapReturnAttributes);
+    	return persistenceEntryManager.find(primaryKey, entryClass, ldapReturnAttributes);
 	}
 
     @Override
@@ -263,6 +264,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	public boolean hasBranchesSupport(String dn) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
     	return persistenceEntryManager.hasBranchesSupport(dn);
+	}
+
+    @Override
+	public String getPersistenceType(String primaryKey) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+		return persistenceEntryManager.getPersistenceType(primaryKey);
 	}
 
     private PersistenceEntryManager getPersistenceEntryManagerByKey(String key) {
