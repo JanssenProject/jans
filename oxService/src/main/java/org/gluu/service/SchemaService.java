@@ -51,7 +51,7 @@ public class SchemaService {
     public SchemaEntry getSchema() {
     	String shemaDn = getDnForSchema();
     	if (StringHelper.isNotEmpty(shemaDn)) { 
-    		SchemaEntry schemaEntry = ldapEntryManager.find(SchemaEntry.class, getDnForSchema(), null);
+    		SchemaEntry schemaEntry = ldapEntryManager.find(getDnForSchema(), SchemaEntry.class, null);
             return schemaEntry;
     	}
     	

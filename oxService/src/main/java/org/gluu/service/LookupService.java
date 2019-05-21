@@ -53,7 +53,7 @@ public class LookupService implements Serializable {
         String key = dn;
         DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entry == null) {
-            entry = ldapEntryManager.find(DisplayNameEntry.class, key, null);
+            entry = ldapEntryManager.find(key, DisplayNameEntry.class, null);
 
             cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
         }

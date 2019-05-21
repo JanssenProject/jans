@@ -32,8 +32,8 @@ import javax.persistence.Query;
  */
 public interface PersistenceEntryManager extends EntityManager {
 
-    boolean authenticate(String bindDn, String password);
-    boolean authenticate(String baseDN, String userName, String password);
+    boolean authenticate(String bindprimaryKey, String password);
+    boolean authenticate(String primaryKey, String userName, String password);
 
 	void persist(Object entry);
 
@@ -43,12 +43,13 @@ public interface PersistenceEntryManager extends EntityManager {
     <T> boolean contains(String primaryKey, Class<T> entryClass, Filter filter);
 
     <T> int countEntries(Object entry);
-    <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter);
-    <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter,  SearchScope scope);
+
+    <T> int countEntries(String primaryKey, Class<T> entryClass, Filter filter);
+    <T> int countEntries(String primaryKey, Class<T> entryClass, Filter filter,  SearchScope scope);
 
     <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
 
-    <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
+    <T> T find(Object primaryKey, Class<T> entryClass, String[] ldapReturnAttributes);
 
     /**
      * Search by sample
@@ -59,25 +60,26 @@ public interface PersistenceEntryManager extends EntityManager {
     <T> List<T> findEntries(Object entry);
     <T> List<T> findEntries(Object entry, int count);
 
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int count);
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int count);
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter);
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, int count);
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int count);
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             int start, int count, int chunkSize);
-    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
+    <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             BatchOperation<T> batchOperation, int start, int count, int chunkSize);
 
     // TODO: Combine sortBy and SortOrder into Sort
-    <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+    <T> PagedResult<T> findPagedEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
                                         SortOrder sortOrder, int start, int count, int chunkSize);
 
 	void remove(Object entry);
-    void removeRecursively(String dn);
-    boolean hasBranchesSupport(String dn);
+    void removeRecursively(String primaryKey);
+    boolean hasBranchesSupport(String primaryKey);
+    String getPersistenceType(String primaryKey);
 
-    Date decodeTime(String baseDN, String date);
-    String encodeTime(String baseDN, Date date);
+    Date decodeTime(String primaryKey, String date);
+    String encodeTime(String primaryKey, Date date);
 
     int getHashCode(Object entry);
 
@@ -91,7 +93,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
-    String[] exportEntry(String dn);
+    String[] exportEntry(String primaryKey);
 
     PersistenceOperationService getOperationService();
 
