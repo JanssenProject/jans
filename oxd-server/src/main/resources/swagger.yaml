@@ -1300,6 +1300,231 @@ paths:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
           schema:
             $ref: '#/definitions/ErrorResponse'
+  /get-op-discovery-config:
+    post:
+      tags:
+      - developers
+      summary: Get OP Discovery Configuration
+      operationId: get-op-discovery-config
+      description: Get OP Discovery Configuration
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: GetOpDiscoveryConfigParams
+        schema:
+          type: object
+          required:
+          - op_host
+          properties:
+            op_host:
+              type: string
+              example: https://<ophostname>
+            op_discovery_path:
+              type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            title: GetOpDiscoveryConfigResponse
+            properties:
+              issuer:
+                type: string
+                example: https://<ophostname>
+              authorization_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/authorize
+              token_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/token
+              token_revocation_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/token/v1
+              user_info_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/userinfo
+              client_info_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/clientinfo
+              check_session_iframe:
+                type: string
+                example: https://<ophostname>/oxauth/opiframe.htm
+              end_session_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/end_session
+              jwks_uri:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/jwks
+              registration_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/register
+              id_generation_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/id
+              introspection_endpoint:
+                type: string
+                example: https://<ophostname>/oxauth/restv1/introspection
+              scopes_supported:
+                type: array
+                items:
+                  type: string
+                example: ["owner", "casa", "address", "clientinfo", "user_name", "openid", "profile", "uma_protection", "admin", "permission", "manage", "phone", "mobile_phone", "name", "oxd", "email" ]
+              response_types_supported:
+                type: array
+                items:
+                  type: string
+                example: ["token id_token", "token code id_token", "token", "token code", "code", "code id_token", "id_token"]
+              grant_types_supported:
+                type: array
+                items:
+                  type: string
+                example: ["authorization_code", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "password", "implicit", "client_credentials"]
+              acr_values_supported:
+                type: array
+                items:
+                  type: string
+                example: ["u2f", "super_gluu", "otp", "auth_ldap_server"]
+              subject_types_supported:
+                type: array
+                items:
+                  type: string
+                example: ["public", "pairwise"]
+              user_info_signing_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512" ]
+              user_info_encryption_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ]
+              user_info_encryption_enc_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ]
+              id_token_signing_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512" ]
+              id_token_encryption_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ]
+              id_token_encryption_enc_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ]
+              request_object_signing_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512" ]
+              request_object_encryption_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ]
+              request_object_encryption_enc_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ]
+              token_endpoint_auth_methods_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt" ]
+              token_endpoint_auth_signing_alg_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512" ]
+              display_values_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "page", "popup" ]
+              claim_types_supported:
+                type: array
+                items:
+                  type: string
+                example: ["normal"]
+              claims_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "street_address", "country", "zoneinfo", "birthdate", "role", "gender", "formatted", "user_name", "phone_mobile_number", "preferred_username", "locale", "inum", "updated_at", "nickname", "email", "website", "email_verified", "profile", "locality", "phone_number_verified", "given_name", "middle_name", "picture", "name", "phone_number", "postal_code", "region", "family_name" ]
+              id_token_token_binding_cnf_values_supported:
+                type: array
+                items:
+                  type: string
+                example: ["tbh"]
+              service_documentation:
+                type: string
+                items:
+                  type: string
+                example: http://<op_docs>
+              claims_locales_supported:
+                type: array
+                items:
+                  type: string
+                example: ["en"]
+              ui_locales_supported:
+                type: array
+                items:
+                  type: string
+                example: [ "en", "es" ]
+              claims_parameter_supported:
+                type: boolean
+                example: true
+              request_parameter_supported:
+                type: boolean
+                example: true
+              request_uri_parameter_supported:
+                type: boolean
+                example: true
+              require_request_uri_registration:
+                type: boolean
+                example: true
+              tls_client_certificate_bound_access_tokens:
+                type: boolean
+                example: true
+              front_channel_logout_supported:
+                type: boolean
+                example: true
+              front_channel_logout_session_supported:
+                type: boolean
+                example: true
+              op_policy_uri:
+                type: string
+                example: http://<policy_uri>
+              op_tos_uri:
+                type: string
+                example: http://<tos_uri>
+              scope_to_claims_mapping:
+                type: object
+                example: [ {"address": [ "formatted", "postal_code", "street_address", "locality", "country", "region" ]}, {"owner": []}, {"manage": []}, {"profile": [ "name", "family_name", "given_name", "middle_name", "nickname", "preferred_username", "profile", "picture", "website", "gender", "birthdate", "zoneinfo", "locale", "updated_at" ]}, {"mobile_phone": ["phone_mobile_number"]}, {"phone": [ "phone_number_verified", "phone_number" ]}, {"clientinfo": [ "name", "inum" ]}, {"permission": ["role"]}, {"oxd": []}, {"email": [ "email_verified", "email" ]}, {"casa": ["email"]}, {"user_name": ["user_name"]}, {"name": []}, {"openid": []}, {"uma_protection": []}, {"admin": []} ]
+        400:
+          description: Invalid parameters are provided to endpoint.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden. Invalid access token provided in Authorization header.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
 
 definitions:
   # List of reusable properties
