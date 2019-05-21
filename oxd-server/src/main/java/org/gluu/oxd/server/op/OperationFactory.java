@@ -70,6 +70,8 @@ public class OperationFactory {
                     return new GetRpOperation(command, injector);
                 case GET_JWKS:
                     return new GetJwksOperation(command, injector);
+                case GET_OP_DISCOVERY_CONFIG:
+                    return new GetOpDiscoveryConfigOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {

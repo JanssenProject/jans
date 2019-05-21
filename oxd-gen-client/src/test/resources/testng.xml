@@ -4,6 +4,7 @@
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
+    <parameter name="opDiscoveryPath" value=""/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
     <parameter name="logoutUrl" value="https://client.example.com/logout"/>
@@ -26,6 +27,11 @@
     </test>
 
     <!-- Connect -->
+    <test name="Get OpDiscovery" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetOpDiscoveryConfigTest"></class>
+        </classes>
+    </test>
     <test name="Register site" enabled="true">
         <classes>
             <class name="io.swagger.client.api.RegisterSiteTest"/>
