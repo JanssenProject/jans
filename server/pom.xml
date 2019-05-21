@@ -57,6 +57,12 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-cdi</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.json.bind</groupId>
+					<artifactId>javax.json.bind-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
