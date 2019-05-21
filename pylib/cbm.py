@@ -47,7 +47,10 @@ class CBM:
         result = requests.post(url, data=data, auth=self.auth, verify=False)
         return result
         
-    
+    def get_system_info(self):
+        result = self._get('pools/default')
+        return result.json()
+
     def get_buckets(self):
         
         return self._get('pools/default/buckets')
