@@ -42,5 +42,9 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
 		</dependency>
-	</dependencies>
+	   <dependency>
+	        <groupId>org.jboss.resteasy</groupId>
+	        <artifactId>resteasy-jackson2-provider</artifactId>
+	    </dependency>
+   	</dependencies>
 </project>
