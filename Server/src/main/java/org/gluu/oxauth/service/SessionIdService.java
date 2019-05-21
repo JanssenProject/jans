@@ -141,10 +141,10 @@ public class SessionIdService {
             boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
-                Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
+                Integer sessionAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr));
 
                 for (String acrValue : acrValuesList) {
-                    Integer currentAcrLevel = acrToLevel.get(acrValue);
+                    Integer currentAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(acrValue));
 
                     log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
                             "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
