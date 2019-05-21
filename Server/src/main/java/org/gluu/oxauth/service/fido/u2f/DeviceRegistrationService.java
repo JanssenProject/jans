@@ -71,7 +71,7 @@ public class DeviceRegistrationService {
 
 		String deviceDn = getDnForU2fDevice(userInum, deviceId);
 
-		return ldapEntryManager.find(DeviceRegistration.class, deviceDn, returnAttributes);
+		return ldapEntryManager.find(deviceDn, DeviceRegistration.class, returnAttributes);
 	}
 
 	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String ... returnAttributes) {
