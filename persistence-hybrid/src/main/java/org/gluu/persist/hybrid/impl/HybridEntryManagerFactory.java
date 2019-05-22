@@ -14,7 +14,7 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.operation.PersistenceOperationService;
-import org.gluu.persist.service.PersistanceFactoryService;
+import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
@@ -51,7 +51,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 	private static final Logger LOG = LoggerFactory.getLogger(HybridEntryManagerFactory.class);
 	
 	@Inject
-	private PersistanceFactoryService persistanceFactoryService;
+	private BaseFactoryService persistanceFactoryService;
 
 	private String[] persistenceTypes;
 
@@ -132,5 +132,10 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 
         return hybridEntryManager;
     }
+
+	@Override
+	public void initStandalone(BaseFactoryService persistanceFactoryService) {
+		this.persistanceFactoryService = persistanceFactoryService;
+	}
 
 }
