@@ -378,6 +378,7 @@ class Setup(object):
         self.idp3CredentialsFolder = "%s/credentials" % self.idp3Folder
         self.idp3WebappFolder = "%s/webapp" % self.idp3Folder
         # self.idp3WarFolder = "%s/war"
+        self.couchbaseShibUserPassword = None
 
         self.hostname = None
         self.ip = None
@@ -2746,14 +2747,15 @@ class Setup(object):
         else:
             self.installHttpd = False
 
-        
+
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
             self.shibboleth_version = 'v3'
             self.installSaml = True
+            if self.persistence_type in ('couchbase','hybrid'):
+                self.couchbaseShibUserPassword = self.getPW()
         else:
             self.installSaml = False
-        
 
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
         if promptForOxAuthRP == 'y':
@@ -4044,6 +4046,10 @@ class Setup(object):
             self.couchebaseCreateIndexes(bucket)
             if self.mappingsLdif[group]:
                 self.import_ldif_couchebase(self.mappingsLdif[group], bucket)
+
+        if self.installSaml:
+            self.logIt("Creating couchbase readonly user for shib")
+            self.cbm.create_user('couchbaseShibUser', self.couchbaseShibUserPassword, 'Shibboleth IDP', 'query_select[*]')
 
         self.couchbaseProperties()
 
