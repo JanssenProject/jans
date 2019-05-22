@@ -43,7 +43,8 @@ public enum CommandType {
     IMPLICIT_FLOW("implicit_flow"),
     GET_CLIENT_TOKEN("get_client_token"),
     GET_RP("get_rp"),
-    GET_JWKS("get_jwks");
+    GET_JWKS("get_jwks"),
+    GET_DISCOVERY("get_discovery");
 
     private final String value;
 
