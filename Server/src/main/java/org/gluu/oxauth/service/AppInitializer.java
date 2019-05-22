@@ -32,6 +32,7 @@ import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.event.ApplicationInitializedEvent;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
@@ -62,7 +63,6 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.event.ApplicationInitializedEvent;
 
 /**
  * @author Javier Rojas Blum
