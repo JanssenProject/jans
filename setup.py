@@ -535,6 +535,7 @@ class Setup(object):
         self.idp3_configuration_services = 'services.properties'
         self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
         self.idp3_metadata = 'idp-metadata.xml'
+        self.data_source_properties = 'datasource.properties'
 
         self.casa_config = '%s/casa.json' % self.outputFolder
 
@@ -685,6 +686,7 @@ class Setup(object):
                              self.ldif_scripts_casa: False,
                              self.lidf_oxtrust_api: False,
                              self.gluu_properties_fn: True,
+                             self.data_source_properties: False
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -2093,6 +2095,14 @@ class Setup(object):
             # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyIdpServiceWebapps], '/opt')
 
+
+            if self.persistence_type == 'couchbase':
+                self.saml_couchbase_settings()
+            elif self.persistence_type == 'hybrid':
+                couchbase_mappings = self.getMappingType('couchbase')
+                if 'user' in couchbase_mappings:
+                    self.saml_couchbase_settings()
+
     def install_saml_libraries(self):
         # Unpack oxauth.war to get bcprov-jdk16.jar
         idpWar = 'idp.war'
@@ -2114,6 +2124,43 @@ class Setup(object):
         self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, idp3WebappLibFolder)
 
         self.removeDirs(tmpIdpDir)
+
+
+    def saml_couchbase_settings(self):
+        # Add couchbase bean to global.xml
+        couchbase_bean_xml_fn = '%s/couchbase/couchbase_bean.xml' % self.staticFolder
+        global_xml_fn = '%s/global.xml' % self.idp3ConfFolder
+        couchbase_bean_xml = self.readFile(couchbase_bean_xml_fn)
+        global_xml = self.readFile(global_xml_fn)
+        global_xml = global_xml.replace('</beans>', couchbase_bean_xml+'\n\n</beans>')
+        self.writeFile(global_xml_fn, global_xml)
+        
+        # Update attribute-resolver.xml for Couchbase
+        couchbase_attribute_resolver_fn = '%s/couchbase/couchbase_attribute_resolver.xml' % self.staticFolder
+        attribute_resolver_fn = '%s/attribute-resolver.xml' % self.idp3ConfFolder
+        couchbase_attribute_resolver_xml = self.readFile(couchbase_attribute_resolver_fn)
+        attribute_resolver_xml = self.readFile(attribute_resolver_fn)
+        attribute_resolver_xml = attribute_resolver_xml.replace('</AttributeResolver>', couchbase_attribute_resolver_xml+'\n\n</AttributeResolver>')
+        self.writeFile(attribute_resolver_fn, attribute_resolver_xml)
+        
+
+        # Add datasource.properties to idp.properties
+        idp3_configuration_properties_fn = os.path.join(self.idp3ConfFolder, self.idp3_configuration_properties)
+
+        with open(idp3_configuration_properties_fn) as r:
+            idp3_properties = r.readlines()
+
+        for i,l in enumerate(idp3_properties[:]):
+            if l.strip().startswith('idp.additionalProperties'):
+                idp3_properties[i] = l.strip() + ', /conf/datasource.properties\n'
+
+        new_idp3_props = ''.join(idp3_properties)
+        self.writeFile(idp3_configuration_properties_fn, new_idp3_props)
+
+        data_source_properties = os.path.join(self.outputFolder, self.data_source_properties)
+
+        self.copyFile(data_source_properties, self.idp3ConfFolder)
+
 
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
@@ -2700,13 +2747,12 @@ class Setup(object):
             self.installHttpd = False
 
         
-        if self.persistence_type != 'couchbase':
-            promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
-            if promptForShibIDP == 'y':
-                self.shibboleth_version = 'v3'
-                self.installSaml = True
-            else:
-                self.installSaml = False
+        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+        if promptForShibIDP == 'y':
+            self.shibboleth_version = 'v3'
+            self.installSaml = True
+        else:
+            self.installSaml = False
         
 
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
