@@ -18,10 +18,11 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 
 	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
-        return getPersistenceEntryManagerFactoryImpl(persistenceConfiguration.getEntryManagerFactoryType());
+        return getPersistenceEntryManagerFactory(persistenceConfiguration.getEntryManagerFactoryType());
     }
 
-	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
+	@Override
+	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
 		if (this.persistenceEntryManagerFactoryTypes == null) {
 			initPersistenceManagerMaps();
 		}
@@ -57,7 +58,7 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 		Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
 		
 		for (Class<? extends PersistenceEntryManagerFactory> clazz : classes) {
-			PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactoryImpl(clazz);
+			PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory(clazz);
 			persistenceEntryManagerFactoryNames.put(persistenceEntryManagerFactory.getPersistenceType(), persistenceEntryManagerFactory);
 			persistenceEntryManagerFactoryTypes.put(clazz, persistenceEntryManagerFactory);
 		}
