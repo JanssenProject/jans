@@ -1,5 +1,6 @@
 package org.gluu.persist.hybrid.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,22 @@ import org.slf4j.LoggerFactory;
  */
 @ApplicationScoped
 public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory {
+	static {
+		if (System.getProperty("gluu.base") != null) {
+			BASE_DIR = System.getProperty("gluu.base");
+		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
+			BASE_DIR = System.getProperty("catalina.base");
+		} else if (System.getProperty("catalina.home") != null) {
+			BASE_DIR = System.getProperty("catalina.home");
+		} else if (System.getProperty("jboss.home.dir") != null) {
+			BASE_DIR = System.getProperty("jboss.home.dir");
+		} else {
+			BASE_DIR = null;
+		}
+	}
+
+	public static final String BASE_DIR;
+	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
     public static final String PERSISTANCE_TYPE = "hybrid";
     public static final String PROPERTIES_FILE = "gluu-hybrid.properties";
@@ -59,9 +76,9 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     private HashMap<String, String> getAllConfigurationFileNames(String confFileName) {
     	HashMap<String, String> allConfs = new HashMap<String, String>();
 
-		FileConfiguration fileConf = new FileConfiguration(PersistanceFactoryService.DIR + confFileName);
+		FileConfiguration fileConf = new FileConfiguration(DIR + confFileName);
 		if (!fileConf.isLoaded()) {
-			LOG.error("Unable to load configuration file '{}'", PersistanceFactoryService.DIR + confFileName);
+			LOG.error("Unable to load configuration file '{}'", DIR + confFileName);
             throw new ConfigurationException(String.format("Unable to load configuration file: '%s'", fileConf));
 		}
 
