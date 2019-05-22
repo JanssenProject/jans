@@ -1494,6 +1494,123 @@ public class DevelopersApi {
         return call;
     }
     /**
+     * Build call for getDiscovery
+     * @param getDiscoveryParams  (optional)
+     * @param progressListener Progress listener
+     * @param progressRequestListener Progress request listener
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     */
+    public com.squareup.okhttp.Call getDiscoveryCall(GetDiscoveryParams getDiscoveryParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = getDiscoveryParams;
+
+        // create path and map variables
+        String localVarPath = "/get-discovery";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+                "application/json"
+        };
+        final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) localVarHeaderParams.put("Accept", localVarAccept);
+
+        final String[] localVarContentTypes = {
+                "application/json"
+        };
+        final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+        localVarHeaderParams.put("Content-Type", localVarContentType);
+
+        if(progressListener != null) {
+            apiClient.getHttpClient().networkInterceptors().add(new com.squareup.okhttp.Interceptor() {
+                @Override
+                public com.squareup.okhttp.Response intercept(com.squareup.okhttp.Interceptor.Chain chain) throws IOException {
+                    com.squareup.okhttp.Response originalResponse = chain.proceed(chain.request());
+                    return originalResponse.newBuilder()
+                            .body(new ProgressResponseBody(originalResponse.body(), progressListener))
+                            .build();
+                }
+            });
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return apiClient.buildCall(localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAuthNames, progressRequestListener);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private com.squareup.okhttp.Call getDiscoveryValidateBeforeCall(GetDiscoveryParams getDiscoveryParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+
+
+        com.squareup.okhttp.Call call = getDiscoveryCall(getDiscoveryParams, progressListener, progressRequestListener);
+        return call;
+
+    }
+
+    /**
+     * Get OP Discovery Configuration
+     * Get OP Discovery Configuration
+     * @param getDiscoveryParams  (optional)
+     * @return GetDiscoveryResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public GetDiscoveryResponse getDiscovery(GetDiscoveryParams getDiscoveryParams) throws ApiException {
+        ApiResponse<GetDiscoveryResponse> resp = getDiscoveryWithHttpInfo(getDiscoveryParams);
+        return resp.getData();
+    }
+
+    /**
+     * Get OP Discovery Configuration
+     * Get OP Discovery Configuration
+     * @param getDiscoveryParams  (optional)
+     * @return ApiResponse&lt;GetDiscoveryResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     */
+    public ApiResponse<GetDiscoveryResponse> getDiscoveryWithHttpInfo(GetDiscoveryParams getDiscoveryParams) throws ApiException {
+        com.squareup.okhttp.Call call = getDiscoveryValidateBeforeCall(getDiscoveryParams, null, null);
+        Type localVarReturnType = new TypeToken<GetDiscoveryResponse>(){}.getType();
+        return apiClient.execute(call, localVarReturnType);
+    }
+
+    /**
+     * Get OP Discovery Configuration (asynchronously)
+     * Get OP Discovery Configuration
+     * @param getDiscoveryParams  (optional)
+     * @param callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     */
+    public com.squareup.okhttp.Call getDiscoveryAsync(GetDiscoveryParams getDiscoveryParams, final ApiCallback<GetDiscoveryResponse> callback) throws ApiException {
+
+        ProgressResponseBody.ProgressListener progressListener = null;
+        ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
+
+        if (callback != null) {
+            progressListener = new ProgressResponseBody.ProgressListener() {
+                @Override
+                public void update(long bytesRead, long contentLength, boolean done) {
+                    callback.onDownloadProgress(bytesRead, contentLength, done);
+                }
+            };
+
+            progressRequestListener = new ProgressRequestBody.ProgressRequestListener() {
+                @Override
+                public void onRequestProgress(long bytesWritten, long contentLength, boolean done) {
+                    callback.onUploadProgress(bytesWritten, contentLength, done);
+                }
+            };
+        }
+
+        com.squareup.okhttp.Call call = getDiscoveryValidateBeforeCall(getDiscoveryParams, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<GetDiscoveryResponse>(){}.getType();
+        apiClient.executeAsync(call, localVarReturnType, callback);
+        return call;
+    }
+    /**
      * Build call for umaRpGetClaimsGatheringUrl
      * @param authorization  (optional)
      * @param umaRpGetClaimsGatheringUrlParams  (optional)
