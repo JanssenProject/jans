@@ -1,7 +1,6 @@
 package org.gluu.oxd.server;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.codehaus.jettison.json.JSONException;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
@@ -23,7 +22,7 @@ public class GetUserInfoTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) throws JSONException {
+    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
