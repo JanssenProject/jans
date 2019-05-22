@@ -8,7 +8,6 @@
 package org.gluu.persist.couchbase.impl;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +17,7 @@ import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
 import org.gluu.util.init.Initializable;
 import org.slf4j.Logger;
@@ -109,6 +109,11 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
         return couchbaseEntryManager;
     }
+
+	@Override
+	public void initStandalone(BaseFactoryService persistanceFactoryService) {}
+
+
 /*
     public static void main(String[] args) throws FileNotFoundException, IOException {
     	Properties prop = new Properties();
