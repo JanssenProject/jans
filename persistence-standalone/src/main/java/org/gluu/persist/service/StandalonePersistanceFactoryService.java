@@ -75,6 +75,7 @@ public class StandalonePersistanceFactoryService<E> extends PersistanceFactorySe
 		PersistenceEntryManagerFactory persistenceEntryManagerFactory;
 		try {
 			persistenceEntryManagerFactory = ReflectHelper.createObjectByDefaultConstructor(persistenceEntryManagerFactoryClass);
+			persistenceEntryManagerFactory.initStandalone(this);
 		} catch (PropertyNotFoundException | IllegalArgumentException | InstantiationException | IllegalAccessException
 				| InvocationTargetException e) {
             throw new ConfigurationException(
