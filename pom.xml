@@ -70,6 +70,7 @@
 		<module>persistence-couchbase</module>
 		<module>persistence-hybrid</module>
 		<module>persistence-cdi</module>
+		<module>persistence-standalone</module>
 		<module>persistence-ldap-sample</module>
 		<module>persistence-couchbase-sample</module>
 		<module>oxModel</module>
