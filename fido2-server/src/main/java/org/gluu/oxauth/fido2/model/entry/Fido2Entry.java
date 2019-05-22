@@ -14,7 +14,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version 11/02/2018
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(values = { "top", "oxFido2Entry" })
+@ObjectClass(values = { "top" })
 public class Fido2Entry extends BaseEntry {
 
     @AttributeName(ignoreDuringUpdate = true, name = "oxId")
