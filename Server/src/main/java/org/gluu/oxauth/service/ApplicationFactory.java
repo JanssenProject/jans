@@ -18,6 +18,7 @@ import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
+import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.cache.InMemoryConfiguration;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
@@ -43,8 +44,8 @@ public class ApplicationFactory {
     @Inject
     private ConfigurationService configurationService;
 
-    @Inject
-    private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
+	@Inject
+	private PersistanceFactoryService persistanceFactoryService;
 
     @Inject
     private StaticConfiguration staticConfiguration;
@@ -98,10 +99,8 @@ public class ApplicationFactory {
 
     public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
         PersistenceConfiguration persistenceConfiguration = configurationFactory.getPersistenceConfiguration();
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
-                .select(persistenceConfiguration.getEntryManagerFactoryType()).get();
 
-        return persistenceEntryManagerFactory;
+        return persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceConfiguration);
     }
 
 }
