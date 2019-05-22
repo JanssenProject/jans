@@ -1,6 +1,7 @@
 package org.gluu.persist.service;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -10,11 +11,17 @@ import javax.inject.Inject;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
+import org.gluu.persist.exception.PropertyNotFoundException;
+import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.persist.hybrid.impl.HybridEntryManagerFactory;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory which creates Persistence Entry Manager
@@ -64,9 +71,9 @@ public class PersistanceFactoryService {
 		// Fall back to old LDAP persistence layer
 		if (currentPersistenceConfiguration == null) {
 			log.warn("Failed to load persistence configuration. Attempting to use LDAP layer");
-			LdapEntryManagerFactory ldapPersistenceEntryManagerFactory = (LdapEntryManagerFactory) persistenceEntryManagerFactoryInstance.select(LdapEntryManagerFactory.class).get();
-			currentPersistenceConfiguration = createPersistenceConfiguration(ldapPersistenceEntryManagerFactory.getPersistenceType(), LdapEntryManagerFactory.class,
-					ldapPersistenceEntryManagerFactory.getConfigurationFileNames());
+			PersistenceEntryManagerFactory defaultEntryManagerFactory = getPersistenceEntryManagerFactoryImpl(LdapEntryManagerFactory.class);
+			currentPersistenceConfiguration = createPersistenceConfiguration(defaultEntryManagerFactory.getPersistenceType(), LdapEntryManagerFactory.class,
+					defaultEntryManagerFactory.getConfigurationFileNames());
 		}
 
 		return currentPersistenceConfiguration;
@@ -185,22 +192,66 @@ public class PersistanceFactoryService {
 	}
 
     public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
-                .select(persistenceConfiguration.getEntryManagerFactoryType()).get();
-
-        return persistenceEntryManagerFactory;
+        return getPersistenceEntryManagerFactoryImpl(persistenceConfiguration.getEntryManagerFactoryType());
     }
 
+	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory;
+		if (persistenceEntryManagerFactoryInstance == null) {
+			try {
+				persistenceEntryManagerFactory = ReflectHelper.createObjectByDefaultConstructor(persistenceEntryManagerFactoryClass);
+			} catch (PropertyNotFoundException | IllegalArgumentException | InstantiationException | IllegalAccessException
+					| InvocationTargetException e) {
+	            throw new ConfigurationException(
+	                    String.format("Failed to create PersistenceEntryManagerFactory by type '%s'!", persistenceEntryManagerFactoryClass));
+			}
+		} else {
+			persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
+	                .select(persistenceEntryManagerFactoryClass).get();
+		}
+
+		return persistenceEntryManagerFactory;
+	}
+
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(String persistenceType) {
-		// Get persistence entry manager factory
-		for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
-			log.debug("Found Persistence Entry Manager Factory with type '{}'", currentPersistenceEntryManagerFactory);
-			if (StringHelper.equalsIgnoreCase(currentPersistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
-				return currentPersistenceEntryManagerFactory;
+		return getPersistenceEntryManagerFactoryImpl(persistenceType);
+	}
+
+	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(String persistenceType) {
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = null;
+		if (persistenceEntryManagerFactoryInstance == null) {
+			switch (persistenceType) {
+			case LdapEntryManagerFactory.PERSISTANCE_TYPE:
+				persistenceEntryManagerFactory = new LdapEntryManagerFactory();
+				break;
+			case CouchbaseEntryManagerFactory.PERSISTANCE_TYPE:
+				persistenceEntryManagerFactory = new CouchbaseEntryManagerFactory();
+				break;
+			case HybridEntryManagerFactory.PERSISTANCE_TYPE:
+				persistenceEntryManagerFactory = new HybridEntryManagerFactory();
+				break;
+
+			default:
+				break;
+			}
+		} else {
+			// Get persistence entry manager factory
+			for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
+				log.debug("Found Persistence Entry Manager Factory with type '{}'", currentPersistenceEntryManagerFactory);
+				if (StringHelper.equalsIgnoreCase(currentPersistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
+					return currentPersistenceEntryManagerFactory;
+				}
 			}
 		}
 
-		return null;
+		return persistenceEntryManagerFactory;
+	}
+
+	public void initLog() {
+		if (this.log == null) {
+			this.log = LoggerFactory.getLogger(PersistanceFactoryService.class);
+		}
+		
 	}
 
 }
