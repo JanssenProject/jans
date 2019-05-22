@@ -111,7 +111,9 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
     }
 
 	@Override
-	public void initStandalone(BaseFactoryService persistanceFactoryService) {}
+	public void initStandalone(BaseFactoryService persistanceFactoryService) {
+		this.builder = DefaultCouchbaseEnvironment.builder().mutationTokensEnabled(true).computationPoolSize(5);
+	}
 
 
 /*
