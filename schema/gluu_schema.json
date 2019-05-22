@@ -5649,6 +5649,7 @@
             "may": [
                 "oxId",
                 "creationDate",
+                "displayName",
                 "oxSessionStateId",
                 "oxCodeChallenge",
                 "oxCodeChallengeHash",
