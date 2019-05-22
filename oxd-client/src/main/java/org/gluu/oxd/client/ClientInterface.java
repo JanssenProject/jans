@@ -146,8 +146,8 @@ public interface ClientInterface {
     GetJwksResponse getJwks(@HeaderParam("Authorization") String authorization, GetJwksParams params);
 
     @POST
-    @Path("/get-op-discovery-config")
+    @Path("/get-discovery")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    GetOpDiscoveryConfigResponse getOpDiscoveryConfig(GetOpDiscoveryConfigParams params);
+    GetDiscoveryResponse getDiscovery(GetDiscoveryParams params);
 }

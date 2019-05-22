@@ -27,9 +27,9 @@
     </test>
 
     <!-- Connect -->
-    <test name="Get OpDiscovery" enabled="true">
+    <test name="Get Discovery" enabled="true">
         <classes>
-            <class name="io.swagger.client.api.GetOpDiscoveryConfigTest"></class>
+            <class name="io.swagger.client.api.GetDiscoveryTest"></class>
         </classes>
     </test>
     <test name="Register site" enabled="true">
