@@ -211,6 +211,12 @@
 				<version>2.10.6</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.9.11</version>
+			</dependency>
+
 			<!-- Jackson -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
