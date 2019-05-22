@@ -67,7 +67,7 @@ public class PersistanceFactoryService {
 		// Fall back to old LDAP persistence layer
 		if (currentPersistenceConfiguration == null) {
 			getLog().warn("Failed to load persistence configuration. Attempting to use LDAP layer");
-			PersistenceEntryManagerFactory defaultEntryManagerFactory = getPersistenceEntryManagerFactoryImpl(LdapEntryManagerFactory.class);
+			PersistenceEntryManagerFactory defaultEntryManagerFactory = getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
 			currentPersistenceConfiguration = createPersistenceConfiguration(defaultEntryManagerFactory.getPersistenceType(), LdapEntryManagerFactory.class,
 					defaultEntryManagerFactory.getConfigurationFileNames());
 		}
@@ -188,10 +188,10 @@ public class PersistanceFactoryService {
 	}
 
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
-        return getPersistenceEntryManagerFactoryImpl(persistenceConfiguration.getEntryManagerFactoryType());
+        return getPersistenceEntryManagerFactory(persistenceConfiguration.getEntryManagerFactoryType());
     }
 
-	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
+	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
 		PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
 	                .select(persistenceEntryManagerFactoryClass).get();
 
