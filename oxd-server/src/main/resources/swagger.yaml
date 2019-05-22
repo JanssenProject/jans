@@ -1300,12 +1300,12 @@ paths:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
           schema:
             $ref: '#/definitions/ErrorResponse'
-  /get-op-discovery-config:
+  /get-discovery:
     post:
       tags:
       - developers
       summary: Get OP Discovery Configuration
-      operationId: get-op-discovery-config
+      operationId: get-discovery
       description: Get OP Discovery Configuration
       consumes:
       - application/json
@@ -1313,7 +1313,7 @@ paths:
       - application/json
       parameters:
       - in: body
-        name: GetOpDiscoveryConfigParams
+        name: GetDiscoveryParams
         schema:
           type: object
           required:
@@ -1329,7 +1329,7 @@ paths:
           description: OK
           schema:
             type: object
-            title: GetOpDiscoveryConfigResponse
+            title: GetDiscoveryResponse
             properties:
               issuer:
                 type: string

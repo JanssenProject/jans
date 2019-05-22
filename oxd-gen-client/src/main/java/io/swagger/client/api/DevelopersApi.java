@@ -1494,18 +1494,18 @@ public class DevelopersApi {
         return call;
     }
     /**
-     * Build call for getOpDiscoveryConfig
-     * @param getOpDiscoveryConfigParams  (optional)
+     * Build call for getDiscovery
+     * @param getDiscoveryParams  (optional)
      * @param progressListener Progress listener
      * @param progressRequestListener Progress request listener
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call getOpDiscoveryConfigCall(GetOpDiscoveryConfigParams getOpDiscoveryConfigParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
-        Object localVarPostBody = getOpDiscoveryConfigParams;
+    public com.squareup.okhttp.Call getDiscoveryCall(GetDiscoveryParams getDiscoveryParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+        Object localVarPostBody = getDiscoveryParams;
 
         // create path and map variables
-        String localVarPath = "/get-op-discovery-config";
+        String localVarPath = "/get-discovery";
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
@@ -1543,10 +1543,10 @@ public class DevelopersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call getOpDiscoveryConfigValidateBeforeCall(GetOpDiscoveryConfigParams getOpDiscoveryConfigParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call getDiscoveryValidateBeforeCall(GetDiscoveryParams getDiscoveryParams, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
 
 
-        com.squareup.okhttp.Call call = getOpDiscoveryConfigCall(getOpDiscoveryConfigParams, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = getDiscoveryCall(getDiscoveryParams, progressListener, progressRequestListener);
         return call;
 
     }
@@ -1554,37 +1554,37 @@ public class DevelopersApi {
     /**
      * Get OP Discovery Configuration
      * Get OP Discovery Configuration
-     * @param getOpDiscoveryConfigParams  (optional)
-     * @return GetOpDiscoveryConfigResponse
+     * @param getDiscoveryParams  (optional)
+     * @return GetDiscoveryResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public GetOpDiscoveryConfigResponse getOpDiscoveryConfig(GetOpDiscoveryConfigParams getOpDiscoveryConfigParams) throws ApiException {
-        ApiResponse<GetOpDiscoveryConfigResponse> resp = getOpDiscoveryConfigWithHttpInfo(getOpDiscoveryConfigParams);
+    public GetDiscoveryResponse getDiscovery(GetDiscoveryParams getDiscoveryParams) throws ApiException {
+        ApiResponse<GetDiscoveryResponse> resp = getDiscoveryWithHttpInfo(getDiscoveryParams);
         return resp.getData();
     }
 
     /**
      * Get OP Discovery Configuration
      * Get OP Discovery Configuration
-     * @param getOpDiscoveryConfigParams  (optional)
-     * @return ApiResponse&lt;GetOpDiscoveryConfigResponse&gt;
+     * @param getDiscoveryParams  (optional)
+     * @return ApiResponse&lt;GetDiscoveryResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<GetOpDiscoveryConfigResponse> getOpDiscoveryConfigWithHttpInfo(GetOpDiscoveryConfigParams getOpDiscoveryConfigParams) throws ApiException {
-        com.squareup.okhttp.Call call = getOpDiscoveryConfigValidateBeforeCall(getOpDiscoveryConfigParams, null, null);
-        Type localVarReturnType = new TypeToken<GetOpDiscoveryConfigResponse>(){}.getType();
+    public ApiResponse<GetDiscoveryResponse> getDiscoveryWithHttpInfo(GetDiscoveryParams getDiscoveryParams) throws ApiException {
+        com.squareup.okhttp.Call call = getDiscoveryValidateBeforeCall(getDiscoveryParams, null, null);
+        Type localVarReturnType = new TypeToken<GetDiscoveryResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
 
     /**
      * Get OP Discovery Configuration (asynchronously)
      * Get OP Discovery Configuration
-     * @param getOpDiscoveryConfigParams  (optional)
+     * @param getDiscoveryParams  (optional)
      * @param callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call getOpDiscoveryConfigAsync(GetOpDiscoveryConfigParams getOpDiscoveryConfigParams, final ApiCallback<GetOpDiscoveryConfigResponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call getDiscoveryAsync(GetDiscoveryParams getDiscoveryParams, final ApiCallback<GetDiscoveryResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1605,8 +1605,8 @@ public class DevelopersApi {
             };
         }
 
-        com.squareup.okhttp.Call call = getOpDiscoveryConfigValidateBeforeCall(getOpDiscoveryConfigParams, progressListener, progressRequestListener);
-        Type localVarReturnType = new TypeToken<GetOpDiscoveryConfigResponse>(){}.getType();
+        com.squareup.okhttp.Call call = getDiscoveryValidateBeforeCall(getDiscoveryParams, progressListener, progressRequestListener);
+        Type localVarReturnType = new TypeToken<GetDiscoveryResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;
     }
