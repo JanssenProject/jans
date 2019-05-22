@@ -46,7 +46,12 @@ class CBM:
         url = os.path.join(self.api_root, endpoint)
         result = requests.post(url, data=data, auth=self.auth, verify=False)
         return result
-        
+    
+    def _put(self,  endpoint, data):
+        url = os.path.join(self.api_root, endpoint)
+        result = requests.put(url, data=data, auth=self.auth, verify=False)
+        return result
+    
     def get_system_info(self):
         result = self._get('pools/default')
         return result.json()
@@ -134,6 +139,17 @@ class CBM:
                  }
 
         result = self._post('settings/web', data)
+
+        return result
+
+    def create_user(self, username, password, fullname, roles):
+        data = {
+                    'name': fullname,
+                    'password': password,
+                    'roles': roles,
+                 }
+
+        result = self._put('settings/rbac/users/local/'+username, data)
 
         return result
 
