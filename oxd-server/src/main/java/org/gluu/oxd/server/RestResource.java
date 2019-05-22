@@ -1,34 +1,12 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.params.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
 import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.common.params.AuthorizationCodeFlowParams;
-import org.gluu.oxd.common.params.CheckAccessTokenParams;
-import org.gluu.oxd.common.params.CheckIdTokenParams;
-import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
-import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
-import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
-import org.gluu.oxd.common.params.GetClientTokenParams;
-import org.gluu.oxd.common.params.GetJwksParams;
-import org.gluu.oxd.common.params.GetLogoutUrlParams;
-import org.gluu.oxd.common.params.GetRpParams;
-import org.gluu.oxd.common.params.GetTokensByCodeParams;
-import org.gluu.oxd.common.params.GetUserInfoParams;
-import org.gluu.oxd.common.params.HasProtectionAccessTokenParams;
-import org.gluu.oxd.common.params.IParams;
-import org.gluu.oxd.common.params.IntrospectAccessTokenParams;
-import org.gluu.oxd.common.params.IntrospectRptParams;
-import org.gluu.oxd.common.params.RegisterSiteParams;
-import org.gluu.oxd.common.params.RemoveSiteParams;
-import org.gluu.oxd.common.params.RpGetClaimsGatheringUrlParams;
-import org.gluu.oxd.common.params.RpGetRptParams;
-import org.gluu.oxd.common.params.RsCheckAccessParams;
-import org.gluu.oxd.common.params.RsProtectParams;
-import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;
 import org.gluu.oxd.server.service.ConfigurationService;
@@ -227,6 +205,13 @@ public class RestResource {
         return process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization);
     }
 
+    @POST
+    @Path("/get-discovery")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getDiscovery(String params) {
+        return process(CommandType.GET_DISCOVERY, params, GetDiscoveryParams.class, null);
+    }
 
     public static <T> T read(String params, Class<T> clazz) {
         try {

@@ -145,4 +145,9 @@ public interface ClientInterface {
     @Consumes(MediaType.APPLICATION_JSON)
     GetJwksResponse getJwks(@HeaderParam("Authorization") String authorization, GetJwksParams params);
 
+    @POST
+    @Path("/get-discovery")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    GetDiscoveryResponse getDiscovery(GetDiscoveryParams params);
 }
