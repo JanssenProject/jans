@@ -1,8 +1,8 @@
 package org.gluu.oxd.server.swagger;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.Iterator;
