@@ -16,6 +16,7 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 	private HashMap<String, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryNames;
 	private HashMap<Class<? extends PersistenceEntryManagerFactory>, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryTypes;
 
+	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
         return getPersistenceEntryManagerFactoryImpl(persistenceConfiguration.getEntryManagerFactoryType());
     }
@@ -31,6 +32,7 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 		return persistenceEntryManagerFactory;
 	}
 
+	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(String persistenceType) {
 		return getPersistenceEntryManagerFactoryImpl(persistenceType);
 	}
