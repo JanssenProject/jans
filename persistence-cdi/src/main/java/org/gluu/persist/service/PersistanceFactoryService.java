@@ -1,31 +1,19 @@
 package org.gluu.persist.service;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
-import org.gluu.persist.exception.PropertyNotFoundException;
-import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.persist.reflect.util.ReflectHelper;
-import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +48,7 @@ public class PersistanceFactoryService {
 
 	@Inject
 	private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
+
 	private HashMap<String, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryNames;
 	private HashMap<Class<? extends PersistenceEntryManagerFactory>, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryTypes;
 
@@ -203,17 +192,8 @@ public class PersistanceFactoryService {
     }
 
 	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
-		PersistenceEntryManagerFactory persistenceEntryManagerFactory;
-		if (persistenceEntryManagerFactoryInstance == null) {
-			if (this.persistenceEntryManagerFactoryTypes == null) {
-				initPersistenceManagerMaps();
-			}
-
-			persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryTypes.get(persistenceEntryManagerFactoryClass);
-		} else {
-			persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
 	                .select(persistenceEntryManagerFactoryClass).get();
-		}
 
 		return persistenceEntryManagerFactory;
 	}
@@ -223,40 +203,9 @@ public class PersistanceFactoryService {
 	}
 
 	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(String persistenceType) {
-		PersistenceEntryManagerFactory persistenceEntryManagerFactory = null;
-		if (persistenceEntryManagerFactoryInstance == null) {
-			if (this.persistenceEntryManagerFactoryNames == null) {
-				initPersistenceManagerMaps();
-			}
-			
-			persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryNames.get(persistenceType);
-		} else {
-			// Get persistence entry manager factory
-			for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
-				getLog().debug("Found Persistence Entry Manager Factory with type '{}'", currentPersistenceEntryManagerFactory);
-				if (StringHelper.equalsIgnoreCase(currentPersistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
-					return currentPersistenceEntryManagerFactory;
-				}
-			}
-		}
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryNames.get(persistenceType);
 
 		return persistenceEntryManagerFactory;
-	}
-
-	private void initPersistenceManagerMaps() {
-		this.persistenceEntryManagerFactoryNames = new HashMap<String, PersistenceEntryManagerFactory>();
-		this.persistenceEntryManagerFactoryTypes = new HashMap<Class<? extends PersistenceEntryManagerFactory>, PersistenceEntryManagerFactory>();
-
-		Reflections reflections = new Reflections(new ConfigurationBuilder()
-			     .setUrls(ClasspathHelper.forPackage("org.gluu.persist"))
-			     .setScanners(new SubTypesScanner()));
-		Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
-		
-		for (Class<? extends PersistenceEntryManagerFactory> clazz : classes) {
-			PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactoryImpl(clazz);
-			persistenceEntryManagerFactoryNames.put(persistenceEntryManagerFactory.getPersistenceType(), persistenceEntryManagerFactory);
-			persistenceEntryManagerFactoryTypes.put(clazz, persistenceEntryManagerFactory);
-		}
 	}
 
 	private Logger getLog() {
