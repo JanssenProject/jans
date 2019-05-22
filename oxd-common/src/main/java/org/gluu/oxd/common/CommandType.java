@@ -44,7 +44,7 @@ public enum CommandType {
     GET_CLIENT_TOKEN("get_client_token"),
     GET_RP("get_rp"),
     GET_JWKS("get_jwks"),
-    GET_OP_DISCOVERY_CONFIG("get_op_discovery_config");
+    GET_DISCOVERY("get_discovery");
 
     private final String value;
 

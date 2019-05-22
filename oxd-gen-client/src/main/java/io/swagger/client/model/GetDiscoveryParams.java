@@ -25,17 +25,17 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
 
 /**
- * GetOpDiscoveryConfigParams
+ * GetDiscoveryParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-21T13:11:53.928Z")
-public class GetOpDiscoveryConfigParams {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-22T07:31:45.590Z")
+public class GetDiscoveryParams {
   @SerializedName("op_host")
   private String opHost = null;
 
   @SerializedName("op_discovery_path")
   private String opDiscoveryPath = null;
 
-  public GetOpDiscoveryConfigParams opHost(String opHost) {
+  public GetDiscoveryParams opHost(String opHost) {
     this.opHost = opHost;
     return this;
   }
@@ -53,7 +53,7 @@ public class GetOpDiscoveryConfigParams {
     this.opHost = opHost;
   }
 
-  public GetOpDiscoveryConfigParams opDiscoveryPath(String opDiscoveryPath) {
+  public GetDiscoveryParams opDiscoveryPath(String opDiscoveryPath) {
     this.opDiscoveryPath = opDiscoveryPath;
     return this;
   }
@@ -80,9 +80,9 @@ public class GetOpDiscoveryConfigParams {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GetOpDiscoveryConfigParams getOpDiscoveryConfigParams = (GetOpDiscoveryConfigParams) o;
-    return Objects.equals(this.opHost, getOpDiscoveryConfigParams.opHost) &&
-        Objects.equals(this.opDiscoveryPath, getOpDiscoveryConfigParams.opDiscoveryPath);
+    GetDiscoveryParams getDiscoveryParams = (GetDiscoveryParams) o;
+    return Objects.equals(this.opHost, getDiscoveryParams.opHost) &&
+        Objects.equals(this.opDiscoveryPath, getDiscoveryParams.opDiscoveryPath);
   }
 
   @Override
@@ -94,7 +94,7 @@ public class GetOpDiscoveryConfigParams {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GetOpDiscoveryConfigParams {\n");
+    sb.append("class GetDiscoveryParams {\n");
     
     sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
     sb.append("    opDiscoveryPath: ").append(toIndentedString(opDiscoveryPath)).append("\n");

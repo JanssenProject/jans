@@ -206,11 +206,11 @@ public class RestResource {
     }
 
     @POST
-    @Path("/get-op-discovery-config")
+    @Path("/get-discovery")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getOpDiscoveryConfig(String params) {
-        return process(CommandType.GET_OP_DISCOVERY_CONFIG, params, GetOpDiscoveryConfigParams.class, null);
+    public String getDiscovery(String params) {
+        return process(CommandType.GET_DISCOVERY, params, GetDiscoveryParams.class, null);
     }
 
     public static <T> T read(String params, Class<T> clazz) {
