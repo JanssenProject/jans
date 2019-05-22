@@ -3,8 +3,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
-	<artifactId>oxcore-persistence-cdi</artifactId>
-	<name>Persistence CDI services</name>
+	<artifactId>oxcore-persistence-standalone</artifactId>
+	<name>Persistence standalone services</name>
 
 	<parent>
 		<groupId>org.gluu</groupId>
@@ -33,30 +33,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-core</artifactId>
+			<artifactId>oxcore-persistence-cdi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-annotation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-ldap</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-		
-		<!-- CDI -->
-		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.11</version>
 		</dependency>
 	</dependencies>
 
