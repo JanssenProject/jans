@@ -1,8 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonProperty;
-
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,8 @@ import java.util.Map;
 /**
  * @author yuriyz
  */
-public class GetOpDiscoveryConfigResponse implements IOpResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GetDiscoveryResponse implements IOpResponse {
 
     @JsonProperty(value = "issuer")
     @com.fasterxml.jackson.annotation.JsonProperty(value = "issuer")
@@ -148,7 +148,7 @@ public class GetOpDiscoveryConfigResponse implements IOpResponse {
     @com.fasterxml.jackson.annotation.JsonProperty(value = "scope_to_claims_mapping")
     private Map<String, List<String>> scope_to_claims_mapping = new HashMap<String, List<String>>();
 
-    public GetOpDiscoveryConfigResponse() {
+    public GetDiscoveryResponse() {
     }
 
     public String getIssuer() {
@@ -513,7 +513,7 @@ public class GetOpDiscoveryConfigResponse implements IOpResponse {
 
     @Override
     public String toString() {
-        return "GetOpDiscoveryConfigResponse{" +
+        return "GetDiscoveryResponse{" +
                 "issuer='" + issuer + '\'' +
                 ", authorization_endpoint='" + authorization_endpoint + '\'' +
                 ", token_endpoint='" + token_endpoint + '\'' +

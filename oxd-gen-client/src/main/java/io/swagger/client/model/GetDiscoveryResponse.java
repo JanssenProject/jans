@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * GetOpDiscoveryConfigResponse
+ * GetDiscoveryResponse
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-21T13:11:53.928Z")
-public class GetOpDiscoveryConfigResponse {
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-22T07:31:45.590Z")
+public class GetDiscoveryResponse {
   @SerializedName("issuer")
   private String issuer = null;
 
@@ -166,7 +166,7 @@ public class GetOpDiscoveryConfigResponse {
   @SerializedName("scope_to_claims_mapping")
   private Object scopeToClaimsMapping = null;
 
-  public GetOpDiscoveryConfigResponse issuer(String issuer) {
+  public GetDiscoveryResponse issuer(String issuer) {
     this.issuer = issuer;
     return this;
   }
@@ -184,7 +184,7 @@ public class GetOpDiscoveryConfigResponse {
     this.issuer = issuer;
   }
 
-  public GetOpDiscoveryConfigResponse authorizationEndpoint(String authorizationEndpoint) {
+  public GetDiscoveryResponse authorizationEndpoint(String authorizationEndpoint) {
     this.authorizationEndpoint = authorizationEndpoint;
     return this;
   }
@@ -202,7 +202,7 @@ public class GetOpDiscoveryConfigResponse {
     this.authorizationEndpoint = authorizationEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse tokenEndpoint(String tokenEndpoint) {
+  public GetDiscoveryResponse tokenEndpoint(String tokenEndpoint) {
     this.tokenEndpoint = tokenEndpoint;
     return this;
   }
@@ -220,7 +220,7 @@ public class GetOpDiscoveryConfigResponse {
     this.tokenEndpoint = tokenEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse tokenRevocationEndpoint(String tokenRevocationEndpoint) {
+  public GetDiscoveryResponse tokenRevocationEndpoint(String tokenRevocationEndpoint) {
     this.tokenRevocationEndpoint = tokenRevocationEndpoint;
     return this;
   }
@@ -238,7 +238,7 @@ public class GetOpDiscoveryConfigResponse {
     this.tokenRevocationEndpoint = tokenRevocationEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse userInfoEndpoint(String userInfoEndpoint) {
+  public GetDiscoveryResponse userInfoEndpoint(String userInfoEndpoint) {
     this.userInfoEndpoint = userInfoEndpoint;
     return this;
   }
@@ -256,7 +256,7 @@ public class GetOpDiscoveryConfigResponse {
     this.userInfoEndpoint = userInfoEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse clientInfoEndpoint(String clientInfoEndpoint) {
+  public GetDiscoveryResponse clientInfoEndpoint(String clientInfoEndpoint) {
     this.clientInfoEndpoint = clientInfoEndpoint;
     return this;
   }
@@ -274,7 +274,7 @@ public class GetOpDiscoveryConfigResponse {
     this.clientInfoEndpoint = clientInfoEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse checkSessionIframe(String checkSessionIframe) {
+  public GetDiscoveryResponse checkSessionIframe(String checkSessionIframe) {
     this.checkSessionIframe = checkSessionIframe;
     return this;
   }
@@ -292,7 +292,7 @@ public class GetOpDiscoveryConfigResponse {
     this.checkSessionIframe = checkSessionIframe;
   }
 
-  public GetOpDiscoveryConfigResponse endSessionEndpoint(String endSessionEndpoint) {
+  public GetDiscoveryResponse endSessionEndpoint(String endSessionEndpoint) {
     this.endSessionEndpoint = endSessionEndpoint;
     return this;
   }
@@ -310,7 +310,7 @@ public class GetOpDiscoveryConfigResponse {
     this.endSessionEndpoint = endSessionEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse jwksUri(String jwksUri) {
+  public GetDiscoveryResponse jwksUri(String jwksUri) {
     this.jwksUri = jwksUri;
     return this;
   }
@@ -328,7 +328,7 @@ public class GetOpDiscoveryConfigResponse {
     this.jwksUri = jwksUri;
   }
 
-  public GetOpDiscoveryConfigResponse registrationEndpoint(String registrationEndpoint) {
+  public GetDiscoveryResponse registrationEndpoint(String registrationEndpoint) {
     this.registrationEndpoint = registrationEndpoint;
     return this;
   }
@@ -346,7 +346,7 @@ public class GetOpDiscoveryConfigResponse {
     this.registrationEndpoint = registrationEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse idGenerationEndpoint(String idGenerationEndpoint) {
+  public GetDiscoveryResponse idGenerationEndpoint(String idGenerationEndpoint) {
     this.idGenerationEndpoint = idGenerationEndpoint;
     return this;
   }
@@ -364,7 +364,7 @@ public class GetOpDiscoveryConfigResponse {
     this.idGenerationEndpoint = idGenerationEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse introspectionEndpoint(String introspectionEndpoint) {
+  public GetDiscoveryResponse introspectionEndpoint(String introspectionEndpoint) {
     this.introspectionEndpoint = introspectionEndpoint;
     return this;
   }
@@ -382,12 +382,12 @@ public class GetOpDiscoveryConfigResponse {
     this.introspectionEndpoint = introspectionEndpoint;
   }
 
-  public GetOpDiscoveryConfigResponse scopesSupported(List<String> scopesSupported) {
+  public GetDiscoveryResponse scopesSupported(List<String> scopesSupported) {
     this.scopesSupported = scopesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addScopesSupportedItem(String scopesSupportedItem) {
+  public GetDiscoveryResponse addScopesSupportedItem(String scopesSupportedItem) {
     if (this.scopesSupported == null) {
       this.scopesSupported = new ArrayList<String>();
     }
@@ -408,12 +408,12 @@ public class GetOpDiscoveryConfigResponse {
     this.scopesSupported = scopesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse responseTypesSupported(List<String> responseTypesSupported) {
+  public GetDiscoveryResponse responseTypesSupported(List<String> responseTypesSupported) {
     this.responseTypesSupported = responseTypesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addResponseTypesSupportedItem(String responseTypesSupportedItem) {
+  public GetDiscoveryResponse addResponseTypesSupportedItem(String responseTypesSupportedItem) {
     if (this.responseTypesSupported == null) {
       this.responseTypesSupported = new ArrayList<String>();
     }
@@ -434,12 +434,12 @@ public class GetOpDiscoveryConfigResponse {
     this.responseTypesSupported = responseTypesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse grantTypesSupported(List<String> grantTypesSupported) {
+  public GetDiscoveryResponse grantTypesSupported(List<String> grantTypesSupported) {
     this.grantTypesSupported = grantTypesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addGrantTypesSupportedItem(String grantTypesSupportedItem) {
+  public GetDiscoveryResponse addGrantTypesSupportedItem(String grantTypesSupportedItem) {
     if (this.grantTypesSupported == null) {
       this.grantTypesSupported = new ArrayList<String>();
     }
@@ -460,12 +460,12 @@ public class GetOpDiscoveryConfigResponse {
     this.grantTypesSupported = grantTypesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse acrValuesSupported(List<String> acrValuesSupported) {
+  public GetDiscoveryResponse acrValuesSupported(List<String> acrValuesSupported) {
     this.acrValuesSupported = acrValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addAcrValuesSupportedItem(String acrValuesSupportedItem) {
+  public GetDiscoveryResponse addAcrValuesSupportedItem(String acrValuesSupportedItem) {
     if (this.acrValuesSupported == null) {
       this.acrValuesSupported = new ArrayList<String>();
     }
@@ -486,12 +486,12 @@ public class GetOpDiscoveryConfigResponse {
     this.acrValuesSupported = acrValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse subjectTypesSupported(List<String> subjectTypesSupported) {
+  public GetDiscoveryResponse subjectTypesSupported(List<String> subjectTypesSupported) {
     this.subjectTypesSupported = subjectTypesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addSubjectTypesSupportedItem(String subjectTypesSupportedItem) {
+  public GetDiscoveryResponse addSubjectTypesSupportedItem(String subjectTypesSupportedItem) {
     if (this.subjectTypesSupported == null) {
       this.subjectTypesSupported = new ArrayList<String>();
     }
@@ -512,12 +512,12 @@ public class GetOpDiscoveryConfigResponse {
     this.subjectTypesSupported = subjectTypesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse userInfoSigningAlgValuesSupported(List<String> userInfoSigningAlgValuesSupported) {
+  public GetDiscoveryResponse userInfoSigningAlgValuesSupported(List<String> userInfoSigningAlgValuesSupported) {
     this.userInfoSigningAlgValuesSupported = userInfoSigningAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addUserInfoSigningAlgValuesSupportedItem(String userInfoSigningAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addUserInfoSigningAlgValuesSupportedItem(String userInfoSigningAlgValuesSupportedItem) {
     if (this.userInfoSigningAlgValuesSupported == null) {
       this.userInfoSigningAlgValuesSupported = new ArrayList<String>();
     }
@@ -538,12 +538,12 @@ public class GetOpDiscoveryConfigResponse {
     this.userInfoSigningAlgValuesSupported = userInfoSigningAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse userInfoEncryptionAlgValuesSupported(List<String> userInfoEncryptionAlgValuesSupported) {
+  public GetDiscoveryResponse userInfoEncryptionAlgValuesSupported(List<String> userInfoEncryptionAlgValuesSupported) {
     this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addUserInfoEncryptionAlgValuesSupportedItem(String userInfoEncryptionAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addUserInfoEncryptionAlgValuesSupportedItem(String userInfoEncryptionAlgValuesSupportedItem) {
     if (this.userInfoEncryptionAlgValuesSupported == null) {
       this.userInfoEncryptionAlgValuesSupported = new ArrayList<String>();
     }
@@ -564,12 +564,12 @@ public class GetOpDiscoveryConfigResponse {
     this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse userInfoEncryptionEncValuesSupported(List<String> userInfoEncryptionEncValuesSupported) {
+  public GetDiscoveryResponse userInfoEncryptionEncValuesSupported(List<String> userInfoEncryptionEncValuesSupported) {
     this.userInfoEncryptionEncValuesSupported = userInfoEncryptionEncValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addUserInfoEncryptionEncValuesSupportedItem(String userInfoEncryptionEncValuesSupportedItem) {
+  public GetDiscoveryResponse addUserInfoEncryptionEncValuesSupportedItem(String userInfoEncryptionEncValuesSupportedItem) {
     if (this.userInfoEncryptionEncValuesSupported == null) {
       this.userInfoEncryptionEncValuesSupported = new ArrayList<String>();
     }
@@ -590,12 +590,12 @@ public class GetOpDiscoveryConfigResponse {
     this.userInfoEncryptionEncValuesSupported = userInfoEncryptionEncValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse idTokenSigningAlgValuesSupported(List<String> idTokenSigningAlgValuesSupported) {
+  public GetDiscoveryResponse idTokenSigningAlgValuesSupported(List<String> idTokenSigningAlgValuesSupported) {
     this.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addIdTokenSigningAlgValuesSupportedItem(String idTokenSigningAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addIdTokenSigningAlgValuesSupportedItem(String idTokenSigningAlgValuesSupportedItem) {
     if (this.idTokenSigningAlgValuesSupported == null) {
       this.idTokenSigningAlgValuesSupported = new ArrayList<String>();
     }
@@ -616,12 +616,12 @@ public class GetOpDiscoveryConfigResponse {
     this.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse idTokenEncryptionAlgValuesSupported(List<String> idTokenEncryptionAlgValuesSupported) {
+  public GetDiscoveryResponse idTokenEncryptionAlgValuesSupported(List<String> idTokenEncryptionAlgValuesSupported) {
     this.idTokenEncryptionAlgValuesSupported = idTokenEncryptionAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addIdTokenEncryptionAlgValuesSupportedItem(String idTokenEncryptionAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addIdTokenEncryptionAlgValuesSupportedItem(String idTokenEncryptionAlgValuesSupportedItem) {
     if (this.idTokenEncryptionAlgValuesSupported == null) {
       this.idTokenEncryptionAlgValuesSupported = new ArrayList<String>();
     }
@@ -642,12 +642,12 @@ public class GetOpDiscoveryConfigResponse {
     this.idTokenEncryptionAlgValuesSupported = idTokenEncryptionAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse idTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
+  public GetDiscoveryResponse idTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
     this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addIdTokenEncryptionEncValuesSupportedItem(String idTokenEncryptionEncValuesSupportedItem) {
+  public GetDiscoveryResponse addIdTokenEncryptionEncValuesSupportedItem(String idTokenEncryptionEncValuesSupportedItem) {
     if (this.idTokenEncryptionEncValuesSupported == null) {
       this.idTokenEncryptionEncValuesSupported = new ArrayList<String>();
     }
@@ -668,12 +668,12 @@ public class GetOpDiscoveryConfigResponse {
     this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requestObjectSigningAlgValuesSupported(List<String> requestObjectSigningAlgValuesSupported) {
+  public GetDiscoveryResponse requestObjectSigningAlgValuesSupported(List<String> requestObjectSigningAlgValuesSupported) {
     this.requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addRequestObjectSigningAlgValuesSupportedItem(String requestObjectSigningAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addRequestObjectSigningAlgValuesSupportedItem(String requestObjectSigningAlgValuesSupportedItem) {
     if (this.requestObjectSigningAlgValuesSupported == null) {
       this.requestObjectSigningAlgValuesSupported = new ArrayList<String>();
     }
@@ -694,12 +694,12 @@ public class GetOpDiscoveryConfigResponse {
     this.requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requestObjectEncryptionAlgValuesSupported(List<String> requestObjectEncryptionAlgValuesSupported) {
+  public GetDiscoveryResponse requestObjectEncryptionAlgValuesSupported(List<String> requestObjectEncryptionAlgValuesSupported) {
     this.requestObjectEncryptionAlgValuesSupported = requestObjectEncryptionAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addRequestObjectEncryptionAlgValuesSupportedItem(String requestObjectEncryptionAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addRequestObjectEncryptionAlgValuesSupportedItem(String requestObjectEncryptionAlgValuesSupportedItem) {
     if (this.requestObjectEncryptionAlgValuesSupported == null) {
       this.requestObjectEncryptionAlgValuesSupported = new ArrayList<String>();
     }
@@ -720,12 +720,12 @@ public class GetOpDiscoveryConfigResponse {
     this.requestObjectEncryptionAlgValuesSupported = requestObjectEncryptionAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requestObjectEncryptionEncValuesSupported(List<String> requestObjectEncryptionEncValuesSupported) {
+  public GetDiscoveryResponse requestObjectEncryptionEncValuesSupported(List<String> requestObjectEncryptionEncValuesSupported) {
     this.requestObjectEncryptionEncValuesSupported = requestObjectEncryptionEncValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addRequestObjectEncryptionEncValuesSupportedItem(String requestObjectEncryptionEncValuesSupportedItem) {
+  public GetDiscoveryResponse addRequestObjectEncryptionEncValuesSupportedItem(String requestObjectEncryptionEncValuesSupportedItem) {
     if (this.requestObjectEncryptionEncValuesSupported == null) {
       this.requestObjectEncryptionEncValuesSupported = new ArrayList<String>();
     }
@@ -746,12 +746,12 @@ public class GetOpDiscoveryConfigResponse {
     this.requestObjectEncryptionEncValuesSupported = requestObjectEncryptionEncValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse tokenEndpointAuthMethodsSupported(List<String> tokenEndpointAuthMethodsSupported) {
+  public GetDiscoveryResponse tokenEndpointAuthMethodsSupported(List<String> tokenEndpointAuthMethodsSupported) {
     this.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addTokenEndpointAuthMethodsSupportedItem(String tokenEndpointAuthMethodsSupportedItem) {
+  public GetDiscoveryResponse addTokenEndpointAuthMethodsSupportedItem(String tokenEndpointAuthMethodsSupportedItem) {
     if (this.tokenEndpointAuthMethodsSupported == null) {
       this.tokenEndpointAuthMethodsSupported = new ArrayList<String>();
     }
@@ -772,12 +772,12 @@ public class GetOpDiscoveryConfigResponse {
     this.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported;
   }
 
-  public GetOpDiscoveryConfigResponse tokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
+  public GetDiscoveryResponse tokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
     this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addTokenEndpointAuthSigningAlgValuesSupportedItem(String tokenEndpointAuthSigningAlgValuesSupportedItem) {
+  public GetDiscoveryResponse addTokenEndpointAuthSigningAlgValuesSupportedItem(String tokenEndpointAuthSigningAlgValuesSupportedItem) {
     if (this.tokenEndpointAuthSigningAlgValuesSupported == null) {
       this.tokenEndpointAuthSigningAlgValuesSupported = new ArrayList<String>();
     }
@@ -798,12 +798,12 @@ public class GetOpDiscoveryConfigResponse {
     this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse displayValuesSupported(List<String> displayValuesSupported) {
+  public GetDiscoveryResponse displayValuesSupported(List<String> displayValuesSupported) {
     this.displayValuesSupported = displayValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addDisplayValuesSupportedItem(String displayValuesSupportedItem) {
+  public GetDiscoveryResponse addDisplayValuesSupportedItem(String displayValuesSupportedItem) {
     if (this.displayValuesSupported == null) {
       this.displayValuesSupported = new ArrayList<String>();
     }
@@ -824,12 +824,12 @@ public class GetOpDiscoveryConfigResponse {
     this.displayValuesSupported = displayValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse claimTypesSupported(List<String> claimTypesSupported) {
+  public GetDiscoveryResponse claimTypesSupported(List<String> claimTypesSupported) {
     this.claimTypesSupported = claimTypesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addClaimTypesSupportedItem(String claimTypesSupportedItem) {
+  public GetDiscoveryResponse addClaimTypesSupportedItem(String claimTypesSupportedItem) {
     if (this.claimTypesSupported == null) {
       this.claimTypesSupported = new ArrayList<String>();
     }
@@ -850,12 +850,12 @@ public class GetOpDiscoveryConfigResponse {
     this.claimTypesSupported = claimTypesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse claimsSupported(List<String> claimsSupported) {
+  public GetDiscoveryResponse claimsSupported(List<String> claimsSupported) {
     this.claimsSupported = claimsSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addClaimsSupportedItem(String claimsSupportedItem) {
+  public GetDiscoveryResponse addClaimsSupportedItem(String claimsSupportedItem) {
     if (this.claimsSupported == null) {
       this.claimsSupported = new ArrayList<String>();
     }
@@ -876,12 +876,12 @@ public class GetOpDiscoveryConfigResponse {
     this.claimsSupported = claimsSupported;
   }
 
-  public GetOpDiscoveryConfigResponse idTokenTokenBindingCnfValuesSupported(List<String> idTokenTokenBindingCnfValuesSupported) {
+  public GetDiscoveryResponse idTokenTokenBindingCnfValuesSupported(List<String> idTokenTokenBindingCnfValuesSupported) {
     this.idTokenTokenBindingCnfValuesSupported = idTokenTokenBindingCnfValuesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addIdTokenTokenBindingCnfValuesSupportedItem(String idTokenTokenBindingCnfValuesSupportedItem) {
+  public GetDiscoveryResponse addIdTokenTokenBindingCnfValuesSupportedItem(String idTokenTokenBindingCnfValuesSupportedItem) {
     if (this.idTokenTokenBindingCnfValuesSupported == null) {
       this.idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
     }
@@ -902,7 +902,7 @@ public class GetOpDiscoveryConfigResponse {
     this.idTokenTokenBindingCnfValuesSupported = idTokenTokenBindingCnfValuesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse serviceDocumentation(String serviceDocumentation) {
+  public GetDiscoveryResponse serviceDocumentation(String serviceDocumentation) {
     this.serviceDocumentation = serviceDocumentation;
     return this;
   }
@@ -920,12 +920,12 @@ public class GetOpDiscoveryConfigResponse {
     this.serviceDocumentation = serviceDocumentation;
   }
 
-  public GetOpDiscoveryConfigResponse claimsLocalesSupported(List<String> claimsLocalesSupported) {
+  public GetDiscoveryResponse claimsLocalesSupported(List<String> claimsLocalesSupported) {
     this.claimsLocalesSupported = claimsLocalesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addClaimsLocalesSupportedItem(String claimsLocalesSupportedItem) {
+  public GetDiscoveryResponse addClaimsLocalesSupportedItem(String claimsLocalesSupportedItem) {
     if (this.claimsLocalesSupported == null) {
       this.claimsLocalesSupported = new ArrayList<String>();
     }
@@ -946,12 +946,12 @@ public class GetOpDiscoveryConfigResponse {
     this.claimsLocalesSupported = claimsLocalesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse uiLocalesSupported(List<String> uiLocalesSupported) {
+  public GetDiscoveryResponse uiLocalesSupported(List<String> uiLocalesSupported) {
     this.uiLocalesSupported = uiLocalesSupported;
     return this;
   }
 
-  public GetOpDiscoveryConfigResponse addUiLocalesSupportedItem(String uiLocalesSupportedItem) {
+  public GetDiscoveryResponse addUiLocalesSupportedItem(String uiLocalesSupportedItem) {
     if (this.uiLocalesSupported == null) {
       this.uiLocalesSupported = new ArrayList<String>();
     }
@@ -972,7 +972,7 @@ public class GetOpDiscoveryConfigResponse {
     this.uiLocalesSupported = uiLocalesSupported;
   }
 
-  public GetOpDiscoveryConfigResponse claimsParameterSupported(Boolean claimsParameterSupported) {
+  public GetDiscoveryResponse claimsParameterSupported(Boolean claimsParameterSupported) {
     this.claimsParameterSupported = claimsParameterSupported;
     return this;
   }
@@ -990,7 +990,7 @@ public class GetOpDiscoveryConfigResponse {
     this.claimsParameterSupported = claimsParameterSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requestParameterSupported(Boolean requestParameterSupported) {
+  public GetDiscoveryResponse requestParameterSupported(Boolean requestParameterSupported) {
     this.requestParameterSupported = requestParameterSupported;
     return this;
   }
@@ -1008,7 +1008,7 @@ public class GetOpDiscoveryConfigResponse {
     this.requestParameterSupported = requestParameterSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requestUriParameterSupported(Boolean requestUriParameterSupported) {
+  public GetDiscoveryResponse requestUriParameterSupported(Boolean requestUriParameterSupported) {
     this.requestUriParameterSupported = requestUriParameterSupported;
     return this;
   }
@@ -1026,7 +1026,7 @@ public class GetOpDiscoveryConfigResponse {
     this.requestUriParameterSupported = requestUriParameterSupported;
   }
 
-  public GetOpDiscoveryConfigResponse requireRequestUriRegistration(Boolean requireRequestUriRegistration) {
+  public GetDiscoveryResponse requireRequestUriRegistration(Boolean requireRequestUriRegistration) {
     this.requireRequestUriRegistration = requireRequestUriRegistration;
     return this;
   }
@@ -1044,7 +1044,7 @@ public class GetOpDiscoveryConfigResponse {
     this.requireRequestUriRegistration = requireRequestUriRegistration;
   }
 
-  public GetOpDiscoveryConfigResponse tlsClientCertificateBoundAccessTokens(Boolean tlsClientCertificateBoundAccessTokens) {
+  public GetDiscoveryResponse tlsClientCertificateBoundAccessTokens(Boolean tlsClientCertificateBoundAccessTokens) {
     this.tlsClientCertificateBoundAccessTokens = tlsClientCertificateBoundAccessTokens;
     return this;
   }
@@ -1062,7 +1062,7 @@ public class GetOpDiscoveryConfigResponse {
     this.tlsClientCertificateBoundAccessTokens = tlsClientCertificateBoundAccessTokens;
   }
 
-  public GetOpDiscoveryConfigResponse frontChannelLogoutSupported(Boolean frontChannelLogoutSupported) {
+  public GetDiscoveryResponse frontChannelLogoutSupported(Boolean frontChannelLogoutSupported) {
     this.frontChannelLogoutSupported = frontChannelLogoutSupported;
     return this;
   }
@@ -1080,7 +1080,7 @@ public class GetOpDiscoveryConfigResponse {
     this.frontChannelLogoutSupported = frontChannelLogoutSupported;
   }
 
-  public GetOpDiscoveryConfigResponse frontChannelLogoutSessionSupported(Boolean frontChannelLogoutSessionSupported) {
+  public GetDiscoveryResponse frontChannelLogoutSessionSupported(Boolean frontChannelLogoutSessionSupported) {
     this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
     return this;
   }
@@ -1098,7 +1098,7 @@ public class GetOpDiscoveryConfigResponse {
     this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
   }
 
-  public GetOpDiscoveryConfigResponse opPolicyUri(String opPolicyUri) {
+  public GetDiscoveryResponse opPolicyUri(String opPolicyUri) {
     this.opPolicyUri = opPolicyUri;
     return this;
   }
@@ -1116,7 +1116,7 @@ public class GetOpDiscoveryConfigResponse {
     this.opPolicyUri = opPolicyUri;
   }
 
-  public GetOpDiscoveryConfigResponse opTosUri(String opTosUri) {
+  public GetDiscoveryResponse opTosUri(String opTosUri) {
     this.opTosUri = opTosUri;
     return this;
   }
@@ -1134,7 +1134,7 @@ public class GetOpDiscoveryConfigResponse {
     this.opTosUri = opTosUri;
   }
 
-  public GetOpDiscoveryConfigResponse scopeToClaimsMapping(Object scopeToClaimsMapping) {
+  public GetDiscoveryResponse scopeToClaimsMapping(Object scopeToClaimsMapping) {
     this.scopeToClaimsMapping = scopeToClaimsMapping;
     return this;
   }
@@ -1161,52 +1161,52 @@ public class GetOpDiscoveryConfigResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GetOpDiscoveryConfigResponse getOpDiscoveryConfigResponse = (GetOpDiscoveryConfigResponse) o;
-    return Objects.equals(this.issuer, getOpDiscoveryConfigResponse.issuer) &&
-        Objects.equals(this.authorizationEndpoint, getOpDiscoveryConfigResponse.authorizationEndpoint) &&
-        Objects.equals(this.tokenEndpoint, getOpDiscoveryConfigResponse.tokenEndpoint) &&
-        Objects.equals(this.tokenRevocationEndpoint, getOpDiscoveryConfigResponse.tokenRevocationEndpoint) &&
-        Objects.equals(this.userInfoEndpoint, getOpDiscoveryConfigResponse.userInfoEndpoint) &&
-        Objects.equals(this.clientInfoEndpoint, getOpDiscoveryConfigResponse.clientInfoEndpoint) &&
-        Objects.equals(this.checkSessionIframe, getOpDiscoveryConfigResponse.checkSessionIframe) &&
-        Objects.equals(this.endSessionEndpoint, getOpDiscoveryConfigResponse.endSessionEndpoint) &&
-        Objects.equals(this.jwksUri, getOpDiscoveryConfigResponse.jwksUri) &&
-        Objects.equals(this.registrationEndpoint, getOpDiscoveryConfigResponse.registrationEndpoint) &&
-        Objects.equals(this.idGenerationEndpoint, getOpDiscoveryConfigResponse.idGenerationEndpoint) &&
-        Objects.equals(this.introspectionEndpoint, getOpDiscoveryConfigResponse.introspectionEndpoint) &&
-        Objects.equals(this.scopesSupported, getOpDiscoveryConfigResponse.scopesSupported) &&
-        Objects.equals(this.responseTypesSupported, getOpDiscoveryConfigResponse.responseTypesSupported) &&
-        Objects.equals(this.grantTypesSupported, getOpDiscoveryConfigResponse.grantTypesSupported) &&
-        Objects.equals(this.acrValuesSupported, getOpDiscoveryConfigResponse.acrValuesSupported) &&
-        Objects.equals(this.subjectTypesSupported, getOpDiscoveryConfigResponse.subjectTypesSupported) &&
-        Objects.equals(this.userInfoSigningAlgValuesSupported, getOpDiscoveryConfigResponse.userInfoSigningAlgValuesSupported) &&
-        Objects.equals(this.userInfoEncryptionAlgValuesSupported, getOpDiscoveryConfigResponse.userInfoEncryptionAlgValuesSupported) &&
-        Objects.equals(this.userInfoEncryptionEncValuesSupported, getOpDiscoveryConfigResponse.userInfoEncryptionEncValuesSupported) &&
-        Objects.equals(this.idTokenSigningAlgValuesSupported, getOpDiscoveryConfigResponse.idTokenSigningAlgValuesSupported) &&
-        Objects.equals(this.idTokenEncryptionAlgValuesSupported, getOpDiscoveryConfigResponse.idTokenEncryptionAlgValuesSupported) &&
-        Objects.equals(this.idTokenEncryptionEncValuesSupported, getOpDiscoveryConfigResponse.idTokenEncryptionEncValuesSupported) &&
-        Objects.equals(this.requestObjectSigningAlgValuesSupported, getOpDiscoveryConfigResponse.requestObjectSigningAlgValuesSupported) &&
-        Objects.equals(this.requestObjectEncryptionAlgValuesSupported, getOpDiscoveryConfigResponse.requestObjectEncryptionAlgValuesSupported) &&
-        Objects.equals(this.requestObjectEncryptionEncValuesSupported, getOpDiscoveryConfigResponse.requestObjectEncryptionEncValuesSupported) &&
-        Objects.equals(this.tokenEndpointAuthMethodsSupported, getOpDiscoveryConfigResponse.tokenEndpointAuthMethodsSupported) &&
-        Objects.equals(this.tokenEndpointAuthSigningAlgValuesSupported, getOpDiscoveryConfigResponse.tokenEndpointAuthSigningAlgValuesSupported) &&
-        Objects.equals(this.displayValuesSupported, getOpDiscoveryConfigResponse.displayValuesSupported) &&
-        Objects.equals(this.claimTypesSupported, getOpDiscoveryConfigResponse.claimTypesSupported) &&
-        Objects.equals(this.claimsSupported, getOpDiscoveryConfigResponse.claimsSupported) &&
-        Objects.equals(this.idTokenTokenBindingCnfValuesSupported, getOpDiscoveryConfigResponse.idTokenTokenBindingCnfValuesSupported) &&
-        Objects.equals(this.serviceDocumentation, getOpDiscoveryConfigResponse.serviceDocumentation) &&
-        Objects.equals(this.claimsLocalesSupported, getOpDiscoveryConfigResponse.claimsLocalesSupported) &&
-        Objects.equals(this.uiLocalesSupported, getOpDiscoveryConfigResponse.uiLocalesSupported) &&
-        Objects.equals(this.claimsParameterSupported, getOpDiscoveryConfigResponse.claimsParameterSupported) &&
-        Objects.equals(this.requestParameterSupported, getOpDiscoveryConfigResponse.requestParameterSupported) &&
-        Objects.equals(this.requestUriParameterSupported, getOpDiscoveryConfigResponse.requestUriParameterSupported) &&
-        Objects.equals(this.requireRequestUriRegistration, getOpDiscoveryConfigResponse.requireRequestUriRegistration) &&
-        Objects.equals(this.tlsClientCertificateBoundAccessTokens, getOpDiscoveryConfigResponse.tlsClientCertificateBoundAccessTokens) &&
-        Objects.equals(this.frontChannelLogoutSupported, getOpDiscoveryConfigResponse.frontChannelLogoutSupported) &&
-        Objects.equals(this.frontChannelLogoutSessionSupported, getOpDiscoveryConfigResponse.frontChannelLogoutSessionSupported) &&
-        Objects.equals(this.opPolicyUri, getOpDiscoveryConfigResponse.opPolicyUri) &&
-        Objects.equals(this.opTosUri, getOpDiscoveryConfigResponse.opTosUri) &&
-        Objects.equals(this.scopeToClaimsMapping, getOpDiscoveryConfigResponse.scopeToClaimsMapping);
+    GetDiscoveryResponse getDiscoveryResponse = (GetDiscoveryResponse) o;
+    return Objects.equals(this.issuer, getDiscoveryResponse.issuer) &&
+        Objects.equals(this.authorizationEndpoint, getDiscoveryResponse.authorizationEndpoint) &&
+        Objects.equals(this.tokenEndpoint, getDiscoveryResponse.tokenEndpoint) &&
+        Objects.equals(this.tokenRevocationEndpoint, getDiscoveryResponse.tokenRevocationEndpoint) &&
+        Objects.equals(this.userInfoEndpoint, getDiscoveryResponse.userInfoEndpoint) &&
+        Objects.equals(this.clientInfoEndpoint, getDiscoveryResponse.clientInfoEndpoint) &&
+        Objects.equals(this.checkSessionIframe, getDiscoveryResponse.checkSessionIframe) &&
+        Objects.equals(this.endSessionEndpoint, getDiscoveryResponse.endSessionEndpoint) &&
+        Objects.equals(this.jwksUri, getDiscoveryResponse.jwksUri) &&
+        Objects.equals(this.registrationEndpoint, getDiscoveryResponse.registrationEndpoint) &&
+        Objects.equals(this.idGenerationEndpoint, getDiscoveryResponse.idGenerationEndpoint) &&
+        Objects.equals(this.introspectionEndpoint, getDiscoveryResponse.introspectionEndpoint) &&
+        Objects.equals(this.scopesSupported, getDiscoveryResponse.scopesSupported) &&
+        Objects.equals(this.responseTypesSupported, getDiscoveryResponse.responseTypesSupported) &&
+        Objects.equals(this.grantTypesSupported, getDiscoveryResponse.grantTypesSupported) &&
+        Objects.equals(this.acrValuesSupported, getDiscoveryResponse.acrValuesSupported) &&
+        Objects.equals(this.subjectTypesSupported, getDiscoveryResponse.subjectTypesSupported) &&
+        Objects.equals(this.userInfoSigningAlgValuesSupported, getDiscoveryResponse.userInfoSigningAlgValuesSupported) &&
+        Objects.equals(this.userInfoEncryptionAlgValuesSupported, getDiscoveryResponse.userInfoEncryptionAlgValuesSupported) &&
+        Objects.equals(this.userInfoEncryptionEncValuesSupported, getDiscoveryResponse.userInfoEncryptionEncValuesSupported) &&
+        Objects.equals(this.idTokenSigningAlgValuesSupported, getDiscoveryResponse.idTokenSigningAlgValuesSupported) &&
+        Objects.equals(this.idTokenEncryptionAlgValuesSupported, getDiscoveryResponse.idTokenEncryptionAlgValuesSupported) &&
+        Objects.equals(this.idTokenEncryptionEncValuesSupported, getDiscoveryResponse.idTokenEncryptionEncValuesSupported) &&
+        Objects.equals(this.requestObjectSigningAlgValuesSupported, getDiscoveryResponse.requestObjectSigningAlgValuesSupported) &&
+        Objects.equals(this.requestObjectEncryptionAlgValuesSupported, getDiscoveryResponse.requestObjectEncryptionAlgValuesSupported) &&
+        Objects.equals(this.requestObjectEncryptionEncValuesSupported, getDiscoveryResponse.requestObjectEncryptionEncValuesSupported) &&
+        Objects.equals(this.tokenEndpointAuthMethodsSupported, getDiscoveryResponse.tokenEndpointAuthMethodsSupported) &&
+        Objects.equals(this.tokenEndpointAuthSigningAlgValuesSupported, getDiscoveryResponse.tokenEndpointAuthSigningAlgValuesSupported) &&
+        Objects.equals(this.displayValuesSupported, getDiscoveryResponse.displayValuesSupported) &&
+        Objects.equals(this.claimTypesSupported, getDiscoveryResponse.claimTypesSupported) &&
+        Objects.equals(this.claimsSupported, getDiscoveryResponse.claimsSupported) &&
+        Objects.equals(this.idTokenTokenBindingCnfValuesSupported, getDiscoveryResponse.idTokenTokenBindingCnfValuesSupported) &&
+        Objects.equals(this.serviceDocumentation, getDiscoveryResponse.serviceDocumentation) &&
+        Objects.equals(this.claimsLocalesSupported, getDiscoveryResponse.claimsLocalesSupported) &&
+        Objects.equals(this.uiLocalesSupported, getDiscoveryResponse.uiLocalesSupported) &&
+        Objects.equals(this.claimsParameterSupported, getDiscoveryResponse.claimsParameterSupported) &&
+        Objects.equals(this.requestParameterSupported, getDiscoveryResponse.requestParameterSupported) &&
+        Objects.equals(this.requestUriParameterSupported, getDiscoveryResponse.requestUriParameterSupported) &&
+        Objects.equals(this.requireRequestUriRegistration, getDiscoveryResponse.requireRequestUriRegistration) &&
+        Objects.equals(this.tlsClientCertificateBoundAccessTokens, getDiscoveryResponse.tlsClientCertificateBoundAccessTokens) &&
+        Objects.equals(this.frontChannelLogoutSupported, getDiscoveryResponse.frontChannelLogoutSupported) &&
+        Objects.equals(this.frontChannelLogoutSessionSupported, getDiscoveryResponse.frontChannelLogoutSessionSupported) &&
+        Objects.equals(this.opPolicyUri, getDiscoveryResponse.opPolicyUri) &&
+        Objects.equals(this.opTosUri, getDiscoveryResponse.opTosUri) &&
+        Objects.equals(this.scopeToClaimsMapping, getDiscoveryResponse.scopeToClaimsMapping);
   }
 
   @Override
@@ -1218,7 +1218,7 @@ public class GetOpDiscoveryConfigResponse {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GetOpDiscoveryConfigResponse {\n");
+    sb.append("class GetDiscoveryResponse {\n");
     
     sb.append("    issuer: ").append(toIndentedString(issuer)).append("\n");
     sb.append("    authorizationEndpoint: ").append(toIndentedString(authorizationEndpoint)).append("\n");

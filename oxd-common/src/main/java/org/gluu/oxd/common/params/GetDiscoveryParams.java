@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetOpDiscoveryConfigParams implements IParams{
+public class GetDiscoveryParams implements IParams{
 
     @JsonProperty(value = "op_host")
     private String op_host;
@@ -15,7 +15,7 @@ public class GetOpDiscoveryConfigParams implements IParams{
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
 
-    public GetOpDiscoveryConfigParams() {
+    public GetDiscoveryParams() {
     }
 
     public String getOpHost() {
@@ -36,7 +36,7 @@ public class GetOpDiscoveryConfigParams implements IParams{
 
     @Override
     public String toString() {
-        return "GetOpDiscoveryConfigParams{" +
+        return "GetDiscoveryParams{" +
                 "op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
                 '}';
