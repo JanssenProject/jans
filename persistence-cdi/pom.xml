@@ -33,17 +33,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-hybrid</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-couchbase</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-ldap</artifactId>
+			<artifactId>oxcore-persistence-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -51,12 +41,23 @@
 			<artifactId>oxcore-persistence-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-ldap</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.11</version>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 		</dependency>
 
-		<!-- Weld -->
+		<!-- CDI -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
