@@ -37,7 +37,7 @@
     </test>
     <test name="Get OpDiscovery" enabled="true">
         <classes>
-            <class name="org.gluu.oxd.server.GetOpDiscoveryConfigTest"></class>
+            <class name="org.gluu.oxd.server.GetDiscoveryTest"></class>
         </classes>
     </test>
     <test name="Register site" enabled="true">
