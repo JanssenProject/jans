@@ -1,7 +1,6 @@
 package org.gluu.persist.service;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
+import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,20 +49,11 @@ public class PersistanceFactoryService implements BaseFactoryService {
 	@Inject
 	private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
 
-	private HashMap<String, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryNames;
-	private HashMap<Class<? extends PersistenceEntryManagerFactory>, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryTypes;
-
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#loadPersistenceConfiguration()
-	 */
 	@Override
 	public PersistenceConfiguration loadPersistenceConfiguration() {
 		return loadPersistenceConfiguration(null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#loadPersistenceConfiguration(java.lang.String)
-	 */
 	@Override
 	public PersistenceConfiguration loadPersistenceConfiguration(String applicationPropertiesFile) {
 		PersistenceConfiguration currentPersistenceConfiguration = null;
@@ -100,8 +91,10 @@ public class PersistanceFactoryService implements BaseFactoryService {
 			}
 
 			// Determine configuration file name and factory class type
-			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory
-					.getClass().getSuperclass();
+			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory.getClass();
+			if (PersistenceEntryManagerFactory.class.isAssignableFrom(persistenceEntryManagerFactoryType.getSuperclass())) {
+				persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactoryType.getSuperclass();
+			}
 			Map<String, String> persistenceFileNames = persistenceEntryManagerFactory.getConfigurationFileNames();
 
 			PersistenceConfiguration persistenceConfiguration = createPersistenceConfiguration(persistenceType, persistenceEntryManagerFactoryType,
@@ -195,17 +188,11 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#getPersistenceEntryManagerFactory(org.gluu.persist.model.PersistenceConfiguration)
-	 */
 	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
         return getPersistenceEntryManagerFactory(persistenceConfiguration.getEntryManagerFactoryType());
     }
 
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#getPersistenceEntryManagerFactory(java.lang.Class)
-	 */
 	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
 		PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
@@ -214,23 +201,19 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		return persistenceEntryManagerFactory;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#getPersistenceEntryManagerFactory(java.lang.String)
-	 */
 	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(String persistenceType) {
-		return getPersistenceEntryManagerFactoryImpl(persistenceType);
+		// Get persistence entry manager factory
+		for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
+			log.debug("Found Persistence Entry Manager Factory with type '{}'", currentPersistenceEntryManagerFactory);
+			if (StringHelper.equalsIgnoreCase(currentPersistenceEntryManagerFactory.getPersistenceType(), persistenceType)) {
+				return currentPersistenceEntryManagerFactory;
+			}
+		}
+
+		return null;
 	}
 
-	private PersistenceEntryManagerFactory getPersistenceEntryManagerFactoryImpl(String persistenceType) {
-		PersistenceEntryManagerFactory persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryNames.get(persistenceType);
-
-		return persistenceEntryManagerFactory;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.gluu.persist.service.BaseFactoryService#getLog()
-	 */
 	@Override
 	public Logger getLog() {
 		if (this.log == null) {
