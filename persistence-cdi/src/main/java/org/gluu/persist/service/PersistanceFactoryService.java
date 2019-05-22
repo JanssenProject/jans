@@ -208,7 +208,7 @@ public class PersistanceFactoryService {
 		return persistenceEntryManagerFactory;
 	}
 
-	private Logger getLog() {
+	public Logger getLog() {
 		if (this.log == null) {
 			this.log = LoggerFactory.getLogger(PersistanceFactoryService.class);
 		}
