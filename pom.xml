@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<json.version>20180813</json.version>
-		<jackson.version>2.9.8</jackson.version>
+		<jackson.version>2.9.9</jackson.version>
 
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.5.1.Final</resteasy.version>
