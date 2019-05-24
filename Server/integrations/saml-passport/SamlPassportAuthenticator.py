@@ -97,6 +97,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if not self.validSignature(jwt):
                     return False
 
+                if self.jwtHasExpired(jwt):
+                    return False
+
                 (user_profile, json) = self.getUserProfile(jwt)
                 if user_profile == None:
                     return False
@@ -435,6 +438,17 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. validSignature. Validation result was %s" % valid
         return valid
 
+    def jwtHasExpired(self, jwt):
+        # Check if jwt has expired
+        jwt_claims = jwt.getClaims()
+        try:
+            exp_date = jwt_claims.getClaimAsDate(JwtClaimName.EXPIRATION_TIME)
+            hasExpired = exp_date < datetime.now()
+        except:
+            print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
+            return False
+
+        return hasExpired
 
     def getUserProfile(self, jwt):
         # Check if there is user profile
