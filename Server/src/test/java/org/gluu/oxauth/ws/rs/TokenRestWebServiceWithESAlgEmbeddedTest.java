@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.TokenRequest;
@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -81,7 +82,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
 
@@ -172,7 +173,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -265,7 +266,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -358,7 +359,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
 
@@ -451,7 +452,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -542,7 +543,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);

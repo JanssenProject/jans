@@ -8,8 +8,8 @@ package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;

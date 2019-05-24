@@ -435,7 +435,7 @@ public class AuthenticationService {
 		}
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-		String nowDateString = ldapEntryManager.encodeTime(now);
+		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
 		CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttribute);
 

@@ -6,14 +6,16 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
-import org.gluu.persist.annotation.AttributeEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.gluu.persist.annotation.AttributeEnum;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * <p>
@@ -36,14 +38,17 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     /**
      * Used for the authorization code grant type.
      */
+	@JsonProperty("code")
     CODE("code", "Authorization Code Grant Type"),
     /**
      * Used for the implicit grant type.
      */
+	@JsonProperty("token")
     TOKEN("token", "Implicit Grant Type"),
     /**
      * Include an ID Token in the authorization response.
      */
+	@JsonProperty("id_token")
     ID_TOKEN("id_token", "ID Token");
 
     private final String value;
@@ -70,7 +75,15 @@ public enum ResponseType implements HasParamName, AttributeEnum {
      */
     @JsonCreator
     public static ResponseType fromString(String param) {
-        return getByValue(param);
+        if (param != null) {
+            for (ResponseType rt : ResponseType.values()) {
+                if (param.equals(rt.value)) {
+                    return rt;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

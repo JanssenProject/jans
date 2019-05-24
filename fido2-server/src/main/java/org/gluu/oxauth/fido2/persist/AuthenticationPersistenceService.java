@@ -165,7 +165,9 @@ public class AuthenticationPersistenceService {
                 }
             }
         };
-        ldapEntryManager.findEntries(getDnForUser(null), Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
+        
+        String baseDn = getDnForUser(null);
+        ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(baseDn), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
 
         // Cleaning empty branches
         BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
@@ -183,7 +185,7 @@ public class AuthenticationPersistenceService {
         ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyAuthenticationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
     }
 
-    private Filter getExpiredAuthenticationFilter() {
+    private Filter getExpiredAuthenticationFilter(String baseDn) {
         int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
         unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
 
@@ -202,7 +204,7 @@ public class AuthenticationPersistenceService {
         Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue()));
 
         Filter exirationDateFilter1 = Filter.createLessOrEqualFilter("creationDate",
-                ldapEntryManager.encodeTime(unfinishedRequestExpirationDate));
+                ldapEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
         
         Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter1, exirationDateFilter1);
 
@@ -210,7 +212,7 @@ public class AuthenticationPersistenceService {
         Filter authenticationStatusFilter2 = Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue());
 
         Filter exirationDateFilter2 = Filter.createLessOrEqualFilter("creationDate",
-                ldapEntryManager.encodeTime(authenticationHistoryExpirationDate));
+                ldapEntryManager.encodeTime(baseDn, authenticationHistoryExpirationDate));
         
         Filter authenticationHistoryFilter = Filter.createANDFilter(authenticationStatusFilter2, exirationDateFilter2);
 

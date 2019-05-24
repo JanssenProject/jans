@@ -12,8 +12,8 @@ import static org.testng.Assert.fail;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Yuriy Zabrovarnyy

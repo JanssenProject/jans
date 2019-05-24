@@ -1,9 +1,10 @@
 package org.gluu.oxauth.model.uma;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;

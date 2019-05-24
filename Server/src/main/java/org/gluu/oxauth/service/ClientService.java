@@ -6,19 +6,10 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.codehaus.jettison.json.JSONArray;
+import com.google.common.collect.Sets;
+import org.json.JSONArray;
 import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.oxauth.model.registration.Client;
@@ -36,9 +27,11 @@ import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.oxauth.persistence.model.Scope;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
-import com.google.common.collect.Sets;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Provides operations with clients.
@@ -215,9 +208,9 @@ public class ClientService {
 		}
 
 		try {
-			cacheService.put(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(client.getClientId()), client,
+			cacheService.put(60, getClientIdCacheKey(client.getClientId()), client,
 					Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-			cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client,
+			cacheService.put(60, getClientDnCacheKey(client.getDn()), client,
 					Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
 		} catch (Exception e) {
 			log.error("Failed to put client in cache, client:" + client, e);
@@ -300,8 +293,8 @@ public class ClientService {
 			String clientId = client.getClientId();
 			String clientDn = client.getDn();
 
-			cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
-			cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+			cacheService.remove(getClientIdCacheKey(clientId));
+			cacheService.remove(getClientDnCacheKey(clientDn));
 		} catch (Exception e) {
 			log.error("Failed to remove client from cache.", e);
 		}
@@ -319,7 +312,7 @@ public class ClientService {
 		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-		String nowDateString = ldapEntryManager.encodeTime(now);
+		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
 
 		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
@@ -361,7 +354,7 @@ public class ClientService {
 				for (String scopeDN : client.getScopes()) {
 					Scope s = scopeService.getScopeByDn(scopeDN);
 					if (s != null) {
-						String scopeName = s.getDisplayName();
+						String scopeName = s.getId();
 						array.put(scopeName);
 					}
 				}

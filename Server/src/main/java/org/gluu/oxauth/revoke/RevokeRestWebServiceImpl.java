@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -93,9 +94,9 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
                     grantService.removeAllTokensBySession(authorizationGrant.getTokenLdap().getSessionDn());
                 }
             } else {
-                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-                builder.entity(errorResponseFactory.getErrorAsJson(
-                        TokenRevocationErrorResponseType.INVALID_REQUEST));
+                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 400
+                builder.entity(errorResponseFactory.errorAsJson(
+                        TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."));
             }
         }
 

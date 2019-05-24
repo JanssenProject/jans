@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.error;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;

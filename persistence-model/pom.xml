@@ -67,6 +67,11 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-service</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-model</artifactId>

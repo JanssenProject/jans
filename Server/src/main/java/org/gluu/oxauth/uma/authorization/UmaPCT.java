@@ -3,7 +3,7 @@ package org.gluu.oxauth.uma.authorization;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaims;

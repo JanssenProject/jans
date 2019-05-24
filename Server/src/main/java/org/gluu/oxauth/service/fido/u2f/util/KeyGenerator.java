@@ -9,7 +9,7 @@ package org.gluu.oxauth.service.fido.u2f.util;
 import java.util.Date;
 import java.util.UUID;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.Certificate;
 import org.gluu.oxauth.model.crypto.Key;
 import org.gluu.oxauth.model.crypto.signature.ECDSAKeyFactory;

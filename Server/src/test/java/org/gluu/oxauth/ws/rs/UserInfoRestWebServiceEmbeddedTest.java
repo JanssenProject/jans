@@ -7,8 +7,8 @@
 package org.gluu.oxauth.ws.rs;
 
 import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.Claim;
@@ -25,6 +25,7 @@ import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -46,7 +47,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version August 1, 2018
+ * @version May 14, 2019
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -93,7 +94,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -367,7 +368,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestUserInfoInvalidToken", response, entity);
 
-        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertEquals(response.getStatus(), 401, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -540,7 +541,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
@@ -683,7 +684,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
@@ -830,7 +831,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         );
         registerRequest.setGrantTypes(grantTypes);
 
-        String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
         Response response = request.post(Entity.json(registerRequestContent));
         String entity = response.readEntity(String.class);
