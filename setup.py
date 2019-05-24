@@ -45,6 +45,7 @@ import copy
 import random
 import ssl
 import ldap
+import uuid
 
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
@@ -574,7 +575,10 @@ class Setup(object):
         self.api_rp_client_jks_fn = '%s/api-rp.jks' % self.certFolder
         self.api_rp_client_jks_pass = 'secret'
         self.api_rp_client_jwks = None
-        
+
+        self.oxtrust_resource_id = None
+        self.oxtrust_requesting_party_client_id = None
+        self.oxtrust_resource_server_client_id = None
 
         # oxPassport Configuration
         self.gluu_passport_base = '%s/passport' % self.node_base
@@ -594,7 +598,7 @@ class Setup(object):
         self.passport_rp_client_cert_alias = None
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
-
+        self.passport_resource_id = None
 
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
@@ -861,21 +865,32 @@ class Setup(object):
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.oxauth_client_id:
-            self.oxauth_client_id = '0008-e701-4470-b6b4-0fee15ca666f'
+            self.oxauth_client_id = '0008-'+ str(uuid.uuid4())
         if not self.idp_client_id:
-            self.idp_client_id = '0008-7e44-4734-9360-d4fe9767884d'
+            self.idp_client_id = '0008-'+ str(uuid.uuid4())
         if not self.scim_rs_client_id:
-            self.scim_rs_client_id = '0008-6e01-43a4-af05-29a7dc9e49bc'
+            self.scim_rs_client_id = '0008-' + str(uuid.uuid4())
         if not self.scim_rp_client_id:
-            self.scim_rp_client_id = '0008-61d5-49c3-861a-d5ee2c2f7709'
+            self.scim_rp_client_id = '0008-' + str(uuid.uuid4())
         if not self.scim_resource_oxid:
-            self.scim_resource_oxid = 'b49a9858-ec79-4144-a7e5-9d992e7abb84'
+            self.scim_resource_oxid = '0008-' + str(uuid.uuid4())
         if not self.passport_rs_client_id:
-            self.passport_rs_client_id = '0008-fca1-48a6-a62f-9681dbb8816d'
+            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
         if not self.passport_rp_client_id:
-            self.passport_rp_client_id = '0008-de0c-476a-9c9f-9c0f079c72d1'           
+            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
         if not self.passport_rp_ii_client_id:
-            self.passport_rp_ii_client_id = '0008-4252-4d65-8bc0-58ad3825a401'
+            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
+
+        if not self.oxtrust_resource_server_client_id:
+            self.oxtrust_resource_server_client_id = '0008-'  + str(uuid.uuid4())
+        if not self.oxtrust_requesting_party_client_id:
+            self.oxtrust_requesting_party_client_id = '0008-'  + str(uuid.uuid4())
+        if not self.oxtrust_resource_id:
+            self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
+        if not self.passport_resource_id:
+            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+
+
         if not self.application_max_ram:
             self.application_max_ram = 3072
 
