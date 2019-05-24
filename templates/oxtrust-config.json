@@ -106,14 +106,14 @@
 
     "passportUmaClientId":"%(passport_rs_client_id)s",
     "passportUmaClientKeyId":"",
-    "passportUmaResourceId":"0f963ecc-93f0-49c1-beae-ad2006abbb99",
+    "passportUmaResourceId":"%(passport_resource_id)s",
     "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
     "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
     "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
 
-    "apiUmaClientId":"800-9340-4274-986f-f7a37c8cc620",
+    "apiUmaClientId":"%(oxtrust_resource_server_client_id)s",
     "apiUmaClientKeyId":"",
-    "apiUmaResourceId":"800-e8ab-4207-9fab-2a27de921ac1",
+    "apiUmaResourceId":"%(oxtrust_resource_id)s",
     "apiUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read",
     "apiUmaClientKeyStoreFile":"%(api_rs_client_jks_fn)s",
     "apiUmaClientKeyStorePassword":"%(api_rs_client_jks_pass_encoded)s",
