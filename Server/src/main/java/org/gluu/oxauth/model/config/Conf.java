@@ -6,9 +6,12 @@
 
 package org.gluu.oxauth.model.config;
 
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
 
 /**
@@ -20,14 +23,22 @@ import org.gluu.persist.annotation.ObjectClass;
 public class Conf {
     @DN
     private String dn;
+
+    @JsonObject
     @AttributeName(name = "oxAuthConfDynamic")
-    private String dynamic;
+    private AppConfiguration dynamic;
+
+    @JsonObject
     @AttributeName(name = "oxAuthConfStatic")
-    private String statics;
+    private StaticConfiguration statics;
+
+    @JsonObject
     @AttributeName(name = "oxAuthConfErrors")
-    private String errors;
+    private ErrorMessages errors;
+
+    @JsonObject
     @AttributeName(name = "oxAuthConfWebKeys")
-    private String webKeys;
+    private WebKeysConfiguration webKeys;
 
     @AttributeName(name = "oxRevision")
     private long revision;
@@ -43,39 +54,39 @@ public class Conf {
         dn = p_dn;
     }
 
-    public String getDynamic() {
-        return dynamic;
-    }
+    public AppConfiguration getDynamic() {
+		return dynamic;
+	}
 
-    public void setDynamic(String p_dynamic) {
-        dynamic = p_dynamic;
-    }
+	public void setDynamic(AppConfiguration dynamic) {
+		this.dynamic = dynamic;
+	}
 
-    public String getErrors() {
-        return errors;
-    }
+	public StaticConfiguration getStatics() {
+		return statics;
+	}
 
-    public void setErrors(String p_errors) {
-        errors = p_errors;
-    }
+	public void setStatics(StaticConfiguration statics) {
+		this.statics = statics;
+	}
 
-    public String getStatics() {
-        return statics;
-    }
+	public ErrorMessages getErrors() {
+		return errors;
+	}
 
-    public void setStatics(String p_statics) {
-        statics = p_statics;
-    }
+	public void setErrors(ErrorMessages errors) {
+		this.errors = errors;
+	}
 
-    public String getWebKeys() {
-        return webKeys;
-    }
+	public WebKeysConfiguration getWebKeys() {
+		return webKeys;
+	}
 
-    public void setWebKeys(String p_webKeys) {
-        webKeys = p_webKeys;
-    }
+	public void setWebKeys(WebKeysConfiguration webKeys) {
+		this.webKeys = webKeys;
+	}
 
-    public long getRevision() {
+	public long getRevision() {
 		return revision;
 	}
 

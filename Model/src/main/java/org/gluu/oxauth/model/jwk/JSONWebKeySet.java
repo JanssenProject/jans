@@ -7,9 +7,14 @@
 package org.gluu.oxauth.model.jwk;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 
@@ -91,12 +96,21 @@ public class JSONWebKeySet {
     public String toString() {
         try {
             JSONObject jwks = toJSONObject();
-            return jwks.toString(4).replace("\\/", "/");
+            return toPrettyJson(jwks).replace("\\/", "/");
         } catch (JSONException e) {
             LOG.error(e.getMessage(), e);
             return null;
-        }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+		}
     }
+
+	private String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+	}
 
     public static JSONWebKeySet fromJSONObject(JSONObject jwksJSONObject) throws JSONException {
         JSONWebKeySet jwks = new JSONWebKeySet();

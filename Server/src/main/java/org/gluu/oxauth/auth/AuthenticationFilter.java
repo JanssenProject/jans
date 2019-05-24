@@ -16,6 +16,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.ref.AuthenticatorReference;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
 import org.gluu.oxauth.model.token.ClientAssertionType;
@@ -27,7 +28,6 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.ref.AuthenticatorReference;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -173,7 +172,7 @@ public class AuthenticationFilter implements Filter {
      * @return whether successful or not
      */
     private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws Exception {
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        AbstractCryptoProvider cryptoProvider = createCryptoProvider();
         if (cryptoProvider == null) {
             log.debug("Unable to create cryptoProvider.");
             return false;
@@ -194,6 +193,15 @@ public class AuthenticationFilter implements Filter {
             }
         }
         return false;
+    }
+
+    private AbstractCryptoProvider createCryptoProvider() {
+        try {
+            return CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        } catch (Exception e) {
+            log.error("Failed to create crypto provider.", e);
+            return null;
+        }
     }
 
     private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
@@ -287,12 +295,6 @@ public class AuthenticationFilter implements Filter {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
-        } catch (UnsupportedEncodingException ex) {
-            log.info("Basic authentication failed", ex);
-        } catch (ServletException ex) {
-            log.info("Basic authentication failed", ex);
-        } catch (IOException ex) {
-            log.info("Basic authentication failed", ex);
         } catch (Exception ex) {
             log.info("Basic authentication failed", ex);
         }
@@ -453,7 +455,7 @@ public class AuthenticationFilter implements Filter {
             servletResponse.setStatus(401);
             servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
             servletResponse.setContentType("application/json;charset=UTF-8");
-            out.write(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT));
+            out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_CLIENT, "Unable to authenticate client."));
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         } finally {

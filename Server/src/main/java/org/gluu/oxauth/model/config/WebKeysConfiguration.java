@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.config;
 
 import javax.enterprise.inject.Vetoed;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 

@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum Date: 05.11.2012
  */
@@ -27,6 +30,7 @@ public enum SubjectType {
      * @return The corresponding user id type if found, otherwise
      *         <code>null</code>.
      */
+    @JsonCreator
     public static SubjectType fromString(String param) {
         if (param != null) {
             for (SubjectType uit : SubjectType.values()) {
@@ -43,6 +47,7 @@ public enum SubjectType {
      * name for the user id type parameter.
      */
     @Override
+    @JsonValue
     public String toString() {
         return paramName;
     }

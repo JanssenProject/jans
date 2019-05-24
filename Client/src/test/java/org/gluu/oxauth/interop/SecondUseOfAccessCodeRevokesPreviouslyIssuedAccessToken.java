@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version May 14, 2019
  */
 public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends BaseTest {
 
@@ -135,7 +135,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(userInfoResponse.getStatus(), 400, "Unexpected response code: " + userInfoResponse.getStatus());
+            assertEquals(userInfoResponse.getStatus(), 401, "Unexpected response code: " + userInfoResponse.getStatus());
             assertNotNull(userInfoResponse.getErrorType(), "Unexpected result: errorType not found");
             assertNotNull(userInfoResponse.getErrorDescription(), "Unexpected result: errorDescription not found");
         }
