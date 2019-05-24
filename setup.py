@@ -2136,6 +2136,14 @@ class Setup(object):
         global_xml = global_xml.replace('</beans>', couchbase_bean_xml+'\n\n</beans>')
         self.writeFile(global_xml_fn, global_xml)
 
+        # Update attribute-resolver.xml for Couchbase
+        couchbase_attribute_resolver_fn = '%s/couchbase/couchbase_attribute_resolver.xml' % self.staticFolder
+        attribute_resolver_fn = '%s/attribute-resolver.xml' % self.idp3ConfFolder
+        couchbase_attribute_resolver_xml = self.readFile(couchbase_attribute_resolver_fn)
+        attribute_resolver_xml = self.readFile(attribute_resolver_fn)
+        attribute_resolver_xml = attribute_resolver_xml.replace('</AttributeResolver>', couchbase_attribute_resolver_xml+'\n\n</AttributeResolver>')
+        self.writeFile(attribute_resolver_fn, attribute_resolver_xml)
+
         # Add datasource.properties to idp.properties
         idp3_configuration_properties_fn = os.path.join(self.idp3ConfFolder, self.idp3_configuration_properties)
 
