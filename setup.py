@@ -3730,7 +3730,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase Node was initialized")
         else:
-            self.logIt("Failed to initilize Couchbase Node, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to initilize Couchbase Node, reason: "+ result.text, errorLog=True)
         
 
         self.logIt("Renaming Couchbase Node")
@@ -3738,7 +3738,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase Node was renamed")
         else:
-            self.logIt("Failed to rename Couchbase Node, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to rename Couchbase Node, reason: "+ result.text, errorLog=True)
 
 
         self.logIt("Setting Couchbase index storage mode")
@@ -3746,7 +3746,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase index storage mode was set")
         else:
-            self.logIt("Failed to set Couchbase index storage mode, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to set Couchbase index storage mode, reason: "+ result.text, errorLog=True)
 
 
         self.logIt("Setting Couchbase indexer memory quota to 1GB")
@@ -3754,7 +3754,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase indexer memory quota was set to 1GB")
         else:
-            self.logIt("Failed to set Couchbase indexer memory quota, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to set Couchbase indexer memory quota, reason: "+ result.text, errorLog=True)
 
 
         self.logIt("Setting up Couchbase Services")
@@ -3762,7 +3762,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase services were set up")
         else:
-            self.logIt("Failed to setup Couchbase services, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to setup Couchbase services, reason: "+ result.text, errorLog=True)
 
 
         self.logIt("Setting Couchbase Admin password")
@@ -3770,7 +3770,7 @@ class Setup(object):
         if result.ok:
             self.logIt("Couchbase admin password  was set")
         else:
-            self.logIt("Failed to set Couchbase admin password, reason: "+ result.reason, errorLog=True)
+            self.logIt("Failed to set Couchbase admin password, reason: "+ result.text, errorLog=True)
             
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
@@ -3780,7 +3780,7 @@ class Setup(object):
             self.couchbaseBuckets.append(bucketName)
             self.logIt("Bucket {} successfully created".format(bucketName))
         else:
-            self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.reason), errorLog=True)
+            self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.text), errorLog=True)
         #wait 1 second 
         time.sleep(1)
 
@@ -3796,7 +3796,7 @@ class Setup(object):
                 if result.ok:
                     self.logIt("Query execution was successful: {}".format(query))
                 else:
-                    self.logIt("Failed to execute query {}, reason:".format(query, result.reason), errorLog=True)
+                    self.logIt("Failed to execute query {}, reason:".format(query, result.text), errorLog=True)
 
     def couchebaseCreateIndexes(self, bucket):
         
