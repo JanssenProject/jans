@@ -26,6 +26,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "oxPublicKeyId")
     protected String publicKeyId;
 
+    @AttributeName(name = "displayName")
+    private String displayName;
+
     @JsonObject
     @AttributeName(name = "oxRegistrationData")
     private Fido2RegistrationData registrationData;
@@ -78,10 +81,19 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.deviceNotificationConf = deviceNotificationConf;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Fido2RegistrationEntry [publicKeyId=").append(publicKeyId).append(", registrationData=").append(registrationData).append("]");
         return builder.toString();
     }
+
 }

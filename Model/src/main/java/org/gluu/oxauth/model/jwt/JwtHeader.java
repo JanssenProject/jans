@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.jwt;
 
 import static org.gluu.oxauth.model.jwt.JwtHeaderName.*;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;

@@ -6,19 +6,6 @@
 
 package org.gluu.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -27,19 +14,22 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.UmaTokenResponse;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.service.token.TokenService;
-import org.gluu.oxauth.uma.authorization.Claims;
-import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
-import org.gluu.oxauth.uma.authorization.UmaPCT;
-import org.gluu.oxauth.uma.authorization.UmaRPT;
-import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import org.gluu.oxauth.uma.authorization.UmaWebException;
+import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * UMA Token Service
@@ -95,11 +85,11 @@ public class UmaTokenService {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
-            Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
+            Map<Scope, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
             Client client = identity.getSessionClient().getClient();
 
             if (client != null && client.isDisabled()) {
-                throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.DISABLED_CLIENT);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.DISABLED_CLIENT, "Client is disabled.");
             }
 
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
@@ -116,7 +106,7 @@ public class UmaTokenService {
                     log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
                 } else {
                     log.warn("Access denied because there are no any protection. Make sure it is intentional behavior.");
-                    throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Access denied because there are no any protection. Make sure it is intentional behavior.");
                 }
             }
 
@@ -149,7 +139,7 @@ public class UmaTokenService {
         }
 
         log.error("Failed to handle request to UMA Token Endpoint.");
-        throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
+        throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Failed to handle request to UMA Token Endpoint.");
     }
 
     private void addPctToPermissions(List<UmaPermission> permissions, UmaPCT pct) {
@@ -159,12 +149,12 @@ public class UmaTokenService {
         }
     }
 
-    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
+    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<Scope, Boolean> scopes) {
         log.trace("Updating permissions with requested scopes ...");
         for (UmaPermission permission : permissions) {
             Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
 
-            for (Map.Entry<UmaScopeDescription, Boolean> entry : scopes.entrySet()) {
+            for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
                 log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
                 scopeDns.add(entry.getKey().getDn());
             }

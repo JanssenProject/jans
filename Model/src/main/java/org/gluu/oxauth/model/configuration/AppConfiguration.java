@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.configuration;
 
 import com.google.common.collect.Lists;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.WebKeyStorage;
@@ -23,7 +23,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version January 16, 2019
+ * @version May 7, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -144,6 +144,7 @@ public class AppConfiguration implements Configuration {
     private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
+    private Boolean shareSubjectIdBetweenClientsWithSameSectorId;
 
     private WebKeyStorage webKeysStorage;
     private String dnName;
@@ -1143,6 +1144,14 @@ public class AppConfiguration implements Configuration {
 
     public void setPairwiseCalculationSalt(String pairwiseCalculationSalt) {
         this.pairwiseCalculationSalt = pairwiseCalculationSalt;
+    }
+
+    public Boolean isShareSubjectIdBetweenClientsWithSameSectorId() {
+        return shareSubjectIdBetweenClientsWithSameSectorId;
+    }
+
+    public void setShareSubjectIdBetweenClientsWithSameSectorId(Boolean shareSubjectIdBetweenClientsWithSameSectorId) {
+        this.shareSubjectIdBetweenClientsWithSameSectorId = shareSubjectIdBetweenClientsWithSameSectorId;
     }
 
     public WebKeyStorage getWebKeysStorage() {

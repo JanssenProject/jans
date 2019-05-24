@@ -84,9 +84,11 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		}
 
 		Set<CustomScriptConfiguration> result = Sets.newHashSet();
-		for (CustomScriptConfiguration script : this.customScriptConfigurations) {
-			if (allowedScripts.contains(script.getCustomScript().getDn())) {
-				result.add(script);
+		if (this.customScriptConfigurations != null) {
+			for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+				if (allowedScripts.contains(script.getCustomScript().getDn())) {
+					result.add(script);
+				}
 			}
 		}
 		return result;

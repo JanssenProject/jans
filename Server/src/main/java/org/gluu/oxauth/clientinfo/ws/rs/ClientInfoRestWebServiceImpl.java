@@ -6,16 +6,8 @@
 
 package org.gluu.oxauth.clientinfo.ws.rs;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoParamsValidator;
@@ -28,6 +20,13 @@ import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services
@@ -76,13 +75,13 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {
             builder = Response.status(400);
-            builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_REQUEST));
+            builder.entity(errorResponseFactory.errorAsJson(ClientInfoErrorResponseType.INVALID_REQUEST, "Failed to validate access token."));
         } else {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
             if (authorizationGrant == null) {
                 builder = Response.status(400);
-                builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN));
+                builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN, "","Unable to find grant object associated with access token."));
             } else {
                 CacheControl cacheControl = new CacheControl();
                 cacheControl.setPrivate(true);
@@ -107,7 +106,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
         try {
             for (String scopeName : scopes) {
-                Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                Scope scope = scopeService.getScopeById(scopeName);
 
                 if (scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {

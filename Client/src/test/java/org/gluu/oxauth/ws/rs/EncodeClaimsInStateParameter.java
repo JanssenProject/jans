@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.JwtState;

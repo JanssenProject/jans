@@ -6,14 +6,10 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
@@ -21,10 +17,13 @@ import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * The endpoint at which the requester can obtain FIDO U2F metadata
@@ -73,7 +72,7 @@ public class U2fConfigurationWS {
 		} catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
 			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(errorResponseFactory.getUmaJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
+					.entity(errorResponseFactory.errorAsJson(U2fErrorResponseType.SERVER_ERROR, "Unknown.")).build());
 		}
 	}
 

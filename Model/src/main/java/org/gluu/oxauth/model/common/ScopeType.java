@@ -6,10 +6,13 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.persist.annotation.AttributeEnum;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.gluu.persist.annotation.AttributeEnum;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Scope types
@@ -55,6 +58,8 @@ public enum ScopeType implements AttributeEnum {
      */
     DYNAMIC("dynamic", "Dynamic"),
 
+    UMA("uma", "UMA"),
+
     /**
      * OAuth 2.0 Scopes for any of their API's.
      * This scope type would only have a description, but no claims.
@@ -78,8 +83,16 @@ public enum ScopeType implements AttributeEnum {
         this.displayName = displayName;
     }
 
+    @JsonCreator
     public static ScopeType fromString(String param) {
-        return getByValue(param);
+        if (param != null) {
+            for (ScopeType st : ScopeType.values()) {
+                if (param.equals(st.value)) {
+                    return st;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -105,6 +118,7 @@ public enum ScopeType implements AttributeEnum {
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }

@@ -6,32 +6,33 @@
 
 package org.gluu.oxauth.model.registration;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.util.Pair;
+import org.gluu.oxauth.model.util.URLPatternList;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.util.ServerUtil;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterErrorResponseType;
-import org.gluu.oxauth.model.util.URLPatternList;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.util.ServerUtil;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.slf4j.Logger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the register web service.
@@ -64,16 +65,22 @@ public class RegisterParamsValidator {
      *                            The URL contains a file with a single JSON array of redirect_uri values.
      * @return Whether the parameters of client register is valid or not.
      */
-    public boolean validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
-                                                List<String> redirectUris, String sectorIdentifierUrl) {
-        boolean valid = applicationType != null && redirectUris != null && !redirectUris.isEmpty();
+    public Pair<Boolean, String> validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
+                                                              List<String> redirectUris, String sectorIdentifierUrl) {
+        if (applicationType == null) {
+            return new Pair<>(false, "application_type is not valid.");
+        }
+
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return new Pair<>(false, "Redirect uris are empty.");
+        }
 
         if (subjectType == null || !appConfiguration.getSubjectTypesSupported().contains(subjectType.toString())) {
             log.debug("Parameter subject_type is not valid.");
-            valid = false;
+            return new Pair<>(false, "Parameter subject_type is not valid.");
         }
 
-        return valid;
+        return new Pair<>(true, "");
     }
 
     /**
@@ -100,43 +107,47 @@ public class RegisterParamsValidator {
         boolean valid = true;
         Set<String> redirectUriHosts = new HashSet<String>();
 
-        try {
-            if (redirectUris != null && !redirectUris.isEmpty()) {
-                for (String redirectUri : redirectUris) {
-                    if (redirectUri == null || redirectUri.contains("#")) {
+        if (redirectUris != null && !redirectUris.isEmpty()) {
+            for (String redirectUri : redirectUris) {
+                if (redirectUri == null || redirectUri.contains("#")) {
+                    valid = false;
+                } else {
+                    URI uri = null;
+                    try {
+                        uri = new URI(redirectUri);
+                    } catch (URISyntaxException e) {
+                        log.error("Failed to parse redirect_uri: {}, error: {}", redirectUri, e.getMessage());
                         valid = false;
-                    } else {
-                        URI uri = new URI(redirectUri);
-                        redirectUriHosts.add(uri.getHost());
-                        switch (applicationType) {
-                            case WEB:
-                                if (HTTP.equalsIgnoreCase(uri.getScheme())) {
-                                    if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                        log.error("Invalid protocol for redirect_uri: " +
-                                                redirectUri +
-                                                " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
-                                        valid = false;
-                                    }
+                        continue;
+                    }
+                    redirectUriHosts.add(uri.getHost());
+                    switch (applicationType) {
+                        case WEB:
+                            if (HTTP.equalsIgnoreCase(uri.getScheme())) {
+                                if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
+                                    log.error("Invalid protocol for redirect_uri: " +
+                                            redirectUri +
+                                            " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
+                                    valid = false;
                                 }
-                                break;
-                            case NATIVE:
-                                // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
-                                // we allow registration with custom schema for native apps.
+                            }
+                            break;
+                        case NATIVE:
+                            // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
+                            // we allow registration with custom schema for native apps.
 //                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
 //                                    valid = false;
 //                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
 //                                    valid = false;
 //                                }
-                                break;
-                        }
+                            break;
                     }
                 }
-            } else {
-                valid = false;
             }
-        } catch (URISyntaxException e) {
+        } else {
             valid = false;
         }
+
 
         /*
          * Providers that use pairwise sub (subject) values SHOULD utilize the sector_identifier_uri value
@@ -176,7 +187,7 @@ public class RegisterParamsValidator {
                     valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
                 }
             } catch (Exception e) {
-                log.trace(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 valid = false;
             }
         }
@@ -264,13 +275,14 @@ public class RegisterParamsValidator {
     private void throwInvalidLogoutUri(ErrorResponseFactory errorResponseFactory) throws WebApplicationException {
         throw new WebApplicationException(
                 Response.status(Response.Status.BAD_REQUEST.getStatusCode()).
-                        entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI)).
+                        type(MediaType.APPLICATION_JSON_TYPE).
+                        entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI, "Failed to valide logout uri.")).
                         cacheControl(ServerUtil.cacheControl(true, false)).
                         header("Pragma", "no-cache").
                         build());
     }
 
-    private Set<String> collectUriHosts(List<String> uriList) throws URISyntaxException {
+    private static Set<String> collectUriHosts(List<String> uriList) throws URISyntaxException {
         Set<String> hosts = new HashSet<String>();
 
         for (String redirectUri : uriList) {

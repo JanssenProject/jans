@@ -9,7 +9,7 @@ package org.gluu.oxauth.service;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
+import org.json.JSONException;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
@@ -133,7 +133,7 @@ public class SessionIdService {
             String sessionAcr = getAcr(session);
 
             if (StringUtils.isBlank(sessionAcr)) {
-                log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
+                log.trace("Failed to fetch acr from session, attributes: " + sessionAttributes);
                 return session;
             }
 
@@ -141,10 +141,10 @@ public class SessionIdService {
             boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
-                Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
+                Integer sessionAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr));
 
                 for (String acrValue : acrValuesList) {
-                    Integer currentAcrLevel = acrToLevel.get(acrValue);
+                    Integer currentAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(acrValue));
 
                     log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
                             "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
@@ -265,7 +265,7 @@ public class SessionIdService {
             if (request != null) {
                 return getValueFromCookie(request, cookieName);
             } else {
-                log.error("Faces context returns null for http request object.");
+                log.trace("Faces context returns null for http request object.");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -300,7 +300,7 @@ public class SessionIdService {
             if (request != null) {
                 return getSessionIdFromCookie(request);
             } else {
-                log.error("Faces context returns null for http request object.");
+                log.trace("Faces context returns null for http request object.");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -535,13 +535,7 @@ public class SessionIdService {
 
             log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
             return sessionId;
-        } catch (NoSuchProviderException e) {
-            log.error("Failed generating session state! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Failed generating session state! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             log.error("Failed generating session state! " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
@@ -729,6 +723,10 @@ public class SessionIdService {
 
     public SessionId getSessionById(String sessionId) {
         return getFromCache(sessionId);
+    }
+
+    public SessionId getSessionId(HttpServletRequest request) {
+        return getSessionId(getSessionIdFromCookie(request));
     }
 
     public SessionId getSessionId(String sessionId) {

@@ -9,8 +9,8 @@ package org.gluu.oxauth.model.fido.u2f.protocol;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * FIDO U2F device data

@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * revoke the respective refresh token as well.
  *
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version May 14, 2019
  */
 public class TokenRevocationTest extends BaseTest {
 
@@ -197,7 +197,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken2);
 
         showClient(userInfoClient2);
-        assertEquals(userInfoResponse2.getStatus(), 400, "Unexpected response code: " + userInfoResponse2.getStatus());
+        assertEquals(userInfoResponse2.getStatus(), 401, "Unexpected response code: " + userInfoResponse2.getStatus());
         assertNotNull(userInfoResponse2.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(userInfoResponse2.getErrorDescription(), "Unexpected result: errorDescription not found");
     }
@@ -320,7 +320,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken);
 
         showClient(userInfoClient2);
-        assertEquals(userInfoResponse2.getStatus(), 400, "Unexpected response code: " + userInfoResponse2.getStatus());
+        assertEquals(userInfoResponse2.getStatus(), 401, "Unexpected response code: " + userInfoResponse2.getStatus());
         assertNotNull(userInfoResponse2.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(userInfoResponse2.getErrorDescription(), "Unexpected result: errorDescription not found");
 
@@ -434,7 +434,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertEquals(userInfoResponse1.getStatus(), 400, "Unexpected response code: " + userInfoResponse1.getStatus());
+        assertEquals(userInfoResponse1.getStatus(), 401, "Unexpected response code: " + userInfoResponse1.getStatus());
         assertNotNull(userInfoResponse1.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(userInfoResponse1.getErrorDescription(), "Unexpected result: errorDescription not found");
 
@@ -458,7 +458,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken);
 
         showClient(userInfoClient2);
-        assertEquals(userInfoResponse2.getStatus(), 400, "Unexpected response code: " + userInfoResponse2.getStatus());
+        assertEquals(userInfoResponse2.getStatus(), 401, "Unexpected response code: " + userInfoResponse2.getStatus());
         assertNotNull(userInfoResponse2.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(userInfoResponse2.getErrorDescription(), "Unexpected result: errorDescription not found");
     }
@@ -618,7 +618,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken);
 
         showClient(userInfoClient2);
-        assertEquals(userInfoResponse2.getStatus(), 400, "Unexpected response code: " + userInfoResponse2.getStatus());
+        assertEquals(userInfoResponse2.getStatus(), 401, "Unexpected response code: " + userInfoResponse2.getStatus());
         assertNotNull(userInfoResponse2.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(userInfoResponse2.getErrorDescription(), "Unexpected result: errorDescription not found");
     }

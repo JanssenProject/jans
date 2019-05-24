@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/02/2013
@@ -25,6 +28,7 @@ public enum ProgrammingLanguage {
         return m_value;
     }
 
+    @JsonCreator
     public static ProgrammingLanguage fromString(String p_string) {
         for (ProgrammingLanguage v : values()) {
             if (v.getValue().equalsIgnoreCase(p_string)) {
@@ -33,4 +37,11 @@ public enum ProgrammingLanguage {
         }
         return null;
     }
+
+    @Override
+    @JsonValue
+    public String toString() {
+        return m_value;
+    }
+
 }

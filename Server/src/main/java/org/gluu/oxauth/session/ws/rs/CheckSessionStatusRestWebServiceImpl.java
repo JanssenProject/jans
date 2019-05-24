@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;

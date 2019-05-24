@@ -26,7 +26,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 28, 2018
+ * @version May 14, 2019
  */
 public class ClientSpecificAccessTokenExpiration extends BaseTest {
 
@@ -81,9 +81,7 @@ public class ClientSpecificAccessTokenExpiration extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
 
-        String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
-        String idToken = authorizationResponse.getIdToken();
 
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -146,7 +144,7 @@ public class ClientSpecificAccessTokenExpiration extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(userInfoResponse.getStatus(), 400, "Unexpected response code: " + userInfoResponse.getStatus());
+            assertEquals(userInfoResponse.getStatus(), 401, "Unexpected response code: " + userInfoResponse.getStatus());
             assertNotNull(userInfoResponse.getErrorType(), "Unexpected result: errorType not found");
             assertNotNull(userInfoResponse.getErrorDescription(), "Unexpected result: errorDescription not found");
         }

@@ -3,8 +3,8 @@ package org.gluu.oxauth.model.crypto.binding;
 import com.google.common.base.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 
 import java.util.ArrayList;

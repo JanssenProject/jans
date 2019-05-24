@@ -2,8 +2,8 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
