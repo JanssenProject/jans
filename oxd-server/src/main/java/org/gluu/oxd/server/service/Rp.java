@@ -36,6 +36,8 @@ public class Rp implements Serializable {
     private String authorizationRedirectUri;
     @JsonProperty(value = "logout_redirect_uri")
     private String postLogoutRedirectUri;
+    @JsonProperty(value = "logout_redirect_uris")
+    private List<String> postLogoutRedirectUris;
 
     @JsonProperty(value = "application_type")
     private String applicationType;
@@ -135,7 +137,7 @@ public class Rp implements Serializable {
 
         this.authorizationRedirectUri = conf.authorizationRedirectUri;
         this.postLogoutRedirectUri = conf.postLogoutRedirectUri;
-
+        this.postLogoutRedirectUris = conf.postLogoutRedirectUris;
         this.applicationType = conf.applicationType;
         this.redirectUris = conf.redirectUris;
         this.claimsRedirectUri = conf.claimsRedirectUri;
@@ -322,6 +324,14 @@ public class Rp implements Serializable {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public List<String> getPostLogoutRedirectUris() {
+        return postLogoutRedirectUris;
+    }
+
+    public void setPostLogoutRedirectUris(List<String> postLogoutRedirectUris) {
+        this.postLogoutRedirectUris = postLogoutRedirectUris;
     }
 
     public String getClientName() {
@@ -619,6 +629,7 @@ public class Rp implements Serializable {
                 ", accessToken='" + accessToken + '\'' +
                 ", authorizationRedirectUri='" + authorizationRedirectUri + '\'' +
                 ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
+                ", postLogoutRedirectUris='" + postLogoutRedirectUris + '\'' +
                 ", applicationType='" + applicationType + '\'' +
                 ", redirectUris=" + redirectUris +
                 ", frontChannelLogoutUri=" + frontChannelLogoutUri +
