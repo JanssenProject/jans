@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.uma.persistence;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;

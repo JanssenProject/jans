@@ -32,8 +32,7 @@ import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.config.oxIDPAuthConf;
-import org.gluu.oxauth.model.config.ConfigurationFactory.PersistenceConfiguration;
+import org.gluu.oxauth.model.event.ApplicationInitializedEvent;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
@@ -42,6 +41,7 @@ import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.JsonService;
 import org.gluu.service.PythonService;
 import org.gluu.service.cdi.async.Asynchronous;
@@ -61,8 +61,8 @@ import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.event.ApplicationInitializedEvent;
 
 /**
  * @author Javier Rojas Blum
@@ -173,7 +173,7 @@ public class AppInitializer {
 		setDefaultAuthenticationMethod(localPersistenceEntryManager);
 
 		// Initialize python interpreter
-		pythonService.initPythonInterpreter(configurationFactory.getPersistenceConfiguration().getConfiguration()
+		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration()
 				.getString("pythonModulesDir", null));
 
 		// Initialize script manager
@@ -566,7 +566,7 @@ public class AppInitializer {
 
 		GluuConfiguration configuration = null;
 		try {
-			configuration = localPersistenceEntryManager.find(GluuConfiguration.class, configurationDn,
+			configuration = localPersistenceEntryManager.find(configurationDn, GluuConfiguration.class,
 					persistenceReturnAttributes);
 		} catch (BasePersistenceException ex) {
 			log.error("Failed to load global configuration entry from Ldap", ex);
@@ -586,7 +586,7 @@ public class AppInitializer {
 		}
 
 		for (oxIDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
-			GluuLdapConfiguration persistenceAuthConfig = loadPersistenceAuthConfig(persistenceIdpAuthConfig);
+			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.getConfig();
 			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
 				persistenceAuthConfigs.add(persistenceAuthConfig);
 			}
@@ -603,36 +603,13 @@ public class AppInitializer {
 		}
 
 		List<oxIDPAuthConf> configurations = new ArrayList<oxIDPAuthConf>();
-		for (String configurationJson : configuration.getOxIDPAuthentication()) {
-
-			try {
-				oxIDPAuthConf authConf = jsonService.jsonToObject(configurationJson, oxIDPAuthConf.class);
-				if (authConf.getType().equalsIgnoreCase("ldap")
-						|| authConf.getType().equalsIgnoreCase("auth")) {
-					configurations.add(authConf);
-				}
-			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{}'", configurationJson, ex);
+		for (oxIDPAuthConf authConf : configuration.getOxIDPAuthentication()) {
+			if (authConf.getType().equalsIgnoreCase("ldap") || authConf.getType().equalsIgnoreCase("auth")) {
+				configurations.add(authConf);
 			}
 		}
 
 		return configurations;
-	}
-
-	private GluuLdapConfiguration loadPersistenceAuthConfig(oxIDPAuthConf configuration) {
-		if (configuration == null) {
-			return null;
-		}
-
-		try {
-			if (configuration.getType().equalsIgnoreCase("auth")) {
-				return jsonService.jsonToObject(configuration.getConfig(), GluuLdapConfiguration.class);
-			}
-		} catch (Exception ex) {
-			log.error("Failed to create object by oxIDPAuthConf: '{}'", configuration, ex);
-		}
-
-		return null;
 	}
 
 	public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {

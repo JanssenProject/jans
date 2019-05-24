@@ -71,7 +71,7 @@ public class DeviceRegistrationService {
 
 		String deviceDn = getDnForU2fDevice(userInum, deviceId);
 
-		return ldapEntryManager.find(DeviceRegistration.class, deviceDn, returnAttributes);
+		return ldapEntryManager.find(deviceDn, DeviceRegistration.class, returnAttributes);
 	}
 
 	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String ... returnAttributes) {
@@ -110,7 +110,7 @@ public class DeviceRegistrationService {
 
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
-
+        deviceRegistration.setDeletable(false);
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
@@ -157,7 +157,7 @@ public class DeviceRegistrationService {
 
 	public List<DeviceRegistration> getExpiredDeviceRegistrations(BatchOperation<DeviceRegistration> batchOperation, Date expirationDate, String[] returnAttributes, int sizeLimit, int chunkSize) {
 		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
-		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeTime(expirationDate));
+		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeTime(u2fBaseDn, expirationDate));
 
 		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
 

@@ -9,8 +9,6 @@ package org.gluu.oxauth.model.util;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxauth.model.crypto.Certificate;
 import org.gluu.oxauth.model.crypto.PublicKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
@@ -19,11 +17,17 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import javax.ws.rs.HttpMethod;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -226,7 +230,7 @@ public class JwtUtil {
                 log.debug(String.format("Status: %n%d", status));
 
                 if (status == 200) {
-                    jwks = new JSONObject(clientResponse.getEntity(String.class));
+                    jwks = fromJson(clientResponse.getEntity(String.class));
                     log.debug(String.format("JWK: %s", jwks));
                 }
             }
@@ -236,4 +240,11 @@ public class JwtUtil {
 
         return jwks;
     }
+
+	public static JSONObject fromJson(String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JsonOrgModule());
+		return mapper.readValue(json, JSONObject.class);
+	}
+
 }

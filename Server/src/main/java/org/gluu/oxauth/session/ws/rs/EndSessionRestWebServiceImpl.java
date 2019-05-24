@@ -104,7 +104,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         // yuriyz : we have to re-visit this since it doesn't look safe to redirect error to uri which is not validated.
         if (pair.getFirst() == null && pair.getSecond() == null && StringUtils.isNotBlank(postLogoutRedirectUri) && allowPostLogoutRedirect(postLogoutRedirectUri)) {
             try {
-                String error = errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+                String error = errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, "");
                 return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(error).build();
             } catch (URISyntaxException e) {
                 log.error("Can't perform redirect", e);
@@ -221,7 +221,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         boolean isGrantAndExternalLogoutSuccessful = isExternalLogoutPresent && externalLogoutResult;
         if (isExternalLogoutPresent && !isGrantAndExternalLogoutSuccessful) {
-            errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, EndSessionErrorResponseType.INVALID_GRANT, "External logout is present but executed external logout script returned failed result.");
         }
 
         if (ldapSessionId != null) {

@@ -307,6 +307,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-hybrid</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-cdi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
@@ -316,16 +324,6 @@
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.ocpsoft.rewrite</groupId>
-					<artifactId>rewrite-config-prettyfaces</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.ocpsoft.rewrite</groupId>
-					<artifactId>rewrite-servlet</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- oxEleven -->
@@ -514,23 +512,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>jaxrs-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
 		</dependency>
 
 		<!-- Jackson -->
@@ -945,12 +931,6 @@
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-client</artifactId>
 					<version>3.0.21.Final</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>jaxrs-api</artifactId>
-					<version>3.0.12.Final</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>

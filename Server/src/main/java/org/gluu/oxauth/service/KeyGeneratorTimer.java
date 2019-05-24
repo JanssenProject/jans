@@ -6,21 +6,13 @@
 
 package org.gluu.oxauth.service;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.gluu.oxauth.model.config.Conf;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
-import org.slf4j.Logger;
+import static org.gluu.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.gluu.oxauth.model.jwk.JWKParameter.KEY_ID;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -28,11 +20,23 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
-
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.gluu.oxauth.model.config.Conf;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.config.WebKeysConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
+import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.Scheduled;
+import org.gluu.service.timer.event.TimerEvent;
+import org.gluu.service.timer.schedule.TimerSchedule;
+import org.slf4j.Logger;
 
 /**
  * @author Javier Rojas Blum
@@ -43,7 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KeyGeneratorTimer {
 
     private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
-    private final static int DEFAULT_INTERVAL = 48; // 48 hours
+
+	private static final int DEFAULT_INTERVAL = 60;
 
     @Inject
     private Logger log;
@@ -61,20 +66,18 @@ public class KeyGeneratorTimer {
     private AppConfiguration appConfiguration;
 
     private AtomicBoolean isActive;
+	private long lastFinishedTime;
 
     public void initTimer() {
         log.debug("Initializing Key Generator Timer");
-
         this.isActive = new AtomicBoolean(false);
 
-        int interval = appConfiguration.getKeyRegenerationInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
+        // Schedule to start every 1 minute
+		final int delay = 1 * 60;
+		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new KeyGenerationEvent(),
+				Scheduled.Literal.INSTANCE));
 
-        interval = interval * 3600;
-        timerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new KeyGenerationEvent(),
-                Scheduled.Literal.INSTANCE));
+		this.lastFinishedTime = System.currentTimeMillis();
     }
 
     @Asynchronous
@@ -92,26 +95,48 @@ public class KeyGeneratorTimer {
         }
 
         try {
-            updateKeys();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	updateKeys();
+        } catch (Exception ex) {
+			log.error("Exception happened while executing keys update", ex);
         } finally {
             this.isActive.set(false);
         }
     }
 
-    public String updateKeys() throws JSONException, Exception {
-        String dn = configurationFactory.getPersistenceConfiguration().getConfiguration().getString("oxauth_ConfigurationEntryDN");
+	private void updateKeys() throws JSONException, Exception {
+		if (!isStartUpdateKeys()) {
+			return;
+		}
+
+		updateKeysImpl();
+		this.lastFinishedTime = System.currentTimeMillis();
+	}
+
+	private boolean isStartUpdateKeys() {
+		int poolingInterval = appConfiguration.getKeyRegenerationInterval();
+        if (poolingInterval <= 0) {
+        	poolingInterval = DEFAULT_INTERVAL;
+        }
+
+        poolingInterval = poolingInterval * 3600 * 1000;
+
+		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+
+		return timeDiffrence >= poolingInterval;
+	}
+
+    private void updateKeysImpl() throws JSONException, Exception {
+        String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
-        JSONObject jwks = new JSONObject(conf.getWebKeys());
-        conf.setWebKeys(updateKeys(jwks).toString());
+        JSONObject jwks = conf.getWebKeys().toJSONObject();
+        JSONObject updatedJwks =  updateKeys(jwks);
+
+        conf.setWebKeys(ServerUtil.createJsonMapper().readValue(updatedJwks.toString(), WebKeysConfiguration.class));
 
         long nextRevision = conf.getRevision() + 1;
         conf.setRevision(nextRevision);
         ldapEntryManager.merge(conf);
-
-        return conf.getWebKeys();
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {

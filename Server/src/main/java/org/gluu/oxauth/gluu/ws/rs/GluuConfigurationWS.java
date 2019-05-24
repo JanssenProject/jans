@@ -6,19 +6,12 @@
 
 package org.gluu.oxauth.gluu.ws.rs;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
@@ -33,12 +26,13 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * Created by eugeniuparvan on 8/5/16.
@@ -116,7 +110,7 @@ public class GluuConfigurationWS {
         try {
             for (Scope scope : scopeService.getAllScopesList()) {
                 final Set<String> claimsList = new HashSet<String>();
-                result.put(scope.getDisplayName(), claimsList);
+                result.put(scope.getId(), claimsList);
 
                 final List<String> claimIdList = scope.getOxAuthClaims();
                 if (claimIdList != null && !claimIdList.isEmpty()) {

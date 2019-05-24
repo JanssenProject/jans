@@ -11,6 +11,7 @@ import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET
 import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import org.gluu.oxauth.util.ServerUtil;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -28,8 +29,8 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
@@ -84,7 +85,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			fail(e.getMessage(), e);
 		}
@@ -186,7 +187,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			fail(e.getMessage(), e);
 		}
@@ -297,7 +298,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
 			fail(e.getMessage(), e);
 		}

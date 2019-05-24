@@ -8,8 +8,8 @@ package org.gluu.oxauth.model.crypto;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.common.JSONable;
 import org.gluu.oxauth.model.util.StringUtils;
 

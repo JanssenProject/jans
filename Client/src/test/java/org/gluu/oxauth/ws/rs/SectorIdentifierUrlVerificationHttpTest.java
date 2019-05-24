@@ -30,31 +30,89 @@ import static org.testng.Assert.*;
  * Functional tests for Sector Identifier URI Verification (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 30, 2018
+ * @version May 7, 2019
  */
 public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
+    // Run this test with both pairwiseIdType persistent and algorithmic
+    // And ensure shareSubjectIdBetweenClientsWithSameSectorId is set to false
     @Parameters({"redirectUris", "sectorIdentifierUri", "redirectUri", "userId", "userSecret"})
-    @Test // Run this test with pairwiseIdType persistent and algorithmic
-    public void paiwiseSectorIdentifierTypeToPreventSubjectIdentifierCorrelation(
+    @Test(enabled = false)
+    public void pairwiseSectorIdentifierTypeToPreventSubjectIdentifierCorrelation(
             final String redirectUris, final String sectorIdentifierUri, final String redirectUri,
             final String userId, final String userSecret) throws Exception {
-        showTitle("paiwiseSectorIdentifierTypeToPreventSubjectIdentifierCorrelation");
+        showTitle("pairwiseSectorIdentifierTypeToPreventSubjectIdentifierCorrelation");
 
-        String sub1 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUris, sectorIdentifierUri, redirectUri, userId, userSecret);
-        String sub2 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUris, sectorIdentifierUri, redirectUri, userId, userSecret);
+        RegisterResponse registerResponse1 = requestClientRegistration(redirectUris, sectorIdentifierUri);
+        RegisterResponse registerResponse2 = requestClientRegistration(redirectUris, sectorIdentifierUri);
+
+        String sub1 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse1.getClientId(),
+                registerResponse1.getClientSecret(),
+                registerResponse1.getResponseTypes());
+        String sub2 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse2.getClientId(),
+                registerResponse2.getClientSecret(),
+                registerResponse2.getResponseTypes());
 
         assertNotEquals(sub1, sub2, "Each client must receive a different sub value");
+
+        String sub3 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse1.getClientId(),
+                registerResponse1.getClientSecret(),
+                registerResponse1.getResponseTypes());
+        String sub4 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse2.getClientId(),
+                registerResponse2.getClientSecret(),
+                registerResponse2.getResponseTypes());
+
+        assertEquals(sub1, sub3, "Same client must receive the same sub value");
+        assertEquals(sub2, sub4, "Same client must receive the same sub value");
     }
 
-    public String requestAuthorizationCodeWithPairwiseSectorIdentifierType(
+    // Run this test with both pairwiseIdType persistent and algorithmic
+    // And ensure shareSubjectIdBetweenClientsWithSameSectorId is set to true
+    @Parameters({"redirectUris", "sectorIdentifierUri", "redirectUri", "userId", "userSecret"})
+    @Test(enabled = true)
+    public void shareSubjectIdBetweenClientsWithSameSectorId(
             final String redirectUris, final String sectorIdentifierUri, final String redirectUri,
             final String userId, final String userSecret) throws Exception {
+        showTitle("shareSubjectIdBetweenClientsWithSameSectorId");
+
+        RegisterResponse registerResponse1 = requestClientRegistration(redirectUris, sectorIdentifierUri);
+        RegisterResponse registerResponse2 = requestClientRegistration(redirectUris, sectorIdentifierUri);
+
+        String sub1 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse1.getClientId(),
+                registerResponse1.getClientSecret(),
+                registerResponse1.getResponseTypes());
+        String sub2 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse2.getClientId(),
+                registerResponse2.getClientSecret(),
+                registerResponse2.getResponseTypes());
+
+        assertEquals(sub1, sub2, "Each client must share the same sub value");
+
+        String sub3 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse1.getClientId(),
+                registerResponse1.getClientSecret(),
+                registerResponse1.getResponseTypes());
+        String sub4 = requestAuthorizationCodeWithPairwiseSectorIdentifierType(redirectUri, userId, userSecret,
+                registerResponse2.getClientId(),
+                registerResponse2.getClientSecret(),
+                registerResponse2.getResponseTypes());
+
+        assertEquals(sub1, sub3, "Same client must receive the same sub value");
+        assertEquals(sub2, sub4, "Same client must receive the same sub value");
+    }
+
+    public RegisterResponse requestClientRegistration(
+            final String redirectUris, final String sectorIdentifierUri) {
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
-        // 1. Register client with Sector Identifier URL
+        // Register client with Sector Identifier URL
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -74,10 +132,14 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         assertNotNull(registerResponse.getRegistrationAccessToken());
         assertNotNull(registerResponse.getClientSecretExpiresAt());
 
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
+        return registerResponse;
+    }
 
-        // 2. Request authorization and receive the authorization code.
+    public String requestAuthorizationCodeWithPairwiseSectorIdentifierType(
+            final String redirectUri, final String userId, final String userSecret,
+            final String clientId, final String clientSecret, final List<ResponseType> responseTypes) throws Exception {
+
+        // 1. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList(
                 "openid",
                 "profile",
@@ -107,7 +169,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
         String idToken = authorizationResponse.getIdToken();
 
-        // 3. Validate id_token
+        // 2. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
@@ -129,7 +191,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         String sub = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
 
-        // 4. Request access token using the authorization code.
+        // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -151,7 +213,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         String accessToken = tokenResponse.getAccessToken();
 
-        // 5. Request user info
+        // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 

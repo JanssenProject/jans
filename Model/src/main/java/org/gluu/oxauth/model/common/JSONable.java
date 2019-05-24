@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Javier Rojas Blum Date: 13.01.2013

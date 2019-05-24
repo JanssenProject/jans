@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.model.fido.u2f.protocol;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.model.util.Util;
 
 import java.io.Serializable;

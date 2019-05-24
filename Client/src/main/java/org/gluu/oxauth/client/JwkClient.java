@@ -7,7 +7,7 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.PublicKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;

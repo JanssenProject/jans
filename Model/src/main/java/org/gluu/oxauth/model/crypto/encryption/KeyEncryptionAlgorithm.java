@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.crypto.encryption;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
@@ -48,6 +51,7 @@ public enum KeyEncryptionAlgorithm {
         return algorithm;
     }
 
+    @JsonCreator
     public static KeyEncryptionAlgorithm fromName(String name) {
         if (name != null) {
             for (KeyEncryptionAlgorithm a : KeyEncryptionAlgorithm.values()) {
@@ -60,6 +64,7 @@ public enum KeyEncryptionAlgorithm {
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return name;
     }

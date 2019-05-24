@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * The access token type provides the client with the information required to
  * successfully utilize the access token to make a protected resource request
@@ -37,6 +40,7 @@ public enum TokenType {
      * @return The corresponding token type if found, otherwise
      *         <code>null</code>.
      */
+    @JsonCreator
     public static TokenType fromString(String param) {
         if (param != null) {
             for (TokenType rt : TokenType.values()) {
@@ -53,6 +57,7 @@ public enum TokenType {
      * name for the token_type parameter.
      */
     @Override
+    @JsonValue
     public String toString() {
         return name;
     }

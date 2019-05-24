@@ -56,7 +56,7 @@ public class ScopeChecker {
                 for (String scopeAllowedDn : scopesAllowed) {
                     org.oxauth.persistence.model.Scope scopeAllowed = scopeService.getScopeByDnSilently(scopeAllowedDn);
                     if (scopeAllowed != null) {
-                        String scopeAllowedName = scopeAllowed.getDisplayName();
+                        String scopeAllowedName = scopeAllowed.getId();
                         if (scopeRequested.equals(scopeAllowedName)) {
                             grantedScopes.add(scopeRequested);
                         }

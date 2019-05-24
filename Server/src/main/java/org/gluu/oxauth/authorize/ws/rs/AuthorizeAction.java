@@ -310,7 +310,7 @@ public class AuthorizeAction {
             ExternalContext externalContext = facesContext.getExternalContext();
             externalContext.setResponseStatus(HttpServletResponse.SC_BAD_REQUEST);
             externalContext.setResponseContentType(MediaType.APPLICATION_JSON);
-            externalContext.getResponseOutputWriter().write(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state));
+            externalContext.getResponseOutputWriter().write(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""));
             facesContext.responseComplete();
         }
 
@@ -847,7 +847,7 @@ public class AuthorizeAction {
     }
 
     private boolean hasOnlyOpenidScope() {
-        return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getDisplayName().equals("openid");
+        return getScopes() != null && getScopes().size() == 1 && getScopes().get(0).getId().equals("openid");
     }
 
     protected void handleSessionInvalid() {

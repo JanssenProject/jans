@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.comp;
 
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.gluu.oxauth.ConfigurableTest;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
