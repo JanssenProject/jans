@@ -32,26 +32,26 @@ public class RegisterSiteTest {
     @Parameters({"opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
     public void register(String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
-            DevelopersApi client = api();
+        DevelopersApi client = api();
 
-            registerSite(client, opHost, redirectUrl, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
+        registerSite(client, opHost, redirectUrl, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
 
-            // more specific site registration
-            final RegisterSiteParams params = new RegisterSiteParams();
-            params.setOpHost(opHost);
-            params.setAuthorizationRedirectUri(redirectUrl);
-            params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-            params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
-            params.setRedirectUris(Lists.newArrayList(redirectUrl));
-            params.setAcrValues(new ArrayList<>());
-            params.setScope(Lists.newArrayList("openid", "profile"));
-            params.setGrantTypes(Lists.newArrayList("authorization_code"));
-            params.setResponseTypes(Lists.newArrayList("code"));
+        // more specific site registration
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrl));
+        params.setAcrValues(new ArrayList<>());
+        params.setScope(Lists.newArrayList("openid", "profile"));
+        params.setGrantTypes(Lists.newArrayList("authorization_code"));
+        params.setResponseTypes(Lists.newArrayList("code"));
 
-            final RegisterSiteResponse resp = client.registerSite(params);
-            assertNotNull(resp);
-            assertNotNull(resp.getOxdId());
-            oxdId = resp.getOxdId();
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertNotNull(resp.getOxdId());
+        oxdId = resp.getOxdId();
     }
 
     @Test(dependsOnMethods = {"register"})
