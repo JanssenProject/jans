@@ -605,7 +605,6 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchbaseClusterRamsize = 2048 #in MB
         self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
@@ -613,12 +612,6 @@ class Setup(object):
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
         self.cbm = None
-
-        #Todo: This should be calculated according to couchbase system information. 
-        ramsize = get_ram_size()
-        if ramsize and ramsize < 4096:
-            self.couchbaseClusterRamsize = 1600
-
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -4024,24 +4017,28 @@ class Setup(object):
             self.couchebaseCreateCluster()
 
         self.couchbaseSSL()
-        
-        couchbase_mappings = self.getMappingType('couchbase')
 
+        #Determine ram_size for buckets
+        system_info = self.cbm.get_system_info()
+        couchbaseClusterRamsize = system_info["memoryQuota"]
+        self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
+        couchbase_mappings = self.getMappingType('couchbase')
         bucketNumber = len(couchbase_mappings)
 
         #TO DO: calculations of bucketRamsize is neaded
 
         if self.mappingLocations['default'] != 'couchbase':
-            self.couchbaseClusterRamsize -= 100
+            couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            self.couchebaseCreateBucket('gluu', bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+            bucketNumber += 1
+            self.couchebaseCreateBucket('gluu', bucketRamsize=couchbaseClusterRamsize/bucketNumber)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.mappingsLdif['default'], 'gluu')
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            self.couchebaseCreateBucket(bucket, bucketRamsize=self.couchbaseClusterRamsize/bucketNumber)
+            self.couchebaseCreateBucket(bucket, bucketRamsize=couchbaseClusterRamsize/bucketNumber)
             self.couchebaseCreateIndexes(bucket)
             if self.mappingsLdif[group]:
                 self.import_ldif_couchebase(self.mappingsLdif[group], bucket)
