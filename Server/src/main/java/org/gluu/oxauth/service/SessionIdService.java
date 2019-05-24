@@ -133,7 +133,7 @@ public class SessionIdService {
             String sessionAcr = getAcr(session);
 
             if (StringUtils.isBlank(sessionAcr)) {
-                log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
+                log.trace("Failed to fetch acr from session, attributes: " + sessionAttributes);
                 return session;
             }
 
@@ -265,7 +265,7 @@ public class SessionIdService {
             if (request != null) {
                 return getValueFromCookie(request, cookieName);
             } else {
-                log.error("Faces context returns null for http request object.");
+                log.trace("Faces context returns null for http request object.");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -300,7 +300,7 @@ public class SessionIdService {
             if (request != null) {
                 return getSessionIdFromCookie(request);
             } else {
-                log.error("Faces context returns null for http request object.");
+                log.trace("Faces context returns null for http request object.");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -535,13 +535,7 @@ public class SessionIdService {
 
             log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
             return sessionId;
-        } catch (NoSuchProviderException e) {
-            log.error("Failed generating session state! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Failed generating session state! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             log.error("Failed generating session state! " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
