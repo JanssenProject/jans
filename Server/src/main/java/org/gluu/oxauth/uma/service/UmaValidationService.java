@@ -6,35 +6,7 @@
 
 package org.gluu.oxauth.uma.service;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_PCT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RESOURCE_SCOPE;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_RPT;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TICKET;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -57,7 +29,6 @@ import org.gluu.oxauth.model.uma.UmaPermissionList;
 import org.gluu.oxauth.model.uma.UmaScopeType;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.service.token.TokenService;
@@ -67,11 +38,20 @@ import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
+import org.oxauth.persistence.model.Scope;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
-import com.google.common.base.Joiner;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.*;
+
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.gluu.oxauth.model.uma.UmaErrorResponseType.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -127,27 +107,27 @@ public class UmaValidationService {
     private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
         log.trace("Validate authorization: {}", authorization);
         if (StringHelper.isEmpty(authorization)) {
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT);
+            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT, "Authorization header is blank.");
         }
 
         String token = tokenService.getTokenFromAuthorizationParameter(authorization);
         if (StringHelper.isEmpty(token)) {
-            log.debug("Token is invalid");
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT);
+            log.debug("Token is invalid.");
+            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT, "Token is invalid.");
         }
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         if (authorizationGrant == null) {
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, ACCESS_DENIED);
+            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, ACCESS_DENIED, "Unable to find authorization grant by token.");
         }
 
         if (!authorizationGrant.isValid()) {
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, INVALID_TOKEN);
+            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_TOKEN, "Authorization grant is found but is not valid anymore.");
         }
 
         Set<String> scopes = authorizationGrant.getScopes();
         if (!scopes.contains(umaScopeType.getValue())) {
-            errorResponseFactory.throwUmaWebApplicationException(Response.Status.NOT_ACCEPTABLE, INVALID_CLIENT_SCOPE);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_ACCEPTABLE, INVALID_CLIENT_SCOPE, "Client does not have scope: " + umaScopeType.getValue());
         }
         return authorizationGrant;
     }
@@ -161,12 +141,12 @@ public class UmaValidationService {
                     return rpt;
                 } else {
                     log.error("RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired() + ", rptCode: " + rptCode);
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RPT, "RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired() + ", rptCode: " + rptCode);
                 }
             } else {
                 log.error("RPT is null, rptCode: " + rptCode);
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RPT, "RPT is null, rptCode: " + rptCode);
             }
-
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RPT);
         }
         return null;
     }
@@ -179,14 +159,14 @@ public class UmaValidationService {
 
     public void validatePermission(UmaPermission permission) {
         if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
-            log.error("Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : ""));
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+            log.error("Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : "No permissions."));
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : "No permissions."));
         }
 
         permission.checkExpired();
         if (!permission.isValid()) {
             log.error("Permission is not valid.");
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, EXPIRED_TICKET);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, EXPIRED_TICKET, "Permission is not valid.");
         }
     }
 
@@ -200,21 +180,20 @@ public class UmaValidationService {
         String resourceId = permission.getResourceId();
         if (StringHelper.isEmpty(resourceId)) {
             log.error("Resource id is empty");
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "Resource id is empty");
         }
 
         try {
             UmaResource resource = resourceService.getResourceById(resourceId);
             if (resource == null) {
                 log.error("Resource isn't registered or there are two resources with same Id");
-                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
-                return;
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "Resource is not registered.");
             }
 
             final List<String> scopeUrls = umaScopeService.getScopeIdsByDns(resource.getScopes());
             if (!scopeUrls.containsAll(permission.getScopes())) {
                 log.error("At least one of the scope isn't registered");
-                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE);
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE, "At least one of the scope isn't registered");
             } else {
                 return;
             }
@@ -223,27 +202,27 @@ public class UmaValidationService {
         }
 
         log.error("Resource isn't registered");
-        errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+        throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "Resource isn't registered");
     }
 
     public void validateGrantType(String grantType) {
         log.trace("Validate grantType: {}", grantType);
 
         if (!GrantType.OXAUTH_UMA_TICKET.getValue().equals(grantType)) {
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "No required grant_type: " + GrantType.OXAUTH_UMA_TICKET.getValue());
         }
     }
 
     public List<UmaPermission> validateTicket(String ticket) {
         if (StringUtils.isBlank(ticket)) {
             log.error("Ticket is null or blank.");
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Ticket is null or blank.");
         }
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
             log.error("Unable to find permissions registered for given ticket:" + ticket);
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Unable to find permissions registered for given ticket:" + ticket);
         }
         return permissions;
     }
@@ -266,7 +245,7 @@ public class UmaValidationService {
         if (StringUtils.isNotBlank(claimToken)) {
             if (!ClaimTokenFormatType.isValueValid(claimTokenFormat)) {
                 log.error("claim_token_format is unsupported. Supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
-                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN_FORMAT);
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN_FORMAT, "claim_token_format is unsupported. Supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
             }
 
             try {
@@ -274,18 +253,19 @@ public class UmaValidationService {
                 if (idToken != null) {
                     if (ServerUtil.isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
                         log.error("claim_token validation failed.");
-                        errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
+                        throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
                     }
                     return idToken;
+                } else {
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "id_tokne is null.");
                 }
             } catch (Exception e) {
                 log.error("Failed to parse claim_token as valid id_token.", e);
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "Failed to parse claim_token as valid id_token.");
             }
-
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
         } else if (StringUtils.isNotBlank(claimTokenFormat)) {
             log.error("claim_token is blank but claim_token_format is not blank. Both must be blank or both must be not blank");
-            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token is blank but claim_token_format is not blank. Both must be blank or both must be not blank");
         }
         return null;
     }
@@ -355,12 +335,12 @@ public class UmaValidationService {
                     return pct;
                 } else {
                     log.error("PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
+                    throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_PCT, "PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
                 }
             } else {
                 log.error("Failed to find PCT with pctCode: " + pctCode);
+                throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_PCT, "Failed to find PCT with pctCode: " + pctCode);
             }
-
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, INVALID_PCT);
         }
         return null;
     }
@@ -370,30 +350,30 @@ public class UmaValidationService {
      * @param permissions permissions
      * @return map of loaded scope and boolean, true - if client requested scope and false if it is permission ticket scope
      */
-    public Map<UmaScopeDescription, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
+    public Map<Scope, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
-        final Map<UmaScopeDescription, Boolean> result = new HashMap<UmaScopeDescription, Boolean>();
+        final Map<Scope, Boolean> result = new HashMap<Scope, Boolean>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-            for (UmaScopeDescription s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
+            for (Scope s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
                 result.put(s, true);
             }
         }
         for (UmaPermission permission : permissions) {
-            for (UmaScopeDescription s : umaScopeService.getScopesByDns(permission.getScopeDns())) {
+            for (Scope s : umaScopeService.getScopesByDns(permission.getScopeDns())) {
                 result.put(s, false);
             }
         }
         if (result.isEmpty()) {
             log.error("There are no any scopes requested in give request.");
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "There are no any scopes requested in give request.");
         }
-        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<UmaScopeDescription, String>() {
+        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<Scope, String>() {
             @Override
-            public String apply(UmaScopeDescription umaScopeDescription) {
-                return umaScopeDescription.getId();
+            public String apply(Scope scope) {
+                return scope.getId();
             }
         })));
         return result;
@@ -402,25 +382,25 @@ public class UmaValidationService {
     public void validateScopeExpression(String scopeExpression) {
         if (StringUtils.isNotBlank(scopeExpression) && !expressionService.isExpressionValid(scopeExpression)) {
             log.error("Scope expression is invalid. Expression: " + scopeExpression);
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Scope expression is invalid. Expression: " + scopeExpression);
         }
     }
 
     public Client validateClientAndClaimsRedirectUri(String clientId, String claimsRedirectUri, String state) {
         if (StringUtils.isBlank(clientId)) {
             log.error("Invalid clientId: {}", clientId);
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLIENT_ID, "Invalid clientId: " + clientId);
         }
         Client client = clientService.getClient(clientId);
         if (client == null) {
             log.error("Failed to find client with client_id: {}", clientId);
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLIENT_ID, "Failed to find client with client_id:" + clientId);
         }
 
         if (StringUtils.isNotBlank(claimsRedirectUri)) {
             if (ArrayUtils.isEmpty(client.getClaimRedirectUris())) {
                 log.error("Client does not have claims_redirect_uri specified, clientId: " + clientId);
-                throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
+                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Client does not have claims_redirect_uri specified, clientId: " + clientId);
             }
 
             String equalRedirectUri = getEqualRedirectUri(claimsRedirectUri, client.getClaimRedirectUris());
@@ -440,7 +420,7 @@ public class UmaValidationService {
 
         if (StringUtils.isBlank(claimsRedirectUri)) {
             log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
         }
 
         throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_REDIRECT_URI, state);
@@ -481,7 +461,7 @@ public class UmaValidationService {
             final List<String> clients = resourceService.getResourceById(rsId).getClients();
             if (!clients.contains(patClientDn)) {
                 log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: " + clients + ", PAT client: " + patClientDn);
-                throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, ACCESS_DENIED);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, ACCESS_DENIED, "Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false).");
             }
         }
     }
@@ -492,7 +472,7 @@ public class UmaValidationService {
         List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
         if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression()) ) {
             log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
-            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");
         }
     }
 }

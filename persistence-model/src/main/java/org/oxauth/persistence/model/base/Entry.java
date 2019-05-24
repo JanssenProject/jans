@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.oxauth.persistence.model.configuration;
+package org.oxauth.persistence.model.base;
 
 import org.gluu.persist.annotation.DN;
 

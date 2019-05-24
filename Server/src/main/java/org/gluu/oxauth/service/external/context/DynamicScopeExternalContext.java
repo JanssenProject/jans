@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.service.external.context;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.oxauth.persistence.model.Scope;
-import org.gluu.oxauth.model.common.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds object required in dynamic scope custom scripts 
@@ -43,7 +43,7 @@ public class DynamicScopeExternalContext extends ExternalScriptContext {
 		List<String> scopes = new ArrayList<String>();
 		if (dynamicScopes != null) {
 			for (Scope scope : dynamicScopes) {
-				scopes.add(scope.getDisplayName());
+				scopes.add(scope.getId());
 			}
 		}
 		return scopes;

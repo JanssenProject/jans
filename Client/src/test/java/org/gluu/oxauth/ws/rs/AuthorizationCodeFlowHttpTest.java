@@ -20,8 +20,14 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +40,7 @@ import static org.testng.Assert.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version January 30, 2018
+ * @version May 14, 2019
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
@@ -672,7 +678,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         UserInfoResponse response7 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response7.getStatus(), 400, "Unexpected response code: " + response7.getStatus());
+        assertEquals(response7.getStatus(), 401, "Unexpected response code: " + response7.getStatus());
         assertNotNull(response7.getErrorType(), "Unexpected result: errorType not found");
         assertNotNull(response7.getErrorDescription(), "Unexpected result: errorDescription not found");
     }

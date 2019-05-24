@@ -6,22 +6,10 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -37,10 +25,12 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.
@@ -128,15 +118,18 @@ public class UmaRptIntrospectionWS {
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asJson(statusResponse);
 
-            return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
+            return Response.status(Response.Status.OK)
+                    .entity(entity)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .cacheControl(ServerUtil.cacheControl(true))
+                    .build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             }
 
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Internal error.");
         }
     }
 
@@ -187,6 +180,6 @@ public class UmaRptIntrospectionWS {
     public Response requestRptStatusGet(@HeaderParam("Authorization") String authorization,
                                         @FormParam("token") String rpt,
                                         @FormParam("token_type_hint") String tokenTypeHint) {
-        throw new WebApplicationException(Response.status(405).entity("Introspection of RPT is not allowed by GET HTTP method.").build());
+        throw new WebApplicationException(Response.status(405).type(MediaType.APPLICATION_JSON_TYPE).entity("Introspection of RPT is not allowed by GET HTTP method.").build());
     }
 }

@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.crypto.signature;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * @author Javier Rojas Blum
  * @version February 12, 2019
@@ -26,10 +29,12 @@ public enum AlgorithmFamily {
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }
 
+    @JsonCreator
     public static AlgorithmFamily fromString(String param) {
         if (param != null) {
             for (AlgorithmFamily gt : AlgorithmFamily.values()) {
@@ -41,4 +46,5 @@ public enum AlgorithmFamily {
 
         return null;
     }
+
 }

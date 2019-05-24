@@ -7,9 +7,9 @@
 package org.gluu.oxauth.servlet;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -19,6 +19,7 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
+import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -28,13 +29,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+
+import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.gluu.oxauth.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum
@@ -283,7 +283,7 @@ public class OpenIdConfiguration extends HttpServlet {
 			jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED,
 					appConfiguration.getFrontChannelLogoutSessionSupported());
 
-			out.println(jsonObj.toString(4).replace("\\/", "/"));
+			out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
 		} catch (JSONException e) {
 			log.error(e.getMessage(), e);
 		} catch (Exception e) {
@@ -314,8 +314,8 @@ public class OpenIdConfiguration extends HttpServlet {
 			for (Scope scope : scopeService.getAllScopesList()) {
 				final JSONArray claimsList = new JSONArray();
 				final JSONObject mapping = new JSONObject();
-				mapping.put(scope.getDisplayName(), claimsList);
-				scopes.add(scope.getDisplayName());
+				mapping.put(scope.getId(), claimsList);
+				scopes.add(scope.getId());
 
 				scopeToClaimMapping.put(mapping);
 

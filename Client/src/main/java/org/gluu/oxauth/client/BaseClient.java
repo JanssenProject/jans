@@ -15,6 +15,11 @@ import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Cookie;
@@ -258,4 +263,5 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public Map<String, String> getHeaders() {
         return headers;
     }
+
 }

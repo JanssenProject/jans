@@ -1,6 +1,7 @@
 package org.gluu.oxauth.model.uma;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.model.uma.ClaimDefinition;
 
 import java.io.Serializable;
@@ -10,7 +11,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 14/04/2015
  */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UmaNeedInfoResponse implements Serializable {
 
     @JsonProperty(value = "error")

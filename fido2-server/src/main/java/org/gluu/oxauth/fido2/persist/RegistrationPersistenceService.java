@@ -217,7 +217,8 @@ public class RegistrationPersistenceService {
                 }
             }
         };
-        ldapEntryManager.findEntries(getDnForUser(null), Fido2RegistrationEntry.class, getExpiredRegistrationFilter(), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
+        String baseDn = getDnForUser(null);
+        ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         // Cleaning empty branches
         BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
@@ -235,7 +236,7 @@ public class RegistrationPersistenceService {
         ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyRegistrationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
     }
 
-    private Filter getExpiredRegistrationFilter() {
+    private Filter getExpiredRegistrationFilter(String baseDn) {
         int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
         unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
 
@@ -247,7 +248,7 @@ public class RegistrationPersistenceService {
         Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
-                ldapEntryManager.encodeTime(unfinishedRequestExpirationDate));
+                ldapEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
         
         Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, exirationDateFilter);
 

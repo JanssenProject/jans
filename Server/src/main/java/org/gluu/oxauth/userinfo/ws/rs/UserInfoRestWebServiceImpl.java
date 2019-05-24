@@ -6,44 +6,16 @@
 
 package org.gluu.oxauth.userinfo.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.AbstractToken;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.AuthorizationGrantType;
-import org.gluu.oxauth.model.common.DefaultScope;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -70,11 +42,7 @@ import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
-import org.gluu.oxauth.service.ScopeService;
-import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.oxauth.util.ServerUtil;
@@ -84,11 +52,24 @@ import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version March 8, 2019
+ * @version May 14, 2019
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -152,34 +133,34 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         try {
             if (!UserInfoParamsValidator.validateParams(accessToken)) {
                 builder = Response.status(400);
-                builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INVALID_REQUEST));
+                builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INVALID_REQUEST, "access token is not valid."));
             } else {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
                 if (authorizationGrant == null) {
                     log.trace("Failed to find authorization grant by access_token: " + accessToken);
-                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                    return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
                 }
 
                 final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
                 if (accessTokenObject == null || !accessTokenObject.isValid()) {
                     log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, accessTokenObject.isValid());
-                    return response(400, UserInfoErrorResponseType.INVALID_TOKEN);
+                    return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
                 }
 
                 if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Grant object has client_credentials grant_type which is not valid."));
                 } else if (appConfiguration.getOpenidScopeBackwardCompatibility()
                         && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())
                         && !authorizationGrant.getScopes().contains(DefaultScope.PROFILE.toString())) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Both openid and profile scopes are not present."));
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
                 } else if (!appConfiguration.getOpenidScopeBackwardCompatibility()
                         && !authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())) {
                     builder = Response.status(403);
-                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    builder.entity(errorResponseFactory.errorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE, "Missed openid scope."));
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
                 } else {
                     oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
@@ -236,7 +217,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     private Response response(int status, UserInfoErrorResponseType errorResponseType) {
-        return Response.status(status).entity(errorResponseFactory.getErrorAsJson(errorResponseType)).build();
+        return Response.status(status).entity(errorResponseFactory.errorAsJson(errorResponseType, "")). type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
@@ -262,7 +243,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().setAudience(authorizationGrant.getClientId());
+        jwt.getClaims().addAudience(authorizationGrant.getClientId());
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -291,7 +272,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwe.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwe.getClaims().setAudience(authorizationGrant.getClientId());
+        jwe.getClaims().addAudience(authorizationGrant.getClientId());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
@@ -337,7 +318,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Claims
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
-            org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+            org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
             if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
                 dynamicScopes.add(scope);
                 continue;
@@ -347,7 +328,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
                 JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                groupClaim.setName(scope.getDisplayName());
+                groupClaim.setName(scope.getId());
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
@@ -359,7 +340,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
 
-                jsonWebResponse.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                jsonWebResponse.getClaims().setClaim(scope.getId(), groupClaim);
             } else {
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
@@ -392,7 +373,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (gluuAttribute != null) {
                         String ldapClaimName = gluuAttribute.getName();
 
-                        Object attribute = user.getAttribute(ldapClaimName, optional);
+                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -425,7 +406,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = user.getAttribute(ldapClaimName, optional);
+                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -500,7 +481,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
 
                 if (scope != null && scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
@@ -530,15 +511,20 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
                     } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                        attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
+                        final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
+                        if (value instanceof String) {
+                            attribute = Boolean.parseBoolean((String) value);
+                        } else {
+                            attribute = value;
+                        }
                     } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
                         if (attributeValue != null) {
                             attribute = format.parse(attributeValue.toString());
                         }
                     } else {
-                        attribute = user.getAttribute(gluuAttribute.getName(), true);
+                        attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
                     }
 
                     if (attribute != null) {

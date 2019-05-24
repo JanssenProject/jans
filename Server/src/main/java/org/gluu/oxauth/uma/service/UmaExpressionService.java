@@ -1,17 +1,6 @@
 package org.gluu.oxauth.uma.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
 import com.google.common.collect.Lists;
-
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.JsonLogic;
 import org.gluu.oxauth.model.uma.JsonLogicNode;
@@ -23,9 +12,17 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz
@@ -58,7 +55,7 @@ public class UmaExpressionService {
             } else {
                 if (!evaluateByScopes(filterByScopeDns(scriptMap, permission.getScopeDns()))) {
                     log.trace("Regular evaluation returns false, access FORBIDDEN.");
-                    throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Regular evaluation returns false, access FORBIDDEN.");
                 }
             }
         }
@@ -110,16 +107,20 @@ public class UmaExpressionService {
                         return; // expression returned true;
                     }
                 } catch (Exception e) {
-                    log.error("Failed to evaluate jsonlogic expression. Expression: " + scopeExpression + ", resourceDn: " + resource.getDn());
+                    log.error("Failed to evaluate jsonlogic expression. Expression: " + scopeExpression + ", resourceDn: " + resource.getDn(), e);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to evaluate jsonlogic expression.");
                 }
             } else {
                 log.error("Scope size in JsonLogic object 'data' and in permission differs which is forbidden. Node data: " + node +
                         ", permissionDns: " + permission.getScopeDns() + ", result scopeIds: " + scopeIdToDnMap);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Scope size in JsonLogic object 'data' and in permission differs which is forbidden.");
             }
         } else {
             log.error("Failed to parse JsonLogic object, invalid expression: " + scopeExpression);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to parse JsonLogic object, invalid expression: " + scopeExpression);
         }
-        throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+
+        throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Unknown");
     }
 
     private void removeFalseScopesFromPermission(UmaPermission permission, List<String> dataScopes, Map<String, String> scopeIdToDnMap, List<Boolean> evaluatedResults) {
