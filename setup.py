@@ -744,6 +744,9 @@ class Setup(object):
 
     def initialize(self):
         self.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
+        if not os.path.exists(self.distFolder):
+            sys.exit("Please ensure that you are running this script inside Gluu container.")
+
 
     def set_ownership(self):
         self.logIt("Changing ownership")
