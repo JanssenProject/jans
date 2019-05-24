@@ -11,6 +11,8 @@ except:
 
 class FakeResult:
     ok = False
+    reason = ''
+    text = ''
 
 class CBM:
 
