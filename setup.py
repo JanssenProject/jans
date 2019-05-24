@@ -723,8 +723,8 @@ class Setup(object):
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
             txt += 'Install Backend'.ljust(30) + repr(self.installLdap).rjust(35) + "\n"
             
-            if self.installLdap:
-                txt += 'Backend Type'.ljust(30) + self.ldap_type.title().rjust(35) + "\n"
+            if (self.installLdap and not self.remoteLdap) or (self.install_couchbase and not self.remoteCouchbase):
+                txt += 'Backend Type'.ljust(30) + self.persistence_type.title().rjust(35) + "\n"
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             
