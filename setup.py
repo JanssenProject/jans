@@ -65,6 +65,13 @@ except:
     tty_rows = 60
     tty_columns = 120
 
+
+try:
+    from pyDes import *
+    from pylib.cbm import CBM
+except:
+    pass
+
 class ProgressBar:
 
     def __init__(self, tty_columns, max_steps=33):
@@ -600,6 +607,20 @@ class Setup(object):
         self.passport_rp_client_jks_pass = 'secret'
         self.passport_resource_id = None
 
+        # Gluu Radius
+        self.installGluuRadius = False
+        self.gluuRadiusSourceDir = '%s/radius' % self.staticFolder
+        self.oxauth_legacyIdTokenClaims = 'false'
+        self.oxauth_openidScopeBackwardCompatibility =  'false'
+        self.gluu_radius_client_id = None
+        self.gluu_ro_pw = None
+        self.gluu_ro_encoded_pw = None
+        self.ox_radius_client_id = None
+        self.oxRadiusClientIpAddress = None
+        self.oxRadiusClientName = None
+        self.oxRadiusClientSecret = None
+
+
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
@@ -731,8 +752,9 @@ class Setup(object):
                 txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
 
 
-            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
-                    + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
+            txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+            txt += 'Install Gluu Radius '.ljust(30) + repr(self.installGluuRadius).rjust(35) + "\n"
 
             return txt
         except:
@@ -892,7 +914,6 @@ class Setup(object):
             self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
         if not self.passport_resource_id:
             self.passport_resource_id = '0008-'  + str(uuid.uuid4())
-
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
@@ -2289,6 +2310,11 @@ class Setup(object):
             self.pbar.progress("Installing Gluu components: Passport", False)
             self.install_passport()
 
+        if self.installGluuRadius:
+            self.pbar.progress("Installing Gluu components: Radius", False)
+            self.install_gluu_radius()
+
+
     def isIP(self, address):
         try:
             socket.inet_aton(address)
@@ -2775,6 +2801,28 @@ class Setup(object):
             self.installPassport = True
         else:
             self.installPassport = False
+
+        promptForGluuRadius = self.getPrompt("Install Gluu Radius?", "No")[0].lower()
+        if promptForGluuRadius == 'y':
+            self.installGluuRadius = True
+            self.oxauth_legacyIdTokenClaims = 'true'
+            self.oxauth_openidScopeBackwardCompatibility =  'true'
+            
+            while True:
+                self.oxRadiusClientIpAddress = self.getPrompt("    Radius Client Ip Address")
+                if self.oxRadiusClientIpAddress:
+                    break
+            while True:
+                self.oxRadiusClientName = self.getPrompt("    Radius Client Name")
+                if self.oxRadiusClientName:
+                    break
+            while True:
+                self.oxRadiusClientSecret = self.getPrompt("    Radius Client Secret")
+                if self.oxRadiusClientSecret:
+                    break
+
+        else:
+            self.installGluuRadius = False
 
 
     def get_filepaths(self, directory):
@@ -4099,6 +4147,36 @@ class Setup(object):
                 self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
                 self.run([self.systemctl, 'daemon-reload'])
 
+
+
+    def install_gluu_radius(self):
+        
+        if not self.gluu_radius_client_id:
+            self.gluu_radius_client_id = '0008-'  + str(uuid.uuid4())
+        if not self.ox_radius_client_id:
+            self.ox_radius_client_id = '0008-'  + str(uuid.uuid4())
+        
+        self.gluu_ro_pw = self.getPW()
+        self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
+        self.oxRadiusClientSecret = self.obscure(self.oxRadiusClientSecret)
+        
+        ldif_template = os.path.join(self.gluuRadiusSourceDir, 'templates/gluu_radius.ldif')
+        scripts_dir = os.path.join(self.gluuRadiusSourceDir,'scripts')
+        
+        for scriptFile, scriptName in ( ('radius_dynamic_scope.py', 'super_gluu_ro_script'),
+                            ('radius_ro_pw_grant_credentials.py','gluu_ro_session_script'),
+                          ):
+            
+            scriptFilePath = os.path.join(scripts_dir, scriptFile)
+            base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
+            self.templateRenderingDict[scriptName] = base64ScriptFile
+
+        client_jwks_fn = os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jwks')
+        
+        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = self.generate_base64_file(client_jwks_fn, 1)
+        
+        self.renderTemplateInOut(ldif_template, os.path.join(self.gluuRadiusSourceDir, 'templates'), self.outputFolder)
+
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -4208,6 +4286,7 @@ if __name__ == '__main__':
         'installSaml': False,
         'installOxAuthRP': False,
         'installPassport': False,
+        'installGluuRadius': False,
         'loadTestData': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
