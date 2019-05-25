@@ -40,7 +40,7 @@ import re
 import glob
 import base64
 import platform
-from ldif import LDIFParser
+from pylib.ldif import LDIFParser
 import copy
 import random
 import ssl
