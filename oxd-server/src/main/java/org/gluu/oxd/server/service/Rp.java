@@ -244,11 +244,11 @@ public class Rp implements Serializable {
         this.clientJwksUri = clientJwksUri;
     }
 
-    public String getPatRefreshToken() {
+    public String getProtectionTokenRefreshToken() {
         return patRefreshToken;
     }
 
-    public void setPatRefreshToken(String patRefreshToken) {
+    public void setProtectionTokenRefreshToken(String patRefreshToken) {
         this.patRefreshToken = patRefreshToken;
     }
 
@@ -268,28 +268,28 @@ public class Rp implements Serializable {
         this.userSecret = userSecret;
     }
 
-    public String getPat() {
+    public String getProtectionToken() {
         return pat;
     }
 
-    public void setPat(String pat) {
-        this.pat = pat;
+    public void setProtectionToken(String protectionToken) {
+        this.pat = protectionToken;
     }
 
-    public int getPatExpiresIn() {
+    public int getProtectionTokenExpiresIn() {
         return patExpiresIn;
     }
 
-    public void setPatExpiresIn(int patExpiresIn) {
+    public void setProtectionTokenExpiresIn(int patExpiresIn) {
         this.patExpiresIn = patExpiresIn;
     }
 
-    public Date getPatCreatedAt() {
+    public Date getProtectionTokenCreatedAt() {
         return patCreatedAt;
     }
 
-    public void setPatCreatedAt(Date patCreatedAt) {
-        this.patCreatedAt = patCreatedAt;
+    public void setProtectionTokenCreatedAt(Date protectionTokenCreatedAt) {
+        this.patCreatedAt = protectionTokenCreatedAt;
     }
 
     public String getSectorIdentifierUri() {
