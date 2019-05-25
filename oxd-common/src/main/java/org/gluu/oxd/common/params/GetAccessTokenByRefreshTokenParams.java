@@ -9,7 +9,7 @@ import java.util.List;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAccessTokenByRefreshTokenParams implements HasProtectionAccessTokenParams {
+public class GetAccessTokenByRefreshTokenParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -17,16 +17,16 @@ public class GetAccessTokenByRefreshTokenParams implements HasProtectionAccessTo
     private String refresh_token;
     @JsonProperty(value = "scope")
     private List<String> scope;
-    @JsonProperty(value = "protection_access_token")
+    @JsonProperty(value = "token")
     private String protectionAccessToken;
 
     @Override
-    public String getProtectionAccessToken() {
+    public String getToken() {
         return protectionAccessToken;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+    public void setToken(String token) {
+        this.protectionAccessToken = token;
     }
 
     public String getOxdId() {

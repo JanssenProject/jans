@@ -9,14 +9,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetUserInfoParams implements HasProtectionAccessTokenParams {
+public class GetUserInfoParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "access_token")
     private String access_token;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public GetUserInfoParams() {
     }
@@ -37,12 +37,12 @@ public class GetUserInfoParams implements HasProtectionAccessTokenParams {
         this.oxd_id = oxdId;
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class GetUserInfoParams implements HasProtectionAccessTokenParams {
         sb.append("GetUserInfoParams");
         sb.append("{access_token='").append(access_token).append('\'');
         sb.append(", oxd_id='").append(oxd_id).append('\'');
-        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
+        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }
