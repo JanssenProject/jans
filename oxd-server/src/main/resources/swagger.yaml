@@ -62,9 +62,11 @@ paths:
                 type: string
                 example: https://<ophostname>
                 description: If missing, must be present in defaults
-              post_logout_redirect_uri:
-                type: string
-                example: https://client.example.org/cb
+              post_logout_redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/logout/page1", "https://client.example.org/logout/page2", "https://client.example.org/logout/page3"]
               application_type:
                 type: string
                 example: web
@@ -425,9 +427,11 @@ paths:
               authorization_redirect_uri:
                 type: string
                 example: https://client.example.org/cb
-              post_logout_redirect_uri:
-                type: string
-                example: https://client.example.org/cb
+              post_logout_redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/logout/page1", "https://client.example.org/logout/page2", "https://client.example.org/logout/page3"]
               response_types:
                 type: array
                 items:

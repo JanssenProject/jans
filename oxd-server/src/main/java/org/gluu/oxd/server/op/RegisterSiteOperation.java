@@ -28,10 +28,7 @@ import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -123,8 +120,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //post_logout_redirect_uri
-        if (Strings.isNullOrEmpty(params.getPostLogoutRedirectUri()) && !Strings.isNullOrEmpty(fallback.getPostLogoutRedirectUri())) {
-            params.setPostLogoutRedirectUri(fallback.getPostLogoutRedirectUri());
+        if (params.getPostLogoutRedirectUris() != null && params.getPostLogoutRedirectUris().isEmpty()
+                && fallback.getPostLogoutRedirectUris() != null && !fallback.getPostLogoutRedirectUris().isEmpty()) {
+            params.setPostLogoutRedirectUris(fallback.getPostLogoutRedirectUris());
         }
 
         // response_type
@@ -145,8 +143,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         redirectUris.add(params.getAuthorizationRedirectUri());
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
-            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-                redirectUris.add(params.getPostLogoutRedirectUri());
+            if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
+                redirectUris.addAll(params.getPostLogoutRedirectUris());
             }
         }
         final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
@@ -276,7 +274,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
-        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
+        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris() != null ? params.getPostLogoutRedirectUris() : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
@@ -334,7 +332,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
         rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
         rp.setResponseTypes(params.getResponseTypes());
-        rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
         rp.setContacts(params.getContacts());
         rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
         return request;
@@ -355,8 +353,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setUmaProtectedResources(new ArrayList<UmaResource>());
         rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
 
-        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-            rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
+            rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
