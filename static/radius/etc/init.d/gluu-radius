@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+# LSB Tags 
+### BEGIN INIT INFO
+# Provides: gluu-radius
+# Required-Start: $local_fs $network oxauth
+# Required-Stop:  $local_fs $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Gluu Radius Server Start Script
+# Description: Start Gluu Radius Server
+### END INIT INFO
+
+# chkconfig style configuration
+# chkconfig: 2345 99 99
+# description: Start Super Gluu Radius Server
+#
+
+# Super Gluu Radius Server daemon script 
+# Copyright (c) Gluu Inc.
+# Author Rolain Djeumen <rolain@gluu.org>
+
+
+############################################################
+# Set the name which is used by other variables 
+############################################################
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
+
+
+############################################################
+# Load settings from config file
+############################################################
+source /etc/default/$NAME
+
+############################################################
+# Variables used accross the script
+############################################################
+SCRIPTNAME="/etc/init.d/$NAME"
+PIDFILE="$GLUU_RADIUS_PID_DIR/$NAME.pid"
+
+
+
+
+############################################################
+# Import LSB log_* functions
+# Depends on lsb-base (>=3.2-14) to ensure the file is 
+# present 
+############################################################
+source /lib/lsb/init-functions
+
+############################################################
+# Test presence of java binary 
+############################################################
+if [ ! -x "$JAVA" ] ; then
+	log_failure_msg "Java executable not found at $JAVA"
+	exit 2
+fi
+
+
+############################################################
+# Service start function 
+############################################################
+
+do_start()
+{
+	# return values
+	# 	- 0 : service has been started 
+	#	- 1 : service is already running 
+	#	- 2 : service could not be started
+	
+	start-stop-daemon --start \
+		--quiet \
+		--pidfile "$PIDFILE" \
+		--user $GLUU_RADIUS_USER \
+		--exec "${JAVA}" \
+		--test > /dev/null \
+		|| return 1
+	
+	start-stop-daemon --start \
+		--quiet \
+		--make-pidfile \
+		--pidfile $PIDFILE \
+		--chuid $GLUU_RADIUS_USER \
+		--user  $GLUU_RADIUS_USER  \
+		--group $GLUU_RADIUS_GROUP \
+		--chdir "$GLUU_RADIUS_INSTALL_DIR" \
+		--background \
+		--exec "$JAVA" \
+		-- $GLUU_RADIUS_OPTS \
+		|| return 2
+ }
+
+############################################################
+# Service stop function 
+############################################################
+
+do_stop() 
+{
+	
+	# return values 
+	#	- 0 : service has been stopped
+	#	- 1 : service was already stopped 
+	#	- 2 : service could not be stopped
+	#   - other : a failure occured 
+
+	start-stop-daemon --stop \
+		--quiet \
+		--user $GLUU_RADIUS_USER \
+		--pidfile $PIDFILE \
+		--exec "${JAVA}" \
+		--retry TERM/5/KILL/5
+
+	RETVAL="$?"
+	[ "$RETVAL" = 2 ] && return 2
+	rm -f $PIDFILE
+	return "${RETVAL}"
+}
+
+
+############################################################
+# Service status function
+############################################################
+
+do_status() 
+{
+   start-stop-daemon \
+   	--start \
+   	--test \
+   	--oknodo \
+   	--pidfile $PIDFILE \
+   	--user $GLUU_RADIUS_USER \
+   	--exec "${JAVA}"
+}
+
+
+case "$1" in
+	start)
+	[ "${VERBOSE}" != no ] && log_daemon_msg "Starting $GLUU_RADIUS_SVC_DESCRIPTION"
+	do_start
+	case "$?" in
+		0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
+		2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+
+
+	stop)
+	[ "${VERBOSE}" != no ] && log_daemon_msg "Stopping $GLUU_RADIUS_SVC_DESCRIPTION"
+	do_stop
+	case "$?" in
+    	0|1) [ "${VERBOSE}" != no ] && log_end_msg 0 ;;
+    	2) [ "${VERBOSE}" != no ] && log_end_msg 1 ;;
+     esac
+    ;;
+
+    status)
+    do_status
+    ;;
+
+    restart|force-reload)
+    log_daemon_msg "Restarting $GLUU_RADIUS_SVC_DESCRIPTION"
+    do_stop
+
+    case "$?" in
+    	0|1)
+    	do_start
+    	case "$?" in
+    		0) log_end_msg 0;;
+    		1) log_end_msg 1;; # Old process is still running
+    		*) log_end_msg 1;; # Failed to start
+    	esac
+    	;;
+    	*)
+    	# Failed to stop 
+    	log_end_msg 1
+    	;;
+    esac
+    ;;
+
+
+    *)
+    echo "Usage : ${SCRIPTNAME} {start|stop|status|restart|force-reload}" >&2
+esac

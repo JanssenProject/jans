@@ -1,0 +1,97 @@
+dn: cn=schema
+changetype: modify
+add: attributeTypes
+attributeTypes: ( 1.3.6.1.4.48710.1.3.500 NAME 'oxRadiusListenInterface'
+    DESC 'Gluu Radius Server Listen Interface(s)'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.501 NAME 'oxRadiusAuthenticationPort'
+    DESC 'Gluu Radius Server Authentication Port'
+    EQUALITY integerMatch
+    SUBSTR integerOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.502 NAME 'oxRadiusAccountingPort'
+    DESC 'Gluu Radius Server Accounting Port'
+    EQUALITY integerMatch
+    SUBSTR integerOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.503 NAME 'oxRadiusOpenidUsername'
+    DESC 'Gluu Radius Server OpenID Username'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.504 NAME 'oxRadiusOpenidPassword' 
+    DESC 'Gluu Radius Server OpenID Password'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.505 NAME 'oxRadiusClientName' 
+    DESC 'Gluu Radius Client Name' 
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.506 NAME 'oxRadiusClientIpAddress'
+    DESC 'Gluu Radius Client Ip Address' 
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.507 NAME 'oxRadiusClientSecret'
+    DESC 'Gluu Radius Client Secret'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.508 NAME 'oxRadiusOpenIdBaseUrl'
+    DESC 'Gluu Radius Openid client base url'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.509 NAME 'oxRadiusAcrValue'
+    DESC 'Gluu Radius acr_values'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.510 NAME 'oxRadiusAuthScope'
+    DESC 'Gluu Radius scope'
+    EQUALITY caseIgnoreMatch
+    SUBSTR caseIgnoreSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.511 NAME 'oxRadiusAuthenticationTimeout'
+    DESC 'Gluu Radius authentication timeout'
+    EQUALITY integerMatch
+    SUBSTR integerOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+    X-ORIGIN 'Gluu created attribute' )
+
+
+dn: cn=schema
+changetype: modify
+add: objectClasses
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.90 NAME 'oxRadiusServerConfiguration'
+   SUP ( top )
+   STRUCTURAL
+   MUST ( objectClass )
+   MAY ( ou $ oxRadiusListenInterface $ oxRadiusAuthenticationPort $ oxRadiusAccountingPort
+            $ oxRadiusOpenIdBaseUrl $ oxRadiusOpenIdUsername $ oxRadiusOpenIdPassword
+            $ oxRadiusAcrValue $ oxRadiusAuthScope $ oxRadiusAuthenticationTimeout )
+   X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.91 NAME 'oxRadiusClient'
+   SUP ( top )
+   STRUCTURAL
+   MUST ( objectClass )
+   MAY ( inum $ oxRadiusClientName $ oxRadiusClientIpAddress $ oxRadiusClientSecret )
+   X-ORIGIN 'Gluu created objectclass' )
+
+
+
