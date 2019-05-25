@@ -18,15 +18,15 @@ public class GetAccessTokenByRefreshTokenParams implements HasAccessTokenParams 
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "token")
-    private String protectionAccessToken;
+    private String token;
 
     @Override
     public String getToken() {
-        return protectionAccessToken;
+        return token;
     }
 
     public void setToken(String token) {
-        this.protectionAccessToken = token;
+        this.token = token;
     }
 
     public String getOxdId() {

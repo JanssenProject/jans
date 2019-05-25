@@ -14,7 +14,7 @@ public class IntrospectRptParams implements HasAccessTokenParams {
     @JsonProperty(value = "rpt")
     private String rpt;
     @JsonProperty(value = "token")
-    private String protectionAccessToken;
+    private String token;
 
     @Override
     public String getOxdId() {
@@ -35,10 +35,10 @@ public class IntrospectRptParams implements HasAccessTokenParams {
 
     @Override
     public String getToken() {
-        return protectionAccessToken;
+        return token;
     }
 
     public void setToken(String token) {
-        this.protectionAccessToken = token;
+        this.token = token;
     }
 }
