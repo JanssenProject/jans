@@ -43,8 +43,8 @@ public class ValidationService {
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
         }
-        if (params instanceof HasProtectionAccessTokenParams) {
-            validate((HasProtectionAccessTokenParams) params);
+        if (params instanceof HasAccessTokenParams) {
+            validate((HasAccessTokenParams) params);
         }
 
         if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
@@ -92,13 +92,13 @@ public class ValidationService {
      * @param params params
      * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
      */
-    private boolean validate(HasProtectionAccessTokenParams params) {
+    private boolean validate(HasAccessTokenParams params) {
         final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             return false; // skip validation since protectCommandsWithAccessToken=false
         }
 
-        final String accessToken = params.getProtectionAccessToken();
+        final String accessToken = params.getToken();
 
         if (StringUtils.isBlank(accessToken)) {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
@@ -118,7 +118,7 @@ public class ValidationService {
             throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
         if (!introspectionResponse.getScope().contains("oxd")) {
-            throw new HttpException(ErrorResponseCode.PROTECTION_ACCESS_TOKEN_INSUFFICIENT_SCOPE);
+            throw new HttpException(ErrorResponseCode.ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
         if (introspectionResponse.getClientId().equals(rp.getClientId())) {
