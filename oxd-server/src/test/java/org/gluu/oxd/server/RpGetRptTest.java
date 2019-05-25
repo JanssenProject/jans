@@ -47,7 +47,7 @@ public class RpGetRptTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPostLogoutRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrl));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrl));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);

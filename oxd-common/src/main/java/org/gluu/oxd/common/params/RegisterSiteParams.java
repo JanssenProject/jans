@@ -19,8 +19,8 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private String op_discovery_path;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorization_redirect_uri;
-    @JsonProperty(value = "post_logout_redirect_uri")
-    private String post_logout_redirect_uri;
+    @JsonProperty(value = "post_logout_redirect_uris")
+    private List<String> post_logout_redirect_uris;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirect_uris;
@@ -180,12 +180,12 @@ public class RegisterSiteParams implements HasOxdIdParams {
         this.client_token_endpoint_auth_method = clientTokenEndpointAuthMethod;
     }
 
-    public String getPostLogoutRedirectUri() {
-        return post_logout_redirect_uri;
+    public List<String> getPostLogoutRedirectUris() {
+        return post_logout_redirect_uris;
     }
 
-    public void setPostLogoutRedirectUri(String post_logout_redirect_uri) {
-        this.post_logout_redirect_uri = post_logout_redirect_uri;
+    public void setPostLogoutRedirectUris(List<String> post_logout_redirect_uris) {
+        this.post_logout_redirect_uris = post_logout_redirect_uris;
     }
 
     public String getClientTokenEndpointAuthSigningAlg() {
@@ -307,7 +307,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
                 "op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
                 ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
-                ", post_logout_redirect_uri='" + post_logout_redirect_uri + '\'' +
+                ", post_logout_redirect_uris='" + post_logout_redirect_uris + '\'' +
                 ", redirect_uris=" + redirect_uris +
                 ", response_types=" + response_types +
                 ", claims_redirect_uri=" + claims_redirect_uri +
