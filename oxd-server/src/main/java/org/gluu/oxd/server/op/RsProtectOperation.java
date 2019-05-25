@@ -51,10 +51,10 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
         Rp site = getRp();
 
-        PatProvider protectionTokenProvider = new PatProvider() {
+        PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getProtectionToken(params.getOxdId()).getToken();
+                return getUmaTokenService().getPat(params.getOxdId()).getToken();
             }
 
             @Override
@@ -63,14 +63,14 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         };
 
-        ResourceRegistrar registrar = new ResourceRegistrar(protectionTokenProvider, new ServiceProvider(site.getOpHost()));
+        ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
         try {
             registrar.register(params.getResources());
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to register resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                getUmaTokenService().obtainProtectionToken(params.getOxdId()); // force to refresh PAT
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
                 registrar.register(params.getResources());
             } else {
                 throw e;
@@ -156,11 +156,11 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                 // remove existing resources, overwrite=true
                 UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
                 UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientExecutor());
-                String protectionToken = getUmaTokenService().getProtectionToken(params.getOxdId()).getToken();
+                String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
 
                 for (UmaResource resource : existingUmaResources) {
                     LOG.trace("Removing existing resource " + resource.getId() + " ...");
-                    resourceService.deleteResource("Bearer " + protectionToken, resource.getId());
+                    resourceService.deleteResource("Bearer " + pat, resource.getId());
                     LOG.trace("Removed existing resource " + resource.getId() + ".");
                 }
                 rp.getUmaProtectedResources().clear();

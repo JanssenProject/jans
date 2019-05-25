@@ -67,10 +67,10 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                     .build());
         }
 
-        PatProvider protectionTokenProvider = new PatProvider() {
+        PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getProtectionToken(params.getOxdId()).getToken();
+                return getUmaTokenService().getPat(params.getOxdId()).getToken();
             }
 
             @Override
@@ -113,7 +113,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             scopes = resource.getScopes();
         }
 
-        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(protectionTokenProvider, new ServiceProvider(site.getOpHost())));
+        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
         Response response = null;
         try {
             LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
@@ -122,7 +122,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
-                getUmaTokenService().obtainProtectionToken(params.getOxdId()); // force to refresh PAT
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
                 response = rptInterceptor.registerTicketResponse(scopes, resource.getId());
             } else {
                 throw e;
