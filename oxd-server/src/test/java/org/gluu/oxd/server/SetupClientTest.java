@@ -22,17 +22,17 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 public class SetupClientTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void setupClient(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
-        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+    public void setupClient(String host, String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls) throws IOException {
+        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrls, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Arrays.asList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
@@ -56,12 +56,12 @@ public class SetupClientTest {
         return setupClient(client, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrls, String logoutUri) {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);

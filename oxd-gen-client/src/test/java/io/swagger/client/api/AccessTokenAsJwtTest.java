@@ -22,16 +22,16 @@ import static org.testng.Assert.*;
 public class AccessTokenAsJwtTest {
 
 
-    @Parameters({"opHost", "redirectUrl",  "postLogoutRedirectUrl"})
+    @Parameters({"opHost", "redirectUrl",  "postLogoutRedirectUrls"})
     @Test
-    public void testWithAccessTokenAsJwt(String opHost, String redirectUrl, String postLogoutRedirectUrl) throws Exception {
+    public void testWithAccessTokenAsJwt(String opHost, String redirectUrl, String postLogoutRedirectUrls) throws Exception {
 
         final DevelopersApi apiClient = api();
 
         final RegisterSiteParams siteParams = new io.swagger.client.model.RegisterSiteParams();
         siteParams.setOpHost(opHost);
         siteParams.setAuthorizationRedirectUri(redirectUrl);
-        siteParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        siteParams.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         siteParams.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         siteParams.setAccessTokenAsJwt(true);
         siteParams.setTrustedClient(true);
