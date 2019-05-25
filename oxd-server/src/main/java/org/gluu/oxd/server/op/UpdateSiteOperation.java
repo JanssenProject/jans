@@ -135,8 +135,8 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
-            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-                redirectUris.add(params.getPostLogoutRedirectUri());
+            if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
+                redirectUris.addAll(params.getPostLogoutRedirectUris());
             }
 
             request.setRedirectUris(Lists.newArrayList(redirectUris));
@@ -168,8 +168,8 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             request.setJwksUri(params.getClientJwksUri());
         }
 
-        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-            request.setPostLogoutRedirectUris(Lists.newArrayList(params.getPostLogoutRedirectUri()));
+        if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
+            request.setPostLogoutRedirectUris(Lists.newArrayList(params.getPostLogoutRedirectUris()));
         }
 
         if (params.getContacts() != null) {
