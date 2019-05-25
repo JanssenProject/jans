@@ -101,7 +101,7 @@ public class ValidationService {
         final String accessToken = params.getProtectionAccessToken();
 
         if (StringUtils.isBlank(accessToken)) {
-            throw new HttpException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
         if (params instanceof RegisterSiteParams) {
             return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
@@ -124,12 +124,12 @@ public class ValidationService {
         if (introspectionResponse.getClientId().equals(rp.getClientId())) {
             return true;
         }
-        throw new HttpException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
+        throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN);
     }
 
     public IntrospectionResponse introspect(String accessToken, String oxdId) {
         if (StringUtils.isBlank(accessToken)) {
-            throw new HttpException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
@@ -142,7 +142,7 @@ public class ValidationService {
 
         if (!response.isActive()) {
             LOG.debug("access_token is not active.");
-            throw new HttpException(ErrorResponseCode.INACTIVE_PROTECTION_ACCESS_TOKEN);
+            throw new HttpException(ErrorResponseCode.INACTIVE_ACCESS_TOKEN);
         }
         return response;
     }
