@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
+public class RsCheckAccessParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -19,18 +19,18 @@ public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
     private String path;
     @JsonProperty(value = "http_method")
     private String http_method;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public RsCheckAccessParams() {
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getOxdId() {
@@ -73,7 +73,7 @@ public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", path='").append(path).append('\'');
         sb.append(", http_method='").append(http_method).append('\'');
-        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
+        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -233,8 +233,8 @@ public class RestResource {
     private static <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(paramsAsString, paramsClass);
-        if (params instanceof HasProtectionAccessTokenParams && !(params instanceof RegisterSiteParams)) {
-            ((HasProtectionAccessTokenParams) params).setProtectionAccessToken(validateAccessToken(authorization));
+        if (params instanceof HasAccessTokenParams && !(params instanceof RegisterSiteParams)) {
+            ((HasAccessTokenParams) params).setToken(validateAccessToken(authorization));
         }
         Command command = new Command(commandType, params);
         final IOpResponse response = ServerLauncher.getInjector().getInstance(Processor.class).process(command);

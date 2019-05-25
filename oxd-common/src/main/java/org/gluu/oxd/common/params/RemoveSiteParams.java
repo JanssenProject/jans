@@ -7,12 +7,12 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RemoveSiteParams implements HasProtectionAccessTokenParams {
+public class RemoveSiteParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public RemoveSiteParams() {
     }
@@ -23,7 +23,7 @@ public class RemoveSiteParams implements HasProtectionAccessTokenParams {
 
     public RemoveSiteParams(String oxdId, String protectionAccessToken) {
         this.oxd_id = oxdId;
-        this.protection_access_token = protectionAccessToken;
+        this.token = protectionAccessToken;
     }
 
     @Override
@@ -36,19 +36,19 @@ public class RemoveSiteParams implements HasProtectionAccessTokenParams {
     }
 
     @Override
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
     public String toString() {
         return "RemoveSiteParams{" +
                 "oxd_id='" + oxd_id + '\'' +
-                ", protection_access_token='" + protection_access_token + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

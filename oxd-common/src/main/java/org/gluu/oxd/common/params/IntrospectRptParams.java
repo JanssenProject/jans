@@ -7,13 +7,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IntrospectRptParams implements HasProtectionAccessTokenParams {
+public class IntrospectRptParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "rpt")
     private String rpt;
-    @JsonProperty(value = "protection_access_token")
+    @JsonProperty(value = "token")
     private String protectionAccessToken;
 
     @Override
@@ -34,11 +34,11 @@ public class IntrospectRptParams implements HasProtectionAccessTokenParams {
     }
 
     @Override
-    public String getProtectionAccessToken() {
+    public String getToken() {
         return protectionAccessToken;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protectionAccessToken = protectionAccessToken;
+    public void setToken(String token) {
+        this.protectionAccessToken = token;
     }
 }

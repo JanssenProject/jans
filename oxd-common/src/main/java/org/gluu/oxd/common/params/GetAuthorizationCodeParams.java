@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParams {
+public class GetAuthorizationCodeParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -25,8 +25,8 @@ public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParam
     private String state;
     @JsonProperty(value = "nonce")
     private String nonce;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public GetAuthorizationCodeParams() {
     }
@@ -79,12 +79,12 @@ public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParam
         this.acr_values = acrValues;
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class GetAuthorizationCodeParams implements HasProtectionAccessTokenParam
         sb.append(", username='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", state='").append(state).append('\'');
-        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
+        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }
