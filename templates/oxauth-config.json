@@ -249,7 +249,7 @@
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-    "legacyIdTokenClaims": false,
+    "legacyIdTokenClaims": %(oxauth_legacyIdTokenClaims)s,
     "customHeadersWithAuthorizationResponse": true,
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
@@ -280,25 +280,25 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "openidScopeBackwardCompatibility": false,
+    "openidScopeBackwardCompatibility": %(oxauth_openidScopeBackwardCompatibility)s,
     "useCacheForAllImplicitFlowObjects":false,
     "disableU2fEndpoint":false,
-	"authenticationProtectionConfiguration": {
-		"attemptExpiration": 15,
-		"maximumAllowedAttemptsWithoutDelay": 4,
-		"delayTime": 2,
-		"bruteForceProtectionEnabled": false
-	},
-	"fido2Configuration":{
-		"authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
-		"mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
-		"mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
-		"serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
-		"userAutoEnrollment":false,
-		"unfinishedRequestExpiration":120,
-		"authenticationHistoryExpiration":1296000,
-		"disableFido2":true
-	},
+    "authenticationProtectionConfiguration": {
+        "attemptExpiration": 15,
+        "maximumAllowedAttemptsWithoutDelay": 4,
+        "delayTime": 2,
+        "bruteForceProtectionEnabled": false
+    },
+    "fido2Configuration":{
+        "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
+        "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
+        "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
+        "serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
+        "userAutoEnrollment":false,
+        "unfinishedRequestExpiration":120,
+        "authenticationHistoryExpiration":1296000,
+        "disableFido2":true
+    },
    "loggingLevel": "INFO",
    "errorHandlingMethod":"internal"
 }
