@@ -48,7 +48,7 @@ public class NotAllowedTest {
         params.setOpHost("https://ce-dev.gluu.org");
         params.setAuthorizationRedirectUri("https://192.168.200.58:5053");
         params.setScope(Lists.newArrayList("openid", "profile", "email", "address", "clientinfo", "mobile_phone", "phone", "uma_protection"));
-        params.setPostLogoutRedirectUri("https://192.168.200.58:5053");
+        params.setPostLogoutRedirectUris(Lists.newArrayList("https://192.168.200.58:5053"));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList("https://192.168.200.58:5053/logout"));
         params.setAcrValues(Lists.newArrayList("gplus", "basic", "duo", "u2f"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));

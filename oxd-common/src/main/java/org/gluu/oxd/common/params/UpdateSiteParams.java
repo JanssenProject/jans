@@ -17,8 +17,8 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
     private String oxd_id;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorization_redirect_uri;
-    @JsonProperty(value = "post_logout_redirect_uri")
-    private String post_logout_redirect_uri;
+    @JsonProperty(value = "post_logout_redirect_uris")
+    private List<String> post_logout_redirect_uris;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirect_uris;
@@ -120,12 +120,12 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         this.client_token_endpoint_auth_method = clientTokenEndpointAuthMethod;
     }
 
-    public String getPostLogoutRedirectUri() {
-        return post_logout_redirect_uri;
+    public List<String> getPostLogoutRedirectUris() {
+        return post_logout_redirect_uris;
     }
 
-    public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
-        this.post_logout_redirect_uri = postLogoutRedirectUri;
+    public void setPostLogoutRedirectUris(List<String> postLogoutRedirectUris) {
+        this.post_logout_redirect_uris = postLogoutRedirectUris;
     }
 
     public String getClientJwksUri() {
@@ -247,6 +247,7 @@ public class UpdateSiteParams implements HasProtectionAccessTokenParams {
         sb.append("{acr_values=").append(acr_values);
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", authorization_redirect_uri='").append(authorization_redirect_uri).append('\'');
+        sb.append(", post_logout_redirect_uris='").append(post_logout_redirect_uris).append('\'');
         sb.append(", redirect_uris=").append(redirect_uris);
         sb.append(", response_types=").append(response_types);
         sb.append(", client_id='").append(client_id).append('\'');
