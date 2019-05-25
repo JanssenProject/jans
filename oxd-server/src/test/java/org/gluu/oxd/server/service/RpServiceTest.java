@@ -96,7 +96,7 @@ public class RpServiceTest {
 
         final Rp rp = configurationService.defaultRp();
         rp.setOxdId(UUID.randomUUID().toString());
-        rp.setPat(UUID.randomUUID().toString());
+        rp.setProtectionToken(UUID.randomUUID().toString());
 
         service.create(rp);
 
@@ -105,9 +105,9 @@ public class RpServiceTest {
                 @Override
                 public void run() {
                     try {
-                        rp.setPat(UUID.randomUUID().toString());
+                        rp.setProtectionToken(UUID.randomUUID().toString());
                         service.update(rp);
-                        System.out.println("Updated PAT: " + rp.getPat() + ", for site: " + rp.getOxdId());
+                        System.out.println("Updated PAT: " + rp.getProtectionToken() + ", for site: " + rp.getOxdId());
                     } catch (Throwable e) {
                         throw new AssertionError("Failed to update configuration: " + rp.getOxdId());
                     }
