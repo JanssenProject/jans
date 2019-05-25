@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthorizationCodeFlowParams implements org.gluu.oxd.common.params.HasProtectionAccessTokenParams {
+public class AuthorizationCodeFlowParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -33,8 +33,8 @@ public class AuthorizationCodeFlowParams implements org.gluu.oxd.common.params.H
     private String nonce;
     @JsonProperty(value = "acr")
     private String acr;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public AuthorizationCodeFlowParams() {
     }
@@ -47,12 +47,12 @@ public class AuthorizationCodeFlowParams implements org.gluu.oxd.common.params.H
         this.oxd_id = oxdId;
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getAcr() {
@@ -136,7 +136,7 @@ public class AuthorizationCodeFlowParams implements org.gluu.oxd.common.params.H
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", acr='").append(acr).append('\'');
-        sb.append(", protection_access_token='").append(protection_access_token).append('\'');
+        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

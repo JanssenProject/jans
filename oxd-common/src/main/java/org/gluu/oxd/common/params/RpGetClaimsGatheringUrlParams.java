@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenParams {
+public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -17,18 +17,18 @@ public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenPa
     private String ticket;
     @JsonProperty(value = "claims_redirect_uri")
     private String claims_redirect_uri;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public RpGetClaimsGatheringUrlParams() {
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getOxdId() {
@@ -62,7 +62,7 @@ public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenPa
         sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", ticket=").append(ticket);
         sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
-        sb.append(", protection_access_token=").append(protection_access_token);
+        sb.append(", token=").append(token);
         sb.append('}');
         return sb.toString();
     }

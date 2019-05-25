@@ -12,7 +12,7 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams {
+public class GetAuthorizationUrlParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -24,8 +24,8 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
     private List<String> scope;
     @JsonProperty(value = "hd")
     private String hd; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
     @JsonProperty(value = "authorization_redirect_uri")
@@ -42,12 +42,12 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
         this.custom_parameters = customParameters;
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getHostedDomain() {
@@ -124,7 +124,7 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
                 ", prompt='" + prompt + '\'' +
                 ", scope=" + scope +
                 ", hd='" + hd + '\'' +
-                ", protection_access_token='" + protection_access_token + '\'' +
+                ", token='" + token + '\'' +
                 ", custom_parameters=" + custom_parameters +
                 ", authorization_redirect_uri=" + authorization_redirect_uri +
                 '}';

@@ -12,7 +12,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetRptParams implements HasProtectionAccessTokenParams {
+public class RpGetRptParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -30,18 +30,18 @@ public class RpGetRptParams implements HasProtectionAccessTokenParams {
     private List<String> scope;
     @JsonProperty(value = "state")
     private String state;
-    @JsonProperty(value = "protection_access_token")
-    private String protection_access_token;
+    @JsonProperty(value = "token")
+    private String token;
 
     public RpGetRptParams() {
     }
 
-    public String getProtectionAccessToken() {
-        return protection_access_token;
+    public String getToken() {
+        return token;
     }
 
-    public void setProtectionAccessToken(String protectionAccessToken) {
-        this.protection_access_token = protectionAccessToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getOxdId() {
@@ -120,7 +120,7 @@ public class RpGetRptParams implements HasProtectionAccessTokenParams {
                 ", rpt='" + rpt + '\'' +
                 ", scope=" + scope +
                 ", state='" + state + '\'' +
-                ", protection_access_token='" + protection_access_token + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }
