@@ -1431,8 +1431,13 @@ class Setup(object):
         changeTo = None
         os_ = self.os_type + self.os_version
 
-        if self.ldap_type == 'couchbase':
+        couchbase_mappings = self.getMappingType('couchbase')
+
+        if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
+
+        if self.remoteLdap and self.remoteCouchbase:
+            changeTo = ''
 
         if changeTo != None:
             for service in self.service_requirements:
@@ -3732,6 +3737,7 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', target_file])
             self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
             self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
+            self.run_service_command('couchbase-server', 'start')
 
     def couchebaseCreateCluster(self):
         
