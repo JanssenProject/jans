@@ -41,14 +41,14 @@ public class IntrospectionService {
         final org.gluu.oxauth.client.service.IntrospectionService introspectionService = ProxyFactory.create(org.gluu.oxauth.client.service.IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
 
         try {
-            IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+            IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getProtectionToken(oxdId).getToken(), accessToken);
             return response; // we need local variable to force convertion here
         } catch (ClientResponseFailure e) {
             int status = e.getResponse().getStatus();
             LOG.debug("Failed to introspect token. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + status, e);
             if (retry && (status == 400 || status == 401)) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                umaTokenService.obtainPat(oxdId); // force to refresh PAT
+                umaTokenService.obtainProtectionToken(oxdId); // force to refresh PAT
                 return introspectToken(oxdId, accessToken, false);
             } else {
                 throw e;
@@ -59,7 +59,7 @@ public class IntrospectionService {
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BackCompatibleIntrospectionService backCompatibleIntrospectionService = ClientFactory.instance().createBackCompatibleIntrospectionService(introspectionEndpoint, httpService.getClientExecutor());
-                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken("Bearer " + umaTokenService.getProtectionToken(oxdId).getToken(), accessToken);
                 LOG.trace("Handled compatibility issue. Response: " + backResponse);
 
                 IntrospectionResponse response = new IntrospectionResponse();
@@ -94,11 +94,11 @@ public class IntrospectionService {
 
         try {
             final CorrectRptIntrospectionService introspectionService = ClientFactory.instance().createCorrectRptStatusService(metadata, httpService.getClientExecutor());
-            return introspectionService.requestRptStatus("Bearer " + umaTokenService.getPat(oxdId).getToken(), rpt, "");
+            return introspectionService.requestRptStatus("Bearer " + umaTokenService.getProtectionToken(oxdId).getToken(), rpt, "");
         } catch (ClientResponseFailure e) {
             int httpStatus = e.getResponse().getStatus();
             if (retry && (httpStatus == 401 || httpStatus == 400 || httpStatus == 403)) {
-                umaTokenService.obtainPat(oxdId).getToken();
+                umaTokenService.obtainProtectionToken(oxdId).getToken();
                 return introspectRpt(oxdId, rpt, false);
             } else {
                 throw e;
@@ -109,7 +109,7 @@ public class IntrospectionService {
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BadRptIntrospectionService badService = ClientFactory.instance().createBadRptStatusService(metadata, httpService.getClientExecutor());
-                BadRptIntrospectionResponse badResponse = badService.requestRptStatus("Bearer " + umaTokenService.getPat(oxdId).getToken(), rpt, "");
+                BadRptIntrospectionResponse badResponse = badService.requestRptStatus("Bearer " + umaTokenService.getProtectionToken(oxdId).getToken(), rpt, "");
 
                 LOG.trace("Handled compatibility issue. Response: " + badResponse);
 
