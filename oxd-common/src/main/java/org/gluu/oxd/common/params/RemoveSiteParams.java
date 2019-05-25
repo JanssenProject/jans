@@ -21,9 +21,9 @@ public class RemoveSiteParams implements HasAccessTokenParams {
         this(oxdId, null);
     }
 
-    public RemoveSiteParams(String oxdId, String protectionAccessToken) {
+    public RemoveSiteParams(String oxdId, String token) {
         this.oxd_id = oxdId;
-        this.token = protectionAccessToken;
+        this.token = token;
     }
 
     @Override
