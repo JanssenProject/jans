@@ -25,7 +25,7 @@ import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.ServerLauncher;
 import org.gluu.oxd.server.Utils;
-import org.gluu.oxd.server.model.ProtectionToken;
+import org.gluu.oxd.server.model.Pat;
 import org.gluu.oxd.server.model.UmaToken;
 import org.gluu.oxd.server.model.UmaTokenFactory;
 
@@ -124,37 +124,37 @@ public class UmaTokenService {
         throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
 
-    public ProtectionToken getProtectionToken(String oxdId) {
+    public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp rp = rpService.getRp(oxdId);
+        Rp site = rpService.getRp(oxdId);
 
-        if (rp.getProtectionToken() != null && rp.getProtectionTokenCreatedAt() != null && rp.getProtectionTokenExpiresIn() > 0) {
+        if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
-            expiredAt.setTime(rp.getProtectionTokenCreatedAt());
-            expiredAt.add(Calendar.SECOND, rp.getProtectionTokenExpiresIn());
+            expiredAt.setTime(site.getPatCreatedAt());
+            expiredAt.add(Calendar.SECOND, site.getPatExpiresIn());
 
             if (!CoreUtils.isExpired(expiredAt.getTime())) {
-                LOG.debug("Protection token from rp configuration: " + rp.getProtectionToken());
-                return new ProtectionToken(rp.getProtectionToken(), "", rp.getProtectionTokenExpiresIn());
+                LOG.debug("PAT from site configuration, PAT: " + site.getPat());
+                return new Pat(site.getPat(), "", site.getPatExpiresIn());
             }
         }
 
-        return obtainProtectionToken(oxdId);
+        return obtainPat(oxdId);
     }
 
-    public ProtectionToken obtainProtectionToken(String oxdId) {
+    public Pat obtainPat(String oxdId) {
         Rp site = rpService.getRp(oxdId);
         UmaToken token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
 
-        site.setProtectionToken(token.getToken());
-        site.setProtectionTokenCreatedAt(new Date());
-        site.setProtectionTokenExpiresIn(token.getExpiresIn());
-        site.setProtectionTokenRefreshToken(token.getRefreshToken());
+        site.setPat(token.getToken());
+        site.setPatCreatedAt(new Date());
+        site.setPatExpiresIn(token.getExpiresIn());
+        site.setPatRefreshToken(token.getRefreshToken());
 
         rpService.updateSilently(site);
 
-        return (ProtectionToken) token;
+        return (Pat) token;
     }
 
     private UmaToken obtainToken(String oxdId, UmaScopeType scopeType, Rp site) {
