@@ -13,7 +13,7 @@ public class UmaTokenFactory {
 
     public static UmaToken newToken(UmaScopeType scopeType) {
         if (scopeType == UmaScopeType.PROTECTION) {
-            return new ProtectionToken();
+            return new Pat();
         }
         throw new RuntimeException("Unknown scope type: " + scopeType);
     }
