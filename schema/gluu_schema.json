@@ -5555,7 +5555,7 @@
             "may": [
                 "ou",
                 "gluuPassportConfiguration",
-                "gluuStatus",
+                "gluuStatus"
             ],
             "must": [
                 "objectclass"
