@@ -4203,7 +4203,7 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
             self.run(['update-rc.d', 'gluu-radius', 'defaults'])
             
-        self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
+        self.run([self.cmd_chown, '-R', 'radius:gluu', radiusHome])
         self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
         self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
         self.run([self.cmd_chown, 'root:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
