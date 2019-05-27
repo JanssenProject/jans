@@ -13,7 +13,7 @@ gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthAppType
-gluuStatus: active
+oxEnabled: active
 inum: 18CC
 urn: urn:gluu:dir:attribute-def:oxAuthAppType
 
@@ -29,7 +29,7 @@ gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
-gluuStatus: active
+oxEnabled: active
 inum: 18CD
 urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
 
@@ -45,7 +45,7 @@ gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthRedirectURI
-gluuStatus: active
+oxEnabled: active
 inum: 18CE
 urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
 
@@ -61,7 +61,7 @@ gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthScope
-gluuStatus: active
+oxEnabled: active
 inum: 18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
 
@@ -151,7 +151,7 @@ objectClass: top
 objectClass: gluuGroup
 gluuGroupType: gluuTestGroup1
 inum: 7890
-gluuStatus: active
+oxEnabled: active
 displayName: Gluu Test Group 1
 
 dn: inum=7891,ou=groups,o=gluu
@@ -159,7 +159,7 @@ objectClass: top
 objectClass: gluuGroup
 gluuGroupType: gluuTestGroup2
 inum: 7891
-gluuStatus: active
+oxEnabled: active
 displayName: Gluu Test Group 2
 
 ######################################
@@ -177,7 +177,7 @@ displayName: oxAuth Test User
 emailVerified: true
 gender: Male
 givenName: Test
-gluuStatus: active
+oxEnabled: active
 iname: @test*person*test_user
 inum: B1F3-AEAE-B798
 locale: en-US
@@ -343,11 +343,11 @@ oxAuthRedirectURI: https://example.com/bad_sector_identifier
 ######################################
 dn: inum=031C-5621,ou=scripts,o=gluu
 changetype: modify
-replace: gluuStatus
-gluuStatus: true
+replace: oxEnabled
+oxEnabled: true
 
 dn: inum=031C-5622,ou=scripts,o=gluu
 changetype: modify
-replace: gluuStatus
-gluuStatus: true
+replace: oxEnabled
+oxEnabled: true
 

@@ -4110,7 +4110,7 @@ class Setup(object):
 
         self.couchbaseProperties()
 
-    def loadTestData(self):
+    def load_test_data(self):
         self.logIt("Loading test ldif files")
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
@@ -4468,7 +4468,7 @@ if __name__ == '__main__':
 
             if setupOptions['loadTestData']:
                 installObject.pbar.progress("Loading test data", False)
-                installObject.loadTestData()
+                installObject.load_test_data()
 
             if 'importLDIFDir' in setupOptions.keys():
                 installObject.pbar.progress("Importing LDIF files")
