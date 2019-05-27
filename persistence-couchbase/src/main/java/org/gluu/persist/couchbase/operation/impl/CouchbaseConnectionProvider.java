@@ -129,7 +129,7 @@ public class CouchbaseConnectionProvider {
     }
 
     private void openWithWaitImpl() {
-        String connectionMaxWaitTime = props.getProperty("connection-max-wait-time");
+        String connectionMaxWaitTime = props.getProperty("connection.connection-max-wait-time");
         int connectionMaxWaitTimeSeconds = 30;
         if (StringHelper.isNotEmpty(connectionMaxWaitTime)) {
             connectionMaxWaitTimeSeconds = Integer.parseInt(connectionMaxWaitTime);
