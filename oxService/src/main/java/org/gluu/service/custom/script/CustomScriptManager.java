@@ -65,7 +65,7 @@ public class CustomScriptManager implements Serializable {
 	private static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType",
-			"oxModuleProperty", "gluuStatus" };
+			"oxModuleProperty", "oxEnabled" };
 
 	@Inject
 	protected Logger log;

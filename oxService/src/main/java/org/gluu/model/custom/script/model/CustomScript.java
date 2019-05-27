@@ -73,7 +73,7 @@ public class CustomScript extends BaseEntry {
     @AttributeName(name = "oxRevision")
     private long revision;
 
-    @AttributeName(name = "gluuStatus")
+    @AttributeName(name = "oxEnabled")
     private boolean enabled;
 
     @JsonObject
