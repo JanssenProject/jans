@@ -223,7 +223,6 @@
     "numSubordinates"
   ], 
   "boolean": [
-    "gluuStatus",
     "oxEnabled",
     "pwdLockout", 
     "pwdMustChange", 
