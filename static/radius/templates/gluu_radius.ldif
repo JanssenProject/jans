@@ -1,8 +1,8 @@
 dn: inum=5866-4202,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Dynamic Scope script for Gluu Radius
-displayName: gluu_ro_session
+description: Dynamic Scope Script for Super Gluu RO
+displayName: super_gluu_ro_session
 gluuStatus: true
 inum: 5866-4202
 oxLevel: 100
@@ -15,7 +15,7 @@ programmingLanguage: python
 dn: inum=B8FD-4C11,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Resource Owner Password Credentials for Gluu Radius
+description: Super Gluu RO Password Credentials Script
 displayName: super_gluu_ro
 gluuStatus: true
 inum: B8FD-4C11
@@ -25,6 +25,7 @@ oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(super_gluu_ro_script)s
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
+oxConfigurationProperty: {"value1":"notification_service_mode","value2":"/etc/certs/super_gluu_creds.json","description":""}
 oxConfigurationProperty: {"value1":"notification_service_mode", "value2":"gluu","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"application_id", "value2":"https://%(hostname)s/identity/authcode.htm","hide":false,"description":""}
 
@@ -44,7 +45,7 @@ oxScriptDn: inum=5866-4202,ou=scripts,o=gluu
 dn: inum=%(gluu_radius_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
-displayName: Gluu Radius client
+displayName: Gluu RO OpenID Client
 inum: %(gluu_radius_client_id)s
 oxAuthClientSecret: %(gluu_ro_encoded_pw)s
 oxAuthAppType: Native
@@ -54,7 +55,7 @@ oxAuthScope: inum=63CD,ou=scopes,o=gluu
 oxAuthRedirectURI: https://%(hostname)s/
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxIncludeClaimsInIdToken: true
-oxAuthTokenEndpointAuthSigningAlg: true
+oxAuthTokenEndpointAuthSigningAlg: RS512
 oxAuthJwks::%(gluu_ro_client_base64_jwks)s
 
 dn: ou=oxradius,ou=configuration,o=gluu
@@ -67,8 +68,8 @@ oxRadiusAuthenticationTimeout: 35000
 oxRadiusAuthScope: inum=F0C4,ou=scopes,o=gluu
 oxRadiusAuthScope: inum=63CD,ou=scopes,o=gluu
 oxRadiusListenInterface: 0.0.0.0
-oxRadiusOpenIdBaseUrl: url
-oxRadiusOpenidUsername: inum=%(gluu_radius_client_id)s,ou=clients,o=gluu
+oxRadiusOpenIdBaseUrl: https://%(hostname)s/
+oxRadiusOpenidUsername: %(gluu_radius_client_id)s
 oxRadiusOpenidPassword: %(gluu_ro_encoded_pw)s
 
 dn: ou=radius_clients,o=gluu
