@@ -4194,7 +4194,6 @@ class Setup(object):
         
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/default/gluu-radius'), self.osDefault)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
-        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius.properties'), conf_dir)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jks'), self.certFolder)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
 
