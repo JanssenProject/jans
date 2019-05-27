@@ -1051,13 +1051,12 @@
         },
         {
             "desc": "Status of the entry, used by many objectclasses",
-            "equality": "caseIgnoreMatch",
+            "equality": "booleanMatch",
             "names": [
                 "gluuStatus"
             ],
             "oid": "oxAttribute:97",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4301,7 +4300,18 @@
             "oid": "oxAttribute:400",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Status of the entry, used by many objectclasses",
+            "equality": "booleanMatch",
+            "names": [
+                "oxEnabled"
+            ],
+            "oid": "oxAttribute:401",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+            "x_origin": "Gluu created attribute"
         }
+        
     ],
     "objectClasses": [
         {
@@ -4334,6 +4344,7 @@
                 "gluuManagedOrganizations",
                 "gluuOptOuts",
                 "gluuStatus",
+                "oxEnabled",
                 "gluuWhitePagesListed",
                 "iname",
                 "inum",
@@ -4429,6 +4440,7 @@
                 "gluuGroupType",
                 "gluuGroupVisibility",
                 "gluuStatus",
+                "oxEnabled",
                 "iname",
                 "inum",
                 "member",
@@ -4476,6 +4488,7 @@
                 "gluuPaymentProcessorTimestamp",
                 "gluuProStoresUser",
                 "gluuStatus",
+                "oxEnabled",
                 "gluuTempFaviconImage",
                 "gluuThemeColor",
                 "gluuWhitePagesEnabled",
@@ -4570,6 +4583,7 @@
                 "gluuSmtpUserName",
                 "gluuSslExpiry",
                 "gluuStatus",
+                "oxEnabled",
                 "gluuSystemUptime",
                 "gluuTargetRAM",
                 "gluuUrl",
@@ -4630,6 +4644,7 @@
                 "gluuSAML1URI",
                 "gluuSAML2URI",
                 "gluuStatus",
+                "oxEnabled",
                 "iname",
                 "inum",
                 "oxAttributeType",
@@ -4675,6 +4690,7 @@
                 "gluuSAMLspMetaDataURL",
                 "gluuSpecificRelyingPartyConfig",
                 "gluuStatus",
+                "oxEnabled",
                 "gluuTrustContact",
                 "gluuTrustDeconstruction",
                 "gluuValidationLog",
@@ -4703,6 +4719,7 @@
             "kind": "STRUCTURAL",
             "may": [
                 "gluuStatus",
+                "oxEnabled",
                 "inum",
                 "primaryKeyAttrName",
                 "primaryKeyValue",
@@ -5402,6 +5419,7 @@
                 "oxLevel",
                 "oxRevision",
                 "gluuStatus",
+                "oxEnabled",
                 "oxScriptError"
             ],
             "must": [
@@ -5543,7 +5561,8 @@
             "may": [
                 "ou",
                 "gluuPassportConfiguration",
-                "gluuStatus"
+                "gluuStatus",
+                "oxEnabled"
             ],
             "must": [
                 "objectclass"
