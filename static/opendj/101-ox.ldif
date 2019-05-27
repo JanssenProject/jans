@@ -571,9 +571,9 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.96 NAME 'gluuSslExpiry'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.97 NAME 'gluuStatus'
   DESC 'Status of the entry, used by many objectclasses'
-  EQUALITY booleanMatch
+  EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.98 NAME 'gluuSystemUptime'
   DESC 'Monitors how long the Gluu Server instance has been running.'
@@ -2299,7 +2299,6 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.400 NAME 'oxDeletable'
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.401 NAME 'oxEnabled'
   DESC 'Status of the entry, used by many objectclasses'
   EQUALITY booleanMatch
-  SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
@@ -2312,43 +2311,43 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.2 NAME 'gluuPerson'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ oxEnabled $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ oxGuid $ userRandomKey $ oxPreferredMethod $ userCertificate $ oxOTPDevices $ oxMobileDevices $ oxStrongAuthPolicy $ oxTrustedDevicesInfo $ oxUnlinkedExternalUids )
+  MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ oxGuid $ userRandomKey $ oxPreferredMethod $ userCertificate $ oxOTPDevices $ oxMobileDevices $ oxStrongAuthPolicy $ oxTrustedDevicesInfo $ oxUnlinkedExternalUids )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.3 NAME 'gluuGroup'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus $ oxEnabled $ iname $ inum $ member $ o $ owner $ seeAlso $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
+  MAY ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus $ iname $ inum $ member $ o $ owner $ seeAlso $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.4 NAME 'gluuOrganization'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ county $ deployedAppliances $ description $ displayName $ gluuAddPersonCapability $ gluuAdditionalUsers $ gluuApplianceUpdateRequestList $ gluuCustomMessage $ gluuFaviconImage $ gluuFederationHostingEnabled $ gluuInvoiceNo $ gluuLogoImage $ gluuManageIdentityPermission $ gluuManager $ gluuManagerGroup $ gluuOrgShortName $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuProStoresUser $ gluuStatus $ oxEnabled $ gluuTempFaviconImage $ gluuThemeColor $ gluuWhitePagesEnabled $ iname $ inum $ l $ mail $ memberOf $ nonProfit $ o $ oxCreationTimestamp $ oxLinkLinktrack $ oxLinktrackEnabled $ oxLinktrackLogin $ oxLinktrackPassword $ oxRegistrationConfiguration $ postalCode $ proStoresToken $ prostoresTimestamp $ scimAuthMode $ scimGroup $ scimStatus $ st $ street $ telephoneNumber $ title $ uid $ userPassword )
+  MAY ( c $ county $ deployedAppliances $ description $ displayName $ gluuAddPersonCapability $ gluuAdditionalUsers $ gluuApplianceUpdateRequestList $ gluuCustomMessage $ gluuFaviconImage $ gluuFederationHostingEnabled $ gluuInvoiceNo $ gluuLogoImage $ gluuManageIdentityPermission $ gluuManager $ gluuManagerGroup $ gluuOrgShortName $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuProStoresUser $ gluuStatus $ gluuTempFaviconImage $ gluuThemeColor $ gluuWhitePagesEnabled $ iname $ inum $ l $ mail $ memberOf $ nonProfit $ o $ oxCreationTimestamp $ oxLinkLinktrack $ oxLinktrackEnabled $ oxLinktrackLogin $ oxLinktrackPassword $ oxRegistrationConfiguration $ postalCode $ proStoresToken $ prostoresTimestamp $ scimAuthMode $ scimGroup $ scimStatus $ st $ street $ telephoneNumber $ title $ uid $ userPassword )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'gluuConfiguration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( blowfishPassword $ c $ description $ displayName $ gluuAdditionalBandwidth $ gluuAdditionalMemory $ gluuApplianceDnsServer $ gluuAppliancePollingInterval $ gluuBandwidthRX $ gluuBandwidthTX $ gluuDSstatus $ gluuFederationHostingEnabled $ gluuFreeDiskSpace $ gluuFreeMemory $ gluuFreeSwap $ gluuGroupCount $ gluuHTTPstatus $ gluuHostname $ gluuInvoiceNo $ gluuIpAddress $ gluuLastUpdate $ gluuLifeRay $ gluuLoadAvg $ gluuManageIdentityPermission $ gluuManager $ gluuMaxLogSize $ gluuOrgProfileMgt $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuPersonCount $ gluuPrivate $ gluuPublishIdpMetadata $ gluuResizeInitiated $ gluuSPTR $ gluuScimEnabled $ gluuShibAssertionsIssued $ gluuShibFailedAuth $ gluuShibSecurityEvents $ gluuShibSuccessfulAuths $ oxTrustEmail $ gluuSmtpFromEmailAddress $ gluuSmtpFromName $ gluuSmtpHost $ gluuSmtpPassword $ gluuSmtpPort $ gluuSmtpRequiresAuthentication $ gluuSmtpRequiresSsl $ gluuSmtpUserName $ gluuSslExpiry $ gluuStatus $ oxEnabled $ gluuSystemUptime $ gluuTargetRAM $ gluuUrl $ gluuVDSenabled $ gluuVDSstatus $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig $ oxLogConfigLocation $ oxSmtpConfiguration $ oxCacheConfiguration $ oxTrustStoreCert $ oxTrustStoreConf $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ gluuPassportEnabled $ gluuSmtpServerTrust )
+  MAY ( blowfishPassword $ c $ description $ displayName $ gluuAdditionalBandwidth $ gluuAdditionalMemory $ gluuApplianceDnsServer $ gluuAppliancePollingInterval $ gluuBandwidthRX $ gluuBandwidthTX $ gluuDSstatus $ gluuFederationHostingEnabled $ gluuFreeDiskSpace $ gluuFreeMemory $ gluuFreeSwap $ gluuGroupCount $ gluuHTTPstatus $ gluuHostname $ gluuInvoiceNo $ gluuIpAddress $ gluuLastUpdate $ gluuLifeRay $ gluuLoadAvg $ gluuManageIdentityPermission $ gluuManager $ gluuMaxLogSize $ gluuOrgProfileMgt $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuPersonCount $ gluuPrivate $ gluuPublishIdpMetadata $ gluuResizeInitiated $ gluuSPTR $ gluuScimEnabled $ gluuShibAssertionsIssued $ gluuShibFailedAuth $ gluuShibSecurityEvents $ gluuShibSuccessfulAuths $ oxTrustEmail $ gluuSmtpFromEmailAddress $ gluuSmtpFromName $ gluuSmtpHost $ gluuSmtpPassword $ gluuSmtpPort $ gluuSmtpRequiresAuthentication $ gluuSmtpRequiresSsl $ gluuSmtpUserName $ gluuSslExpiry $ gluuStatus $ gluuSystemUptime $ gluuTargetRAM $ gluuUrl $ gluuVDSenabled $ gluuVDSstatus $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig $ oxLogConfigLocation $ oxSmtpConfiguration $ oxCacheConfiguration $ oxTrustStoreCert $ oxTrustStoreConf $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ gluuPassportEnabled $ gluuSmtpServerTrust )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'gluuAttribute'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI $ gluuSAML2URI $ gluuStatus $ oxEnabled $ iname $ inum $ oxAttributeType $ oxMultivaluedAttribute $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
+  MAY ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI $ gluuSAML2URI $ gluuStatus $ iname $ inum $ oxAttributeType $ oxMultivaluedAttribute $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.7 NAME 'gluuSAMLconfig'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( description $ displayName $ federationRules $ gluuContainerFederation $ gluuEntityId $ gluuIsFederation $ gluuProfileConfiguration $ gluuReleasedAttribute $ gluuRulesAccepted $ gluuSAMLMetaDataFilter $ gluuSAMLTrustEngine $ gluuSAMLmaxRefreshDelay $ gluuSAMLspMetaDataFN $ gluuSAMLspMetaDataSourceType $ gluuSAMLspMetaDataURL $ gluuSpecificRelyingPartyConfig $ gluuStatus $ oxEnabled $ gluuTrustContact $ gluuTrustDeconstruction $ gluuValidationLog $ gluuValidationStatus $ iname $ inum $ o $ oxAuthPostLogoutRedirectURI $ url $ researchAndScholarshipEnabled $ gluuEntityType )
+  MAY ( description $ displayName $ federationRules $ gluuContainerFederation $ gluuEntityId $ gluuIsFederation $ gluuProfileConfiguration $ gluuReleasedAttribute $ gluuRulesAccepted $ gluuSAMLMetaDataFilter $ gluuSAMLTrustEngine $ gluuSAMLmaxRefreshDelay $ gluuSAMLspMetaDataFN $ gluuSAMLspMetaDataSourceType $ gluuSAMLspMetaDataURL $ gluuSpecificRelyingPartyConfig $ gluuStatus $ gluuTrustContact $ gluuTrustDeconstruction $ gluuValidationLog $ gluuValidationStatus $ iname $ inum $ o $ oxAuthPostLogoutRedirectURI $ url $ researchAndScholarshipEnabled $ gluuEntityType )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.8 NAME 'gluuInumMap'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( gluuStatus $ oxEnabled $ inum $ primaryKeyAttrName $ primaryKeyValue $ secondaryKeyAttrName $ secondaryKeyValue $ tertiaryKeyAttrName $ tertiaryKeyValue )
+  MAY ( gluuStatus $ inum $ primaryKeyAttrName $ primaryKeyValue $ secondaryKeyAttrName $ secondaryKeyValue $ tertiaryKeyAttrName $ tertiaryKeyValue )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.9 NAME 'gluuInvoice'
   SUP ( top )
@@ -2552,7 +2551,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.48 NAME 'oxPassportConfiguration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( ou $ gluuPassportConfiguration $ gluuStatus $ oxEnabled )
+  MAY ( ou $ gluuPassportConfiguration $ gluuStatus )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.49 NAME 'oxShibbolethCASProtocolConfiguration'
   SUP ( top )
