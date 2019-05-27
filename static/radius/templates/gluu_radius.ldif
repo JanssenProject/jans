@@ -75,9 +75,10 @@ dn: ou=radius_clients,o=gluu
 objectClass: organizationalUnit
 objectClass: top
 
-inum=%(ox_radius_client_id)s, ou=radius_clients,o=gluu
+dn: inum=%(ox_radius_client_id)s,ou=radius_clients,o=gluu
 objectClass: oxRadiusClient
 objectClass: top
+inum: %(ox_radius_client_id)s
 oxRadiusClientIpAddress: %(oxRadiusClientIpAddress)s
 oxRadiusClientName: %(oxRadiusClientName)s
 oxRadiusClientSecret: %(oxRadiusClientSecret)s
