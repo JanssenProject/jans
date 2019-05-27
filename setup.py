@@ -40,13 +40,13 @@ import re
 import glob
 import base64
 import platform
-from pylib.ldif import LDIFParser
 import copy
 import random
 import ssl
 import ldap
 import uuid
 
+from pylib.ldif import LDIFParser
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
 
@@ -2330,11 +2330,22 @@ class Setup(object):
         encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
         return encrypted_password
 
-    def createUser(self, userName, homeDir):
+    def createUser(self, userName, homeDir, shell='/bin/bash'):
+        
         try:
             useradd = '/usr/sbin/useradd'
-            self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', homeDir, userName])
-            self.logOSChanges("User %s with homedir %s was created" % (userName, homeDir))
+            cmd = [useradd, '--system', '--user-group', '--shell', shell, userName]
+            if homeDir:
+                cmd.insert(-1, '--create-home')
+                cmd.insert(-1, '--home-dir')
+                cmd.insert(-1, homeDir)
+            else:
+                cmd.insert(-1, '--no-create-home')
+            self.run(cmd)
+            if homeDir:
+                self.logOSChanges("User %s with homedir %s was created" % (userName, homeDir))
+            else:
+                self.logOSChanges("User %s without homedir was created" % (userName))
         except:
             self.logIt("Error adding user", True)
             self.logIt(traceback.format_exc(), True)
@@ -4176,6 +4187,33 @@ class Setup(object):
         self.templateRenderingDict['gluu_ro_client_base64_jwks'] = self.generate_base64_file(client_jwks_fn, 1)
         
         self.renderTemplateInOut(ldif_template, os.path.join(self.gluuRadiusSourceDir, 'templates'), self.outputFolder)
+
+        radiusHome = '/opt/gluu/radius/'
+
+        #schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
+        #self.import_ldif_opendj([schema_ldif])
+
+        #ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
+        #self.import_ldif_opendj([ldif_file])
+
+        #self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
+        #self.addUserToGroup('gluu', 'radius')
+        
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jks'), self.certFolder)
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
+        
+        self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
+        self.run([self.cmd_chown, '-R', 'root:gluu', '/etc/gluu/conf/radius/'])
+        self.run([self.cmd_chown, 'root:gluu', '/opt/gluu/python/libs/gluu_common.py'])
+        self.run([self.cmd_chown, 'root:gluu', '/etc/certs/gluu-radius.jks'])
+        
+        if self.os_type+self.os_version == 'ubuntu16':
+            self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+            self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+
+        # udpate-rc.d gluu-radius defaults
+
+
 
 ############################   Main Loop   #################################################
 
