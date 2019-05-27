@@ -4153,6 +4153,9 @@ class Setup(object):
         if not self.ox_radius_client_id:
             self.ox_radius_client_id = '0008-'  + str(uuid.uuid4())
         
+        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
+        self.createDirs(conf_dir)
+        radius_jwt_pass = self.obscure('changeit')
         self.gluu_ro_pw = self.getPW()
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
         
@@ -4170,9 +4173,11 @@ class Setup(object):
         client_jwks_fn = os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jwks')
         
         self.templateRenderingDict['gluu_ro_client_base64_jwks'] = self.generate_base64_file(client_jwks_fn, 1)
+        self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
         
         self.renderTemplateInOut(ldif_template, os.path.join(self.gluuRadiusSourceDir, 'templates'), self.outputFolder)
-
+        self.renderTemplateInOut('gluu-radius.properties', os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/'), conf_dir)
+        
         radiusHome = '/opt/gluu/radius/'
 
         schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
@@ -4183,9 +4188,6 @@ class Setup(object):
 
         self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
         self.addUserToGroup('gluu', 'radius')
-
-        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
-        self.createDirs(conf_dir)
 
         radius_archive = os.path.join(self.distGluuFolder, 'gluu-radius.tgz')
         self.run(['tar', '-zxf', radius_archive, '-C', '/'])
@@ -4201,7 +4203,6 @@ class Setup(object):
             self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
             self.run(['update-rc.d', 'gluu-radius', 'defaults'])
             
-        # udpate-rc.d gluu-radius defaults
         self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
         self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
         self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
