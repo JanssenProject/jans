@@ -4155,7 +4155,6 @@ class Setup(object):
         
         self.gluu_ro_pw = self.getPW()
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
-        self.oxRadiusClientSecret = self.obscure(self.oxRadiusClientSecret)
         
         ldif_template = os.path.join(self.gluuRadiusSourceDir, 'templates/gluu_radius.ldif')
         scripts_dir = os.path.join(self.gluuRadiusSourceDir,'scripts')
@@ -4176,29 +4175,37 @@ class Setup(object):
 
         radiusHome = '/opt/gluu/radius/'
 
-        #schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
-        #self.import_ldif_opendj([schema_ldif])
+        schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
+        self.import_ldif_opendj([schema_ldif])
 
-        #ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
-        #self.import_ldif_opendj([ldif_file])
+        ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
+        self.import_ldif_opendj([ldif_file])
 
-        #self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
-        #self.addUserToGroup('gluu', 'radius')
+        self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
+        self.addUserToGroup('gluu', 'radius')
+
+        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
+        self.createDirs(conf_dir)
+
+        radius_archive = os.path.join(self.distGluuFolder, 'gluu-radius.tgz')
+        self.run(['tar', '-zxf', radius_archive, '-C', '/'])
         
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/default/gluu-radius'), self.osDefault)
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius.properties'), conf_dir)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jks'), self.certFolder)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
-        
-        self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
-        self.run([self.cmd_chown, '-R', 'root:gluu', '/etc/gluu/conf/radius/'])
-        self.run([self.cmd_chown, 'root:gluu', '/opt/gluu/python/libs/gluu_common.py'])
-        self.run([self.cmd_chown, 'root:gluu', '/etc/certs/gluu-radius.jks'])
-        
+
         if self.os_type+self.os_version == 'ubuntu16':
             self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/init.d/gluu-radius'), '/etc/init.d')
             self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
-
+            self.run(['update-rc.d', 'gluu-radius', 'defaults'])
+            
         # udpate-rc.d gluu-radius defaults
-
+        self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
+        self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
+        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
 
 
 ############################   Main Loop   #################################################
