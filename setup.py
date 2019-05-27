@@ -2818,20 +2818,6 @@ class Setup(object):
             self.installGluuRadius = True
             self.oxauth_legacyIdTokenClaims = 'true'
             self.oxauth_openidScopeBackwardCompatibility =  'true'
-            
-            while True:
-                self.oxRadiusClientIpAddress = self.getPrompt("    Radius Client Ip Address")
-                if self.oxRadiusClientIpAddress:
-                    break
-            while True:
-                self.oxRadiusClientName = self.getPrompt("    Radius Client Name")
-                if self.oxRadiusClientName:
-                    break
-            while True:
-                self.oxRadiusClientSecret = self.getPrompt("    Radius Client Secret")
-                if self.oxRadiusClientSecret:
-                    break
-
         else:
             self.installGluuRadius = False
 
