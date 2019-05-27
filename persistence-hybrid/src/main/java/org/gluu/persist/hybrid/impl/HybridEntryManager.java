@@ -15,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.MappingException;

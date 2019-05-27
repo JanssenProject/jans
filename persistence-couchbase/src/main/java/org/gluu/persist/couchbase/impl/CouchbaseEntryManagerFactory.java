@@ -8,7 +8,6 @@
 package org.gluu.persist.couchbase.impl;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +17,9 @@ import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
+import org.gluu.util.StringHelper;
 import org.gluu.util.init.Initializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +57,19 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
             String sslTrustStoreFile = couchbaseConnectionProperties.getProperty("ssl.trustStore.file");
             String sslTrustStorePin = couchbaseConnectionProperties.getProperty("ssl.trustStore.pin");
 
-            this.couchbaseEnvironment = builder.sslEnabled(true).sslTruststoreFile(sslTrustStoreFile).sslTruststorePassword(sslTrustStorePin).build();
+            builder.sslEnabled(true).sslTruststoreFile(sslTrustStoreFile).sslTruststorePassword(sslTrustStorePin);
         } else {
-        	this.couchbaseEnvironment = builder.sslEnabled(false).build();
+        	builder.sslEnabled(false);
         }
+        
+        String connectTimeoutString = couchbaseConnectionProperties.getProperty("connection.connect-timeout");
+        if (StringHelper.isNotEmpty(connectTimeoutString)) {
+        	int connectTimeout = Integer.valueOf(connectTimeoutString);
+        	builder.connectTimeout(connectTimeout);
+        	
+        }
+
+        this.couchbaseEnvironment = builder.build();
 
         this.builder = null;
 	}
@@ -109,6 +119,13 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
         return couchbaseEntryManager;
     }
+
+	@Override
+	public void initStandalone(BaseFactoryService persistanceFactoryService) {
+		this.builder = DefaultCouchbaseEnvironment.builder().mutationTokensEnabled(true).computationPoolSize(5);
+	}
+
+
 /*
     public static void main(String[] args) throws FileNotFoundException, IOException {
     	Properties prop = new Properties();
