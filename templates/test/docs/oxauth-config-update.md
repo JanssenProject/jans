@@ -50,11 +50,13 @@ VII. Update LDAP schema (this is not needed for Couchbase)
 1. cp ./output/test/oxauth/schema/102-oxauth_test.ldif /opt/opendj/config/schema/
 2. cp ./output/test/scim-client/schema/103-scim_test.ldif /opt/opendj/config/schema/
 3. Apply manual schema changes described in ./output/test/scim-client/schema/scim_test_manual_update.schema
-4. Restart OpenDJ
-5. Create /home/ldap/.pw with LDAP admin user pwd
-6. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr1 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
-7. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
-8. Remove /home/ldap/.pw
+4. Create /home/ldap/.pw with LDAP admin user pwd
+5. Enable listen on all interfaes:
+   /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig --trustAll --no-prompt --hostname localhost --port 4444 --bindDN "cn=directory manager" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop --handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0
+6. Restart OpenDJ
+7. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr1 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
+8. /bin/su ldap -c cd /opt/opendj/bin ;  /opt/opendj/bin/dsconfig create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt
+9. Remove /home/ldap/.pw
 
 VIII. Update oxIDPAuthentication
 1. Update property https://github.com/GluuFederation/community-edition-setup/blob/master/templates/configuration.ldif#L26 in DB.
