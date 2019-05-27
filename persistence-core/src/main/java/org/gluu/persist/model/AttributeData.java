@@ -79,7 +79,7 @@ public class AttributeData {
         } else if (!name.equals(other.name)) {
             return false;
         }
-        if (!ArrayHelper.equalsIgnoreOrder(values, other.values)) {
+        if (!ArrayHelper.equalsIgnoreOrder(getStringValues(), other.getStringValues())) {
             return false;
         }
         return true;
