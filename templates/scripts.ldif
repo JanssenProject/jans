@@ -3,7 +3,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Cert authentication module
 displayName: cert
-gluuStatus: false
+oxEnabled: false
 inum: 2124-0CF1
 oxConfigurationProperty: {"value1":"chain_cert_file_path","value2":"/etc/certs/chain_cert.pem","description":""}
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/cert_creds.json","description":""}
@@ -26,7 +26,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module
 displayName: passport_social
-gluuStatus: false
+oxEnabled: false
 inum: 2FDB-CF02
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
@@ -43,7 +43,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Permission Dynamic Scope script
 displayName: dynamic_permission
-gluuStatus: true
+oxEnabled: true
 inum: CB5B-3211
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -57,7 +57,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Id Generator script
 displayName: id_generator
-gluuStatus: false
+oxEnabled: false
 inum: 031C-4A65
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -71,7 +71,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for org_name
 displayName: org_name
-gluuStatus: false
+oxEnabled: false
 inum: 031C-5621
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -85,7 +85,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for work_phone
 displayName: work_phone
-gluuStatus: false
+oxEnabled: false
 inum: 031C-5622
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -99,7 +99,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Cache Refresh script
 displayName: cache_refresh
-gluuStatus: false
+oxEnabled: false
 inum: 13D3-E7AD
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -113,7 +113,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: OTP Validation of passwords using Yubicloud authentication module
 displayName: yubicloud
-gluuStatus: false
+oxEnabled: false
 inum: 24FD-B96E
 oxConfigurationProperty: {"value1":"yubicloud_uri","value2":"api.yubico.com","description":""}
 oxConfigurationProperty: {"value1":"yubicloud_api_key","value2":"","description":""}
@@ -131,7 +131,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA RPT Policy
 displayName: uma_rpt_policy
-gluuStatus: false
+oxEnabled: false
 inum: 2DAF-F995
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
 oxLevel: 100
@@ -146,7 +146,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
-gluuStatus: false
+oxEnabled: false
 inum: 2DAF-F9A5
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
 oxLevel: 100
@@ -161,7 +161,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for oxtrust api
 displayName: oxtrust_api_access_policy
-gluuStatus: false
+oxEnabled: false
 inum: OO11-BAFE
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(oxtrust_requesting_party_client_id)s","description":""}
 oxLevel: 100
@@ -176,7 +176,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Claims Gathering
 displayName: sampleClaimsGathering
-gluuStatus: false
+oxEnabled: false
 inum: 2DAF-F996
 oxLevel: 1
 oxRevision: 1
@@ -190,7 +190,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Introspection sample script
 displayName: introspection_sample
-gluuStatus: true
+oxEnabled: true
 inum: 2DAF-AA90
 oxLevel: 1
 oxRevision: 1
@@ -204,7 +204,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Example
 displayName: resource_owner_password_credentials_example
-gluuStatus: false
+oxEnabled: false
 inum: 2DAF-AA91
 oxLevel: 1
 oxRevision: 1
@@ -218,7 +218,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Basic (with user locking) authentication module
 displayName: basic_lock
-gluuStatus: false
+oxEnabled: false
 inum: 4BBE-C6A8
 oxConfigurationProperty: {"value1":"invalid_login_count_attribute","value2":"oxCountInvalidLogin","description":""}
 oxConfigurationProperty: {"value1":"maximum_invalid_login_attemps","value2":"3","description":""}
@@ -236,7 +236,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: UAF authentication module
 displayName: uaf
-gluuStatus: false
+oxEnabled: false
 inum: 5018-AF9C
 oxConfigurationProperty: {"value1":"uaf_server_uri","value2":"https://%(hostname)s","description":""}
 oxConfigurationProperty: {"value1":"uaf_policy_name","value2":"default","description":""}
@@ -256,7 +256,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: HOTP/TOPT authentication module
 displayName: otp
-gluuStatus: false
+oxEnabled: false
 inum: 5018-D4BF
 oxConfigurationProperty: {"value1":"otp_type","value2":"totp","description":""}
 oxConfigurationProperty: {"value1":"otp_conf_file","value2":"/etc/certs/otp_configuration.json","description":""}
@@ -277,7 +277,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: DUO authentication module
 displayName: duo
-gluuStatus: false
+oxEnabled: false
 inum: 5018-F9CF
 oxConfigurationProperty: {"value1":"duo_creds_file","value2":"/etc/certs/duo_creds.json","description":""}
 oxConfigurationProperty: {"value1":"duo_host","value2":"api-random.duosecurity.com","description":""}
@@ -294,7 +294,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Update User script
 displayName: update_user
-gluuStatus: false
+oxEnabled: false
 inum: 522F-CDC5
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -308,7 +308,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample User Registration script
 displayName: user_registration
-gluuStatus: false
+oxEnabled: false
 inum: 6EA0-8F0C
 oxConfigurationProperty: {"value1":"enable_user","value2":"false","description":""}
 oxLevel: 90
@@ -323,7 +323,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Confirm User Registration  script
 displayName: user_confirm_registration
-gluuStatus: false
+oxEnabled: false
 inum: 6EA0-8F0D
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -337,7 +337,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Fido U2F authentication module
 displayName: u2f
-gluuStatus: false
+oxEnabled: false
 inum: 8BAF-80D6
 oxConfigurationProperty: {"value1":"u2f_application_id","value2":"https://%(hostname)s","description":""}
 oxConfigurationProperty: {"value1":"u2f_server_uri","value2":"https://%(hostname)s","description":""}
@@ -354,7 +354,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Fido2 authentication module
 displayName: fido2
-gluuStatus: false
+oxEnabled: false
 inum: 8BAF-80D7
 oxConfigurationProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","hide":false,"description":""}
 oxLevel: 70
@@ -370,7 +370,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Super Gluu authentication module
 displayName: super_gluu
-gluuStatus: false
+oxEnabled: false
 inum: 92F0-BF9E
 oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 oxConfigurationProperty: {"value1":"label","value2":"Super Gluu","description":""}
@@ -393,7 +393,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: ThumbSignIn authentication module
 displayName: thumb_sign_in
-gluuStatus: false
+oxEnabled: false
 inum: 92F0-759E
 oxConfigurationProperty: {"value1":"ts_host","value2":"https://ts.host.com","description":""}
 oxConfigurationProperty: {"value1":"ts_apiKey","value2":"ts_api_key","description":""}
@@ -411,7 +411,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample authentication module
 displayName: basic
-gluuStatus: false
+oxEnabled: false
 inum: A51E-76DA
 oxLevel: 10
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -426,7 +426,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample script for SCIM events
 displayName: scim_event_handler
-gluuStatus: false
+oxEnabled: false
 inum: A910-56AB
 oxConfigurationProperty: {"value1":"testProp1","value2":"Test value 1","description":""}
 oxConfigurationProperty: {"value1":"testProp2","value2":"Test value 2","description":""}
@@ -442,7 +442,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Passport SAML authentication module
 displayName: passport_saml
-gluuStatus: false
+oxEnabled: false
 inum: D40C-1CA4
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
@@ -459,7 +459,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Client Registration script
 displayName: client_registration
-gluuStatus: false
+oxEnabled: false
 inum: DAA9-B788
 oxLevel: 100
 oxConfigurationProperty: {"value1":"client_redirect_uris","value2":"https://client.example.com/example1, https://client.example.com/example2","description":""}
@@ -474,7 +474,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Twilio SMS authentication module
 displayName: twilio_sms
-gluuStatus: false
+oxEnabled: false
 inum: 09A0-93D6
 oxConfigurationProperty: {"value1":"twilio_sid","value2":"","description":"Twilio account SID"}
 oxConfigurationProperty: {"value1":"twilio_token","value2":"","description":"Twilio API token"}
@@ -492,7 +492,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample Application Session script
 displayName: application_session
-gluuStatus: false
+oxEnabled: false
 inum: DAA9-B789
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -506,7 +506,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Consent Gathering script
 displayName: consent_gathering
-gluuStatus: false
+oxEnabled: false
 inum: DAA9-BA60
 oxLevel: 10
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
