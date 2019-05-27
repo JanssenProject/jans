@@ -15,6 +15,7 @@ import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory which creates Persistence Entry Manager
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 05/10/2019
  */
 @ApplicationScoped
-public class PersistanceFactoryService {
+public class PersistanceFactoryService implements BaseFactoryService {
 
 	static {
 		if (System.getProperty("gluu.base") != null) {
@@ -40,7 +41,6 @@ public class PersistanceFactoryService {
 
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
-
 	private static final String GLUU_FILE_PATH = DIR + "gluu.properties";
 
 	@Inject
@@ -49,10 +49,12 @@ public class PersistanceFactoryService {
 	@Inject
 	private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
 
+	@Override
 	public PersistenceConfiguration loadPersistenceConfiguration() {
 		return loadPersistenceConfiguration(null);
 	}
 
+	@Override
 	public PersistenceConfiguration loadPersistenceConfiguration(String applicationPropertiesFile) {
 		PersistenceConfiguration currentPersistenceConfiguration = null;
 
@@ -63,10 +65,10 @@ public class PersistanceFactoryService {
 
 		// Fall back to old LDAP persistence layer
 		if (currentPersistenceConfiguration == null) {
-			log.warn("Failed to load persistence configuration. Attempting to use LDAP layer");
-			LdapEntryManagerFactory ldapPersistenceEntryManagerFactory = (LdapEntryManagerFactory) persistenceEntryManagerFactoryInstance.select(LdapEntryManagerFactory.class).get();
-			currentPersistenceConfiguration = createPersistenceConfiguration(ldapPersistenceEntryManagerFactory.getPersistenceType(), LdapEntryManagerFactory.class,
-					ldapPersistenceEntryManagerFactory.getConfigurationFileNames());
+			getLog().warn("Failed to load persistence configuration. Attempting to use LDAP layer");
+			PersistenceEntryManagerFactory defaultEntryManagerFactory = getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
+			currentPersistenceConfiguration = createPersistenceConfiguration(defaultEntryManagerFactory.getPersistenceType(), LdapEntryManagerFactory.class,
+					defaultEntryManagerFactory.getConfigurationFileNames());
 		}
 
 		return currentPersistenceConfiguration;
@@ -77,20 +79,22 @@ public class PersistanceFactoryService {
 			// Determine persistence type
 			FileConfiguration gluuFileConf = new FileConfiguration(gluuFileName);
 			if (!gluuFileConf.isLoaded()) {
-				log.error("Unable to load configuration file '{}'", gluuFileName);
+				getLog().error("Unable to load configuration file '{}'", gluuFileName);
 				return null;
 			}
 
 			String persistenceType = gluuFileConf.getString("persistence.type");
 			PersistenceEntryManagerFactory persistenceEntryManagerFactory = getPersistenceEntryManagerFactory(persistenceType);
 			if (persistenceEntryManagerFactory == null) {
-				log.error("Unable to get Persistence Entry Manager Factory by type '{}'", persistenceType);
+				getLog().error("Unable to get Persistence Entry Manager Factory by type '{}'", persistenceType);
 				return null;
 			}
 
 			// Determine configuration file name and factory class type
-			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory
-					.getClass().getSuperclass();
+			Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactory.getClass();
+			if (PersistenceEntryManagerFactory.class.isAssignableFrom(persistenceEntryManagerFactoryType.getSuperclass())) {
+				persistenceEntryManagerFactoryType = (Class<? extends PersistenceEntryManagerFactory>) persistenceEntryManagerFactoryType.getSuperclass();
+			}
 			Map<String, String> persistenceFileNames = persistenceEntryManagerFactory.getConfigurationFileNames();
 
 			PersistenceConfiguration persistenceConfiguration = createPersistenceConfiguration(persistenceType, persistenceEntryManagerFactoryType,
@@ -98,7 +102,7 @@ public class PersistanceFactoryService {
 
 			return persistenceConfiguration;
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			getLog().error(e.getMessage(), e);
 		}
 
 		return null;
@@ -107,7 +111,7 @@ public class PersistanceFactoryService {
 	private PersistenceConfiguration createPersistenceConfiguration(String persistenceType, Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryType,
 			Map<String, String> persistenceFileNames) {
 		if (persistenceFileNames == null) {
-			log.error("Unable to get Persistence Entry Manager Factory by type '{}'", persistenceType);
+			getLog().error("Unable to get Persistence Entry Manager Factory by type '{}'", persistenceType);
 			return null;
 		}
 
@@ -128,7 +132,7 @@ public class PersistanceFactoryService {
 			String persistenceFileNamePath = DIR + persistenceFileName;
 			File persistenceFile = new File(persistenceFileNamePath);
 			if (!persistenceFile.exists()) {
-				log.error("Unable to load configuration file '{}'", persistenceFileNamePath);
+				getLog().error("Unable to load configuration file '{}'", persistenceFileNamePath);
 				return null;
 			}
 			mergedPersistenceFileLastModifiedTime = Math.max(mergedPersistenceFileLastModifiedTime, persistenceFile.lastModified());
@@ -136,7 +140,7 @@ public class PersistanceFactoryService {
 			// Load persistence configuration
 			FileConfiguration persistenceFileConf = new FileConfiguration(persistenceFileNamePath);
 			if (!persistenceFileConf.isLoaded()) {
-				log.error("Unable to load configuration file '{}'", persistenceFileNamePath);
+				getLog().error("Unable to load configuration file '{}'", persistenceFileNamePath);
 				return null;
 			}
 			PropertiesConfiguration propertiesConfiguration = persistenceFileConf.getPropertiesConfiguration();
@@ -184,13 +188,20 @@ public class PersistanceFactoryService {
 		return null;
 	}
 
-    public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
-                .select(persistenceConfiguration.getEntryManagerFactoryType()).get();
-
-        return persistenceEntryManagerFactory;
+	@Override
+	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(PersistenceConfiguration persistenceConfiguration) {
+        return getPersistenceEntryManagerFactory(persistenceConfiguration.getEntryManagerFactoryType());
     }
 
+	@Override
+	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistenceEntryManagerFactoryInstance
+	                .select(persistenceEntryManagerFactoryClass).get();
+
+		return persistenceEntryManagerFactory;
+	}
+
+	@Override
 	public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(String persistenceType) {
 		// Get persistence entry manager factory
 		for (PersistenceEntryManagerFactory currentPersistenceEntryManagerFactory : persistenceEntryManagerFactoryInstance) {
@@ -201,6 +212,16 @@ public class PersistanceFactoryService {
 		}
 
 		return null;
+	}
+
+	@Override
+	public Logger getLog() {
+		if (this.log == null) {
+			this.log = LoggerFactory.getLogger(PersistanceFactoryService.class);
+		}
+		
+		return this.log;
+		
 	}
 
 }

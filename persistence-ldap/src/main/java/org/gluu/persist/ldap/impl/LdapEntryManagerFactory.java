@@ -10,6 +10,7 @@ import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.ldap.operation.impl.LdapAuthConnectionProvider;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
+import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,5 +64,8 @@ public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
         return ldapEntryManager;
     }
+
+	@Override
+	public void initStandalone(BaseFactoryService persistanceFactoryService) {}
 
 }
