@@ -1051,12 +1051,13 @@
         },
         {
             "desc": "Status of the entry, used by many objectclasses",
-            "equality": "booleanMatch",
+            "equality": "caseIgnoreMatch",
             "names": [
                 "gluuStatus"
             ],
             "oid": "oxAttribute:97",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
         },
         {
@@ -4344,7 +4345,6 @@
                 "gluuManagedOrganizations",
                 "gluuOptOuts",
                 "gluuStatus",
-                "oxEnabled",
                 "gluuWhitePagesListed",
                 "iname",
                 "inum",
@@ -4440,7 +4440,6 @@
                 "gluuGroupType",
                 "gluuGroupVisibility",
                 "gluuStatus",
-                "oxEnabled",
                 "iname",
                 "inum",
                 "member",
@@ -4488,7 +4487,6 @@
                 "gluuPaymentProcessorTimestamp",
                 "gluuProStoresUser",
                 "gluuStatus",
-                "oxEnabled",
                 "gluuTempFaviconImage",
                 "gluuThemeColor",
                 "gluuWhitePagesEnabled",
@@ -4583,7 +4581,6 @@
                 "gluuSmtpUserName",
                 "gluuSslExpiry",
                 "gluuStatus",
-                "oxEnabled",
                 "gluuSystemUptime",
                 "gluuTargetRAM",
                 "gluuUrl",
@@ -4644,7 +4641,6 @@
                 "gluuSAML1URI",
                 "gluuSAML2URI",
                 "gluuStatus",
-                "oxEnabled",
                 "iname",
                 "inum",
                 "oxAttributeType",
@@ -4690,7 +4686,6 @@
                 "gluuSAMLspMetaDataURL",
                 "gluuSpecificRelyingPartyConfig",
                 "gluuStatus",
-                "oxEnabled",
                 "gluuTrustContact",
                 "gluuTrustDeconstruction",
                 "gluuValidationLog",
@@ -4719,7 +4714,6 @@
             "kind": "STRUCTURAL",
             "may": [
                 "gluuStatus",
-                "oxEnabled",
                 "inum",
                 "primaryKeyAttrName",
                 "primaryKeyValue",
@@ -5562,7 +5556,6 @@
                 "ou",
                 "gluuPassportConfiguration",
                 "gluuStatus",
-                "oxEnabled"
             ],
             "must": [
                 "objectclass"
