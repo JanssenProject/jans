@@ -5412,7 +5412,6 @@
                 "oxConfigurationProperty",
                 "oxLevel",
                 "oxRevision",
-                "gluuStatus",
                 "oxEnabled",
                 "oxScriptError"
             ],
