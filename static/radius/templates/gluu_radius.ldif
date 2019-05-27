@@ -74,11 +74,3 @@ oxRadiusOpenidPassword: %(gluu_ro_encoded_pw)s
 dn: ou=radius_clients,o=gluu
 objectClass: organizationalUnit
 objectClass: top
-
-dn: inum=%(ox_radius_client_id)s,ou=radius_clients,o=gluu
-objectClass: oxRadiusClient
-objectClass: top
-inum: %(ox_radius_client_id)s
-oxRadiusClientIpAddress: %(oxRadiusClientIpAddress)s
-oxRadiusClientName: %(oxRadiusClientName)s
-oxRadiusClientSecret: %(oxRadiusClientSecret)s
