@@ -33,8 +33,8 @@ oxConfigurationProperty: {"value1":"application_id", "value2":"https://%(hostnam
 dn: inum=63CD,ou=scopes,o=gluu
 defaultScope: true
 description: Dynamic scope for Gluu Radius
-oxId: oxd
-displayName: gluu_ro_session
+oxId: super_gluu_ro_session
+displayName: super_gluu_ro_session
 inum: 63CD
 objectClass: oxAuthCustomScope
 objectClass: top
