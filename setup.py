@@ -4168,7 +4168,31 @@ class Setup(object):
         
         conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
         self.createDirs(conf_dir)
-        radius_jwt_pass = self.obscure('changeit')
+        
+        
+        self.radius_jwt_pass = self.getPW()
+        radius_jwt_pass = self.obscure(self.radius_jwt_pass)
+        radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
+        
+        self.raidus_client_jwks = self.gen_openid_jwks_jks_keys(radius_jks_fn, self.radius_jwt_pass)
+        
+        
+        raidus_client_jwks = ''.join(self.raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
+        
+        raidus_client_jwks = eval(raidus_client_jwks)
+        
+        self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
+
+
+        raidus_client_jwks_json = json.dumps(raidus_client_jwks, indent=2)
+        
+        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = base64.encodestring(raidus_client_jwks_json).replace(' ','').replace('\n','')
+
+        
+        for k in raidus_client_jwks['keys']:
+            if k.get('alg') == 'RS512':
+                self.templateRenderingDict['radius_jwt_keyId'] = k['kid']
+        
         self.gluu_ro_pw = self.getPW()
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
         
@@ -4183,11 +4207,6 @@ class Setup(object):
             base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
             self.templateRenderingDict[scriptName] = base64ScriptFile
 
-        client_jwks_fn = os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jwks')
-        
-        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = self.generate_base64_file(client_jwks_fn, 1)
-        self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
-        
         self.renderTemplateInOut(ldif_template, os.path.join(self.gluuRadiusSourceDir, 'templates'), self.outputFolder)
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/'), conf_dir)
         
@@ -4207,7 +4226,6 @@ class Setup(object):
         
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/default/gluu-radius'), self.osDefault)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
-        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jks'), self.certFolder)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
 
         if self.os_type+self.os_version == 'ubuntu16':
@@ -4449,7 +4467,7 @@ if __name__ == '__main__':
             installObject.encode_test_passwords()
             installObject.pbar.progress("Installing Gluu base")
             installObject.install_gluu_base()
-            installObject.pbar.progress("Preparing bas64 extention scripts")
+            installObject.pbar.progress("Preparing base64 extention scripts")
             installObject.prepare_base64_extension_scripts()
             installObject.pbar.progress("Rendering templates")
             installObject.render_templates()
