@@ -1,9 +1,9 @@
 # Super Gluu Radius Dynamic Scope 
 # Copyright (c) 2019 Gluu Inc.
 
-from org.xdi.model.custom.script.type.scope import DynamicScopeType
-from org.xdi.oxauth.security import Identity
-from org.xdi.service.cdi.util import CdiUtil
+from org.gluu.model.custom.script.type.scope import DynamicScopeType
+from org.gluu.oxauth.security import Identity
+from org.gluu.service.cdi.util import CdiUtil
 
 import java
 
