@@ -4162,8 +4162,8 @@ class Setup(object):
         ldif_template = os.path.join(self.gluuRadiusSourceDir, 'templates/gluu_radius.ldif')
         scripts_dir = os.path.join(self.gluuRadiusSourceDir,'scripts')
         
-        for scriptFile, scriptName in ( ('radius_dynamic_scope.py', 'super_gluu_ro_script'),
-                            ('radius_ro_pw_grant_credentials.py','gluu_ro_session_script'),
+        for scriptFile, scriptName in ( ('super_gluu_ro.py', 'super_gluu_ro_script'),
+                            ('gluu_ro_session.py','gluu_ro_session_script'),
                           ):
             
             scriptFilePath = os.path.join(scripts_dir, scriptFile)

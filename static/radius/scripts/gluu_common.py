@@ -6,14 +6,15 @@ from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from javax.ws.rs import InternalServerErrorException
 
+from org.gluu.oxnotify.model import NotifyMetadata
 from org.gluu.oxnotify.client import NotifyClientFactory
 from org.apache.http.params import CoreConnectionPNames
-from org.xdi.oxauth.service import EncryptionService , UserService
-from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
+from org.gluu.oxauth.service import EncryptionService , UserService
+from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
+from org.gluu.oxauth.service.net import HttpService
+from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper
 
 
 import json
@@ -48,6 +49,7 @@ class PushNotificationManager:
         self.titleTemplate = "Super-Gluu"
         self.messageTemplate = "Super-Gluu login request to %s"
         self.debugEnabled = True
+        self.httpConnTimeout = 15 * 1000 # in milliseconds 
         creds = self.loadCredentials(credentialsFile)
         if creds == None:
             return None
@@ -128,15 +130,10 @@ class PushNotificationManager:
         
         gluu_server_uri = gluu_conf["server_uri"]
         notifyClientFactory  = NotifyClientFactory.instance()
-        metadataConfiguration = None
-        try:
-            metadataConfigurationService = notifyClientFactory.createMetaDataConfigurationService(gluu_server_uri)
-            metadataConfiguration = metadataConfigurationService.getMetadataConfiguration()
-        except:
-            exc_value = sys.exc_info()[1]
-            print "Super-Gluu-Push. Gluu push notifications init failed while loading metadata. Exception: " , exc_value
+        metadataConfiguration = self.getNotifyMetadata(gluu_server_uri)
+        if metadataConfiguration == None:
             return None
-        
+         
         gluuClient = notifyClientFactory.createNotifyService(metadataConfiguration)
         encryptionService = CdiUtil.bean(EncryptionService)
 
@@ -223,6 +220,67 @@ class PushNotificationManager:
             f.close()
         
         return creds
+    
+    def getNotifyMetadata(self, gluu_server_uri):
+
+        try:
+            notifyClientFactory  = NotifyClientFactory.instance()
+            metadataConfigurationService = notifyClientFactory.createMetaDataConfigurationService(gluu_server_uri)
+            return metadataConfigurationService.getMetadataConfiguration()
+        except:
+            exc_value = sys.exc_info()[1]
+            print "Super-Gluu-Push. Gluu push notification init failed while loading metadata. %s." % exc_value
+            print "Super-Gluu-Push. Retrying loading metadata using httpService..."
+            httpService = CdiUtil.bean(HttpService)
+            http_client = httpService.getHttpsClient()
+            http_client_params = http_client.getParams()
+            http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT,self.httpConnTimeout)
+            notify_service_url = "%s/.well-known/notify-configuration" % gluu_server_uri
+            notify_service_headers = {"Accept": "application/json"}
+            try:
+                http_service_response = httpService.executeGet(http_client,notify_service_url,notify_service_headers)
+                http_response = http_service_response.getHttpResponse()
+            except:
+                print "Super-Gluu-Push. Loading metadata using httpService failed. %s." % sys.exc_info()[1]
+                return None
+            
+            try:
+                if not httpService.isResponseStastusCodeOk(http_response):
+                    http_error_str = str(http_response.getStatusLine().getStatusCode())
+                    print "Super-Gluu-Push. Loading metadata using httpService failed with http code %s." % http_error_str
+                    httpService.consume(http_response)
+                    return None
+                resp_bytes = httpService.getResponseContent(http_response)
+                resp_str = httpService.convertEntityToString(resp_bytes)
+                httpService.consume(http_response)
+            except:
+                print "Super-Gluu-Push. Loading metadata using httpService failed. %s." % sys.exc_info()[1]
+                return None
+            finally:
+                http_service_response.closeConnection()
+            
+            if resp_str == None:
+                print "Super-Gluu-Push. Loading metadata using httpService failed.Empty response from server"
+                return None
+            
+            json_resp = json.loads(resp_str)
+            if ('version' not in json_resp) or ('issuer' not in json_resp):
+                print "Super-Gluu-Push. Loading metadata using httpService failed. Invalid json response %s." % json_resp
+                return None
+            
+            if ('notify_endpoint' not in json_resp) and ('notifyEndpoint' not in json_resp):
+                print "Super-Gluu-Push. Loading metadata using httpService failed. Invalid json response %s." % json_resp
+                return None
+            
+            notifyMeta = NotifyMetadata()
+            notifyMeta.setVersion(json_resp['version'])
+            notifyMeta.setIssuer(json_resp['issuer'])
+            if 'notify_endpoint' in json_resp:
+                notifyMeta.setNotifyEndpoint(json_resp['notify_endpoint'])
+            elif 'notifyEndpoint' in json_resp: 
+                notifyMeta.setNotifyEndpoint(json_resp['notifyEndpoint'])
+            print "Super-Gluu-Push. Metadata loaded using httpService successfully"
+            return notifyMeta
     
     def sendPushNotification(self, user, app_id, super_gluu_request):
         try:
