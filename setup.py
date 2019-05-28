@@ -4179,7 +4179,7 @@ class Setup(object):
         
         raidus_client_jwks = ''.join(self.raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
         
-        raidus_client_jwks = eval(raidus_client_jwks)
+        raidus_client_jwks = json.loads(raidus_client_jwks)
         
         self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
 
