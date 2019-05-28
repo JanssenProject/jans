@@ -343,11 +343,11 @@ oxAuthRedirectURI: https://example.com/bad_sector_identifier
 ######################################
 dn: inum=031C-5621,ou=scripts,o=gluu
 changetype: modify
-replace: gluuStatus
-gluuStatus: true
+replace: oxEnabled
+oxEnabled: true
 
 dn: inum=031C-5622,ou=scripts,o=gluu
 changetype: modify
-replace: gluuStatus
-gluuStatus: true
+replace: oxEnabled
+oxEnabled: true
 
