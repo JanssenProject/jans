@@ -4110,7 +4110,7 @@ class Setup(object):
 
         self.couchbaseProperties()
 
-    def loadTestData(self):
+    def load_test_data(self):
         self.logIt("Loading test ldif files")
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
@@ -4121,6 +4121,19 @@ class Setup(object):
         elif self.persistence_type in ('couchbase', 'hybrid'):
             self.import_ldif_couchebase(ldif_files)
 
+
+    def load_test_data_exit(self):
+        print "Loading test data"
+        prop_file = os.path.join(self.install_dir, 'setup.properties.last')
+        if not os.path.exists(prop_file):
+            sys.exit("setup.properties.last were not found, exiting.")
+
+        self.load_properties(prop_file)
+        self.createLdapPw()
+        self.load_test_data()
+        self.deleteLdapPw()
+        print "Test data loaded. Exiting ..."
+        sys.exit()
 
     def fix_systemd_script(self):
         oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
@@ -4153,9 +4166,11 @@ class Setup(object):
         if not self.ox_radius_client_id:
             self.ox_radius_client_id = '0008-'  + str(uuid.uuid4())
         
+        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
+        self.createDirs(conf_dir)
+        radius_jwt_pass = self.obscure('changeit')
         self.gluu_ro_pw = self.getPW()
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
-        self.oxRadiusClientSecret = self.obscure(self.oxRadiusClientSecret)
         
         ldif_template = os.path.join(self.gluuRadiusSourceDir, 'templates/gluu_radius.ldif')
         scripts_dir = os.path.join(self.gluuRadiusSourceDir,'scripts')
@@ -4171,34 +4186,39 @@ class Setup(object):
         client_jwks_fn = os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jwks')
         
         self.templateRenderingDict['gluu_ro_client_base64_jwks'] = self.generate_base64_file(client_jwks_fn, 1)
+        self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
         
         self.renderTemplateInOut(ldif_template, os.path.join(self.gluuRadiusSourceDir, 'templates'), self.outputFolder)
-
+        self.renderTemplateInOut('gluu-radius.properties', os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/'), conf_dir)
+        
         radiusHome = '/opt/gluu/radius/'
 
-        #schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
-        #self.import_ldif_opendj([schema_ldif])
+        schema_ldif = os.path.join(self.gluuRadiusSourceDir, 'schema/98-radius.ldif')
+        self.import_ldif_opendj([schema_ldif])
 
-        #ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
-        #self.import_ldif_opendj([ldif_file])
+        ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
+        self.import_ldif_opendj([ldif_file])
 
-        #self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
-        #self.addUserToGroup('gluu', 'radius')
+        self.createUser('radius', homeDir=radiusHome, shell='/bin/false')
+        self.addUserToGroup('gluu', 'radius')
+
+        radius_archive = os.path.join(self.distGluuFolder, 'gluu-radius.tgz')
+        self.run(['tar', '-zxf', radius_archive, '-C', '/'])
         
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/default/gluu-radius'), self.osDefault)
+        self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/certs/gluu-radius.jks'), self.certFolder)
         self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
-        
-        self.run([self.cmd_chown, '-R', 'root:gluu', radiusHome])
-        self.run([self.cmd_chown, '-R', 'root:gluu', '/etc/gluu/conf/radius/'])
-        self.run([self.cmd_chown, 'root:gluu', '/opt/gluu/python/libs/gluu_common.py'])
-        self.run([self.cmd_chown, 'root:gluu', '/etc/certs/gluu-radius.jks'])
-        
+
         if self.os_type+self.os_version == 'ubuntu16':
             self.copyFile(os.path.join(self.gluuRadiusSourceDir, 'etc/init.d/gluu-radius'), '/etc/init.d')
             self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
-
-        # udpate-rc.d gluu-radius defaults
-
+            self.run(['update-rc.d', 'gluu-radius', 'defaults'])
+            
+        self.run([self.cmd_chown, '-R', 'radius:gluu', radiusHome])
+        self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
+        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
 
 
 ############################   Main Loop   #################################################
@@ -4220,6 +4240,7 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -t   Load test data"
+    print "    -x  Load test data and exit"
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
@@ -4228,7 +4249,7 @@ def print_help():
     
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", 
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
                                         [
                                         'allow_pre_released_applications', 
                                         'allow_deprecated_applications', 
@@ -4277,6 +4298,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == "-t":
             setupOptions['loadTestData'] = True
+        elif opt == "-x":
+            setupOptions['loadTestDataExit'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
@@ -4317,6 +4340,7 @@ if __name__ == '__main__':
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
+        'loadTestDataExit': False
     }
 
     if len(sys.argv) > 1:
@@ -4327,6 +4351,11 @@ if __name__ == '__main__':
 
 
     installObject = Setup(setupOptions['install_dir'])
+
+
+    if setupOptions['loadTestDataExit']:
+        installObject.load_test_data_exit()
+
 
     if installObject.check_installed():
         print "\nThis instance already configured. If you need to install new one you should reinstall package first."
@@ -4460,7 +4489,7 @@ if __name__ == '__main__':
 
             if setupOptions['loadTestData']:
                 installObject.pbar.progress("Loading test data", False)
-                installObject.loadTestData()
+                installObject.load_test_data()
 
             if 'importLDIFDir' in setupOptions.keys():
                 installObject.pbar.progress("Importing LDIF files")
