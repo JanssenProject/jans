@@ -13,7 +13,7 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomFirst
 gluuSAML2URI: urn:oid:scimCustomFirst
-oxEnabled: active
+gluuStatus: active
 inum: ADA6
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true
@@ -30,7 +30,7 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: generalizedTime
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomSecond
 gluuSAML2URI: urn:oid:scimCustomSecond
-oxEnabled: active
+gluuStatus: active
 inum: 70F0
 oxMultivaluedAttribute: true
 oxSCIMCustomAttribute: true
@@ -47,7 +47,7 @@ gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: numeric
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomThird
 gluuSAML2URI: urn:oid:scimCustomThird
-oxEnabled: active
+gluuStatus: active
 inum: 653A
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true
@@ -64,7 +64,7 @@ uid: aaaa1111
 givenName: Aaaa 1111
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Aaaa 1111
 oxTrustExternalId: 11000
 birthdate: 20140101000000Z
@@ -80,7 +80,7 @@ uid: aaaa2222
 givenName: Aaaa 2222
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Aaaa 2222
 oxTrustExternalId: 12000
 birthdate: 20140210000000Z
@@ -95,7 +95,7 @@ uid: aaaa3333
 givenName: Aaaa 3333
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Aaaa 3333
 oxTrustExternalId: 13000
 birthdate: 20140307000000Z
@@ -109,7 +109,7 @@ uid: aaaa4444
 givenName: Aaaa 4444
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Aaaa 4444
 oxTrustExternalId: 14000
 birthdate: 20140425000000Z
@@ -123,7 +123,7 @@ uid: aaaa5555
 givenName: Aaaa 5555
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Aaaa 5555
 oxTrustExternalId: 15000
 birthdate: 20140518000000Z
@@ -137,7 +137,7 @@ uid: bbbb1111
 givenName: Bbbb 1111
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Bbbb 1111
 oxTrustExternalId: 21000
 birthdate: 20150108000000Z
@@ -153,7 +153,7 @@ uid: bbbb2222
 givenName: Bbbb 2222
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Bbbb 2222
 oxTrustExternalId: 22000
 birthdate: 20150214000000Z
@@ -168,7 +168,7 @@ uid: bbbb3333
 givenName: Bbbb 3333
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Bbbb 3333
 oxTrustExternalId: 23000
 birthdate: 20150321000000Z
@@ -182,7 +182,7 @@ uid: bbbb4444
 givenName: Bbbb 4444
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Bbbb 4444
 oxTrustExternalId: 24000
 birthdate: 20150420000000Z
@@ -196,7 +196,7 @@ uid: bbbb5555
 givenName: Bbbb 5555
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Bbbb 5555
 oxTrustExternalId: 25000
 birthdate: 20150530000000Z
@@ -210,7 +210,7 @@ uid: cccc1111
 givenName: Cccc 1111
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Cccc 1111
 oxTrustExternalId: 31000
 birthdate: 20160125000000Z
@@ -226,7 +226,7 @@ uid: cccc2222
 givenName: Cccc 2222
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Cccc 2222
 oxTrustExternalId: 32000
 birthdate: 20160119000000Z
@@ -241,7 +241,7 @@ uid: cccc3333
 givenName: Cccc 3333
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Cccc 3333
 oxTrustExternalId: 33000
 birthdate: 20160229194603Z
@@ -255,7 +255,7 @@ uid: cccc4444
 givenName: Cccc 4444
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Cccc 4444
 oxTrustExternalId: 34000
 birthdate: 20160315000000Z
@@ -269,7 +269,7 @@ uid: cccc5555
 givenName: Cccc 5555
 sn: FilterTest
 userPassword:{SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
-oxEnabled: active
+gluuStatus: active
 displayName: Test Cccc 5555
 oxTrustExternalId: 35000
 birthdate: 20160413000000Z
@@ -284,7 +284,7 @@ inum: XXXX.DDDD-1111
 uid: dddd1111 *char
 givenName: Dddd 1111
 sn: FilterTest
-oxEnabled: active
+gluuStatus: active
 displayName: Test Dddd 1111
 
 dn: inum=XXXX.DDDD-2222,ou=people,o=gluu
@@ -295,7 +295,7 @@ inum: XXXX.DDDD-2222
 uid: dddd2222 * \ (char
 givenName: Dddd 2222
 sn: FilterTest
-oxEnabled: active
+gluuStatus: active
 displayName: Test Dddd 2222
 
 dn: inum=XXXX.DDDD-3333,ou=people,o=gluu
@@ -306,7 +306,7 @@ inum: XXXX.DDDD-3333
 uid: dddd3333 * \ (char) /
 givenName: Dddd 3333
 sn: FilterTest
-oxEnabled: active
+gluuStatus: active
 displayName: Test Dddd 3333
 
 dn: inum=XXXX.DDDD-4444,ou=people,o=gluu
@@ -317,5 +317,5 @@ inum: XXXX.DDDD-4444
 uid: dddd4444
 givenName: (special chars\)/*
 sn: FilterTest
-oxEnabled: active
+gluuStatus: active
 displayName: Test Dddd 4444
