@@ -5,6 +5,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
+import org.gluu.oxauth.model.uma.JsonLogic;
+import org.gluu.oxauth.model.uma.JsonLogicNode;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,6 +141,16 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                                 boolean nodeValid = JsonLogicNodeParser.isNodeValid(json);
                                 LOG.trace("Scope expression validator - Valid: " + nodeValid + ", expression: " + json);
                                 if (!nodeValid) {
+                                    throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
+                                }
+                                JsonLogicNode jsonLogicNode = JsonLogicNodeParser.parseNode(json);
+                                try {
+                                    Object scope = JsonLogic.applyObject(jsonLogicNode.getRule().toString(), Util.asJsonSilently(jsonLogicNode.getData()));
+                                    if(scope == null || !jsonLogicNode.getData().contains(scope.toString())) {
+                                        throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
+                                    }
+                                } catch (Exception e) {
+                                    LOG.trace("The scope expression is invalid. Please check the documentation and make sure it is a valid JsonLogic expression.", e);
                                     throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
                                 }
                             }
