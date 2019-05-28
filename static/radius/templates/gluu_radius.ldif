@@ -8,7 +8,7 @@ inum: 5866-4202
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
-oxScript::%(gluu_ro_session_script)s
+oxScript::%(super_gluu_ro_session_script)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
@@ -48,7 +48,7 @@ objectClass: top
 displayName: Gluu RO OpenID Client
 inum: %(gluu_radius_client_id)s
 oxAuthClientSecret: %(gluu_ro_encoded_pw)s
-oxAuthAppType: Native
+oxAuthAppType: native
 oxAuthGrantType: password
 oxAuthScope: inum=F0C4,ou=scopes,o=gluu
 oxAuthScope: inum=63CD,ou=scopes,o=gluu
