@@ -4122,6 +4122,19 @@ class Setup(object):
             self.import_ldif_couchebase(ldif_files)
 
 
+    def load_test_data_exit(self):
+        print "Loading test data"
+        prop_file = os.path.join(self.install_dir, 'setup.properties.last')
+        if not os.path.exists(prop_file):
+            sys.exit("setup.properties.last were not found, exiting.")
+
+        self.load_properties(prop_file)
+        self.createLdapPw()
+        self.load_test_data()
+        self.deleteLdapPw()
+        print "Test data loaded. Exiting ..."
+        sys.exit()
+
     def fix_systemd_script(self):
         oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
         if os.path.exists(oxauth_systemd_script_fn):
@@ -4227,6 +4240,7 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -t   Load test data"
+    print "    -x  Load test data and exit"
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
@@ -4235,7 +4249,7 @@ def print_help():
     
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevt", 
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
                                         [
                                         'allow_pre_released_applications', 
                                         'allow_deprecated_applications', 
@@ -4284,6 +4298,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == "-t":
             setupOptions['loadTestData'] = True
+        elif opt == "-x":
+            setupOptions['loadTestDataExit'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
@@ -4324,6 +4340,7 @@ if __name__ == '__main__':
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
+        'loadTestDataExit': False
     }
 
     if len(sys.argv) > 1:
@@ -4334,6 +4351,11 @@ if __name__ == '__main__':
 
 
     installObject = Setup(setupOptions['install_dir'])
+
+
+    if setupOptions['loadTestDataExit']:
+        installObject.load_test_data_exit()
+
 
     if installObject.check_installed():
         print "\nThis instance already configured. If you need to install new one you should reinstall package first."
