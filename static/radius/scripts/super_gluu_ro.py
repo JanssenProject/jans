@@ -4,14 +4,14 @@
 from java.util import Date , HashMap
 from org.gluu.oxnotify.client import NotifyClientFactory
 
-from org.xdi.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from org.xdi.oxauth.model.common import SessionIdState
-from org.xdi.oxauth.model.config import ConfigurationFactory , Constants
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import EncryptionService , UserService , AuthenticationService , SessionIdService
-from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
+from org.gluu.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
+from org.gluu.oxauth.model.common import SessionIdState
+from org.gluu.oxauth.model.config import ConfigurationFactory , Constants
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.service import EncryptionService , UserService , AuthenticationService , SessionIdService
+from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.util import StringHelper
 from gluu_common import PushNotificationManager, NetworkApi, GeolocationData, SuperGluuRequestBuilder
 
 import java
@@ -50,7 +50,11 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         if configurationAttributes.containsKey("notification_service_mode"):
             notificationServiceMode = configurationAttributes.get("notification_service_mode").getValue2()
         
-        self.applicationId = configurationAttributes.get("application_id").getValue2()
+        
+        self.applicationId = "*" # wildcard. Selects all devices irrespective of the application 
+        if configurationAttributes.containsKey("application_id"):
+            self.applicationId = configurationAttributes.get("application_id").getValue2()
+        
         credentialsFile = configurationAttributes.get("credentials_file").getValue2()
 
         if configurationAttributes.containsKey("push_notification_title"):
@@ -85,10 +89,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def getApiVersion(self):
         return 1
     
-    def authenticate(self, context):
-        if context.getUser() == None:
-            print "Super-Gluu-RO. Notice: no user specified for ro password grant"
-        
+    def authenticate(self, context): 
         if self.perform_preliminary_user_authentication(context) == False:
             print "Super-Gluu-Radius. User authentication state not validated"
             return False
@@ -114,7 +115,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         identity = CdiUtil.bean(Identity)
         identity.setSessionId(sessionId)
         if not self.send_push_notification_to_user(sessionId,context):
-            context.setUser(False)
+            context.setUser(None)
             print "Send push notification to user '%s' failed " % context.getUser().getUserId()
             return False
         print "Super-Gluu-RO initiate_authentication complete"
@@ -127,19 +128,19 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         session_id = context.getHttpRequest().getParameter(self.sessionIdParamName)
         if session_id == None:
             print "Super-Gluu-RO. No session_id was specified for resend_push_notification"
-            context.setUser(False)
+            context.setUser(None)
             return False
         
         sessionId = sessionIdService.getSessionId(session_id)
         if sessionId == None:
             print "Super-Gluu-RO. Session '%s' does not exist or has expired" % session_id
-            context.setUser(False)
+            context.setUser(None)
             return False
         
         client = CdiUtil.bean(Identity).getSessionClient().getClient()
         if not self.verify_session_ownership(sessionId,context.getUser(),client):
             print "Super-Gluu-RO. resend_push_notification_failed due to invalid session ownership"
-            context.setUser(False)
+            context.setUser(None)
             return False
         
         self.send_push_notification_to_user(sessionId,context)
