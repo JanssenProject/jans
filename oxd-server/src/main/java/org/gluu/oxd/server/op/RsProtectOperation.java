@@ -5,6 +5,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
+import org.gluu.oxauth.model.uma.JsonLogic;
+import org.gluu.oxauth.model.uma.JsonLogicNode;
+import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +131,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         if (!org.gluu.oxd.rs.protect.ResourceValidator.isHttpMethodUniqueInPath(params.getResources())) {
             throw new HttpException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
         }
-        if (params.getResources() != null){
+        if (params.getResources() != null) {
             for (RsResource resource : params.getResources()) {
                 if (resource.getConditions() != null) {
                     for (Condition condition : resource.getConditions()) {
@@ -140,6 +143,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                                 if (!nodeValid) {
                                     throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
                                 }
+                                validateScopeExpression(json);
                             }
                         }
                     }
@@ -166,6 +170,19 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                 rp.getUmaProtectedResources().clear();
                 getRpService().updateSilently(rp);
             }
+        }
+    }
+
+    public static void validateScopeExpression(String scopeExpression) {
+        JsonLogicNode jsonLogicNode = JsonLogicNodeParser.parseNode(scopeExpression);
+        try {
+            Object scope = JsonLogic.applyObject(jsonLogicNode.getRule().toString(), Util.asJsonSilently(jsonLogicNode.getData()));
+            if(scope == null || !jsonLogicNode.getData().contains(scope.toString())) {
+                throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
+            }
+        } catch (Exception e) {
+            LOG.trace("The scope expression is invalid. Please check the documentation and make sure it is a valid JsonLogic expression.", e);
+            throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
         }
     }
 }
