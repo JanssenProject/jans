@@ -65,7 +65,15 @@ attributeTypes: ( 1.3.6.1.4.48710.1.3.507 NAME 'oxRadiusClientSecret'
     X-ORIGIN 'Gluu created attribute'
     X-SCHEMA-FILE '98-radius.ldif'
     )
-attributeTypes: ( 1.3.6.1.4.48710.1.3.508 NAME 'oxRadiusOpenIdBaseUrl'
+attributeTypes: ( 1.3.6.1.4.48710.1.3.508 NAME 'oxRadiusClientSortPriority'
+    DESC 'Gluu Radius Sort Priority'
+    EQUALITY integerMatch
+    SUBSTR integerOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+    X-ORIGIN 'Gluu created attribute'
+    X-SCHEMA-FILE '98-radius.ldif'
+    )
+attributeTypes: ( 1.3.6.1.4.48710.1.3.509 NAME 'oxRadiusOpenIdBaseUrl'
     DESC 'Gluu Radius Openid client base url'
     EQUALITY caseIgnoreMatch
     SUBSTR caseIgnoreSubstringsMatch
@@ -73,7 +81,7 @@ attributeTypes: ( 1.3.6.1.4.48710.1.3.508 NAME 'oxRadiusOpenIdBaseUrl'
     X-ORIGIN 'Gluu created attribute'
     X-SCHEMA-FILE '98-radius.ldif'
     )
-attributeTypes: ( 1.3.6.1.4.48710.1.3.509 NAME 'oxRadiusAcrValue'
+attributeTypes: ( 1.3.6.1.4.48710.1.3.510 NAME 'oxRadiusAcrValue'
     DESC 'Gluu Radius acr_values'
     EQUALITY caseIgnoreMatch
     SUBSTR caseIgnoreSubstringsMatch
@@ -81,7 +89,7 @@ attributeTypes: ( 1.3.6.1.4.48710.1.3.509 NAME 'oxRadiusAcrValue'
     X-ORIGIN 'Gluu created attribute'
     X-SCHEMA-FILE '98-radius.ldif'
     )
-attributeTypes: ( 1.3.6.1.4.48710.1.3.510 NAME 'oxRadiusAuthScope'
+attributeTypes: ( 1.3.6.1.4.48710.1.3.511 NAME 'oxRadiusAuthScope'
     DESC 'Gluu Radius scope'
     EQUALITY caseIgnoreMatch
     SUBSTR caseIgnoreSubstringsMatch
@@ -89,7 +97,7 @@ attributeTypes: ( 1.3.6.1.4.48710.1.3.510 NAME 'oxRadiusAuthScope'
     X-ORIGIN 'Gluu created attribute'
     X-SCHEMA-FILE '98-radius.ldif'
     )
-attributeTypes: ( 1.3.6.1.4.48710.1.3.511 NAME 'oxRadiusAuthenticationTimeout'
+attributeTypes: ( 1.3.6.1.4.48710.1.3.512 NAME 'oxRadiusAuthenticationTimeout'
     DESC 'Gluu Radius authentication timeout'
     EQUALITY integerMatch
     SUBSTR integerOrderingMatch
@@ -116,7 +124,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.91 NAME 'oxRadiusClient'
    SUP ( top )
    STRUCTURAL
    MUST ( objectClass )
-   MAY ( inum $ oxRadiusClientName $ oxRadiusClientIpAddress $ oxRadiusClientSecret )
+   MAY ( inum $ oxRadiusClientName $ oxRadiusClientIpAddress $ oxRadiusClientSecret $ oxRadiusClientSortPriority )
    X-ORIGIN 'Gluu created objectclass'
    X-SCHEMA-FILE '98-radius.ldif'
    )
