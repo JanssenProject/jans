@@ -132,14 +132,12 @@ public class RsProtectTest {
     @Parameters({"correctScopeExpression"})
     @Test
     public void testCorrectScopeExpression(String correctScopeExpression) {
-        System.out.println(correctScopeExpression);
         RsProtectOperation.validateScopeExpression(correctScopeExpression.replaceAll("'", "\""));
     }
 
     @Parameters({"incorrectScopeExpression"})
     @Test(expectedExceptions = HttpException.class)
     public void testIncorrectScopeExpression(String incorrectScopeExpression) {
-        System.out.println(incorrectScopeExpression.replaceAll("'", "\""));
         RsProtectOperation.validateScopeExpression(incorrectScopeExpression.replaceAll("'", "\""));
     }
 
