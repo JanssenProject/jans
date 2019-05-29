@@ -2,6 +2,7 @@ package org.gluu.oxd.server;
 
 import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.server.op.RsProtectOperation;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
@@ -127,4 +128,17 @@ public class RsProtectTest {
         assertNotNull(resp);
         return resp;
     }
+
+    @Parameters({"correctScopeExpression"})
+    @Test
+    public void testCorrectScopeExpression(String correctScopeExpression) {
+        RsProtectOperation.validateScopeExpression(correctScopeExpression.replaceAll("'", "\""));
+    }
+
+    @Parameters({"incorrectScopeExpression"})
+    @Test(expectedExceptions = HttpException.class)
+    public void testIncorrectScopeExpression(String incorrectScopeExpression) {
+        RsProtectOperation.validateScopeExpression(incorrectScopeExpression.replaceAll("'", "\""));
+    }
+
 }
