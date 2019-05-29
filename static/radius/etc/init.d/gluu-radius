@@ -57,6 +57,31 @@ if [ ! -x "$JAVA" ] ; then
 	exit 2
 fi
 
+dumpEnv()
+{
+    echo "JAVA                  =  $JAVA"
+    echo "JAVA_OPTIONS          =  ${JAVA_OPTIONS[*]}"
+    echo "START_D               =  $START_D"
+    echo "START_INI             =  $START_INI"
+    echo "RUN_CMD               =  ${RUN_CMD[*]}"
+}
+
+#####################################################
+# Find a pid and state file
+#####################################################
+
+running()
+{
+  if [ -f "$1" ]
+  then
+    local PID=$(cat "$1" 2>/dev/null) || return 1
+    kill -0 "$PID" 2>/dev/null
+    return
+  fi
+  rm -f "$1"
+  return 1
+}
+
 
 ############################################################
 # Service start function 
@@ -124,13 +149,21 @@ do_stop()
 
 do_status() 
 {
-   start-stop-daemon \
-   	--start \
-   	--test \
-   	--oknodo \
-   	--pidfile $PIDFILE \
-   	--user $GLUU_RADIUS_USER \
-   	--exec "${JAVA}"
+   	#start-stop-daemon \
+   		#--start \
+   		#--test \
+   		#--oknodo \
+   		#--pidfile $PIDFILE \
+   		#--user $GLUU_RADIUS_USER \
+   		#--exec "${JAVA}"
+	
+	MSG=`status_of_proc -p $PIDFILE "gluu-radius" $NAME`
+	STATUS="$?"
+	if [ "$STATUS" != "0" ]; then
+		echo "$MSG"
+	else
+		echo "$MSG [$(< "$PIDFILE")]"
+	fi
 }
 
 
