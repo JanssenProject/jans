@@ -242,12 +242,20 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert")); // create token after scopes are checked
 
+                        IdToken idToken = null;
+                        if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
+                            boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                                    appConfiguration.getLegacyIdTokenClaims());
+                            idToken = authorizationGrant.createIdToken(
+                                    null, null, accToken, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                        }
+
                         builder.entity(getJSonResponse(accToken,
                                 accToken.getTokenType(),
                                 accToken.getExpiresIn(),
                                 reToken,
                                 scope,
-                                null));
+                                idToken));
                         oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                     } else {
                         builder = error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token.");
