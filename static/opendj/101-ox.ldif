@@ -2301,11 +2301,17 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.401 NAME 'oxEnabled'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.402 NAME 'oxAlias'
+  DESC 'oxAlias'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ description $ oxSectorIdentifier $ oxAuthClientId )
+  MAY ( oxId $ oxSectorIdentifier $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.2 NAME 'gluuPerson'
   SUP ( top )
@@ -2545,7 +2551,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.42 NAME 'oxSectorIdentifier'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ oxAuthRedirectURI $ oxAuthClientId )
+  MAY ( oxId $ description $ oxAuthRedirectURI $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.48 NAME 'oxPassportConfiguration'
   SUP ( top )
@@ -2583,4 +2589,5 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.53 NAME 'oxFido2RegistrationEntry'
   MUST ( objectclass )
   MAY ( oxId $ creationDate $ displayName $ oxSessionStateId $ oxCodeChallenge $ oxCodeChallengeHash $ oxPublicKeyId $ personInum $ oxRegistrationData $ oxDeviceNotificationConf $ oxStatus )
   X-ORIGIN 'Gluu created objectclass' )
+
 

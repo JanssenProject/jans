@@ -4311,6 +4311,17 @@
             "oid": "oxAttribute:401",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAlias",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "oxAlias"
+            ],
+            "oid": "oxAttribute:402",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
         
     ],
@@ -4319,7 +4330,6 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxId",
-                "description",
                 "oxSectorIdentifier",
                 "oxAuthClientId"
             ],
@@ -5534,6 +5544,7 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxId",
+                "description",
                 "oxAuthRedirectURI",
                 "oxAuthClientId"
             ],
