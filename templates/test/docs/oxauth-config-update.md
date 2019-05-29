@@ -32,13 +32,14 @@ III. These changes should be applied to oxAuth config.
 6. "authenticationFiltersEnabled":true,
 7. "clientAuthenticationFiltersEnabled":true,
 8. "keyRegenerationEnabled":true,
+9. "openidScopeBackwardCompatibility":false
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
 2. Enable basic and basic_lock Person Authentication scripts.
 
 V. Update system configuration
-1. Diable token binding module
+1. Disable token binding module
 ```
   a2dismod mod_token_binding
   systemctl restart apache2
