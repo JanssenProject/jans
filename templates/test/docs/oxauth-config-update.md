@@ -35,7 +35,7 @@ III. These changes should be applied to oxAuth config.
 9. "openidScopeBackwardCompatibility":false
 
 IV. Next custom scripts should be enabled:
-1. Enable all UMA RPT Policies UMA Claims Gathering scripts.
+1. Enable all UMA RPT Policies and UMA Claims Gathering scripts.
 2. Enable basic and basic_lock Person Authentication scripts.
 
 V. Update system configuration
