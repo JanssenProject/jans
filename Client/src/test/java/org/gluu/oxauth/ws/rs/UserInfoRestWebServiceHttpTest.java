@@ -409,6 +409,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setAccessTokenLifetime(3);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -447,7 +448,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
         }
 
-        Thread.sleep(61000);
+        Thread.sleep(4000);
 
         {
             // 3. Request user info with expired access token
