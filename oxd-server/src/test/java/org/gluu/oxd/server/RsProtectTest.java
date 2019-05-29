@@ -127,4 +127,31 @@ public class RsProtectTest {
         assertNotNull(resp);
         return resp;
     }
+
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtectCorrectScopeExpression"})
+    @Test
+    public void testCorrectScopeExpression(String host, String redirectUrl, String opHost, String rsProtectCorrectScopeExpression) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RsProtectResponse response = protectResources(client, site, UmaFullTest.resourceList(rsProtectCorrectScopeExpression).getResources());
+        Assert.assertNotNull(response);
+
+    }
+
+    @Parameters({"host", "redirectUrl", "opHost", "rsProtectIncorrectScopeExpression"})
+    @Test
+    public void testIncorrectScopeExpression(String host, String redirectUrl, String opHost, String rsProtectIncorrectScopeExpression) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RsProtectResponse response = null;
+        try {
+            response = protectResources(client, site, UmaFullTest.resourceList(rsProtectIncorrectScopeExpression).getResources());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        Assert.assertNull(response);
+    }
+
 }
