@@ -419,7 +419,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                 }
                                 jsonWebResponse.getClaims().setClaim(claim.getName(), values);
                             } else {
-                                String value = (String) attribute;
+                                String value = String.valueOf(attribute);
                                 jsonWebResponse.getClaims().setClaim(claim.getName(), value);
                             }
                         }
