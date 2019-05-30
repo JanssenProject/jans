@@ -79,7 +79,7 @@ public class CleanerTimerTest extends BaseComponentTest {
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         client.setClientIdIssuedAt(calendar.getTime());
 
-        calendar.add(Calendar.HOUR, -1);
+        calendar.add(Calendar.MONTH, -1);
         client.setExpirationDate(calendar.getTime());
 
         clientService.persist(client);
@@ -100,23 +100,29 @@ public class CleanerTimerTest extends BaseComponentTest {
         // 1. create client
         final Client client = createClient(false);
 
-        final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        client.setClientIdIssuedAt(calendar.getTime());
+        try {
+            final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            client.setClientIdIssuedAt(calendar.getTime());
 
-        calendar.add(Calendar.HOUR, -1);
-        client.setExpirationDate(calendar.getTime());
+            calendar.add(Calendar.HOUR, -1);
+            client.setExpirationDate(calendar.getTime());
 
-        clientService.persist(client);
+            clientService.persist(client);
 
-        // 2. client is in persistence
-        assertNotNull(clientService.getClient(client.getClientId()));
+            // 2. client is in persistence
+            assertNotNull(clientService.getClient(client.getClientId()));
 
-        // 3. clean up
-        cleanerTimer.processImpl();
-        cacheService.clear();
+            // 3. clean up
+            cleanerTimer.processImpl();
+            cacheService.clear();
 
-        // 4. client is in persistence (not removed)
-        assertNotNull(clientService.getClient(client.getClientId()));
+            // 4. client is in persistence (not removed)
+            assertNotNull(clientService.getClient(client.getClientId()));
+        } finally {
+            client.setDeletable(true); // make it available for cleaner
+            clientService.persist(client);
+
+        }
     }
 
     @Test
