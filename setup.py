@@ -663,7 +663,7 @@ class Setup(object):
                                          self.ldif_clients,
                                          self.ldif_configuration,
                                          self.ldif_scim,
-                                         #self.ldif_passport,
+                                         self.ldif_passport,
                                          self.ldif_idp,
                                          self.lidf_oxtrust_api,
                                          ],
@@ -4049,8 +4049,12 @@ class Setup(object):
         couchbase_mappings = []
 
         for group in self.groupMappings[1:]:
+            cb_key = 'couchbase_{}_mapping'.format(group)
             if self.mappingLocations[group] == 'couchbase':
                 couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, bucketMappings[group]))
+                self.templateRenderingDict[cb_key] = bucketMappings[group]
+            else:
+                self.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
 
