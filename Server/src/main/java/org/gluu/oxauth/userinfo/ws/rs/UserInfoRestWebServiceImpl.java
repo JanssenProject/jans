@@ -336,7 +336,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (value instanceof List) {
                         groupClaim.setClaim(key, (List<String>) value);
                     } else {
-                        groupClaim.setClaim(key, (String) value);
+                        groupClaim.setClaim(key, String.valueOf(value));
                     }
                 }
 
@@ -353,7 +353,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (value instanceof Date) {
                         jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime());
                     } else {
-                        jsonWebResponse.getClaims().setClaim(key, (String) value);
+                        jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
                     }
                 }
             }
@@ -386,7 +386,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                 }
                                 jsonWebResponse.getClaims().setClaim(claimName, values);
                             } else {
-                                String value = (String) attribute;
+                                String value = String.valueOf(attribute);
                                 jsonWebResponse.getClaims().setClaim(claimName, value);
                             }
                         }
@@ -513,7 +513,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
                         if (value instanceof String) {
-                            attribute = Boolean.parseBoolean((String) value);
+                            attribute = Boolean.parseBoolean(String.valueOf(value));
                         } else {
                             attribute = value;
                         }
