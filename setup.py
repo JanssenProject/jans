@@ -3510,6 +3510,11 @@ class Setup(object):
         # Passport service
         if self.installPassport:
             self.run_service_command('passport', 'start')
+            
+        # Radius service
+        if self.installGluuRadius:
+            self.run_service_command('gluu-radius', 'start')
+        
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
