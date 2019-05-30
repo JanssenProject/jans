@@ -616,7 +616,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
                                 }
 
-                                clientService.updatAccessTime(client, false);
+                                clientService.updateAccessTime(client, false);
                                 oAuth2AuditLog.setSuccess(true);
 
                                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
