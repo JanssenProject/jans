@@ -70,14 +70,6 @@ public class ClientService {
 	@Inject
 	private StaticConfiguration staticConfiguration;
 
-	private static String getClientIdCacheKey(String clientId) {
-		return "client_id_" + StringHelper.toLowerCase(clientId);
-	}
-
-	private static String getClientDnCacheKey(String dn) {
-		return "client_dn_" + StringHelper.toLowerCase(dn);
-	}
-
 	public void persist(Client client) {
 		ldapEntryManager.persist(client);
 	}
@@ -208,10 +200,7 @@ public class ClientService {
 		}
 
 		try {
-			cacheService.put(60, getClientIdCacheKey(client.getClientId()), client,
-					Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-			cacheService.put(60, getClientDnCacheKey(client.getDn()), client,
-					Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
+			cacheService.put(60, client.getDn(), client, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
 		} catch (Exception e) {
 			log.error("Failed to put client in cache, client:" + client, e);
 		}
@@ -219,8 +208,7 @@ public class ClientService {
 
 	private Client fromCache(String dn) {
 		try {
-			String key = getClientDnCacheKey(dn);
-			return (Client) cacheService.get(CACHE_CLIENT_NAME, key);
+			return (Client) cacheService.get(dn);
 		} catch (Exception e) {
 			log.error("Failed to fetch client from cache, dn: " + dn, e);
 			return null;
@@ -290,17 +278,13 @@ public class ClientService {
 
 	private void removeFromCache(Client client) {
 		try {
-			String clientId = client.getClientId();
-			String clientDn = client.getDn();
-
-			cacheService.remove(getClientIdCacheKey(clientId));
-			cacheService.remove(getClientDnCacheKey(clientDn));
+			cacheService.remove(client.getDn());
 		} catch (Exception e) {
-			log.error("Failed to remove client from cache.", e);
+			log.error("Failed to remove client from cache." + client.getDn(), e);
 		}
 	}
 
-	public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
+	public void updateAccessTime(Client client, boolean isUpdateLogonTime) {
 		if (!appConfiguration.getUpdateClientAccessTime()) {
 			return;
 		}
