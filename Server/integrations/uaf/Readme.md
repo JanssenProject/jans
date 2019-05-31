@@ -4,7 +4,7 @@ UAF allows applications to take advantage of the security capabilities of modern
 
 ## Typical UAF architecture
 
-THe following diagram provides an overview of the UAF infrastructure, which contains (1) components that resides on the user’s device, and (2) server side components that connect to a UAF server. The typical gateway between these two parts is a mobile browser with a UAF plugin. The RP should provide proxy capabilities to deliver messages from the mobile browser plugin to the UAF server.
+The following diagram provides an overview of the UAF infrastructure, which contains (1) components that resides on the user’s device, and (2) server side components that connect to a UAF server. The typical gateway between these two parts is a mobile browser with a UAF plugin. The RP should provide proxy capabilities to deliver messages from the mobile browser plugin to the UAF server.
 
 ![Typical UAF design](./img/typical_uaf_architecture.png)
 
