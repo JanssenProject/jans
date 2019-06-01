@@ -4247,10 +4247,15 @@ class Setup(object):
         self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
         self.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
 
+        
+        self.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+        self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+        
         if self.os_type+self.os_version == 'ubuntu16':
-            self.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
-            self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
             self.run(['update-rc.d', 'gluu-radius', 'defaults'])
+        else:
+            self.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+            self.run([self.systemctl, 'daemon-reload'])
             
         self.run([self.cmd_chown, '-R', 'radius:gluu', radius_dir])
         self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
