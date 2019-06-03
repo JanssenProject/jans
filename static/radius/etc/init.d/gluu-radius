@@ -498,13 +498,13 @@ case "$ACTION" in
         			chown "$RADIUS_USER" "$PIDFILE"
         			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         			su - "$RADIUS_USER" $SU_SHELL -c "
-          			cd \"$RADIUS_BASE\"
+          			cd "$RADIUS_BASE"
           			exec ${RUN_CMD[*]} start-log-file=\"$RADIUS_START_LOG\" > /dev/null &
           			disown \$!
           			echo \$! > \"$PIDFILE\"
 				echo "STARTED" > \"$RADIUS_STATE\""
       			else
-          			cd \"$RADIUS_BASE\"
+          			cd "$RADIUS_BASE"
         			"${RUN_CMD[@]}" > /dev/null &
         			disown $!
         			echo $! > "$PIDFILE"
