@@ -144,7 +144,7 @@ public class AppConfiguration implements Configuration {
     private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
-    private Boolean shareSubjectIdBetweenClientsWithSameSectorId;
+    private Boolean shareSubjectIdBetweenClientsWithSameSectorId = false;
 
     private WebKeyStorage webKeysStorage;
     private String dnName;
