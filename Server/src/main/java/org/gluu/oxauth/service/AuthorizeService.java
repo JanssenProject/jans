@@ -170,10 +170,14 @@ public class AuthorizeService {
             }
 
             final String parametersAsString = requestParameterService.parametersAsString(sessionAttribute);
-            final String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
+            String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
-            invalidateSessionCookiesIfNeeded();
+            if (invalidateSessionCookiesIfNeeded()) {
+                if (!uri.contains(AuthorizeRequestParam.SESSION_ID)) {
+                    uri += "&session_id=" + session.getId();
+                }
+            }
             facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {
             log.trace(e.getMessage(), e);
@@ -233,13 +237,14 @@ public class AuthorizeService {
         return result;
     }
 
-    private void invalidateSessionCookiesIfNeeded() {
+    private boolean invalidateSessionCookiesIfNeeded() {
         if (appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
-            invalidateSessionCookies();
+            return invalidateSessionCookies();
         }
+        return false;
     }
 
-    private void invalidateSessionCookies() {
+    private boolean invalidateSessionCookies() {
         try {
             if (externalContext.getResponse() instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
@@ -249,9 +254,11 @@ public class AuthorizeService {
 
                 log.trace("Invalidated {} cookie.", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
                 httpResponse.addHeader("Set-Cookie", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
+                return true;
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        return true;
     }
 }
