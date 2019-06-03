@@ -46,9 +46,10 @@ import ssl
 import ldap
 import uuid
 
-from pylib.ldif import LDIFParser
+from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
+from ldap.schema import ObjectClass
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -3684,9 +3685,7 @@ class Setup(object):
         return o, e
 
 
-
-    def check_and_install_packages(self):
-
+    def get_install_commands(self):
         if self.os_type in ('ubuntu', 'debian'):
             install_command = 'DEBIAN_FRONTEND=noninteractive apt-get install -y {0}'
             update_command = 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
@@ -3698,6 +3697,12 @@ class Setup(object):
             update_command = 'yum install -y epel-release'
             query_command = 'rpm -q {0}'
             check_text = 'is not installed'
+            
+        return install_command, update_command, query_command, check_text
+
+    def check_and_install_packages(self):
+
+        install_command, update_command, query_command, check_text = self.get_install_commands()
 
 
         install_list = []
@@ -4120,6 +4125,13 @@ class Setup(object):
 
         self.couchbaseProperties()
 
+    def getLdapConnection(self):
+            ldap_conn = ldap.initialize('ldaps://{0}:{1}'.format(self.ldap_hostname, self.ldaps_port))
+            ldap_conn.simple_bind_s(self.opendj_ldap_binddn, self.ldapPass)
+            
+            return ldap_conn
+
+
     def load_test_data(self):
         self.logIt("Loading test ldif files")
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
@@ -4131,6 +4143,123 @@ class Setup(object):
         elif self.persistence_type in ('couchbase', 'hybrid'):
             self.import_ldif_couchebase(ldif_files)
 
+
+        apache_user = 'www-data'
+        if self.os_type in ('red', 'centos', 'fedora'):
+            apache_user = 'apache'
+
+
+        # Client keys deployment
+        self.run(['wget', '--no-check-certificate', 'https://raw.githubusercontent.com/GluuFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip', '-O', '/var/www/html/oxauth_test_client_keys.zip'])
+        self.run(['unzip', '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
+        self.run(['rm', '-rf', 'oxauth_test_client_keys.zip'])
+        self.run(['chown', '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
+
+        if self.mappingLocations['default'] == 'ldap':
+            # oxAuth config changes
+            ldap_conn = self.getLdapConnection()
+
+            dn = 'ou=oxauth,ou=configuration,o=gluu'
+            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxAuthConfDynamic'])
+            oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
+
+            oxAuthConfDynamic['dynamicRegistrationCustomObjectClass'] = "oxAuthClientCustomAttributes"
+            oxAuthConfDynamic['dynamicRegistrationCustomAttributes'] = [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ]
+            oxAuthConfDynamic['dynamicRegistrationExpirationTime'] = 86400
+            oxAuthConfDynamic['dynamicGrantTypeDefault'] = [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ]
+            oxAuthConfDynamic['legacyIdTokenClaims'] = True
+            oxAuthConfDynamic['authenticationFiltersEnabled'] = True
+            oxAuthConfDynamic['clientAuthenticationFiltersEnabled'] = True
+            oxAuthConfDynamic['keyRegenerationEnabled'] = True
+            oxAuthConfDynamic['openidScopeBackwardCompatibility'] = False
+            
+            oxAuthConfDynamic_js = json.dumps(oxAuthConfDynamic, indent=2)
+            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfDynamic_js)])
+            
+            # Enable custom scripts
+            for inum in ('2DAF-F995', '2DAF-F996', '4BBE-C6A8'):
+                dn = 'inum={0},ou=scripts,o=gluu'.format(inum)
+                ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxEnabled',  'true')])
+            
+
+            # Update LDAP schema
+            self.copyFile(os.path.join(self.outputFolder, 'test/oxauth/schema/102-oxauth_test.ldif'), '/opt/opendj/config/schema/')
+            self.copyFile(os.path.join(self.outputFolder, 'test/scim-client/schema/103-scim_test.ldif'), '/opt/opendj/config/schema/')
+
+            schema_fn = os.path.join(self.openDjSchemaFolder,'77-customAttributes.ldif')
+
+            obcl_parser = myLdifParser(schema_fn)
+            obcl_parser.parse()
+
+            for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
+                objcl = ObjectClass(o)
+                if 'gluuCustomPerson' in objcl.names:
+                    may_list = list(objcl.may)
+                    for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
+                        if not a in may_list:
+                            may_list.append(a)
+                    
+                    objcl.may = tuple(may_list)
+                    obcl_parser.entries[0][1]['objectClasses'][i] = str(objcl)
+
+            tmp_fn = '/tmp/77-customAttributes.ldif'
+
+            with open(tmp_fn, 'w') as w:
+                ldif_writer = LDIFWriter(w)
+                for dn, entry in obcl_parser.entries:
+                    ldif_writer.unparse(dn, entry)
+
+            self.copyFile(tmp_fn, self.openDjSchemaFolder)
+
+            dsconfigCmd = 'cd {0}/bin ; {1} --trustAll --no-prompt --hostname localhost --port 4444 --bindDN "cn=directory manager" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop --handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'.format(self.ldapBaseFolder, self.ldapDsconfigCommand)
+            
+            self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
+            
+            ldap_conn.unbind()
+            
+            self.run_service_command('opendj', 'restart')
+
+            for cmd in ('create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr1 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt',
+                        'create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt'
+                        ):
+                dsconfigCmd = 'cd {0}/bin ; {1} {2}'.format(self.ldapBaseFolder, self.ldapDsconfigCommand, cmd)
+                self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
+            
+            
+            ldap_conn = self.getLdapConnection()
+            
+            dn = 'ou=configuration,o=gluu'
+
+            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxIDPAuthentication'])
+            oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
+            oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(self.hostname, self.ldaps_port)]
+            oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
+            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication_js)])
+            ldap_conn.unbind()
+            
+        else:
+            # Todo: couchbase data updates
+            pass
+
+        # Disable token binding module
+        if self.os_type+self.os_version == 'ubuntu18':
+            self.run(['a2dismod', 'mod_token_binding'])
+            self.run_service_command('apache2', 'restart')
+
+        self.run_service_command('oxauth', 'restart')
+        
+        # Prepare for tests run
+        install_command, update_command, query_command, check_text = self.get_install_commands()
+        self.run_command(install_command.format('git'))
+        self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
+        self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
+        # Todo: Download and unzip file test_data.zip from CE server.
+        # Todo: Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
+        # Todo: Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
+ 
+        self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_httpd', '-keystore', 'cacerts', '-file', '%s/httpd.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
+        self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_opendj', '-keystore', 'cacerts', '-file', '%s/opendj.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
+ 
 
     def load_test_data_exit(self):
         print "Loading test data"
