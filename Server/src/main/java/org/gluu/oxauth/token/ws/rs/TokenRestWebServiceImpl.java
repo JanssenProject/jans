@@ -32,7 +32,6 @@ import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.service.UserService;
 
 import javax.inject.Inject;
@@ -46,6 +45,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Provides interface for token REST web services
@@ -246,8 +246,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                     appConfiguration.getLegacyIdTokenClaims());
+
                             idToken = authorizationGrant.createIdToken(
-                                    null, null, accToken, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                            		null, null, accToken, null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                         }
 
                         builder.entity(getJSonResponse(accToken,
