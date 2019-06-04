@@ -1,0 +1,78 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
+
+	<ui:param name="showGlobalMessages" value="false" />
+
+	<ui:define name="body">
+		<header class="bs-docs-nav navbar navbar-static-top" id="top">
+		<div class="container">
+			<div class="logo span2">
+				<h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
+					<object data="ext/resources/img/logo.png" type="image/png">
+						<img src="img/logo.png" />
+					</object>
+				</h:panelGroup>
+			</div>
+		</div>
+		</header>
+		<div class="bs-docs-section"
+			style="padding-bottom: 1px; border-top: 2px solid #1ab26b !important;"></div>
+		<div class="container-fluid"
+			style="padding-bottom: 5%; width: 50%; height: 50%;">
+			<div class="row">
+				<div class="text-center col-sm-12">
+					<div class="section">
+						<h1
+							style="font-size: 3em; font-weight: bold; font-family: Arial">
+							SESSION</h1>
+					</div>
+					<div class="section text-center">
+						<p>
+							<h:outputFormat value="#{msgs['error.invalidSessionState']}">
+								<f:param value="#{pageService.currentDateTime}" />
+							</h:outputFormat>
+						</p>
+						<div class="body text-center">
+							<h:messages id="globalMessage" styleClass="message text-center"
+								errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+								globalOnly="true" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-copyright text-center py-3"
+			style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
+			<div class="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="padding_spc"
+							style="padding-bottom: 5px; padding-top: 5px;">
+							<p>
+								<h:outputText value="#{msgs['common.gluuInc']}" />
+								| <a target="_blank"
+									href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+										value="#{msgs['common.caution']}" escape="false" /></a>
+								<h:panelGroup rendered='#{!empty client.policyUri}'>
+					| <a target="_blank" href="#{client.policyUri}"><h:outputText
+											value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
+								</h:panelGroup>
+								<h:panelGroup rendered='#{!empty client.tosUri}'>
+					| <a target="_blank" href="#{client.tosUri}"><h:outputText
+											value="#{msgs['common.termsOfService']}" escape="false" /></a>
+								</h:panelGroup>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</ui:define>
+
+</ui:composition>
