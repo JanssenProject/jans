@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.AcrChangedException;
+import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
@@ -184,6 +185,10 @@ public class SessionIdService {
                     it.remove();
                 }
             }
+            
+            // Cover case when we call it after checking session in session script
+            currentSessionAttributes.remove(Constants.AUTHENTICATED_USER);
+            session.setState(SessionIdState.UNAUTHENTICATED);
 
             session.setSessionAttributes(currentSessionAttributes);
 
@@ -445,28 +450,32 @@ public class SessionIdService {
         return null;
     }
 
-    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn) {
-        return generateAuthenticatedSessionId(httpRequest, userDn, "");
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn) throws InvalidSessionStateException {
+        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        sessionIdAttributes.put("prompt", "");
+
+        return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
     }
 
-    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, String prompt) {
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, String prompt) throws InvalidSessionStateException {
         Map<String, String> sessionIdAttributes = new HashMap<String, String>();
         sessionIdAttributes.put("prompt", prompt);
 
-        return generateAuthenticatedSessionId(httpRequest, userDn, new Date(), sessionIdAttributes, true);
+        return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
     }
 
-    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) {
-        return generateAuthenticatedSessionId(httpRequest, userDn, new Date(), sessionIdAttributes, true);
-    }
-
-    private SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Date authenticationDate, Map<String, String> sessionIdAttributes, boolean persist) {
+    public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
 
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
             log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+
+            if (!externalResult) {
+            	reinitLogin(sessionId, true);
+            	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
+            }
         }
 
         return sessionId;
@@ -583,6 +592,11 @@ public class SessionIdService {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
             log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+
+            if (!externalResult) {
+            	reinitLogin(sessionId, true);
+            	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
+            }
         }
 
         return sessionId;
