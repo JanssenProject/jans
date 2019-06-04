@@ -20,7 +20,7 @@
 
 		<resteasy.version>3.7.0.Final</resteasy.version>
 
-		<weld.version>3.1.0.Final</weld.version>
+		<weld.version>3.1.1.Final</weld.version>
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.19</jsf-api.version>
