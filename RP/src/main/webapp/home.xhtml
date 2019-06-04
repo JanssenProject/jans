@@ -1,21 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:rich="http://richfaces.org/rich"
-	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:b="http://bootsfaces.net/ui" xmlns:a4j="http://richfaces.org/a4j"
 	template="/WEB-INF/incl/layout/template.xhtml">
-
 	<ui:define name="body">
-
 		<h:form id="mainForm">
 			<h1>Welcome to oxAuth RP!</h1>
-
 			<div>
-				<rich:panel>
-					<f:facet name="header">OpenID Connect Discovery (Webfinger)</f:facet>
+				<b:panel title="OpenID Connect Discovery (Webfinger)" look="primary">
 					<a4j:region>
 						<h:panelGroup layout="block">
 							<div>
@@ -45,12 +41,9 @@
 					</a4j:region>
 
 					<h:panelGroup layout="block" id="discoveryResults">
-						<h:panelGroup layout="block" rendered="#{openIdConnectDiscoveryAction.showResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Identifier Normalization</f:facet>
+						<h:panelGroup layout="block"
+							rendered="#{openIdConnectDiscoveryAction.showResults}">
+							<b:panel title="Identifier Normalization" look="primary">
 								<h:panelGroup layout="block">
 									<div>
 										<h:panelGrid columns="2">
@@ -66,53 +59,41 @@
 										</h:panelGrid>
 									</div>
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Webfinger Request</f:facet>
+							</b:panel>
+							<b:panel title="Webfinger Request" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
 										value="#{openIdConnectDiscoveryAction.requestString1}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Webfinger Response</f:facet>
+							</b:panel>
+							<b:panel title="Webfinger Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="10"
 										value="#{openIdConnectDiscoveryAction.responseString1}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Configuration Request</f:facet>
+							</b:panel>
+							<b:panel title="Configuration Request" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
 										value="#{openIdConnectDiscoveryAction.requestString2}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Configuration Response</f:facet>
+							</b:panel>
+							<b:panel title="Configuration Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="15"
 										value="#{openIdConnectDiscoveryAction.responseString2}" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</div>
 
-			<br />
 
 			<div>
-				<rich:panel>
-					<f:facet name="header">Dynamic Client Registration</f:facet>
+				<b:panel title="Dynamic Client Registration" look="primary">
 					<a4j:region>
 						<h:panelGroup layout="block" id="registrationForm">
 							<div>
@@ -133,7 +114,7 @@
 
 									<h:outputLabel for="claimsRedirectUris">Claims Redirect URIs (space-separated)</h:outputLabel>
 									<h:inputText id="claimsRedirectUris"
-												 value="#{registrationAction.claimsRedirectUris}" size="40" />
+										value="#{registrationAction.claimsRedirectUris}" size="40" />
 									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/uma/gather_claims</h:outputText>
 
 									<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
@@ -143,21 +124,24 @@
 
 									<h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
 									<h:selectManyListbox id="registrationResponseType"
-										value="#{registrationAction.responseTypes}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.responseTypes}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{responseTypes}" />
 									</h:selectManyListbox>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="registrationGrantType">Grant Types</h:outputLabel>
 									<h:selectManyListbox id="registrationGrantType"
-										value="#{registrationAction.grantTypes}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.grantTypes}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{grantTypes}" />
 									</h:selectManyListbox>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="applicationType">Application Type</h:outputLabel>
 									<h:selectOneMenu id="applicationType"
-										value="#{registrationAction.applicationType}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.applicationType}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{applicationTypes}" />
 									</h:selectOneMenu>
@@ -205,7 +189,8 @@
 
 									<h:outputLabel for="subjectType">Subject Type</h:outputLabel>
 									<h:selectOneMenu id="subjectType"
-										value="#{registrationAction.subjectType}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.subjectType}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{subjectTypes}" />
 									</h:selectOneMenu>
@@ -213,7 +198,8 @@
 
 									<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
 									<h:selectOneMenu id="idTokenSignedResponseAlg"
-										value="#{registrationAction.idTokenSignedResponseAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.idTokenSignedResponseAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
@@ -221,7 +207,8 @@
 
 									<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
 									<h:selectOneMenu id="idTokenEncryptedResponseAlg"
-										value="#{registrationAction.idTokenEncryptedResponseAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.idTokenEncryptedResponseAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -229,7 +216,8 @@
 
 									<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
 									<h:selectOneMenu id="idTokenEncryptedResponseEnc"
-										value="#{registrationAction.idTokenEncryptedResponseEnc}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.idTokenEncryptedResponseEnc}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -237,7 +225,8 @@
 
 									<h:outputLabel for="userInfoSignedResponseAlg">User Info Signed Response Alg</h:outputLabel>
 									<h:selectOneMenu id="userInfoSignedResponseAlg"
-										value="#{registrationAction.userInfoSignedResponseAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.userInfoSignedResponseAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
@@ -245,7 +234,8 @@
 
 									<h:outputLabel for="userInfoEncryptedResponseAlg">User Info Encrypted Response Alg</h:outputLabel>
 									<h:selectOneMenu id="userInfoEncryptedResponseAlg"
-										value="#{registrationAction.userInfoEncryptedResponseAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.userInfoEncryptedResponseAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -253,7 +243,8 @@
 
 									<h:outputLabel for="userInfoEncryptedResponseEnc">User Info Encrypted Response Enc</h:outputLabel>
 									<h:selectOneMenu id="userInfoEncryptedResponseEnc"
-										value="#{registrationAction.userInfoEncryptedResponseEnc}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.userInfoEncryptedResponseEnc}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -261,7 +252,8 @@
 
 									<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="requestObjectSigningAlg"
-										value="#{registrationAction.requestObjectSigningAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.requestObjectSigningAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
@@ -269,7 +261,8 @@
 
 									<h:outputLabel for="requestObjectEncryptionAlg">Request Object Encryption Alg</h:outputLabel>
 									<h:selectOneMenu id="requestObjectEncryptionAlg"
-										value="#{registrationAction.requestObjectEncryptionAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.requestObjectEncryptionAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -277,7 +270,8 @@
 
 									<h:outputLabel for="requestObjectEncryptionEnc">Request Object Encryption Enc</h:outputLabel>
 									<h:selectOneMenu id="requestObjectEncryptionEnc"
-										value="#{registrationAction.requestObjectEncryptionEnc}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.requestObjectEncryptionEnc}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
@@ -285,7 +279,8 @@
 
 									<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
 									<h:selectOneMenu id="tokenEndpointAuthMethod"
-										value="#{registrationAction.tokenEndpointAuthMethod}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.tokenEndpointAuthMethod}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{authenticationMethods}" />
 									</h:selectOneMenu>
@@ -293,7 +288,8 @@
 
 									<h:outputLabel for="tokenEndpointAuthSigningAlg">Token Endpoint Auth Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="tokenEndpointAuthSigningAlg"
-										value="#{registrationAction.tokenEndpointAuthSigningAlg}" converter="omnifaces.GenericEnumConverter">
+										value="#{registrationAction.tokenEndpointAuthSigningAlg}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
@@ -347,36 +343,28 @@
 						</div>
 					</a4j:region>
 					<h:panelGroup layout="block" id="registrationResults">
-						<h:panelGroup layout="block" rendered="#{registrationAction.showResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Registration Request</f:facet>
+						<h:panelGroup layout="block"
+							rendered="#{registrationAction.showResults}">
+							<b:panel title="Registration Request" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="10" value="#{registrationAction.requestString}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Registration Response</f:facet>
+							</b:panel>
+							<b:panel title="Registration Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="30" value="#{registrationAction.responseString}" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
 
 					<a4j:region>
 						<h:panelGroup layout="block" id="clientReadForm">
 							<div>
-								<br />
-								<hr />
-								<br /> <strong> Please fill the form to read the
-									current configuration of the Client on the Authorization
-									Server. </strong>
+								<strong> Please fill the form to read the current
+									configuration of the Client on the Authorization Server. </strong>
 							</div>
 							<div>
 								<h:panelGrid columns="3">
@@ -401,36 +389,29 @@
 						</div>
 					</a4j:region>
 					<h:panelGroup layout="block" id="clientReadResults">
-						<h:panelGroup layout="block" rendered="#{registrationAction.showClientReadResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Client Read Request</f:facet>
+						<h:panelGroup layout="block"
+							rendered="#{registrationAction.showClientReadResults}">
+							<b:panel title="Client Read Request" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
 										value="#{registrationAction.clientReadRequestString}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Client Read Response</f:facet>
+							</b:panel>
+							<b:panel title="Client Read Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="30"
 										value="#{registrationAction.clientReadResponseString}" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</div>
 
-			<br />
 
 			<h:panelGroup layout="block" id="authorizationEndpointDiv">
-				<rich:panel>
-					<f:facet name="header">Authorization Endpoint</f:facet>
+				<b:panel title="Authorization Endpoint" look="primary">
 					<h:panelGroup layout="block" id="authorizationForm">
 						<div>
 							<strong>OAuth 2.0 request parameters</strong>
@@ -444,7 +425,8 @@
 
 								<h:outputLabel for="responseType">Response Type</h:outputLabel>
 								<h:selectManyListbox id="responseType"
-									value="#{authorizationAction.responseTypes}" converter="omnifaces.GenericEnumConverter">
+									value="#{authorizationAction.responseTypes}"
+									converter="omnifaces.GenericEnumConverter">
 									<f:selectItems value="#{responseTypes}" />
 								</h:selectManyListbox>
 								<h:outputText></h:outputText>
@@ -488,14 +470,16 @@
 
 								<h:outputLabel for="display">Display</h:outputLabel>
 								<h:selectOneMenu id="display"
-									value="#{authorizationAction.display}" converter="omnifaces.GenericEnumConverter">
+									value="#{authorizationAction.display}"
+									converter="omnifaces.GenericEnumConverter">
 									<f:selectItems value="#{displays}" />
 								</h:selectOneMenu>
 								<h:outputText></h:outputText>
 
 								<h:outputLabel for="prompt">Prompt</h:outputLabel>
 								<h:selectManyListbox id="prompt"
-									value="#{authorizationAction.prompt}" converter="omnifaces.GenericEnumConverter">
+									value="#{authorizationAction.prompt}"
+									converter="omnifaces.GenericEnumConverter">
 									<f:selectItems value="#{prompts}" />
 								</h:selectManyListbox>
 								<h:outputText></h:outputText>
@@ -534,10 +518,8 @@
 								<h:inputTextarea id="claims"
 									value="#{authorizationAction.claims}" rows="10" cols="45">
 									<f:validator validatorId="jsonValidator" />
-									<rich:validator event="blur" />
 								</h:inputTextarea>
-								<rich:message for="claims" style="color: red" />
-
+								<b:message for="claims" style="color: red" />
 								<h:outputLabel for="registration">Registration</h:outputLabel>
 								<h:inputText id="registration"
 									value="#{authorizationAction.registration}" size="40" />
@@ -561,7 +543,8 @@
 										render="authorizationEndpointDiv" />
 								</h:selectBooleanCheckbox>
 							</h:panelGrid>
-							<h:panelGroup layout="block" rendered="#{authorizationAction.useOpenIdRequestObject}">
+							<h:panelGroup layout="block"
+								rendered="#{authorizationAction.useOpenIdRequestObject}">
 								<h:panelGrid columns="2">
 									<h:outputLabel for="signOrEncryptRequestObject">Sign/Encrypted the JWT Request Object</h:outputLabel>
 									<h:selectOneRadio id="signOrEncryptRequestObject"
@@ -578,7 +561,8 @@
 										rendered="#{authorizationAction.JWSSelected}">Request Object Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectSigningAlg"
 										value="#{authorizationAction.requestObjectSigningAlg}"
-										rendered="#{authorizationAction.JWSSelected}" converter="omnifaces.GenericEnumConverter">
+										rendered="#{authorizationAction.JWSSelected}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{signatureAlgorithms}" />
 
 										<a4j:ajax event="change" render="authorizationEndpointDiv"
@@ -590,7 +574,8 @@
 										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Alg</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectEncryptionAlg"
 										value="#{authorizationAction.requestObjectEncryptionAlg}"
-										rendered="#{authorizationAction.JWESelected}" converter="omnifaces.GenericEnumConverter">
+										rendered="#{authorizationAction.JWESelected}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 
 										<a4j:ajax event="change" render="authorizationEndpointDiv"
@@ -602,25 +587,27 @@
 										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Enc</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectEncryptionEnc"
 										value="#{authorizationAction.requestObjectEncryptionEnc}"
-										rendered="#{authorizationAction.JWESelected}" converter="omnifaces.GenericEnumConverter">
+										rendered="#{authorizationAction.JWESelected}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
 
-                                    <h:outputLabel for="keyStoreFile"
-                                                   rendered="#{authorizationAction.keyStoreRequired}">Key Store File</h:outputLabel>
-                                    <h:inputText id="keyStoreFile"
-                                                 value="#{authorizationAction.keyStoreFile}"
-                                                 rendered="#{authorizationAction.keyStoreRequired}" size="40" />
-                                    <h:outputText value="eg: /etc/certs/client_keystore.jks"
-                                                  rendered="#{authorizationAction.keyStoreRequired}"/>
+									<h:outputLabel for="keyStoreFile"
+										rendered="#{authorizationAction.keyStoreRequired}">Key Store File</h:outputLabel>
+									<h:inputText id="keyStoreFile"
+										value="#{authorizationAction.keyStoreFile}"
+										rendered="#{authorizationAction.keyStoreRequired}" size="40" />
+									<h:outputText value="eg: /etc/certs/client_keystore.jks"
+										rendered="#{authorizationAction.keyStoreRequired}" />
 
-                                    <h:outputLabel for="keyStoreSecret"
-                                                   rendered="#{authorizationAction.keyStoreRequired}">Key Store Secret</h:outputLabel>
-                                    <h:inputText id="keyStoreSecret"
-                                                 value="#{authorizationAction.keyStoreSecret}"
-                                                 rendered="#{authorizationAction.keyStoreRequired}" size="40" />
-                                    <h:outputText rendered="#{authorizationAction.keyStoreRequired}"></h:outputText>
+									<h:outputLabel for="keyStoreSecret"
+										rendered="#{authorizationAction.keyStoreRequired}">Key Store Secret</h:outputLabel>
+									<h:inputText id="keyStoreSecret"
+										value="#{authorizationAction.keyStoreSecret}"
+										rendered="#{authorizationAction.keyStoreRequired}" size="40" />
+									<h:outputText
+										rendered="#{authorizationAction.keyStoreRequired}"></h:outputText>
 
 									<h:outputLabel for="authorizationKeyId"
 										rendered="#{authorizationAction.keyIdRequired}">Key ID</h:outputLabel>
@@ -643,9 +630,8 @@
 										value="#{authorizationAction.openIdRequestObject}" rows="20"
 										cols="45">
 										<f:validator validatorId="jsonValidator" />
-										<rich:validator event="blur" />
 									</h:inputTextarea>
-									<rich:message for="openIdRequestObject" style="color: red" />
+									<b:message for="openIdRequestObject" style="color: red" />
 								</h:panelGrid>
 							</h:panelGroup>
 						</div>
@@ -657,35 +643,31 @@
 					</div>
 
 					<h:panelGroup layout="block" id="authorizationResults">
-						<h:panelGroup layout="block" rendered="#{authorizationAction.showResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Authorization Request</f:facet>
+						<h:panelGroup layout="block"
+							rendered="#{authorizationAction.showResults}">
+							<b:panel title="Authorization Request" look="primary">
+								<f:facet name="header"></f:facet>
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
-													 rows="10" value="#{authorizationAction.requestString}" />
+										rows="10" value="#{authorizationAction.requestString}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Authorization Response (Parameters)</f:facet>
+							</b:panel>
+							<b:panel title="Authorization Response (Parameters)"
+								look="primary">
 								<h:panelGroup layout="block">
-									<h:inputTextarea id="authorizationResponse" styleClass="width100"
-													 value="#{authorizationAction.responseString}" rows="10" />
+									<h:inputTextarea id="authorizationResponse"
+										styleClass="width100"
+										value="#{authorizationAction.responseString}" rows="10" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</h:panelGroup>
 
-			<br />
 
 			<div>
-				<rich:panel>
-					<f:facet name="header">Token Endpoint</f:facet>
+				<b:panel title="Token Endpoint" look="primary">
 					<a4j:region>
 						<h:panelGroup layout="block" id="tokenForm">
 							<div>
@@ -700,7 +682,8 @@
 
 									<h:outputLabel for="grantType">Grant Type</h:outputLabel>
 									<h:selectOneMenu id="grantType"
-										value="#{tokenAction.grantType}" converter="omnifaces.GenericEnumConverter">
+										value="#{tokenAction.grantType}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
 										<f:selectItems value="#{grantTypes}" />
 									</h:selectOneMenu>
@@ -762,7 +745,8 @@
 							<div>
 								<h:panelGrid columns="2">
 									<h:selectOneMenu id="tokenAuthenticationMethod"
-										value="#{tokenAction.authenticationMethod}" converter="omnifaces.GenericEnumConverter">
+										value="#{tokenAction.authenticationMethod}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{authenticationMethods}" />
 									</h:selectOneMenu>
 								</h:panelGrid>
@@ -776,40 +760,34 @@
 					</a4j:region>
 					<h:panelGroup layout="block" id="tokenResults">
 						<h:panelGroup layout="block" rendered="#{tokenAction.showResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">Token Request</f:facet>
+							<b:panel title="Token Request" look="primary">
+								<f:facet name="header"></f:facet>
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
 										value="#{tokenAction.requestString}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">Token Response</f:facet>
+							</b:panel>
+							<b:panel title="Token Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
 										value="#{tokenAction.responseString}" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</div>
 
-			<br />
 
 			<div>
-				<rich:panel>
-					<f:facet name="header">Check Session Endpoint</f:facet>
+				<b:panel title="Check Session Endpoint" look="primary">
 					<h:panelGroup layout="block" id="checkSessionForm">
 						<iframe id="op" style="visibility: hidden" height="0" width="0"
 							src="#{checkSessionAction.checkSessionEndpoint}" />
 						<iframe id="rp" style="visibility: hidden" height="0" width="0" />
 
-						<h:panelGroup layout="block" rendered="#{openIdConnectDiscoveryAction.showResults}">
+						<h:panelGroup layout="block"
+							rendered="#{openIdConnectDiscoveryAction.showResults}">
 							<h:panelGrid columns="3">
 								<h:outputLabel for="opIFrame">OP IFrame</h:outputLabel>
 								<h:inputText id="opIFrame"
@@ -829,14 +807,12 @@
 							</h:panelGrid>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</div>
 
-			<br />
 
 			<div>
-				<rich:panel>
-					<f:facet name="header">User Info Endpoint</f:facet>
+				<b:panel title="User Info Endpoint" look="primary">
 					<a4j:region>
 						<h:panelGroup layout="block" id="userInfoForm">
 							<div>
@@ -861,7 +837,8 @@
 							<div>
 								<h:panelGrid columns="2">
 									<h:selectOneMenu id="userInfoAuthorizationMethod"
-										value="#{userInfoAction.authorizationMethod}" converter="omnifaces.GenericEnumConverter">
+										value="#{userInfoAction.authorizationMethod}"
+										converter="omnifaces.GenericEnumConverter">
 										<f:selectItems value="#{authorizationMethods}" />
 									</h:selectOneMenu>
 								</h:panelGrid>
@@ -874,35 +851,28 @@
 						</div>
 					</a4j:region>
 					<h:panelGroup layout="block" id="userInfoResults">
-						<h:panelGroup layout="block" rendered="#{userInfoAction.showResults}">
-							<br />
-							<hr />
-							<br />
-							<rich:panel>
-								<f:facet name="header">User Info Request</f:facet>
+						<h:panelGroup layout="block"
+							rendered="#{userInfoAction.showResults}">
+							<b:panel title="User Info Request" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
 										value="#{userInfoAction.requestString}" />
 								</h:panelGroup>
-							</rich:panel>
-							<br />
-							<rich:panel>
-								<f:facet name="header">User Info Response</f:facet>
+							</b:panel>
+							<b:panel title="User Info Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea readonly="true" styleClass="width100"
 										rows="10" value="#{userInfoAction.responseString}" />
 								</h:panelGroup>
-							</rich:panel>
+							</b:panel>
 						</h:panelGroup>
 					</h:panelGroup>
-				</rich:panel>
+				</b:panel>
 			</div>
 
-			<br />
 
 			<div>
-				<rich:panel>
-					<f:facet name="header">End Session Endpoint</f:facet>
+				<b:panel title="End Session Endpoint" look="primary">
 					<a4j:region>
 						<h:panelGroup layout="block" id="endSessionForm">
 							<div>
@@ -939,59 +909,64 @@
 								render="endSessionResults" />
 						</div>
 					</a4j:region>
-				</rich:panel>
+				</b:panel>
 			</div>
 
 		</h:form>
 
 		<script type="text/javascript">
-    //<![CDATA[
-    var params = null;
-    if (self.document.location.hash) {
-        var hash = self.document.location.hash.substring(1);
-        hash = decodeURI(hash.replace(/\+/g, " "));
-        params = hash.split("&");
-    } else {
-        var query = window.location.search.slice(1);
-        params = query.split("&");
-    }
+			//<![CDATA[
+			var params = null;
+			if (self.document.location.hash) {
+				var hash = self.document.location.hash.substring(1);
+				hash = decodeURI(hash.replace(/\+/g, " "));
+				params = hash.split("&");
+			} else {
+				var query = window.location.search.slice(1);
+				params = query.split("&");
+			}
 
-    if (params != null) {
-		var authorizationResponse = document.getElementById("mainForm:authorizationResponse");
-		if (authorizationResponse != null) {
-			authorizationResponse.value = params;
-		}
+			if (params != null) {
+				var authorizationResponse = document
+						.getElementById("mainForm:authorizationResponse");
+				if (authorizationResponse != null) {
+					authorizationResponse.value = params;
+				}
 
-        for (var i = 0; i < params.length; i++) {
-            var param = params[i].split("=");
+				for (var i = 0; i < params.length; i++) {
+					var param = params[i].split("=");
 
-            if (param[0] == "code") {
-                document.getElementById("mainForm:code").value = param[1];
-            } else if (param[0] == "access_token") {
-                document.getElementById("mainForm:userInfoAccessToken").value = param[1];
-            } else if (param[0] == "id_token") {
-                document.getElementById("mainForm:endSessionIdTokenHint").value = param[1];
-            } else if (param[0] == "scope") {
-                document.getElementById("mainForm:scope").value = param[1];
-            } else if (param[0] == "session_state") {
-                var rp = document.getElementById("rp");
-                var clientIdValue = document.getElementById("mainForm:authorizationClientId").value;
-                var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin");
-                if (opOrigin != null) {
-	                var opOriginValue = opOrigin.value;
-	
-	                var rpIFrame = "./rpiframe.htm?session_state=" + param[1]
-	                        + "&client_id=" + clientIdValue + "&op_origin=" + opOriginValue;
-	
-	                document.getElementById("mainForm:rpIFrame").value = rpIFrame;
-	
-	                rp.src = rpIFrame;
-            	}
-            }
-        }
-    }
-    //]]>
-</script>
+					if (param[0] == "code") {
+						document.getElementById("mainForm:code").value = param[1];
+					} else if (param[0] == "access_token") {
+						document.getElementById("mainForm:userInfoAccessToken").value = param[1];
+					} else if (param[0] == "id_token") {
+						document
+								.getElementById("mainForm:endSessionIdTokenHint").value = param[1];
+					} else if (param[0] == "scope") {
+						document.getElementById("mainForm:scope").value = param[1];
+					} else if (param[0] == "session_state") {
+						var rp = document.getElementById("rp");
+						var clientIdValue = document
+								.getElementById("mainForm:authorizationClientId").value;
+						var opOrigin = document
+								.getElementById("mainForm:checkSessionOpOrigin");
+						if (opOrigin != null) {
+							var opOriginValue = opOrigin.value;
+
+							var rpIFrame = "./rpiframe.htm?session_state="
+									+ param[1] + "&client_id=" + clientIdValue
+									+ "&op_origin=" + opOriginValue;
+
+							document.getElementById("mainForm:rpIFrame").value = rpIFrame;
+
+							rp.src = rpIFrame;
+						}
+					}
+				}
+			}
+			//]]>
+		</script>
 
 	</ui:define>
 </ui:composition>

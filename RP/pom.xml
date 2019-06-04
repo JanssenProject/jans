@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
@@ -76,7 +77,8 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<configuration>
 					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+						<connector
+							implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
 							<port>${jetty.http.port}</port>
 							<maxIdleTime>3600000</maxIdleTime>
 						</connector>
@@ -228,6 +230,13 @@
 			<groupId>org.richfaces</groupId>
 			<artifactId>richfaces-a4j</artifactId>
 		</dependency>
+		<!-- BootsFaces -->
+		<dependency>
+			<groupId>net.bootsfaces</groupId>
+			<artifactId>bootsfaces</artifactId>
+			<version>1.4.1</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- OmniFaces -->
 		<dependency>
@@ -270,12 +279,12 @@
 					<artifactId>javax.inject</artifactId>
 				</dependency>
 				<dependency>
-				    <groupId>org.glassfish</groupId>
-				    <artifactId>javax.faces</artifactId>
+					<groupId>org.glassfish</groupId>
+					<artifactId>javax.faces</artifactId>
 				</dependency>
 				<dependency>
-				    <groupId>org.glassfish</groupId>
-				    <artifactId>javax.faces</artifactId>
+					<groupId>org.glassfish</groupId>
+					<artifactId>javax.faces</artifactId>
 				</dependency>
 				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>
