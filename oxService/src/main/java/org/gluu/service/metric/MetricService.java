@@ -55,6 +55,8 @@ public abstract class MetricService implements Serializable {
 
     private int entryLifetimeInDays;
 
+	private LdapEntryReporter ldapEntryReporter;
+
     @Inject
     private Logger log;
 
@@ -63,13 +65,19 @@ public abstract class MetricService implements Serializable {
         this.registeredMetricTypes = new HashSet<MetricType>();
         this.entryLifetimeInDays = entryLifetimeInDays;
 
-        LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
+        this.ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
         int metricReporterInterval = metricInterval;
         if (metricReporterInterval <= 0) {
             metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
         }
         ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
+    }
+
+    public void close() {
+    	if (this.ldapEntryReporter != null) {
+    		this.ldapEntryReporter.close();
+    	}
     }
 
     public int getEntryLifetimeInDays() {
