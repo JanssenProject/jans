@@ -19,6 +19,7 @@ import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
@@ -202,6 +203,9 @@ public class Authenticator {
                     }
                 }
             }
+        } catch (InvalidSessionStateException ex) {
+        	// Allow to handle it via GlobalExceptionHandler
+        	throw ex;
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
         }
@@ -323,9 +327,6 @@ public class Authenticator {
             }
 
             int overridenNextStep = -1;
-            logger.trace("#########################################################################");
-            logger.trace("#########################################################################");
-            logger.trace("#########################################################################");
             logger.trace("#########################################################################");
             logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT ACR:" + this.authAcr);
             logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT STEP:" + this.authStep);

@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.ldap.ClientAuthorizations;
 import org.gluu.oxauth.model.registration.Client;
@@ -657,6 +658,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
             log.error(e.getMessage(), e);
+        } catch (InvalidSessionStateException ex) {
+        	// Allow to handle it via GlobalExceptionHandler
+        	throw ex;
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
             log.error(e.getMessage(), e);
