@@ -75,7 +75,7 @@ public class ConsentGathererService {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
-        final SessionId session = sessionService.getSession(httpRequest, httpResponse, userDn, true);
+        final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, userDn, true);
 
         CustomScriptConfiguration script = external.getDefaultExternalCustomScript();
         if (script == null) {
@@ -109,7 +109,7 @@ public class ConsentGathererService {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
-            final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
+            final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, null, false);
             if (session == null) {
                 log.error("Failed to restore claim-gathering session state");
             	errorPage("consent.gather.invalid.session");
@@ -195,7 +195,7 @@ public class ConsentGathererService {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
-            final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
+            final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, null, false);
             if (session == null || session.getSessionAttributes().isEmpty()) {
             	log.error("Failed to restore claim-gathering session state");
                 return result(Constants.RESULT_EXPIRED);
