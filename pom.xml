@@ -31,7 +31,7 @@
 		<log4j.version>2.11.2</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<weld.version>3.0.5.Final</weld.version>
+		<weld.version>3.1.1.Final</weld.version>
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.16</jsf-api.version>
