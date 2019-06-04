@@ -614,6 +614,8 @@ public class AppInitializer {
 
 	public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
 		log.info("Closing LDAP connection at server shutdown...");
+		metricService.close();
+
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
 		closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
 
