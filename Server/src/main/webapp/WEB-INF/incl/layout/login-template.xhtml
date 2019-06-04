@@ -48,11 +48,36 @@
 		<script
 			src="#{oxAuthConfigurationService.getJsLocation()}/Duo-Web-v2.min.js"></script>
 		<ui:insert name="head" />
+
+		<style>
+.footer {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	color: white; height : 55px;
+	background-color: #00BE79;
+	height: 55px;
+}
+</style>
+
 	</h:head>
 	<h:body>
 		<div class="body">
 			<ui:insert name="body" />
 		</div>
 	</h:body>
+	<footer class="footer">
+	<div class="container">
+		<p style="margin-right: 20%; margin-left: 25%; padding: 20px;">
+			&copy; <a target="_blank"
+				href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+					value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
+				target="_blank" href="#{client.policyUri}"><h:outputText
+					value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
+				target="_blank" href="#{client.tosUri}"><h:outputText
+					value="#{msgs['common.termsOfService']}" escape="false" /></a>
+		</p>
+	</div>
+	</footer>
 </f:view>
 </html>
