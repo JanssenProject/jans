@@ -10,8 +10,6 @@
         <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
     </f:metadata>
     <ui:define name="head">
-        <script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui-1.12.1.min.js"/>
-
         <h:panelGroup rendered="#{param.oxpush_user_uid != null}">
             <script type="text/javascript">
                 //<![CDATA[
