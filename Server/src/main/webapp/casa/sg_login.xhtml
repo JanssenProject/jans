@@ -9,19 +9,6 @@
         <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
     </f:metadata>
     <ui:define name="head">
-
-        <link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/jquery-ui-1.12.1.min.css"/>
-        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"/>
-        <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
-        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.12.1.min.js"/>
-        <script src="../js/gluu-auth.js"/>
-        <link href="#{oxAuthConfigurationService.cssLocation}/bootstrap.min.css" rel="stylesheet"/>
-		<link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/style.css"/>
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
-		
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
         <script>
             var helper = (function() {
                 var authResult = undefined;

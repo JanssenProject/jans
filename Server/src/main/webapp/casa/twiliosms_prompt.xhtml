@@ -10,9 +10,6 @@
     </f:metadata>
     
     <ui:define name="head">
-	<link href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
-	<link rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/style.css"/>
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>    
         <style type="text/css">
             .login-panel {
                 border-style: solid;
@@ -76,7 +73,6 @@
 				    margin: 0 20% auto;
 			}
         </style>
-        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"/>
     </ui:define>
 
     <ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
