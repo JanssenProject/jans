@@ -11,16 +11,6 @@
 	</f:metadata>
 	<ui:define name="head">
 		<meta name="description" content="Gluu Inc." />
-		<link rel="stylesheet"
-			href="#{oxAuthConfigurationService.cssLocation}/jquery-ui-1.12.1.min.css" />
-		<script
-			src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js" />
-		<script
-			src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js" />
-		<script
-			src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.12.1.min.js" />
-		<script src="../../js/gluu-auth.js" />
-
 		<script>
 			var helper = (function() {
 				var authResult = undefined;
@@ -158,33 +148,6 @@
 					</h:form>
 				</div>
 			</div>
-			<div class="footer-copyright text-center py-3"
-				style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
-				<div class="footer">
-					<div class="row">
-						<div class="col-md-12">
-							<div class="padding_spc"
-								style="padding-bottom: 5px; padding-top: 5px;">
-								<p>
-									<h:outputText value="#{msgs['common.gluuInc']}" />
-									| <a target="_blank"
-										href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
-											value="#{msgs['common.caution']}" escape="false" /></a>
-									<h:panelGroup rendered='#{!empty client.policyUri}'>
-					| <a target="_blank" href="#{client.policyUri}"><h:outputText
-												value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
-									</h:panelGroup>
-									<h:panelGroup rendered='#{!empty client.tosUri}'>
-					| <a target="_blank" href="#{client.tosUri}"><h:outputText
-												value="#{msgs['common.termsOfService']}" escape="false" /></a>
-									</h:panelGroup>
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
-
 	</ui:define>
 </ui:composition>
