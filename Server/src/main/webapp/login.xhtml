@@ -173,7 +173,7 @@
 
 									<div class="form-group row">
 										<div class="col-sm-4 col-md-4">
-											<h:outputLabel styleClass="col-sm-4 control-label"
+											<h:outputLabel styleClass="col-sm-4 col-form-label"
 												for="rememberme" value="#{msgs['login.rememberMe']}" />
 										</div>
 										<div class="col-sm-6 col-md-6">
@@ -182,16 +182,17 @@
 									</div>
 
 									<div class="form-group row">
-										<div class="col-sm-offset-4 offset-md-4 col-sm-8">
+										<div class="col-sm-offset-4 offset-md-4 col-sm-6 col-md-6">
 											<h:commandButton id="loginButton"
-												styleClass="btn btn-primary col-sm-12"
+											    style="background-color: #00BE79; color:white;"
+												styleClass="btn col-sm-12"
 												value="#{msgs['login.login']}" onclick="checkRemembeMe()"
 												action="#{authenticator.authenticate}" />
 										</div>
 									</div>
 
 									<div class="form-group row">
-										<div class="col-sm-offset-6 offset-md-6 col-sm-6">
+										<div class="col-sm-offset-4 offset-md-4 col-sm-6 col-md-6">
 											<div class="forgot_link">
 												<a href="/identity/person/passwordReminder.htm"
 													style="color: blue;"> <h:outputText
@@ -228,34 +229,6 @@
 				</h:panelGroup>
 			</div>
 		</div>
-
-		<div class="footer-copyright text-center py-3"
-			style="background: #1ab26b; position: fixed; left: 0; bottom: 0; width: 100%; text-align: center;">
-			<div class="footer">
-				<div class="row">
-					<div class="col-md-12">
-						<div class="padding_spc"
-							style="padding-bottom: 5px; padding-top: 5px;">
-							<p>
-								<h:outputText value="#{msgs['common.gluuInc']}" />
-								| <a target="_blank"
-									href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
-										value="#{msgs['common.caution']}" escape="false" /></a>
-								<h:panelGroup rendered='#{!empty client.policyUri}'>
-					| <a target="_blank" href="#{client.policyUri}"><h:outputText
-											value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
-								</h:panelGroup>
-								<h:panelGroup rendered='#{!empty client.tosUri}'>
-					| <a target="_blank" href="#{client.tosUri}"><h:outputText
-											value="#{msgs['common.termsOfService']}" escape="false" /></a>
-								</h:panelGroup>
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<script type="text/javascript">
 
             window.onload = function () {
