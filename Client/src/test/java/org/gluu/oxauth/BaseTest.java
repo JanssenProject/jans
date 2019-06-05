@@ -6,42 +6,11 @@
 
 package org.gluu.oxauth;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.dev.HostnameVerifierType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.error.IErrorType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.openqa.selenium.*;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.ITestContext;
-import org.testng.Reporter;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -57,7 +26,55 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.testng.Assert.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.AuthorizationResponse;
+import org.gluu.oxauth.client.AuthorizeClient;
+import org.gluu.oxauth.client.BaseClient;
+import org.gluu.oxauth.client.BaseResponseWithErrors;
+import org.gluu.oxauth.client.ClientUtils;
+import org.gluu.oxauth.client.OpenIdConfigurationClient;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.gluu.oxauth.dev.HostnameVerifierType;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.error.IErrorType;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestContext;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 
 /**
  * @author Javier Rojas Blum
@@ -65,7 +82,7 @@ import static org.testng.Assert.*;
  */
 public abstract class BaseTest {
 
-    protected WebDriver driver;
+    protected HtmlUnitDriver driver;
 
     protected String authorizationEndpoint;
     protected String authorizationPageEndpoint;
@@ -124,10 +141,6 @@ public abstract class BaseTest {
 
     public WebDriver getDriver() {
         return driver;
-    }
-
-    public void setDriver(WebDriver driver) {
-        this.driver = driver;
     }
 
     public String getAuthorizationEndpoint() {
@@ -311,9 +324,10 @@ public abstract class BaseTest {
 
     private WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
         // Allow to run test in multi thread mode
-        WebDriver currentDriver;
+    	HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver();
+            currentDriver.setJavascriptEnabled(false);
         } else {
             startSelenium();
             currentDriver = driver;
@@ -373,9 +387,14 @@ public abstract class BaseTest {
                     .until(ExpectedConditions.presenceOfElementLocated(By.id(authorizeFormAllowButton)));
 
             final String previousURL = currentDriver.getCurrentUrl();
-            JavascriptExecutor jse = (JavascriptExecutor) driver;
-            jse.executeScript("scroll(0, 1000)");
-            Actions actions = new Actions(driver);
+            driver.setJavascriptEnabled(true);
+            try {
+				JavascriptExecutor jse = (JavascriptExecutor) driver;
+				jse.executeScript("scroll(0, 1000)");
+			} finally {
+	            driver.setJavascriptEnabled(false);
+			}
+			Actions actions = new Actions(driver);
             actions.moveToElement(allowButton).click().build().perform();
             WebDriverWait wait = new WebDriverWait(currentDriver, 10);
             wait.until(new ExpectedCondition<Boolean>() {
