@@ -390,7 +390,7 @@ public abstract class BaseTest {
         if (!authorizationResponseStr.contains("#")) {
             //WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
     	   Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
-    		       .withTimeout(Duration.ofSeconds(20))
+    		       .withTimeout(Duration.ofSeconds(10))
     		       .pollingEvery(Duration.ofMillis(500))
     		       .ignoring(NoSuchElementException.class);
     	   
