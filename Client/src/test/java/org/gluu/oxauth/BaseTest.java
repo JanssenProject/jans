@@ -20,11 +20,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -64,12 +67,15 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.Reporter;
@@ -383,8 +389,16 @@ public abstract class BaseTest {
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             //WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
-            WebElement allowButton = (new WebDriverWait(driver, 10))
-                    .until(ExpectedConditions.presenceOfElementLocated(By.id(authorizeFormAllowButton)));
+    	   Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+    		       .withTimeout(Duration.ofSeconds(20))
+    		       .pollingEvery(Duration.ofMillis(500))
+    		       .ignoring(NoSuchElementException.class);
+    	   
+    	   WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
+    		     public WebElement apply(WebDriver driver) {
+    		       return driver.findElement(By.id(authorizeFormAllowButton));
+    		     }
+    		   });
 
             final String previousURL = currentDriver.getCurrentUrl();
             driver.setJavascriptEnabled(true);
@@ -396,8 +410,7 @@ public abstract class BaseTest {
 			}
 			Actions actions = new Actions(driver);
             actions.moveToElement(allowButton).click().build().perform();
-            WebDriverWait wait = new WebDriverWait(currentDriver, 10);
-            wait.until(new ExpectedCondition<Boolean>() {
+            wait.until(new Function<WebDriver, Boolean>() {
                 public Boolean apply(WebDriver d) {
                     return (d.getCurrentUrl() != previousURL);
                 }
@@ -459,7 +472,7 @@ public abstract class BaseTest {
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
         WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new ExpectedCondition<Boolean>() {
+        wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver d) {
                 return (d.getCurrentUrl() != previousURL);
             }
@@ -505,7 +518,7 @@ public abstract class BaseTest {
         final String previousURL = driver.getCurrentUrl();
         allowButton.click();
         WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new ExpectedCondition<Boolean>() {
+        wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver d) {
                 return (d.getCurrentUrl() != previousURL);
             }
@@ -548,7 +561,7 @@ public abstract class BaseTest {
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
         WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new ExpectedCondition<Boolean>() {
+        wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver d) {
                 return (d.getCurrentUrl() != previousURL);
             }
