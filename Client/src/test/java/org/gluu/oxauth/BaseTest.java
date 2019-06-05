@@ -14,6 +14,8 @@ import static org.testng.Assert.fail;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -59,6 +61,7 @@ import org.gluu.oxauth.dev.HostnameVerifierType;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.error.IErrorType;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
@@ -330,7 +333,6 @@ public abstract class BaseTest {
     	HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver();
-//            currentDriver.setJavascriptEnabled(false);
         } else {
             startSelenium();
             currentDriver = driver;
@@ -361,7 +363,7 @@ public abstract class BaseTest {
 
         System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
 
-        currentDriver.navigate().to(authorizationRequestUrl);
+        navigateToAuhorizationUrl(currentDriver, authorizationRequestUrl);
 
         if (userSecret != null) {
             if (userId != null) {
@@ -398,18 +400,23 @@ public abstract class BaseTest {
     		   });
 
             final String previousURL = currentDriver.getCurrentUrl();
-//            driver.setJavascriptEnabled(true);
-//            try {
-				JavascriptExecutor jse = (JavascriptExecutor) driver;
-				jse.executeScript("scroll(0, 1000)");
-//			} finally {
-//	            driver.setJavascriptEnabled(false);
-//			}
+            driver.setJavascriptEnabled(true);
+			JavascriptExecutor jse = (JavascriptExecutor) driver;
+			jse.executeScript("scroll(0, 1000)");
 			Actions actions = new Actions(driver);
             actions.moveToElement(allowButton).click().build().perform();
             wait.until(new Function<WebDriver, Boolean>() {
                 public Boolean apply(WebDriver d) {
                     return (d.getCurrentUrl() != previousURL);
+                }
+            });
+
+            // Do redirect to get proper authorization response
+            final String previousURL2 = currentDriver.getCurrentUrl();
+            driver.navigate().to(previousURL2);
+            wait.until(new Function<WebDriver, Boolean>() {
+                public Boolean apply(WebDriver d) {
+                    return (d.getCurrentUrl() != previousURL2);
                 }
             });
 
@@ -450,7 +457,7 @@ public abstract class BaseTest {
 
         System.out.println("authenticateResourceOwnerAndDenyAccess: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
-        driver.navigate().to(authorizationRequestUrl);
+        navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
@@ -506,7 +513,7 @@ public abstract class BaseTest {
 
         System.out.println("authorizationRequestAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
-        driver.navigate().to(authorizationRequestUrl);
+        navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
@@ -551,7 +558,7 @@ public abstract class BaseTest {
 
         System.out.println("authorizationRequestAndDenyAccess: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
-        driver.navigate().to(authorizationRequestUrl);
+        navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
         WebElement doNotAllowButton = driver.findElement(By.id(authorizeFormDoNotAllowButton));
 
@@ -602,15 +609,8 @@ public abstract class BaseTest {
             System.out.println("authenticateResourceOwner: Cleaning cookies");
             deleteAllCookies();
         }
-//        try {
-        driver.navigate().to(authorizationRequestUrl);
-//        } catch (WebDriverException ex) {
-//            if (ex.getCause() instanceof ScriptException) {
-//                System.out.println("authenticateResourceOwner: Script error: " + ex.getMessage());
-//            } else {
-//                throw ex;
-//            }
-//        }
+
+        navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
         if (userSecret != null) {
             if (userId != null) {
@@ -663,7 +663,7 @@ public abstract class BaseTest {
             System.out.println("waitForResourceOwnerAndGrantLoginForm: Cleaning cookies");
             deleteAllCookies();
         }
-        driver.navigate().to(authorizationRequestUrl);
+        navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
@@ -884,4 +884,13 @@ public abstract class BaseTest {
         ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
         return new DefaultHttpClient(ccm);
     }
+
+	private void navigateToAuhorizationUrl(WebDriver currentDriver, String authorizationRequestUrl) {
+		try {
+			currentDriver.navigate().to(URLDecoder.decode(authorizationRequestUrl, Util.UTF8_STRING_ENCODING));
+		} catch (UnsupportedEncodingException ex) {
+            fail("Failed to decode the authorization URL.");
+		}
+	}
+
 }
