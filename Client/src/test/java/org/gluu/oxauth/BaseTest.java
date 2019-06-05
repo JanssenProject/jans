@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.net.ssl.HostnameVerifier;
@@ -72,8 +71,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -333,7 +330,7 @@ public abstract class BaseTest {
     	HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver();
-            currentDriver.setJavascriptEnabled(false);
+//            currentDriver.setJavascriptEnabled(false);
         } else {
             startSelenium();
             currentDriver = driver;
@@ -401,13 +398,13 @@ public abstract class BaseTest {
     		   });
 
             final String previousURL = currentDriver.getCurrentUrl();
-            driver.setJavascriptEnabled(true);
-            try {
+//            driver.setJavascriptEnabled(true);
+//            try {
 				JavascriptExecutor jse = (JavascriptExecutor) driver;
 				jse.executeScript("scroll(0, 1000)");
-			} finally {
-	            driver.setJavascriptEnabled(false);
-			}
+//			} finally {
+//	            driver.setJavascriptEnabled(false);
+//			}
 			Actions actions = new Actions(driver);
             actions.moveToElement(allowButton).click().build().perform();
             wait.until(new Function<WebDriver, Boolean>() {
