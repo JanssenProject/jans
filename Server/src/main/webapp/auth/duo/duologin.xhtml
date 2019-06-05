@@ -11,6 +11,9 @@
 
     <ui:define name="head">
 
+        <script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-1.12.4.min.js"/>
+        <script src="./js/Duo-Web-v2.min.js"/>
+
         <script>
             Duo.init({
                 'host':'#{identity.getWorkingParameter('duo_host')}',
