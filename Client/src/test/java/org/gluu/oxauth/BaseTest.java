@@ -250,6 +250,7 @@ public abstract class BaseTest {
     public void stopSelenium() {
 //        driver.close();
         driver.quit();
+        driver = null;
     }
 
     /**
