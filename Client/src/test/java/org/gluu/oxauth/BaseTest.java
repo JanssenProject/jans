@@ -405,8 +405,8 @@ public abstract class BaseTest {
 
 			final String previousURL = currentDriver.getCurrentUrl();
 			actions.click(allowButton).perform();
-			WebDriverWait wait2 = new WebDriverWait(currentDriver, 10);
 
+			WebDriverWait wait2 = new WebDriverWait(currentDriver, 10);
 			wait2.until(new Function<WebDriver, Boolean>() {
 				public Boolean apply(WebDriver d) {
 					return (d.getCurrentUrl() != previousURL);
