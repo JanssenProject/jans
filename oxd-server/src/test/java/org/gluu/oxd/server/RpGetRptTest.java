@@ -67,7 +67,7 @@ public class RpGetRptTest {
         Jwt jwt = Jwt.parse(response.getRpt());
         assertNotNull(jwt);
         assertEquals(site.getClientId(), jwt.getClaims().getClaimAsString("client_id"));
-        assertTrue(jwt.getClaims().getClaimAsString("permissions").startsWith("[{\"resource_id\":\""));
+        assertTrue(jwt.getClaims().getClaimAsString("permissions").contains("resource_id"));
     }
 
     public static RpGetRptResponse requestRpt(ClientInterface client, RegisterSiteResponse site, String rsProtect) throws IOException {
