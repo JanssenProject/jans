@@ -20,60 +20,6 @@ import org.gluu.persist.annotation.ObjectClass;
 @ObjectClass(values={"oxRadiusServerConfiguration","top"})
 public class ServerConfiguration implements Serializable {
 
-	@DataEntry
-	@ObjectClass(values={"oxAuthCustomScope","top"})
-	public static class AuthScope implements Serializable {
-
-		private static final long serialVersionUID = -1L;
-
-		@DN
-		private String dn;
-
-		@AttributeName(name="oxId")
-		private String id;
-
-		@AttributeName(name="displayName")
-		private String name;
-
-
-		public AuthScope() {
-
-		}
-
-		public String getDn() {
-
-			return this.dn;
-		}
-
-		public AuthScope setDn(String dn) {
-
-			this.dn = dn;
-			return this; 
-		}
-
-		public String getId() {
-
-			return this.id;
-		}
-
-		public AuthScope setId(String id) {
-
-			this.id = id;
-			return this;
-		}
-
-		public String getName() {
-
-			return this.name;
-		}
-
-		public AuthScope setName(String name) {
-
-			this.name = name;
-			return this;
-		}
-	}
-
 	private static final long serialVersionUID = -1L;
 	
 	public static final String LISTEN_ON_ALL_INTERFACES = "0.0.0.0";
@@ -81,10 +27,10 @@ public class ServerConfiguration implements Serializable {
 	public static final Integer DEFAULT_RADIUS_ACCT_PORT = 1813;
 
 	@DN
-	private String  dn;
+	private String dn;
 	
 	@AttributeName(name="oxRadiusListenInterface")
-	private String  listenInterface;
+	private String listenInterface;
 
 	@AttributeName(name="oxRadiusAuthenticationPort")
 	private Integer authPort;
@@ -93,10 +39,10 @@ public class ServerConfiguration implements Serializable {
 	private Integer acctPort;
 
 	@AttributeName(name="oxRadiusOpenidUsername")
-	private String  openidUsername;
+	private String openidUsername;
 
 	@AttributeName(name="oxRadiusOpenidPassword")
-	private String  openidPassword;
+	private String openidPassword;
 
 	@AttributeName(name="oxRadiusOpenIdBaseUrl")
 	private String openidBaseUrl;
@@ -105,12 +51,10 @@ public class ServerConfiguration implements Serializable {
 	private String acrValue;
 
 	@AttributeName(name="oxRadiusAuthScope")
-	private String [] scopesDn;
+	private List<String> scopes;
 
 	@AttributeName(name="oxRadiusAuthenticationTimeout")
 	private Integer authenticationTimeout;
-
-	private transient List<AuthScope> scopes;
 
 
 	public ServerConfiguration() {
@@ -119,12 +63,7 @@ public class ServerConfiguration implements Serializable {
 		this.listenInterface = LISTEN_ON_ALL_INTERFACES;
 		this.authPort = DEFAULT_RADIUS_AUTH_PORT;
 		this.acctPort = DEFAULT_RADIUS_ACCT_PORT;
-		this.openidUsername = null;
-		this.openidPassword = null;
-		this.openidBaseUrl = null;
-		this.acrValue = null;
-		this.scopesDn = null;
-		this.scopes = new ArrayList<AuthScope>();
+		this.scopes = new ArrayList<String>();
 		this.authenticationTimeout = 0;
 	}
 
@@ -132,16 +71,12 @@ public class ServerConfiguration implements Serializable {
 	public ServerConfiguration(String listeninterface,Integer authport,Integer acctport,String openidusername, 
 		String openidpassword) {
 
-		this.dn = null;
 		this.listenInterface = listeninterface;
 		this.authPort = authport;
 		this.acctPort = acctport;
 		this.openidUsername = openidusername;
 		this.openidPassword = openidpassword;
-		this.openidBaseUrl  = null;
-		this.acrValue = null;
-		this.scopesDn = null;
-		this.scopes = new ArrayList<AuthScope>();
+		this.scopes = new ArrayList<String>();
 		this.authenticationTimeout = 0;
 	}
 
@@ -236,25 +171,14 @@ public class ServerConfiguration implements Serializable {
 		return this;
 	}
 
-	public String [] getScopesDn() {
-
-		return this.scopesDn;
-	}
-
-	public ServerConfiguration setScopesDn(String [] scopesDn) {
-
-		this.scopesDn = scopesDn;
-		return this;
-	}
-
-	public List<AuthScope> getScopes() {
+	public List<String> getScopes() {
 
 		return this.scopes;
 	}
 
-	public ServerConfiguration addScope(AuthScope scope) {
+	public ServerConfiguration setScopes(List<String> scopes) {
 
-		this.scopes.add(scope);
+		this.scopes = scopes;
 		return this;
 	}
 
