@@ -7,12 +7,12 @@ import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.Jackson2;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             opResponse.setIdToken(response.getIdToken());
             opResponse.setRefreshToken(response.getRefreshToken());
             opResponse.setExpiresIn(response.getExpiresIn() != null ? response.getExpiresIn() : -1);
-            opResponse.setIdTokenClaims(CoreUtils.createJsonMapper().readTree(idToken.getClaims().toJsonString()));
+            opResponse.setIdTokenClaims(Jackson2.createJsonMapper().readTree(idToken.getClaims().toJsonString()));
             return opResponse;
         } else {
             if (response.getStatus() == 400) {
@@ -109,12 +109,5 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         if (!getStateService().isStateValid(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
-    }
-
-    public static void main(String[] args) {
-        String s1 = "a";
-        String s2 = "a";
-        System.out.println(s1 == s2);
-
     }
 }
