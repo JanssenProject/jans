@@ -408,8 +408,6 @@ public abstract class BaseTest {
             driver.navigate().to(previousURL);
             wait.until(new Function<WebDriver, Boolean>() {
                 public Boolean apply(WebDriver d) {
-                	System.out.println(d.getCurrentUrl());
-                	System.out.println(d.getPageSource());
                     return (d.getCurrentUrl() != previousURL);
                 }
             });
