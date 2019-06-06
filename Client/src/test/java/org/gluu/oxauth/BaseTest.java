@@ -400,23 +400,17 @@ public abstract class BaseTest {
     		   });
 
             final String previousURL = currentDriver.getCurrentUrl();
-            driver.setJavascriptEnabled(true);
 			JavascriptExecutor jse = (JavascriptExecutor) driver;
 			jse.executeScript("scroll(0, 1000)");
 			Actions actions = new Actions(driver);
-            actions.moveToElement(allowButton).click().build().perform();
-            wait.until(new Function<WebDriver, Boolean>() {
-                public Boolean apply(WebDriver d) {
-                    return (d.getCurrentUrl() != previousURL);
-                }
-            });
+            actions.click(allowButton).perform();
 
-            // Do redirect to get proper authorization response
-            final String previousURL2 = currentDriver.getCurrentUrl();
-            driver.navigate().to(previousURL2);
+            driver.navigate().to(previousURL);
             wait.until(new Function<WebDriver, Boolean>() {
                 public Boolean apply(WebDriver d) {
-                    return (d.getCurrentUrl() != previousURL2);
+                	System.out.println(d.getCurrentUrl());
+                	System.out.println(d.getPageSource());
+                    return (d.getCurrentUrl() != previousURL);
                 }
             });
 
