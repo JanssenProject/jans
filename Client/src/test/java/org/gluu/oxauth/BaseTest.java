@@ -74,6 +74,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -332,7 +333,7 @@ public abstract class BaseTest {
         // Allow to run test in multi thread mode
     	HtmlUnitDriver currentDriver;
         if (useNewDriver) {
-            currentDriver = new HtmlUnitDriver();
+            currentDriver = new HtmlUnitDriver(true);
         } else {
             startSelenium();
             currentDriver = driver;
@@ -382,43 +383,43 @@ public abstract class BaseTest {
         return authorizeClient;
     }
 
-    private String acceptAuthorization(WebDriver currentDriver) {
-        String authorizationResponseStr = currentDriver.getCurrentUrl();
+	private String acceptAuthorization(WebDriver currentDriver) {
+		String authorizationResponseStr = currentDriver.getCurrentUrl();
 
-        // Check for authorization form if client has no persistent authorization
-        if (!authorizationResponseStr.contains("#")) {
-            //WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
-    	   Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
-    		       .withTimeout(Duration.ofSeconds(10))
-    		       .pollingEvery(Duration.ofMillis(500))
-    		       .ignoring(NoSuchElementException.class);
-    	   
-    	   WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
-    		     public WebElement apply(WebDriver driver) {
-    		       return driver.findElement(By.id(authorizeFormAllowButton));
-    		     }
-    		   });
+		// Check for authorization form if client has no persistent authorization
+		if (!authorizationResponseStr.contains("#")) {
+			Wait<WebDriver> wait = new FluentWait<WebDriver>(driver).withTimeout(Duration.ofSeconds(10))
+					.pollingEvery(Duration.ofMillis(500)).ignoring(NoSuchElementException.class);
 
-            final String previousURL = currentDriver.getCurrentUrl();
+			WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
+				public WebElement apply(WebDriver driver) {
+					return driver.findElement(By.id(authorizeFormAllowButton));
+				}
+			});
+
+			// We have to use JavaScript because target is link with onclick
 			JavascriptExecutor jse = (JavascriptExecutor) driver;
 			jse.executeScript("scroll(0, 1000)");
 			Actions actions = new Actions(driver);
-            actions.click(allowButton).perform();
+			actions.click(allowButton).perform();
 
-            driver.navigate().to(previousURL);
-            wait.until(new Function<WebDriver, Boolean>() {
-                public Boolean apply(WebDriver d) {
-                    return (d.getCurrentUrl() != previousURL);
-                }
-            });
+			final String previousURL = currentDriver.getCurrentUrl();
+			actions.click(allowButton).perform();
+			WebDriverWait wait2 = new WebDriverWait(currentDriver, 10);
 
-            authorizationResponseStr = currentDriver.getCurrentUrl();
-        } else {
-            fail("The authorization form was expected to be shown.");
-        }
+			wait2.until(new Function<WebDriver, Boolean>() {
+				public Boolean apply(WebDriver d) {
+					return (d.getCurrentUrl() != previousURL);
+				}
+			});
 
-        return authorizationResponseStr;
-    }
+			authorizationResponseStr = currentDriver.getCurrentUrl();
+		} else {
+			fail("The authorization form was expected to be shown.");
+		}
+
+		return authorizationResponseStr;
+	}
 
     private AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
                                                              boolean useNewDriver, WebDriver currentDriver, AuthorizeClient authorizeClient,
