@@ -224,7 +224,7 @@ public class RestResource {
 
     private static <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization) {
         Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization);
-        final String json = CoreUtils.asJsonSilently(forJsonConversion);
+        final String json = Jackson2.asJsonSilently(forJsonConversion);
         LOG.trace("Send back response: {}", json);
         return json;
     }
