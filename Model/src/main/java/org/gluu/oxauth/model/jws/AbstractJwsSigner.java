@@ -12,11 +12,8 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.HashUtil;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 
 /**
@@ -77,47 +74,11 @@ public abstract class AbstractJwsSigner implements JwsSigner {
     }
 
     private boolean validateHash(String tokenCode, String tokenHash) {
-        boolean result = false;
-
-        try {
-            if (signatureAlgorithm != null
-                    && StringUtils.isNotBlank(tokenCode)
-                    && StringUtils.isNotBlank(tokenHash)) {
-                byte[] digest = null;
-                if (signatureAlgorithm == SignatureAlgorithm.HS256 ||
-                        signatureAlgorithm == SignatureAlgorithm.RS256 ||
-                        signatureAlgorithm == SignatureAlgorithm.ES256) {
-                    digest = JwtUtil.getMessageDigestSHA256(tokenCode);
-                } else if (signatureAlgorithm == SignatureAlgorithm.HS384 ||
-                        signatureAlgorithm == SignatureAlgorithm.RS384 ||
-                        signatureAlgorithm == SignatureAlgorithm.ES512) {
-                    digest = JwtUtil.getMessageDigestSHA384(tokenCode);
-                } else if (signatureAlgorithm == SignatureAlgorithm.HS512 ||
-                        signatureAlgorithm == SignatureAlgorithm.RS384 ||
-                        signatureAlgorithm == SignatureAlgorithm.ES512) {
-                    digest = JwtUtil.getMessageDigestSHA512(tokenCode);
-                }
-
-                if (digest != null) {
-                    byte[] lefMostHalf = new byte[digest.length / 2];
-                    System.arraycopy(digest, 0, lefMostHalf, 0, lefMostHalf.length);
-                    String hash = Base64Util.base64urlencode(lefMostHalf);
-
-                    result = hash.equals(tokenHash);
-                }
-            }
-        } catch (NoSuchProviderException e) {
-            LOG.error(e.getMessage(), e);
-            result = false;
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
-            result = false;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            result = false;
+        if (StringUtils.isBlank(tokenCode) || StringUtils.isBlank(tokenHash)) {
+            return false;
         }
 
-        return result;
+        return tokenHash.equals(HashUtil.getHash(tokenCode, signatureAlgorithm));
     }
 
     public abstract String generateSignature(String signingInput) throws SignatureException;
