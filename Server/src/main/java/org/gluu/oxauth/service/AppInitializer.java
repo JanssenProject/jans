@@ -39,6 +39,7 @@ import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
@@ -614,6 +615,8 @@ public class AppInitializer {
 
 	public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
 		log.info("Stopping services and closing DB connections at server shutdown...");
+		log.debug("Checking who intiated destory", new Throwable());
+
 		metricService.close();
 
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
