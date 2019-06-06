@@ -56,7 +56,7 @@ public class UmaFullTest {
     }
 
     @Parameters({"redirectUrl", "opHost", "rsProtect"})
-    @Test
+    @Test(enabled = false)
     public void testWithInvalidTicket(String redirectUrl, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
@@ -79,7 +79,7 @@ public class UmaFullTest {
 
 
     @Parameters({"redirectUrl", "opHost", "rsProtect"})
-    @Test
+    @Test(enabled = false)
     public void testWithClaimTokenButNoTokenFormat(String redirectUrl, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
