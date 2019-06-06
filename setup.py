@@ -2587,7 +2587,7 @@ class Setup(object):
         if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
             backend_types.append(('Wren:DS','wrends'))
 
-        if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+        if glob.glob(self.distFolder+'/couchbase/couchbase-server-enterprise*.'+suffix):
             backend_types.append(('Couchbase','couchbase'))
 
         
