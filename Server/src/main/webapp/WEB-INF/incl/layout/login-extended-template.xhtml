@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+<f:view transient="true" locale="#{language.localeCode}">
+	<h:head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title><ui:insert name="pageTitle" /></title>
+		<link rel="icon"
+			href="#{oxAuthConfigurationService.getImgLocation()}/favicon_icosahedron.ico" />
+		<link type="text/css" rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/style.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap-responsive.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap-reboot.min.css" />
+		<link type="text/css" rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap-grid.min.css" />
+		<link rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/fontawesome.min.css" />
+		<link rel="stylesheet"
+			href="#{oxAuthConfigurationService.getCssLocation()}/authorize.css" />
+		<link type="text/css" rel="stylesheet"
+			href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" />
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/jquery-3.4.1.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/popper.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/fontawesome.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/bootstrap.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/bootstrap.bundle.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/platform.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/jquery-qrcode-0.17.0.min.js"></script>
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/gluu-auth.js" />
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui.min.js"></script>
+		<ui:insert name="head" />
+
+		<style>
+.footer {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	color: white; height : 55px;
+	background-color: #00BE79;
+	height: 55px;
+}
+</style>
+
+	</h:head>
+	<h:body>
+		<div class="body">
+			<ui:insert name="body" />
+		</div>
+	</h:body>
+	<footer class="footer">
+	<div class="container">
+		<p style="margin-right: 20%; margin-left: 25%; padding: 20px;">
+			&copy; <a target="_blank"
+				href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+					value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
+				target="_blank" href="#{client.policyUri}"><h:outputText
+					value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
+				target="_blank" href="#{client.tosUri}"><h:outputText
+					value="#{msgs['common.termsOfService']}" escape="false" /></a>
+		</p>
+	</div>
+	</footer>
+</f:view>
+</html>
