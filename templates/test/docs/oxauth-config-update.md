@@ -33,6 +33,7 @@ III. These changes should be applied to oxAuth config.
 7. "clientAuthenticationFiltersEnabled":true,
 8. "keyRegenerationEnabled":true,
 9. "openidScopeBackwardCompatibility":false
+10. umaGrantAccessIfNoPolicies: true
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies and UMA Claims Gathering scripts.
