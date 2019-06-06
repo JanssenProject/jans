@@ -3856,6 +3856,13 @@ class Setup(object):
         #wait 1 second 
         time.sleep(1)
 
+    def exec_n1ql_query(self, query):
+        result = self.cbm.exec_query(query)
+        if result.ok:
+            self.logIt("Query execution was successful: {}".format(query))
+        else:
+            self.logIt("Failed to execute query {}, reason:".format(query, result.text), errorLog=True)
+
     def couchbaseExecQuery(self, queryFile):
         self.logIt("Running Couchbase query from file " + queryFile)
         
@@ -3864,11 +3871,7 @@ class Setup(object):
         for line in query_file:
             query = line.strip()
             if query:
-                result = self.cbm.exec_query(query)
-                if result.ok:
-                    self.logIt("Query execution was successful: {}".format(query))
-                else:
-                    self.logIt("Failed to execute query {}, reason:".format(query, result.text), errorLog=True)
+                self.exec_n1ql_query(query)
 
     def couchebaseCreateIndexes(self, bucket):
         
@@ -4141,6 +4144,7 @@ class Setup(object):
         if self.persistence_type in ('opendj', 'hybrid'):
             self.import_ldif_opendj(ldif_files)
         elif self.persistence_type in ('couchbase', 'hybrid'):
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
 
@@ -4155,6 +4159,26 @@ class Setup(object):
         self.run(['rm', '-rf', 'oxauth_test_client_keys.zip'])
         self.run(['chown', '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
 
+
+
+        oxAuthConfDynamic_changes = (
+                                    ('dynamicRegistrationCustomObjectClass', 'oxAuthClientCustomAttributes'),
+                                    ('dynamicRegistrationCustomAttributes', [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ]),
+                                    ('dynamicRegistrationExpirationTime', 86400),
+                                    ('dynamicGrantTypeDefault', [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ]),
+                                    ('legacyIdTokenClaims', True),
+                                    ('authenticationFiltersEnabled', True),
+                                    ('clientAuthenticationFiltersEnabled', True),
+                                    ('keyRegenerationEnabled',True),
+                                    ('openidScopeBackwardCompatibility', False),
+                                    )
+
+
+        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
+        
+        config_servers = ['{0}:{1}'.format(self.hostname, self.ldaps_port)]
+        
+
         if self.mappingLocations['default'] == 'ldap':
             # oxAuth config changes
             ldap_conn = self.getLdapConnection()
@@ -4163,24 +4187,17 @@ class Setup(object):
             result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxAuthConfDynamic'])
             oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
 
-            oxAuthConfDynamic['dynamicRegistrationCustomObjectClass'] = "oxAuthClientCustomAttributes"
-            oxAuthConfDynamic['dynamicRegistrationCustomAttributes'] = [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ]
-            oxAuthConfDynamic['dynamicRegistrationExpirationTime'] = 86400
-            oxAuthConfDynamic['dynamicGrantTypeDefault'] = [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ]
-            oxAuthConfDynamic['legacyIdTokenClaims'] = True
-            oxAuthConfDynamic['authenticationFiltersEnabled'] = True
-            oxAuthConfDynamic['clientAuthenticationFiltersEnabled'] = True
-            oxAuthConfDynamic['keyRegenerationEnabled'] = True
-            oxAuthConfDynamic['openidScopeBackwardCompatibility'] = False
-            
+            for k, v in oxAuthConfDynamic_changes:
+                oxAuthConfDynamic[k] = v
+
             oxAuthConfDynamic_js = json.dumps(oxAuthConfDynamic, indent=2)
             ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfDynamic_js)])
-            
+
             # Enable custom scripts
-            for inum in ('2DAF-F995', '2DAF-F996', '4BBE-C6A8'):
+            for inum in custom_scripts:
                 dn = 'inum={0},ou=scripts,o=gluu'.format(inum)
                 ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxEnabled',  'true')])
-            
+
 
             # Update LDAP schema
             self.copyFile(os.path.join(self.outputFolder, 'test/oxauth/schema/102-oxauth_test.ldif'), '/opt/opendj/config/schema/')
@@ -4232,14 +4249,23 @@ class Setup(object):
 
             result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxIDPAuthentication'])
             oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
-            oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(self.hostname, self.ldaps_port)]
+            oxIDPAuthentication['config']['servers'] = config_servers
             oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
             ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication_js)])
             ldap_conn.unbind()
             
         else:
-            # Todo: couchbase data updates
-            pass
+            
+            for k, v in oxAuthConfDynamic_changes:
+                query = 'UPDATE gluu USE KEYS "configuration_oxauth" set gluu.oxAuthConfDynamic.{0}={1}'.format(k, json.dumps(v))
+                self.exec_n1ql_query(query)
+ 
+            for inum in custom_scripts:
+                query = 'UPDATE gluu USE KEYS "scripts_{0}" set gluu.oxEnabled=true'.format(inum)
+                self.exec_n1ql_query(query)
+
+            #query = 'UPDATE gluu USE KEYS "configuration" set gluu.oxIDPAuthentication.config.servers = {0}'.format(json.dumps(config_servers))
+            #self.exec_n1ql_query(query)
 
         # Disable token binding module
         if self.os_type+self.os_version == 'ubuntu18':
@@ -4249,10 +4275,10 @@ class Setup(object):
         self.run_service_command('oxauth', 'restart')
         
         # Prepare for tests run
-        install_command, update_command, query_command, check_text = self.get_install_commands()
-        self.run_command(install_command.format('git'))
-        self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
-        self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
+        #install_command, update_command, query_command, check_text = self.get_install_commands()
+        #self.run_command(install_command.format('git'))
+        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
+        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
         # Todo: Download and unzip file test_data.zip from CE server.
         # Todo: Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
         # Todo: Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
