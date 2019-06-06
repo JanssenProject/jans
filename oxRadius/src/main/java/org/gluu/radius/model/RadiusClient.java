@@ -8,12 +8,10 @@ package org.gluu.radius.model;
 
 import java.io.Serializable;
 
-
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.ObjectClass;
-
 
 @DataEntry
 @ObjectClass(values={"oxRadiusClient","top"})
