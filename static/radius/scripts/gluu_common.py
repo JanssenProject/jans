@@ -239,6 +239,9 @@ class PushNotificationManager:
             notify_service_headers = {"Accept": "application/json"}
             try:
                 http_service_response = httpService.executeGet(http_client,notify_service_url,notify_service_headers)
+                if http_service_response == None:
+                    print "Super-Gluu-Push. Loading metadata using httpService failed. Nil http_service_response"
+                    return None
                 http_response = http_service_response.getHttpResponse()
             except:
                 print "Super-Gluu-Push. Loading metadata using httpService failed. %s." % sys.exc_info()[1]
