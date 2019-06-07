@@ -4394,11 +4394,8 @@ class Setup(object):
         if self.mappingLocations['default'] == 'ldap':
             schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
             self.import_ldif_opendj([schema_ldif])
-
-            
             self.import_ldif_opendj([ldif_file])
         else:
-            
             self.import_ldif_couchebase([ldif_file])
 
         self.createUser('radius', homeDir=radius_dir, shell='/bin/false')
@@ -4447,13 +4444,16 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -t   Load test data"
-    print "    -x  Load test data and exit"
+    print "    -x   Load test data and exit"
 #    print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
     print "    --remote-ldap"
-    
+    print "    --remote-couchbase"
+
+
+
 def getOpts(argv, setupOptions):
     try:
         opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
@@ -4463,7 +4463,6 @@ def getOpts(argv, setupOptions):
                                         'import-ldif',
                                         'listen_all_interfaces',
                                         'remote-couchbase',
-                                        'enable-hybrid-storage',
                                         'remote-ldap',
                                         ]
                                     )
