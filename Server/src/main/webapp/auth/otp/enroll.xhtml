@@ -1,79 +1,53 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+
 	<f:metadata>
 		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
 			if="#{not identity.loggedIn}" />
 	</f:metadata>
 	<ui:define name="head">
+		<script
+			src="#{oxAuthConfigurationService.getJsLocation()}/gluu-auth.js" />
 		<meta name="description" content="Gluu Inc." />
 		<script>
-			var helper = (function() {
-				var authResult = undefined;
-
-				return {
-					/**
-					 * Resume on getting authentication result from server
-					 */
-					onSignInCallback: function(authResult) {
-						console.log('Get authentication result: ' + authResult);
-						helper.resumeAuthentication(authResult);
-					},
-
-					/**
-					 * Send form to server to resume authentication workflow
-					 */
-					resumeAuthentication: function(authResult) {
-						$('input#auth_result').val(authResult);
-						$('form#response').submit();
-					},
-				};
-			})();
-
-			/**
-			 * Calls the helper method that handles the authentication flow.
-			 */
-			function onSignInCallback(authResult) {
-				helper.onSignInCallback(authResult);
-			}
-
-			var request = '${identity.getWorkingParameter('otp_enrollment_request')}';
-			var label = '${identity.getWorkingParameter('qr_label')}';
-			var qr_options = ${identity.getWorkingParameter('qr_options')};
-			$(document).ready(function() {
-
-				if (request == '') {
-					onSignInCallback('error');
-				}
-
-				gluu_auth.renderQrCode('#container', request, qr_options, label);
-				gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
-			});
-
-		</script>
-		<style type="text/css">
-.otp-progress-bar {
-	margin-right: 80px;
-}
-
-#progressbar {
-	background-color: #1AB26B;
-	border-radius: 10px;
-	margin: auto;
-	margin-left: 5%;
-	width: 90%;
-}
-</style>
+            var helper = (function() {
+                var authResult = undefined;
+                return {
+                    onSignInCallback: function(authResult) {
+                        console.log('Get authentication result: ' + authResult);
+                        helper.resumeAuthentication(authResult);
+                    },
+                    resumeAuthentication: function(authResult) {
+                        $('input#auth_result').val(authResult);
+                        $('form#response').submit();
+                    },
+                };
+            })();
+            function onSignInCallback(authResult) {
+                helper.onSignInCallback(authResult);
+            }
+            var request = '${identity.getWorkingParameter('otp_enrollment_request')}';
+            var label = '${identity.getWorkingParameter('qr_label')}';
+            var qr_options = ${identity.getWorkingParameter('qr_options')};
+            $(document).ready(function() {
+                if (request == '') {
+                    onSignInCallback('error');
+                }
+                gluu_auth.renderQrCode('#container', request, qr_options, label);
+                gluu_auth.startProgressBar('.progress-bar', 60, onSignInCallback);
+                
+            });
+        </script>
+		<style type="text/css"></style>
 	</ui:define>
-
 	<ui:define name="pageTitle">
 		<h:outputText value="#{msgs['otp.pageTitle']}" />
 	</ui:define>
-
 	<ui:define name="body">
 		<form method="post" id="response"
 			action="#{request.contextPath}/postlogin.htm">
@@ -84,7 +58,6 @@
 			<div class="logo span2">
 				<ui:param name="client"
 					value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
-
 				<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
 					<h:graphicImage url='#{client.getLogoUri()}' />
 				</h:panelGroup>
@@ -97,54 +70,43 @@
 		</div>
 		<div class="bs-docs-section"
 			style="border-top: 2px solid #1ab26b !important;"></div>
-
 		</header>
 		<!-- end header-->
-		<div class="container text-center otp-container">
-			<div id="content" class="sign-in-page">
+		<div class="container text-center">
+			<div id="content">
 				<div class="row-fluid">
-					<h:form id="loginForm" class="signin-form span6 offset3">
-						<h:panelGroup rendered="#{not identity.loggedIn}">
-							<div class="inner-form-container row-fluid">
-								<div class="row">
-									<div class="dialog">
-										<p>#{msgs['otp.scanQRCode']}</p>
-										<div id="container"></div>
-										<br></br>
-										<div id="progressbar" class="otp-progress-bar"></div>
-										<br></br>
+					<h:form id="loginForm">
+						<div class="row">
+							<div class="col-md-3"></div>
+							<div class="col-md-6">
+								<h:panelGroup rendered="#{not identity.loggedIn}">
+									<div class="inner-form-container row-fluid">
+										<div class="row">
+											<div class="dialog">
+												<p>#{msgs['otp.scanQRCode']}</p>
+												<div id="container"></div>
+											</div>
+										</div>
 									</div>
-								</div>
-								<div class="row">
-									<div id="submit_block" class="login_input">
+								</h:panelGroup>
+								<h:panelGroup rendered="#{not identity.loggedIn}">
+									<div class="progress">
+										<div
+											class="progress-bar progress-bar-striped progress-bar-animated"
+											role="progressbar" aria-valuenow="100" aria-valuemin="0"
+											aria-valuemax="100" style="width: 100%"></div>
+									</div>
+									<div class="row">
 										<h:commandButton id="finishButton"
-										    style="margin-left:35%;"
-											styleClass="btn btn-primary col-sm-4"
-											value="#{msgs['otp.finish']}"
+											style=" margin-left: 20%;width:50%; margin-top:10px;"
+											styleClass="btn btn-primary" value="#{msgs['otp.finish']}"
 											action="#{authenticator.authenticate}" />
+										<span class="sprite-green_click_icon"></span>
 									</div>
-									<span class="sprite-green_click_icon"></span>
-								</div>
-								<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-									<p>
-										<h:outputText value="#{msgs['common.agreePolicy']}" />
-										<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-												value="#{msgs['common.privacyPolicy']}" />
-										</a>
-									</p>
 								</h:panelGroup>
-
-								<h:panelGroup rendered='#{!empty client.getTosUri()}'>
-									<p>
-										<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-										<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-												value="#{msgs['common.termsOfService']}" />
-										</a>
-									</p>
-								</h:panelGroup>
-
 							</div>
-						</h:panelGroup>
+							<div class="col-md-3"></div>
+						</div>
 					</h:form>
 				</div>
 			</div>
