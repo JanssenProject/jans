@@ -532,7 +532,10 @@ public class AppInitializer {
 
 		String actualAuthMethod = getActualDefaultAuthenticationMethod(localPersistenceEntryManager);
 
-		if (!StringHelper.equals(currentAuthMethod, actualAuthMethod)) {
+		if (this.authenticationMode == null) {
+			this.authenticationMode = new AuthenticationMode(actualAuthMethod);
+			authenticationModeInstance.destroy(authenticationModeInstance.get());
+		} else if (!StringHelper.equals(currentAuthMethod, actualAuthMethod)) { 
 			authenticationMode = null;
 			if (actualAuthMethod != null) {
 				this.authenticationMode = new AuthenticationMode(actualAuthMethod);
