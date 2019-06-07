@@ -4389,11 +4389,17 @@ class Setup(object):
         self.renderTemplateInOut(ldif_template, os.path.join(source_dir, 'templates'), self.outputFolder)
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
         
-        schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
-        self.import_ldif_opendj([schema_ldif])
-
         ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
-        self.import_ldif_opendj([ldif_file])
+        
+        if self.mappingLocations['default'] == 'ldap':
+            schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
+            self.import_ldif_opendj([schema_ldif])
+
+            
+            self.import_ldif_opendj([ldif_file])
+        else:
+            
+            self.import_ldif_couchebase([ldif_file])
 
         self.createUser('radius', homeDir=radius_dir, shell='/bin/false')
         self.addUserToGroup('gluu', 'radius')
