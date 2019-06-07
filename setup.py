@@ -216,7 +216,7 @@ class Setup(object):
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
-        self.templateRenderingDict = {}
+        self.templateRenderingDict = {'passport_oxtrust_config':''}
 
         # OS commands
         self.cmd_ln = '/bin/ln'
@@ -650,7 +650,6 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
-                           self.ldif_passport,
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
                            ]
@@ -664,7 +663,6 @@ class Setup(object):
                                          self.ldif_clients,
                                          self.ldif_configuration,
                                          self.ldif_scim,
-                                         self.ldif_passport,
                                          self.ldif_idp,
                                          self.lidf_oxtrust_api,
                                          ],
@@ -699,7 +697,6 @@ class Setup(object):
                              self.ldif_groups: False,
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
-                             self.ldif_passport: False,
                              self.ldif_idp: False,
                              self.network: False,
                              self.casa_config: False,
@@ -901,21 +898,13 @@ class Setup(object):
             self.scim_rp_client_id = '0008-' + str(uuid.uuid4())
         if not self.scim_resource_oxid:
             self.scim_resource_oxid = '0008-' + str(uuid.uuid4())
-        if not self.passport_rs_client_id:
-            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
-        if not self.passport_rp_client_id:
-            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
-        if not self.passport_rp_ii_client_id:
-            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
-
         if not self.oxtrust_resource_server_client_id:
             self.oxtrust_resource_server_client_id = '0008-'  + str(uuid.uuid4())
         if not self.oxtrust_requesting_party_client_id:
             self.oxtrust_requesting_party_client_id = '0008-'  + str(uuid.uuid4())
         if not self.oxtrust_resource_id:
             self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
-        if not self.passport_resource_id:
-            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
@@ -1933,18 +1922,6 @@ class Setup(object):
         self.templateRenderingDict['api_rp_client_base64_jwks'] = self.generate_base64_string(self.api_rp_client_jwks, 1)
 
 
-
-    def generate_passport_configuration(self):
-        self.passport_rs_client_jks_pass = self.getPW()
-
-        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
-
-        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
-        self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
-
-        self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
-        self.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(self.passport_rp_client_jwks, 1)
-
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
@@ -2020,11 +1997,9 @@ class Setup(object):
         self.prepare_openid_keys_generator()
         self.generate_oxtrust_api_configuration()
         self.generate_scim_configuration()
-        self.generate_passport_configuration()
 
         self.ldap_binddn = self.opendj_ldap_binddn
         self.ldap_site_binddn = self.opendj_ldap_binddn
-
 
         self.ldapCertFn = self.opendj_cert_fn
         self.ldapTrustStoreFn = self.opendj_p12_fn
@@ -2205,19 +2180,49 @@ class Setup(object):
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth-rp.war' % self.distGluuFolder, jettyServiceWebapps)
 
+    def generate_passport_configuration(self):
+        self.passport_rs_client_jks_pass = self.getPW()
+        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
+
+        if not self.passport_rs_client_id:
+            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
+        if not self.passport_rp_client_id:
+            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
+        if not self.passport_rp_ii_client_id:
+            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
+        if not self.passport_resource_id:
+            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+
+        self.templateRenderingDict['passport_oxtrust_config'] = '''
+                "passportUmaClientId":"%(passport_rs_client_id)s",
+                "passportUmaClientKeyId":"",
+                "passportUmaResourceId":"%(passport_resource_id)s",
+                "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
+                "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
+                "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
+        ''' % self.merge_dicts(self.__dict__)
+
+
     def install_passport(self):
         self.logIt("Installing Passport...")
+
+        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
+        self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
+
+        self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
+        self.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(self.passport_rp_client_jwks, 1)
+
 
         self.logIt("Rendering Passport templates")
         self.renderTemplate(self.passport_central_config_json)
         self.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
         self.renderTemplate(self.ldif_passport_config)
-        
-        if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport_config])
-        else:
-            self.import_ldif_couchebase([self.ldif_passport_config])
+        self.renderTemplate(self.ldif_passport)
 
+        if self.mappingLocations['default'] == 'ldap':
+            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config])
+        else:
+            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
 
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -2261,7 +2266,9 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
         self.logIt("Preparing Passport OpenID RP certificate...")
+
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
+        
         for jwks_key in passport_rp_client_jwks_json["keys"]:
             if jwks_key["alg"]  == self.passport_rp_client_cert_alg:
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
@@ -4619,7 +4626,6 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-
     # Show to properties for approval
     print '\n%s\n' % `installObject`
     proceed = "NO"
@@ -4653,6 +4659,10 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.pbar.progress("Encoding test passwords")
             installObject.encode_test_passwords()
+            
+            if installObject.installPassport:
+                installObject.generate_passport_configuration()
+            
             installObject.pbar.progress("Installing Gluu base")
             installObject.install_gluu_base()
             installObject.pbar.progress("Preparing base64 extention scripts")
