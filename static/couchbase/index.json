@@ -28,7 +28,8 @@
     "mail", 
     "oxId", 
     "oxTicket", 
-    "oxDeletable"
+    "oxDeletable",
+    "oxAuthSessionDn"
   ], 
   "gluu_site": [
     "objectClass", 
