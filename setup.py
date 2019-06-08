@@ -97,8 +97,6 @@ class ProgressBar:
         sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
         sys.stdout.flush()
 
-listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
-
 
 def getTypedValue(dtype, val):
     retVal = val
@@ -165,7 +163,7 @@ def get_documents_from_ldif(ldif_file):
             entry['dn'] = dn
             for k in copy.deepcopy(entry):
                 if len(entry[k]) == 1:
-                    if not k in listAttrib:
+                    if not k in installObject.listAttrib:
                         entry[k] = entry[k][0]
 
             for k in entry:
@@ -4093,7 +4091,20 @@ class Setup(object):
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
     def install_couchbase_server(self):
+
+        # prepare multivalued list
+        self.listAttrib = ['uid', 'member']
         
+        gluu_schema_fn = os.path.join(self.install_dir, 'schema/gluu_schema.json')
+        gluu_schema = json.load(open(gluu_schema_fn))
+
+        for obj_type in ['objectClasses', 'attributeTypes']:
+            for obj in gluu_schema[obj_type]:
+                if obj.get('multivalued'):
+                    for name in obj['names']:
+                        self.listAttrib.append(name)
+
+
         if not self.remoteCouchbase:
             
             self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
