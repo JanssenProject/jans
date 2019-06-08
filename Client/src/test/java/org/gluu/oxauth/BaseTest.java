@@ -6,11 +6,49 @@
 
 package org.gluu.oxauth;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.dev.HostnameVerifierType;
+import org.gluu.oxauth.model.common.Holder;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.error.IErrorType;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.openqa.selenium.*;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestContext;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,58 +68,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Function;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.client.AuthorizeClient;
-import org.gluu.oxauth.client.BaseClient;
-import org.gluu.oxauth.client.BaseResponseWithErrors;
-import org.gluu.oxauth.client.ClientUtils;
-import org.gluu.oxauth.client.OpenIdConfigurationClient;
-import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
-import org.gluu.oxauth.dev.HostnameVerifierType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.error.IErrorType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.ITestContext;
-import org.testng.Reporter;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -367,6 +354,7 @@ public abstract class BaseTest {
         navigateToAuhorizationUrl(currentDriver, authorizationRequestUrl);
 
         if (userSecret != null) {
+            final String previousUrl = currentDriver.getCurrentUrl();
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.name(loginFormUsername));
                 usernameElement.sendKeys(userId);
@@ -378,6 +366,8 @@ public abstract class BaseTest {
             WebElement loginButton = currentDriver.findElement(By.name(loginFormLoginButton));
 
             loginButton.click();
+
+            waitForPageSwitch(currentDriver, previousUrl);
         }
 
         return authorizeClient;
@@ -388,11 +378,15 @@ public abstract class BaseTest {
 
 		// Check for authorization form if client has no persistent authorization
 		if (!authorizationResponseStr.contains("#")) {
-			Wait<WebDriver> wait = new FluentWait<WebDriver>(driver).withTimeout(Duration.ofSeconds(10))
-					.pollingEvery(Duration.ofMillis(500)).ignoring(NoSuchElementException.class);
+			Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                    .withTimeout(Duration.ofSeconds(10))
+					.pollingEvery(Duration.ofMillis(500))
+                    .ignoring(NoSuchElementException.class);
 
 			WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
-				public WebElement apply(WebDriver driver) {
+				public WebElement apply(WebDriver d) {
+                    //System.out.println(d.getCurrentUrl());
+                    //System.out.println(d.getPageSource());
 					return driver.findElement(By.id(authorizeFormAllowButton));
 				}
 			});
@@ -400,26 +394,47 @@ public abstract class BaseTest {
 			// We have to use JavaScript because target is link with onclick
 			JavascriptExecutor jse = (JavascriptExecutor) driver;
 			jse.executeScript("scroll(0, 1000)");
+
+            String previousURL = currentDriver.getCurrentUrl();
+
 			Actions actions = new Actions(driver);
 			actions.click(allowButton).perform();
 
-			final String previousURL = currentDriver.getCurrentUrl();
-			actions.click(allowButton).perform();
+            String authorizedRedirect = waitForPageSwitch(currentDriver, previousURL); // first internal redirect to Authorization Endpoint
 
-			WebDriverWait wait2 = new WebDriverWait(currentDriver, 10);
-			wait2.until(new Function<WebDriver, Boolean>() {
-				public Boolean apply(WebDriver d) {
-					return (d.getCurrentUrl() != previousURL);
-				}
-			});
+            try {
+                final HttpParams httpGetParams = new BasicHttpParams();
+                httpGetParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
 
-			authorizationResponseStr = currentDriver.getCurrentUrl();
+                final HttpGet httpGet = new HttpGet(authorizedRedirect);
+                httpGet.setParams(httpGetParams);
+
+                final HttpClient httpClient = createHttpClientTrustAll();
+                final HttpResponse response = httpClient.execute(httpGet);
+                return response.getFirstHeader("Location").getValue();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            authorizationResponseStr = currentDriver.getCurrentUrl();
 		} else {
 			fail("The authorization form was expected to be shown.");
 		}
 
 		return authorizationResponseStr;
 	}
+
+    public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
+        Holder<String> currentUrl = new Holder<>();
+        WebDriverWait wait = new WebDriverWait(currentDriver, 10);
+        wait.until(d -> {
+            //System.out.println("Previous url: " + previousURL);
+            //System.out.println("Current url: " + d.getCurrentUrl());
+            currentUrl.setT(d.getCurrentUrl());
+            return !currentUrl.getT().equals(previousURL);
+        });
+        return currentUrl.getT();
+    }
 
     private AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
                                                              boolean useNewDriver, WebDriver currentDriver, AuthorizeClient authorizeClient,
