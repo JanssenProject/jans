@@ -22,12 +22,15 @@ public class PropertyAnnotation implements Comparable<PropertyAnnotation>, Seria
     private final String propertyName;
     private final transient List<Annotation> annotations;
 
+    private transient Class<?> parameterType;
+
     public PropertyAnnotation(String property, List<Annotation> annotations) {
         this.propertyName = property;
         this.annotations = annotations;
+        this.parameterType = null;
     }
 
-    public String getPropertyName() {
+	public String getPropertyName() {
         return propertyName;
     }
 
@@ -35,7 +38,15 @@ public class PropertyAnnotation implements Comparable<PropertyAnnotation>, Seria
         return annotations;
     }
 
-    @Override
+    public Class<?> getParameterType() {
+		return parameterType;
+	}
+
+	public void setParameterType(Class<?> parameterType) {
+		this.parameterType = parameterType;
+	}
+
+	@Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

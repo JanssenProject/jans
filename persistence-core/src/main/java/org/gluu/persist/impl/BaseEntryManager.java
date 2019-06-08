@@ -403,7 +403,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 
-		return contains(dnValue.toString(), attributes, objectClasses, ldapReturnAttributes);
+		return contains(dnValue.toString(), entryClass, propertiesAnnotations, attributes, objectClasses, ldapReturnAttributes);
 	}
 
 	protected <T> boolean contains(Class<T> entryClass, String primaryKey, String[] ldapReturnAttributes) {
@@ -429,10 +429,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
 		String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 
-		return contains(baseDN, filter, objectClasses, ldapReturnAttributes);
+		return contains(baseDN, entryClass, propertiesAnnotations, filter, objectClasses, ldapReturnAttributes);
 	}
 
-	protected boolean contains(String baseDN, List<AttributeData> attributes, String[] objectClasses,
+	protected <T> boolean contains(String baseDN, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, List<AttributeData> attributes, String[] objectClasses,
 			String... ldapReturnAttributes) {
 		Filter[] attributesFilters = createAttributesFilter(attributes);
 		Filter attributesFilter = null;
@@ -440,11 +440,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributesFilter = Filter.createANDFilter(attributesFilters);
 		}
 
-		return contains(baseDN, attributesFilter, objectClasses, ldapReturnAttributes);
+		return contains(baseDN, entryClass, propertiesAnnotations, attributesFilter, objectClasses, ldapReturnAttributes);
 	}
 
-	protected abstract boolean contains(String baseDN, Filter filter, String[] objectClasses,
-			String[] ldapReturnAttributes);
+	protected abstract <T> boolean contains(String baseDN, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
+			Filter filter, String[] objectClasses, String[] ldapReturnAttributes);
 
 	@Override
 	public <T> boolean contains(String primaryKey, Class<T> entryClass) {
@@ -479,9 +479,20 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return attributes.toArray(new String[0]);
 	}
 
-	private <T> List<String> getAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
+	protected <T> List<String> getAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
 			boolean isIgnoreAttributesList) {
-		List<String> attributes = new ArrayList<String>();
+		Map<String, PropertyAnnotation> attributesMap = getAttributesMap(entry, propertiesAnnotations, isIgnoreAttributesList);
+		
+		if (attributesMap == null) {
+			return null;
+		}
+		
+		return new ArrayList<String>(attributesMap.keySet());
+	}
+
+	protected <T> Map<String, PropertyAnnotation> getAttributesMap(T entry, List<PropertyAnnotation> propertiesAnnotations,
+			boolean isIgnoreAttributesList) {
+		Map<String, PropertyAnnotation> attributes = new HashMap<String, PropertyAnnotation>();
 
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
@@ -498,8 +509,8 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 								ldapAttribute, propertyName);
 						for (AttributeData attributeData : attributesList) {
 							String ldapAttributeName = attributeData.getName();
-							if (!attributes.contains(ldapAttributeName)) {
-								attributes.add(ldapAttributeName);
+							if (!attributes.containsKey(ldapAttributeName)) {
+								attributes.put(ldapAttributeName, propertiesAnnotation);
 							}
 						}
 					}
@@ -515,8 +526,8 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					ldapAttributeName = propertyName;
 				}
 
-				if (!attributes.contains(ldapAttributeName)) {
-					attributes.add(ldapAttributeName);
+				if (!attributes.containsKey(ldapAttributeName)) {
+					attributes.put(ldapAttributeName, propertiesAnnotation);
 				}
 			}
 		}
@@ -526,6 +537,20 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		return attributes;
+	}
+
+	protected <T> void preparePropertyAnnotationTypes(Class<T> entry, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotationsMap.values()) {
+			String propertyName = propertiesAnnotation.getPropertyName();
+
+			Setter propertyValueSetter = getSetter(entry, propertyName);
+			if (propertyValueSetter == null) {
+				throw new MappingException("Entry should has setter for property " + propertyName);
+			}
+
+			Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
+			propertiesAnnotation.setParameterType(parameterType);
+		}
 	}
 
 	private <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes,

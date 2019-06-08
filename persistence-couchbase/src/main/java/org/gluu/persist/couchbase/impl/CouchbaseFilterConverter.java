@@ -7,10 +7,16 @@
 
 package org.gluu.persist.couchbase.impl;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.enterprise.context.ApplicationScoped;
 
+import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
 import org.gluu.util.StringHelper;
@@ -31,7 +37,7 @@ public class CouchbaseFilterConverter {
     
     private LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 
-    public Expression convertToCouchbaseFilter(Filter genericFilter) throws SearchException {
+    public Expression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         Filter currentGenericFilter = genericFilter;
 
         FilterType type = currentGenericFilter.getType();
@@ -47,7 +53,7 @@ public class CouchbaseFilterConverter {
 
             if (genericFilters != null) {
                 for (int i = 0; i < genericFilters.length; i++) {
-                    expFilters[i] = convertToCouchbaseFilter(genericFilters[i]);
+                    expFilters[i] = convertToCouchbaseFilter(genericFilters[i], propertiesAnnotationsMap);
                 }
 
                 if (FilterType.NOT == type) {
@@ -69,8 +75,11 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-            if (currentGenericFilter.isArrayAttribute()) {
+        	Boolean isMultiValued = isMultiValued(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+            if (currentGenericFilter.isArrayAttribute() || Boolean.TRUE.equals(isMultiValued)) {
                 return Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(currentGenericFilter.getAttributeName())));
+            } else if (Boolean.FALSE.equals(isMultiValued)) {
+            	return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter));
             } else {
                 Expression exp1 = Expression
                         .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter)));
@@ -130,6 +139,23 @@ public class CouchbaseFilterConverter {
 		}
 
 		return Expression.s(StringHelper.escapeSql(currentGenericFilter.getAssertionValue()));
+	}
+
+	private Boolean isMultiValued(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+		if (propertiesAnnotationsMap == null) {
+			return null;
+		}
+
+		PropertyAnnotation propertyAnnotation = propertiesAnnotationsMap.get(attributeName);
+		if ((propertyAnnotation == null) || (propertyAnnotation.getParameterType() == null)) {
+			return null;
+		}
+
+		Class<?> parameterType = propertyAnnotation.getParameterType();
+		
+		boolean isMultiValued = parameterType.equals(String[].class) || ReflectHelper.assignableFrom(parameterType, List.class) || ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class); 
+		
+		return isMultiValued;
 	}
 
 }
