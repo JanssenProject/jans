@@ -29,7 +29,8 @@
     "oxId", 
     "oxTicket", 
     "oxDeletable",
-    "oxAuthSessionDn"
+    "oxAuthSessionDn",
+    "gluu_bucket"
   ], 
   "gluu_site": [
     "objectClass", 
