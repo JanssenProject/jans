@@ -5,7 +5,7 @@ import com.google.common.io.Files;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.common.Jackson2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

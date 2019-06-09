@@ -2,10 +2,10 @@ package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.gluu.oxd.common.Command;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.response.GetRpResponse;
 import org.gluu.oxd.common.response.IOpResponse;
-import org.gluu.oxd.server.Jackson2;
 import org.gluu.oxd.server.service.MinimumRp;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
