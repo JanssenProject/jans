@@ -71,7 +71,7 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
 
         try {
             startSelenium();
-            driver.navigate().to(authorizationRequestUrl);
+            navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
 //            WebElement policy = driver.findElement(By.xpath("//a[@href='" + policyUri + "']"));
 //            assertNotNull(policy);
