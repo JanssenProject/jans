@@ -6,6 +6,7 @@ package org.gluu.oxd.server;
 import com.fasterxml.jackson.databind.node.POJONode;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.IParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package org.gluu.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

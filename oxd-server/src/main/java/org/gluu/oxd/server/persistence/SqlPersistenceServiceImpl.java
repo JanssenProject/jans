@@ -1,7 +1,7 @@
 package org.gluu.oxd.server.persistence;
 
 import com.google.inject.Inject;
-import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
 import org.h2.util.IOUtils;

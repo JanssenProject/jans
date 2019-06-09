@@ -2,6 +2,7 @@ package org.gluu.oxd.server;
 
 import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.op.RsProtectOperation;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
