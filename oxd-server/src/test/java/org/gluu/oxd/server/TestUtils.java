@@ -2,7 +2,6 @@ package org.gluu.oxd.server;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponse;
 
 import javax.ws.rs.WebApplicationException;
@@ -41,6 +40,6 @@ public class TestUtils {
             throw new RuntimeException("Failed to identify type of the entity");
         }
         System.out.println(entityAsString);
-        return CoreUtils.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
+        return Jackson2.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
     }
 }
