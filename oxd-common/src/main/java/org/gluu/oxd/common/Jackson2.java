@@ -1,4 +1,4 @@
-package org.gluu.oxd.server;
+package org.gluu.oxd.common;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;

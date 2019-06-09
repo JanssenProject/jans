@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
 import org.gluu.oxd.common.CoreUtils;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;

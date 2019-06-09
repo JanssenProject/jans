@@ -19,6 +19,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.OxdClient;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.params.RemoveSiteParams;
 import org.gluu.oxd.common.response.GetRpResponse;
