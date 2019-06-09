@@ -2,7 +2,7 @@ package org.gluu.oxd.server.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;

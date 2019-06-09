@@ -1,16 +1,16 @@
 package io.swagger.client.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.client.ApiException;
 import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.RsResource;
 import io.swagger.client.model.UmaRpGetRptParams;
 import io.swagger.client.model.UmaRpGetRptResponse;
 import io.swagger.client.model.UmaRsCheckAccessResponse;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.gluu.oxd.common.Jackson2;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxd.rs.protect.Jackson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -106,11 +106,11 @@ public class UmaFullTest {
     public static List<RsResource> resourceList(String rsProtect) throws IOException {
         rsProtect = replace(rsProtect, "'", "\"");
 
-        final ObjectMapper jsonMapper = Jackson.createJsonMapper();
+        final ObjectMapper jsonMapper = Jackson2.createJsonMapper();
         final JsonNode resourcesNode = jsonMapper.readTree(rsProtect).get(("resources"));
 
         if (resourcesNode != null)
-            return jsonMapper.readValue(resourcesNode, ArrayList.class);
+            return jsonMapper.treeToValue(resourcesNode, ArrayList.class);
 
         throw new IllegalArgumentException("Could not find test data for protected resources");
 

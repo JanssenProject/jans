@@ -3,6 +3,7 @@ package org.gluu.oxd.server;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.ErrorResponse;
+import org.gluu.oxd.common.Jackson2;
 
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;

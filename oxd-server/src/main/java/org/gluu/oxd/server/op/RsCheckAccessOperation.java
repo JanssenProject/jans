@@ -2,21 +2,17 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.gluu.oxd.common.*;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
 import org.gluu.oxauth.model.uma.PermissionTicket;
-import org.gluu.oxd.common.Command;
-import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.common.ErrorResponse;
-import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.gluu.oxd.common.introspection.CorrectUmaPermission;
 import org.gluu.oxd.common.params.RsCheckAccessParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
-import org.gluu.oxd.rs.protect.Jackson;
 import org.gluu.oxd.rs.protect.resteasy.PatProvider;
 import org.gluu.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.gluu.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
@@ -63,7 +59,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(Jackson.asJson(error))
+                    .entity(Jackson2.asJson(error))
                     .build());
         }
 
