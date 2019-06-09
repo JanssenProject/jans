@@ -4,6 +4,8 @@ import java.util.Map;
 
 /**
  * Created by eugeniuparvan on 5/15/17.
+ *
+ * @author Yuriy Movchan Date: 06/09/2019
  */
 public class HttpRequest {
     private String senderIP;
@@ -12,6 +14,7 @@ public class HttpRequest {
     private Map<String, String> params;
     private Map<String, String> headers;
     private String body;
+    private String duration;
 
     public String getSenderIP() {
         return senderIP;
@@ -60,4 +63,13 @@ public class HttpRequest {
     public void setBody(String body) {
         this.body = body;
     }
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+
 }
