@@ -2,10 +2,10 @@ package org.gluu.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
+import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.server.OxdServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.server.OxdServerConfiguration;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class ConfigurationService implements Provider<OxdServerConfiguration> {
 
     public Rp defaultRp() {
         try {
-            return CoreUtils.createJsonMapper().readValue(configuration.getDefaultSiteConfig().toString(), Rp.class);
+            return Jackson2.createJsonMapper().readValue(configuration.getDefaultSiteConfig().toString(), Rp.class);
         } catch (IOException e) {
             LOG.error("Failed to parse default RP.", e);
             return null;

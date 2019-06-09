@@ -1,15 +1,15 @@
 package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.response.GetRpResponse;
 import org.gluu.oxd.common.response.IOpResponse;
-import org.gluu.oxd.rs.protect.Jackson;
+import org.gluu.oxd.server.Jackson2;
 import org.gluu.oxd.server.service.MinimumRp;
 import org.gluu.oxd.server.service.Rp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +38,12 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
             for (Rp rp : getRpService().getRps().values()) {
                 rps.add(rp.asMinimumRp());
             }
-            return new GetRpResponse(Jackson.createJsonMapper().valueToTree(rps));
+            return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rps));
         }
 
         Rp rp = getRpService().getRp(params.getOxdId());
         if (rp != null) {
-            return new GetRpResponse(Jackson.createJsonMapper().valueToTree(rp));
+            return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rp));
         } else {
             LOG.trace("Failed to find RP by oxd_id: " + params.getOxdId());
         }

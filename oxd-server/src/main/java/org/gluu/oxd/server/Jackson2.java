@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.common.CoreUtils;
 
 import java.io.IOException;
 
@@ -58,7 +57,7 @@ public class Jackson2 {
         }
     }
 
-    public static org.codehaus.jackson.JsonNode asOldNode(JsonNode node) throws IOException {
-        return CoreUtils.createJsonMapper().readTree(Jackson2.asJsonSilently(node));
+    public static JsonNode asOldNode(JsonNode node) throws IOException {
+        return Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(node));
     }
 }
