@@ -4,17 +4,18 @@
 package org.gluu.oxd.common;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.gluu.oxd.common.response.IOpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.common.response.IOpResponse;
 
 import java.io.Serializable;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorResponse implements Serializable, IOpResponse {
 
     private static final Logger LOG = LoggerFactory.getLogger(ErrorResponse.class);

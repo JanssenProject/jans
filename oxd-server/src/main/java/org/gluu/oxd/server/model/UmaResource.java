@@ -1,7 +1,7 @@
 package org.gluu.oxd.server.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 @JsonPropertyOrder({"active", "scopes", "client_id", "username", "token_type", "exp", "iat", "sub", "aud", "iss", "jti", "acr_values"})
-@com.fasterxml.jackson.annotation.JsonPropertyOrder({"active", "scopes", "client_id", "username", "token_type", "exp", "iat", "sub", "aud", "iss", "jti", "acr_values"})
 @IgnoreMediaTypes({"application/*+json"})
 public class IntrospectAccessTokenResponse {
     @JsonProperty("active")
@@ -20,40 +19,28 @@ public class IntrospectAccessTokenResponse {
 
     @Deprecated
     @JsonProperty("scopes")
-    @com.fasterxml.jackson.annotation.JsonProperty("scopes")
     private List<String> scopes;
     @JsonProperty("scope")
-    @com.fasterxml.jackson.annotation.JsonProperty("scope")
     private List<String> scope;
     @JsonProperty("client_id")
-    @com.fasterxml.jackson.annotation.JsonProperty("client_id")
     private String clientId;
     @JsonProperty("username")
-    @com.fasterxml.jackson.annotation.JsonProperty("username")
     private String username;
     @JsonProperty("token_type")
-    @com.fasterxml.jackson.annotation.JsonProperty("token_type")
     private String tokenType;
     @JsonProperty("exp")
-    @com.fasterxml.jackson.annotation.JsonProperty("exp")
     private Integer expiresAt;
     @JsonProperty("iat")
-    @com.fasterxml.jackson.annotation.JsonProperty("iat")
     private Integer issuedAt;
     @JsonProperty("sub")
-    @com.fasterxml.jackson.annotation.JsonProperty("sub")
     private String subject;
     @JsonProperty("aud")
-    @com.fasterxml.jackson.annotation.JsonProperty("aud")
     private String audience;
     @JsonProperty("iss")
-    @com.fasterxml.jackson.annotation.JsonProperty("iss")
     private String issuer;
     @JsonProperty("jti")
-    @com.fasterxml.jackson.annotation.JsonProperty("jti")
     private String jti;
     @JsonProperty("acr_values")
-    @com.fasterxml.jackson.annotation.JsonProperty("acr_values")
     private String acrValues;
 
     public IntrospectAccessTokenResponse() {
