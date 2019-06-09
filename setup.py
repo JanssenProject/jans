@@ -4463,8 +4463,7 @@ def print_help():
     print "    -w   Get the development head war files"
     print "    -t   Load test data"
     print "    -x   Load test data and exit"
-#    print "    --allow_pre_released_applications"
-    print "    --allow_deprecated_applications"
+    print "    --allow-pre-released-features"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
     print "    --remote-ldap"
@@ -4476,8 +4475,7 @@ def getOpts(argv, setupOptions):
     try:
         opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
                                         [
-                                        'allow_pre_released_applications', 
-                                        'allow_deprecated_applications', 
+                                        'allow-pre-released-features'
                                         'import-ldif',
                                         'listen_all_interfaces',
                                         'remote-couchbase',
@@ -4524,10 +4522,8 @@ def getOpts(argv, setupOptions):
             setupOptions['loadTestData'] = True
         elif opt == "-x":
             setupOptions['loadTestDataExit'] = True
-        elif opt == '--allow_pre_released_applications':
-            setupOptions['allowPreReleasedApplications'] = True
-        elif opt == '--allow_deprecated_applications':
-            setupOptions['allowDeprecatedApplications'] = True
+        elif opt == '--allow-pre-released-features':
+            setupOptions['allowPreReleasedFeatures'] = True
         elif opt == '--listen_all_interfaces':
             setupOptions['listenAllInterfaces'] = True
         elif opt == '--remote-couchbase':
@@ -4559,8 +4555,7 @@ if __name__ == '__main__':
         'installPassport': False,
         'installGluuRadius': False,
         'loadTestData': False,
-        'allowPreReleasedApplications': False,
-        'allowDeprecatedApplications': False,
+        'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
@@ -4570,16 +4565,12 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
 
-
     attribDataTypes = ATTRUBUTEDATATYPES(setupOptions['install_dir'])
-
 
     installObject = Setup(setupOptions['install_dir'])
 
-
     if setupOptions['loadTestDataExit']:
         installObject.load_test_data_exit()
-
 
     if installObject.check_installed():
         print "\nThis instance already configured. If you need to install new one you should reinstall package first."
@@ -4602,7 +4593,6 @@ if __name__ == '__main__':
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
-
 
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
@@ -4730,9 +4720,9 @@ if __name__ == '__main__':
             
             if installObject.couchbaseInstallOutput:
                 print
-                print "-"*50
+                print "-"*tty_columns
                 print installObject.couchbaseInstallOutput
-                print "-"*50
+                print "-"*tty_columns
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
