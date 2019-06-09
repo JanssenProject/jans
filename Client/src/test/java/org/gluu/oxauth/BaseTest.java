@@ -893,9 +893,9 @@ public abstract class BaseTest {
         return new DefaultHttpClient(ccm);
     }
 
-	private void navigateToAuhorizationUrl(WebDriver currentDriver, String authorizationRequestUrl) {
+	protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
 		try {
-			currentDriver.navigate().to(URLDecoder.decode(authorizationRequestUrl, Util.UTF8_STRING_ENCODING));
+			driver.navigate().to(URLDecoder.decode(authorizationRequestUrl, Util.UTF8_STRING_ENCODING));
 		} catch (UnsupportedEncodingException ex) {
             fail("Failed to decode the authorization URL.");
 		}
