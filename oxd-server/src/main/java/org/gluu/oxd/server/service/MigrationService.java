@@ -5,9 +5,9 @@ import com.google.common.io.Files;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.server.Jackson2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.common.CoreUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class MigrationService {
                 return null;
             }
             try {
-                return CoreUtils.createJsonMapper().readValue(rpAsJson, Rp.class);
+                return Jackson2.createJsonMapper().readValue(rpAsJson, Rp.class);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 return null;

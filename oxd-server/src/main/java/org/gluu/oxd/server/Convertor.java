@@ -3,13 +3,12 @@
  */
 package org.gluu.oxd.server;
 
-import org.codehaus.jackson.node.POJONode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.node.POJONode;
 import org.gluu.oxd.common.Command;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.IParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenient static convertor.
@@ -40,7 +39,7 @@ public class Convertor {
         }
         final String paramsAsString = command.paramsAsString();
         try {
-            T params = CoreUtils.createJsonMapper().readValue(paramsAsString, clazz);
+            T params = Jackson2.createJsonMapper().readValue(paramsAsString, clazz);
             if (params == null) {
                 throw new HttpException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
             }
