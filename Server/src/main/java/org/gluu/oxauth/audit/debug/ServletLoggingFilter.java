@@ -1,6 +1,8 @@
 package org.gluu.oxauth.audit.debug;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -29,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Created by eugeniuparvan on 5/10/17.
+ *
+ * @author Yuriy Movchan Date: 06/09/2019
  */
 @WebFilter(urlPatterns = {"/*"})
 public class ServletLoggingFilter implements Filter {
@@ -47,11 +51,12 @@ public class ServletLoggingFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    	Instant start = now(); 
+    			
         if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
             throw new ServletException("LoggingFilter just supports HTTP requests");
         }
@@ -77,11 +82,15 @@ public class ServletLoggingFilter implements Filter {
         ResponseWrapper responseWrapper = new ResponseWrapper(httpResponse);
 
         chain.doFilter(httpRequest, httpResponse);
+        
+        Duration duration = duration(start);
 
         // yuriyz: log request and response only after filter handling.
         // #914 - we don't want to effect server functionality due to logging. Currently content can be messed if it is InputStream.
-        log.debug(getRequestDescription(requestWrapper));
-        log.debug(getResponseDescription(responseWrapper));
+        if (log.isDebugEnabled()) {
+	        log.debug(getRequestDescription(requestWrapper, duration));
+	        log.debug(getResponseDescription(responseWrapper));
+        }
     }
 
     @Override
@@ -89,7 +98,7 @@ public class ServletLoggingFilter implements Filter {
 
     }
 
-    protected String getRequestDescription(RequestWrapper requestWrapper) {
+    protected String getRequestDescription(RequestWrapper requestWrapper, Duration duration) {
         try {
             HttpRequest httpRequest = new HttpRequest();
             httpRequest.setSenderIP(requestWrapper.getLocalAddr());
@@ -98,6 +107,7 @@ public class ServletLoggingFilter implements Filter {
             httpRequest.setParams(requestWrapper.isFormPost() ? null : requestWrapper.getParameters());
             httpRequest.setHeaders(requestWrapper.getHeaders());
             httpRequest.setBody(requestWrapper.getContent());
+            httpRequest.setDuration(duration.toString());
             return OBJECT_MAPPER.writeValueAsString(httpRequest);
         } catch (Exception e) {
             log.warn("Cannot serialize Request to JSON", e);
@@ -116,4 +126,18 @@ public class ServletLoggingFilter implements Filter {
             return null;
         }
     }
+
+    public Instant now() {
+        return Instant.now();
+    }
+
+    public Duration duration(Instant start) {
+        Instant end = Instant.now();
+        return Duration.between(start, end);
+    }
+
+    public Duration duration(Instant start, Instant end) {
+        return Duration.between(start, end);
+    }
+
 }
