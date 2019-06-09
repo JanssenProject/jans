@@ -1,6 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,10 +11,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RpGetClaimsGatheringUrlResponse implements IOpResponse {
 
     @JsonProperty(value = "url")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "url")
     private String url;
     @JsonProperty(value = "state")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "state")
     private String state;
 
     public RpGetClaimsGatheringUrlResponse() {

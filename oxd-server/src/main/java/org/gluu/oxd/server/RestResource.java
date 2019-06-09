@@ -1,23 +1,17 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.common.params.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
 import org.gluu.oxd.common.CoreUtils;
+import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;
 import org.gluu.oxd.server.service.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;

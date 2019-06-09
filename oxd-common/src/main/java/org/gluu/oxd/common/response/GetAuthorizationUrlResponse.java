@@ -1,6 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetAuthorizationUrlResponse implements IOpResponse {
 
     @JsonProperty(value = "authorization_url")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "authorization_url")
     private String authorizationUrl;
 
     public GetAuthorizationUrlResponse() {

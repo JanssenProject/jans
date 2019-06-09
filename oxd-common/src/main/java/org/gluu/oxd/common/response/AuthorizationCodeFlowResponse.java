@@ -3,7 +3,8 @@
  */
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -13,22 +14,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class AuthorizationCodeFlowResponse implements org.gluu.oxd.common.response.IOpResponse {
 
     @JsonProperty(value = "access_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "access_token")
     private String accessToken;
     @JsonProperty(value = "expires_in_seconds")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "expires_in_seconds")
     private long expiresIn;
     @JsonProperty(value = "refresh_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "refresh_token")
     private String refreshToken;
     @JsonProperty(value = "authorization_code")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "authorization_code")
     private String authorizationCode;
     @JsonProperty(value = "scope")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "scope")
     private String scope;
     @JsonProperty(value = "id_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_token")
     private String idToken;
 
     public AuthorizationCodeFlowResponse() {

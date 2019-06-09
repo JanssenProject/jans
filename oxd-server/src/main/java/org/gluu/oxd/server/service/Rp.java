@@ -1,7 +1,7 @@
 package org.gluu.oxd.server.service;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.server.model.UmaResource;

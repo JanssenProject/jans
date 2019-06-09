@@ -1,7 +1,8 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,139 +14,94 @@ import java.util.Map;
 public class GetDiscoveryResponse implements IOpResponse {
 
     @JsonProperty(value = "issuer")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "issuer")
     private String issuer;
     @JsonProperty(value = "authorization_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "authorization_endpoint")
     private String authorization_endpoint;
     @JsonProperty(value = "token_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "token_endpoint")
     private String token_endpoint;
     @JsonProperty(value = "token_revocation_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "token_revocation_endpoint")
     private String token_revocation_endpoint;
     @JsonProperty(value = "user_info_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "user_info_endpoint")
     private String user_info_endpoint;
     @JsonProperty(value = "client_info_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_info_endpoint")
     private String client_info_endpoint;
     @JsonProperty(value = "check_session_iframe")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "check_session_iframe")
     private String check_session_iframe;
     @JsonProperty(value = "end_session_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "end_session_endpoint")
     private String end_session_endpoint;
     @JsonProperty(value = "jwks_uri")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "jwks_uri")
     private String jwks_uri;
     @JsonProperty(value = "registration_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "registration_endpoint")
     private String registration_endpoint;
     @JsonProperty(value = "id_generation_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_generation_endpoint")
     private String id_generation_endpoint;
     @JsonProperty(value = "introspection_endpoint")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "introspection_endpoint")
     private String introspection_endpoint;
     @JsonProperty(value = "scopes_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "scopes_supported")
     private List<String> scopes_supported;
     @JsonProperty(value = "response_types_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "response_types_supported")
     private List<String> response_types_supported;
     @JsonProperty(value = "grant_types_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "grant_types_supported")
     private List<String> grant_types_supported;
     @JsonProperty(value = "acr_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "acr_values_supported")
     private List<String> acr_values_supported;
     @JsonProperty(value = "subject_types_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "subject_types_supported")
     private List<String> subject_types_supported;
     @JsonProperty(value = "user_info_signing_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "user_info_signing_alg_values_supported")
     private List<String> user_info_signing_alg_values_supported;
     @JsonProperty(value = "user_info_encryption_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "user_info_encryption_alg_values_supported")
     private List<String> user_info_encryption_alg_values_supported;
     @JsonProperty(value = "user_info_encryption_enc_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "user_info_encryption_enc_values_supported")
     private List<String> user_info_encryption_enc_values_supported;
     @JsonProperty(value = "id_token_signing_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_token_signing_alg_values_supported")
     private List<String> id_token_signing_alg_values_supported;
     @JsonProperty(value = "id_token_encryption_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_token_encryption_alg_values_supported")
     private List<String> id_token_encryption_alg_values_supported;
     @JsonProperty(value = "id_token_encryption_enc_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_token_encryption_enc_values_supported")
     private List<String> id_token_encryption_enc_values_supported;
     @JsonProperty(value = "request_object_signing_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "request_object_signing_alg_values_supported")
     private List<String> request_object_signing_alg_values_supported;
     @JsonProperty(value = "request_object_encryption_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "request_object_encryption_alg_values_supported")
     private List<String> request_object_encryption_alg_values_supported;
     @JsonProperty(value = "request_object_encryption_enc_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "request_object_encryption_enc_values_supported")
     private List<String> request_object_encryption_enc_values_supported;
     @JsonProperty(value = "token_endpoint_auth_methods_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "token_endpoint_auth_methods_supported")
     private List<String> token_endpoint_auth_methods_supported;
     @JsonProperty(value = "token_endpoint_auth_signing_alg_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "token_endpoint_auth_signing_alg_values_supported")
     private List<String> token_endpoint_auth_signing_alg_values_supported;
     @JsonProperty(value = "display_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "display_values_supported")
     private List<String> display_values_supported;
     @JsonProperty(value = "claim_types_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "claim_types_supported")
     private List<String> claim_types_supported;
     @JsonProperty(value = "claims_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "claims_supported")
     private List<String> claims_supported;
     @JsonProperty(value = "id_token_token_binding_cnf_values_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "id_token_token_binding_cnf_values_supported")
     private List<String> id_token_token_binding_cnf_values_supported;
     @JsonProperty(value = "service_documentation")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "service_documentation")
     private String service_documentation;
     @JsonProperty(value = "claims_locales_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "claims_locales_supported")
     private List<String> claims_locales_supported;
     @JsonProperty(value = "ui_locales_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "ui_locales_supported")
     private List<String> ui_locales_supported;
     @JsonProperty(value = "claims_parameter_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "claims_parameter_supported")
     private Boolean claims_parameter_supported;
     @JsonProperty(value = "request_parameter_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "request_parameter_supported")
     private Boolean request_parameter_supported;
     @JsonProperty(value = "request_uri_parameter_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "request_uri_parameter_supported")
     private Boolean request_uri_parameter_supported;
     @JsonProperty(value = "require_request_uri_registration")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "require_request_uri_registration")
     private Boolean require_request_uri_registration;
     @JsonProperty(value = "tls_client_certificate_bound_access_tokens")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "tls_client_certificate_bound_access_tokens")
     private Boolean tls_client_certificate_bound_access_tokens;
     @JsonProperty(value = "front_channel_logout_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "front_channel_logout_supported")
     private Boolean front_channel_logout_supported;
     @JsonProperty(value = "front_channel_logout_session_supported")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "front_channel_logout_session_supported")
     private Boolean front_channel_logout_session_supported;
     @JsonProperty(value = "op_policy_uri")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "op_policy_uri")
     private String op_policy_uri;
     @JsonProperty(value = "op_tos_uri")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "op_tos_uri")
     private String op_tos_uri;
     @JsonProperty(value = "scope_to_claims_mapping")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "scope_to_claims_mapping")
     private Map<String, List<String>> scope_to_claims_mapping = new HashMap<String, List<String>>();
 
     public GetDiscoveryResponse() {
