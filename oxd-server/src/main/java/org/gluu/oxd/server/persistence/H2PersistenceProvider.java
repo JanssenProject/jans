@@ -2,10 +2,10 @@ package org.gluu.oxd.server.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
+import org.gluu.oxd.common.Jackson2;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.server.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.ConfigurationService;
 

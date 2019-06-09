@@ -6,10 +6,10 @@ import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.RsProtectParams2;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.RegisterSiteParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RsProtectResponse;
-import org.gluu.oxd.server.Jackson2;
 import org.gluu.oxd.server.Tester;
 
 import java.io.IOException;
