@@ -393,8 +393,13 @@ public abstract class BaseTest {
 
             authorizationResponseStr = currentDriver.getCurrentUrl();
 
-            if (!authorizationResponseStr.startsWith(redirectUri)) {
-                navigateToAuhorizationUrl(driver, authorizationResponseStr);
+            if (redirectUri != null && !authorizationResponseStr.startsWith(redirectUri)) {
+                navigateToAuhorizationUrl(currentDriver, authorizationResponseStr);
+                authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
+            }
+
+            if (redirectUri == null && !authorizationResponseStr.contains("code=")) { // corner case for redirect_uri = null
+                navigateToAuhorizationUrl(currentDriver, authorizationResponseStr);
                 authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
             }
 		} else {
