@@ -129,7 +129,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         System.out.println();
         try {
             startSelenium();
-            driver.navigate().to(gatheringUrl);
+            navigateToAuhorizationUrl(driver, gatheringUrl);
             System.out.println(driver.getCurrentUrl());
 
             driver.findElement(By.id("loginForm:country")).sendKeys("US");
