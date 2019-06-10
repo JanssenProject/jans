@@ -19,31 +19,28 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.*;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -54,6 +51,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -92,6 +91,18 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    public String getKeyStoreFile() {
+        return keyStoreFile;
+    }
+
+    public String getKeyStoreSecret() {
+        return keyStoreSecret;
+    }
+
+    public String getDnName() {
+        return dnName;
     }
 
     @Override
