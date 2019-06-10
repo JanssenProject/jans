@@ -198,10 +198,6 @@ public class SessionIdService {
                     it.remove();
                 }
             }
-            
-            // Cover case when we call it after checking session in session script
-            currentSessionAttributes.remove(Constants.AUTHENTICATED_USER);
-            session.setState(SessionIdState.UNAUTHENTICATED);
 
             session.setSessionAttributes(currentSessionAttributes);
 
