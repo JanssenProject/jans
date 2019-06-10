@@ -6,53 +6,16 @@
 
 package org.gluu.oxauth;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.dev.HostnameVerifierType;
-import org.gluu.oxauth.model.common.Holder;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.error.IErrorType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.openqa.selenium.*;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.ITestContext;
-import org.testng.Reporter;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -68,7 +31,57 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Function;
 
-import static org.testng.Assert.*;
+import javax.net.ssl.SSLContext;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.ssl.SSLContexts;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.AuthorizationResponse;
+import org.gluu.oxauth.client.AuthorizeClient;
+import org.gluu.oxauth.client.BaseClient;
+import org.gluu.oxauth.client.BaseResponseWithErrors;
+import org.gluu.oxauth.client.ClientUtils;
+import org.gluu.oxauth.client.OpenIdConfigurationClient;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.gluu.oxauth.dev.HostnameVerifierType;
+import org.gluu.oxauth.model.common.Holder;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.error.IErrorType;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestContext;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 
 /**
  * @author Javier Rojas Blum
@@ -403,15 +416,24 @@ public abstract class BaseTest {
             String authorizedRedirect = waitForPageSwitch(currentDriver, previousURL); // first internal redirect to Authorization Endpoint
 
             try {
-                final HttpParams httpGetParams = new BasicHttpParams();
-                httpGetParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-
+            	final HttpClientContext context = HttpClientContext.create();
                 final HttpGet httpGet = new HttpGet(authorizedRedirect);
-                httpGet.setParams(httpGetParams);
 
-                final HttpClient httpClient = createHttpClientTrustAll();
-                final HttpResponse response = httpClient.execute(httpGet);
-                return response.getFirstHeader("Location").getValue();
+                final CloseableHttpClient httpClient = createHttpClientTrustAll();
+                
+//                System.out.println(Arrays.toString(response.getAllHeaders()));
+//                System.out.println(EntityUtils.toString(response.getEntity()));
+//              System.out.println("Final HTTP location: " + location.toString());
+                
+                try {
+					final HttpResponse response = httpClient.execute(httpGet, context);
+					HttpHost target = context.getTargetHost();
+					List<URI> redirectLocations = context.getRedirectLocations();
+					URI location = URIUtils.resolve(httpGet.getURI(), target, redirectLocations);
+					return location.toString();
+				} finally {
+					httpClient.close();
+				}
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -839,32 +861,20 @@ public abstract class BaseTest {
         assertTrue(StringUtils.isNotBlank(p_response.getErrorDescription()));
     }
 
-    public static DefaultHttpClient createHttpClient() {
+    public static CloseableHttpClient createHttpClient() {
         return createHttpClient(HostnameVerifierType.DEFAULT);
     }
 
-    public static DefaultHttpClient createHttpClient(HostnameVerifierType p_verifierType) {
+	public static CloseableHttpClient createHttpClient(HostnameVerifierType p_verifierType) {
         if (p_verifierType != null && p_verifierType != HostnameVerifierType.DEFAULT) {
             switch (p_verifierType) {
                 case ALLOW_ALL:
-                    HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-                    DefaultHttpClient client = new DefaultHttpClient();
-
-                    SchemeRegistry registry = new SchemeRegistry();
-                    SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-                    socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-                    registry.register(new Scheme("https", socketFactory, 443));
-                    SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
-
-                    // Set verifier
-                    HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-                    return new DefaultHttpClient(mgr, client.getParams());
-                case DEFAULT:
-                    return new DefaultHttpClient();
+                	return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+    				
             }
         }
-        return new DefaultHttpClient();
+
+        return HttpClients.custom().build();
     }
 
     public static ClientExecutor clientExecutor() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
@@ -878,20 +888,20 @@ public abstract class BaseTest {
         return ClientRequest.getDefaultExecutor();
     }
 
-    public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                return true;
-            }
-        }, new AllowAllHostnameVerifier());
+	public static CloseableHttpClient createHttpClientTrustAll()
+			throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+		SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
+			@Override
+			public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+				return true;
+			}
+		}).build();
+		SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+		CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslContextFactory)
+				.setRedirectStrategy(new LaxRedirectStrategy()).build();
 
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        registry.register(new Scheme("https", 443, sf));
-        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-        return new DefaultHttpClient(ccm);
-    }
+		return httpclient;
+	}
 
 	protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
 		try {
