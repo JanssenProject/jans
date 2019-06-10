@@ -97,8 +97,6 @@ class ProgressBar:
         sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
         sys.stdout.flush()
 
-listAttrib = ['gluuPassportConfiguration', 'oxModuleProperty', 'oxConfigurationProperty', 'oxAuthContact', 'oxAuthRedirectURI', 'oxAuthPostLogoutRedirectURI', 'oxAuthScope', 'associatedPerson', 'oxAuthLogoutURI', 'uid', 'oxAuthClientId', 'gluuOptOuts', 'associatedClient', 'oxPPID', 'oxExternalUid', 'oxLinkModerators', 'oxLinkPending', 'member', 'oxAuthClaim', 'oxScriptDn', 'gluuReleasedAttribute', 'gluuSAMLMetaDataFilter', 'gluuTrustContact', 'gluuTrustDeconstruction', 'gluuEntityId', 'gluuProfileConfiguration', 'gluuValidationLog']
-
 
 def getTypedValue(dtype, val):
     retVal = val
@@ -165,7 +163,7 @@ def get_documents_from_ldif(ldif_file):
             entry['dn'] = dn
             for k in copy.deepcopy(entry):
                 if len(entry[k]) == 1:
-                    if not k in listAttrib:
+                    if not k in installObject.listAttrib:
                         entry[k] = entry[k][0]
 
             for k in entry:
@@ -216,7 +214,7 @@ class Setup(object):
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
-        self.templateRenderingDict = {}
+        self.templateRenderingDict = {'passport_oxtrust_config':''}
 
         # OS commands
         self.cmd_ln = '/bin/ln'
@@ -650,7 +648,6 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
-                           self.ldif_passport,
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
                            ]
@@ -664,7 +661,6 @@ class Setup(object):
                                          self.ldif_clients,
                                          self.ldif_configuration,
                                          self.ldif_scim,
-                                         self.ldif_passport,
                                          self.ldif_idp,
                                          self.lidf_oxtrust_api,
                                          ],
@@ -699,7 +695,6 @@ class Setup(object):
                              self.ldif_groups: False,
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
-                             self.ldif_passport: False,
                              self.ldif_idp: False,
                              self.network: False,
                              self.casa_config: False,
@@ -901,21 +896,13 @@ class Setup(object):
             self.scim_rp_client_id = '0008-' + str(uuid.uuid4())
         if not self.scim_resource_oxid:
             self.scim_resource_oxid = '0008-' + str(uuid.uuid4())
-        if not self.passport_rs_client_id:
-            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
-        if not self.passport_rp_client_id:
-            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
-        if not self.passport_rp_ii_client_id:
-            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
-
         if not self.oxtrust_resource_server_client_id:
             self.oxtrust_resource_server_client_id = '0008-'  + str(uuid.uuid4())
         if not self.oxtrust_requesting_party_client_id:
             self.oxtrust_requesting_party_client_id = '0008-'  + str(uuid.uuid4())
         if not self.oxtrust_resource_id:
             self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
-        if not self.passport_resource_id:
-            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
@@ -1933,18 +1920,6 @@ class Setup(object):
         self.templateRenderingDict['api_rp_client_base64_jwks'] = self.generate_base64_string(self.api_rp_client_jwks, 1)
 
 
-
-    def generate_passport_configuration(self):
-        self.passport_rs_client_jks_pass = self.getPW()
-
-        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
-
-        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
-        self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
-
-        self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
-        self.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(self.passport_rp_client_jwks, 1)
-
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
@@ -2020,11 +1995,9 @@ class Setup(object):
         self.prepare_openid_keys_generator()
         self.generate_oxtrust_api_configuration()
         self.generate_scim_configuration()
-        self.generate_passport_configuration()
 
         self.ldap_binddn = self.opendj_ldap_binddn
         self.ldap_site_binddn = self.opendj_ldap_binddn
-
 
         self.ldapCertFn = self.opendj_cert_fn
         self.ldapTrustStoreFn = self.opendj_p12_fn
@@ -2205,19 +2178,49 @@ class Setup(object):
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth-rp.war' % self.distGluuFolder, jettyServiceWebapps)
 
+    def generate_passport_configuration(self):
+        self.passport_rs_client_jks_pass = self.getPW()
+        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
+
+        if not self.passport_rs_client_id:
+            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
+        if not self.passport_rp_client_id:
+            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
+        if not self.passport_rp_ii_client_id:
+            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
+        if not self.passport_resource_id:
+            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+
+        self.templateRenderingDict['passport_oxtrust_config'] = '''
+                "passportUmaClientId":"%(passport_rs_client_id)s",
+                "passportUmaClientKeyId":"",
+                "passportUmaResourceId":"%(passport_resource_id)s",
+                "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
+                "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
+                "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
+        ''' % self.merge_dicts(self.__dict__)
+
+
     def install_passport(self):
         self.logIt("Installing Passport...")
+
+        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
+        self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
+
+        self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
+        self.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(self.passport_rp_client_jwks, 1)
+
 
         self.logIt("Rendering Passport templates")
         self.renderTemplate(self.passport_central_config_json)
         self.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
         self.renderTemplate(self.ldif_passport_config)
-        
-        if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport_config])
-        else:
-            self.import_ldif_couchebase([self.ldif_passport_config])
+        self.renderTemplate(self.ldif_passport)
 
+        if self.mappingLocations['default'] == 'ldap':
+            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config])
+        else:
+            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
 
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -2261,7 +2264,9 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
         self.logIt("Preparing Passport OpenID RP certificate...")
+
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
+        
         for jwks_key in passport_rp_client_jwks_json["keys"]:
             if jwks_key["alg"]  == self.passport_rp_client_cert_alg:
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
@@ -2587,7 +2592,7 @@ class Setup(object):
         if self.allowPreReleasedApplications and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
             backend_types.append(('Wren:DS','wrends'))
 
-        if glob.glob(self.distFolder+'/couchbase/couchbase-server*.'+suffix):
+        if glob.glob(self.distFolder+'/couchbase/couchbase-server-enterprise*.'+suffix):
             backend_types.append(('Couchbase','couchbase'))
 
         
@@ -3856,6 +3861,13 @@ class Setup(object):
         #wait 1 second 
         time.sleep(1)
 
+    def exec_n1ql_query(self, query):
+        result = self.cbm.exec_query(query)
+        if result.ok:
+            self.logIt("Query execution was successful: {}".format(query))
+        else:
+            self.logIt("Failed to execute query {}, reason:".format(query, result.text), errorLog=True)
+
     def couchbaseExecQuery(self, queryFile):
         self.logIt("Running Couchbase query from file " + queryFile)
         
@@ -3864,11 +3876,7 @@ class Setup(object):
         for line in query_file:
             query = line.strip()
             if query:
-                result = self.cbm.exec_query(query)
-                if result.ok:
-                    self.logIt("Query execution was successful: {}".format(query))
-                else:
-                    self.logIt("Failed to execute query {}, reason:".format(query, result.text), errorLog=True)
+                self.exec_n1ql_query(query)
 
     def couchebaseCreateIndexes(self, bucket):
         
@@ -4083,7 +4091,20 @@ class Setup(object):
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
     def install_couchbase_server(self):
+
+        # prepare multivalued list
+        self.listAttrib = ['uid', 'member']
         
+        gluu_schema_fn = os.path.join(self.install_dir, 'schema/gluu_schema.json')
+        gluu_schema = json.load(open(gluu_schema_fn))
+
+        for obj_type in ['objectClasses', 'attributeTypes']:
+            for obj in gluu_schema[obj_type]:
+                if obj.get('multivalued'):
+                    for name in obj['names']:
+                        self.listAttrib.append(name)
+
+
         if not self.remoteCouchbase:
             
             self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
@@ -4141,6 +4162,7 @@ class Setup(object):
         if self.persistence_type in ('opendj', 'hybrid'):
             self.import_ldif_opendj(ldif_files)
         elif self.persistence_type in ('couchbase', 'hybrid'):
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
 
@@ -4155,6 +4177,26 @@ class Setup(object):
         self.run(['rm', '-rf', 'oxauth_test_client_keys.zip'])
         self.run(['chown', '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
 
+
+
+        oxAuthConfDynamic_changes = (
+                                    ('dynamicRegistrationCustomObjectClass', 'oxAuthClientCustomAttributes'),
+                                    ('dynamicRegistrationCustomAttributes', [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ]),
+                                    ('dynamicRegistrationExpirationTime', 86400),
+                                    ('dynamicGrantTypeDefault', [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ]),
+                                    ('legacyIdTokenClaims', True),
+                                    ('authenticationFiltersEnabled', True),
+                                    ('clientAuthenticationFiltersEnabled', True),
+                                    ('keyRegenerationEnabled',True),
+                                    ('openidScopeBackwardCompatibility', False),
+                                    )
+
+
+        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
+        
+        config_servers = ['{0}:{1}'.format(self.hostname, self.ldaps_port)]
+        
+
         if self.mappingLocations['default'] == 'ldap':
             # oxAuth config changes
             ldap_conn = self.getLdapConnection()
@@ -4163,24 +4205,17 @@ class Setup(object):
             result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxAuthConfDynamic'])
             oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
 
-            oxAuthConfDynamic['dynamicRegistrationCustomObjectClass'] = "oxAuthClientCustomAttributes"
-            oxAuthConfDynamic['dynamicRegistrationCustomAttributes'] = [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ]
-            oxAuthConfDynamic['dynamicRegistrationExpirationTime'] = 86400
-            oxAuthConfDynamic['dynamicGrantTypeDefault'] = [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ]
-            oxAuthConfDynamic['legacyIdTokenClaims'] = True
-            oxAuthConfDynamic['authenticationFiltersEnabled'] = True
-            oxAuthConfDynamic['clientAuthenticationFiltersEnabled'] = True
-            oxAuthConfDynamic['keyRegenerationEnabled'] = True
-            oxAuthConfDynamic['openidScopeBackwardCompatibility'] = False
-            
+            for k, v in oxAuthConfDynamic_changes:
+                oxAuthConfDynamic[k] = v
+
             oxAuthConfDynamic_js = json.dumps(oxAuthConfDynamic, indent=2)
             ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfDynamic_js)])
-            
+
             # Enable custom scripts
-            for inum in ('2DAF-F995', '2DAF-F996', '4BBE-C6A8'):
+            for inum in custom_scripts:
                 dn = 'inum={0},ou=scripts,o=gluu'.format(inum)
                 ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxEnabled',  'true')])
-            
+
 
             # Update LDAP schema
             self.copyFile(os.path.join(self.outputFolder, 'test/oxauth/schema/102-oxauth_test.ldif'), '/opt/opendj/config/schema/')
@@ -4232,14 +4267,27 @@ class Setup(object):
 
             result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxIDPAuthentication'])
             oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
-            oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(self.hostname, self.ldaps_port)]
+            oxIDPAuthentication['config']['servers'] = config_servers
             oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
             ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication_js)])
             ldap_conn.unbind()
             
         else:
-            # Todo: couchbase data updates
-            pass
+            
+            for k, v in oxAuthConfDynamic_changes:
+                query = 'UPDATE gluu USE KEYS "configuration_oxauth" set gluu.oxAuthConfDynamic.{0}={1}'.format(k, json.dumps(v))
+                self.exec_n1ql_query(query)
+ 
+            for inum in custom_scripts:
+                query = 'UPDATE gluu USE KEYS "scripts_{0}" set gluu.oxEnabled=true'.format(inum)
+                self.exec_n1ql_query(query)
+
+            self.exec_n1ql_query('CREATE INDEX def_gluu_myCustomAttr1 ON `gluu`(myCustomAttr1) USING GSI WITH {"defer_build":true}')
+            self.exec_n1ql_query('CREATE INDEX def_gluu_myCustomAttr2 ON `gluu`(myCustomAttr2) USING GSI WITH {"defer_build":true}')
+            self.exec_n1ql_query('BUILD INDEX ON `gluu` (def_gluu_myCustomAttr1, def_gluu_myCustomAttr2)')
+
+            #query = 'UPDATE gluu USE KEYS "configuration" set gluu.oxIDPAuthentication.config.servers = {0}'.format(json.dumps(config_servers))
+            #self.exec_n1ql_query(query)
 
         # Disable token binding module
         if self.os_type+self.os_version == 'ubuntu18':
@@ -4249,16 +4297,15 @@ class Setup(object):
         self.run_service_command('oxauth', 'restart')
         
         # Prepare for tests run
-        install_command, update_command, query_command, check_text = self.get_install_commands()
-        self.run_command(install_command.format('git'))
-        self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
-        self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
+        #install_command, update_command, query_command, check_text = self.get_install_commands()
+        #self.run_command(install_command.format('git'))
+        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
+        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
         # Todo: Download and unzip file test_data.zip from CE server.
         # Todo: Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
         # Todo: Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
- 
-        self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_httpd', '-keystore', 'cacerts', '-file', '%s/httpd.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
-        self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_opendj', '-keystore', 'cacerts', '-file', '%s/opendj.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
+        #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_httpd', '-keystore', 'cacerts', '-file', '%s/httpd.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
+        #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_opendj', '-keystore', 'cacerts', '-file', '%s/opendj.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
  
 
     def load_test_data_exit(self):
@@ -4360,11 +4407,14 @@ class Setup(object):
         self.renderTemplateInOut(ldif_template, os.path.join(source_dir, 'templates'), self.outputFolder)
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
         
-        schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
-        self.import_ldif_opendj([schema_ldif])
-
         ldif_file = os.path.join(self.outputFolder, 'gluu_radius.ldif')
-        self.import_ldif_opendj([ldif_file])
+        
+        if self.mappingLocations['default'] == 'ldap':
+            schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
+            self.import_ldif_opendj([schema_ldif])
+            self.import_ldif_opendj([ldif_file])
+        else:
+            self.import_ldif_couchebase([ldif_file])
 
         self.createUser('radius', homeDir=radius_dir, shell='/bin/false')
         self.addUserToGroup('gluu', 'radius')
@@ -4412,23 +4462,23 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -t   Load test data"
-    print "    -x  Load test data and exit"
-#    print "    --allow_pre_released_applications"
-    print "    --allow_deprecated_applications"
+    print "    -x   Load test data and exit"
+    print "    --allow-pre-released-features"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
     print "    --listen_all_interfaces"
     print "    --remote-ldap"
-    
+    print "    --remote-couchbase"
+
+
+
 def getOpts(argv, setupOptions):
     try:
         opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
                                         [
-                                        'allow_pre_released_applications', 
-                                        'allow_deprecated_applications', 
+                                        'allow-pre-released-features'
                                         'import-ldif',
                                         'listen_all_interfaces',
                                         'remote-couchbase',
-                                        'enable-hybrid-storage',
                                         'remote-ldap',
                                         ]
                                     )
@@ -4472,10 +4522,8 @@ def getOpts(argv, setupOptions):
             setupOptions['loadTestData'] = True
         elif opt == "-x":
             setupOptions['loadTestDataExit'] = True
-        elif opt == '--allow_pre_released_applications':
-            setupOptions['allowPreReleasedApplications'] = True
-        elif opt == '--allow_deprecated_applications':
-            setupOptions['allowDeprecatedApplications'] = True
+        elif opt == '--allow-pre-released-features':
+            setupOptions['allowPreReleasedFeatures'] = True
         elif opt == '--listen_all_interfaces':
             setupOptions['listenAllInterfaces'] = True
         elif opt == '--remote-couchbase':
@@ -4507,8 +4555,7 @@ if __name__ == '__main__':
         'installPassport': False,
         'installGluuRadius': False,
         'loadTestData': False,
-        'allowPreReleasedApplications': False,
-        'allowDeprecatedApplications': False,
+        'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
@@ -4518,16 +4565,12 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
 
-
     attribDataTypes = ATTRUBUTEDATATYPES(setupOptions['install_dir'])
-
 
     installObject = Setup(setupOptions['install_dir'])
 
-
     if setupOptions['loadTestDataExit']:
         installObject.load_test_data_exit()
-
 
     if installObject.check_installed():
         print "\nThis instance already configured. If you need to install new one you should reinstall package first."
@@ -4550,7 +4593,6 @@ if __name__ == '__main__':
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
-
 
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
@@ -4585,7 +4627,6 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-
     # Show to properties for approval
     print '\n%s\n' % `installObject`
     proceed = "NO"
@@ -4619,6 +4660,10 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.pbar.progress("Encoding test passwords")
             installObject.encode_test_passwords()
+            
+            if installObject.installPassport:
+                installObject.generate_passport_configuration()
+            
             installObject.pbar.progress("Installing Gluu base")
             installObject.install_gluu_base()
             installObject.pbar.progress("Preparing base64 extention scripts")
@@ -4675,9 +4720,9 @@ if __name__ == '__main__':
             
             if installObject.couchbaseInstallOutput:
                 print
-                print "-"*50
+                print "-"*tty_columns
                 print installObject.couchbaseInstallOutput
-                print "-"*50
+                print "-"*tty_columns
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
