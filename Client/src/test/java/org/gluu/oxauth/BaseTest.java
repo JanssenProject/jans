@@ -7,12 +7,7 @@
 package org.gluu.oxauth;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.client.utils.URIUtils;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -47,7 +42,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -299,7 +293,7 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = null;
         do {
-            authorizationResponseStr = acceptAuthorization(currentDriver);
+            authorizationResponseStr = acceptAuthorization(currentDriver, authorizationRequest.getRedirectUri());
             remainAuthzSteps--;
         } while (remainAuthzSteps >= 1);
 
@@ -368,7 +362,7 @@ public abstract class BaseTest {
         return authorizeClient;
     }
 
-	private String acceptAuthorization(WebDriver currentDriver) {
+	private String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
 		String authorizationResponseStr = currentDriver.getCurrentUrl();
 
 		// Check for authorization form if client has no persistent authorization
@@ -382,45 +376,27 @@ public abstract class BaseTest {
 				public WebElement apply(WebDriver d) {
                     //System.out.println(d.getCurrentUrl());
                     //System.out.println(d.getPageSource());
-					return driver.findElement(By.id(authorizeFormAllowButton));
+					return currentDriver.findElement(By.id(authorizeFormAllowButton));
 				}
 			});
 
 			// We have to use JavaScript because target is link with onclick
-			JavascriptExecutor jse = (JavascriptExecutor) driver;
+			JavascriptExecutor jse = (JavascriptExecutor) currentDriver;
 			jse.executeScript("scroll(0, 1000)");
 
             String previousURL = currentDriver.getCurrentUrl();
 
-			Actions actions = new Actions(driver);
+			Actions actions = new Actions(currentDriver);
 			actions.click(allowButton).perform();
 
-            String authorizedRedirect = waitForPageSwitch(currentDriver, previousURL); // first internal redirect to Authorization Endpoint
-
-            try {
-            	final HttpClientContext context = HttpClientContext.create();
-                final HttpGet httpGet = new HttpGet(authorizedRedirect);
-
-                final CloseableHttpClient httpClient = createHttpClientTrustAll();
-
-//                System.out.println(Arrays.toString(response.getAllHeaders()));
-//                System.out.println(EntityUtils.toString(response.getEntity()));
-//              System.out.println("Final HTTP location: " + location.toString());
-
-                try {
-					final HttpResponse response = httpClient.execute(httpGet, context);
-					HttpHost target = context.getTargetHost();
-					List<URI> redirectLocations = context.getRedirectLocations();
-					URI location = URIUtils.resolve(httpGet.getURI(), target, redirectLocations);
-					return location.toString();
-				} finally {
-					httpClient.close();
-				}
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            waitForPageSwitch(currentDriver, previousURL);
 
             authorizationResponseStr = currentDriver.getCurrentUrl();
+
+            if (!authorizationResponseStr.startsWith(redirectUri)) {
+                navigateToAuhorizationUrl(driver, authorizationResponseStr);
+                authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
+            }
 		} else {
 			fail("The authorization form was expected to be shown.");
 		}
