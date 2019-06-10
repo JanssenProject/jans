@@ -3,9 +3,9 @@
  */
 package org.gluu.oxd.common;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.node.JsonNodeFactory;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

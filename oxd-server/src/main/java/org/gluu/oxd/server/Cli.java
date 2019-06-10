@@ -1,5 +1,7 @@
 package org.gluu.oxd.server;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Injector;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
@@ -15,11 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.OxdClient;
-import org.gluu.oxd.common.CoreUtils;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.params.RemoveSiteParams;
 import org.gluu.oxd.common.response.GetRpResponse;
@@ -41,6 +41,7 @@ import java.util.*;
 /**
  * @author yuriyz
  */
+
 public class Cli {
 
     public static void main(String[] args) {
@@ -208,7 +209,7 @@ public class Cli {
                 params.setList(true);
 
                 String respString = client.getRp(authorization, params);
-                GetRpResponse resp = CoreUtils.createJsonMapper().readValue(respString, GetRpResponse.class);
+                GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp == null) {
                     System.out.println("Failed to fetch entries from database. Please check oxd-server.log file for details.");
                     return;
@@ -220,7 +221,7 @@ public class Cli {
                         return;
                     }
 
-                    Iterator<JsonNode> elements = arrayNode.getElements();
+                    Iterator<JsonNode> elements = arrayNode.iterator();
                     System.out.println("oxd_id                                client_name");
                     while (elements.hasNext()) {
                         final JsonNode element = elements.next();
@@ -238,7 +239,7 @@ public class Cli {
                 final String oxdId = cmd.getOptionValue("oxd_id");
 
                 String respString = client.getRp(authorization, new GetRpParams(oxdId));
-                GetRpResponse resp = CoreUtils.createJsonMapper().readValue(respString, GetRpResponse.class);
+                GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp != null) {
                     print(oxdId, resp.getNode());
                 } else {

@@ -1,8 +1,8 @@
 package org.gluu.oxd.server;
 
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponse;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.Jackson2;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -17,7 +17,7 @@ public class HttpException extends WebApplicationException {
     private final ErrorResponseCode code;
 
     public HttpException(ErrorResponseCode code) {
-        super(Response.status(code.getHttpStatus()).type(MediaType.APPLICATION_JSON_TYPE).entity(CoreUtils.asJsonSilently(new ErrorResponse(code))).build());
+        super(Response.status(code.getHttpStatus()).type(MediaType.APPLICATION_JSON_TYPE).entity(Jackson2.asJsonSilently(new ErrorResponse(code))).build());
         this.code = code;
     }
 

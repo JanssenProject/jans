@@ -1,6 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,31 +11,22 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RegisterSiteResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "oxd_id")
     private String oxdId;
     @JsonProperty(value = "op_host")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "op_host")
     private String opHost;
     @JsonProperty(value = "client_id")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "client_name")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_name")
     private String clientName;
     @JsonProperty(value = "client_secret")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_secret")
     private String clientSecret;
     @JsonProperty(value = "client_registration_access_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_registration_access_token")
     private String clientRegistrationAccessToken;
     @JsonProperty(value = "client_registration_client_uri")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_registration_client_uri")
     private String clientRegistrationClientUri;
     @JsonProperty(value = "client_id_issued_at")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_id_issued_at")
     private long clientIdIssuedAt;
     @JsonProperty(value = "client_secret_expires_at")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_secret_expires_at")
     private long clientSecretExpiresAt;
 
     public RegisterSiteResponse() {
