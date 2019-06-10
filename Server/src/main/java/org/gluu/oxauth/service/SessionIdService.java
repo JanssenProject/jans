@@ -185,7 +185,7 @@ public class SessionIdService {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
 
-        if (force || !shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
+        if (force || shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
 
             // Reinit login
