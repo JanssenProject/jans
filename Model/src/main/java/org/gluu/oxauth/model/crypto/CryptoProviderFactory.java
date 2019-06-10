@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.WebKeyStorage;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 
@@ -15,7 +16,9 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
  */
 public class CryptoProviderFactory {
 
-    public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
+    private static OxAuthCryptoProvider keyStoreProvider = null;
+
+    public synchronized static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
         WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
         if (webKeyStorage == null) {
@@ -24,10 +27,8 @@ public class CryptoProviderFactory {
 
         switch (webKeyStorage) {
             case KEYSTORE:
-                String keyStoreFile = configuration.getKeyStoreFile();
-                String keyStoreSecret = configuration.getKeyStoreSecret();
-                String dnName = configuration.getDnName();
-                cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+                cryptoProvider = getKeyStoreProvider(configuration);
+
                 break;
             case PKCS11:
                 cryptoProvider = new OxElevenCryptoProvider(
@@ -40,5 +41,22 @@ public class CryptoProviderFactory {
         }
 
         return cryptoProvider;
+    }
+
+    private static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
+        if (keyStoreProvider != null &&
+                StringUtils.isNotBlank(keyStoreProvider.getKeyStoreFile()) &&
+                StringUtils.isNotBlank(keyStoreProvider.getKeyStoreSecret()) &&
+                StringUtils.isNotBlank(keyStoreProvider.getDnName()) &&
+                keyStoreProvider.getKeyStoreFile().equals(configuration.getKeyStoreFile()) &&
+                keyStoreProvider.getKeyStoreSecret().equals(configuration.getKeyStoreSecret()) &&
+                keyStoreProvider.getDnName().equals(configuration.getDnName())) {
+            return keyStoreProvider;
+        }
+
+        String keyStoreFile = configuration.getKeyStoreFile();
+        String keyStoreSecret = configuration.getKeyStoreSecret();
+        String dnName = configuration.getDnName();
+        return keyStoreProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
     }
 }
