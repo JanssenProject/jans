@@ -249,7 +249,7 @@
 		</classes>
 	</test>
 
-    <test name="Cleaner timer test" enabled="true">
+    <test name="Cleaner timer test" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.comp.CleanerTimerTest" />
         </classes>
