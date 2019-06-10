@@ -1,6 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author yuriyz
@@ -8,7 +9,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RemoveSiteResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "oxd_id")
     private String oxdId;
 
     public RemoveSiteResponse() {

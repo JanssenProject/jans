@@ -3,7 +3,7 @@
  */
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;
@@ -16,16 +16,12 @@ import java.util.Map;
 public class CheckIdTokenResponse implements IOpResponse {
 
     @JsonProperty(value = "active")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "active")
     private boolean active;
     @JsonProperty(value = "expires_at")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "expires_at")
     private long expiresAt;
     @JsonProperty(value = "issued_at")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "issued_at")
     private long issuedAt;
     @JsonProperty("claims")
-    @com.fasterxml.jackson.annotation.JsonProperty("claims")
     private Map<String, List<String>> claims;
 
     public CheckIdTokenResponse() {
