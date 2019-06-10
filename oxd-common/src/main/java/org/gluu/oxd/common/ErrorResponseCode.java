@@ -3,9 +3,9 @@
  */
 package org.gluu.oxd.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonValue;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 import java.util.Arrays;
@@ -91,13 +91,11 @@ public enum ErrorResponseCode {
     }
 
     @JsonValue
-    @com.fasterxml.jackson.annotation.JsonValue
     public String getCode() {
         return code;
     }
 
     @JsonCreator
-    @com.fasterxml.jackson.annotation.JsonCreator
     public static ErrorResponseCode fromValue(String v) {
         if (StringUtils.isNotBlank(v)) {
             for (ErrorResponseCode t : values()) {
