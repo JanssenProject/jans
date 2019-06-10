@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
@@ -35,8 +37,14 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         showTitle("OpenID Connect Discovery");
 
         OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
-        OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
-                new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+        
+        CloseableHttpClient httpClient = createHttpClient(HostnameVerifierType.ALLOW_ALL);
+        OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse;
+		try {
+			openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(new ApacheHttpClient4Executor(httpClient));
+		} finally {
+			httpClient.close();
+		}
 
         showClient(openIdConnectDiscoveryClient);
         assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");
