@@ -103,7 +103,9 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: bind, duration: {}, key: {}", duration, key);
+
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: bind, duration: {}, bucket: {}, key: {}", duration, bucketMapping.getBucketName(), key);
         
         return result;
     }
@@ -112,18 +114,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean addEntry(String key, JsonObject jsonObject) throws DuplicateEntryException, PersistenceException {
         Instant startTime = OperationDurationUtil.instance().now();
 
-        boolean result = addEntryImpl(key, jsonObject);
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        boolean result = addEntryImpl(bucketMapping, key, jsonObject);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, key: {}, json: {}", duration, key, jsonObject);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, json: {}", duration, bucketMapping.getBucketName(), key, jsonObject);
         
         return result;
     }
 
-	private boolean addEntryImpl(String key, JsonObject jsonObject) throws PersistenceException {
+	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject) throws PersistenceException {
 		try {
-
-            BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument jsonDocument = JsonDocument.create(key, jsonObject);
             JsonDocument result = bucketMapping.getBucket().upsert(jsonDocument);
             if (result != null) {
@@ -161,17 +162,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        boolean result = updateEntryImpl(key, mods);
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        boolean result = updateEntryImpl(bucketMapping, key, mods);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, key: {}, mods: {}", duration, key, mods);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, bucket: {}, key: {}, mods: {}", duration, bucketMapping.getBucketName(), key, mods);
 
         return result;
     }
 
-	private boolean updateEntryImpl(String key, List<MutationSpec> mods) throws SearchException {
+	private boolean updateEntryImpl(BucketMapping bucketMapping, String key, List<MutationSpec> mods) throws SearchException {
 		try {
-            BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             MutateInBuilder builder = bucketMapping.getBucket().mutateIn(key);
 
             return modifyEntry(builder, mods);
@@ -210,17 +211,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean delete(String key) throws EntryNotFoundException {
         Instant startTime = OperationDurationUtil.instance().now();
 
-        boolean result = deleteImpl(key);
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        boolean result = deleteImpl(bucketMapping, key);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: delete, duration: {}, key: {}", duration, key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: delete, duration: {}, bucket: {}, key: {}", duration, bucketMapping.getBucketName(), key);
 
         return result;
     }
 
-	private boolean deleteImpl(String key) throws EntryNotFoundException {
+	private boolean deleteImpl(BucketMapping bucketMapping, String key) throws EntryNotFoundException {
 		try {
-            BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             JsonDocument result = bucketMapping.getBucket().remove(key);
 
             return (result != null) && (result.id() != null);
@@ -233,17 +234,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
 
-        boolean result = deleteRecursivelyImpl(key);
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        boolean result = deleteRecursivelyImpl(bucketMapping, key);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: delete_tree, duration: {}, key: {}", duration, key);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: delete_tree, duration: {}, bucket: {}, key: {}", duration, bucketMapping.getBucketName(), key);
 
         return result;
     }
 
-	private boolean deleteRecursivelyImpl(String key) throws SearchException, EntryNotFoundException {
+	private boolean deleteRecursivelyImpl(BucketMapping bucketMapping, String key) throws SearchException, EntryNotFoundException {
 		try {
-            BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
                     .where(Expression.path("META().id").like(Expression.s(key + "%")));
 
@@ -263,17 +264,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public JsonObject lookup(String key, String... attributes) throws SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        JsonObject result = lookupImpl(key, attributes);
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        JsonObject result = lookupImpl(bucketMapping, key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, key: {}, attributes: {}", duration, key, attributes);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}", duration, bucketMapping.getBucketName(), key, attributes);
 
         return result;
     }
 
-	private JsonObject lookupImpl(String key, String... attributes) throws SearchException {
+	private JsonObject lookupImpl(BucketMapping bucketMapping, String key, String... attributes) throws SearchException {
 		try {
-            BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
             if (ArrayHelper.isEmpty(attributes)) {
                 JsonDocument doc = bucketMapping.getBucket().get(key);
                 if (doc != null) {
@@ -303,19 +304,18 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
-        
-        
-        PagedResult<JsonObject> result = searchImpl(key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+        PagedResult<JsonObject> result = searchImpl(bucketMapping, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
         return result;
 	}
 
-    private <O> PagedResult<JsonObject> searchImpl(String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+    private <O> PagedResult<JsonObject> searchImpl(BucketMapping bucketMapping, String key, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
-        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
         Bucket bucket = bucketMapping.getBucket();
 
         BatchOperation<O> ldapBatchOperation = null;
