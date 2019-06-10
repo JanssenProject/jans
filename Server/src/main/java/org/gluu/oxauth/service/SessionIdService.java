@@ -9,6 +9,7 @@ package org.gluu.oxauth.service;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.json.JSONException;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
@@ -169,10 +170,22 @@ public class SessionIdService {
         return session;
     }
 
+    private static boolean shouldReinitSession(Map<String, String> sessionAttributes, Map<String, String> currentSessionAttributes) {
+        final Map<String, String> copySessionAttributes = new HashMap<>(sessionAttributes);
+        final Map<String, String> copyCurrentSessionAttributes = new HashMap<>(currentSessionAttributes);
+
+        // it's up to RP whether to change state per request
+        copySessionAttributes.remove(AuthorizeRequestParam.STATE);
+        copyCurrentSessionAttributes.remove(AuthorizeRequestParam.STATE);
+
+        return !copyCurrentSessionAttributes.equals(copySessionAttributes);
+    }
+
     public void reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
-        if (force || !currentSessionAttributes.equals(sessionAttributes)) {
+
+        if (force || !shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
 
             // Reinit login
