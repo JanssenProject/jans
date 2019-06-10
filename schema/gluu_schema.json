@@ -7,6 +7,7 @@
                 "oxAssociatedClient",
                 "associatedClient"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:1",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
             "x_origin": "Gluu created attribute"
@@ -17,6 +18,7 @@
             "names": [
                 "associatedPerson"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:2",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
             "x_origin": "Gluu created attribute"
@@ -312,6 +314,7 @@
             "names": [
                 "gluuEntityId"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:29",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -639,6 +642,7 @@
             "names": [
                 "gluuOptOuts"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:59",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -726,6 +730,7 @@
             "names": [
                 "gluuProfileConfiguration"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:67",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -748,6 +753,7 @@
             "names": [
                 "gluuReleasedAttribute"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:69",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -803,6 +809,7 @@
             "names": [
                 "gluuSAMLMetaDataFilter"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:74",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1110,6 +1117,7 @@
             "names": [
                 "gluuTrustContact"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:102",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1121,6 +1129,7 @@
             "names": [
                 "gluuTrustDeconstruction"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:103",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1164,6 +1173,7 @@
             "names": [
                 "gluuValidationLog"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:107",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1404,6 +1414,7 @@
             "names": [
                 "oxAuthClaim"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:130",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1425,6 +1436,7 @@
             "names": [
                 "oxAuthClientId"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:132",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1528,6 +1540,7 @@
             "names": [
                 "oxAuthContact"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:141",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1747,6 +1760,7 @@
             "names": [
                 "oxAuthLogoutURI"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:161",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1768,6 +1782,7 @@
             "names": [
                 "oxAuthPostLogoutRedirectURI"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:163",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1779,6 +1794,7 @@
             "names": [
                 "oxAuthRedirectURI"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:164",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1877,6 +1893,7 @@
             "names": [
                 "oxAuthScope"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:173",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2147,6 +2164,7 @@
             "names": [
                 "oxExternalUid"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:198",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2333,6 +2351,7 @@
             "names": [
                 "oxLinkModerators"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:215",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2344,6 +2363,7 @@
             "names": [
                 "oxLinkPending"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:216",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2742,6 +2762,7 @@
             "names": [
                 "oxScriptDn"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:253",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
             "x_origin": "Gluu created attribute"
@@ -3623,6 +3644,7 @@
                 "oxModuleProperty"
             ],
             "json": true,
+            "multivalued": true,
             "oid": "oxAttribute:334",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -3635,6 +3657,7 @@
                 "oxConfigurationProperty"
             ],
             "json": true,
+            "multivalued": true,
             "oid": "oxAttribute:335",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -3834,6 +3857,7 @@
                 "gluuPassportConfiguration"
             ],
             "json": true,
+            "multivalued": true,
             "oid": "oxAttribute:356",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -3876,6 +3900,7 @@
             "names": [
                 "oxPPID"
             ],
+            "multivalued": true,
             "oid": "oxAttribute:360",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",

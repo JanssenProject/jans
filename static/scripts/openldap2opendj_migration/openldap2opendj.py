@@ -1488,3 +1488,7 @@ if __name__ == '__main__':
     installObject.install_ldap_server()
     update_ox_ldap_prop(installObject.ldap_binddn, installObject.opendj_p12_fn, installObject.encoded_opendj_p12_pass)
     
+    print "\n", "-"*50,"\n"
+    print "OpenDJ installation finished. Please import your data as described in document,"
+    print "and re-run this script with -p argument."
+
