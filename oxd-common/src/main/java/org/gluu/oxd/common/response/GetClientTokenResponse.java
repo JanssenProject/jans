@@ -1,6 +1,6 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -12,16 +12,12 @@ import java.util.List;
 public class GetClientTokenResponse implements IOpResponse {
 
     @JsonProperty(value = "access_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "access_token")
     private String accessToken;
     @JsonProperty(value = "expires_in")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "expires_in")
     private int expiresIn; // expiration time in seconds
     @JsonProperty(value = "refresh_token")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "refresh_token")
     private String refreshToken;
     @JsonProperty(value = "scope")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "scope")
     private List<String> scope;
 
     public String getAccessToken() {

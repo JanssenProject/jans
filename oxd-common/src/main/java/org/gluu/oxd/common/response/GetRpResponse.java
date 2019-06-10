@@ -1,7 +1,8 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author yuriyz
@@ -9,7 +10,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetRpResponse implements IOpResponse {
 
     @JsonProperty(value = "node")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "node")
     private JsonNode node;
 
     public GetRpResponse() {

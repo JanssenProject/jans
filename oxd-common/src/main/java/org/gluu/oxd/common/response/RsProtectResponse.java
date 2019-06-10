@@ -1,6 +1,7 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RsProtectResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "oxd_id")
     private String oxdId;
 
     public RsProtectResponse() {

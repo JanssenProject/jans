@@ -8,8 +8,8 @@ import io.swagger.client.ApiException;
 import io.swagger.client.model.GetClientTokenParams;
 import io.swagger.client.model.GetClientTokenResponse;
 import io.swagger.client.model.RegisterSiteResponse;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponse;
+import org.gluu.oxd.common.Jackson2;
 
 import java.io.IOException;
 import java.util.List;
@@ -110,7 +110,7 @@ public class Tester {
     }
 
     public static ErrorResponse asError(String entity) throws IOException {
-        return CoreUtils.createJsonMapper().readValue(entity, ErrorResponse.class);
+        return Jackson2.createJsonMapper().readValue(entity, ErrorResponse.class);
     }
 
     public static ErrorResponse asError(ApiException e) throws IOException {

@@ -3,7 +3,7 @@
  */
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.List;
 public class GetJwksResponse implements IOpResponse {
 
     @JsonProperty(value = "keys" )
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "keys")
     private List<JSONWebKey> keys;
 
     public GetJwksResponse() {

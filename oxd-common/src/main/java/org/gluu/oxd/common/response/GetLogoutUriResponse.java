@@ -1,6 +1,6 @@
 package org.gluu.oxd.common.response;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,7 +10,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GetLogoutUriResponse implements IOpResponse {
 
     @JsonProperty(value = "uri")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "uri")
     private String uri;
 
     public GetLogoutUriResponse() {
