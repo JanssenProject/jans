@@ -1,18 +1,16 @@
 package org.gluu.oxd.server.persistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import org.codehaus.jackson.JsonNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.rs.protect.Jackson;
-import org.gluu.oxd.server.Jackson2;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.service.cache.AbstractRedisProvider;
 import org.gluu.service.cache.RedisConfiguration;
 import org.gluu.service.cache.RedisProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
@@ -49,7 +47,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean create(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson.asJson(rp));
+            put(rp.getOxdId(), Jackson2.asJson(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
@@ -60,7 +58,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean update(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson.asJson(rp));
+            put(rp.getOxdId(), Jackson2.asJson(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
@@ -119,7 +117,7 @@ public class RedisPersistenceService implements PersistenceService {
 
     public static RedisConfiguration asRedisConfiguration(JsonNode node) throws Exception {
         try {
-            return CoreUtils.createJsonMapper().readValue(node, RedisConfiguration.class);
+            return Jackson2.createJsonMapper().treeToValue(node, RedisConfiguration.class);
         } catch (Exception e) {
             LOG.error("Failed to parse RedisConfiguration.", e);
             throw e;

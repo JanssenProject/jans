@@ -5,10 +5,10 @@ import org.gluu.oxauth.client.UserInfoClient;
 import org.gluu.oxauth.client.UserInfoRequest;
 import org.gluu.oxauth.client.UserInfoResponse;
 import org.gluu.oxd.common.Command;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetUserInfoParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;
-import org.gluu.oxd.server.Jackson2;
 
 import java.io.IOException;
 

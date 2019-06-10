@@ -1,8 +1,8 @@
 package org.gluu.oxd.common.introspection;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -16,7 +16,6 @@ import java.util.List;
 @JsonPropertyOrder({"active", "exp", "iat", "nbf", "permissions", "client_id", "sub", "aud", "iss", "jti"})
 @XmlRootElement
 @JsonIgnoreProperties(ignoreUnknown = true)
-@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class CorrectRptIntrospectionResponse {
 
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
@@ -38,7 +37,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "aud")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "aud")
     @XmlElement(name = "aud")
     public String getAud() {
         return aud;
@@ -49,7 +47,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "iss")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "iss")
     @XmlElement(name = "iss")
     public String getIss() {
         return iss;
@@ -60,7 +57,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "jti")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "jti")
     @XmlElement(name = "jti")
     public String getJti() {
         return jti;
@@ -71,7 +67,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "sub")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "sub")
     @XmlElement(name = "sub")
     public String getSub() {
         return sub;
@@ -82,7 +77,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "client_id")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "client_id")
     @XmlElement(name = "client_id")
     public String getClientId() {
         return clientId;
@@ -93,7 +87,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "active")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "active")
     @XmlElement(name = "active")
     public boolean getActive() {
         return active;
@@ -104,7 +97,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "nbf")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "nbf")
     @XmlElement(name = "nbf")
     public Integer getNbf() {
         return nbf;
@@ -115,7 +107,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "exp")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "exp")
     @XmlElement(name = "exp")
     public Integer getExpiresAt() {
         return expiresAt;
@@ -126,7 +117,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "iat")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "iat")
     @XmlElement(name = "iat")
     public Integer getIssuedAt() {
         return issuedAt;
@@ -137,7 +127,6 @@ public class CorrectRptIntrospectionResponse {
     }
 
     @JsonProperty(value = "permissions")
-    @com.fasterxml.jackson.annotation.JsonProperty(value = "permissions")
     @XmlElement(name = "permissions")
     public List<CorrectUmaPermission> getPermissions() {
         return permissions;

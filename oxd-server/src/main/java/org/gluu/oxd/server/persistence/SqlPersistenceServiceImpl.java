@@ -1,12 +1,12 @@
 package org.gluu.oxd.server.persistence;
 
 import com.google.inject.Inject;
+import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.server.service.MigrationService;
+import org.gluu.oxd.server.service.Rp;
 import org.h2.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.rs.protect.Jackson;
-import org.gluu.oxd.server.service.MigrationService;
-import org.gluu.oxd.server.service.Rp;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -64,7 +64,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("insert into rp(id, data) values(?, ?)");
             query.setString(1, rp.getOxdId());
-            query.setString(2, Jackson.asJson(rp));
+            query.setString(2, Jackson2.asJson(rp));
             query.executeUpdate();
             query.close();
 
@@ -86,7 +86,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("update rp set data = ? where id = ?");
-            query.setString(1, Jackson.asJson(rp));
+            query.setString(1, Jackson2.asJson(rp));
             query.setString(2, rp.getOxdId());
             query.executeUpdate();
             query.close();

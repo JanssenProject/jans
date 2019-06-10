@@ -3,10 +3,10 @@
  */
 package org.gluu.oxd.common;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.node.JsonNodeFactory;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.gluu.oxd.common.params.IParams;
 
 import java.io.Serializable;
@@ -39,7 +39,7 @@ public class Command implements Serializable {
 
     public Command(CommandType commandType, IParams params) {
         this.commandType = commandType;
-        this.params = JsonNodeFactory.instance.POJONode(params);
+        this.params = JsonNodeFactory.instance.pojoNode(params);
     }
 
     public CommandType getCommandType() {
@@ -61,7 +61,7 @@ public class Command implements Serializable {
     }
 
     public Command setParamsObject(IParams p_params) {
-        params = JsonNodeFactory.instance.POJONode(p_params);
+        params = JsonNodeFactory.instance.pojoNode(p_params);
         return this;
     }
 
