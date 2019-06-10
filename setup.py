@@ -4727,9 +4727,9 @@ if __name__ == '__main__':
             
             if installObject.couchbaseInstallOutput:
                 print
-                print "-"*tty_columns
+                print "-"*int(tty_columns)
                 print installObject.couchbaseInstallOutput
-                print "-"*tty_columns
+                print "-"*int(tty_columns)
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
