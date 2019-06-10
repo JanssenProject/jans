@@ -74,7 +74,7 @@ public class DisplaysLogoInLoginPage extends BaseTest {
 
         try {
             startSelenium();
-            driver.navigate().to(authorizationRequestUrl);
+            navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
             WebElement logo = driver.findElement(By.xpath("//img[@src='" + logoUri + "']"));
             assertNotNull(logo);
