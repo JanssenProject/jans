@@ -2675,6 +2675,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
+            authorizationRequest.setAcrValues(Arrays.asList("basic"));
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndDenyAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
@@ -2696,6 +2697,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
             authorizationRequest.setSessionId(sessionId);
+            authorizationRequest.setAcrValues(Arrays.asList("basic"));
 
             AuthorizationResponse authorizationResponse = authorizationRequestAndDenyAccess(
                     authorizationEndpoint, authorizationRequest);
@@ -2715,6 +2717,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
             authorizationRequest.setSessionId(sessionId);
+            authorizationRequest.setAcrValues(Arrays.asList("basic"));
 
             AuthorizationResponse authorizationResponse = authorizationRequestAndGrantAccess(
                     authorizationEndpoint, authorizationRequest);

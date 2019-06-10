@@ -6,33 +6,6 @@
 
 package org.gluu.oxauth;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.function.Function;
-
-import javax.net.ssl.SSLContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -47,16 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.ssl.SSLContexts;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.client.AuthorizeClient;
-import org.gluu.oxauth.client.BaseClient;
-import org.gluu.oxauth.client.BaseResponseWithErrors;
-import org.gluu.oxauth.client.ClientUtils;
-import org.gluu.oxauth.client.OpenIdConfigurationClient;
-import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.dev.HostnameVerifierType;
 import org.gluu.oxauth.model.common.Holder;
 import org.gluu.oxauth.model.common.ResponseMode;
@@ -67,12 +31,7 @@ import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -420,11 +379,11 @@ public abstract class BaseTest {
                 final HttpGet httpGet = new HttpGet(authorizedRedirect);
 
                 final CloseableHttpClient httpClient = createHttpClientTrustAll();
-                
+
 //                System.out.println(Arrays.toString(response.getAllHeaders()));
 //                System.out.println(EntityUtils.toString(response.getEntity()));
 //              System.out.println("Final HTTP location: " + location.toString());
-                
+
                 try {
 					final HttpResponse response = httpClient.execute(httpGet, context);
 					HttpHost target = context.getTargetHost();
@@ -445,6 +404,10 @@ public abstract class BaseTest {
 
 		return authorizationResponseStr;
 	}
+
+	public String waitForPageSwitch(String previousUrl) {
+        return waitForPageSwitch(driver, previousUrl);
+    }
 
     public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
         Holder<String> currentUrl = new Holder<>();
@@ -497,7 +460,11 @@ public abstract class BaseTest {
             usernameElement.sendKeys(userId);
         }
         passwordElement.sendKeys(userSecret);
+
+        String previousUrl = driver.getCurrentUrl();
         loginButton.click();
+
+        waitForPageSwitch(driver, previousUrl);
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
@@ -551,14 +518,15 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         allowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new Function<WebDriver, Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return (d.getCurrentUrl() != previousURL);
-            }
-        });
+
+        waitForPageSwitch(previousURL);
 
         authorizationResponseStr = driver.getCurrentUrl();
+
+        if (!authorizationResponseStr.startsWith(authorizationRequest.getRedirectUri())) {
+            navigateToAuhorizationUrl(driver, authorizationResponseStr);
+            authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
+        }
 
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
@@ -870,7 +838,7 @@ public abstract class BaseTest {
             switch (p_verifierType) {
                 case ALLOW_ALL:
                 	return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-    				
+
             }
         }
 
