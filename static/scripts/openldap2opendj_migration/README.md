@@ -61,6 +61,8 @@ Ubuntu Users:
 ## Run the migration script:
 
 ```
+# export OPENDJ_JAVA_HOME=/opt/jre
+# export JAVA_HOME=/opt/jre
 # cd /install/community-edition-setup/
 # python openldap2opendj.py
 ```
