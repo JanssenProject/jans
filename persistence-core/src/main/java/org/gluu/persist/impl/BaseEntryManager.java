@@ -483,6 +483,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			boolean isIgnoreAttributesList) {
 		Map<String, PropertyAnnotation> attributesMap = getAttributesMap(entry, propertiesAnnotations, isIgnoreAttributesList);
 		
+		if (attributesMap == null) {
+			return null;
+		}
+		
 		return new ArrayList<String>(attributesMap.keySet());
 	}
 
@@ -526,6 +530,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					attributes.put(ldapAttributeName, propertiesAnnotation);
 				}
 			}
+		}
+
+		if (attributes.size() == 0) {
+			return null;
 		}
 
 		return attributes;
