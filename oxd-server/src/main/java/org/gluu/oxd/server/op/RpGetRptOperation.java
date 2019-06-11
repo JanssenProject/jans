@@ -56,8 +56,6 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     private static Status getErrorCode(UmaNeedInfoResponse needInfo) {
         if (StringUtils.isNotBlank(needInfo.getError())) {
-            System.out.println("#####################################33333");
-            System.out.println(needInfo.getError());
             switch (needInfo.getError().toLowerCase()) {
                 case "invalid_claim_token_format":
                     return Response.Status.BAD_REQUEST;
