@@ -2,6 +2,7 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:b="http://bootsfaces.net/ui"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
@@ -163,125 +164,123 @@ input[type="text"]:focus, input[type="password"]:focus {
 		</div>
 		<div class="bs-docs-section"
 			style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top: 1px !important;"></div>
-		<!--         </nav> -->
-
 		<!--Header End-->
-
-		<div class="container" style="padding-top: 1px;">
-			<div id="content" class="sign-in-page">
+		<div class="container" style="padding-top: 0px;">
+			<div id="content" class="sign-in-page" style="margin-top:-15px;">
 				<noscript>
 					<b>#{msgs['passport.javascriptRequired']}</b>
 				</noscript>
 				<div class="row">
 					<div class="col-xs-12 col-md-6">
-						<div class="panel panel-default panel-order">
-							<div class="panel-heading">Login</div>
-							<div class="panel-body">
-								<h:form id="loginForm">
-									<h:panelGroup rendered="#{not identity.loggedIn}">
-										<p class="text-danger errormsg" style="display: none"></p>
-										<h:inputHidden id="provider" />
-										<div class="row form-group">
-											<h:messages class="text-danger" />
-											<span class="input-name col-md-3"> <h:outputLabel
-													for="username" value="#{msgs['login.username']}" />
-											</span>
-											<div class="col-md-6">
-												<h:inputText id="username" value="#{credentials.username}"
-													autocomplete="off" class="form-control usernameField" />
-											</div>
-										</div>
-
-										<div class="row form-group">
-											<span class="input-name col-md-3"> <h:outputLabel
-													for="password" value="#{msgs['login.password']}" />
-											</span>
-											<div class="col-md-6">
-												<h:inputSecret id="password" value="#{credentials.password}"
-													autocomplete="off" class="form-control passwordField" />
-
-											</div>
-										</div>
-										<div class="row form-group">
-											<h:outputLabel styleClass="col-sm-3 control-label"
-												for="rememberme" value="#{msgs['login.rememberMe']}" />
-											<div class="col-sm-6">
-												<input type="checkbox" value="rememberme" id="rememberme"
-													class="rememberField" />
-											</div>
-										</div>
-
-										<div class="row form-group">
-											<div id="submit_block" class="col-md-offset-3 col-md-3">
-												<h:commandButton id="loginButton"
-													value="#{msgs['login.login']}" onclick="checkRememberMe();"
-													action="#{authenticator.authenticate}"
-													class="btn btn-login" />
-											</div>
-										</div>
-
-										<div class="row">
-											<div class="col-md-offset-3 col-md-6">
-												<a href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
-											</div>
-										</div>
-										<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-											<p>
-												<h:outputText value="#{msgs['common.agreePolicy']}" />
-												<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-														value="#{msgs['common.privacyPolicy']}" />
-												</a>
-											</p>
-										</h:panelGroup>
-										<h:panelGroup rendered='#{!empty client.getTosUri()}'>
-											<p>
-												<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-												<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-														value="#{msgs['common.termsOfService']}" />
-												</a>
-											</p>
-										</h:panelGroup>
-										<h:panelGroup
-											rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
-											<li class="row-fluid submit-container">
-												<div class="gradient contact-button green span2 offset3"
-													style="width: 320px;">
-													<h:panelGroup
-														rendered="#{external_auth_request_uri != Null}">
-														<a id="externalAuthButton"
-															href="#{external_auth_request_uri}"> <input
-															type="button"
-															value="#{msgs['passport.useExternalAuthentication']}" />
-														</a>
-													</h:panelGroup>
-													<h:panelGroup
-														rendered="#{external_registration_uri != Null}">
-														<a id="externalRegistrationButton"
-															href="#{external_registration_uri}"> <input
-															type="button" style="width: 220px;"
-															value="#{msgs['passport.registerNewUser']}" />
-														</a>
-													</h:panelGroup>
-												</div>
-											</li>
-										</h:panelGroup>
-									</h:panelGroup>
-								</h:form>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-xs-12 col-md-6">
-						<div visibility="hidden" id="provider_panel">
+						<b:panel title="Login" look="primary" collapsible="false">
 							<div class="panel panel-default panel-order">
-								<div class="panel-heading">External Providers</div>
-								<div class="panel-body" id="add_here">
+								<div class="panel-body">
+									<h:form id="loginForm">
+										<h:panelGroup rendered="#{not identity.loggedIn}">
+											<p class="text-danger errormsg" style="display: none"></p>
+											<h:inputHidden id="provider" />
+											<div class="row form-group">
+												<h:messages class="text-danger" />
+												<span class="input-name col-md-3"> <h:outputLabel
+														for="username" value="#{msgs['login.username']}" />
+												</span>
+												<div class="col-md-6">
+													<h:inputText id="username" value="#{credentials.username}"
+														autocomplete="off" class="form-control usernameField" />
+												</div>
+											</div>
 
-									<div id="signinButton"></div>
+											<div class="row form-group">
+												<span class="input-name col-md-3"> <h:outputLabel
+														for="password" value="#{msgs['login.password']}" />
+												</span>
+												<div class="col-md-6">
+													<h:inputSecret id="password"
+														value="#{credentials.password}" autocomplete="off"
+														class="form-control passwordField" />
 
+												</div>
+											</div>
+											<div class="row form-group">
+												<h:outputLabel styleClass="col-sm-3 control-label"
+													for="rememberme" value="#{msgs['login.rememberMe']}" />
+												<div class="col-sm-6">
+													<input type="checkbox" value="rememberme" id="rememberme"
+														class="rememberField" />
+												</div>
+											</div>
+
+											<div class="row form-group">
+												<div id="submit_block" class="col-md-offset-3 col-md-3">
+													<h:commandButton id="loginButton"
+														value="#{msgs['login.login']}"
+														onclick="checkRememberMe();"
+														action="#{authenticator.authenticate}"
+														class="btn btn-login" />
+												</div>
+											</div>
+
+											<div class="row">
+												<div class="col-md-offset-3 col-md-6">
+													<a href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
+												</div>
+											</div>
+											<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.agreePolicy']}" />
+													<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+															value="#{msgs['common.privacyPolicy']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+											<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+												<p>
+													<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+													<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+															value="#{msgs['common.termsOfService']}" />
+													</a>
+												</p>
+											</h:panelGroup>
+											<h:panelGroup
+												rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+												<li class="row-fluid submit-container">
+													<div class="gradient contact-button green span2 offset3"
+														style="width: 320px;">
+														<h:panelGroup
+															rendered="#{external_auth_request_uri != Null}">
+															<a id="externalAuthButton"
+																href="#{external_auth_request_uri}"> <input
+																type="button"
+																value="#{msgs['passport.useExternalAuthentication']}" />
+															</a>
+														</h:panelGroup>
+														<h:panelGroup
+															rendered="#{external_registration_uri != Null}">
+															<a id="externalRegistrationButton"
+																href="#{external_registration_uri}"> <input
+																type="button" style="width: 220px;"
+																value="#{msgs['passport.registerNewUser']}" />
+															</a>
+														</h:panelGroup>
+													</div>
+												</li>
+											</h:panelGroup>
+										</h:panelGroup>
+									</h:form>
 								</div>
 							</div>
-						</div>
+						</b:panel>
+					</div>
+					<div class="col-xs-12 col-md-6">
+						<b:panel title="External Providers" look="primary" collapsible="false">
+							<div visibility="hidden" id="provider_panel">
+								<div class="panel panel-default panel-order">
+									<div class="panel-body" id="add_here">
+										<div id="signinButton"></div>
+									</div>
+								</div>
+							</div>
+						</b:panel>
 					</div>
 				</div>
 			</div>
