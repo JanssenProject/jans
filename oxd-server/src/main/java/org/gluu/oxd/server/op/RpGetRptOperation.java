@@ -4,6 +4,7 @@
 package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.Jackson2;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.params.RpGetRptParams;
 import org.gluu.oxd.common.response.IOpResponse;
-
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,7 +43,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
             if (needInfo != null) {
                 LOG.trace("Need info: " + entity);
                 throw new WebApplicationException(Response
-                        .status(Response.Status.FORBIDDEN)
+                        .status(getErrorCode(needInfo))
                         .type(MediaType.APPLICATION_JSON_TYPE)
                         .entity(Jackson2.asJson(needInfo))
                         .build());
@@ -51,6 +52,20 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
                 throw new WebApplicationException(entity, ex.getResponse().getStatus());
             }
         }
+    }
+
+    private static Status getErrorCode(UmaNeedInfoResponse needInfo) {
+        if (StringUtils.isNotBlank(needInfo.getError())) {
+            switch (needInfo.getError().toLowerCase()) {
+                case "invalid_claim_token_format":
+                    return Response.Status.BAD_REQUEST;
+                case "invalid_ticket":
+                    return Response.Status.BAD_REQUEST;
+                default:
+                    return Response.Status.FORBIDDEN;
+            }
+        }
+        return Response.Status.FORBIDDEN;
     }
 
     private static UmaNeedInfoResponse parseNeedInfoSilently(String entity) {
