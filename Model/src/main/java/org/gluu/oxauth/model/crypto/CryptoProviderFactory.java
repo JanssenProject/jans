@@ -18,7 +18,7 @@ public class CryptoProviderFactory {
 
     private static OxAuthCryptoProvider keyStoreProvider = null;
 
-    public synchronized static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
+    public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
         WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
         if (webKeyStorage == null) {
@@ -43,7 +43,7 @@ public class CryptoProviderFactory {
         return cryptoProvider;
     }
 
-    private static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
+    private synchronized static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
         if (keyStoreProvider != null &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreFile()) &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreSecret()) &&
@@ -54,9 +54,6 @@ public class CryptoProviderFactory {
             return keyStoreProvider;
         }
 
-        String keyStoreFile = configuration.getKeyStoreFile();
-        String keyStoreSecret = configuration.getKeyStoreSecret();
-        String dnName = configuration.getDnName();
-        return keyStoreProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        return keyStoreProvider = new OxAuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName());
     }
 }
