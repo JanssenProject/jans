@@ -4090,7 +4090,7 @@ class Setup(object):
     def install_couchbase_server(self):
 
         # prepare multivalued list
-        self.listAttrib = ['uid', 'member']
+        self.listAttrib = ['member']
         
         gluu_schema_fn = os.path.join(self.install_dir, 'schema/gluu_schema.json')
         gluu_schema = json.load(open(gluu_schema_fn))
