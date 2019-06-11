@@ -4421,13 +4421,10 @@ class Setup(object):
                 self.import_ldif_opendj([schema_ldif])
                 self.import_ldif_opendj([ldif_file_server])
             else:
-                self.import_ldif_couchebase([ldif_file])
+                self.import_ldif_couchebase([ldif_file_server])
 
             self.createUser('radius', homeDir=radius_dir, shell='/bin/false')
             self.addUserToGroup('gluu', 'radius')
-
-            radius_archive = os.path.join(self.distGluuFolder, 'gluu-radius.tgz')
-            self.run(['tar', '-zxf', radius_archive, '-C', '/'])
             
             self.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), self.osDefault)
             self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
