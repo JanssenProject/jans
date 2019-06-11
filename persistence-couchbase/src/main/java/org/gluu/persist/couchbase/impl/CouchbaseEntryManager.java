@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -386,8 +387,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	private <T> Map<String, PropertyAnnotation> prepareEntryPropertiesTypes(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations) {
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = getAttributesMap(null, propertiesAnnotations, true);
+        if (propertiesAnnotationsMap== null) {
+        	return new HashMap<String, PropertyAnnotation>(0);
+        }
+
         preparePropertyAnnotationTypes(entryClass, propertiesAnnotationsMap);
-        
+
         return propertiesAnnotationsMap;
 	}
 
