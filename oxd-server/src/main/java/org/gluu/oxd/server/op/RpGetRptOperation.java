@@ -65,7 +65,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
                     return Response.Status.FORBIDDEN;
             }
         }
-        return Response.Status.BAD_REQUEST;
+        return Response.Status.FORBIDDEN;
     }
 
     private static UmaNeedInfoResponse parseNeedInfoSilently(String entity) {
