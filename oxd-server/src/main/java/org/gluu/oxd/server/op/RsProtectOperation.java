@@ -1,10 +1,10 @@
 package org.gluu.oxd.server.op;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonNode;
 import org.gluu.oxauth.model.uma.JsonLogic;
 import org.gluu.oxauth.model.uma.JsonLogicNode;
 import org.gluu.oxauth.model.util.Util;
@@ -137,7 +137,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                     for (Condition condition : resource.getConditions()) {
                         if (condition.getScopeExpression() != null) {
                             String json = condition.getScopeExpression().toString();
-                            if (StringUtils.isNotBlank(json)) {
+                            if (StringUtils.isNotBlank(json) && !json.equalsIgnoreCase("null")) {
                                 boolean nodeValid = JsonLogicNodeParser.isNodeValid(json);
                                 LOG.trace("Scope expression validator - Valid: " + nodeValid + ", expression: " + json);
                                 if (!nodeValid) {
