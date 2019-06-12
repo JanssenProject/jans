@@ -138,7 +138,7 @@ public class CouchbaseFilterConverter {
 			return Expression.x((Long) currentGenericFilter.getAssertionValue());
 		}
 
-		return Expression.s(StringHelper.escapeSql(currentGenericFilter.getAssertionValue()));
+		return Expression.s(StringHelper.escapeJson(currentGenericFilter.getAssertionValue()));
 	}
 
 	private Boolean determineMultiValuedByType(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
