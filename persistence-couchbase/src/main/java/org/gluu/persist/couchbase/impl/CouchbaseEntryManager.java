@@ -160,7 +160,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
-                
+
+                escapeValues(realValues);
+
                 if ((multivalued == null) || !multivalued) {
                     jsonObject.put(attributeName, realValues[0]);
                 } else {
@@ -489,6 +491,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             		attributeValueObjects = new Object[] { attributeObject.toString() };
             	}
             }
+            
+            unescapeValues(attributeValueObjects);
 
             AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueObjects);
             result.add(tmpAttribute);
@@ -520,7 +524,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), password);
+            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), StringHelper.escapeJson(password));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
@@ -572,6 +576,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
             realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
         }
+
+        escapeValues(realValues);
         
         if ((multiValued == null) || !multiValued) {
             return new MutationSpec(type, realAttributeName, realValues[0]);
@@ -714,6 +720,22 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     	}
 
     	return super.convertJsonToValue(parameterType, jsonStringPropertyValue);
+	}
+
+	private void escapeValues(Object[] realValues) {
+		for (int i = 0; i < realValues.length; i++) {
+        	if (realValues[i] instanceof String) {
+        		realValues[i] = StringHelper.escapeJson(realValues[i]);
+        	}
+        }
+	}
+
+	private void unescapeValues(Object[] realValues) {
+		for (int i = 0; i < realValues.length; i++) {
+        	if (realValues[i] instanceof String) {
+        		realValues[i] = StringHelper.unescapeJson(realValues[i]);
+        	}
+        }
 	}
 
 }

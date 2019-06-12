@@ -32,14 +32,10 @@ public class AttributeData {
     }
 
     public AttributeData(String name, Object value) {
-    	this(name, value, null);
-    }
-
-    public AttributeData(String name, Object value, Boolean multiValued) {
         this.name = name;
         this.values = new Object[1];
         this.values[0] = value;
-        this.multiValued = multiValued;
+        this.multiValued = null;
     }
 
     public final String getName() {
