@@ -109,6 +109,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             grantTypes.addAll(fallback.getGrantType());
         }
 
+        if (!grantTypes.contains(GrantType.CLIENT_CREDENTIALS.getValue()) && getConfigurationService().getConfiguration().getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration()) {
+            grantTypes.add(GrantType.CLIENT_CREDENTIALS.getValue());
+        }
+
         params.setGrantTypes(grantTypes);
 
         // authorization_redirect_uri
