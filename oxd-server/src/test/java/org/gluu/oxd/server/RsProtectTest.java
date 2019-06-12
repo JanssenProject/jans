@@ -8,7 +8,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.RsProtectParams2;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.RsCheckAccessParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
@@ -53,7 +52,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
+        params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
 
         try {
             client.umaRsProtect(Tester.getAuthorization(), params);
@@ -77,7 +76,7 @@ public class RsProtectTest {
 
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
-        params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
+        params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
         RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params);
@@ -120,7 +119,7 @@ public class RsProtectTest {
         final RsProtectParams2 params = new RsProtectParams2();
         params.setOxdId(site.getOxdId());
         try {
-            params.setResources(Jackson2.createJsonMapper().readTree(CoreUtils.asJsonSilently(resources)));
+            params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         } catch (IOException e) {
             e.printStackTrace();
         }

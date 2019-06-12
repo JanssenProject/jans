@@ -19,9 +19,9 @@ public class JsonTest {
 
     @Test
     public void testCommandType() throws IOException {
-        final String json = CoreUtils.asJson(CommandType.GET_AUTHORIZATION_URL);
+        final String json = Jackson2.asJson(CommandType.GET_AUTHORIZATION_URL);
         Assert.assertEquals(json, "\"obtain_pat\"");
-        final CommandType obtainPat = CoreUtils.createJsonMapper().readValue(json, CommandType.class);
+        final CommandType obtainPat = Jackson2.createJsonMapper().readValue(json, CommandType.class);
         Assert.assertNotNull(obtainPat);
     }
 
@@ -31,7 +31,7 @@ public class JsonTest {
         c.setCommandType(CommandType.GET_USER_INFO);
         c.setParams(JsonNodeFactory.instance.textNode("myParams"));
 
-        final String cJson = CoreUtils.asJson(c);
+        final String cJson = Jackson2.asJson(c);
         Assert.assertTrue(StringUtils.isNotBlank(cJson));
 
         final String json = "{\"command\":\"register_client\",\"params\": {\"discovery_url\":\"<discovery url>\",\n" +
@@ -39,13 +39,13 @@ public class JsonTest {
                 "        \"client_name\":\"<client name>\"\n" +
                 "    }\n" +
                 "}";
-        final Command command = CoreUtils.createJsonMapper().readValue(json, Command.class);
+        final Command command = Jackson2.createJsonMapper().readValue(json, Command.class);
         Assert.assertNotNull(command);
     }
 
     @Test
     public void testErrorResponseJson() throws IOException {
-        final String json = CoreUtils.asJson(new ErrorResponse(ErrorResponseCode.INTERNAL_ERROR_UNKNOWN));
+        final String json = Jackson2.asJson(new ErrorResponse(ErrorResponseCode.INTERNAL_ERROR_UNKNOWN));
         Assert.assertTrue(StringUtils.isNotBlank(json));
     }
 }

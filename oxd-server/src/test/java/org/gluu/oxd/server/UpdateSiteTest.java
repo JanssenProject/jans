@@ -1,7 +1,7 @@
 package org.gluu.oxd.server;
 
 import com.google.common.collect.Lists;
-import org.gluu.oxd.common.CoreUtils;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.params.RegisterSiteParams;
 import org.gluu.oxd.common.params.UpdateSiteParams;
@@ -81,7 +81,7 @@ public class UpdateSiteTest {
 
     private static Rp fetchRp(String host, String oxdId) throws IOException {
         final String rpAsJson = Tester.newClient(host).getRp(Tester.getAuthorization(), new GetRpParams(oxdId));
-        GetRpResponse resp = CoreUtils.createJsonMapper().readValue(rpAsJson, GetRpResponse.class);
-        return CoreUtils.createJsonMapper().readValue(resp.getNode().toString(), Rp.class);
+        GetRpResponse resp = Jackson2.createJsonMapper().readValue(rpAsJson, GetRpResponse.class);
+        return Jackson2.createJsonMapper().readValue(resp.getNode().toString(), Rp.class);
     }
 }
