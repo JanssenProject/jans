@@ -46,7 +46,7 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     @PostConstruct
     public void create() {
-    	this.builder = DefaultCouchbaseEnvironment.builder().mutationTokensEnabled(true).computationPoolSize(5);
+    	this.builder = DefaultCouchbaseEnvironment.builder().mutationTokensEnabled(true).computationPoolSize(5).operationTracingEnabled(false);
     }
 
 	@Override
@@ -66,7 +66,12 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
         if (StringHelper.isNotEmpty(connectTimeoutString)) {
         	int connectTimeout = Integer.valueOf(connectTimeoutString);
         	builder.connectTimeout(connectTimeout);
-        	
+        }
+
+        String operationTracingEnabledString = couchbaseConnectionProperties.getProperty("connection.operation-tracing-enabled");
+        if (StringHelper.isNotEmpty(operationTracingEnabledString)) {
+        	boolean operationTracingEnabled = Boolean.valueOf(operationTracingEnabledString);
+        	builder.operationTracingEnabled(operationTracingEnabled);
         }
 
         this.couchbaseEnvironment = builder.build();
