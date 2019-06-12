@@ -1,13 +1,13 @@
 package org.gluu.oxd.common.params;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetDiscoveryParams implements IParams{
+public class GetDiscoveryParams implements IParams {
 
     @JsonProperty(value = "op_host")
     private String op_host;

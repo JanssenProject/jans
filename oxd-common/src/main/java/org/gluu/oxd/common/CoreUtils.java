@@ -12,11 +12,6 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,24 +47,7 @@ public class CoreUtils {
         return expiredAt != null && expiredAt.before(new Date());
     }
 
-    /**
-     * Lazy initialization of jackson mapper via static holder
-     */
-    private static class JacksonMapperHolder {
-        private static final ObjectMapper MAPPER = jsonMapper();
 
-        public static ObjectMapper jsonMapper() {
-            final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
-
-            final ObjectMapper mapper = new ObjectMapper();
-            final DeserializationConfig deserializationConfig = mapper.getDeserializationConfig().withAnnotationIntrospector(jackson);
-            final SerializationConfig serializationConfig = mapper.getSerializationConfig().withAnnotationIntrospector(jackson);
-            if (deserializationConfig != null && serializationConfig != null) {
-                // do nothing for now
-            }
-            return mapper;
-        }
-    }
 
     /**
      * UTF-8 encoding string
@@ -110,42 +88,6 @@ public class CoreUtils {
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-
-    /**
-     * Converts object to json string.
-     *
-     * @param p_object object to convert to string
-     * @return json object representation in string format
-     * @throws java.io.IOException if io problems occurs
-     */
-    public static String asJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
-        return mapper.writeValueAsString(p_object);
-    }
-
-    public static String asJsonSilently(Object p_object) {
-        try {
-            final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
-            return mapper.writeValueAsString(p_object);
-        } catch (Exception e) {
-            LOG.error("Failed to serialize object into json.", e);
-            return "";
-        }
-    }
-
-    /**
-     * Creates json mapper for json object serialization/deserialization.
-     *
-     * @return object mapper
-     */
-    public static ObjectMapper createJsonMapper() {
-        return JacksonMapperHolder.MAPPER;
-    }
-
-    public static Command asCommand(String commandAsJson) throws IOException {
-        return createJsonMapper().readValue(commandAsJson, Command.class);
     }
 
     public static long parseSilently(String p_str) {

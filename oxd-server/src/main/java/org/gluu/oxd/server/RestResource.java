@@ -3,7 +3,6 @@ package org.gluu.oxd.server;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
-import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.IOpResponse;
@@ -210,7 +209,7 @@ public class RestResource {
 
     public static <T> T read(String params, Class<T> clazz) {
         try {
-            return CoreUtils.createJsonMapper().readValue(params, clazz);
+            return Jackson2.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
             LOG.error("Invalid params: " + params, e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
