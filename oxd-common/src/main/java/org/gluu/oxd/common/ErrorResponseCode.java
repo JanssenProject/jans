@@ -43,6 +43,8 @@ public enum ErrorResponseCode {
     INVALID_OXD_ID(400, "invalid_oxd_id", "Invalid oxd_id. Unable to find the site for oxd_id. It does not exist or has been removed from the server. Please use the register_site command to register a site."),
     INVALID_REQUEST(400, "invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED(400, "invalid_request", "Request is invalid. Scopes are required parameter in request."),
+    INVALID_CLIENT_SECRET_REQUIRED(400, "invalid_client_secret", "client_secret is required parameter in request (skip client_id if you wish to dynamically register client.)."),
+    INVALID_CLIENT_ID_REQUIRED(400, "invalid_client_id", "client_id is required parameter in request (skip client_secret if you wish to dynamically register client.)."),
     UNSUPPORTED_OPERATION(500, "unsupported_operation", "Operation is not supported by server error."),
     INVALID_OP_HOST(400, "invalid_op_host", "Invalid op_host (empty or blank)."),
     BLANK_ACCESS_TOKEN(403, "blank_access_token", "access_token is blank. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
