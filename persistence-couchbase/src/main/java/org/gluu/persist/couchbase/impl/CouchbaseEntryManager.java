@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -128,7 +127,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
             if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                        new AttributeData(OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClassesFromDb)));
+                        new AttributeData(OBJECT_CLASS, objectClasses, true), new AttributeData(OBJECT_CLASS, objectClassesFromDb, true)));
             }
         }
     }
@@ -154,16 +153,18 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
+            Boolean multivalued = attribute.isMultiValued();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
                 Object[] realValues = attributeValues;
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
-                if (realValues.length > 1) {
-                    jsonObject.put(attributeName, JsonArray.from(realValues));
-                } else {
+                
+                if ((multivalued == null) || !multivalued) {
                     jsonObject.put(attributeName, realValues[0]);
+                } else {
+                    jsonObject.put(attributeName, JsonArray.from(realValues));
                 }
             }
         }
@@ -203,14 +204,16 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
+                Boolean multivalued = attribute.isMultiValued();
+
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(Mutation.DICT_ADD, attributeName, attributeValues);
+                    modification = createModification(Mutation.DICT_ADD, attributeName, multivalued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.DELETE, oldAttributeName, oldAttributeValues);
+                        modification = createModification(Mutation.DELETE, oldAttributeName, multivalued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.REPLACE, attributeName, attributeValues);
+                        modification = createModification(Mutation.REPLACE, attributeName, multivalued, attributeValues);
                     }
                 }
 
@@ -384,17 +387,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), expression), ex);
         }
     }
-
-	private <T> Map<String, PropertyAnnotation> prepareEntryPropertiesTypes(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations) {
-        Map<String, PropertyAnnotation> propertiesAnnotationsMap = getAttributesMap(null, propertiesAnnotations, true);
-        if (propertiesAnnotationsMap== null) {
-        	return new HashMap<String, PropertyAnnotation>(0);
-        }
-
-        preparePropertyAnnotationTypes(entryClass, propertiesAnnotationsMap);
-
-        return propertiesAnnotationsMap;
-	}
 
 	@Override
     protected <T> boolean contains(String baseDN, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
@@ -573,19 +565,19 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return searchResult.getTotalEntriesCount();
     }
 
-    private MutationSpec createModification(final Mutation type, final String attributeName, final Object... attributeValues) {
+    private MutationSpec createModification(final Mutation type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
             realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
         }
-
-        if (realValues.length == 1) {
+        
+        if ((multiValued == null) || !multiValued) {
             return new MutationSpec(type, realAttributeName, realValues[0]);
+        } else {
+            return new MutationSpec(type, realAttributeName, realValues);
         }
-
-        return new MutationSpec(type, realAttributeName, realValues);
     }
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {

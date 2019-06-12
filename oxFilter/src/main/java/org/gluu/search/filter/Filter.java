@@ -21,7 +21,7 @@ public class Filter {
     private String[] subAny;
     private String subFinal;
 
-    private boolean arrayAttribute = false;
+    private boolean multiValued = false;
 
     public Filter(FilterType type) {
         this.type = type;
@@ -169,12 +169,12 @@ public class Filter {
         this.subFinal = subFinal;
     }
 
-    public final boolean isArrayAttribute() {
-        return arrayAttribute;
+    public final boolean isMultiValued() {
+        return multiValued;
     }
 
-    public Filter arrayType() {
-        this.arrayAttribute = true;
+    public Filter multiValued() {
+        this.multiValued = true;
         return this;
     }
 
