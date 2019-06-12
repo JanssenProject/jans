@@ -75,10 +75,10 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-        	Boolean isMultiValued = isMultiValued(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
-            if (currentGenericFilter.isArrayAttribute() || Boolean.TRUE.equals(isMultiValued)) {
+        	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+            if (currentGenericFilter.isMultiValued() || Boolean.TRUE.equals(isMultiValuedDetected)) {
                 return Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(currentGenericFilter.getAttributeName())));
-            } else if (Boolean.FALSE.equals(isMultiValued)) {
+            } else if (Boolean.FALSE.equals(isMultiValuedDetected)) {
             	return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter));
             } else {
                 Expression exp1 = Expression
@@ -141,7 +141,7 @@ public class CouchbaseFilterConverter {
 		return Expression.s(StringHelper.escapeSql(currentGenericFilter.getAssertionValue()));
 	}
 
-	private Boolean isMultiValued(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+	private Boolean determineMultiValuedByType(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
 		if (propertiesAnnotationsMap == null) {
 			return null;
 		}

@@ -19,16 +19,27 @@ import org.gluu.util.StringHelper;
 public class AttributeData {
     private final String name;
     private final Object[] values;
+    private final Boolean multiValued;
 
     public AttributeData(String name, Object[] values) {
+    	this(name, values, null);
+    }
+
+    public AttributeData(String name, Object[] values, Boolean multiValued) {
         this.name = name;
         this.values = values;
+        this.multiValued = multiValued;
     }
 
     public AttributeData(String name, Object value) {
+    	this(name, value, null);
+    }
+
+    public AttributeData(String name, Object value, Boolean multiValued) {
         this.name = name;
         this.values = new Object[1];
         this.values[0] = value;
+        this.multiValued = multiValued;
     }
 
     public final String getName() {
@@ -51,7 +62,11 @@ public class AttributeData {
         return this.values[0];
     }
 
-    @Override
+	public Boolean isMultiValued() {
+		return multiValued;
+	}
+
+	@Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
