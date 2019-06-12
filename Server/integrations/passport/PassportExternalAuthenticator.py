@@ -8,7 +8,6 @@ from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
 
 from org.gluu.oxauth.model.common import User, WebKeyStorage
-from org.gluu.oxauth.model.config import ConfigurationFactory
 from org.gluu.oxauth.model.configuration import AppConfiguration
 from org.gluu.oxauth.model.crypto import CryptoProviderFactory
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
@@ -47,6 +46,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if success:
             self.providerKey = "provider"
             self.customAuthzParameter = self.getCustomAuthzParameter(configurationAttributes.get("authz_req_param_provider"))
+            self.passportDN = self.getPassportConfigDN()
             print "Passport. init. Initialization success"
         else:
             print "Passport. init. Initialization failed"
@@ -312,15 +312,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
 # Configuration parsing
 
+    def getPassportConfigDN(self):
+
+        f = open('/etc/gluu/conf/gluu.properties', 'r')
+        for line in f:
+            prop = line.split("=")
+            if prop[0] == "oxpassport_ConfigurationEntryDN":
+              prop.pop(0)
+              break
+
+        f.close()
+        return "=".join(prop).strip()
+
+
     def parseAllProviders(self):
 
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
-        passportDN = CdiUtil.bean(ConfigurationFactory).getPersistenceConfiguration().getConfiguration().getString("oxpassport_ConfigurationEntryDN")
         entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
 
         config = LdapOxPassportConfiguration()
-        config = entryManager.find(config.getClass(), passportDN).getPassportConfiguration()
+        config = entryManager.find(config.getClass(), self.passportDN).getPassportConfiguration()
         config = config.getProviders() if config != None else config
 
         if config != None and len(config) > 0:
