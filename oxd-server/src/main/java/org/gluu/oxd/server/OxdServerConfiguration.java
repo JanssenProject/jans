@@ -38,6 +38,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean protectCommandsWithAccessToken;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    @JsonProperty(value = "add_client_credentials_grant_type_automatically_during_client_registration")
+    private Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration;
     @JsonProperty(value = "migration_source_folder_path")
     private String migrationSourceFolderPath;
     @JsonProperty(value = "storage")
@@ -199,6 +201,13 @@ public class OxdServerConfiguration extends Configuration {
         this.storageConfiguration = storageConfiguration;
     }
 
+    public Boolean getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration() {
+        return addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration;
+    }
+
+    public void setAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration(Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration) {
+        this.addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration = addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration;
+    }
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -221,6 +230,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", storage='" + storage + '\'' +
                 ", storageConfiguration=" + storageConfiguration +
                 ", defaultSiteConfig=" + defaultSiteConfig +
+                ", addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration=" + addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration +
                 '}';
     }
 }
