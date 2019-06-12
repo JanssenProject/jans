@@ -39,7 +39,7 @@ public class OxdServerConfiguration extends Configuration {
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
     @JsonProperty(value = "add_client_credentials_grant_type_automatically_during_client_registration")
-    private Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration;
+    private Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration = true;
     @JsonProperty(value = "migration_source_folder_path")
     private String migrationSourceFolderPath;
     @JsonProperty(value = "storage")
