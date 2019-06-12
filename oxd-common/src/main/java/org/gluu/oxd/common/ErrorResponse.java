@@ -73,7 +73,7 @@ public class ErrorResponse implements Serializable, IOpResponse {
         if (details != null && p_class != null) {
             final String asString = details.toString();
             try {
-                return CoreUtils.createJsonMapper().readValue(asString, p_class);
+                return Jackson2.createJsonMapper().readValue(asString, p_class);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }

@@ -1,6 +1,6 @@
 package org.gluu.oxd.common.params;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Yuriy Zabrovarnyy
