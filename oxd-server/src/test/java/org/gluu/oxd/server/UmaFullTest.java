@@ -1,6 +1,7 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.Jackson2;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
@@ -8,7 +9,6 @@ import org.gluu.oxd.common.params.RpGetRptParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RpGetRptResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
-import org.gluu.oxd.rs.protect.Jackson;
 import org.gluu.oxd.rs.protect.RsResourceList;
 
 import java.io.IOException;
@@ -48,6 +48,6 @@ public class UmaFullTest {
 
     public static RsResourceList resourceList(String rsProtect) throws IOException {
         rsProtect = StringUtils.replace(rsProtect, "'", "\"");
-        return Jackson.createJsonMapper().readValue(rsProtect, RsResourceList.class);
+        return Jackson2.createJsonMapper().readValue(rsProtect, RsResourceList.class);
     }
 }
