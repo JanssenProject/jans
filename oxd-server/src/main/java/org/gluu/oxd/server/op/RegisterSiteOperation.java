@@ -85,6 +85,14 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
+        if (StringUtils.isNotBlank(params.getClientId()) && StringUtils.isBlank(params.getClientSecret())) {
+            throw new HttpException(ErrorResponseCode.INVALID_CLIENT_SECRET_REQUIRED);
+        }
+
+        if (StringUtils.isNotBlank(params.getClientSecret()) && StringUtils.isBlank(params.getClientId())) {
+            throw new HttpException(ErrorResponseCode.INVALID_CLIENT_ID_REQUIRED);
+        }
+
         Rp fallback = getConfigurationService().defaultRp();
 
         // op_host
