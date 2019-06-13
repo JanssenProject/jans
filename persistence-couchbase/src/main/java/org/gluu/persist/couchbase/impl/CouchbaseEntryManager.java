@@ -524,7 +524,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), StringHelper.escapeJson(password));
+            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), escapeValue(password));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
@@ -720,6 +720,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     	}
 
     	return super.convertJsonToValue(parameterType, jsonStringPropertyValue);
+	}
+
+	private String escapeValue(String value) {
+		return StringHelper.escapeJson(value);
+	}
+
+	private String unescapeValue(String value) {
+		return StringHelper.unescapeJson(value);
 	}
 
 	private void escapeValues(Object[] realValues) {
