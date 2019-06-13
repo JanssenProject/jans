@@ -723,19 +723,21 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 
 	private void escapeValues(Object[] realValues) {
-		for (int i = 0; i < realValues.length; i++) {
-        	if (realValues[i] instanceof String) {
-        		realValues[i] = StringHelper.escapeJson(realValues[i]);
-        	}
-        }
+		// Couchbade SDK do this automatically 
+//		for (int i = 0; i < realValues.length; i++) {
+//        	if (realValues[i] instanceof String) {
+//        		realValues[i] = StringHelper.escapeJson(realValues[i]);
+//        	}
+//        }
 	}
 
 	private void unescapeValues(Object[] realValues) {
-		for (int i = 0; i < realValues.length; i++) {
-        	if (realValues[i] instanceof String) {
-        		realValues[i] = StringHelper.unescapeJson(realValues[i]);
-        	}
-        }
+		// Couchbade SDK do this automatically 
+//		for (int i = 0; i < realValues.length; i++) {
+//        	if (realValues[i] instanceof String) {
+//        		realValues[i] = StringHelper.unescapeJson(realValues[i]);
+//        	}
+//        }
 	}
 
 }
