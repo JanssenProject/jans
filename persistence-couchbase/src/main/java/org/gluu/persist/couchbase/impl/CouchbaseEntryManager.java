@@ -723,11 +723,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 
 	private String escapeValue(String value) {
-		return StringHelper.escapeJson(value);
+		// Couchbade SDK do this automatically 
+//		return StringHelper.escapeJson(value);
+		return value;
 	}
 
 	private String unescapeValue(String value) {
-		return StringHelper.unescapeJson(value);
+		// Couchbade SDK do this automatically 
+//		return StringHelper.unescapeJson(value);
+		return value;
 	}
 
 	private void escapeValues(Object[] realValues) {
