@@ -131,25 +131,29 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                 final String nonce = getNonce();
                 final String scopes = getScopesAsString();
                 for (TokenLdap t : grants) {
-                    t.setNonce(nonce);
-                    t.setScope(scopes);
-                    t.setAuthMode(getAcrValues());
-                    t.setSessionDn(getSessionDn());
-                    t.setAuthenticationTime(getAuthenticationTime());
-                    t.setCodeChallenge(getCodeChallenge());
-                    t.setCodeChallengeMethod(getCodeChallengeMethod());
-                    t.setClaims(getClaims());
-
-                    final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
-                    if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
-                        t.setJwtRequest(jwtRequest.getEncodedJwt());
-                    }
+                    updateTokenFromGrant(nonce, scopes, t);
                     log.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
         }
     }
+
+	private void updateTokenFromGrant(final String nonce, final String scopes, TokenLdap t) {
+		t.setNonce(nonce);
+		t.setScope(scopes);
+		t.setAuthMode(getAcrValues());
+		t.setSessionDn(getSessionDn());
+		t.setAuthenticationTime(getAuthenticationTime());
+		t.setCodeChallenge(getCodeChallenge());
+		t.setCodeChallengeMethod(getCodeChallengeMethod());
+		t.setClaims(getClaims());
+
+		final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
+		if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
+		    t.setJwtRequest(jwtRequest.getEncodedJwt());
+		}
+	}
 
     @Override
     public AccessToken createAccessToken(String certAsPem) {
@@ -291,6 +295,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setSessionDn(p_token.getSessionDn());
         result.setAuthenticationTime(getAuthenticationTime());
         result.getAttributes().setX5cs256(p_token.getX5ts256());
+        result.setClaims(getClaims());
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();
         if (grantType != null) {
