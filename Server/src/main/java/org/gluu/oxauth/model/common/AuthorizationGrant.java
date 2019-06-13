@@ -128,10 +128,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
             final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
-                final String nonce = getNonce();
-                final String scopes = getScopesAsString();
                 for (TokenLdap t : grants) {
-                    updateTokenFromGrant(nonce, scopes, t);
+                    initTokenFromGrant(t);
                     log.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
@@ -139,19 +137,22 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-	private void updateTokenFromGrant(final String nonce, final String scopes, TokenLdap t) {
-		t.setNonce(nonce);
-		t.setScope(scopes);
-		t.setAuthMode(getAcrValues());
-		t.setSessionDn(getSessionDn());
-		t.setAuthenticationTime(getAuthenticationTime());
-		t.setCodeChallenge(getCodeChallenge());
-		t.setCodeChallengeMethod(getCodeChallengeMethod());
-		t.setClaims(getClaims());
+	private void initTokenFromGrant(TokenLdap token) {
+        final String nonce = getNonce();
+        if (nonce != null) {
+        	token.setNonce(nonce);
+        }
+		token.setScope(getScopesAsString());
+		token.setAuthMode(getAcrValues());
+		token.setSessionDn(getSessionDn());
+		token.setAuthenticationTime(getAuthenticationTime());
+		token.setCodeChallenge(getCodeChallenge());
+		token.setCodeChallengeMethod(getCodeChallengeMethod());
+		token.setClaims(getClaims());
 
 		final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
 		if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
-		    t.setJwtRequest(jwtRequest.getEncodedJwt());
+		    token.setJwtRequest(jwtRequest.getEncodedJwt());
 		}
 	}
 
@@ -290,12 +291,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setTokenCode(TokenHashUtil.getHashedToken(p_token.getCode()));
         result.setUserId(getUserId());
         result.setClientId(getClientId());
-        result.setScope(getScopesAsString());
-        result.setAuthMode(p_token.getAuthMode());
-        result.setSessionDn(p_token.getSessionDn());
-        result.setAuthenticationTime(getAuthenticationTime());
+
         result.getAttributes().setX5cs256(p_token.getX5ts256());
-        result.setClaims(getClaims());
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();
         if (grantType != null) {
@@ -307,15 +304,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             result.setAuthorizationCode(TokenHashUtil.getHashedToken(authorizationCode.getCode()));
         }
 
-        final String nonce = getNonce();
-        if (nonce != null) {
-            result.setNonce(nonce);
-        }
+        initTokenFromGrant(result);
 
-        final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
-        if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
-            result.setJwtRequest(jwtRequest.getEncodedJwt());
-        }
         return result;
     }
 
