@@ -64,6 +64,8 @@ import static org.testng.Assert.*;
  * @version January 16, 2019
  */
 public abstract class BaseTest {
+	
+	private static int WAIT_OPERATION_TIMEOUT = 15;
 
     protected HtmlUnitDriver driver;
 
@@ -368,7 +370,7 @@ public abstract class BaseTest {
 		// Check for authorization form if client has no persistent authorization
 		if (!authorizationResponseStr.contains("#")) {
 			Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
-                    .withTimeout(Duration.ofSeconds(10))
+                    .withTimeout(Duration.ofSeconds(WAIT_OPERATION_TIMEOUT))
 					.pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
 
@@ -415,7 +417,7 @@ public abstract class BaseTest {
 
     public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
         Holder<String> currentUrl = new Holder<>();
-        WebDriverWait wait = new WebDriverWait(currentDriver, 10);
+        WebDriverWait wait = new WebDriverWait(currentDriver, WAIT_OPERATION_TIMEOUT);
         wait.until(d -> {
             //System.out.println("Previous url: " + previousURL);
             //System.out.println("Current url: " + d.getCurrentUrl());
@@ -476,7 +478,7 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebDriverWait wait = new WebDriverWait(driver, WAIT_OPERATION_TIMEOUT);
         wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver d) {
                 return (d.getCurrentUrl() != previousURL);
@@ -566,7 +568,7 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebDriverWait wait = new WebDriverWait(driver, 1);
         wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver d) {
                 return (d.getCurrentUrl() != previousURL);
