@@ -4159,7 +4159,7 @@ class Setup(object):
         if self.persistence_type in ('opendj', 'hybrid'):
             self.import_ldif_opendj(ldif_files)
         elif self.persistence_type in ('couchbase', 'hybrid'):
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
 
