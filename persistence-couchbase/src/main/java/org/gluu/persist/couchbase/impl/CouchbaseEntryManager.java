@@ -194,9 +194,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 String attributeName = null;
                 Object[] attributeValues = null;
+                Boolean multivalued = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
+                    multivalued = attribute.isMultiValued();
                 }
 
                 String oldAttributeName = null;
@@ -206,7 +208,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
-                Boolean multivalued = attribute.isMultiValued();
 
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
