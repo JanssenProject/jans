@@ -390,7 +390,7 @@ public class CustomScriptManager implements Serializable {
 			externalType = pythonService.loadPythonScript(bis, scriptName, customScriptType.getPythonClass(),
 					customScriptType.getCustomScriptType(), new PyObject[] { new PyLong(System.currentTimeMillis()) });
 		} catch (UnsupportedEncodingException e) {
-			log.error(e.getMessage(), e);
+			log.error(String.format("%s. Script inum: %s", e.getMessage(), customScript.getInum()), e);
 		} finally {
 			IOUtils.closeQuietly(bis);
 		}
