@@ -3,7 +3,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Authentication script for Gluu Casa
 displayName: casa
-oxEnabled: true
+oxEnabled: false
 inum: BABA-CACA
 oxConfigurationProperty: {"value1":"supergluu_app_id","value2":"https://%(hostname)s/casa","description":""}
 oxConfigurationProperty: {"value1":"u2f_app_id","value2":"https://%(hostname)s","description":""}
@@ -21,7 +21,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Gluu Casa Client Registration script
 displayName: casa_client_registration
-oxEnabled: true
+oxEnabled: false
 inum: DAA9-F7F8
 oxLevel: 1
 oxConfigurationProperty: {"value1":"client_redirect_uris","value2":"https://%(hostname)s/casa","description":""}

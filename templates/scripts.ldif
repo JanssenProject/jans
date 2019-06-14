@@ -43,7 +43,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Permission Dynamic Scope script
 displayName: dynamic_permission
-oxEnabled: true
+oxEnabled: false
 inum: CB5B-3211
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -190,7 +190,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Introspection sample script
 displayName: introspection_sample
-oxEnabled: true
+oxEnabled: false
 inum: 2DAF-AA90
 oxLevel: 1
 oxRevision: 1
