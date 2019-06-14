@@ -2307,6 +2307,42 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.402 NAME 'oxAlias'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.403 NAME 'oxTrustLogoPath'
+  DESC 'oxTrustLogoPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.404 NAME 'oxTrustFaviconPath'
+  DESC 'oxTrustFaviconPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.405 NAME 'oxAuthLogoPath'
+  DESC 'oxAuthLogoPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.406 NAME 'oxAuthFaviconPath'
+  DESC 'oxAuthFaviconPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.407 NAME 'idpLogoPath'
+  DESC 'idpLogoPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.408 NAME 'idpFaviconPath'
+  DESC 'idpFaviconPath'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
@@ -2335,7 +2371,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'gluuConfiguration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( blowfishPassword $ c $ description $ displayName $ gluuAdditionalBandwidth $ gluuAdditionalMemory $ gluuApplianceDnsServer $ gluuAppliancePollingInterval $ gluuBandwidthRX $ gluuBandwidthTX $ gluuDSstatus $ gluuFederationHostingEnabled $ gluuFreeDiskSpace $ gluuFreeMemory $ gluuFreeSwap $ gluuGroupCount $ gluuHTTPstatus $ gluuHostname $ gluuInvoiceNo $ gluuIpAddress $ gluuLastUpdate $ gluuLifeRay $ gluuLoadAvg $ gluuManageIdentityPermission $ gluuManager $ gluuMaxLogSize $ gluuOrgProfileMgt $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuPersonCount $ gluuPrivate $ gluuPublishIdpMetadata $ gluuResizeInitiated $ gluuSPTR $ gluuScimEnabled $ gluuShibAssertionsIssued $ gluuShibFailedAuth $ gluuShibSecurityEvents $ gluuShibSuccessfulAuths $ oxTrustEmail $ gluuSmtpFromEmailAddress $ gluuSmtpFromName $ gluuSmtpHost $ gluuSmtpPassword $ gluuSmtpPort $ gluuSmtpRequiresAuthentication $ gluuSmtpRequiresSsl $ gluuSmtpUserName $ gluuSslExpiry $ gluuStatus $ gluuSystemUptime $ gluuTargetRAM $ gluuUrl $ gluuVDSenabled $ gluuVDSstatus $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig $ oxLogConfigLocation $ oxSmtpConfiguration $ oxCacheConfiguration $ oxTrustStoreCert $ oxTrustStoreConf $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ gluuPassportEnabled $ gluuSmtpServerTrust )
+  MAY ( blowfishPassword $ c $ description $ displayName $ gluuAdditionalBandwidth $ gluuAdditionalMemory $ gluuApplianceDnsServer $ gluuAppliancePollingInterval $ gluuBandwidthRX $ gluuBandwidthTX $ gluuDSstatus $ gluuFederationHostingEnabled $ gluuFreeDiskSpace $ gluuFreeMemory $ gluuFreeSwap $ gluuGroupCount $ gluuHTTPstatus $ gluuHostname $ gluuInvoiceNo $ gluuIpAddress $ gluuLastUpdate $ gluuLifeRay $ gluuLoadAvg $ gluuManageIdentityPermission $ gluuManager $ gluuMaxLogSize $ gluuOrgProfileMgt $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuPersonCount $ gluuPrivate $ gluuPublishIdpMetadata $ gluuResizeInitiated $ gluuSPTR $ gluuScimEnabled $ gluuShibAssertionsIssued $ gluuShibFailedAuth $ gluuShibSecurityEvents $ gluuShibSuccessfulAuths $ oxTrustEmail $ gluuSmtpFromEmailAddress $ gluuSmtpFromName $ gluuSmtpHost $ gluuSmtpPassword $ gluuSmtpPort $ gluuSmtpRequiresAuthentication $ gluuSmtpRequiresSsl $ gluuSmtpUserName $ gluuSslExpiry $ gluuStatus $ gluuSystemUptime $ gluuTargetRAM $ gluuUrl $ gluuVDSenabled $ gluuVDSstatus $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig $ oxLogConfigLocation $ oxSmtpConfiguration $ oxCacheConfiguration $ oxTrustStoreCert $ oxTrustStoreConf $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ gluuPassportEnabled $ gluuSmtpServerTrust $ oxTrustLogoPath $ oxTrustFaviconPath $ oxAuthLogoPath $ oxAuthFaviconPath $ idpLogoPath $ idpFaviconPath )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'gluuAttribute'
   SUP ( top )
