@@ -4347,6 +4347,72 @@
             "oid": "oxAttribute:402",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxTrustLogoPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "oxTrustLogoPath"
+            ],
+            "oid": "oxAttribute:403",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxTrustFaviconPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "oxTrustFaviconPath"
+            ],
+            "oid": "oxAttribute:404",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuthLogoPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "oxAuthLogoPath"
+            ],
+            "oid": "oxAttribute:405",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuthFaviconPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "oxAuthFaviconPath"
+            ],
+            "oid": "oxAttribute:406",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "idpLogoPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "idpLogoPath"
+            ],
+            "oid": "oxAttribute:407",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "idpFaviconPath",
+            "equality": "caseIgnoreMatch",
+            "substr": "caseIgnoreSubstringsMatch",
+            "names": [
+                "idpFaviconPath"
+            ],
+            "oid": "oxAttribute:408",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
         
     ],
@@ -4635,7 +4701,7 @@
                 "oxTrustAuthenticationMode",
                 "oxIDPAuthentication",
                 "oxLogViewerConfig",
-		        "oxLogConfigLocation",
+                "oxLogConfigLocation",
                 "oxSmtpConfiguration",
                 "oxCacheConfiguration",
                 "oxTrustStoreCert",
@@ -4645,7 +4711,13 @@
                 "userPassword",
                 "oxTrustCacheRefreshServerIpAddress",
                 "gluuPassportEnabled",
-                "gluuSmtpServerTrust"
+                "gluuSmtpServerTrust",
+                "oxTrustLogoPath",
+                "oxTrustFaviconPath",
+                "oxAuthLogoPath",
+                "oxAuthFaviconPath",
+                "idpLogoPath",
+                "idpFaviconPath"
             ],
             "must": [
                 "objectclass"
