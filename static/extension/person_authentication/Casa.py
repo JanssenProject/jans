@@ -406,7 +406,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Casa. getSuitableAcr. %s was selected for user %s" % (acr, id)
         return acr
 
-    def determineSkip2FA(self, userService, identity, foundUser, platform):
+    def determineSkip2FA(self, userService, identity, foundUser, deviceInf):
 
         f = open(self.configFileLocation, 'r')
         try:
