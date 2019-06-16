@@ -733,7 +733,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
-                    String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+                    String.format("Failed to calculate the number of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
         if (SearchScope.BASE != searchScope) {
@@ -741,12 +741,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
 
         if (searchResult.getEntryCount() != 1) {
-            throw new EntryPersistenceException(String.format("Failed to calucalte count of entries due to missing result entry with baseDN: %s, filter: %s", baseDN, searchFilter));
+            throw new EntryPersistenceException(String.format("Failed to calculate the number of entries due to missing result entry with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         Long result = searchResult.getSearchEntries().get(0).getAttributeValueAsLong("numsubordinates");
         if (result == null) {
-            throw new EntryPersistenceException(String.format("Failed to calucalte count of entries due to missing attribute 'numsubordinates' with baseDN: %s, filter: %s", baseDN, searchFilter));
+            throw new EntryPersistenceException(String.format("Failed to calculate the number of entries due to missing attribute 'numsubordinates' with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         return result.intValue();
