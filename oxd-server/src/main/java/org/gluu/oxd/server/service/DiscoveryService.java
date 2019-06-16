@@ -15,8 +15,6 @@ import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
 
 import javax.net.ssl.SSLHandshakeException;
-import java.io.IOException;
-import java.security.UnrecoverableKeyException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
