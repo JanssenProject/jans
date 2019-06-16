@@ -564,7 +564,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
-                    String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+                    String.format("Failed to calculate the number of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
         return searchResult.getTotalEntriesCount();
