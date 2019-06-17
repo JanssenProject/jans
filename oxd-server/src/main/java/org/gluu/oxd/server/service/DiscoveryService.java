@@ -14,6 +14,10 @@ import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
 
+import javax.net.ssl.SSLHandshakeException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -75,6 +79,12 @@ public class DiscoveryService {
             } else {
                 LOG.error("No response from discovery!");
             }
+        } catch (SSLHandshakeException e) {
+            LOG.error(e.getMessage(), e);
+            throw new HttpException(ErrorResponseCode.SSL_HANDSHAKE_ERROR);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error. Message: " + e.getMessage()).build());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
