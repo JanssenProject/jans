@@ -610,6 +610,7 @@ class Setup(object):
         
         self.oxauth_legacyIdTokenClaims = 'false'
         self.oxauth_openidScopeBackwardCompatibility =  'false'
+        self.enableRadiusScripts = 'false'
         self.gluu_radius_client_id = None
         self.gluu_ro_pw = None
         self.gluu_ro_encoded_pw = None
@@ -2822,6 +2823,7 @@ class Setup(object):
             self.installGluuRadius = True
             self.oxauth_legacyIdTokenClaims = 'true'
             self.oxauth_openidScopeBackwardCompatibility =  'true'
+            self.enableRadiusScripts = 'true'
         else:
             self.installGluuRadius = False
 

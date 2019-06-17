@@ -3,7 +3,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Dynamic Scope Script for Super Gluu RO
 displayName: super_gluu_ro_session
-oxEnabled: false
+oxEnabled: %(enableRadiusScripts)s
 inum: 5866-4202
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -17,7 +17,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Super Gluu RO Password Credentials Script
 displayName: super_gluu_ro
-oxEnabled: false
+oxEnabled: %(enableRadiusScripts)s
 inum: B8FD-4C11
 oxLevel: 1
 oxRevision: 1
