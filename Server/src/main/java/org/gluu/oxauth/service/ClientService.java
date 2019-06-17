@@ -94,6 +94,10 @@ public class ClientService {
 
 		try {
 			Client client = getClient(clientId);
+			if (client == null) {
+				log.error("Failed to find client = {}", clientId);
+				return authenticated;
+			}
 			String decryptedClientSecret = decryptSecret(client.getClientSecret());
 			authenticated = client != null && decryptedClientSecret != null && decryptedClientSecret.equals(password);
 		} catch (StringEncrypter.EncryptionException e) {
