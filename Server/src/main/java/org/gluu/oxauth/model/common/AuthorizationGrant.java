@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.Jwt;
@@ -29,7 +28,6 @@ import org.gluu.service.CacheService;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import java.util.Date;
@@ -230,7 +228,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             setAcrValues(acrValues);
             setSessionDn(sessionDn);
-            save();
             return idToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
