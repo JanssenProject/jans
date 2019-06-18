@@ -286,7 +286,7 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
 
-                        requireAuth = !authenticator.authenticateWebService(servletRequest);
+                        requireAuth = !authenticator.authenticateUser(servletRequest);
                     }
                 }
             }
@@ -354,7 +354,7 @@ public class AuthenticationFilter implements Filter {
                             identity.getCredentials().setUsername(clientId);
                             identity.getCredentials().setPassword(clientSecret);
 
-                            requireAuth = !authenticator.authenticateWebService(servletRequest);
+                            requireAuth = !authenticator.authenticateClient(servletRequest);
                         } else {
                             authenticator.configureSessionClient(client);
                         }
@@ -370,7 +370,7 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setUsername(client.getClientId());
                         identity.getCredentials().setPassword(null);
 
-                        requireAuth = !authenticator.authenticateWebService(servletRequest, true);
+                        requireAuth = !authenticator.authenticateClient(servletRequest, true);
                     }
                 } else if (tokenEndpoint) {
                     Client client = clientService.getClient(servletRequest.getParameter("client_id"));
@@ -380,7 +380,7 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setUsername(client.getClientId());
                         identity.getCredentials().setPassword(null);
 
-                        requireAuth = !authenticator.authenticateWebService(servletRequest, true);
+                        requireAuth = !authenticator.authenticateClient(servletRequest, true);
                     }
                 }
             }
@@ -427,7 +427,7 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
 
-                        authenticator.authenticateWebService(servletRequest, true);
+                        authenticator.authenticateClient(servletRequest, true);
                         authorized = true;
                     }
                 }
