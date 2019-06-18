@@ -284,7 +284,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 }
 
             } else {
-            	N1qlParams params = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
+            	N1qlParams params = N1qlParams.build().consistency(connectionProvider.getScanConsistency());
                 N1qlQuery query = N1qlQuery
                         .simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1), params);
                 N1qlQueryResult result = bucketMapping.getBucket().query(query);
@@ -388,7 +388,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	
 	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
 	                    LOG.debug("Execution query: '" + query + "'");
-	                    lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS)));
+	                    lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(connectionProvider.getScanConsistency())));
 	                    if (!lastResult.finalSuccess()) {
 	                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
 	                                lastResult.info().errorCount());
@@ -428,7 +428,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	                }
 	
 	                LOG.debug("Execution query: '" + query + "'");
-	                lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS)));
+	                lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(connectionProvider.getScanConsistency())));
 	                if (!lastResult.finalSuccess()) {
 	                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
 	                            lastResult.info().errorCount());
@@ -456,7 +456,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     .where(finalExpression);
             try {
                 LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
-                N1qlQueryResult countResult = bucket.query(N1qlQuery.simple(selectCountQuery, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS)));
+                N1qlQueryResult countResult = bucket.query(N1qlQuery.simple(selectCountQuery, N1qlParams.build().consistency(connectionProvider.getScanConsistency())));
                 if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
                     throw new SearchException(
                             String.format("Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
