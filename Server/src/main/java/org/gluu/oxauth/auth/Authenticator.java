@@ -171,13 +171,18 @@ public class Authenticator {
         return lastResult;
     }
 
-    public boolean authenticateWebService(HttpServletRequest servletRequest, boolean skipPassword) {
+    public boolean authenticateClient(HttpServletRequest servletRequest, boolean skipPassword) {
         String result = authenticateImpl(servletRequest, false, skipPassword, true);
         return Constants.RESULT_SUCCESS.equals(result);
     }
 
-    public boolean authenticateWebService(HttpServletRequest servletRequest) {
+    public boolean authenticateClient(HttpServletRequest servletRequest) {
         String result = authenticateImpl(servletRequest, false, false, true);
+        return Constants.RESULT_SUCCESS.equals(result);
+    }
+
+    public boolean authenticateUser(HttpServletRequest servletRequest) {
+        String result = authenticateImpl(servletRequest, false, false, false);
         return Constants.RESULT_SUCCESS.equals(result);
     }
 
@@ -186,7 +191,7 @@ public class Authenticator {
         try {
             logger.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword
                     + ", credentials.username: " + credentials.getUsername() + ")");
-            if (service || (StringHelper.isNotEmpty(credentials.getUsername())
+            if (service && (StringHelper.isNotEmpty(credentials.getUsername())
                     && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword())) && servletRequest != null
                     && (servletRequest.getRequestURI().endsWith("/token") || servletRequest.getRequestURI().endsWith("/revoke")))) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
