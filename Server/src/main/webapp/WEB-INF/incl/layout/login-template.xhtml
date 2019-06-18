@@ -9,10 +9,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title><ui:insert name="pageTitle" /></title>
-
-		<link rel="icon"
-			href="#{oxAuthConfigurationService.getImgLocation()}/favicon_icosahedron.ico" />
-
+		<link rel="icon" href="#{request.contextPath}/favicon" />
 		<link type="text/css" rel="stylesheet"
 			href="#{oxAuthConfigurationService.getCssLocation()}/style.css" />
 		<link type="text/css" rel="stylesheet"
@@ -46,6 +43,14 @@
 
 	</h:head>
 	<h:body>
+		<div>
+			<div class="login-logo">
+				<img style="width: 15%; height: 20%;"
+					src="#{request.contextPath}/servlet/logo" />
+			</div>
+			<div class="bs-docs-section"
+				style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top: 1px !important;"></div>
+		</div>
 		<div class="body">
 			<ui:insert name="body" />
 		</div>
