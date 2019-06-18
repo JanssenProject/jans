@@ -2,20 +2,102 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 2:
-    print "Usage: python loga.py <log_dir>"
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--hide_key", help="Hide key string",  action="store_true")
+
+parser.add_argument("-sort",  choices=['count', 't_sum','t_avg','expression','path'], help="Sort criteria")
+
+
+parser.add_argument("dir", help="Path to log dir")
+
+
+args = parser.parse_args()
+
+
+if not args.dir:
+    args.print_help()
     sys.exit()
 
 log_dir = sys.argv[1]
 
+def sort_result(result):
+    sort_index = 0
+    
+    if args.sort == 'count':
+        sort_index = 1
+    elif args.sort == 't_sum': 
+        sort_index = 2
+    elif args.sort in ('expression','path'): 
+        sort_index = 3
+    
+
+    result.sort(key=lambda tup: tup[sort_index])
+    
+    result.reverse()
+
+
+def print_result(result, k, heading):
+        
+    sort_result(result)
+    
+    title = ' count\t     t_sum\t     t_avg\t'
+    t_un = 35
+
+    if not args.hide_key:
+        title += k
+        t_un = 100
+    
+    print
+    print heading
+    print "="*t_un
+    print title
+
+    tn = 0
+    ts = 0
+    ta = 0
+    for a, n, t, k in result:
+        tn += n
+        ts += t
+        ta +=a
+        tss = '{:0.3f}'.format(t).rjust(10)
+        
+        avs = '{:0.3f}'.format(a).rjust(10)
+        ns = str(n).rjust(6)
+        print '{}\t{}\t{}'.format(ns,tss,avs),
+        if not args.hide_key:
+            print "\t{}".format(k),
+        print
+
+    print '-'*t_un
+
+    sts = '{:0.3f}'.format(ts).rjust(10)
+    sa = ts / tn
+    savs = '{:0.3f}'.format(sa).rjust(10)
+    
+    tns = str(tn).rjust(6)
+
+
+    print '{}\t{}\t{}'.format(tns,sts,savs),
+    
+    if not args.hide_key:
+        print '\tGRAND TOTAL',
+    print
+        
+    print
+
+
+
 def http_log():
 
-    print "\nHTTP REQUEST LOG ANALYSES"
-    print "="*100
+    fn = os.path.join(log_dir, 'http_request_response.log')
+    if not os.path.exists(fn):
+        print "File {0} does not exists".format(fn)
+        return
 
     rdict = {}
 
-    for l in open(os.path.join(log_dir, 'http_request_response.log')):
+    for l in open(fn):
         ls = l.strip().split(' - ') 
         data = json.loads(ls[-1])
         if data.get('method') == 'GET':
@@ -26,10 +108,18 @@ def http_log():
                 else:
                     rdict[data['path']] = [d]
 
+    if not rdict:
+        print "\n *** NO HTTP LOG ANALYSES IS AVAILABLE ***"
+        return
+
+
+
     sn = 0
     st = 0
 
-    print 'Count\t  t_sum\t  t_avg\tPATH'
+
+    result=[]
+
 
     for path in rdict:
         data = rdict[path]
@@ -38,31 +128,23 @@ def http_log():
         sn += n
         t = sum(data)
         st += t
-        ts = '{:0.3f}'.format(t).rjust(7)
         a= t/n
-        avs = '{:0.3f}'.format(a).rjust(7)
-        print '{}\t{}\t{}\t{}'.format(ssn,ts,avs, path)
+        
+        result.append((a, n, t, path))
 
-    print '-'*100
-
-    sts = '{:0.3f}'.format(st).rjust(7)
-    sa = st / sn
-    savs = '{:0.3f}'.format(sa).rjust(7)
-    sssn = str(sn).rjust(5)
-
-    print '{}\t{}\t{}\t GRAND TOTAL'.format(sssn,sts,savs)
+    print_result(result, 'path', "HTTP REQUEST LOG ANALYSES")
 
 
 def durations():
 
-    print "\nDURATIONS LOG ANALYSES"
-    print "="*100
-
+    fn = os.path.join(log_dir,'oxauth_persistence_duration.log')
+    if not os.path.exists(fn):
+        print "File {0} does not exists".format(fn)
+        return
 
     rdict = {}
 
-
-    for l in open(os.path.join(log_dir,'oxauth_persistence_duration.log')):
+    for l in open(fn):
         ls = l.split(',')
         d = float(ls[2].strip()[12:-1])
 
@@ -80,7 +162,6 @@ def durations():
     sn = 0
     st = 0
 
-    print 'Count\t  t_sum\t  t_avg\t  Expression'
 
     result = []
 
@@ -94,27 +175,8 @@ def durations():
         result.append((a, n, t, path))
 
         st += t
-        
 
-
-    result.sort()
-    result.reverse()
-
-    for a, n, t, path in result:
-        
-        ssn = str(n).rjust(5)
-        ts = '{:0.3f}'.format(t).rjust(7)
-        avs = '{:0.3f}'.format(a).rjust(7)
-        print '{}\t{}\t{}\t  {}'.format(ssn,ts,avs, path)
-
-    print '-'*100
-
-    sts = '{:0.3f}'.format(st).rjust(7)
-    sa = st / sn
-    savs = '{:0.3f}'.format(sa).rjust(7)
-    sssn = str(sn).rjust(5)
-
-    print '{}\t{}\t{}\t GRAND TOTAL'.format(sssn,sts,savs)
+    print_result(result, 'expression', "DURATIONS LOG ANALYSES")
 
 durations()
 http_log()
