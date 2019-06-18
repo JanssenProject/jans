@@ -1,17 +1,18 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:f="http://xmlns.jcp.org/jsf/core"
-				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-				xmlns:h="http://xmlns.jcp.org/jsf/html"
-				template="/WEB-INF/incl/layout/template.xhtml">
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
 	<f:metadata>
-		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{not identity.loggedIn}" />
 	</f:metadata>
-	
+
 	<ui:define name="head">
 		<meta name="description" content="Gluu Inc." />
-		
+
 	</ui:define>
 
 	<ui:define name="pageTitle">
@@ -19,85 +20,62 @@
 	</ui:define>
 
 	<ui:define name="body">
-		<header>
-			<div class="container">
-				<div id="header" class="row-fluid">
-					<div class="logo span2">
-						<ui:param name="client"
-								  value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+		<h:form id="loginForm">
+			<h:panelGroup rendered="#{not identity.loggedIn}">
+				<div class="bs-docs-section">
+					<div class="container">
+						<h:messages style="color:red;" />
+						<div class="step_bx">
+							<h2>#{msgs['otp.verification']}</h2>
+							<p>#{msgs['otp.usedevice']}</p>
+							<img
+								src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
+								alt="ver_code" />
+							<h4>#{msgs['otp.entercode']}</h4>
+							<p>
+								<br />#{msgs['otp.getcode2']}
+							</p>
 
-						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
-							<h:graphicImage url='#{client.getLogoUri()}' />
-						</h:panelGroup>
-						<h:panelGroup rendered='#{empty client.getLogoUri()}'>
-							<a href="http://www.gluu.org/"> <h:graphicImage
-									url="../img/logo.png" />
-							</a>
-						</h:panelGroup>
+							<input class="form-control" id="loginForm:otpCode"
+								name="loginForm:otpCode" type="text" autocomplete="off" />
+							<h:commandButton class="btn btn-done"
+								value="#{msgs['login.login']}"
+								action="#{authenticator.authenticate}" />
+						</div>
 					</div>
-					<!-- end logo-->
 				</div>
-			</div>
+				<div class="inner-form-container row-fluid"
+					style='display: #{(empty client.getPolicyUri() and empty client.getTosUri())? "none": ""'>
+					<ul class="offset2 span10">
 
-		</header>
-		<!-- end header-->
-					<h:form id="loginForm" >
-						<h:panelGroup rendered="#{not identity.loggedIn}">							
-							<div class="bs-docs-section">
-								<div class="container">								
-									<h:messages style="color:red;" />
-									<div class="step_bx">
-										<h2>#{msgs['otp.verification']}</h2>
-										<p>#{msgs['otp.usedevice']}</p>
-										<img src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png" alt="ver_code"/>
-										<h4>#{msgs['otp.entercode']}</h4>
-											<p><br />#{msgs['otp.getcode2']}</p>
-										
-										   	<input class="form-control" id="loginForm:otpCode" name="loginForm:otpCode"   type="text" autocomplete="off" />
-										   	<h:commandButton class="btn btn-done"
-																 value="#{msgs['login.login']}"
-																 action="#{authenticator.authenticate}" />															
-									</div>
-								</div>
-							</div>						
-							<div class="inner-form-container row-fluid" style='display: #{(empty client.getPolicyUri() and empty client.getTosUri()) ? "none" : ""}'>
-								<ul class="offset2 span10">
-									
-									<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-										<p>
-											<h:outputText value="#{msgs['common.agreePolicy']}" />
-											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-													value="#{msgs['common.privacyPolicy']}" />
-											</a>
-										</p>
-									</h:panelGroup>
-
-									<h:panelGroup rendered='#{!empty client.getTosUri()}'>
-										<p>
-											<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-													value="#{msgs['common.termsOfService']}" />
-											</a>
-										</p>
-									</h:panelGroup>
-								</ul>
-
-							</div>
+						<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+							<p>
+								<h:outputText value="#{msgs['common.agreePolicy']}" />
+								<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+										value="#{msgs['common.privacyPolicy']}" />
+								</a>
+							</p>
 						</h:panelGroup>
-					</h:form>
-					<ui:include src="/casa/casa.xhtml">
-					            <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
-        				</ui:include>
-			<div id="footer">
-				<p>
-					<h:outputText value="#{msgs['common.gluuInc']}" />
-					, |
-					<h:outputText value="#{msgs['common.caution']}" escape="false" />
-				</p>
-			</div>
 
+						<h:panelGroup rendered='#{!empty client.getTosUri()}'>
+							<p>
+								<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+								<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+										value="#{msgs['common.termsOfService']}" />
+								</a>
+							</p>
+						</h:panelGroup>
+					</ul>
+
+				</div>
+			</h:panelGroup>
+		</h:form>
+		<ui:include src="/casa/casa.xhtml">
+			<ui:param name="methods"
+				value="${identity.getWorkingParameter('methods')}" />
+		</ui:include>
 		<script type="text/javascript">
-			window.onload = function () {
+			window.onload = function() {
 				var otpCodeField = document.getElementById("loginForm:otpCode");
 				otpCodeField.focus();
 			};
