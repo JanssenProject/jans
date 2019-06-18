@@ -140,31 +140,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 	</ui:define>
 
 	<ui:define name="body">
-
-		<!--Header-->
-		<!--         <nav class="navbar navbar-default"> -->
-		<div class="container">
-			<div class="row">
-				<div class="col-xs-12 col-sm-3">
-					<div class="navbar-header">
-						<ui:param name="client"
-							value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
-						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
-							<h:graphicImage url='#{client.getLogoUri()}' />
-						</h:panelGroup>
-						<h:panelGroup rendered='#{empty client.getLogoUri()}'>
-							<object data="../../ext/resources/img/logo.png" type="image/png">
-								<img src="../../img/logo.png" />
-							</object>
-						</h:panelGroup>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-9"></div>
-			</div>
-		</div>
-		<div class="bs-docs-section"
-			style="border-top: 2px solid #1ab26b !important; margin-bottom: 5px !important; margin-top: 1px !important; padding-top: 1px !important;"></div>
-		<!--Header End-->
 		<div class="container" style="padding-top: 0px;">
 			<div id="content" class="sign-in-page" style="margin-top:-15px;">
 				<noscript>
