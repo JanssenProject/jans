@@ -148,12 +148,12 @@ def durations():
         ls = l.split(',')
         d = float(ls[2].strip()[12:-1])
 
-        if len(ls)>4:
+        if len(ls)>6:
 
-            p = ls[4].strip()
+            p = ls[5].strip()
         else:
-            p = ls[3].strip()
-        
+            p = ls[4].strip()
+ 
         if p in rdict:
             rdict[p].append(d)
         else:
@@ -179,4 +179,4 @@ def durations():
     print_result(result, 'expression', "DURATIONS LOG ANALYSES")
 
 durations()
-http_log()
+#http_log()
