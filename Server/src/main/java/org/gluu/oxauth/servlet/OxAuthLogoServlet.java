@@ -33,7 +33,7 @@ public class OxAuthLogoServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType("image/jpg");
+		response.setContentType("/image/jpg");
 		GluuOrganization organization = organizationService.getOrganization();
 		boolean hasSucceed = readCustomLogo(response, organization);
 		if (!hasSucceed) {
@@ -42,26 +42,26 @@ public class OxAuthLogoServlet extends HttpServlet {
 	}
 
 	private boolean readDefaultLogo(HttpServletResponse response) {
-		String defaultLogoFileName = "img/logo.png";
+		String defaultLogoFileName = "/WEB-INF/static/logo.png";
 		try (InputStream in = getServletContext().getResourceAsStream(defaultLogoFileName);
 				OutputStream out = response.getOutputStream()) {
 			IOUtils.copy(in, out);
 			return true;
 		} catch (IOException e) {
-			log.debug("Error loading default logo: " + e.getMessage());
+			log.debug("---------------Error loading default logo: " + e.getMessage());
 			return false;
 		}
 	}
 
 	private boolean readCustomLogo(HttpServletResponse response, GluuOrganization organization) {
-		if (organization.getOxTrustLogoPath() == null || StringUtils.isEmpty(organization.getOxTrustLogoPath())) {
+		if (organization.getOxAuthLogoPath() == null || StringUtils.isEmpty(organization.getOxAuthLogoPath())) {
 			return false;
 		}
 		File directory = new File(BASE_OXAUTH_LOGO_PATH);
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File logoPath = new File(BASE_OXAUTH_LOGO_PATH + organization.getOxTrustLogoPath());
+		File logoPath = new File(BASE_OXAUTH_LOGO_PATH + organization.getOxAuthLogoPath());
 		if (!logoPath.exists()) {
 			return false;
 		}

@@ -42,7 +42,7 @@ public class OxAuthFaviconServlet extends HttpServlet {
 	}
 
 	private boolean readDefaultFavicon(HttpServletResponse response) {
-		String defaultFaviconFileName = "/WEB-INF/static/images/favicon_icosahedron.ico";
+		String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
 		try (InputStream in = getServletContext().getResourceAsStream(defaultFaviconFileName);
 				OutputStream out = response.getOutputStream()) {
 			IOUtils.copy(in, out);
@@ -54,7 +54,7 @@ public class OxAuthFaviconServlet extends HttpServlet {
 	}
 
 	private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
-		if (organization.getOxTrustFaviconPath() == null || StringUtils.isEmpty(organization.getOxTrustFaviconPath())) {
+		if (organization.getOxAuthFaviconPath() == null || StringUtils.isEmpty(organization.getOxAuthFaviconPath())) {
 			return false;
 		}
 
@@ -62,7 +62,7 @@ public class OxAuthFaviconServlet extends HttpServlet {
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File faviconPath = new File(BASE_OXAUTH_FAVICON_PATH + organization.getOxTrustFaviconPath());
+		File faviconPath = new File(BASE_OXAUTH_FAVICON_PATH + organization.getOxAuthFaviconPath());
 		if (!faviconPath.exists()) {
 			return false;
 		}

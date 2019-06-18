@@ -58,7 +58,7 @@ public class OrganizationService extends org.gluu.service.OrganizationService {
 	}
 
 	public String getDnForOrganization() {
-		return "ou=gluu";
+		return "o=gluu";
 	}
 
 }
