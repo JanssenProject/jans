@@ -128,8 +128,8 @@ public class CouchbaseConnectionProvider {
         }
         LOG.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
         
-        if (props.containsKey("connection.scan-consistency-mode")) {
-        	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency-mode").toString());
+        if (props.containsKey("connection.scan-consistency")) {
+        	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency").toString());
         	this.scanConsistency = ScanConsistency.valueOf(scanConsistencyString);
         	if (this.scanConsistency == null) {
         		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
