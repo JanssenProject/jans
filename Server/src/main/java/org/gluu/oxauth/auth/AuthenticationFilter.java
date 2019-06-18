@@ -274,6 +274,9 @@ public class AuthenticationFilter implements Filter {
                 // and user isn't authenticated
                 if (requireAuth) {
                     if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+                        identity.getCredentials().setUsername(username);
+                        identity.getCredentials().setPassword(password);
+
                         if (servletRequest.getRequestURI().endsWith("/token")
                                 || servletRequest.getRequestURI().endsWith("/revoke")) {
                             Client client = clientService.getClient(username);
@@ -281,12 +284,10 @@ public class AuthenticationFilter implements Filter {
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
                                 throw new Exception("The Token Authentication Method is not valid.");
                             }
+                            requireAuth = !authenticator.authenticateClient(servletRequest);
+                        } else {
+                            requireAuth = !authenticator.authenticateUser(servletRequest);
                         }
-
-                        identity.getCredentials().setUsername(username);
-                        identity.getCredentials().setPassword(password);
-
-                        requireAuth = !authenticator.authenticateUser(servletRequest);
                     }
                 }
             }
