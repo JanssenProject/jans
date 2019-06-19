@@ -3,30 +3,38 @@ import json
 import os
 import argparse
 
+columns = ['count', 't_sum', 't_avg', 'operation', 'key']
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--hide", choices=['count', 't_sum','t_avg','key'], nargs='+', help="Hide specified column")
 parser.add_argument("--log", choices=["http", "duration", "all"], default="all", help="Log to analayse")
-parser.add_argument("--sort", choices=['count', 't_sum','t_avg','key'], default='count', help="Sort criteria")
+parser.add_argument("--sort", choices=columns + ['D'+c for c in columns], default='count', help="Sort criteria.")
 parser.add_argument("--min", type=float, default=0, help="Duration below this time will be omitted")
+parser.add_argument("--operation", choices=['add', 'lookup','search','bind', 'modify'], default=['add', 'lookup','search','bind', 'modify'], nargs='+', help="Database operations to include")
+
 parser.add_argument("--type", choices=["csv", "html", "text"], default="text", help="Output type")
-
-
 
 parser.add_argument("dir", help="Path to log dir")
 
 args = parser.parse_args()
 
-columns = ['count', 't_sum', 't_avg', 'key']
-
 if not args.dir:
     args.print_help()
     sys.exit()
 
-
 def sort_result(result):
-    sort_index = columns.index(args.sort)
-    result.sort(key=lambda mydic: mydic[args.sort])
-    result.reverse()
+    
+    descending = False
+    order_by = args.sort
+
+    if order_by[0] == 'D':
+        order_by = order_by[1:]
+        descending = True
+    
+    result.sort(key=lambda mydic: mydic[order_by])
+    
+    if descending:
+        result.reverse()
 
 def get_formatted_str(v):
     if type(v) == type(1):
@@ -36,40 +44,6 @@ def get_formatted_str(v):
     else:
         return v
 
-def print_table(table):
-    
-    print 
-    
-    footer = {'count':0, 't_sum':0, 't_avg':0}
-    
-    
-    """
-    if args.type == 'text':
-    
-        hs = '----'
-    
-        print '   #',
-    
-        for _ in columns[:-1]:
-            if not is_hidden(_):
-                print _.rjust(8),
-                hs += ('-'*len(_)).rjust(9)
-        if not is_hidden('key'):
-            print '    '+table['key'],
-            hs += '     '+ '-'*50
-        print
-        print hs
-    """
-    
-    for ln, row in enumerate(table['rows']):
-        print str(ln+1).rjust(4),
-
-        for c in columns:
-            if not is_hidden(c):
-                print get_formatted_str(row[c]),
-
-        print
-
 def is_hidden(c):
     if args.hide and c in args.hide:
         return True
@@ -77,8 +51,6 @@ def is_hidden(c):
 def print_result(result, k, heading):
         
     sort_result(result)
-
-
 
     if args.type == 'text':
     
@@ -115,7 +87,7 @@ def print_result(result, k, heading):
         print '='*100
         
         print ' '.rjust(3),
-        for c in columns[:-1]:
+        for c in columns[:-2]:
             if not is_hidden(c):
                 if c=='t_avg':
                     pp = footer[c] / len(result)
@@ -133,15 +105,10 @@ def print_result(result, k, heading):
         print '<table>'
         print '<caption><b>{0}</b></caption>'.format(heading)
 
-
-
         print '<tr><td style="padding-right:10px; padding-left:10px">#</td>',
-
     
         for c in columns:
             if not is_hidden(c):
-                
-                
                 
                 if c=='key':
                     td = k
@@ -170,7 +137,7 @@ def print_result(result, k, heading):
                 print '</tr>'
         
         print '<tr><td></td>',
-        for c in columns[:-1]:
+        for c in columns[:-2]:
             if not is_hidden(c):
                 if c=='t_avg':
                     pp = footer[c] / len(result)
@@ -179,12 +146,8 @@ def print_result(result, k, heading):
                 
                 print '<td align="right">{0}</td>'.format(get_formatted_str(pp).strip()),
                 
-        print "<td> GRANT TOTAL </td></tr>"
-
-
+        print '<td colspan="2"> GRANT TOTAL </td></tr>'
         print '</table>\n'
-        
-        
         print '<br><br>'
 
 
@@ -240,9 +203,17 @@ def durations():
         return
 
     rdict = {}
+    operations = {}
 
     for l in open(fn):
         ls = l.split(',')
+        
+        operation = ls[1].split('operation: ')[1]
+        
+        
+        if not operation in args.operation:
+            continue
+        
         d = float(ls[2].strip()[12:-1])
 
         if d > args.min:
@@ -256,6 +227,8 @@ def durations():
             else:
                 rdict[p] = [d]
 
+            operations[p] = operation
+
     sn = 0
     st = 0
 
@@ -268,9 +241,8 @@ def durations():
         sn += n
         t = sum(data)
         a = t/n
-        
 
-        result.append({'count': n, 't_sum': t, 't_avg': a, 'key': path})
+        result.append({'count': n, 't_sum': t, 't_avg': a, 'key': path, 'operation': operations[path]})
 
         st += t
 
