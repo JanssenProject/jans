@@ -1,15 +1,16 @@
 {
+
   "gluu_user": [
     "objectClass", 
     "oxStatus", 
     "creationDate", 
     "ou", 
     "uid", 
-    "oxAuthClientId", 
     "oxDeletable", 
     "oxAuthExpiration", 
     "mail"
   ], 
+
   "gluu": [
     "objectClass", 
     "oxScriptType", 
@@ -30,18 +31,25 @@
     "oxTicket", 
     "oxDeletable",
     "oxAuthSessionDn",
-    "gluu_bucket"
+    "oxAuthClientId"
   ], 
+
   "gluu_site": [
     "objectClass", 
     "inum", 
     "gluuStatus"
   ], 
+
   "gluu_statistic": [
     "objectClass", 
     "ou", 
     "oxStartDate", 
     "oxDeletable", 
     "oxAuthExpiration"
+  ],
+
+  "cache": [
+    "uniqueIdentifier"
   ]
+
 }
