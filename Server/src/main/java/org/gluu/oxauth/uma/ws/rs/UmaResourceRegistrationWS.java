@@ -273,17 +273,14 @@ public class UmaResourceRegistrationWS {
         String userDn = authorizationGrant.getUserDn();
         String clientDn = authorizationGrant.getClientDn();
 
-        final String resourceDn;
+        org.gluu.oxauth.model.uma.persistence.UmaResource ldapUpdatedResource;
 
         if (status == Response.Status.CREATED) {
-            resourceDn = addResource(rsid, resource, userDn, clientDn);
+            ldapUpdatedResource = addResource(rsid, resource, userDn, clientDn);
         } else {
             umaValidationService.validateRestrictedByClient(clientDn, rsid);
-            resourceDn = updateResource(rsid, resource);
+            ldapUpdatedResource = updateResource(rsid, resource);
         }
-
-        // Load resource description
-        org.gluu.oxauth.model.uma.persistence.UmaResource ldapUpdatedResource = resourceService.getResourceByDn(resourceDn);
 
         UmaResourceResponse response = new UmaResourceResponse();
         response.setId(ldapUpdatedResource.getId());
@@ -294,7 +291,7 @@ public class UmaResourceRegistrationWS {
                 build();
     }
 
-    private String addResource(String rsid, UmaResource resource, String userDn, String clientDn) {
+    private org.gluu.oxauth.model.uma.persistence.UmaResource addResource(String rsid, UmaResource resource, String userDn, String clientDn) {
         log.debug("Adding new resource: '{}'", rsid);
 
         final String resourceDn = resourceService.getDnForResource(rsid);
@@ -319,7 +316,7 @@ public class UmaResourceRegistrationWS {
 
         resourceService.addResource(ldapResource);
 
-        return resourceDn;
+        return ldapResource;
     }
 
     private Date getExpirationDate(Calendar creationCalender) {
@@ -331,7 +328,7 @@ public class UmaResourceRegistrationWS {
         return creationCalender.getTime();
     }
 
-    private String updateResource(String rsid, UmaResource resource) {
+    private org.gluu.oxauth.model.uma.persistence.UmaResource updateResource(String rsid, UmaResource resource) {
         log.debug("Updating resource description: '{}'.", rsid);
 
         org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
@@ -352,7 +349,7 @@ public class UmaResourceRegistrationWS {
 
         resourceService.updateResource(ldapResource);
 
-        return ldapResource.getDn();
+        return ldapResource;
     }
 
     private int incrementRev(String rev) {
