@@ -170,6 +170,7 @@ public class UmaResourceService {
         try {
             final UmaResource resource = ldapEntryManager.find(UmaResource.class, getDnForResource(id));
             if (resource != null) {
+                putInCache(resource);
                 return resource;
             }
         } catch (Exception e) {
@@ -184,20 +185,6 @@ public class UmaResourceService {
         if (!ldapEntryManager.contains(getDnForResource(null), SimpleBranch.class)) {
             addBranch();
         }
-    }
-
-    /**
-     * Get resource description by DN
-     *
-     * @param dn Resource description DN
-     * @return Resource description
-     */
-    public UmaResource getResourceByDn(String dn) {
-        UmaResource fromCache = fromCache(dn);
-        if (fromCache != null) {
-            return fromCache;
-        }
-        return ldapEntryManager.find(UmaResource.class, dn);
     }
 
     /**
@@ -216,7 +203,7 @@ public class UmaResourceService {
     }
 
     private void putInCache(UmaResource resource) {
-        if (resource == null) {
+        if (resource == null || StringUtils.isBlank(resource.getDn())) {
             return;
         }
 
@@ -229,7 +216,11 @@ public class UmaResourceService {
 
     private UmaResource fromCache(String dn) {
         try {
-            return (UmaResource) cacheService.get(null, dn);
+            if (StringUtils.isBlank(dn)) {
+                return null;
+            }
+
+            return (UmaResource) cacheService.get(dn);
         } catch (Exception e) {
             log.error("Failed to fetch client from cache, dn: " + dn, e);
             return null;

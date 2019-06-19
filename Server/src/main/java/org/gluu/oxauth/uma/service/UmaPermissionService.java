@@ -134,14 +134,6 @@ public class UmaPermissionService {
         return null;
     }
 
-    public String getPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
-        final UmaPermission permission = getPermissionByConfigurationCode(configurationCode, clientDn);
-        if (permission != null) {
-            return permission.getTicket();
-        }
-        return null;
-    }
-
     public UmaPermission getPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
         try {
             final Filter filter = Filter.createEqualityFilter("oxConfigurationCode", p_configurationCode);
