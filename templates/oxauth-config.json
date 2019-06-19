@@ -184,6 +184,7 @@
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
+    "cleanServiceBatchChunkSize": 1000,
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
