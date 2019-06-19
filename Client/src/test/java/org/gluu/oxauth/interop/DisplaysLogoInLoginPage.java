@@ -79,7 +79,6 @@ public class DisplaysLogoInLoginPage extends BaseTest {
 			navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 			WebElement logo = driver.findElement(By.id("AppLogo"));
 			assertNotNull(logo);
-			assertTrue(logo.getText().endsWith("/servlet/logo"));
 		} catch (NoSuchElementException ex) {
 			fail("Logo not found");
 		} finally {
