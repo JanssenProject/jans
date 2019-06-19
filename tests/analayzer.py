@@ -4,10 +4,11 @@ import os
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--hide_key", help="Hide key string",  action="store_true")
-
+parser.add_argument("--hide_key", action="store_true", help="Hide key string")
+parser.add_argument("--log",   choices=["http", "duration", "all"], default="all", help="Log to analayse")
 parser.add_argument("--sort",  choices=['count', 't_sum','t_avg','expression','path'], help="Sort criteria")
-parser.add_argument("--min",  type=float, default=0)
+parser.add_argument("--min",  type=float, default=0, help="Duration below this time will be omitted")
+
 
 parser.add_argument("dir", help="Path to log dir")
 
@@ -82,9 +83,7 @@ def print_result(result, k, heading):
     if not args.hide_key:
         print '\tGRAND TOTAL',
     print
-        
     print
-
 
 
 def http_log():
@@ -158,7 +157,6 @@ def durations():
     sn = 0
     st = 0
 
-
     result = []
 
     for path in rdict:
@@ -174,5 +172,7 @@ def durations():
 
     print_result(result, 'expression', "DURATIONS LOG ANALYSES")
 
-durations()
-http_log()
+if args.log in ('duration', 'all'):
+    durations()
+if args.log in ('http', 'all'):
+    http_log()
