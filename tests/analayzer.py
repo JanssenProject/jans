@@ -6,14 +6,12 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--hide_key", help="Hide key string",  action="store_true")
 
-parser.add_argument("-sort",  choices=['count', 't_sum','t_avg','expression','path'], help="Sort criteria")
-
+parser.add_argument("--sort",  choices=['count', 't_sum','t_avg','expression','path'], help="Sort criteria")
+parser.add_argument("--min",  type=float, default=0)
 
 parser.add_argument("dir", help="Path to log dir")
 
-
 args = parser.parse_args()
-
 
 if not args.dir:
     args.print_help()
@@ -29,7 +27,6 @@ def sort_result(result):
         sort_index = 2
     elif args.sort in ('expression','path'): 
         sort_index = 3
-    
 
     result.sort(key=lambda tup: tup[sort_index])
     
@@ -102,23 +99,20 @@ def http_log():
         if data.get('method') == 'GET':
             if data.get('duration'):
                 d = float(data['duration'][2:-1])
-                if data['path'] in rdict:
-                    rdict[data['path']].append(d)
-                else:
-                    rdict[data['path']] = [d]
+                if d > args.min:
+                    if data['path'] in rdict:
+                        rdict[data['path']].append(d)
+                    else:
+                        rdict[data['path']] = [d]
 
     if not rdict:
         print "\n *** NO HTTP LOG ANALYSES IS AVAILABLE ***"
         return
 
-
-
     sn = 0
     st = 0
 
-
     result=[]
-
 
     for path in rdict:
         data = rdict[path]
@@ -147,16 +141,16 @@ def durations():
         ls = l.split(',')
         d = float(ls[2].strip()[12:-1])
 
-        if len(ls)>6:
-
-            p = ls[5].strip()
-        else:
-            p = ls[4].strip()
- 
-        if p in rdict:
-            rdict[p].append(d)
-        else:
-            rdict[p] = [d]
+        if d > args.min:
+            if len(ls)>6:
+                p = ls[5].strip()
+            else:
+                p = ls[4].strip()
+     
+            if p in rdict:
+                rdict[p].append(d)
+            else:
+                rdict[p] = [d]
 
     sn = 0
     st = 0
