@@ -54,6 +54,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             }
 
             baseDn = branchDn;
+            cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(baseDn);
 
             log.info("Created NATIVE_PERSISTENCE cache provider. `baseDn`: " + baseDn);
         } catch (Exception e) {
