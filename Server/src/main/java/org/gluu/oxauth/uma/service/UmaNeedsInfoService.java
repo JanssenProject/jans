@@ -84,9 +84,7 @@ public class UmaNeedsInfoService {
                         if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
                             ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
                         } else {
-                            if (!UmaConstants.NO_SCRIPT.equalsIgnoreCase(claimsGatheringScriptName)) {
-                                log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
-                            }
+                            log.debug("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
                         }
                     } else {
                         log.error("Unable to load UMA script dn: '{}'", scriptDN);
