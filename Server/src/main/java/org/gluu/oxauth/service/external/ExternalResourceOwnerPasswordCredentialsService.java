@@ -52,6 +52,12 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
 
             ResourceOwnerPasswordCredentialsType script = (ResourceOwnerPasswordCredentialsType) customScriptConfiguration.getExternalType();
             context.setScript(customScriptConfiguration);
+
+            if (script == null) {
+                log.error("Failed to load script, name: " + customScriptConfiguration.getName());
+                return false;
+            }
+
             final boolean result = script.authenticate(context);
 
             log.debug("Finished external 'executeExternalAuthenticate' method, script name: {}, context: {}, result: {}",
