@@ -38,6 +38,7 @@ class UmaRptPolicy(UmaRptPolicyType):
 
     # Returns required claims definitions.
     # This method must provide definition of all claims that is used in 'authorize' method.
+    # Return empty array `[]` if no claims should be gathered.
     # Note : name in both places must match.
     # %1$s - placeholder for issuer. It uses standard Java Formatter, docs : https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
     def getRequiredClaims(self, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaAuthorizationContext
@@ -70,7 +71,7 @@ class UmaRptPolicy(UmaRptPolicyType):
 
         return False
 
-    # Returns name of the Claims-Gathering script which will be invoked if need_info error is returned.
+    # Returns name of the Claims-Gathering script which will be invoked if need_info error is returned. Return blank/empty string if claims gathering flow is not involved.
     def getClaimsGatheringScriptName(self, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaAuthorizationContext
         context.addRedirectUserParam("customUserParam2", "value2") # pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
         return "sampleClaimsGathering"
