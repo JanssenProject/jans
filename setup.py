@@ -938,7 +938,7 @@ class Setup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on"])
                 
-        elif self.os_type+self.os_version in ('ubuntu18','ubuntu9'):
+        elif self.os_type+self.os_version in ('ubuntu18','debian9'):
             self.run([self.systemctl, 'enable', serviceName])
                 
         elif self.os_type in ['ubuntu', 'debian']:
@@ -1464,8 +1464,11 @@ class Setup(object):
                 initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
-        
-        service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+
+	if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
+ 	    service_init_script_fn = os.path.join('/opt/dist/scripts', serviceName)
+        else:
+ 	    service_init_script_fn = os.path.join('/etc/init.d', serviceName)
         with open(service_init_script_fn, 'w') as W:
             W.write(''.join(initscript))
 
@@ -3399,7 +3402,7 @@ class Setup(object):
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -3463,7 +3466,7 @@ class Setup(object):
     def detect_service_path(self):
         service_path = '/sbin/service'
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
             service_path = self.systemctl
             
         elif self.os_type in ['debian', 'ubuntu']:
@@ -3475,7 +3478,7 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','ubuntu9')):
+            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
