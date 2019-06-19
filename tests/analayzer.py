@@ -19,7 +19,6 @@ if not args.dir:
     args.print_help()
     sys.exit()
 
-log_dir = sys.argv[1]
 
 def sort_result(result):
     sort_index = 0
@@ -90,7 +89,7 @@ def print_result(result, k, heading):
 
 def http_log():
 
-    fn = os.path.join(log_dir, 'http_request_response.log')
+    fn = os.path.join(args.dir, 'http_request_response.log')
     if not os.path.exists(fn):
         print "File {0} does not exists".format(fn)
         return
@@ -137,7 +136,7 @@ def http_log():
 
 def durations():
 
-    fn = os.path.join(log_dir,'oxauth_persistence_duration.log')
+    fn = os.path.join(args.dir,'oxauth_persistence_duration.log')
     if not os.path.exists(fn):
         print "File {0} does not exists".format(fn)
         return
@@ -179,4 +178,4 @@ def durations():
     print_result(result, 'expression', "DURATIONS LOG ANALYSES")
 
 durations()
-#http_log()
+http_log()
