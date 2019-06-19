@@ -31,57 +31,59 @@ import static org.testng.Assert.*;
  */
 public class DisplaysLogoInLoginPage extends BaseTest {
 
-    @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
-    @Test
-    public void displaysLogoInLoginPage(final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("OC5:FeatureTest-Displays Logo in Login Page");
+	@Parameters({ "redirectUris", "redirectUri", "sectorIdentifierUri" })
+	@Test
+	public void displaysLogoInLoginPage(final String redirectUris, final String redirectUri,
+			final String sectorIdentifierUri) throws Exception {
+		showTitle("OC5:FeatureTest-Displays Logo in Login Page");
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        String logoUri = "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png";
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+		String logoUri = "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png";
 
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setLogoUri(logoUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+		// 1. Register client
+		RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+				StringUtils.spaceSeparatedToList(redirectUris));
+		registerRequest.setResponseTypes(responseTypes);
+		registerRequest.setLogoUri(logoUri);
+		registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
+		RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+		registerClient.setRequest(registerRequest);
+		RegisterResponse registerResponse = registerClient.exec();
 
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+		showClient(registerClient);
+		assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+		assertNotNull(registerResponse.getClientId());
+		assertNotNull(registerResponse.getClientSecret());
+		assertNotNull(registerResponse.getRegistrationAccessToken());
+		assertNotNull(registerResponse.getClientIdIssuedAt());
+		assertNotNull(registerResponse.getClientSecretExpiresAt());
 
-        String clientId = registerResponse.getClientId();
+		String clientId = registerResponse.getClientId();
 
-        // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String state = UUID.randomUUID().toString();
+		// 2. Request authorization and receive the authorization code.
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
-        authorizationRequest.setState(state);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, null);
+		authorizationRequest.setState(state);
 
-        String authorizationRequestUrl = getAuthorizationEndpoint() + "?" + authorizationRequest.getQueryString();
+		String authorizationRequestUrl = getAuthorizationEndpoint() + "?" + authorizationRequest.getQueryString();
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(getAuthorizationEndpoint());
-        authorizeClient.setRequest(authorizationRequest);
+		AuthorizeClient authorizeClient = new AuthorizeClient(getAuthorizationEndpoint());
+		authorizeClient.setRequest(authorizationRequest);
 
-        try {
-            startSelenium();
-            navigateToAuhorizationUrl(driver, authorizationRequestUrl);
-
-            WebElement logo = driver.findElement(By.xpath("//img[@src='" + logoUri + "']"));
-            assertNotNull(logo);
-        } catch (NoSuchElementException ex) {
-            fail("Logo not found");
-        } finally {
-            stopSelenium();
-        }
-    }
+		try {
+			startSelenium();
+			navigateToAuhorizationUrl(driver, authorizationRequestUrl);
+			WebElement logo = driver.findElement(By.id("AppLogo"));
+			assertNotNull(logo);
+			assertTrue(logo.getText().endsWith("/servlet/logo"));
+		} catch (NoSuchElementException ex) {
+			fail("Logo not found");
+		} finally {
+			stopSelenium();
+		}
+	}
 }
