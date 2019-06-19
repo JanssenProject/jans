@@ -37,7 +37,7 @@ def print_result(result, k, heading):
         
     sort_result(result)
     
-    title = ' count\t     t_sum\t     t_avg\t'
+    title = '  #   count\t     t_sum\t     t_avg\t'
     t_un = 35
 
     if not args.hide_key:
@@ -49,10 +49,12 @@ def print_result(result, k, heading):
     print "="*t_un
     print title
 
+    line_n = 0
     tn = 0
     ts = 0
     ta = 0
     for a, n, t, k in result:
+        line_n += 1
         tn += n
         ts += t
         ta +=a
@@ -60,7 +62,8 @@ def print_result(result, k, heading):
         
         avs = '{:0.3f}'.format(a).rjust(10)
         ns = str(n).rjust(6)
-        print '{}\t{}\t{}'.format(ns,tss,avs),
+        line_ns = str(line_n).rjust(3)
+        print '{}  {}\t{}\t{}'.format(line_ns, ns,tss,avs),
         if not args.hide_key:
             print "\t{}".format(k),
         print
