@@ -45,7 +45,6 @@ import random
 import ssl
 import ldap
 import uuid
-import zipfile
 
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
@@ -214,7 +213,7 @@ class Setup(object):
 
         self.oxVersion = oxauth_info['version']
         self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
-        self.githubBranchName = 'master'
+        self.githubBranchName = oxauth_info['branch']
 
         self.pbar = ProgressBar(tty_columns)
 
