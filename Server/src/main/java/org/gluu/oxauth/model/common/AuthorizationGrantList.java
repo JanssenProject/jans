@@ -184,16 +184,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         return asGrant(grantService.getGrantsByCodeAndClient(p_code, clientId));
     }
 
-    public static String extractClientIdFromTokenDn(String p_dn) {
-        return StringUtils.substringBetween(p_dn, "inum=", "ou=clients").replaceAll(",", "");
-    }
-
     public AuthorizationGrant asGrant(TokenLdap tokenLdap) {
         if (tokenLdap != null) {
             final AuthorizationGrantType grantType = AuthorizationGrantType.fromString(tokenLdap.getGrantType());
             if (grantType != null) {
                 final User user = userService.getUser(tokenLdap.getUserId());
-                final Client client = clientService.getClient(extractClientIdFromTokenDn(tokenLdap.getDn()));
+                final Client client = clientService.getClient(tokenLdap.getClientId());
                 final Date authenticationTime = tokenLdap.getAuthenticationTime();
                 final String nonce = tokenLdap.getNonce();
 

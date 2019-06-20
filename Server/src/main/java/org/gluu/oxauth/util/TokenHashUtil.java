@@ -20,4 +20,13 @@ public class TokenHashUtil {
             return token;
         }
     }
+
+    public static String getHashedTokenWithoutPrefix(String hashedToken) {
+        if (StringUtils.isNotBlank(hashedToken) && hashedToken.startsWith(PREFIX)) {
+            return hashedToken;
+        } else {
+            return DigestUtils.sha256Hex(hashedToken);
+        }
+    }
+
 }
