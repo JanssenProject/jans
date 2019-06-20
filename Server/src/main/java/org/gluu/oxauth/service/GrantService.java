@@ -72,10 +72,6 @@ public class GrantService {
         return String.format("uniqueIdentifier=%s,", p_hashedToken) + tokenBaseDn();
     }
 
-    public String clientsBaseDn() {
-        return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=gluu
-    }
-
     public String tokenBaseDn() {
         return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=gluu
     }
@@ -268,7 +264,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
         try {
-            return ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthGrantId", p_grantId));
+            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthGrantId", p_grantId));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -277,7 +273,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.getHashedToken(p_authorizationCode)));
+            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.getHashedToken(p_authorizationCode)));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -287,7 +283,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
         List<TokenLdap> grants = new ArrayList<TokenLdap>();
         try {
-            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(clientsBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthSessionDn", sessionDn));
+            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthSessionDn", sessionDn));
             if (ldapGrants != null) {
                 grants.addAll(ldapGrants);
             }
