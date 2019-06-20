@@ -3,6 +3,7 @@ package org.gluu.model.passport.idpinitiated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,7 +22,7 @@ public class AuthzParams {
     @JsonProperty("scope")
     private String scopes;
 
-    private Map<String, String> extraParams;
+    private Map<String, String> extraParams=new HashMap<>();
 
     public String getProvider() {
         return provider;
