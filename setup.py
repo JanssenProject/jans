@@ -45,11 +45,14 @@ import random
 import ssl
 import ldap
 import uuid
+import zipfile
 
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
 from ldap.schema import ObjectClass
+from pylib.printVersion import get_war_info
+
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -142,6 +145,8 @@ def get_key_from(dn):
 
     return key
 
+
+
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
         LDIFParser.__init__(self, open(ldif_file,'rb'))
@@ -199,7 +204,16 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '4.0.0-SNAPSHOT'
+
+        self.distFolder = '/opt/dist'
+        self.distAppFolder = '%s/app' % self.distFolder
+        self.distGluuFolder = '%s/gluu' % self.distFolder
+        self.distTmpFolder = '%s/tmp' % self.distFolder
+        
+        oxauth_info = get_war_info(os.path.join(self.distGluuFolder, 'oxauth.war'))
+
+        self.oxVersion = oxauth_info['version']
+        self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = 'master'
 
         self.pbar = ProgressBar(tty_columns)
@@ -258,8 +272,6 @@ class Setup(object):
 
         self.allowPreReleasedFeatures = False
 
-        self.currentGluuVersion = '4.0.0'
-
         self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
         self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
@@ -269,17 +281,10 @@ class Setup(object):
         self.persistence_type = 'ldap'
         self.shibboleth_version = 'v3'
 
-        self.distFolder = '/opt/dist'
-        self.distAppFolder = '%s/app' % self.distFolder
-        self.distGluuFolder = '%s/gluu' % self.distFolder
-        self.distTmpFolder = '%s/tmp' % self.distFolder
-
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
         self.savedProperties = '%s/setup.properties.last' % self.install_dir
-        
-        
 
         self.gluuOptFolder = '/opt/gluu'
         self.gluuOptBinFolder = '%s/bin' % self.gluuOptFolder
