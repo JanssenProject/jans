@@ -68,12 +68,16 @@ public class GrantService {
         return UUID.randomUUID().toString();
     }
 
-    public String buildDn(String p_uniqueIdentifier, String p_clientId) {
-        return String.format("uniqueIdentifier=%s,", p_uniqueIdentifier) + tokenBaseDn(p_clientId);
+    public String buildDn(String p_hashedToken) {
+        return String.format("uniqueIdentifier=%s,", p_hashedToken) + tokenBaseDn();
     }
 
     public String clientsBaseDn() {
         return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=gluu
+    }
+
+    public String tokenBaseDn() {
+        return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=gluu
     }
 
     public void merge(TokenLdap p_token) {
@@ -145,8 +149,6 @@ public class GrantService {
             }
             return;
         }
-
-        prepareBranch(token.getClientId());
 
         ldapEntryManager.persist(token);
     }
@@ -234,7 +236,7 @@ public class GrantService {
     }
 
     public TokenLdap getGrantsByCodeAndClient(String p_code, String p_clientId) {
-        return load(clientService.buildClientDn(p_clientId), p_code);
+        return load(buildDn(TokenHashUtil.getHashedTokenWithoutPrefix(p_code)));
     }
 
     public TokenLdap getGrantsByCode(String p_code) {
@@ -250,16 +252,14 @@ public class GrantService {
             if (onlyFromCache) {
                 return null;
             }
-            return load(clientsBaseDn(), p_code);
+            return load(buildDn(TokenHashUtil.getHashedTokenWithoutPrefix(p_code)));
         }
     }
 
-    private TokenLdap load(String p_baseDn, String p_code) {
+    private TokenLdap load(String p_tokenDn) {
         try {
-            final List<TokenLdap> entries = ldapEntryManager.findEntries(p_baseDn, TokenLdap.class, Filter.createEqualityFilter("oxAuthTokenCode", TokenHashUtil.getHashedToken(p_code)));
-            if (entries != null && !entries.isEmpty()) {
-                return entries.get(0);
-            }
+            final TokenLdap entry = ldapEntryManager.find(TokenLdap.class, p_tokenDn);
+            return entry;
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -350,19 +350,5 @@ public class GrantService {
 
     public void removeAllByGrantId(String p_grantId) {
         removeSilently(getGrantsByGrantId(p_grantId));
-    }
-
-    private void prepareBranch(final String clientId) {
-        if (!ldapEntryManager.contains(tokenBaseDn(clientId), SimpleBranch.class)) {
-            SimpleBranch branch = new SimpleBranch();
-            branch.setOrganizationalUnitName("token");
-            branch.setDn(tokenBaseDn(clientId));
-
-            ldapEntryManager.persist(branch);
-        }
-    }
-
-    private String tokenBaseDn(final String clientId) {
-        return "ou=token," + clientService.buildClientDn(clientId);
     }
 }

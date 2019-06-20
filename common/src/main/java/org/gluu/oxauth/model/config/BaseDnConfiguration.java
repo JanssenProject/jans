@@ -31,6 +31,8 @@ public class BaseDnConfiguration {
     private String groups;
     @XmlElement(name = "clients")
     private String clients;
+	@XmlElement(name = "tokens")
+	private String tokens;
     @XmlElement(name = "scopes")
     private String scopes;
     @XmlElement(name = "attributes")
@@ -96,7 +98,15 @@ public class BaseDnConfiguration {
         clients = p_clients;
     }
 
-    public String getPeople() {
+    public String getTokens() {
+		return tokens;
+	}
+
+	public void setTokens(String tokens) {
+		this.tokens = tokens;
+	}
+
+	public String getPeople() {
         return people;
     }
 
