@@ -19,8 +19,8 @@ repos = {
         }
 
 
-def get_latest_commit(service):
-    url = 'https://api.github.com/repos/GluuFederation/{}/commits/master'.format(repos[service])
+def get_latest_commit(service, branch):
+    url = 'https://api.github.com/repos/GluuFederation/{0}/commits/{1}'.format(repos[service], branch)
     try:
         f = urllib.urlopen(url)
         commits = json.loads(f.read())
@@ -29,7 +29,7 @@ def get_latest_commit(service):
         return "ERROR: Unable to retreive latest commit"
 
 def get_war_info(war_fn):
-    retDict = {'title':'', 'version':'', 'build':'', 'build date':''}
+    retDict = {'title':'', 'version':'', 'build':'', 'build date':'', 'branch':''}
     war_zip = zipfile.ZipFile(war_fn,"r")
     menifest = war_zip.read('META-INF/MANIFEST.MF')
 
@@ -39,7 +39,8 @@ def get_war_info(war_fn):
             if ls.startswith('Implementation-{0}'.format(key.title())):
                 retDict[key] = ls.split(':')[1].strip()
                 break
-
+        if ls.startswith('Build-Branch:'):
+            retDict['branch'] = ls.split(':')[1].strip()
 
     for f in war_zip.filelist:
         if f.filename.startswith('META-INF/maven/org.gluu') and f.filename.endswith('pom.properties'):
@@ -66,7 +67,7 @@ if __name__ == '__main__':
             print "{0}: {1}".format(si.title(), info[si])
         
         if args.show_latest_commit and (service in repos):
-            latest_commit = get_latest_commit(service)
+            latest_commit = get_latest_commit(service, info['branch'])
             if not 'ERROR:' in latest_commit:
                 compare_build = 'diff: https://github.com/GluuFederation/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
             else:
