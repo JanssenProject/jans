@@ -40,7 +40,12 @@ def get_war_info(war_fn):
                 retDict[key] = ls.split(':')[1].strip()
                 break
         if ls.startswith('Build-Branch:'):
-            retDict['branch'] = ls.split(':')[1].strip()
+            branch = ls.split(':')[1].strip()
+            if '/' in branch:
+                branch = branch.split('/')[1]
+
+            retDict['branch'] = branch
+            
 
     for f in war_zip.filelist:
         if f.filename.startswith('META-INF/maven/org.gluu') and f.filename.endswith('pom.properties'):
