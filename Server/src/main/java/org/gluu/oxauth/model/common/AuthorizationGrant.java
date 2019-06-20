@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -343,7 +344,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             if (StringUtils.isNotBlank(getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifierUri = getClient().getRedirectUris()[0];
+                sectorIdentifierUri = !ArrayUtils.isEmpty(getClient().getRedirectUris()) ? getClient().getRedirectUris()[0] : null;
             }
 
             String userInum = user.getAttribute("inum");
