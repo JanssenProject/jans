@@ -276,11 +276,11 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public TokenLdap asTokenLdap(AbstractToken p_token) {
-        final String id = GrantService.generateGrantId();
+        final String id = TokenHashUtil.getHashedTokenWithoutPrefix(p_token.getCode());
 
         final TokenLdap result = new TokenLdap();
 
-        result.setDn(grantService.buildDn(id, getClientId()));
+        result.setDn(grantService.buildDn(id));
         result.setId(id);
         result.setGrantId(getGrantId());
         result.setCreationDate(p_token.getCreationDate());
