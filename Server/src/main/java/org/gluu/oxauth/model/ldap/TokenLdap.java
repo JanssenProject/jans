@@ -27,7 +27,7 @@ public class TokenLdap implements Serializable {
     private String dn;
     @AttributeName(name = "uniqueIdentifier")
     private String id;
-    @AttributeName(name = "oxAuthGrantId")
+    @AttributeName(name = "oxAuthGrantId", consistency = true)
     private String grantId;
     @AttributeName(name = "oxAuthUserId")
     private String userId;
@@ -43,7 +43,7 @@ public class TokenLdap implements Serializable {
     private Date authenticationTime;
     @AttributeName(name = "oxAuthScope")
     private String scope;
-    @AttributeName(name = "oxAuthTokenCode")
+    @AttributeName(name = "oxAuthTokenCode", consistency = true)
     private String tokenCode;
     @AttributeName(name = "oxAuthTokenType")
     private String tokenType;
@@ -51,7 +51,7 @@ public class TokenLdap implements Serializable {
     private String grantType;
     @AttributeName(name = "oxAuthJwtRequest")
     private String jwtRequest;
-    @AttributeName(name = "oxAuthAuthorizationCode")
+    @AttributeName(name = "oxAuthAuthorizationCode", consistency = true)
     private String authorizationCode;
     @AttributeName(name = "oxAuthNonce")
     private String nonce;
