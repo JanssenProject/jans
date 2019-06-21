@@ -10,6 +10,7 @@ import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.service.GrantService;
+import org.gluu.oxauth.util.TokenHashUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -44,19 +45,17 @@ public class GrantServiceTest extends BaseComponentTest {
 
 	@Test(dependsOnMethods = "createTestToken")
 	public void removeTestTokens() {
-		final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
+		final TokenLdap t = grantService.getGrantByCode(TEST_TOKEN_CODE);
 		if (t != null) {
 			grantService.remove(t);
 		}
 	}
 
 	private TokenLdap createTestToken() {
-		final String id = GrantService.generateGrantId();
 		final String grantId = GrantService.generateGrantId();
-		final String dn = grantService.buildDn(id);
+		final String dn = grantService.buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
 
 		final TokenLdap t = new TokenLdap();
-		t.setId(id);
 		t.setDn(dn);
 		t.setGrantId(grantId);
 		t.setClientId(m_clientId);
