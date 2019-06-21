@@ -22,6 +22,7 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.operation.PersistenceOperationService;
 
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
 import com.couchbase.client.java.query.dsl.Expression;
 import com.couchbase.client.java.query.dsl.Sort;
 import com.couchbase.client.java.subdoc.MutationSpec;
@@ -51,9 +52,9 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     boolean delete(String key) throws EntryNotFoundException;
     boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException;
 
-    JsonObject lookup(String key, String... attributes) throws SearchException;
+    JsonObject lookup(String key, ScanConsistency scanConsistency, String... attributes) throws SearchException;
 
-    <O> PagedResult<JsonObject> search(String key, Expression expression, SearchScope scope,
+    <O> PagedResult<JsonObject> search(String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope,
             String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
