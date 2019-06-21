@@ -59,7 +59,7 @@ public class GrantServiceTest extends BaseComponentTest {
 		t.setDn(dn);
 		t.setGrantId(grantId);
 		t.setClientId(m_clientId);
-		t.setTokenCode(TEST_TOKEN_CODE);
+		t.setTokenCode(TokenHashUtil.hash(TEST_TOKEN_CODE));
 		t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
 		t.setCreationDate(new Date());
 		t.setExpirationDate(new Date());
