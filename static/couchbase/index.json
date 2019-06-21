@@ -8,7 +8,8 @@
     "uid", 
     "oxDeletable", 
     "oxAuthExpiration", 
-    "mail"
+    "mail",
+    "displayName"
   ], 
 
   "gluu": [
