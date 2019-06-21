@@ -161,7 +161,7 @@ public class GrantService {
 
     public void remove(TokenLdap p_token) {
         if (p_token.isFromCache()) {
-            cacheService.remove(null, TokenHashUtil.hash(p_token.getTokenCode()));
+            cacheService.remove(p_token.getTokenCode());
             log.trace("Removed token from cache, code: " + p_token.getTokenCode());
         } else {
             ldapEntryManager.remove(p_token);
@@ -227,7 +227,7 @@ public class GrantService {
 
 
     public TokenLdap getGrantByCode(String p_code, boolean onlyFromCache) {
-        Object grant = cacheService.get(null, TokenHashUtil.hash(p_code));
+        Object grant = cacheService.get(TokenHashUtil.hash(p_code));
         if (grant instanceof TokenLdap) {
             return (TokenLdap) grant;
         } else {
