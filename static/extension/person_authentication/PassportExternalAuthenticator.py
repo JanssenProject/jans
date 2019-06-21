@@ -90,6 +90,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if not self.validSignature(jwt):
                     return False
 
+                if self.jwtHasExpired(jwt):
+                    return False
+
                 (user_profile, json) = self.getUserProfile(jwt)
                 if user_profile == None:
                     return False
@@ -330,22 +333,22 @@ class PersonAuthentication(PersonAuthenticationType):
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
         entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
-        
+
         config = LdapOxPassportConfiguration()
         config = entryManager.find(config.getClass(), self.passportDN).getPassportConfiguration()
         config = config.getProviders() if config != None else config
-            
-        if config != None and len(config) > 0:      
+
+        if config != None and len(config) > 0:
             for prvdetails in config:
-                if prvdetails.isEnabled():              
-                    registeredProviders[prvdetails.getId()] = {     
-                        "emailLinkingSafe": prvdetails.isEmailLinkingSafe(), 
+                if prvdetails.isEnabled():
+                    registeredProviders[prvdetails.getId()] = {
+                        "emailLinkingSafe": prvdetails.isEmailLinkingSafe(),
                         "requestForEmail" : prvdetails.isRequestForEmail(),
                         "logo_img": prvdetails.getLogoImg(),
                         "displayName": prvdetails.getDisplayName(),
                         "type": prvdetails.getType()
                     }
-        
+
         return registeredProviders
 
 
@@ -355,23 +358,23 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             registeredProviders = self.parseAllProviders()
             toRemove = []
-            
-            for provider in registeredProviders:                
+
+            for provider in registeredProviders:
                 if registeredProviders[provider]["type"] == "saml":
                     toRemove.append(provider)
                 else:
                     registeredProviders[provider]["saml"] = False
-                
+
             for provider in toRemove:
                 registeredProviders.pop(provider)
-                
+
             if len(registeredProviders.keys()) > 0:
-                print "Passport. parseProviderConfigs. Configured providers:", registeredProviders    
+                print "Passport. parseProviderConfigs. Configured providers:", registeredProviders
             else:
                 print "Passport. parseProviderConfigs. No providers registered yet"
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
-            
+
         self.registeredProviders = registeredProviders
 
 # Auxiliary routines
@@ -436,6 +439,19 @@ class PersonAuthentication(PersonAuthenticationType):
         return valid
 
 
+    def jwtHasExpired(self, jwt):
+        # Check if jwt has expired
+        jwt_claims = jwt.getClaims()
+        try:
+            exp_date = jwt_claims.getClaimAsDate(JwtClaimName.EXPIRATION_TIME)
+            hasExpired = exp_date < datetime.now()
+        except:
+            print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
+            return False
+
+        return hasExpired
+
+
     def getUserProfile(self, jwt):
         # Check if there is user profile
         jwt_claims = jwt.getClaims()
@@ -459,7 +475,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
 
-        uidKey = "uid" 
+        uidKey = "uid"
         if not self.checkRequiredAttributes(user_profile, [uidKey, self.providerKey]):
             return False
 
@@ -528,7 +544,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 doUpdate = True
             else:
                 print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
-                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account.")
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account. If you already have a username and password use those instead of an external authentication site to get access.")
 
         username = None
         try:
