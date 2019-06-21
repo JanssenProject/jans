@@ -15,9 +15,14 @@ public class ConvertedExpression {
 	private ConvertedExpression(Expression expression) {
 		this.expression = expression;
 	}
-	
+
+	private ConvertedExpression(Expression expression, boolean consistency) {
+		this.expression = expression;
+		this.consistency = consistency;
+	}
+
 	public static ConvertedExpression build(Expression expression, boolean consistency) {
-		return new ConvertedExpression(expression);
+		return new ConvertedExpression(expression, consistency);
 	}
 
 	public Expression expression() {
