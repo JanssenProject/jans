@@ -209,7 +209,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
 
-                        grantService.removeAllByAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
+                        grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
                         log.debug("AuthorizationCodeGrant is empty by clinetId: '{}', code: '{}'", client.getClientId(), code);
                         // if authorization code is not found then code was already used = remove all grants with this auth code
