@@ -86,10 +86,9 @@ public class ServerConfiguration implements Serializable {
 		return this.dn;
 	}
 
-	public ServerConfiguration setDn(String dn) {
-
+	public void setDn(String dn) {
+		
 		this.dn = dn;
-		return this;
 	}
 
 	public String getListenInterface() {
@@ -97,10 +96,9 @@ public class ServerConfiguration implements Serializable {
 		return this.listenInterface;
 	}
 
-	public ServerConfiguration setListenInterface(String listeninterface) {
+	public void setListenInterface(String listeninterface) {
 
 		this.listenInterface = listeninterface;
-		return this;
 	}
 
 	public Integer getAuthPort() {
@@ -108,10 +106,9 @@ public class ServerConfiguration implements Serializable {
 		return this.authPort;
 	}
 
-	public ServerConfiguration setAuthPort(Integer authPort) {
+	public void setAuthPort(Integer authPort) {
 
 		this.authPort = authPort;
-		return this;
 	}
 
 	public Integer getAcctPort() {
@@ -119,10 +116,9 @@ public class ServerConfiguration implements Serializable {
 		return this.acctPort;
 	}
 
-	public ServerConfiguration setAcctPort(Integer acctPort) {
+	public void setAcctPort(Integer acctPort) {
 
 		this.acctPort = acctPort;
-		return this;
 	}
 
 	public String getOpenidUsername() {
@@ -130,10 +126,9 @@ public class ServerConfiguration implements Serializable {
 		return this.openidUsername;
 	}
 
-	public ServerConfiguration setOpenidUsername(String openidusername) {
+	public void setOpenidUsername(String openidusername) {
 
 		this.openidUsername = openidusername;
-		return this;
 	}
 
 
@@ -143,10 +138,9 @@ public class ServerConfiguration implements Serializable {
 	}
 
 
-	public ServerConfiguration setOpenidPassword(String openidpassword) {
+	public void setOpenidPassword(String openidpassword) {
 
 		this.openidPassword = openidpassword;
-		return this;
 	}
 
 	public String getOpenidBaseUrl() {
@@ -154,10 +148,9 @@ public class ServerConfiguration implements Serializable {
 		return this.openidBaseUrl;
 	}
 
-	public ServerConfiguration setOpenidBaseUrl(String openidBaseUrl) {
+	public void setOpenidBaseUrl(String openidBaseUrl) {
 
 		this.openidBaseUrl = openidBaseUrl;
-		return this;
 	}
 
 	public String getAcrValue() {
@@ -165,10 +158,9 @@ public class ServerConfiguration implements Serializable {
 		return this.acrValue;
 	}
 
-	public ServerConfiguration setAcrValue(String acrValue) {
+	public void setAcrValue(String acrValue) {
 
 		this.acrValue = acrValue;
-		return this;
 	}
 
 	public List<String> getScopes() {
@@ -176,10 +168,9 @@ public class ServerConfiguration implements Serializable {
 		return this.scopes;
 	}
 
-	public ServerConfiguration setScopes(List<String> scopes) {
+	public void setScopes(List<String> scopes) {
 
 		this.scopes = scopes;
-		return this;
 	}
 
 	public Integer getAuthenticationTimeout() {
@@ -187,10 +178,9 @@ public class ServerConfiguration implements Serializable {
 		return this.authenticationTimeout;
 	}
 
-	public ServerConfiguration setAuthenticationTimeout(Integer authenticationTimeout) {
+	public void setAuthenticationTimeout(Integer authenticationTimeout) {
 
 		this.authenticationTimeout = authenticationTimeout;
-		return this;
 	}
 
 
