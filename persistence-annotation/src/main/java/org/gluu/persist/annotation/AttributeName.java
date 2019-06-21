@@ -43,4 +43,10 @@ public @interface AttributeName {
      */
     boolean updateOnly() default false;
 
+    /**
+     * (Optional) Specify that search request should wait for indexes update
+     * Defaults value is false.
+     */
+    boolean consistency() default false;
+
 }
