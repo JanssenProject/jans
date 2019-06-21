@@ -1470,7 +1470,7 @@ class Setup(object):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
 
         if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
-            service_init_script_fn = os.path.join('/opt/dist/scripts', serviceName)
+            service_init_script_fn = os.path.join(self.distFolder, 'scripts', serviceName)
         else:
             service_init_script_fn = os.path.join('/etc/init.d', serviceName)
 
