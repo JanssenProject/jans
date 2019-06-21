@@ -259,19 +259,19 @@ public class Cli {
             }
             printHelpAndExit();
         } catch (BadRequestException e) {
-            System.out.println("Bad Request : 400. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token is active and is not malformed, error: " + e.getMessage());
+            System.out.println("Bad Request : 400. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (NotAuthorizedException e) {
-            System.out.println("Not Authorized : 401. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token is active and is not malformed, error: " + e.getMessage());
+            System.out.println("Not Authorized : 401. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (ForbiddenException e) {
-            System.out.println("Forbidden : 403. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token is active and is not malformed, error: " + e.getMessage());
+            System.out.println("Forbidden : 403. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token is active and is not malformed, error: " + e.getMessage());
+            System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
