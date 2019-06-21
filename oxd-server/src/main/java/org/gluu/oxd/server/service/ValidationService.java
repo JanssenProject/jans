@@ -41,10 +41,14 @@ public class ValidationService {
     public Pair<Rp, Boolean> validate(IParams params) {
         notNull(params);
         if (params instanceof HasOxdIdParams) {
-            validate((HasOxdIdParams) params);
+            if (!isInstanceOfGetRpParamsWithList(params)) {
+                validate((HasOxdIdParams) params);
+            }
         }
         if (params instanceof HasAccessTokenParams) {
-            validate((HasAccessTokenParams) params);
+            if (!isInstanceOfGetRpParamsWithList(params)) {
+                validate((HasAccessTokenParams) params);
+            }
         }
 
         if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
@@ -160,5 +164,16 @@ public class ValidationService {
         notBlankOxdId(rp.getOxdId());
         notBlankOpHost(rp.getOpHost());
         return rp;
+    }
+
+    private static boolean isInstanceOfGetRpParamsWithList(IParams params) {
+        if (params instanceof GetRpParams) {
+            GetRpParams p = (GetRpParams) params;
+            if (p.getList() == null || !p.getList()) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }
