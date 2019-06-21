@@ -19,7 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
+import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
 import com.couchbase.client.java.query.dsl.Expression;
 import com.couchbase.client.java.query.dsl.Sort;
 import com.couchbase.client.java.subdoc.MutationSpec;
@@ -272,7 +275,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey(), ldapReturnAttributes);
+            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null, ldapReturnAttributes);
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -363,11 +366,10 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
-
         ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-        Expression expression;
+        ConvertedExpression convertedExpression;
 		try {
-			expression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
 		}
@@ -378,16 +380,16 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             if (batchOperation != null) {
                 batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), scope, currentLdapReturnAttributes,
+            searchResult = operationService.search(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), expression));
+                throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), convertedExpression));
             }
 
             return searchResult;
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), expression), ex);
+            throw new EntryPersistenceException(String.format("Failed to find entries with key: %s, expression: %s", keyWithInum.getKey(), convertedExpression), ex);
         }
     }
 
@@ -408,10 +410,17 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
+        ConvertedExpression convertedExpression;
+		try {
+			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
+		} catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+		}
+
         PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = operationService.search(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 1, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -504,9 +513,17 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public boolean authenticate(String baseDN, String userName, String password) {
-        try {
-            Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
-            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter, null),
+        Filter searchFilter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
+
+        ConvertedExpression convertedExpression;
+		try {
+			convertedExpression = toCouchbaseFilter(searchFilter, null);
+		} catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+		}
+
+		try {
+            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(),
                     SearchScope.SUB, null, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -558,9 +575,16 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		// Prepare properties types to allow build filter properly
         Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
+        ConvertedExpression convertedExpression;
+		try {
+			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
+		} catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+		}
+
         PagedResult<JsonObject> searchResult;
         try {
-            searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), scope, null, null,
+            searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -619,7 +643,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey());
+            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null);
             Map<String, Object> map = entry.toMap();
             List<String> result = new ArrayList<String>(map.size());
             for (Entry<String, Object> attr : map.entrySet()) {
@@ -632,8 +656,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-    private Expression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+    private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap);
+    }
+
+    private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
+        return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap, processor);
     }
 
     private ParsedKey toCouchbaseKey(String dn) {
@@ -721,6 +749,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     	}
 
     	return super.convertJsonToValue(parameterType, jsonStringPropertyValue);
+	}
+
+	private ScanConsistency getScanConsistency(ConvertedExpression convertedExpression) {
+		if (convertedExpression.consistency()) {
+			return ScanConsistency.REQUEST_PLUS;
+		}
+
+		return null;
 	}
 
 	private String escapeValue(String value) {
