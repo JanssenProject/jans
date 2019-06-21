@@ -13,7 +13,7 @@ public class TokenHashUtil {
 
     public static final String PREFIX = "{sha256Hex}";
 
-    public static String getHashedToken(String token) {
+    public static String getHashWithPrefix(String token) {
         if (StringUtils.isNotBlank(token) && !token.startsWith(PREFIX)) {
             return PREFIX + DigestUtils.sha256Hex(token);
         } else {
@@ -21,7 +21,7 @@ public class TokenHashUtil {
         }
     }
 
-    public static String getHashedTokenWithoutPrefix(String hashedToken) {
+    public static String hash(String hashedToken) {
         if (StringUtils.isNotBlank(hashedToken) && hashedToken.startsWith(PREFIX)) {
             return hashedToken;
         } else {
