@@ -1469,10 +1469,11 @@ class Setup(object):
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
 
-	if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
- 	    service_init_script_fn = os.path.join('/opt/dist/scripts', serviceName)
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9')):
+            service_init_script_fn = os.path.join('/opt/dist/scripts', serviceName)
         else:
- 	    service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+            service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+
         with open(service_init_script_fn, 'w') as W:
             W.write(''.join(initscript))
 
@@ -2031,6 +2032,26 @@ class Setup(object):
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
+        
+        # don't send header to server
+        start_ini_fn = os.path.join(self.jetty_base, jettyServiceName,'start.ini')
+        start_ini = self.readFile(start_ini_fn)
+        start_ini_list = start_ini.split('\n')
+
+        jetty_param = 'jetty.httpConfig.sendServerVersion'
+
+        for i, l in enumerate(start_ini_list[:]):
+            if jetty_param in l and l[0]=='#':
+                start_ini_list[i] = jetty_param +'=false'
+                break
+            elif l.strip().startswith(jetty_param):
+                start_ini_list[i] = jetty_param +'=false'
+                break
+        else:
+            start_ini_list.append(jetty_param +'=false')
+
+        self.writeFile(start_ini_fn, '\n'.join(start_ini_list))
+        
 
     def install_oxtrust(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
@@ -2702,7 +2723,7 @@ class Setup(object):
             ldapPass = self.getPW(special='.*=!%&+/-')
 
             while True:
-                ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", ldapPass)
+                ldapPass = self.getPrompt("Optional: enter password for oxTrust and DB superuser", ldapPass)
 
                 if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
                     break
