@@ -28,6 +28,7 @@ import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.Statement;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
 
 /**
  * Perform cluster initialization and open required buckets
@@ -58,6 +59,8 @@ public class CouchbaseConnectionProvider {
     private ArrayList<String> binaryAttributes, certificateAttributes;
 
     private PasswordEncryptionMethod passwordEncryptionMethod;
+    
+    private ScanConsistency scanConsistency;
 
     protected CouchbaseConnectionProvider() {
     }
@@ -124,6 +127,14 @@ public class CouchbaseConnectionProvider {
             this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
         }
         LOG.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
+        
+        if (props.containsKey("connection.scan-consistency")) {
+        	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency").toString());
+        	this.scanConsistency = ScanConsistency.valueOf(scanConsistencyString);
+        	if (this.scanConsistency == null) {
+        		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
+        	}
+        }
 
         this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
     }
@@ -299,5 +310,10 @@ public class CouchbaseConnectionProvider {
     public PasswordEncryptionMethod getPasswordEncryptionMethod() {
         return passwordEncryptionMethod;
     }
+
+	public ScanConsistency getScanConsistency() {
+		return scanConsistency;
+	}
+
 }
 

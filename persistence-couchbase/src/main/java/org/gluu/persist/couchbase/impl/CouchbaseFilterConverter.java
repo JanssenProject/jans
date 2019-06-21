@@ -7,16 +7,24 @@
 
 package org.gluu.persist.couchbase.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.enterprise.context.ApplicationScoped;
 
+import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.query.dsl.Expression;
 
 /**
@@ -31,7 +39,7 @@ public class CouchbaseFilterConverter {
     
     private LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 
-    public Expression convertToCouchbaseFilter(Filter genericFilter) throws SearchException {
+    public Expression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         Filter currentGenericFilter = genericFilter;
 
         FilterType type = currentGenericFilter.getType();
@@ -46,8 +54,39 @@ public class CouchbaseFilterConverter {
             Expression[] expFilters = new Expression[genericFilters.length];
 
             if (genericFilters != null) {
+            	boolean canJoinOrFilters = FilterType.OR == type; // We can replace only multiple OR with IN
+            	List<Filter> joinOrFilters = new ArrayList<Filter>();
+            	String joinOrAttributeName = null;
                 for (int i = 0; i < genericFilters.length; i++) {
-                    expFilters[i] = convertToCouchbaseFilter(genericFilters[i]);
+                	Filter tmpFilter = genericFilters[i];
+                    expFilters[i] = convertToCouchbaseFilter(tmpFilter, propertiesAnnotationsMap);
+
+                    // Check if we can replace OR with IN
+                	if (!canJoinOrFilters) {
+                		continue;
+                	}
+
+                	if ((FilterType.EQUALITY != tmpFilter.getType()) || (tmpFilter.getFilters() != null)) {
+                    	canJoinOrFilters = false;
+                    	continue;
+                    }
+
+                    Boolean isMultiValuedDetected = determineMultiValuedByType(tmpFilter.getAttributeName(), propertiesAnnotationsMap);
+                	if (!Boolean.FALSE.equals(isMultiValuedDetected)) {
+                		canJoinOrFilters = false;
+                    	continue;
+                	}
+                	
+            		if (joinOrAttributeName == null) {
+            			joinOrAttributeName = tmpFilter.getAttributeName();
+            			joinOrFilters.add(tmpFilter);
+            			continue;
+            		}
+            		if (!joinOrAttributeName.equals(tmpFilter.getAttributeName())) {
+                		canJoinOrFilters = false;
+                    	continue;
+            		}
+            		joinOrFilters.add(tmpFilter);
                 }
 
                 if (FilterType.NOT == type) {
@@ -59,6 +98,15 @@ public class CouchbaseFilterConverter {
                     }
                     return Expression.par(result);
                 } else if (FilterType.OR == type) {
+                	if (canJoinOrFilters) {
+                		JsonArray jsonArrayValues = JsonArray.create();
+                		for (Filter eqFilter : joinOrFilters) {
+                			jsonArrayValues.add(eqFilter.getAssertionValue());
+            			}
+                        Expression exp = Expression
+                                .par(Expression.path(Expression.path(joinOrAttributeName)).in(jsonArrayValues));
+                        return exp;
+                	}
                     Expression result = expFilters[0];
                     for (int i = 1; i < expFilters.length; i++) {
                         result = result.or(expFilters[i]);
@@ -69,8 +117,11 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-            if (currentGenericFilter.isArrayAttribute()) {
+        	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+            if (currentGenericFilter.isMultiValued() || Boolean.TRUE.equals(isMultiValuedDetected)) {
                 return Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(currentGenericFilter.getAttributeName())));
+            } else if (Boolean.FALSE.equals(isMultiValuedDetected)) {
+            	return Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter));
             } else {
                 Expression exp1 = Expression
                         .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter)));
@@ -129,7 +180,24 @@ public class CouchbaseFilterConverter {
 			return Expression.x((Long) currentGenericFilter.getAssertionValue());
 		}
 
-		return Expression.s(StringHelper.escapeSql(currentGenericFilter.getAssertionValue()));
+		return Expression.s(StringHelper.escapeJson(currentGenericFilter.getAssertionValue()));
+	}
+
+	private Boolean determineMultiValuedByType(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+		if (propertiesAnnotationsMap == null) {
+			return null;
+		}
+
+		PropertyAnnotation propertyAnnotation = propertiesAnnotationsMap.get(attributeName);
+		if ((propertyAnnotation == null) || (propertyAnnotation.getParameterType() == null)) {
+			return null;
+		}
+
+		Class<?> parameterType = propertyAnnotation.getParameterType();
+		
+		boolean isMultiValued = parameterType.equals(String[].class) || ReflectHelper.assignableFrom(parameterType, List.class) || ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class); 
+		
+		return isMultiValued;
 	}
 
 }

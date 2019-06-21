@@ -28,6 +28,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
@@ -379,7 +380,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
     @Override
-	protected boolean contains(String baseDN, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
+	protected <T> boolean contains(String baseDN, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
