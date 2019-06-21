@@ -270,7 +270,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         JsonObject result = lookupImpl(bucketMapping, key, scanConsistency, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, attributes, scanConsistency);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, attributes, getScanConsistency(scanConsistency));
 
         return result;
     }
@@ -284,10 +284,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 }
 
             } else {
-            	ScanConsistency useScanConsistency = scanConsistency;
-            	if (useScanConsistency == null) {
-            		useScanConsistency = connectionProvider.getScanConsistency();
-            	}
+            	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency);
 
             	N1qlParams params = N1qlParams.build().consistency(useScanConsistency);
                 N1qlQuery query = N1qlQuery
@@ -317,19 +314,16 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         PagedResult<JsonObject> result = searchImpl(bucketMapping, key, scanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, scanConsistency);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, getScanConsistency(scanConsistency));
 
         return result;
 	}
 
-    private <O> PagedResult<JsonObject> searchImpl(BucketMapping bucketMapping, String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+	private <O> PagedResult<JsonObject> searchImpl(BucketMapping bucketMapping, String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         Bucket bucket = bucketMapping.getBucket();
 
-        ScanConsistency useScanConsistency = scanConsistency;
-    	if (useScanConsistency == null) {
-    		useScanConsistency = connectionProvider.getScanConsistency();
-    	}
+    	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency);
 
         BatchOperation<O> ldapBatchOperation = null;
         if (batchOperationWraper != null) {
@@ -503,6 +497,14 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean isCertificateAttribute(String attribute) {
         return this.connectionProvider.isCertificateAttribute(attribute);
     }
+
+    private ScanConsistency getScanConsistency(ScanConsistency scanConsistency) {
+    	if (scanConsistency != null) {
+    		return scanConsistency;
+    	}
+
+    	return connectionProvider.getScanConsistency();
+	}
 
     @Override
     public boolean destroy() {
