@@ -9,8 +9,6 @@ package org.gluu.oxauth.token.ws.rs;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
@@ -31,8 +29,9 @@ import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCre
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +44,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Provides interface for token REST web services
@@ -211,7 +209,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
 
-                        grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
+                        grantService.removeAllByAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
                     } else {
                         log.debug("AuthorizationCodeGrant is empty by clinetId: '{}', code: '{}'", client.getClientId(), code);
                         // if authorization code is not found then code was already used = remove all grants with this auth code
