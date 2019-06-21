@@ -554,7 +554,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 doUpdate = True
             else:
                 print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
-                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account.")
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account. If you already have a username and password use those instead of an external authentication site to get access.")
 
         username = None
         try:
