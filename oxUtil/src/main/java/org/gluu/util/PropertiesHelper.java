@@ -9,7 +9,6 @@ package org.gluu.util;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  * @author Yuriy Movchan Date: 05/11/2019

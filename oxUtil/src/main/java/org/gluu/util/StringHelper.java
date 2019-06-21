@@ -24,8 +24,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * @see org.apache.commons.lang.StringUtils
@@ -557,19 +556,16 @@ public final class StringHelper {
         return string.getBytes(StandardCharsets.UTF_8);
     }
 
-	public static String escapeSql(Object str) {
-		String result = StringEscapeUtils.escapeSql(String.valueOf(str));
-		result = escapeDoubleQuotes(result);
+	public static String escapeJson(Object str) {
+		String result = StringEscapeUtils.escapeJson(String.valueOf(str));
 		
 		return result;
 	}
-    
-	private static String escapeDoubleQuotes(String str) {
-        if (str == null) {
-            return null;
-        }
 
-        return StringUtils.replace(str, "\"", "\\\"");
-    }
+	public static String unescapeJson(Object str) {
+		String result = StringEscapeUtils.unescapeJson(String.valueOf(str));
+		
+		return result;
+	}
 
 }

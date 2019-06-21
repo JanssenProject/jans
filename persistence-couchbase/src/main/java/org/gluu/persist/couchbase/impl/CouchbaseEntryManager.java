@@ -127,7 +127,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
             if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                        new AttributeData(OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClassesFromDb)));
+                        new AttributeData(OBJECT_CLASS, objectClasses, true), new AttributeData(OBJECT_CLASS, objectClassesFromDb, true)));
             }
         }
     }
@@ -153,16 +153,20 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
+            Boolean multivalued = attribute.isMultiValued();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
                 Object[] realValues = attributeValues;
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
-                if (realValues.length > 1) {
-                    jsonObject.put(attributeName, JsonArray.from(realValues));
-                } else {
+
+                escapeValues(realValues);
+
+                if ((multivalued == null) || !multivalued) {
                     jsonObject.put(attributeName, realValues[0]);
+                } else {
+                    jsonObject.put(attributeName, JsonArray.from(realValues));
                 }
             }
         }
@@ -190,9 +194,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 String attributeName = null;
                 Object[] attributeValues = null;
+                Boolean multivalued = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
+                    multivalued = attribute.isMultiValued();
                 }
 
                 String oldAttributeName = null;
@@ -202,14 +208,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
+
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(Mutation.DICT_ADD, attributeName, attributeValues);
+                    modification = createModification(Mutation.DICT_ADD, attributeName, multivalued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.DELETE, oldAttributeName, oldAttributeValues);
+                        modification = createModification(Mutation.DELETE, oldAttributeName, multivalued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.REPLACE, attributeName, attributeValues);
+                        modification = createModification(Mutation.REPLACE, attributeName, multivalued, attributeValues);
                     }
                 }
 
@@ -354,10 +361,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
         }
 
+		// Prepare properties types to allow build filter properly
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
         ParsedKey keyWithInum = toCouchbaseKey(baseDN);
         Expression expression;
 		try {
-			expression = toCouchbaseFilter(searchFilter);
+			expression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
 		}
@@ -368,7 +378,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             if (batchOperation != null) {
                 batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), scope, currentLdapReturnAttributes,
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
@@ -381,8 +391,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-    @Override
-    protected boolean contains(String baseDN, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
+	@Override
+    protected <T> boolean contains(String baseDN, Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Filter filter, String[] objectClasses, String[] ldapReturnAttributes) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to check contain entries is null");
         }
@@ -395,10 +405,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             searchFilter = filter;
         }
 
+		// Prepare properties types to allow build filter properly
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
         PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter), SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = operationService.search(keyWithInum.getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 1, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -479,6 +492,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             		attributeValueObjects = new Object[] { attributeObject.toString() };
             	}
             }
+            
+            unescapeValues(attributeValueObjects);
 
             AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueObjects);
             result.add(tmpAttribute);
@@ -491,7 +506,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public boolean authenticate(String baseDN, String userName, String password) {
         try {
             Filter filter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
-            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter),
+            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(filter, null),
                     SearchScope.SUB, null, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -510,7 +525,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), password);
+            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), escapeValue(password));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
@@ -530,7 +545,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
-
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         
         // Find entries
         Filter searchFilter;
@@ -540,19 +555,22 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             searchFilter = filter;
         }
 
+		// Prepare properties types to allow build filter properly
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
         PagedResult<JsonObject> searchResult;
         try {
-            searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter), scope, null, null,
+            searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), toCouchbaseFilter(searchFilter, propertiesAnnotationsMap), scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
-                    String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+                    String.format("Failed to calculate the number of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
         return searchResult.getTotalEntriesCount();
     }
 
-    private MutationSpec createModification(final Mutation type, final String attributeName, final Object... attributeValues) {
+    private MutationSpec createModification(final Mutation type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
@@ -560,11 +578,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
         }
 
-        if (realValues.length == 1) {
+        escapeValues(realValues);
+        
+        if ((multiValued == null) || !multiValued) {
             return new MutationSpec(type, realAttributeName, realValues[0]);
+        } else {
+            return new MutationSpec(type, realAttributeName, realValues);
         }
-
-        return new MutationSpec(type, realAttributeName, realValues);
     }
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
@@ -612,8 +632,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-    private Expression toCouchbaseFilter(Filter genericFilter) throws SearchException {
-        return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter);
+    private Expression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+        return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap);
     }
 
     private ParsedKey toCouchbaseKey(String dn) {
@@ -701,6 +721,36 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     	}
 
     	return super.convertJsonToValue(parameterType, jsonStringPropertyValue);
+	}
+
+	private String escapeValue(String value) {
+		// Couchbade SDK do this automatically 
+//		return StringHelper.escapeJson(value);
+		return value;
+	}
+
+	private String unescapeValue(String value) {
+		// Couchbade SDK do this automatically 
+//		return StringHelper.unescapeJson(value);
+		return value;
+	}
+
+	private void escapeValues(Object[] realValues) {
+		// Couchbade SDK do this automatically 
+//		for (int i = 0; i < realValues.length; i++) {
+//        	if (realValues[i] instanceof String) {
+//        		realValues[i] = StringHelper.escapeJson(realValues[i]);
+//        	}
+//        }
+	}
+
+	private void unescapeValues(Object[] realValues) {
+		// Couchbade SDK do this automatically 
+//		for (int i = 0; i < realValues.length; i++) {
+//        	if (realValues[i] instanceof String) {
+//        		realValues[i] = StringHelper.unescapeJson(realValues[i]);
+//        	}
+//        }
 	}
 
 }
