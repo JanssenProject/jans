@@ -49,17 +49,18 @@ public class CouchbaseFilterConverter {
 
     public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
         Filter currentGenericFilter = genericFilter;
-        boolean requiredConsistency = isRequiredConsistency(currentGenericFilter, propertiesAnnotationsMap);
-
-        if (processor != null) {
-        	processor.apply(currentGenericFilter);
-        }
 
         FilterType type = currentGenericFilter.getType();
         if (FilterType.RAW == type) {
         	LOG.warn("RAW Ldap filter to Couchbase convertion will be removed in new version!!!");
         	currentGenericFilter = ldapFilterConverter.convertRawLdapFilterToFilter(currentGenericFilter.getFilterString());
         	type = currentGenericFilter.getType();
+        }
+
+        boolean requiredConsistency = isRequiredConsistency(currentGenericFilter, propertiesAnnotationsMap);
+
+        if (processor != null) {
+        	processor.apply(currentGenericFilter);
         }
 
         if ((FilterType.NOT == type) || (FilterType.AND == type) || (FilterType.OR == type)) {
@@ -232,7 +233,7 @@ public class CouchbaseFilterConverter {
 		AttributeName attributeNameAnnotation = (AttributeName) ReflectHelper.getAnnotationByType(propertyAnnotation.getAnnotations(),
 				AttributeName.class);
 		
-		if (attributeNameAnnotation.ignoreDuringRead()) {
+		if (attributeNameAnnotation.consistency()) {
 			return true;
 		}
 
