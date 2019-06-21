@@ -6,18 +6,6 @@
 
 package org.gluu.oxauth.service;
 
-import static org.gluu.oxauth.util.ServerUtil.isTrue;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -31,11 +19,16 @@ import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.impl.LdapFilterConverter;
-import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+
+import static org.gluu.oxauth.util.ServerUtil.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -69,7 +62,7 @@ public class GrantService {
     }
 
     public String buildDn(String p_hashedToken) {
-        return String.format("uniqueIdentifier=%s,", p_hashedToken) + tokenBaseDn();
+        return String.format("oxAuthTokenCode=%s,", p_hashedToken) + tokenBaseDn();
     }
 
     public String tokenBaseDn() {
@@ -107,7 +100,7 @@ public class GrantService {
     }
 
     public void persist(TokenLdap token) {
-        String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
+        String hashedToken = TokenHashUtil.hash(token.getTokenCode());
         token.setTokenCode(hashedToken);
 
         if (shouldPutInCache(token.getTokenTypeEnum(), token.isImplicitFlow())) {
@@ -171,7 +164,7 @@ public class GrantService {
 
     public void remove(TokenLdap p_token) {
         if (p_token.isFromCache()) {
-            cacheService.remove(null, TokenHashUtil.getHashedToken(p_token.getTokenCode()));
+            cacheService.remove(null, TokenHashUtil.hash(p_token.getTokenCode()));
             log.trace("Removed token from cache, code: " + p_token.getTokenCode());
         } else {
             ldapEntryManager.remove(p_token);
@@ -231,24 +224,20 @@ public class GrantService {
         return Collections.emptyList();
     }
 
-    public TokenLdap getGrantsByCodeAndClient(String p_code, String p_clientId) {
-        return load(buildDn(TokenHashUtil.getHashedTokenWithoutPrefix(p_code)));
-    }
-
-    public TokenLdap getGrantsByCode(String p_code) {
-        return getGrantsByCode(p_code, false);
+    public TokenLdap getGrantByCode(String p_code) {
+        return getGrantByCode(p_code, false);
     }
 
 
-    public TokenLdap getGrantsByCode(String p_code, boolean onlyFromCache) {
-        Object grant = cacheService.get(null, TokenHashUtil.getHashedToken(p_code));
+    public TokenLdap getGrantByCode(String p_code, boolean onlyFromCache) {
+        Object grant = cacheService.get(null, TokenHashUtil.hash(p_code));
         if (grant instanceof TokenLdap) {
             return (TokenLdap) grant;
         } else {
             if (onlyFromCache) {
                 return null;
             }
-            return load(buildDn(TokenHashUtil.getHashedTokenWithoutPrefix(p_code)));
+            return load(buildDn(TokenHashUtil.hash(p_code)));
         }
     }
 
@@ -273,7 +262,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.getHashedToken(p_authorizationCode)));
+            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.hash(p_authorizationCode)));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -333,7 +322,7 @@ public class GrantService {
      * @param p_code code
      */
     public void removeByCode(String p_code, String p_clientId) {
-        final TokenLdap t = getGrantsByCodeAndClient(p_code, p_clientId);
+        final TokenLdap t = getGrantByCode(p_code);
         if (t != null) {
             removeSilently(t);
         }

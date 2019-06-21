@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.uma.authorization;
 
-import java.util.Date;
-import java.util.List;
-
 import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Requesting Party Token.
@@ -26,8 +26,6 @@ public class UmaRPT extends AbstractToken {
 
     @DN
     private String dn;
-    @AttributeName(name = "uniqueIdentifier")
-    private String id;
     @AttributeName(name = "oxAuthUserId")
     private String userId;
     @AttributeName(name = "oxAuthClientId")
@@ -69,14 +67,6 @@ public class UmaRPT extends AbstractToken {
         this.clientId = clientId;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String p_id) {
-        id = p_id;
-    }
-
     public List<String> getPermissions() {
         return permissions;
     }
@@ -89,7 +79,6 @@ public class UmaRPT extends AbstractToken {
     public String toString() {
         return "UmaRPT{" +
                 "dn='" + dn + '\'' +
-                ", id='" + id + '\'' +
                 ", userId='" + userId + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", permissions=" + permissions +

@@ -15,7 +15,6 @@ import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -454,7 +453,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
 
-        String hashedTokenCode = TokenHashUtil.getHashedToken(tokenCode);
+        String hashedTokenCode = TokenHashUtil.hash(tokenCode);
 
         final IdToken idToken = getIdToken();
         if (idToken != null) {

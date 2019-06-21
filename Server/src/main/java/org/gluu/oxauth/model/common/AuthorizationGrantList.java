@@ -15,12 +15,11 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.service.CacheService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
@@ -114,10 +113,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        Object cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode, null));
+        Object cachedGrant = cacheService.get(CacheGrant.cacheKey(clientId, authorizationCode, null));
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode, null));
+            cachedGrant = cacheService.get(CacheGrant.cacheKey(clientId, authorizationCode, null));
             log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
@@ -126,9 +125,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-            return assertTokenType((TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(refreshTokenCode)), TokenType.REFRESH_TOKEN);
+            return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), TokenType.REFRESH_TOKEN);
         }
-        return assertTokenType(grantService.getGrantsByCodeAndClient(refreshTokenCode, clientId), TokenType.REFRESH_TOKEN);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), TokenType.REFRESH_TOKEN);
     }
 
     public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType) {
@@ -140,7 +139,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public List<AuthorizationGrant> getAuthorizationGrant(String clientId) {
-        final List<AuthorizationGrant> result = new ArrayList<AuthorizationGrant>();
+        final List<AuthorizationGrant> result = new ArrayList<>();
         try {
             final List<TokenLdap> entries = new ArrayList<TokenLdap>();
             entries.addAll(grantService.getGrantsOfClient(clientId));
@@ -164,7 +163,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken, boolean onlyFromCache) {
-        final TokenLdap tokenLdap = grantService.getGrantsByCode(accessToken, onlyFromCache);
+        final TokenLdap tokenLdap = grantService.getGrantByCode(accessToken, onlyFromCache);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
@@ -173,15 +172,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        final TokenLdap tokenLdap = grantService.getGrantsByCode(idToken);
+        final TokenLdap tokenLdap = grantService.getGrantByCode(idToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ID_TOKEN)) {
             return asGrant(tokenLdap);
         }
         return null;
-    }
-
-    public AuthorizationGrant load(String clientId, String p_code) {
-        return asGrant(grantService.getGrantsByCodeAndClient(p_code, clientId));
     }
 
     public AuthorizationGrant asGrant(TokenLdap tokenLdap) {
