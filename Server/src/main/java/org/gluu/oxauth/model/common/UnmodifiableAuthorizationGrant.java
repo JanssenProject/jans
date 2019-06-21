@@ -7,12 +7,10 @@
 package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
-
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JsonWebResponse;
-import org.gluu.oxauth.model.common.User;
 
 import java.util.Collection;
 import java.util.Date;
@@ -89,11 +87,6 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
         return grant.getAccessToken(tokenCode);
-    }
-
-    @Override
-    public boolean isValid() {
-        return grant.isValid();
     }
 
     @Override

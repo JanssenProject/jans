@@ -8,8 +8,7 @@ package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -17,18 +16,18 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.gluu.util.StringHelper;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -75,24 +74,22 @@ public class UmaRptService {
     @Inject
     private ClientService clientService;
 
-    public static String getDn(String clientDn, String uniqueIdentifier) {
-        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
+    private boolean containsBranch = false;
+
+    public String createDn(String tokenCode) {
+        return String.format("oxAuthTokenCode=%s,%s", TokenHashUtil.hash(tokenCode), branchDn());
     }
 
-    public static String branchDn(String clientDn) {
-        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
+    public String branchDn() {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, staticConfiguration.getBaseDn().getTokens());
     }
 
     public void persist(UmaRPT rpt) {
         try {
             Preconditions.checkNotNull(rpt.getClientId());
 
-            Client client = clientService.getClient(rpt.getClientId());
-
-            addBranchIfNeeded(client.getDn());
-            String id = UUID.randomUUID().toString();
-            rpt.setId(id);
-            rpt.setDn(getDn(client.getDn(), id));
+            addBranchIfNeeded();
+            rpt.setDn(createDn(rpt.getCode()));
             ldapEntryManager.persist(rpt);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -101,11 +98,9 @@ public class UmaRptService {
 
     public UmaRPT getRPTByCode(String rptCode) {
         try {
-            final Filter filter = Filter.createEqualityFilter("oxAuthTokenCode", rptCode);
-            final String baseDn = staticConfiguration.getBaseDn().getClients();
-            final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
-            if (entries != null && !entries.isEmpty()) {
-                return entries.get(0);
+            final UmaRPT entry = ldapEntryManager.find(UmaRPT.class, createDn(rptCode));
+            if (entry != null) {
+                return entry;
             } else {
                 log.error("Failed to find RPT by code: " + rptCode);
             }
@@ -264,60 +259,22 @@ public class UmaRptService {
         return new JSONArray(json);
     }
 
-    public UmaPermission getPermissionFromRPTByResourceId(UmaRPT rpt, String resourceId) {
-        try {
-            if (Util.allNotBlank(resourceId)) {
-                for (UmaPermission permission : getRptPermissions(rpt)) {
-                    if (resourceId.equals(permission.getResourceId())) {
-                        return permission;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public void addBranch(String clientDn) {
+    public void addBranch() {
         final SimpleBranch branch = new SimpleBranch();
         branch.setOrganizationalUnitName(ORGUNIT_OF_RPT);
-        branch.setDn(branchDn(clientDn));
+        branch.setDn(branchDn());
         ldapEntryManager.persist(branch);
     }
 
-    public void addBranchIfNeeded(String clientDn) {
-        if (!containsBranch(clientDn)) {
-            addBranch(clientDn);
+    public void addBranchIfNeeded() {
+        if (!containsBranch() && !containsBranch) {
+            addBranch();
+        } else {
+            containsBranch = true;
         }
     }
 
-    public boolean containsBranch(String clientDn) {
-        return ldapEntryManager.contains(branchDn(clientDn), SimpleBranch.class);
+    public boolean containsBranch() {
+        return ldapEntryManager.contains(branchDn(), SimpleBranch.class);
     }
-
-//    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
-//        final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
-//
-//        JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
-//        Jwt jwt = jwtSigner.newJwt();
-//
-//        jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
-//        jwt.getClaims().setIssuedAt(rpt.getCreationDate());
-//
-//        if (!gluuAccessTokenScopes.isEmpty()) {
-//            jwt.getClaims().setClaim("scopes", gluuAccessTokenScopes);
-//        }
-//
-//        return jwtSigner.sign();
-//    }
-
-//    UmaRPT rpt = rptService.createRPT(authorization);
-//
-//    String rptResponse = rpt.getCode();
-//    final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
-//    if (umaRptAsJwt != null && umaRptAsJwt) {
-//        rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
-//    }
-
 }
