@@ -88,7 +88,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if jwt_param == None:
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
-                
+
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
@@ -150,7 +150,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        
+
         extensionResult = self.extensionPrepareForStep(configurationAttributes, requestParameters, step)
         if extensionResult != None:
             return extensionResult
@@ -345,22 +345,22 @@ class PersonAuthentication(PersonAuthenticationType):
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
         entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
-        
+
         config = LdapOxPassportConfiguration()
         config = entryManager.find(config.getClass(), self.passportDN).getPassportConfiguration()
         config = config.getProviders() if config != None else config
-            
-        if config != None and len(config) > 0:      
+
+        if config != None and len(config) > 0:
             for prvdetails in config:
-                if prvdetails.isEnabled():              
-                    registeredProviders[prvdetails.getId()] = {     
-                        "emailLinkingSafe": prvdetails.isEmailLinkingSafe(), 
+                if prvdetails.isEnabled():
+                    registeredProviders[prvdetails.getId()] = {
+                        "emailLinkingSafe": prvdetails.isEmailLinkingSafe(),
                         "requestForEmail" : prvdetails.isRequestForEmail(),
                         "logo_img": prvdetails.getLogoImg(),
                         "displayName": prvdetails.getDisplayName(),
                         "type": prvdetails.getType()
                     }
-        
+
         return registeredProviders
 
 
@@ -370,25 +370,25 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             registeredProviders = self.parseAllProviders()
             toRemove = []
-            
-            for provider in registeredProviders:                
+
+            for provider in registeredProviders:
                 if registeredProviders[provider]["type"] != "saml":
                     toRemove.append(provider)
                 else:
                     registeredProviders[provider]["saml"] = True
-                
+
             for provider in toRemove:
                 registeredProviders.pop(provider)
-                
+
             if len(registeredProviders.keys()) > 0:
-                print "Passport. parseProviderConfigs. Configured providers:", registeredProviders    
+                print "Passport. parseProviderConfigs. Configured providers:", registeredProviders
             else:
                 print "Passport. parseProviderConfigs. No providers registered yet"
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
-            
+
         self.registeredProviders = registeredProviders
-        
+
 # Auxiliary routines
 
     def getProviderFromJson(self, providerJson):
@@ -554,7 +554,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 doUpdate = True
             else:
                 print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
-                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account.")
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account. If you already have a username and password use those instead of an external authentication site to get access.")
 
         username = None
         try:
@@ -670,7 +670,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def isInboundJwt(self, value):
         if value == None:
             return False
-        
+
         try:
             jwt = Jwt.parse(value)
             user_profile_json = jwt.getClaims().getClaimAsString("data")
