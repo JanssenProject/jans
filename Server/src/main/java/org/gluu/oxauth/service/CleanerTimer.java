@@ -198,6 +198,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getTokens());
 		if (cacheConfiguration.getNativePersistenceConfiguration() != null
 				&& StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
 			cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());
