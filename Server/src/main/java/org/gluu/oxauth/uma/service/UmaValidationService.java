@@ -121,10 +121,6 @@ public class UmaValidationService {
             throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, ACCESS_DENIED, "Unable to find authorization grant by token.");
         }
 
-        if (!authorizationGrant.isValid()) {
-            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_TOKEN, "Authorization grant is found but is not valid anymore.");
-        }
-
         Set<String> scopes = authorizationGrant.getScopes();
         if (!scopes.contains(umaScopeType.getValue())) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_ACCEPTABLE, INVALID_CLIENT_SCOPE, "Client does not have scope: " + umaScopeType.getValue());
