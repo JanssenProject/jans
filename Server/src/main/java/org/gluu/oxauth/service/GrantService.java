@@ -100,12 +100,9 @@ public class GrantService {
     }
 
     public void persist(TokenLdap token) {
-        String hashedToken = TokenHashUtil.hash(token.getTokenCode());
-        token.setTokenCode(hashedToken);
-
         if (shouldPutInCache(token.getTokenTypeEnum(), token.isImplicitFlow())) {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
-            clientTokens.getTokenHashes().add(hashedToken);
+            clientTokens.getTokenHashes().add(token.getTokenCode());
 
             String expiration = null;
             switch (token.getTokenTypeEnum()) {
@@ -127,12 +124,12 @@ public class GrantService {
             }
 
             token.setIsFromCache(true);
-            cacheService.put(expiration, hashedToken, token);
+            cacheService.put(expiration, token.getTokenCode(), token);
             cacheService.put(expiration, clientTokens.cacheKey(), clientTokens);
 
             if (StringUtils.isNotBlank(token.getSessionDn())) {
                 SessionTokens sessionTokens = getCacheSessionTokens(token.getSessionDn());
-                sessionTokens.getTokenHashes().add(hashedToken);
+                sessionTokens.getTokenHashes().add(token.getTokenCode());
 
                 cacheService.put(expiration, sessionTokens.cacheKey(), sessionTokens);
             }
@@ -326,7 +323,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(null, CacheGrant.cacheKey(p_clientId, p_code, null));
+        cacheService.remove(CacheGrant.cacheKey(p_clientId, p_code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
