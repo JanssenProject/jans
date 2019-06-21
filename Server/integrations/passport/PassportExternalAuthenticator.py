@@ -90,6 +90,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if not self.validSignature(jwt):
                     return False
 
+                if self.jwtHasExpired(jwt):
+                    return False
+
                 (user_profile, json) = self.getUserProfile(jwt)
                 if user_profile == None:
                     return False
@@ -436,6 +439,19 @@ class PersonAuthentication(PersonAuthenticationType):
         return valid
 
 
+    def jwtHasExpired(self, jwt):
+        # Check if jwt has expired
+        jwt_claims = jwt.getClaims()
+        try:
+            exp_date = jwt_claims.getClaimAsDate(JwtClaimName.EXPIRATION_TIME)
+            hasExpired = exp_date < datetime.now()
+        except:
+            print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
+            return False
+
+        return hasExpired
+
+
     def getUserProfile(self, jwt):
         # Check if there is user profile
         jwt_claims = jwt.getClaims()
@@ -528,7 +544,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 doUpdate = True
             else:
                 print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
-                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account.")
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account. If you already have a username and password use those instead of an external authentication site to get access.")
 
         username = None
         try:
