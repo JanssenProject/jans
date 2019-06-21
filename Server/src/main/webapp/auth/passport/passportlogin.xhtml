@@ -276,13 +276,9 @@ border-color: #d6e9c6;
 			function dynamic_link(provider, logo_img, name) {
 				name = name ? name : provider;
 				if (logo_img == null) {
-					logo_img = "img/" + name.toLowerCase() + ".png"
+					logo_img = "/oxauth/img/glu_icon.png"
 				}
-				if (logo_img.indexOf("http") != 0) {
-					//logo is assumed to be located relative to /oxauth/auth/passport
-					logo_img = "auth/passport/" + logo_img
-				}
-            			
+
 				imgMarkup = '<img style="cursor: pointer" class="img-responsive" alt="'
 						+ name
 						+ '" onclick="idp_redirect(\''
