@@ -55,10 +55,9 @@ public class RadiusClient implements Serializable {
 		return this.dn;
 	}
 
-	public RadiusClient setDn(String dn) {
+	public void setDn(String dn) {
 
 		this.dn = dn;
-		return this;
 	}
 
 
@@ -67,10 +66,9 @@ public class RadiusClient implements Serializable {
 		return this.inum;
 	}
 
-	public RadiusClient setInum(String inum) {
+	public void setInum(String inum) {
 
 		this.inum = inum;
-		return this;
 	}
 
 
@@ -79,10 +77,9 @@ public class RadiusClient implements Serializable {
 		return this.name;
 	}
 
-	public RadiusClient setName(String name) {
+	public void setName(String name) {
 
 		this.name = name;
-		return this;
 	}
 
 
@@ -91,10 +88,9 @@ public class RadiusClient implements Serializable {
 		return this.ipAddress;
 	}
 
-	public RadiusClient setIpAddress(String ipaddress) {
+	public void setIpAddress(String ipaddress) {
 
 		this.ipAddress = ipaddress;
-		return this;
 	}
 
 
@@ -103,10 +99,9 @@ public class RadiusClient implements Serializable {
 		return this.secret;
 	}
 
-	public RadiusClient setSecret(String secret) {
+	public void setSecret(String secret) {
 
 		this.secret = secret;
-		return this;
 	}
 
 	public Integer getPriority() {
@@ -114,9 +109,8 @@ public class RadiusClient implements Serializable {
 		return this.priority;
 	}
 
-	public RadiusClient setPriority(Integer priority) {
+	public void setPriority(Integer priority) {
 
 		this.priority = priority;
-		return this;
 	}
 }
