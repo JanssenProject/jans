@@ -25,8 +25,6 @@ public class TokenLdap implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "uniqueIdentifier")
-    private String id;
     @AttributeName(name = "oxAuthGrantId", consistency = true)
     private String grantId;
     @AttributeName(name = "oxAuthUserId")
@@ -96,14 +94,6 @@ public class TokenLdap implements Serializable {
 
     public void setDeletable(boolean deletable) {
         this.deletable = deletable;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String p_id) {
-        id = p_id;
     }
 
     public String getAuthorizationCode() {
