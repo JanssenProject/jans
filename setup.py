@@ -2024,6 +2024,30 @@ class Setup(object):
         certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
         return certificate_text
 
+
+
+    def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val):
+
+        self.logIt("Seeting jetty parameter {0}={1} for service {2}".format(jetty_param, jetty_val, jettyServiceName))
+
+        service_fn = os.path.join(self.jetty_base, jettyServiceName, 'start.ini')
+        start_ini = self.readFile(service_fn)
+        start_ini_list = start_ini.split('\n')
+        param_ln = jetty_param + '=' + jetty_val
+
+        for i, l in enumerate(start_ini_list[:]):
+            if jetty_param in l and l[0]=='#':
+                start_ini_list[i] = param_ln 
+                break
+            elif l.strip().startswith(jetty_param):
+                start_ini_list[i] = param_ln
+                break
+        else:
+            start_ini_list.append(param_ln)
+
+        self.writeFile(service_fn, '\n'.join(start_ini_list))
+
+
     def install_oxauth(self):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
@@ -2032,26 +2056,9 @@ class Setup(object):
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
-        
+
         # don't send header to server
-        start_ini_fn = os.path.join(self.jetty_base, jettyServiceName,'start.ini')
-        start_ini = self.readFile(start_ini_fn)
-        start_ini_list = start_ini.split('\n')
-
-        jetty_param = 'jetty.httpConfig.sendServerVersion'
-
-        for i, l in enumerate(start_ini_list[:]):
-            if jetty_param in l and l[0]=='#':
-                start_ini_list[i] = jetty_param +'=false'
-                break
-            elif l.strip().startswith(jetty_param):
-                start_ini_list[i] = jetty_param +'=false'
-                break
-        else:
-            start_ini_list.append(jetty_param +'=false')
-
-        self.writeFile(start_ini_fn, '\n'.join(start_ini_list))
-        
+        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
     def install_oxtrust(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
@@ -2061,6 +2068,9 @@ class Setup(object):
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/identity.war' % self.distGluuFolder, jettyServiceWebapps)
+
+        # don't send header to server
+        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
     def install_saml(self):
         if self.installSaml:
