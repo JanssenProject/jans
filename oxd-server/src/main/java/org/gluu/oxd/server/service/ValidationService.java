@@ -40,15 +40,15 @@ public class ValidationService {
 
     public Pair<Rp, Boolean> validate(IParams params) {
         notNull(params);
+        if (isInstanceOfGetRpParamsWithList(params)) {
+            return new Pair(null, true);
+        }
+
         if (params instanceof HasOxdIdParams) {
-            if (!isInstanceOfGetRpParamsWithList(params)) {
-                validate((HasOxdIdParams) params);
-            }
+            validate((HasOxdIdParams) params);
         }
         if (params instanceof HasAccessTokenParams) {
-            if (!isInstanceOfGetRpParamsWithList(params)) {
-                validate((HasAccessTokenParams) params);
-            }
+            validate((HasAccessTokenParams) params);
         }
 
         if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
