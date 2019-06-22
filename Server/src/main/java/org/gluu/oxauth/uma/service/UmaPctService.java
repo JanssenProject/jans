@@ -1,17 +1,17 @@
 package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
-import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -84,9 +84,10 @@ public class UmaPctService {
 
     public UmaPCT getByCode(String pctCode) {
         try {
-            final UmaPCT entry = ldapEntryManager.find(UmaPCT.class, dn(pctCode));
-            if (entry != null) {
-                return entry;
+            final Filter filter = Filter.createEqualityFilter("oxAuthTokenCode", pctCode);
+            final List<UmaPCT> entries = ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                return entries.get(0);
             } else {
                 log.error("Failed to find PCT by code: " + pctCode);
             }
@@ -100,7 +101,7 @@ public class UmaPctService {
         String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
 
         UmaPCT pct = new UmaPCT(pctLifetime());
-        pct.setCode(TokenHashUtil.hash(code));
+        pct.setCode(code);
         pct.setDn(dn(pct.getCode()));
         pct.setClientId(clientId);
         return pct;
@@ -163,7 +164,7 @@ public class UmaPctService {
         if (StringUtils.isBlank(pctCode)) {
             throw new IllegalArgumentException("PCT code is null or blank.");
         }
-        return String.format("oxAuthTokenCode=%s,%s", TokenHashUtil.hash(pctCode), branchBaseDn());
+        return String.format("oxAuthTokenCode=%s,%s", pctCode, branchBaseDn());
     }
 
     public String branchBaseDn() {
