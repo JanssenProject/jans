@@ -235,14 +235,14 @@ public class CleanerTimerTest extends BaseComponentTest {
         final AccessToken accessToken = grant.createAccessToken(null, new ExecutionContext(null, null));
 
         // 2. token exists
-        assertNotNull(grantService.getGrantsByCode(accessToken.getCode()));
+        assertNotNull(grantService.getGrantByCode(accessToken.getCode()));
 
         // 3. clean up
         cleanerTimer.processImpl();
         cacheService.clear();
 
         // 4. token exists
-        final TokenLdap grantLdap = grantService.getGrantsByCode(accessToken.getCode());
+        final TokenLdap grantLdap = grantService.getGrantByCode(accessToken.getCode());
         assertNotNull(grantLdap);
 
         final Calendar calendar = Calendar.getInstance();
@@ -256,7 +256,7 @@ public class CleanerTimerTest extends BaseComponentTest {
         cacheService.clear();
 
         // 6. no token in persistence
-        assertNull(grantService.getGrantsByCode(accessToken.getCode()));
+        assertNull(grantService.getGrantByCode(accessToken.getCode()));
     }
 
     @Test
