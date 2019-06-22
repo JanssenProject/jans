@@ -48,8 +48,6 @@ public interface IAuthorizationGrant {
 
     AbstractToken getAccessToken(String tokenCode);
 
-    boolean isValid();
-
     void revokeAllTokens();
 
     void checkExpiredTokens();

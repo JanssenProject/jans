@@ -90,11 +90,6 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public boolean isValid() {
-        return grant.isValid();
-    }
-
-    @Override
     public void revokeAllTokens() {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
