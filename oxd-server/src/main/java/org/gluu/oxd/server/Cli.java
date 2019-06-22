@@ -203,7 +203,7 @@ public class Cli {
                         " - 2) provide authorization access_token (same that is provided in Authorization header in oxd API) via -a parameter (e.g. lsox.sh -a xxxx-xxxx-xxxx-xxxx -l), so script can connect to running oxd");
                 return;
             }
-
+            authorization = "Bearer " + authorization;
             if (cmd.hasOption("l")) {
                 GetRpParams params = new GetRpParams();
                 params.setList(true);
