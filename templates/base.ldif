@@ -55,6 +55,15 @@ ou: clients
 
 ################################
 
+# Token data - LEVEL 2
+dn: ou=tokens,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: clients
+
+
+################################
+
 # Custom scripts - LEVEL 2
 dn: ou=scripts,o=gluu
 objectClass: top
