@@ -178,7 +178,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope = authorizationCodeGrant.checkScopesPolicy(scope);
                         }
 
-                        AccessToken accToken = authorizationCodeGrant.createAccessToken(request.getHeader("X-ClientCert")); // create token after scopes are checked
+                        AccessToken accToken = authorizationCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
                         log.debug("Issuing access token: {}", accToken.getCode());
 
                         IdToken idToken = null;
@@ -238,7 +238,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope = authorizationGrant.checkScopesPolicy(scope);
                         }
 
-                        AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert")); // create token after scopes are checked
+                        AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
 
                         IdToken idToken = null;
                         if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
@@ -270,7 +270,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         scope = clientCredentialsGrant.checkScopesPolicy(scope);
                     }
 
-                    AccessToken accessToken = clientCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert")); // create token after scopes are checked
+                    AccessToken accessToken = clientCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
 
                     IdToken idToken = null;
                     if (appConfiguration.getOpenidScopeBackwardCompatibility() && clientCredentialsGrant.getScopes().contains("openid")) {
@@ -332,7 +332,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
                         }
 
-                        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert")); // create token after scopes are checked
+                        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
 
                         IdToken idToken = null;
                         if (appConfiguration.getOpenidScopeBackwardCompatibility() && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
