@@ -172,6 +172,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
+        if (StringUtils.isBlank(idToken)) {
+            return null;
+        }
         final TokenLdap tokenLdap = grantService.getGrantByCode(idToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ID_TOKEN)) {
             return asGrant(tokenLdap);
