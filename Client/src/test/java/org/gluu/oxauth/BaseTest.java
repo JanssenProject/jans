@@ -65,7 +65,7 @@ import static org.testng.Assert.*;
  */
 public abstract class BaseTest {
 	
-	private static int WAIT_OPERATION_TIMEOUT = 20;
+	private static int WAIT_OPERATION_TIMEOUT = 30;
 
     protected HtmlUnitDriver driver;
 
@@ -476,14 +476,9 @@ public abstract class BaseTest {
 
         WebElement doNotAllowButton = driver.findElement(By.id(authorizeFormDoNotAllowButton));
 
-        final String previousURL = driver.getCurrentUrl();
+        final String previousUrl2 = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, WAIT_OPERATION_TIMEOUT);
-        wait.until(new Function<WebDriver, Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return (d.getCurrentUrl() != previousURL);
-            }
-        });
+        waitForPageSwitch(driver, previousUrl2);
 
         authorizationResponseStr = driver.getCurrentUrl();
 
