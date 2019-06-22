@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Named
 public class CleanerTimer {
 
-	public final static int BATCH_SIZE = 25;
+	public final static int BATCH_SIZE = 1000;
 	private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
 	@Inject

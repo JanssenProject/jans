@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -20,11 +21,15 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.IdTokenFactory;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwtSigner;
+import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
 import org.gluu.oxauth.service.PairwiseIdentifierService;
+import org.gluu.oxauth.service.external.ExternalIntrospectionService;
+import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.service.CacheService;
+import org.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +68,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ExternalIntrospectionService externalIntrospectionService;
+
+    @Inject
+    private AttributeService attributeService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -155,11 +166,11 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 	}
 
     @Override
-    public AccessToken createAccessToken(String certAsPem) {
+    public AccessToken createAccessToken(String certAsPem, ExecutionContext context) {
         try {
-            final AccessToken accessToken = super.createAccessToken(certAsPem);
+            final AccessToken accessToken = super.createAccessToken(certAsPem, context);
             if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken));
+                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
             }
             if (accessToken.getExpiresIn() > 0) {
                 persist(asToken(accessToken));
@@ -171,7 +182,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private String createAccessTokenAsJwt(AccessToken accessToken) throws Exception {
+    private String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
@@ -194,7 +205,22 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+
+        if (client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims()) {
+            runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
+        }
+
         return jwtSigner.sign().toString();
+    }
+
+    private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
+        JSONObject responseAsJsonObject = new JSONObject();
+
+        ExternalIntrospectionContext context = new ExternalIntrospectionContext(this, executionContext.getHttpRequest(), executionContext.getHttpResponse(), appConfiguration, attributeService);
+        if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
+            log.trace("Successfully run external introspection scripts.");
+            // todo WIP
+        }
     }
 
     @Override
@@ -331,7 +357,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             if (StringUtils.isNotBlank(getClient().getSectorIdentifierUri())) {
                 sectorIdentifierUri = getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifierUri = getClient().getRedirectUris()[0];
+                sectorIdentifierUri = !ArrayUtils.isEmpty(getClient().getRedirectUris()) ? getClient().getRedirectUris()[0] : null;
             }
 
             String userInum = user.getAttribute("inum");
