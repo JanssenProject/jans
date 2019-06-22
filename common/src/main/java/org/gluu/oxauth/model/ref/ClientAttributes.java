@@ -19,6 +19,9 @@ public class ClientAttributes implements Serializable {
 	@JsonProperty("tlsClientAuthSubjectDn")
 	private String tlsClientAuthSubjectDn;
 
+    @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
+    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+
 	public String getTlsClientAuthSubjectDn() {
 		return tlsClientAuthSubjectDn;
 	}
@@ -27,8 +30,22 @@ public class ClientAttributes implements Serializable {
 		this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
 	}
 
-	@Override
-	public String toString() {
-		return "ClientAttributes{" + "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' + '}';
-	}
+    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
+	    if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
+            runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+        }
+        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
+        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientAttributes{" +
+                "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
+                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                '}';
+    }
 }

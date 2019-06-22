@@ -1,9 +1,7 @@
 package org.gluu.oxauth.comp;
 
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.common.AccessToken;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.ClientCredentialsGrant;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -28,7 +26,6 @@ import org.gluu.service.CacheService;
 import org.gluu.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.service.InumService;
 
@@ -235,7 +232,7 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 1. create token
         final ClientCredentialsGrant grant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
-        final AccessToken accessToken = grant.createAccessToken(null);
+        final AccessToken accessToken = grant.createAccessToken(null, new ExecutionContext(null, null));
 
         // 2. token exists
         assertNotNull(grantService.getGrantByCode(accessToken.getCode()));
