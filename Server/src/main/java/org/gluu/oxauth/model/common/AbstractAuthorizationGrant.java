@@ -15,7 +15,6 @@ import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.model.common.User;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -281,7 +280,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public AccessToken createAccessToken(String certAsPem) {
+    public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // oxAuth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
