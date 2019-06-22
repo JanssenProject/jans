@@ -453,7 +453,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
 
-        String hashedTokenCode = TokenHashUtil.getHashedToken(tokenCode);
+        String hashedTokenCode = TokenHashUtil.hash(tokenCode);
 
         final IdToken idToken = getIdToken();
         if (idToken != null) {

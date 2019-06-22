@@ -302,16 +302,15 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public TokenLdap asTokenLdap(AbstractToken p_token) {
-        final String id = GrantService.generateGrantId();
 
         final TokenLdap result = new TokenLdap();
+        final String hashedCode = TokenHashUtil.hash(p_token.getCode());
 
-        result.setDn(grantService.buildDn(id, getClientId()));
-        result.setId(id);
+        result.setDn(grantService.buildDn(hashedCode));
         result.setGrantId(getGrantId());
         result.setCreationDate(p_token.getCreationDate());
         result.setExpirationDate(p_token.getExpirationDate());
-        result.setTokenCode(TokenHashUtil.getHashedToken(p_token.getCode()));
+        result.setTokenCode(hashedCode);
         result.setUserId(getUserId());
         result.setClientId(getClientId());
 
@@ -324,23 +323,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         final AuthorizationCode authorizationCode = getAuthorizationCode();
         if (authorizationCode != null) {
-            result.setAuthorizationCode(TokenHashUtil.getHashedToken(authorizationCode.getCode()));
+            result.setAuthorizationCode(TokenHashUtil.hash(authorizationCode.getCode()));
         }
 
         initTokenFromGrant(result);
 
         return result;
-    }
-
-    @Override
-    public boolean isValid() {
-        // final TokenLdap t = getTokenLdap();
-        // if (t != null) {
-        // if (new Date().after(t.getExpirationDate())) {
-        // return true;
-        // }
-        // }
-        return true;
     }
 
     @Override
