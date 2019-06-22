@@ -14,10 +14,7 @@
 		<script src="../auth/u2f/scripts/u2f-api.js" />
 
 		<script>
-			var auth_request = $
-			{
-				identity.getWorkingParameter('fido_u2f_authentication_request')
-			};
+			var auth_request = ${identity.getWorkingParameter('fido_u2f_authentication_request')};
 
 			function startAuthentication() {
 				u2f

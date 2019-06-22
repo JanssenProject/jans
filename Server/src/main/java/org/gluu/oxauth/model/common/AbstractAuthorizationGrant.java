@@ -280,7 +280,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public AccessToken createAccessToken(String certAsPem) {
+    public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // oxAuth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {

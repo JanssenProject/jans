@@ -137,7 +137,7 @@ class PersonAuthentication(PersonAuthenticationType):
             json = identity.getWorkingParameter("passport_user_profile")
 
             if mail == None:
-                self.setEmailMessageError()
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email was missing in user profile")
             elif json != None:
                 # Completion of profile takes place
                 user_profile = self.getProfileFromJson(json)
@@ -538,6 +538,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     doUpdate = True
                 else:
                     print "Users with externalUid '%s' and mail '%s' are different. Access will be denied. Impersonation attempt?" % (externalUid, email)
+                    self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing provisioned account")
         else:
             if userByMail == None:
                 doAdd = True
@@ -553,6 +554,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 doUpdate = True
             else:
                 print "An attempt to supply an email of an existing user was made. Turn on 'emailLinkingSafe' if you want to enable linking"
+                self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email value corresponds to an already existing account. If you already have a username and password use those instead of an external authentication site to get access.")
 
         username = None
         try:
@@ -598,11 +600,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return user
 
 
-    def setEmailMessageError(self):
+    def setMessageError(self, msg, severity):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()
-        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Email was missing in user profile")
+        facesMessages.add(severity, msg)
 
 
     def checkRequiredAttributes(self, profile, attrs):

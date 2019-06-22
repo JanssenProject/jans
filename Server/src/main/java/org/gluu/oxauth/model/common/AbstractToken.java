@@ -33,7 +33,7 @@ import java.util.Date;
  */
 public abstract class AbstractToken implements Serializable, Deletable {
 
-    @AttributeName(name = "oxAuthTokenCode")
+    @AttributeName(name = "oxAuthTokenCode", consistency = true)
     private String code;
     @AttributeName(name = "oxAuthCreation")
     private Date creationDate;
