@@ -40,6 +40,10 @@ public class ValidationService {
 
     public Pair<Rp, Boolean> validate(IParams params) {
         notNull(params);
+        if (isInstanceOfGetRpParamsWithList(params)) {
+            return new Pair(null, true);
+        }
+
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
         }
@@ -160,5 +164,16 @@ public class ValidationService {
         notBlankOxdId(rp.getOxdId());
         notBlankOpHost(rp.getOpHost());
         return rp;
+    }
+
+    private static boolean isInstanceOfGetRpParamsWithList(IParams params) {
+        if (params instanceof GetRpParams) {
+            GetRpParams p = (GetRpParams) params;
+            if (p.getList() == null || !p.getList()) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }
