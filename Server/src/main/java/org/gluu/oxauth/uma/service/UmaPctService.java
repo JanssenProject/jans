@@ -100,7 +100,7 @@ public class UmaPctService {
         String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
 
         UmaPCT pct = new UmaPCT(pctLifetime());
-        pct.setCode(code);
+        pct.setCode(TokenHashUtil.hash(code));
         pct.setDn(dn(pct.getCode()));
         pct.setClientId(clientId);
         return pct;
