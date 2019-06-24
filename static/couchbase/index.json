@@ -38,7 +38,7 @@
 
   "gluu_site": [
     "objectClass", 
-    "inum", 
+    "inum"
   ], 
 
   "gluu_statistic": [
