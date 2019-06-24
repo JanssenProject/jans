@@ -77,7 +77,11 @@ public class Scope implements Serializable {
     }
 
     public String getDisplayName() {
-        return this.displayName;
+        if(this.displayName==null){
+            return getId();
+        }else {
+            return this.displayName;
+        }
     }
 
     public void setDisplayName(String displayName) {
