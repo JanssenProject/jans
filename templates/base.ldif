@@ -59,7 +59,7 @@ ou: clients
 dn: ou=tokens,o=gluu
 objectClass: top
 objectClass: organizationalUnit
-ou: clients
+ou: tokens
 
 
 ################################
