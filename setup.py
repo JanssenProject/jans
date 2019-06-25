@@ -34,7 +34,7 @@ import json
 import traceback
 import subprocess
 import sys
-import getopt
+import argparse
 import hashlib
 import re
 import glob
@@ -4491,99 +4491,31 @@ class Setup(object):
 
 ############################   Main Loop   #################################################
 
-def print_help():
-    print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
-    print "oxAuth and oxTrust to start. If setup.properties is found in this folder, these"
-    print "properties will automatically be used instead of the interactive setup."
-    print "Options:"
-    print ""
-    print "    -r   Install oxAuth RP"
-    print "    -p   Install Passport"
-    print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
-    print "    -f   specify setup.properties file"
-    print "    -h   Help"
-    print "    -n   No interactive prompt before install starts. Run with -f"
-    print "    -N   No apache httpd server"
-    print "    -s   Install the Shibboleth IDP"
-    print "    -u   Update hosts file with IP address / hostname"
-    print "    -w   Get the development head war files"
-    print "    -t   Load test data"
-    print "    -x   Load test data and exit"
-    print "    --allow-pre-released-features"
-    print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
-    print "    --listen_all_interfaces"
-    print "    --remote-ldap"
-    print "    --remote-couchbase"
+parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
+oxAuth and oxTrust to start. If setup.properties is found in this folder, these
+properties will automatically be used instead of the interactive setup.
+'''
 
+parser = argparse.ArgumentParser(description=parser_description)
+parser.add_argument('-d', help="Installation directory")
+parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
+parser.add_argument('-p', help="Install Passport", action='store_true')
+parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
+parser.add_argument('-f', help="Specify setup.properties file")
+parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
+parser.add_argument('-N', help="No apache httpd server", action='store_true')
+parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
+parser.add_argument('-w', help="Get the development head war files", action='store_true')
+parser.add_argument('-t', help="Load test data", action='store_true')
+parser.add_argument('-x', help="Load test data and exit", action='store_true')
+parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
+parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
+parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
+parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
 
+argsp = parser.parse_args()
 
-def getOpts(argv, setupOptions):
-    try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrevtx", 
-                                        [
-                                        'allow-pre-released-features'
-                                        'import-ldif',
-                                        'listen_all_interfaces',
-                                        'remote-couchbase',
-                                        'remote-ldap',
-                                        ]
-                                    )
-    except getopt.GetoptError:
-        print_help()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-d':
-            if os.path.exists(arg):
-                setupOptions['install_dir'] = arg
-            else:
-                print 'System folder %s does not exist. Installing in %s' % (arg, os.getcwd())
-        elif opt == '-h':
-            print_help()
-            sys.exit()
-        elif opt == "-f":
-            try:
-                if os.path.isfile(arg):
-                    setupOptions['setup_properties'] = arg
-                    print "Found setup properties %s\n" % arg
-                else:
-                    print "\nOoops... %s file not found for setup properties.\n" % arg
-            except:
-                print "\nOoops... %s file not found\n" % arg
-
-        elif opt == "-n":
-            setupOptions['noPrompt'] = True
-        elif opt == "-N":
-            setupOptions['installHTTPD'] = False
-        elif opt == "-s":
-            setupOptions['installSaml'] = True
-        elif opt == "-u":
-            pass  # TODO implement this option or remove it from help
-        elif opt == "-w":
-            setupOptions['downloadWars'] = True
-        elif opt == '-r':
-            setupOptions['installOxAuthRP'] = True
-        elif opt == '-p':
-            setupOptions['installPassport'] = True
-        elif opt == "-t":
-            setupOptions['loadTestData'] = True
-        elif opt == "-x":
-            setupOptions['loadTestDataExit'] = True
-        elif opt == '--allow-pre-released-features':
-            setupOptions['allowPreReleasedFeatures'] = True
-        elif opt == '--listen_all_interfaces':
-            setupOptions['listenAllInterfaces'] = True
-        elif opt == '--remote-couchbase':
-            setupOptions['remoteCouchbase'] = True
-        elif opt == '--remote-ldap':
-            setupOptions['remoteLdap'] = True
-        elif opt == '--import-ldif':
-            if os.path.isdir(arg):
-                setupOptions['importLDIFDir'] = arg
-                print "Found setup LDIF import directory %s\n" % (arg)
-            else:
-                print 'The custom LDIF import directory %s does not exist. Exiting...' % (arg)
-                sys.exit(2)
-    return setupOptions
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
@@ -4610,12 +4542,45 @@ if __name__ == '__main__':
         'loadTestDataExit': False
     }
 
-    if len(sys.argv) > 1:
-        setupOptions = getOpts(sys.argv[1:], setupOptions)
+    if argsp.d:
+        if os.path.exists(argsp.d):
+            setupOptions['install_dir'] = argsp.d
+        else:
+            print 'System folder %s does not exist. Installing in %s' % (argsp.d, os.getcwd())
 
+    if argsp.f:
+        if os.path.isfile(argsp.f):
+            setupOptions['setup_properties'] = argsp.f
+            print "Found setup properties %s\n" % argsp.f
+        else:
+            print "\nOoops... %s file not found for setup properties.\n" %argsp.f
+
+    setupOptions['noPrompt'] = argsp.n
+        
+    if argsp.N:
+        setupOptions['installHTTPD'] = False
+    
+    setupOptions['installSaml'] = argsp.s
+    setupOptions['downloadWars'] = argsp.w
+    setupOptions['installOxAuthRP'] = argsp.r
+    setupOptions['installPassport'] = argsp.p
+    setupOptions['loadTestData']  = argsp.t
+    setupOptions['loadTestDataExit'] = argsp.x
+    setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
+    setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
+    setupOptions['remoteCouchbase'] = argsp.remote_couchbase
+    setupOptions['remoteLdap'] = argsp.remote_ldap
+
+
+    if argsp.import_ldif:
+        if os.path.isdir(argsp.import_ldif):
+            setupOptions['importLDIFDir'] = argsp.import_ldif
+            print "Found setup LDIF import directory %s\n" % (argsp.import_ldif)
+        else:
+            print 'The custom LDIF import directory %s does not exist. Exiting...' % (argsp.import_ldif)
+            sys.exit(2)
 
     installObject = Setup(setupOptions['install_dir'])
-
     attribDataTypes.startup(setupOptions['install_dir'])
 
     if setupOptions['loadTestDataExit']:
