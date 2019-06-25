@@ -63,7 +63,11 @@ def opendjSchemaDataTypes(schemaDir):
 
 class ATTRUBUTEDATATYPES:
 
-    def __init__(self, installDir):
+    def __init__(self, installDir=None):
+        if installDir:
+            self.startup(installDir)
+
+    def startup(self, installDir):
 
         self.installDir = installDir
         opendjTypesFn = os.path.join(self.installDir, 'schema/opendj_types.json')
