@@ -17,20 +17,20 @@ public class CouchbaseSampleEntryManager {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("servers", "localhost");
-        connectionProperties.put("auth.userName", "admin");
-        connectionProperties.put("auth.userPassword", "test");
-//        connectionProperties.put("buckets", "gluu");
-        connectionProperties.put("buckets", "gluu, gluu_site, gluu_user, gluu_session, gluu_statistic");
+        connectionProperties.put("couchbase.servers", "localhost");
+        connectionProperties.put("couchbase.auth.userName", "admin");
+        connectionProperties.put("couchbase.auth.userPassword", "test");
+//        connectionProperties.put("couchbase.buckets", "gluu");
+        connectionProperties.put("couchbase.buckets", "gluu, gluu_site, gluu_user, gluu_session, gluu_statistic");
 
-        connectionProperties.put("bucket.default", "gluu");
-//        connectionProperties.put("bucket.gluu.mapping", "people, groups");
-        connectionProperties.put("bucket.gluu_user.mapping", "people, groups");
-        connectionProperties.put("bucket.gluu_session.mapping", "sessions");
-        connectionProperties.put("bucket.gluu_statistic.mapping", "statistic");
-        connectionProperties.put("bucket.gluu_site.mapping", "site");
+        connectionProperties.put("couchbase.bucket.default", "gluu");
+//        connectionProperties.put("couchbase.bucket.gluu.mapping", "people, groups");
+        connectionProperties.put("couchbase.bucket.gluu_user.mapping", "people, groups");
+        connectionProperties.put("couchbase.bucket.gluu_session.mapping", "sessions");
+        connectionProperties.put("couchbase.bucket.gluu_statistic.mapping", "statistic");
+        connectionProperties.put("couchbase.bucket.gluu_site.mapping", "site");
 
-        connectionProperties.put("password.encryption.method", "CRYPT-SHA-256");
+        connectionProperties.put("couchbase.password.encryption.method", "CRYPT-SHA-256");
 
         return connectionProperties;
     }

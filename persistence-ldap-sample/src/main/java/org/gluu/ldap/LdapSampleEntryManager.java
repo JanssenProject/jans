@@ -17,11 +17,11 @@ public class LdapSampleEntryManager {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("bindDN", "cn=Directory Manager");
-        connectionProperties.put("bindPassword", "test");
-        connectionProperties.put("servers", "localhost:1636");
-        connectionProperties.put("useSSL", "true");
-        connectionProperties.put("maxconnections", "3");
+        connectionProperties.put("ldap.bindDN", "cn=Directory Manager");
+        connectionProperties.put("ldap.bindPassword", "test");
+        connectionProperties.put("ldap.servers", "localhost:1636");
+        connectionProperties.put("ldap.useSSL", "true");
+        connectionProperties.put("ldap.maxconnections", "3");
 
         return connectionProperties;
     }
