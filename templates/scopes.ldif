@@ -104,7 +104,7 @@ oxId: uma_protection
 inum: 6D99
 objectClass: oxAuthCustomScope
 objectClass: top
-oxScopeType: uma
+oxScopeType: openid
 
 dn: inum=6D90,ou=scopes,o=gluu
 defaultScope: true
