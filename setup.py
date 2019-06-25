@@ -68,6 +68,7 @@ except:
     tty_rows = 60
     tty_columns = 120
 
+listAttrib = ['member']
 
 try:
     from pyDes import *
@@ -167,7 +168,7 @@ def get_documents_from_ldif(ldif_file):
             entry['dn'] = dn
             for k in copy.deepcopy(entry):
                 if len(entry[k]) == 1:
-                    if not k in installObject.listAttrib:
+                    if not k in listAttrib:
                         entry[k] = entry[k][0]
 
             for k in entry:
@@ -4127,11 +4128,8 @@ class Setup(object):
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
-    def install_couchbase_server(self):
-
-        # prepare multivalued list
-        self.listAttrib = ['member']
-        
+    def prepare_multivalued_list(self):
+        global listAttrib
         gluu_schema_fn = os.path.join(self.install_dir, 'schema/gluu_schema.json')
         gluu_schema = json.load(open(gluu_schema_fn))
 
@@ -4139,8 +4137,12 @@ class Setup(object):
             for obj in gluu_schema[obj_type]:
                 if obj.get('multivalued'):
                     for name in obj['names']:
-                        self.listAttrib.append(name)
+                        listAttrib.append(name)
 
+
+    def install_couchbase_server(self):
+        # prepare multivalued list
+        self.prepare_multivalued_list()
 
         if not self.remoteCouchbase:
             
@@ -4583,6 +4585,8 @@ def getOpts(argv, setupOptions):
                 sys.exit(2)
     return setupOptions
 
+attribDataTypes = ATTRUBUTEDATATYPES()
+
 if __name__ == '__main__':
 
     setupOptions = {
@@ -4609,9 +4613,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
 
-    attribDataTypes = ATTRUBUTEDATATYPES(setupOptions['install_dir'])
 
     installObject = Setup(setupOptions['install_dir'])
+
+    attribDataTypes.startup(setupOptions['install_dir'])
 
     if setupOptions['loadTestDataExit']:
         installObject.load_test_data_exit()
