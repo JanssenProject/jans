@@ -77,9 +77,5 @@
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-common</artifactId>
-		</dependency>
 	</dependencies>
 </project>
