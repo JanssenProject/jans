@@ -88,6 +88,10 @@
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxauth-persistence-model</artifactId>
+        </dependency>
 
 		<!-- CDI -->
         <dependency>
