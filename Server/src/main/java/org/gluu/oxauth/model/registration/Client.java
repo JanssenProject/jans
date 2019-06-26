@@ -13,7 +13,7 @@ import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.annotation.*;
-import org.gluu.oxauth.model.ref.ClientAttributes;
+import org.oxauth.persistence.model.ClientAttributes;
 import org.gluu.oxauth.model.ref.ClientReference;
 
 import java.io.Serializable;
