@@ -7,15 +7,12 @@ import com.google.common.base.Joiner;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
-
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class with static methods.
@@ -96,5 +93,19 @@ public class Utils {
 
     public static List<String> stringToList(String source) {
         return Arrays.asList(source.split("\\s+"));
+    }
+
+    public static String mapAsStringWithEncodedValues(Map<String, String> p_map) {
+        if (p_map != null && p_map.size() != 0) {
+            return p_map.entrySet().stream().map(e -> {
+                try {
+                    return e.getKey() + "=" + encode(e.getValue());
+                } catch (UnsupportedEncodingException e1) {
+                    throw new RuntimeException(e1);
+                }
+            }).collect(Collectors.joining("&"));
+        } else {
+            return null;
+        }
     }
 }
