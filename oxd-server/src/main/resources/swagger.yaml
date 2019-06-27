@@ -608,6 +608,16 @@ paths:
                     type: string
                   param2:
                     type: string
+              params:
+                type: object
+                required:
+                - param1
+                - param2
+                properties:
+                  param1:
+                    type: string
+                  param2:
+                    type: string
       responses:
         200:
           description: OK
