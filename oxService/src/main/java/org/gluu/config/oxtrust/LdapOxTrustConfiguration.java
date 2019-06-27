@@ -18,7 +18,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version 0.9, 05/16/2013
  */
 @DataEntry
-@ObjectClass(values = { "top", "oxTrustConfiguration" })
+@ObjectClass(value = "oxTrustConfiguration")
 public class LdapOxTrustConfiguration extends Entry {
 
     private static final long serialVersionUID = -15289347651306279L;

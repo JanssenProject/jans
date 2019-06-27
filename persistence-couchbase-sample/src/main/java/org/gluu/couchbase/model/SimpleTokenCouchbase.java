@@ -16,7 +16,7 @@ import org.gluu.util.StringHelper;
  * Created by eugeniuparvan on 1/12/17.
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthToken"})
+@ObjectClass(value = "top", "oxAuthToken"})
 public class SimpleTokenCouchbase implements Serializable {
 
     private static final long serialVersionUID = 6726419630327625172L;

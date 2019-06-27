@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @DataEntry
-@ObjectClass(values = {"top", "oxCacheEntity"})
+@ObjectClass(value = "oxCacheEntity")
 public class NativePersistenceCacheEntity implements Serializable, Deletable {
 
     @DN

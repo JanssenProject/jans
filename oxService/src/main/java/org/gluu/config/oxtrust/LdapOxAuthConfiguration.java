@@ -19,7 +19,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version 2.1, 19/04/2015
  */
 @DataEntry
-@ObjectClass(values = { "top", "oxAuthConfiguration" })
+@ObjectClass(value = "oxAuthConfiguration")
 public class LdapOxAuthConfiguration extends Entry {
 
     private static final long serialVersionUID = 2453308522994526877L;

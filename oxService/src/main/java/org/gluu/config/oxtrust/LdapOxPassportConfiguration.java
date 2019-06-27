@@ -14,7 +14,7 @@ import org.gluu.persist.annotation.ObjectClass;
  */
 
 @DataEntry
-@ObjectClass(values = { "top", "oxPassportConfiguration" })
+@ObjectClass(value = "oxPassportConfiguration")
 public class LdapOxPassportConfiguration extends Entry {
 
 	private static final long serialVersionUID = -8451013277721189767L;
