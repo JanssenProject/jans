@@ -14,10 +14,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.persist.event.DeleteNotifier;
@@ -846,6 +848,18 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     @Override
 	public String getPersistenceType(String primaryKey) {
 		return LdapEntryManagerFactory.PERSISTANCE_TYPE;
+	}
+
+    @Override
+	public String[] getObjectClasses(Object entry, Class<?> entryClass) {
+		String[] ojectClasses = super.getObjectClasses(entry, entryClass);
+
+		Set<String> objecClassSet = new HashSet<String>();
+
+		// Add in LDAP implementation "top" by default
+		objecClassSet.add("top");
+		objecClassSet.addAll(Arrays.asList(ojectClasses));
+		return objecClassSet.toArray(new String[0]);
 	}
 
 	private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {

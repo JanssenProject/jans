@@ -668,6 +668,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return KEY_CONVERTER.convertToKey(dn);
     }
 
+    @Override
+    protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {
+    	// We can skip custom object classes because in Couchbase we don't need schema 
+		return NO_STRINGS;
+    }
+
+    @Override
+	protected Filter addObjectClassFilter(Filter filter, String[] objectClasses) {
+		if (objectClasses.length == 0) {
+			return filter;
+		}
+		
+		// In Couchbase implementation we need to use first one as entry type
+		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
+
+		return searchFilter;
+	}
+
     private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;

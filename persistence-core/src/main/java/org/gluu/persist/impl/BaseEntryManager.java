@@ -663,6 +663,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		return ((ObjectClass) ldapObjectClass).values();
+//		return new String[] { ((ObjectClass) ldapObjectClass).value() };
 	}
 
 	protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {
@@ -1681,7 +1682,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributesFilter = Filter.createANDFilter(attributesFilters);
 		}
 
-		String[] objectClasses = getCustomObjectClasses(entry, entryClass);
+		String[] objectClasses = getObjectClasses(entry, entryClass);
 		return addObjectClassFilter(attributesFilter, objectClasses);
 	}
 
