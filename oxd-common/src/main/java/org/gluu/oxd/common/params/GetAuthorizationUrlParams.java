@@ -28,6 +28,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private String token;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
+    @JsonProperty(value = "params")
+    private Map<String, String> params;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorization_redirect_uri;
 
@@ -98,6 +100,14 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
         this.authorization_redirect_uri = authorizationRedirectUri;
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -125,6 +135,7 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", scope=" + scope +
                 ", hd='" + hd + '\'' +
                 ", token='" + token + '\'' +
+                ", params=" + params +
                 ", custom_parameters=" + custom_parameters +
                 ", authorization_redirect_uri=" + authorization_redirect_uri +
                 '}';

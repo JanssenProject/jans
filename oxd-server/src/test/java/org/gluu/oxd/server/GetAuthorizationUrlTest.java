@@ -10,6 +10,9 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertTrue;
@@ -49,6 +52,24 @@ public class GetAuthorizationUrlTest {
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
+    }
 
+    @Parameters({"host", "redirectUrl", "opHost"})
+    @Test
+    public void testWithParams(String host, String redirectUrl, String opHost) {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("max_age", "70");
+        params.put("is_valid", "true");
+        commandParams.setParams(params);
+
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
     }
 }
