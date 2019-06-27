@@ -216,7 +216,7 @@ public class GetAuthorizationUrlParams {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAuthorizationUrlParams {\n");
-    
+
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
