@@ -1,6 +1,8 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.CoreUtils;
+import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertTrue;
@@ -56,7 +59,7 @@ public class GetAuthorizationUrlTest {
 
     @Parameters({"host", "redirectUrl", "opHost"})
     @Test
-    public void testWithParams(String host, String redirectUrl, String opHost) {
+    public void testWithParams(String host, String redirectUrl, String opHost) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
@@ -69,7 +72,15 @@ public class GetAuthorizationUrlTest {
         commandParams.setParams(params);
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
-        assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+
+        Assert.assertTrue(StringUtils.isNotBlank(parameters.get("max_age")));
+        assertEquals(parameters.get("max_age"), "70");
+        Assert.assertTrue(StringUtils.isNotBlank(parameters.get("is_valid")));
+        assertEquals(parameters.get("is_valid"), "true");
+        assertNotNull(resp);
+
     }
 }
