@@ -13,17 +13,16 @@
 
 package io.swagger.client.model;
 
+import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * GetAuthorizationUrlParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-17T12:08:18.906Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-06-27T09:26:43.404Z")
 public class GetAuthorizationUrlParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -42,6 +41,9 @@ public class GetAuthorizationUrlParams {
 
   @SerializedName("custom_parameters")
   private GetauthorizationurlCustomParameters customParameters = null;
+
+  @SerializedName("params")
+  private GetauthorizationurlCustomParameters params = null;
 
   public GetAuthorizationUrlParams oxdId(String oxdId) {
     this.oxdId = oxdId;
@@ -136,10 +138,10 @@ public class GetAuthorizationUrlParams {
     return this;
   }
 
-  /**
+   /**
    * Get authorizationRedirectUri
    * @return authorizationRedirectUri
-   **/
+  **/
   @ApiModelProperty(example = "https://client.example.org/cb", value = "")
   public String getAuthorizationRedirectUri() {
     return authorizationRedirectUri;
@@ -167,9 +169,27 @@ public class GetAuthorizationUrlParams {
     this.customParameters = customParameters;
   }
 
+  public GetAuthorizationUrlParams params(GetauthorizationurlCustomParameters params) {
+    this.params = params;
+    return this;
+  }
+
+   /**
+   * Get params
+   * @return params
+  **/
+  @ApiModelProperty(value = "")
+  public GetauthorizationurlCustomParameters getParams() {
+    return params;
+  }
+
+  public void setParams(GetauthorizationurlCustomParameters params) {
+    this.params = params;
+  }
+
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -178,16 +198,17 @@ public class GetAuthorizationUrlParams {
     }
     GetAuthorizationUrlParams getAuthorizationUrlParams = (GetAuthorizationUrlParams) o;
     return Objects.equals(this.oxdId, getAuthorizationUrlParams.oxdId) &&
-            Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
-            Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
-            Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
-            Objects.equals(this.authorizationRedirectUri, getAuthorizationUrlParams.authorizationRedirectUri) &&
-            Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters);
+        Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
+        Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
+        Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
+        Objects.equals(this.authorizationRedirectUri, getAuthorizationUrlParams.authorizationRedirectUri) &&
+        Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters) &&
+        Objects.equals(this.params, getAuthorizationUrlParams.params);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, scope, acrValues, prompt, authorizationRedirectUri, customParameters);
+    return Objects.hash(oxdId, scope, acrValues, prompt, authorizationRedirectUri, customParameters, params);
   }
 
 
@@ -202,6 +223,7 @@ public class GetAuthorizationUrlParams {
     sb.append("    prompt: ").append(toIndentedString(prompt)).append("\n");
     sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
     sb.append("    customParameters: ").append(toIndentedString(customParameters)).append("\n");
+    sb.append("    params: ").append(toIndentedString(params)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -210,7 +232,7 @@ public class GetAuthorizationUrlParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(java.lang.Object o) {
+  private String toIndentedString(Object o) {
     if (o == null) {
       return "null";
     }
