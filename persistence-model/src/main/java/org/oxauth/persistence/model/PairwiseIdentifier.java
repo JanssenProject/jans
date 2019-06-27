@@ -12,7 +12,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version June 30, 2018
  */
 @DataEntry
-@ObjectClass(values = {"top", "pairwiseIdentifier"})
+@ObjectClass(value = "pairwiseIdentifier")
 public class PairwiseIdentifier extends BaseEntry {
 
     @AttributeName(ignoreDuringUpdate = true, name = "oxId")

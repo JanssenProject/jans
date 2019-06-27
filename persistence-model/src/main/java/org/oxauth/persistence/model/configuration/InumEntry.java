@@ -17,7 +17,7 @@ import org.oxauth.persistence.model.base.Entry;
  *
  */
 @DataEntry
-@ObjectClass(values = { "top" })
+@ObjectClass
 public class InumEntry extends Entry {
 
 	@AttributeName(ignoreDuringUpdate = true)

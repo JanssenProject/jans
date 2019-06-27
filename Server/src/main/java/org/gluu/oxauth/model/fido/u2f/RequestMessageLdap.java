@@ -17,7 +17,7 @@ import java.util.TimeZone;
  * @version August 9, 2017
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(values = {"top", "oxU2fRequest"})
+@ObjectClass(value = "oxU2fRequest")
 public class RequestMessageLdap extends BaseEntry {
 
     @AttributeName(ignoreDuringUpdate = true, name = "oxId")

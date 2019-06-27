@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author yuriyz on 05/30/2017.
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthUmaPCT"})
+@ObjectClass(value = "oxAuthUmaPCT")
 public class UmaPCT extends AbstractToken {
 
     private final static Logger log = LoggerFactory.getLogger(UmaPCT.class);

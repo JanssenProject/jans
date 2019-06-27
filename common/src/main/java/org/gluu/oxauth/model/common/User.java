@@ -19,7 +19,7 @@ import org.gluu.util.StringHelper;
  * @author Yuriy Movchan Date: 06/11/2013
  */
 @DataEntry
-@ObjectClass(values = { "top", "gluuPerson" })
+@ObjectClass(value = "gluuPerson")
 public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;

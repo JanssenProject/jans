@@ -18,7 +18,7 @@ import java.util.*;
  * @version 2.0, date: 17/05/2017
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxUmaResourcePermission"})
+@ObjectClass(value = "oxUmaResourcePermission")
 public class UmaPermission {
 
     public static final String PCT = "pct";
