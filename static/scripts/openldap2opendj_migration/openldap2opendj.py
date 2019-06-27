@@ -87,7 +87,7 @@ def update_ox_ldap_prop(bindDN, trustStoreFile, trustStorePin):
     with open(ox_ldap_prop_fn, 'w') as w:
         w.write(''.join(prop))
     
-def update_ox_idp(ldap_bind_dn, ldap_bind_pw):
+def post_ldap_update(ldap_bind_dn, ldap_bind_pw):
     conn = ldap.initialize('ldaps://localhost:1636')
     conn.protocol_version = 3 
     conn.simple_bind_s(ldap_bind_dn, ldap_bind_pw)
@@ -95,13 +95,23 @@ def update_ox_idp(ldap_bind_dn, ldap_bind_pw):
     result = conn.search_s('ou=appliances,o=gluu',ldap.SCOPE_SUBTREE,'(oxIDPAuthentication=*)',['oxIDPAuthentication'])
 
     dn = result[0][0]
-    oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])    
+    oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
+
     config = json.loads(oxIDPAuthentication['config'])
-    config['bindDN'] = 'cn=Directory Manager'
-    oxIDPAuthentication['config'] = json.dumps(config)
-    oxIDPAuthentication = json.dumps(oxIDPAuthentication)
-    
-    conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication)])
+
+    if config['servers'][0]=='localhost:1636' and config['bindDN'].lower()=='cn=directory manager,o=gluu':
+        config['bindDN'] = 'cn=Directory Manager'
+        oxIDPAuthentication['config'] = json.dumps(config)
+        oxIDPAuthentication = json.dumps(oxIDPAuthentication, indent=2)
+        conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication)])
+
+    result = conn.search_s('ou=appliances,o=gluu',ldap.SCOPE_SUBTREE,'(oxTrustConfCacheRefresh=*)',['oxTrustConfCacheRefresh'])
+
+    dn = result[0][0]
+    oxTrustConfCacheRefresh = json.loads(result[0][1]['oxTrustConfCacheRefresh'][0])
+    oxTrustConfCacheRefresh['inumConfig']['bindDN'] = 'cn=Directory Manager'
+    oxTrustConfCacheRefresh = json.dumps(oxTrustConfCacheRefresh, indent=2)
+    conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxTrustConfCacheRefresh',  oxTrustConfCacheRefresh)])
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -1437,6 +1447,12 @@ class Setup(object):
             os.system('mkdir %s/static/opendj/systemd' % self.install_dir)
             self.run(['wget', 'https://raw.githubusercontent.com/GluuFederation/community-edition-setup/version_3.1.2/static/opendj/systemd/opendj.service', '-O', self.opendj_service_centos7])
 
+    def fix_shib_idp(self):
+        shib_ldap_prop_fn = '/opt/shibboleth-idp/conf/ldap.properties'
+        
+        if os.path_exists(shib_ldap_prop_fn):
+            pass
+
 
 if __name__ == '__main__':
 
@@ -1476,7 +1492,7 @@ if __name__ == '__main__':
     
     if len(sys.argv) > 1:
         if sys.argv[1] == '-p':
-            update_ox_idp(installObject.ldap_binddn, installObject.ldapPass)
+            post_ldap_update(installObject.ldap_binddn, installObject.ldapPass)
             sys.exit("Completed")
         else:
             sys.exit("Unrecognized argument")
@@ -1487,7 +1503,8 @@ if __name__ == '__main__':
     installObject.install_opendj()        
     installObject.install_ldap_server()
     update_ox_ldap_prop(installObject.ldap_binddn, installObject.opendj_p12_fn, installObject.encoded_opendj_p12_pass)
-    
+    installObject.fix_shib_idp()
+
     print "\n", "-"*50,"\n"
     print "OpenDJ installation finished. Please import your data as described in document,"
     print "and re-run this script with -p argument."
