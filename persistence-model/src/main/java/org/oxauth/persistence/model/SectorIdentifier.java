@@ -13,7 +13,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version March 20, 2018
  */
 @DataEntry(sortBy = {"id"})
-@ObjectClass(values = {"top", "oxSectorIdentifier"})
+@ObjectClass(value = "oxSectorIdentifier")
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -2812480357430436514L;

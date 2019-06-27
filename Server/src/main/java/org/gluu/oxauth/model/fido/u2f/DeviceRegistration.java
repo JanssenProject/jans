@@ -30,7 +30,7 @@ import java.util.TimeZone;
  * @author Yuriy Movchan Date: 05/14/2015
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(values = {"top", "oxDeviceRegistration"})
+@ObjectClass(value = "oxDeviceRegistration")
 public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;

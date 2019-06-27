@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @author Yuriy Movchan Date: 11.02.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(values = { "top", "gluuOrganization" })
+@ObjectClass(value = "gluuOrganization")
 @JsonInclude(Include.NON_NULL)
 public class GluuOrganization extends Entry implements Serializable {
 
