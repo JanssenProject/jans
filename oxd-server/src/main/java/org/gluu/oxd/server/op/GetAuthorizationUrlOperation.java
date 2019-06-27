@@ -80,6 +80,10 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             authorizationEndpoint += "&" + AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS + "=" + Utils.encode(Util.mapAsString(params.getCustomParameters()));
         }
 
+        if (params.getParams() != null && !params.getParams().isEmpty()) {
+            authorizationEndpoint += "&" + Utils.mapAsStringWithEncodedValues(params.getParams());
+        }
+
         return new GetAuthorizationUrlResponse(authorizationEndpoint);
     }
 
