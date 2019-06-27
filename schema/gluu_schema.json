@@ -4615,7 +4615,13 @@
                 "telephoneNumber",
                 "title",
                 "uid",
-                "userPassword"
+                "userPassword",
+                "oxTrustLogoPath",
+                "oxTrustFaviconPath",
+                "oxAuthLogoPath",
+                "oxAuthFaviconPath",
+                "idpLogoPath",
+                "idpFaviconPath"
             ],
             "must": [
                 "objectclass"
@@ -4711,13 +4717,7 @@
                 "userPassword",
                 "oxTrustCacheRefreshServerIpAddress",
                 "gluuPassportEnabled",
-                "gluuSmtpServerTrust",
-                "oxTrustLogoPath",
-                "oxTrustFaviconPath",
-                "oxAuthLogoPath",
-                "oxAuthFaviconPath",
-                "idpLogoPath",
-                "idpFaviconPath"
+                "gluuSmtpServerTrust"
             ],
             "must": [
                 "objectclass"
