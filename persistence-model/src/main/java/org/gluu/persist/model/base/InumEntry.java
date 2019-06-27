@@ -16,7 +16,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @author Oleksiy Tataryn
  */
 @DataEntry
-@ObjectClass(values = { "top" })
+@ObjectClass
 public class InumEntry extends Entry {
 
     @AttributeName(ignoreDuringUpdate = true)

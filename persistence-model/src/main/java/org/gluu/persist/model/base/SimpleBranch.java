@@ -18,7 +18,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @author Yuriy Movchan Date: 11.01.2010
  */
 @DataEntry
-@ObjectClass(values = { "top", "organizationalUnit"})
+@ObjectClass(value = "organizationalUnit")
 public class SimpleBranch extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -1311006812730222719L;

@@ -25,7 +25,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version December 15, 2015
  */
 @DataEntry
-@ObjectClass(values = { "top", "oxAuthSessionId" })
+@ObjectClass(value = "oxAuthSessionId")
 public class SimpleSessionState implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;

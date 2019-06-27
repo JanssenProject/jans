@@ -19,7 +19,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @author Dmitry Ognyannikov
  */
 @DataEntry
-@ObjectClass(values = { "top", "oxShibbolethCASProtocolConfiguration" })
+@ObjectClass(value = "oxShibbolethCASProtocolConfiguration")
 public class LdapShibbolethCASProtocolConfiguration extends Entry implements Serializable {
 
     private static final long serialVersionUID = -11887457695212971L;

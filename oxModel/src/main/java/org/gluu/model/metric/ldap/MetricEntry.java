@@ -20,7 +20,7 @@ import java.util.Date;
  * @author Yuriy Movchan Date: 07/27/2015
  */
 @DataEntry(sortBy = "startDate")
-@ObjectClass(values = { "top", "oxMetric" })
+@ObjectClass(value = "oxMetric")
 public class MetricEntry {
 
     @DN

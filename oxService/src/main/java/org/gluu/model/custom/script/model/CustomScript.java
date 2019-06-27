@@ -30,7 +30,7 @@ import org.gluu.util.StringHelper;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @DataEntry(sortBy = "level")
-@ObjectClass(values = { "top", "oxCustomScript" })
+@ObjectClass(value = "oxCustomScript")
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
