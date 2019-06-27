@@ -20,7 +20,7 @@ import java.util.List;
  * @author Yuriy Movchan Date: 06/30/2015
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthCustomScope"})
+@ObjectClass(value = "oxAuthCustomScope")
 public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;

@@ -19,7 +19,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version 0.9, 03/01/2013
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthConfiguration"})
+@ObjectClass(value = "oxAuthConfiguration")
 public class Conf {
     @DN
     private String dn;
