@@ -105,7 +105,7 @@ public class Utils {
                 }
             }).collect(Collectors.joining("&"));
         } else {
-            return null;
+            return "";
         }
     }
 }
