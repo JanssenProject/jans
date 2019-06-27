@@ -26,7 +26,7 @@ import java.util.List;
  * @version December 4, 2018
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthClient"})
+@ObjectClass(value = "oxAuthClient")
 public class Client extends DeletableEntity implements Serializable, ClientReference {
 
     private static final long serialVersionUID = -6832496019942067970L;

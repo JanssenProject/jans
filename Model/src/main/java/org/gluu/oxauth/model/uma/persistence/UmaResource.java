@@ -23,7 +23,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxUmaResource"})
+@ObjectClass(value = "oxUmaResource")
 public class UmaResource {
 
     @DN

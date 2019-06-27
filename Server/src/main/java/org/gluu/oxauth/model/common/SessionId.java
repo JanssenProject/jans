@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Named("sessionUser")
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthSessionId"})
+@ObjectClass(value = "oxAuthSessionId")
 public class SessionId implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
