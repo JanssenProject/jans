@@ -184,6 +184,20 @@ def get_documents_from_ldif(ldif_file):
                     else:
                         entry[k] = getTypedValue(dtype, entry[k])
 
+                if k == 'objectClass':
+                    entry[k].remove('top')
+                    oc_list = entry[k]
+
+                    for oc in oc_list[:]:
+                        if 'Custom' in oc and len(oc_list) > 1:
+                            oc_list.remove(oc)
+
+                        if not 'gluu' in oc.lower() and len(oc_list) > 1:
+                            oc_list.remove(oc)
+
+                    entry[k] = oc_list[0]
+
+
             documents.append((key, entry))
 
     return documents
