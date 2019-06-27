@@ -662,8 +662,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			return EMPTY_STRING_ARRAY;
 		}
 
-		return ((ObjectClass) ldapObjectClass).values();
-//		return new String[] { ((ObjectClass) ldapObjectClass).value() };
+		if (StringHelper.isEmpty(((ObjectClass) ldapObjectClass).value())) {
+			return EMPTY_STRING_ARRAY;
+		}
+		
+		return new String[] { ((ObjectClass) ldapObjectClass).value() };
 	}
 
 	protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {

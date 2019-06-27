@@ -16,7 +16,7 @@ import org.gluu.util.StringHelper;
  * Created by eugeniuparvan on 1/12/17.
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxAuthToken"})
+@ObjectClass(value = "top", "oxAuthToken"})
 public class SimpleTokenLdap implements Serializable {
 
     @AttributesList(name = "name", value = "values", sortByName = true)

@@ -29,7 +29,7 @@ import org.gluu.persist.model.base.Entry;
  * @version May 2, 2019
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(values = { "top", "gluuAttribute" })
+@ObjectClass(value = "gluuAttribute")
 public class GluuAttribute extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 4817004894646725606L;

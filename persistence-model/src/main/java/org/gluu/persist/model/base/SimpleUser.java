@@ -22,7 +22,7 @@ import org.gluu.util.StringHelper;
  * @author Javier Rojas Blum Date: 11.25.2011
  */
 @DataEntry
-@ObjectClass(values = {"top"})
+@ObjectClass
 public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;

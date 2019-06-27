@@ -17,7 +17,7 @@ import org.gluu.persist.annotation.ObjectClass;
 
 
 @DataEntry
-@ObjectClass(values={"oxRadiusServerConfiguration","top"})
+@ObjectClass(value = "oxRadiusServerConfiguration")
 public class ServerConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -1L;

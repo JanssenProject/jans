@@ -14,7 +14,7 @@ import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.ObjectClass;
 
 @DataEntry
-@ObjectClass(values={"oxRadiusClient","top"})
+@ObjectClass(value = "oxRadiusClient")
 public class RadiusClient implements Serializable {
 
 	private static final long serialVersionUID = -3145075159422463151L;
