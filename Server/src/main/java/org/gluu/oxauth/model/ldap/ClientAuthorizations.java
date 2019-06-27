@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @version October 16, 2015
  */
 @DataEntry
-@ObjectClass(values = {"top", "oxClientAuthorizations"})
+@ObjectClass(value = "oxClientAuthorizations")
 public class ClientAuthorizations implements Serializable {
 
     @DN

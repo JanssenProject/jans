@@ -18,7 +18,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
-@ObjectClass(values = { "top", "oxFido2AuthenticationEntry" })
+@ObjectClass(value = "oxFido2AuthenticationEntry")
 public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
