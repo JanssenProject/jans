@@ -344,13 +344,18 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         // Find entries
+        LOG.info("-------------------------------------------------------");
+        LOG.info("Filter:"+filter);
+        LOG.info("OBJECTCLASS SIZE:"+objectClasses.length);
+        LOG.info("OBJECTCLASS:"+objectClasses.toString());
         Filter searchFilter;
         if (objectClasses.length > 0) {
+        	 LOG.info("Filter:"+filter);
             searchFilter = addObjectClassFilter(filter, objectClasses);
         } else {
             searchFilter = filter;
         }
-
+        LOG.info("search Filter:"+searchFilter);
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
