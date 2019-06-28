@@ -27,13 +27,16 @@ import java.io.IOException;
 /**
  * UmaRpGetClaimsGatheringUrlParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-03-15T09:55:53.588Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-06-28T07:12:55.225Z")
 public class UmaRpGetClaimsGatheringUrlParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
 
   @SerializedName("ticket")
   private String ticket = null;
+
+  @SerializedName("state")
+  private String state = null;
 
   @SerializedName("claims_redirect_uri")
   private String claimsRedirectUri = null;
@@ -74,6 +77,24 @@ public class UmaRpGetClaimsGatheringUrlParams {
     this.ticket = ticket;
   }
 
+  public UmaRpGetClaimsGatheringUrlParams state(String state) {
+    this.state = state;
+    return this;
+  }
+
+   /**
+   * Get state
+   * @return state
+  **/
+  @ApiModelProperty(value = "")
+  public String getState() {
+    return state;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
   public UmaRpGetClaimsGatheringUrlParams claimsRedirectUri(String claimsRedirectUri) {
     this.claimsRedirectUri = claimsRedirectUri;
     return this;
@@ -94,7 +115,7 @@ public class UmaRpGetClaimsGatheringUrlParams {
 
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -104,12 +125,13 @@ public class UmaRpGetClaimsGatheringUrlParams {
     UmaRpGetClaimsGatheringUrlParams umaRpGetClaimsGatheringUrlParams = (UmaRpGetClaimsGatheringUrlParams) o;
     return Objects.equals(this.oxdId, umaRpGetClaimsGatheringUrlParams.oxdId) &&
         Objects.equals(this.ticket, umaRpGetClaimsGatheringUrlParams.ticket) &&
+        Objects.equals(this.state, umaRpGetClaimsGatheringUrlParams.state) &&
         Objects.equals(this.claimsRedirectUri, umaRpGetClaimsGatheringUrlParams.claimsRedirectUri);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, ticket, claimsRedirectUri);
+    return Objects.hash(oxdId, ticket, state, claimsRedirectUri);
   }
 
 
@@ -120,6 +142,7 @@ public class UmaRpGetClaimsGatheringUrlParams {
     
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    ticket: ").append(toIndentedString(ticket)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -129,7 +152,7 @@ public class UmaRpGetClaimsGatheringUrlParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(java.lang.Object o) {
+  private String toIndentedString(Object o) {
     if (o == null) {
       return "null";
     }
