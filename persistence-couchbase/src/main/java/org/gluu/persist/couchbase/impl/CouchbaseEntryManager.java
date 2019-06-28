@@ -355,7 +355,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         } else {
             searchFilter = filter;
         }
-        LOG.info("AFTER Filter:"+filter);
+        LOG.info("search Filter:"+searchFilter);
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
