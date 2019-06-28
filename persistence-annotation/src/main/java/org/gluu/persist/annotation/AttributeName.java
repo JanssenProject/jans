@@ -49,4 +49,9 @@ public @interface AttributeName {
      */
     boolean consistency() default false;
 
+    /**
+     *  (Optional) Specify whether attribute contains expiration date (E.g. used by Couchbase TTL).
+     */
+    boolean expiry () default false;
+
 }
