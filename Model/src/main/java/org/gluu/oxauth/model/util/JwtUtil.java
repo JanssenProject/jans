@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.model.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
@@ -14,19 +16,14 @@ import org.gluu.oxauth.model.crypto.PublicKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
 import javax.ws.rs.HttpMethod;
-
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -34,6 +31,8 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Set;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -247,4 +246,14 @@ public class JwtUtil {
 		return mapper.readValue(json, JSONObject.class);
 	}
 
+	public static void transferIntoJwtClaims(JSONObject jsonObject, Jwt jwt) {
+        if (jsonObject == null || jwt == null) {
+            return;
+        }
+
+        for (String key : jsonObject.keySet()) {
+            final Object value = jsonObject.opt(key);
+            jwt.getClaims().setClaimObject(key, value, true);
+        }
+    }
 }
