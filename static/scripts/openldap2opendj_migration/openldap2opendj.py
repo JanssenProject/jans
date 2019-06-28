@@ -1450,8 +1450,10 @@ class Setup(object):
     def fix_shib_idp(self):
         shib_ldap_prop_fn = '/opt/shibboleth-idp/conf/ldap.properties'
         
-        if os.path_exists(shib_ldap_prop_fn):
-            pass
+        if os.path.exists(shib_ldap_prop_fn):
+            shib_ldap_prop = self.readFile(shib_ldap_prop_fn)
+            shib_ldap_prop = shib_ldap_prop.replace('cn=directory manager,o=gluu', 'cn=Directory Manager')
+            self.writeFile(shib_ldap_prop_fn, shib_ldap_prop)
 
 
 if __name__ == '__main__':
