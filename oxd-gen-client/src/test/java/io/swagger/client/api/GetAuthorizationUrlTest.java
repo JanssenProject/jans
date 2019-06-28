@@ -22,4 +22,19 @@ public class GetAuthorizationUrlTest {
         assertNotNull(resp);
         Tester.notEmpty(resp.getAuthorizationUrl());
     }
+
+    @Parameters({"redirectUrl", "opHost", "state"})
+    @Test
+    public void testWithCustomStateParameter(String redirectUrl, String opHost, String state) throws Exception {
+        DevelopersApi api = Tester.api();
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrl);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setState(state);
+
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
+        assertNotNull(resp);
+        Tester.notEmpty(resp.getAuthorizationUrl());
+    }
 }
