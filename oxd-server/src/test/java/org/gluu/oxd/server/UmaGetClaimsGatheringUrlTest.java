@@ -1,6 +1,7 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
@@ -46,5 +47,34 @@ public class UmaGetClaimsGatheringUrlTest {
         assertTrue(StringUtils.isNotBlank(parameters.get("state")));
         assertTrue(StringUtils.isNotBlank(response.getState()));
         assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
+    }
+
+    @Parameters({"host", "opHost", "redirectUrl", "rsProtect", "state"})
+    @Test
+    public void testWithCustomStateParameter(String host, String opHost, String redirectUrl, String rsProtect, String state) throws IOException {
+
+        ClientInterface client = Tester.newClient(host);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+
+        final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
+        params.setOxdId(site.getOxdId());
+        params.setTicket(checkAccess.getTicket());
+        params.setClaimsRedirectUri(redirectUrl);
+        params.setState(state);
+
+        final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params);
+
+        Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
+
+        assertTrue(StringUtils.isNotBlank(parameters.get("client_id")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("ticket")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("state")));
+        assertTrue(StringUtils.isNotBlank(response.getState()));
+        assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
+        assertEquals(response.getState(), state);
     }
 }
