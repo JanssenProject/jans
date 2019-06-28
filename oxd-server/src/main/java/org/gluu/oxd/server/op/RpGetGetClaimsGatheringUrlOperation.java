@@ -9,6 +9,7 @@ import org.gluu.oxd.common.params.RpGetClaimsGatheringUrlParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.RpGetClaimsGatheringUrlResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
 
 /**
@@ -25,12 +26,12 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
     }
 
     @Override
-    public IOpResponse execute(RpGetClaimsGatheringUrlParams params) {
+    public IOpResponse execute(RpGetClaimsGatheringUrlParams params) throws Exception {
         validate(params);
 
         final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
         final Rp rp = getRp();
-        final String state = getStateService().generateState();
+        final String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
 
         String url = metadata.getClaimsInteractionEndpoint() +
                 "?client_id=" + rp.getClientId() +
