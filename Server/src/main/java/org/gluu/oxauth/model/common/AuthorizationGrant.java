@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.IdTokenFactory;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwtSigner;
+import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
@@ -217,9 +218,15 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         JSONObject responseAsJsonObject = new JSONObject();
 
         ExternalIntrospectionContext context = new ExternalIntrospectionContext(this, executionContext.getHttpRequest(), executionContext.getHttpResponse(), appConfiguration, attributeService);
+        context.setAccessTokenAsJwt(jwt);
         if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
             log.trace("Successfully run external introspection scripts.");
-            // todo WIP
+
+            if (context.isTranferIntrospectionPropertiesIntoJwtClaims()) {
+                log.trace("Transfering claims into jwt ...");
+                JwtUtil.transferIntoJwtClaims(responseAsJsonObject, jwt);
+                log.trace("Transfered.");
+            }
         }
     }
 
