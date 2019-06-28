@@ -14,15 +14,23 @@
 package io.swagger.client.model;
 
 import java.util.Objects;
+import java.util.Arrays;
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.client.model.GetauthorizationurlCustomParameters;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * GetAuthorizationUrlParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-06-27T09:26:43.404Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-06-28T07:12:55.225Z")
 public class GetAuthorizationUrlParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -35,6 +43,9 @@ public class GetAuthorizationUrlParams {
 
   @SerializedName("prompt")
   private String prompt = null;
+
+  @SerializedName("state")
+  private String state = null;
 
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
@@ -133,6 +144,24 @@ public class GetAuthorizationUrlParams {
     this.prompt = prompt;
   }
 
+  public GetAuthorizationUrlParams state(String state) {
+    this.state = state;
+    return this;
+  }
+
+   /**
+   * Get state
+   * @return state
+  **/
+  @ApiModelProperty(value = "")
+  public String getState() {
+    return state;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
   public GetAuthorizationUrlParams authorizationRedirectUri(String authorizationRedirectUri) {
     this.authorizationRedirectUri = authorizationRedirectUri;
     return this;
@@ -201,6 +230,7 @@ public class GetAuthorizationUrlParams {
         Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
         Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
         Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
+        Objects.equals(this.state, getAuthorizationUrlParams.state) &&
         Objects.equals(this.authorizationRedirectUri, getAuthorizationUrlParams.authorizationRedirectUri) &&
         Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters) &&
         Objects.equals(this.params, getAuthorizationUrlParams.params);
@@ -208,7 +238,7 @@ public class GetAuthorizationUrlParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, scope, acrValues, prompt, authorizationRedirectUri, customParameters, params);
+    return Objects.hash(oxdId, scope, acrValues, prompt, state, authorizationRedirectUri, customParameters, params);
   }
 
 
@@ -216,11 +246,12 @@ public class GetAuthorizationUrlParams {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAuthorizationUrlParams {\n");
-
+    
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
     sb.append("    prompt: ").append(toIndentedString(prompt)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
     sb.append("    customParameters: ").append(toIndentedString(customParameters)).append("\n");
     sb.append("    params: ").append(toIndentedString(params)).append("\n");
