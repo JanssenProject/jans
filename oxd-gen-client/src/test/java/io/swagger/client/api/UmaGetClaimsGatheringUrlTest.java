@@ -48,4 +48,33 @@ public class UmaGetClaimsGatheringUrlTest {
         assertTrue(isNotBlank(response.getState()));
         assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
     }
+
+    @Parameters({"opHost", "redirectUrl", "rsProtect", "state"})
+    @Test
+    public void testWithCustomStateParameter(String opHost, String redirectUrl, String rsProtect, String state) throws Exception {
+
+        final DevelopersApi client = Tester.api();
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
+
+        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+
+        final UmaRpGetClaimsGatheringUrlParams params = new UmaRpGetClaimsGatheringUrlParams();
+        params.setOxdId(site.getOxdId());
+        params.setTicket(checkAccess.getTicket());
+        params.setClaimsRedirectUri(redirectUrl);
+        params.setState(state);
+
+        final UmaRpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params);
+
+        final Map<String, String> parameters = CoreUtils.splitQuery(response.getUrl());
+
+        assertTrue(isNotBlank(parameters.get("client_id")));
+        assertTrue(isNotBlank(parameters.get("ticket")));
+        assertTrue(isNotBlank(parameters.get("state")));
+        assertTrue(isNotBlank(response.getState()));
+        assertEquals(response.getState(), state);
+        assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
+    }
 }
