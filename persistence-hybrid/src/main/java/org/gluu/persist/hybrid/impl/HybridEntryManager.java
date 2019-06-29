@@ -370,7 +370,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	public void remove(String dn) {
+	protected void remove(String dn) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
