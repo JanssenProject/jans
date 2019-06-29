@@ -165,9 +165,20 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
             Boolean multivalued = attribute.isMultiValued();
+            
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
-                Object[] realValues = attributeValues;
+            	Object[] realValues = attributeValues;
+
+            	// We need to store only one objectClass value in Couchbase
+                if (StringHelper.equals(CouchbaseOperationService.OBJECT_CLASS, attributeName)) {
+                	if (!ArrayHelper.isEmpty(realValues)) {
+                		realValues = new Object[] { realValues[0] };
+                		multivalued = false;
+                	}
+                }
+
+            	// Process userPassword 
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
