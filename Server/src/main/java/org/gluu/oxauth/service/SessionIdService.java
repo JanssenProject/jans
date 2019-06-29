@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
@@ -109,6 +110,9 @@ public class SessionIdService {
 
     @Inject
     private RequestParameterService requestParameterService;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     public String getAcr(SessionId session) {
         if (session == null || session.getSessionAttributes() == null) {

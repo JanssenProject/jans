@@ -39,10 +39,10 @@ public class ClientAssertion {
     private Jwt jwt;
     private String clientSecret;
 
-    public ClientAssertion(AppConfiguration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    public ClientAssertion(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException {
         try {
-            if (!load(appConfiguration, clientId, clientAssertionType, encodedAssertion)) {
+            if (!load(appConfiguration, cryptoProvider, clientId, clientAssertionType, encodedAssertion)) {
                 throw new InvalidJwtException("Cannot load the JWT");
             }
         } catch (StringEncrypter.EncryptionException e) {
@@ -60,7 +60,7 @@ public class ClientAssertion {
         return clientSecret;
     }
 
-    private boolean load(AppConfiguration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    private boolean load(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws Exception {
         boolean result;
 
@@ -111,8 +111,6 @@ public class ClientAssertion {
                                                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                                                 new JSONObject(client.getJwks());
                                         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-                                        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                                                appConfiguration);
                                         boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                                                 keyId, jwks, sharedSecret, signatureAlgorithm);
 
