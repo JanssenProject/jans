@@ -26,6 +26,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private String hd; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
     @JsonProperty(value = "token")
     private String token;
+    @JsonProperty(value = "state")
+    private String state;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
     @JsonProperty(value = "params")
@@ -108,6 +110,14 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
         this.params = params;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -137,7 +147,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", token='" + token + '\'' +
                 ", params=" + params +
                 ", custom_parameters=" + custom_parameters +
-                ", authorization_redirect_uri=" + authorization_redirect_uri +
+                ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
+                ", state='" + state + '\'' +
                 '}';
     }
 }
