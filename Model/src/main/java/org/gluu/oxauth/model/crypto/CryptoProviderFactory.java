@@ -43,7 +43,7 @@ public class CryptoProviderFactory {
         return cryptoProvider;
     }
 
-    private synchronized static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
+    private static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
         if (keyStoreProvider != null &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreFile()) &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreSecret()) &&
