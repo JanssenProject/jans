@@ -55,13 +55,14 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             throw new HttpException(ErrorResponseCode.REDIRECT_URI_IS_NOT_REGISTERED);
         }
 
+        String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
         String redirectUri = StringUtils.isNotBlank(params.getAuthorizationRedirectUri()) ? params.getAuthorizationRedirectUri() : site.getAuthorizationRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
-        authorizationEndpoint += "&state=" + getStateService().generateState();
+        authorizationEndpoint += "&state=" + state;
         authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
 
         String acrValues = Utils.joinAndUrlEncode(acrValues(site, params)).trim();
