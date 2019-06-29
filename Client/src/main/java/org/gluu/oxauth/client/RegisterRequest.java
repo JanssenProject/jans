@@ -6,13 +6,8 @@
 
 package org.gluu.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -23,14 +18,16 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxauth.util.ClientUtil;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
+import java.util.*;
 
 import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.gluu.oxauth.model.util.StringUtils.implode;
 import static org.gluu.oxauth.model.util.StringUtils.toJSONArray;
-
-import java.util.*;
 
 /**
  * Represents a register request to send to the authorization server.
@@ -60,6 +57,7 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
+    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     private SubjectType subjectType;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
@@ -161,6 +159,14 @@ public class RegisterRequest extends BaseRequest {
 
     public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
         this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
+        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
+        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     }
 
     /**
@@ -1152,6 +1158,9 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
         }
+        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
+            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
+        }
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
@@ -1322,6 +1331,7 @@ public class RegisterRequest extends BaseRequest {
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
+        result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
@@ -1404,6 +1414,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
+            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
         }
         if (StringUtils.isNotBlank(logoUri)) {
             parameters.put(LOGO_URI.toString(), logoUri);
