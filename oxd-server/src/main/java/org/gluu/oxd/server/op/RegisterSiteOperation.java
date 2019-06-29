@@ -288,7 +288,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris() != null ? params.getPostLogoutRedirectUris() : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
-        request.setScopes(params.getScope());
+        request.setScope(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthSigningAlg())) {
