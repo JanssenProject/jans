@@ -212,6 +212,10 @@ public class CouchbaseFilterConverter {
 			return null;
 		}
 
+		if (StringHelper.equalsIgnoreCase(attributeName, CouchbaseEntryManager.OBJECT_CLASS)) {
+			return false;
+		}
+
 		PropertyAnnotation propertyAnnotation = propertiesAnnotationsMap.get(attributeName);
 		if ((propertyAnnotation == null) || (propertyAnnotation.getParameterType() == null)) {
 			return null;

@@ -20,7 +20,6 @@ import org.gluu.util.StringHelper;
  * @author Yuriy Movchan Date: 04/08/2014
  */
 @DataEntry
-@ObjectClass
 public class CustomEntry extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -7686468010219068788L;

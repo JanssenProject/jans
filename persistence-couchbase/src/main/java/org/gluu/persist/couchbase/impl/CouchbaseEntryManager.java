@@ -107,16 +107,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Update object classes if entry contains custom object classes
         if (!isSchemaUpdate) {
             String[] objectClasses = getObjectClasses(entry, entryClass);
+            if (ArrayHelper.isEmpty(objectClasses)) {
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses to persist! Entry is invalid: '%s'", entry));
+            }
+
             AttributeData objectClassAttributeData = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase());
             if (objectClassAttributeData == null) {
-                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses list! Entry is invalid: '%s'", entry));
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses in DB! Entry is invalid: '%s'", entry));
             }
 
             String[] objectClassesFromDb = objectClassAttributeData.getStringValues();
-
-            if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
+            if (ArrayHelper.isEmpty(objectClassesFromDb)) {
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses in DB! Entry is invalid: '%s'", entry));
+            }
+            
+            // We need to check only first element of each array because objectCLass in Couchbase is single value attribute
+            if (!StringHelper.equals(objectClassesFromDb[0], objectClasses[0])) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                        new AttributeData(OBJECT_CLASS, objectClasses, true), new AttributeData(OBJECT_CLASS, objectClassesFromDb, true)));
+                        new AttributeData(OBJECT_CLASS, objectClasses, false), new AttributeData(OBJECT_CLASS, objectClassesFromDb, false)));
             }
         }
     }
@@ -143,9 +151,20 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
             Boolean multivalued = attribute.isMultiValued();
+            
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
-                Object[] realValues = attributeValues;
+            	Object[] realValues = attributeValues;
+
+            	// We need to store only one objectClass value in Couchbase
+                if (StringHelper.equals(CouchbaseOperationService.OBJECT_CLASS, attributeName)) {
+                	if (!ArrayHelper.isEmpty(realValues)) {
+                		realValues = new Object[] { realValues[0] };
+                		multivalued = false;
+                	}
+                }
+
+            	// Process userPassword 
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
                     realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
@@ -330,18 +349,19 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         // Find entries
-        LOG.info("-------------------------------------------------------");
-        LOG.info("Filter:"+filter);
-        LOG.info("OBJECTCLASS SIZE:"+objectClasses.length);
-        LOG.info("OBJECTCLASS:"+objectClasses.toString());
+        LOG.trace("-------------------------------------------------------");
+        LOG.trace("Filter: {}", filter);
+        LOG.trace("objectClasses count: {} ", objectClasses.length);
+        LOG.trace("objectClasses: {}", objectClasses.toString());
+
         Filter searchFilter;
         if (objectClasses.length > 0) {
-        	 LOG.info("Filter:"+filter);
+        	 LOG.trace("Filter: {}", filter);
             searchFilter = addObjectClassFilter(filter, objectClasses);
         } else {
             searchFilter = filter;
         }
-        LOG.info("search Filter:"+searchFilter);
+        LOG.trace("Search filter: {}", searchFilter);
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
@@ -660,12 +680,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {
-    	// We can skip custom object classes because in Couchbase we don't need schema 
-		return NO_STRINGS;
-    }
-
-    @Override
 	protected Filter addObjectClassFilter(Filter filter, String[] objectClasses) {
 		if (objectClasses.length == 0) {
 			return filter;
@@ -673,6 +687,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		
 		// In Couchbase implementation we need to use first one as entry type
 		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
+		if (filter != null) {
+			searchFilter = Filter.createANDFilter(Filter.createANDFilter(searchFilter), filter);
+		}
 
 		return searchFilter;
 	}
