@@ -344,18 +344,19 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         // Find entries
-        LOG.info("-------------------------------------------------------");
-        LOG.info("Filter:"+filter);
-        LOG.info("OBJECTCLASS SIZE:"+objectClasses.length);
-        LOG.info("OBJECTCLASS:"+objectClasses.toString());
+        LOG.trace("-------------------------------------------------------");
+        LOG.trace("Filter: {}", filter);
+        LOG.trace("objectClasses count: {} ", objectClasses.length);
+        LOG.trace("objectClasses: {}", objectClasses.toString());
+
         Filter searchFilter;
         if (objectClasses.length > 0) {
-        	 LOG.info("Filter:"+filter);
+        	 LOG.trace("Filter: {}", filter);
             searchFilter = addObjectClassFilter(filter, objectClasses);
         } else {
             searchFilter = filter;
         }
-        LOG.info("search Filter:"+searchFilter);
+        LOG.trace("Search filter: {}", searchFilter);
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
@@ -687,6 +688,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		
 		// In Couchbase implementation we need to use first one as entry type
 		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
+		if (filter != null) {
+			searchFilter = Filter.createANDFilter(Filter.createANDFilter(searchFilter), filter);
+		}
 
 		return searchFilter;
 	}
