@@ -32,10 +32,11 @@ public class CryptoProviderTest extends ConfigurableTest {
 	@Inject
 	private ConfigurationFactory configurationFactory;
 
+	@Inject
+	private AbstractCryptoProvider cryptoProvider;
+
 	private final String SIGNING_INPUT = "Signing Input";
 	private final String SHARED_SECRET = "secret";
-
-	private static AbstractCryptoProvider cryptoProvider;
 
 	private static Long expirationTime;
 	private static String hs256Signature;
@@ -60,7 +61,6 @@ public class CryptoProviderTest extends ConfigurableTest {
 			AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
 			assertNotNull(appConfiguration);
 
-			cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
 			assertNotNull(cryptoProvider);
 
 			GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));

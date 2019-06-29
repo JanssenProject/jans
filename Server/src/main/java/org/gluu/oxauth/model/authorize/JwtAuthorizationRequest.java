@@ -69,7 +69,7 @@ public class JwtAuthorizationRequest {
 
     private AppConfiguration appConfiguration;
 
-    public JwtAuthorizationRequest(AppConfiguration appConfiguration, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
+    public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
         try {
             this.appConfiguration = appConfiguration;
             this.responseTypes = new ArrayList<ResponseType>();
@@ -97,8 +97,6 @@ public class JwtAuthorizationRequest {
 
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(appConfiguration.getKeyStoreFile(),
-                                appConfiguration.getKeyStoreSecret(), appConfiguration.getDnName());
                         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
                         jweDecrypter = new JweDecrypterImpl(privateKey);
                     } else {
@@ -139,7 +137,7 @@ public class JwtAuthorizationRequest {
 
                     SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
                     if (sigAlg != null) {
-                        if (validateSignature(sigAlg, client, signingInput, encodedSignature)) {
+                        if (validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
                             JSONObject jsonPayload = new JSONObject(payload);
 
                             if (jsonPayload.has("response_type")) {
@@ -309,14 +307,12 @@ public class JwtAuthorizationRequest {
         }
     }
 
-    private boolean validateSignature(SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
+    private boolean validateSignature(AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                appConfiguration);
         boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
 
         return validSignature;
