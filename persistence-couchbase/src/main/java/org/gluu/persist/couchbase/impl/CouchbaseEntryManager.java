@@ -130,7 +130,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
             if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                        new AttributeData(OBJECT_CLASS, objectClasses, true), new AttributeData(OBJECT_CLASS, objectClassesFromDb, true)));
+                        new AttributeData(OBJECT_CLASS, objectClasses, false), new AttributeData(OBJECT_CLASS, objectClassesFromDb, false)));
             }
         }
     }
