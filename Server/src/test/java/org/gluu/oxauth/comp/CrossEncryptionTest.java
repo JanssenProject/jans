@@ -52,6 +52,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateKey;
@@ -396,6 +397,11 @@ public class CrossEncryptionTest {
             public boolean deleteKey(String keyId) throws Exception {
                 return false;
             }
+
+			@Override
+			public PrivateKey getPrivateKey(String keyId) throws Exception {
+		        throw new UnsupportedOperationException("Method not implemented.");
+			}
         });
         Jwt jwt = jwtSigner.newJwt();
         jwt.getClaims().setSubjectIdentifier("testi");

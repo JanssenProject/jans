@@ -9,6 +9,7 @@ package org.gluu.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.model.registration.Client;
@@ -58,6 +59,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
@@ -241,7 +245,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {
-                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(appConfiguration, jwtRequest, client));
+                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(appConfiguration, cryptoProvider, jwtRequest, client));
                     } catch (Exception e) {
                         log.trace(e.getMessage(), e);
                     }
