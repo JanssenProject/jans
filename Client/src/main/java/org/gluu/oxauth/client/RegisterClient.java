@@ -8,21 +8,20 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.util.ClientUtil;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.Map;
 
 import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.gluu.oxauth.model.util.StringUtils.implode;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
@@ -159,6 +158,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 }
                 if (getRequest().getTlsClientAuthSubjectDn() != null) {
                     requestBody.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), getRequest().getTlsClientAuthSubjectDn());
+                }
+                if (getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
+                    requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
                 }
                 if (getRequest().getIdTokenSignedResponseAlg() != null) {
                     requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
