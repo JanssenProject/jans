@@ -290,7 +290,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public void remove(String dn) {
+    protected void remove(String dn) {
         // Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
