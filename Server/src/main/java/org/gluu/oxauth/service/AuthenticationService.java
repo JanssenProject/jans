@@ -311,7 +311,7 @@ public class AuthenticationService {
 				log.error("There are no baseDns specified in authentication configuration.");
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 		}
 
 		return false;
@@ -413,9 +413,12 @@ public class AuthenticationService {
 		List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
 		if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
 			// Combine object classes from LDAP and configuration in one list
-			Set<Object> customPersonCustomObjectClassList = new HashSet<Object>(personCustomObjectClassList);
+			Set<Object> customPersonCustomObjectClassList = new HashSet<Object>();
 			customPersonCustomObjectClassList.add("gluuPerson");
-			customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
+			customPersonCustomObjectClassList.addAll(personCustomObjectClassList);
+			if (user.getCustomObjectClasses() != null) { 
+				customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
+			}
 
 			customEntry.setCustomObjectClasses(
 					customPersonCustomObjectClassList.toArray(new String[customPersonCustomObjectClassList.size()]));
