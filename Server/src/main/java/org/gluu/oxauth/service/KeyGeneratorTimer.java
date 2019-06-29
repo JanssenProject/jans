@@ -65,6 +65,9 @@ public class KeyGeneratorTimer {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
 
@@ -156,7 +159,6 @@ public class KeyGeneratorTimer {
                     // The expired key is not added to the array of keys
                     log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
                             key.getString(EXPIRATION_TIME));
-                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
                 } else {
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);

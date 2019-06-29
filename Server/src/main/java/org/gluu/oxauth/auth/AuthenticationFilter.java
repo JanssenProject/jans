@@ -6,14 +6,34 @@
 
 package org.gluu.oxauth.auth;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.ref.AuthenticatorReference;
@@ -28,16 +48,6 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLDecoder;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -74,6 +84,9 @@ public class AuthenticationFilter implements Filter {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     @Inject
     private MTLSProxy mtlsProxy;
@@ -172,7 +185,6 @@ public class AuthenticationFilter implements Filter {
      * @return whether successful or not
      */
     private boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws Exception {
-        AbstractCryptoProvider cryptoProvider = createCryptoProvider();
         if (cryptoProvider == null) {
             log.debug("Unable to create cryptoProvider.");
             return false;
@@ -193,15 +205,6 @@ public class AuthenticationFilter implements Filter {
             }
         }
         return false;
-    }
-
-    private AbstractCryptoProvider createCryptoProvider() {
-        try {
-            return CryptoProviderFactory.getCryptoProvider(appConfiguration);
-        } catch (Exception e) {
-            log.error("Failed to create crypto provider.", e);
-            return null;
-        }
     }
 
     private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
@@ -416,7 +419,7 @@ public class AuthenticationFilter implements Filter {
                 String encodedAssertion = servletRequest.getParameter("client_assertion");
 
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
-                    ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, clientId,
+                    ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, cryptoProvider, clientId,
                             clientAssertionType, encodedAssertion);
 
                     String username = clientAssertion.getSubjectIdentifier();

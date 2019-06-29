@@ -110,6 +110,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
         return requestUserInfo(accessToken, authorization, request, securityContext);
@@ -223,7 +226,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws Exception {
         Jwt jwt = new Jwt();
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
@@ -278,7 +280,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
             String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
