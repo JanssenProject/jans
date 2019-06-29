@@ -28,7 +28,7 @@ public class CryptoProviderProviderFactory {
 
     @Produces
     @ApplicationScoped
-    public AbstractCryptoProvider getCacheProvider() throws Exception {
+    public AbstractCryptoProvider getCryptoProvider() throws Exception {
         log.debug("Started to create crypto provider");
 
         WebKeyStorage webKeyStorage = appConfiguration.getWebKeysStorage();

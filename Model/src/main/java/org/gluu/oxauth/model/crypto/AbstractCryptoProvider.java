@@ -28,6 +28,7 @@ import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
@@ -54,6 +55,8 @@ public abstract class AbstractCryptoProvider {
     public abstract boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
     public abstract boolean deleteKey(String keyId) throws Exception;
+
+    public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {

@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.authorize.*;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidJweException;
@@ -135,6 +136,9 @@ public class AuthorizeAction {
 
     @Inject
     private ErrorHandlerService errorHandlerService;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -439,7 +443,7 @@ public class AuthorizeAction {
                 Client client = clientService.getClient(clientId);
 
                 if (client != null) {
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, request, client);
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
 
                     if (jwtAuthorizationRequest.getUserInfoMember() != null) {
                         for (Claim claim : jwtAuthorizationRequest.getUserInfoMember().getClaims()) {
