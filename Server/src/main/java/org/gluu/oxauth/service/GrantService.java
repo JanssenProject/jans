@@ -77,7 +77,7 @@ public class GrantService {
         try {
             ldapEntryManager.merge(p_token);
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -177,7 +177,7 @@ public class GrantService {
                 cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -206,7 +206,7 @@ public class GrantService {
             try {
                 remove(p_grant.getTokenLdap());
             } catch (Exception e) {
-                log.trace(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -216,7 +216,7 @@ public class GrantService {
             final String baseDn = clientService.buildClientDn(p_clientId);
             return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("oxAuthTokenCode"));
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
@@ -243,7 +243,7 @@ public class GrantService {
             final TokenLdap entry = ldapEntryManager.find(TokenLdap.class, p_tokenDn);
             return entry;
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -252,7 +252,7 @@ public class GrantService {
         try {
             return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthGrantId", p_grantId));
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
@@ -261,7 +261,7 @@ public class GrantService {
         try {
             return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.hash(p_authorizationCode)));
         } catch (Exception e) {
-            log.trace(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
