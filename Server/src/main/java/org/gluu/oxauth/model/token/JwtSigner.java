@@ -49,7 +49,7 @@ public class JwtSigner {
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
 
-        cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        cryptoProvider = CdiUtil.bean(AbstractCryptoProvider.class);
     }
 
     public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
