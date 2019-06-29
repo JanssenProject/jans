@@ -383,7 +383,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications);
 
-	protected abstract void remove(String dn);
+	public abstract void remove(String dn);
 
 	@Override
 	public boolean contains(Object entry) {
