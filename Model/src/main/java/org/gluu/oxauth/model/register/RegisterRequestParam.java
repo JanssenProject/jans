@@ -262,6 +262,11 @@ public enum RegisterRequestParam {
     TLS_CLIENT_AUTH_SUBJECT_DN("tls_client_auth_subject_dn"),
 
     /**
+     * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
+     */
+    RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS("run_introspection_script_before_access_token_as_jwt_creation_and_include_claims"),
+
+    /**
      * String containing a space-separated list of scope values.
      */
     SCOPE("scope"),
