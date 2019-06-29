@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import java.security.PrivateKey;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -111,4 +113,9 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
             throw new Exception(response.getEntity());
         }
     }
+
+	@Override
+	public PrivateKey getPrivateKey(String keyId) {
+        throw new UnsupportedOperationException("Method not implemented.");
+	}
 }

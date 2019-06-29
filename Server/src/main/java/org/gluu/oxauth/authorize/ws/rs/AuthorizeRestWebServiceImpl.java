@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.authorize.*;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
@@ -114,6 +115,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ConfigurationFactory сonfigurationFactory;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -310,7 +314,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             boolean invalidOpenidRequestObject = false;
                             if (StringUtils.isNotBlank(request)) {
                                 try {
-                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, request, client);
+                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
 
                                     if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
                                             || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
