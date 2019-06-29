@@ -121,14 +121,22 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Update object classes if entry contains custom object classes
         if (!isSchemaUpdate) {
             String[] objectClasses = getObjectClasses(entry, entryClass);
+            if (ArrayHelper.isEmpty(objectClasses)) {
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses to persist! Entry is invalid: '%s'", entry));
+            }
+
             AttributeData objectClassAttributeData = attributesFromDbMap.get(OBJECT_CLASS.toLowerCase());
             if (objectClassAttributeData == null) {
-                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses list! Entry is invalid: '%s'", entry));
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses in DB! Entry is invalid: '%s'", entry));
             }
 
             String[] objectClassesFromDb = objectClassAttributeData.getStringValues();
-
-            if (!Arrays.equals(objectClassesFromDb, objectClasses)) {
+            if (ArrayHelper.isEmpty(objectClassesFromDb)) {
+                throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses in DB! Entry is invalid: '%s'", entry));
+            }
+            
+            // We need to check only first element of each array because objectCLass in Couchbase is single value attribute
+            if (!StringHelper.equals(objectClassesFromDb[0], objectClasses[0])) {
                 attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
                         new AttributeData(OBJECT_CLASS, objectClasses, false), new AttributeData(OBJECT_CLASS, objectClassesFromDb, false)));
             }
