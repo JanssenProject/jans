@@ -153,7 +153,7 @@ public class CleanerTimer {
 						public void performAction(List<DeletableEntity> entries) {
 							for (DeletableEntity entity : entries) {
 								try {
-									ldapEntryManager.removeRecursively(entity.getDn());
+									ldapEntryManager.remove(entity.getDn());
 									log.trace("Removed {}", entity.getDn());
                                     cacheService.remove(entity.getDn());
 								} catch (Exception e) {
