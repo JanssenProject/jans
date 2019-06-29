@@ -76,11 +76,33 @@ public class GetAuthorizationUrlTest {
 
         Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
 
-        Assert.assertTrue(StringUtils.isNotBlank(parameters.get("max_age")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("max_age")));
         assertEquals(parameters.get("max_age"), "70");
-        Assert.assertTrue(StringUtils.isNotBlank(parameters.get("is_valid")));
+        assertTrue(StringUtils.isNotBlank(parameters.get("is_valid")));
         assertEquals(parameters.get("is_valid"), "true");
         assertNotNull(resp);
+    }
 
+
+    @Parameters({"host", "redirectUrl", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl", "state"})
+    @Test
+    public void testWithCustomStateParameter(String host, String redirectUrl, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl, String state) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl,
+                StringUtils.isNotBlank(redirectUrls) ? Lists.newArrayList(redirectUrls.split(" ")) : null);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setAuthorizationRedirectUri(paramRedirectUrl);
+        commandParams.setState(state);
+
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+        assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(StringUtils.isNotBlank(parameters.get("state")));
+        assertEquals(parameters.get("state"), state);
     }
 }
