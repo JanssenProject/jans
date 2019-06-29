@@ -190,6 +190,10 @@ public class UserService {
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        
+        if (StringHelper.isEmpty(attributeName) || StringHelper.isEmpty(attributeValue)) {
+        	return null;
+        }
 
         User user = new User();
         user.setDn(staticConfiguration.getBaseDn().getPeople());
