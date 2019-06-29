@@ -683,12 +683,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected String[] getCustomObjectClasses(Object entry, Class<?> entryClass) {
-    	// We can skip custom object classes because in Couchbase we don't need schema 
-		return NO_STRINGS;
-    }
-
-    @Override
 	protected Filter addObjectClassFilter(Filter filter, String[] objectClasses) {
 		if (objectClasses.length == 0) {
 			return filter;
