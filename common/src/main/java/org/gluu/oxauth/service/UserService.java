@@ -203,7 +203,7 @@ public class UserService {
 
         user.setCustomAttributes(customAttributes);
 
-        List<User> entries = ldapEntryManager.findEntries(user);
+        List<User> entries = ldapEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
