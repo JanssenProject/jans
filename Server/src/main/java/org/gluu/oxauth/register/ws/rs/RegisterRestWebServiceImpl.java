@@ -107,6 +107,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.DYNAMIC_CLIENT_REGISTRATION_RATE).time();
@@ -130,7 +133,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 JSONObject jwks = Strings.isNullOrEmpty(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString())) ?
                         new JSONObject(softwareStatement.getClaims().getClaimAsString(JWKS.toString())) :
                         JwtUtil.getJSONWebKeys(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString()));
-                AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
                 boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
                         softwareStatement.getEncodedSignature(),
                         keyId, jwks, null, softwareStatement.getHeader().getAlgorithm());

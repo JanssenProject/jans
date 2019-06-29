@@ -6,22 +6,41 @@
 
 package org.gluu.oxauth.model.token;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AbstractToken;
+import org.gluu.oxauth.model.common.AccessToken;
+import org.gluu.oxauth.model.common.AuthorizationCode;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
@@ -47,18 +66,14 @@ import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.util.security.StringEncrypter;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -102,6 +117,9 @@ public class IdTokenFactory {
 
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken, String state,
@@ -470,7 +488,6 @@ public class IdTokenFactory {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
             String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
