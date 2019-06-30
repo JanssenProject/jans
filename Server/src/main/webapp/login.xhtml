@@ -28,7 +28,7 @@
 						<h:inputHidden id="platform" />
 					</div>
 					<b:form horizontal="true" id="loginForm" style="padding:30px;">
-						<b:inputText placeholder="#{msgs['login.username']}"  id="username" fieldId="loginForm:username"
+						<b:inputText placeholder="#{msgs['login.username']}" fieldId="loginForm:username"
 							required="true" colMd="10" labelColMd="2" autocomplete="off"
 							value="#{credentials.username}" styleClass="form-control"
 							style="width:100%">
@@ -36,7 +36,7 @@
 								<b:icon name="user" />
 							</f:facet>
 						</b:inputText>
-						<b:inputSecret placeholder="#{msgs['login.password']}" colMd="10" id="password"
+						<b:inputSecret placeholder="#{msgs['login.password']}" colMd="10"
 							fieldId="loginForm:password" labelColMd="2" value="#{credentials.password}"
 							autocomplete="off" styleClass="form-control" tyle="width:100%">
 							<f:facet name="prepend">
