@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
@@ -64,14 +65,43 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
+    private Properties props;
     private CouchbaseConnectionProvider connectionProvider;
+
+    private ScanConsistency scanConsistency;
+	private boolean ignoreAttributeScanConsistency;
+	private boolean disableScopeSupport;
 
     @SuppressWarnings("unused")
     private CouchbaseOperationsServiceImpl() {
     }
 
-    public CouchbaseOperationsServiceImpl(CouchbaseConnectionProvider connectionProvider) {
+    public CouchbaseOperationsServiceImpl(Properties props, CouchbaseConnectionProvider connectionProvider) {
+        this.props = props;
         this.connectionProvider = connectionProvider;
+        init();
+    }
+    
+    private void init() {
+        if (props.containsKey("connection.scan-consistency")) {
+        	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency").toString());
+        	this.scanConsistency = ScanConsistency.valueOf(scanConsistencyString);
+        	if (this.scanConsistency == null) {
+        		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
+        	}
+        }
+
+        if (props.containsKey("connection.ignore-attribute-scan-consistency")) {
+        	this.ignoreAttributeScanConsistency = StringHelper.toBoolean(props.get("connection.ignore-attribute-scan-consistency").toString(), false);
+        }
+
+        if (props.containsKey("connection.disable-scope-support")) {
+        	this.disableScopeSupport = StringHelper.toBoolean(props.get("connection.disable-scope-support").toString(), false);
+        }
+
+        LOG.info("Option scanConsistency: " + scanConsistency);
+        LOG.info("Option ignoreAttributeScanConsistency: " + ignoreAttributeScanConsistency);
+        LOG.info("Option disableScopeSupport: " + disableScopeSupport);
     }
 
     @Override
@@ -247,15 +277,20 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
 	private boolean deleteRecursivelyImpl(BucketMapping bucketMapping, String key) throws SearchException, EntryNotFoundException {
 		try {
-            MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
-                    .where(Expression.path("META().id").like(Expression.s(key + "%")));
-
-            N1qlQueryResult result = bucketMapping.getBucket().query(deleteQuery);
-            if (!result.finalSuccess()) {
-                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()),
-                        result.info().errorCount());
-            }
-
+	        if (disableScopeSupport) {
+	        	LOG.warn("Removing only base key without sub-tree: " + key);
+	        	delete(key);
+	        } else {
+	            MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
+	                    .where(Expression.path("META().id").like(Expression.s(key + "%")));
+	
+	            N1qlQueryResult result = bucketMapping.getBucket().query(deleteQuery);
+	            if (!result.finalSuccess()) {
+	                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()),
+	                        result.info().errorCount());
+	            }
+	        }
+	    	
             return true;
         } catch (CouchbaseException ex) {
             throw new EntryNotFoundException("Failed to delete entry", ex);
@@ -336,19 +371,26 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 LOG.trace("Search in whole DB tree", new Exception());
             }
         }
-
-        Expression scopeExpression;
-        if (scope == null) {
-            scopeExpression = null;
-        } else if (SearchScope.BASE == scope) {
-            scopeExpression = Expression.path("META().id").like(Expression.s(key + "%")).and(Expression.path("META().id").notLike(Expression.s(key + "\\\\_%\\\\_")));
+        
+        Expression finalExpression = expression;
+        if (disableScopeSupport) { 
+            if (scope != null) {
+            	LOG.warn("Ignoring scope '" + scope + " for expression: " + expression);
+            }
         } else {
-            scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"));
-        }
+			Expression scopeExpression;
+			if (scope == null) {
+				scopeExpression = null;
+			} else if (SearchScope.BASE == scope) {
+				scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"))
+						.and(Expression.path("META().id").notLike(Expression.s(key + "\\\\_%\\\\_")));
+			} else {
+				scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"));
+			}
 
-        Expression finalExpression = scopeExpression;
-        if (expression != null) {
-            finalExpression = scopeExpression.and(expression);
+			if (scopeExpression != null) {
+				finalExpression = scopeExpression.and(expression);
+			}
         }
 
         String[] select = attributes;
@@ -498,12 +540,20 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return this.connectionProvider.isCertificateAttribute(attribute);
     }
 
-    private ScanConsistency getScanConsistency(ScanConsistency scanConsistency) {
-    	if (scanConsistency != null) {
-    		return scanConsistency;
+    private ScanConsistency getScanConsistency(ScanConsistency operationScanConsistency) {
+    	if (ignoreAttributeScanConsistency) {
+        	return scanConsistency;
     	}
 
-    	return connectionProvider.getScanConsistency();
+    	if (operationScanConsistency != null) {
+    		return operationScanConsistency;
+    	}
+
+    	return scanConsistency;
+	}
+
+	public ScanConsistency getScanConsistency() {
+		return scanConsistency;
 	}
 
     @Override
