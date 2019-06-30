@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -34,6 +35,7 @@ public class OxAuthFaviconServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("image/x-icon");
+		response.setDateHeader("Expires", new Date().getTime()+1000L*1800);
 		GluuOrganization organization = organizationService.getOrganization();
 		boolean hasSucceed = readCustomFavicon(response, organization);
 		if (!hasSucceed) {
