@@ -131,7 +131,7 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
         }
         LOG.debug("Created connectionProvider '{}' with code '{}'", connectionProvider, connectionProvider.getCreationResultCode());
 
-        CouchbaseEntryManager couchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationsServiceImpl(connectionProvider));
+        CouchbaseEntryManager couchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationsServiceImpl(entryManagerConf, connectionProvider));
         LOG.info("Created CouchbaseEntryManager: {}", couchbaseEntryManager.getOperationService());
 
         return couchbaseEntryManager;
