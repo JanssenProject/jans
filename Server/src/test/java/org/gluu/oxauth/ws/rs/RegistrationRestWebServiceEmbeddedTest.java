@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -147,10 +148,14 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(SCOPE.toString()));
 
             JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(jsonObj.getString((SCOPE.toString()))));
-            assertEquals(scopesJsonArray.getString(0), "openid");
-            assertEquals(scopesJsonArray.getString(1), "clientinfo");
-            assertEquals(scopesJsonArray.getString(2), "profile");
-            assertEquals(scopesJsonArray.getString(3), "email");
+            List<String> scopes = new ArrayList<String>();
+            for (int i = 0; i < scopesJsonArray.length(); i++) {
+                scopes.add(scopesJsonArray.get(i).toString());
+            }
+            assertTrue(scopes.contains("openid"));
+            assertTrue(scopes.contains("email"));
+            assertTrue(scopes.contains("profile"));
+            assertTrue(scopes.contains("clientinfo"));
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
