@@ -73,7 +73,7 @@ if __name__ == '__main__':
         
         if args.show_latest_commit and (service in repos):
             latest_commit = get_latest_commit(service, info['branch'])
-            if not 'ERROR:' in latest_commit:
+            if not 'ERROR:' in latest_commit and info['build'] != latest_commit:
                 compare_build = 'diff: https://github.com/GluuFederation/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
             else:
                 compare_build = ''
