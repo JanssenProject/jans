@@ -6,24 +6,15 @@
 
 package org.gluu.persist;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import org.gluu.persist.event.DeleteNotifier;
-import org.gluu.persist.model.AttributeData;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.PagedResult;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.model.*;
 import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.search.filter.Filter;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Methods which Entry Manager must provide
@@ -74,6 +65,7 @@ public interface PersistenceEntryManager extends EntityManager {
                                         SortOrder sortOrder, int start, int count, int chunkSize);
 
 	void remove(Object entry);
+    void remove(String dn);
     void removeRecursively(String primaryKey);
     boolean hasBranchesSupport(String primaryKey);
     String getPersistenceType(String primaryKey);
