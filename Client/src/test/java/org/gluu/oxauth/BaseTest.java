@@ -347,14 +347,14 @@ public abstract class BaseTest {
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
             if (userId != null) {
-                WebElement usernameElement = currentDriver.findElement(By.name(loginFormUsername));
+                WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
                 usernameElement.sendKeys(userId);
             }
 
-            WebElement passwordElement = currentDriver.findElement(By.name(loginFormPassword));
+            WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
             passwordElement.sendKeys(userSecret);
 
-            WebElement loginButton = currentDriver.findElement(By.name(loginFormLoginButton));
+            WebElement loginButton = currentDriver.findElement(By.id(loginFormLoginButton));
 
             loginButton.click();
 
@@ -458,9 +458,9 @@ public abstract class BaseTest {
         startSelenium();
         navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
-        WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
-        WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
-        WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
+        WebElement usernameElement = driver.findElement(By.id(loginFormUsername));
+        WebElement passwordElement = driver.findElement(By.id(loginFormPassword));
+        WebElement loginButton = driver.findElement(By.id(loginFormLoginButton));
 
         if (userId != null) {
             usernameElement.sendKeys(userId);
@@ -613,14 +613,14 @@ public abstract class BaseTest {
 
         if (userSecret != null) {
             if (userId != null) {
-                WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
+                WebElement usernameElement = driver.findElement(By.id(loginFormUsername));
                 usernameElement.sendKeys(userId);
             }
 
-            WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
+            WebElement passwordElement = driver.findElement(By.id(loginFormPassword));
             passwordElement.sendKeys(userSecret);
 
-            WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
+            WebElement loginButton = driver.findElement(By.id(loginFormLoginButton));
 
             loginButton.click();
         }
@@ -664,9 +664,9 @@ public abstract class BaseTest {
         }
         navigateToAuhorizationUrl(driver, authorizationRequestUrl);
 
-        WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
-        WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
-        WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
+        WebElement usernameElement = driver.findElement(By.id(loginFormUsername));
+        WebElement passwordElement = driver.findElement(By.id(loginFormPassword));
+        WebElement loginButton = driver.findElement(By.id(loginFormLoginButton));
 
         if ((usernameElement == null) || (passwordElement == null) || (loginButton == null)) {
             return null;
