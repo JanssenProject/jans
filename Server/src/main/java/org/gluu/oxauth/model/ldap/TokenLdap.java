@@ -65,7 +65,7 @@ public class TokenLdap implements Serializable {
     @AttributeName(name = "oxAuthenticationMode")
     private String authMode;
 
-    @AttributeName(name = "oxAuthSessionDn")
+    @AttributeName(name = "oxAuthSessionDn", consistency = true)
     private String sessionDn;
 
     @AttributeName(name = "oxAttributes")
