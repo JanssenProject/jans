@@ -7,7 +7,6 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
-import org.json.JSONArray;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -24,6 +23,7 @@ import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
+import org.json.JSONArray;
 import org.oxauth.persistence.model.Scope;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
@@ -140,18 +140,10 @@ public class ClientService {
 	}
 
 	public Client getClient(String clientId, String registrationAccessToken) {
-		String baseDN = staticConfiguration.getBaseDn().getClients();
-
-		Filter filterInum = Filter.createEqualityFilter("inum", clientId);
-		Filter registrationAccessTokenInum = Filter.createEqualityFilter("oxAuthRegistrationAccessToken",
-				registrationAccessToken);
-		Filter filter = Filter.createANDFilter(filterInum, registrationAccessTokenInum);
-
-		List<Client> clients = ldapEntryManager.findEntries(baseDN, Client.class, filter, null, 1);
-		if (clients != null && clients.size() > 0) {
-			return clients.get(0);
-		}
-
+        final Client client = getClient(clientId);
+        if (client != null && registrationAccessToken != null && registrationAccessToken.equals(client.getRegistrationAccessToken())) {
+            return client;
+        }
 		return null;
 	}
 
