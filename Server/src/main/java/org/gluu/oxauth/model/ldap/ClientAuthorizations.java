@@ -21,7 +21,7 @@ public class ClientAuthorizations implements Serializable {
     @AttributeName(name = "oxId")
     private String id;
 
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "oxAuthClientId", consistency = true)
     private String clientId;
 
     @AttributeName(name = "oxAuthScope")
