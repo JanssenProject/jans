@@ -4640,6 +4640,7 @@
             "may": [
                 "blowfishPassword",
                 "c",
+                "ou",
                 "description",
                 "displayName",
                 "gluuAdditionalBandwidth",
