@@ -564,7 +564,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     private ScanConsistency getScanConsistency(ScanConsistency operationScanConsistency, boolean ignore) {
     	if (ignore) {
-    		return ScanConsistency.NOT_BOUNDED;
+    		return scanConsistency;
     	}
 
     	if (ignoreAttributeScanConsistency) {
