@@ -72,6 +72,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	private boolean ignoreAttributeScanConsistency;
 	private boolean disableScopeSupport;
 
+	private boolean attemptWithoutAttributeScanConsistency;
+
     @SuppressWarnings("unused")
     private CouchbaseOperationsServiceImpl() {
     }
@@ -93,6 +95,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         if (props.containsKey("connection.ignore-attribute-scan-consistency")) {
         	this.ignoreAttributeScanConsistency = StringHelper.toBoolean(props.get("connection.ignore-attribute-scan-consistency").toString(), false);
+        }
+
+        this.attemptWithoutAttributeScanConsistency = true;
+        if (props.containsKey("connection.attempt-without-attribute-scan-consistency")) {
+        	this.attemptWithoutAttributeScanConsistency = StringHelper.toBoolean(props.get("attempt-without-attribute-scan-consistency").toString(), this.attemptWithoutAttributeScanConsistency);
         }
 
         if (props.containsKey("connection.disable-scope-support")) {
@@ -301,11 +308,20 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public JsonObject lookup(String key, ScanConsistency scanConsistency, String... attributes) throws SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        JsonObject result = lookupImpl(bucketMapping, key, scanConsistency, attributes);
+    	BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+
+    	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
+        JsonObject result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+        if ((result == null) || result.isEmpty()) {
+        	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
+        	if (!useScanConsistency2.equals(useScanConsistency)) {
+        		useScanConsistency = useScanConsistency2;
+                result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+        	}
+        }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, attributes, getScanConsistency(scanConsistency));
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency);
 
         return result;
     }
@@ -319,14 +335,13 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 }
 
             } else {
-            	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency);
+                Bucket bucket = bucketMapping.getBucket();
 
-            	N1qlParams params = N1qlParams.build().consistency(useScanConsistency);
-                N1qlQuery query = N1qlQuery
-                        .simple(Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1), params);
-                N1qlQueryResult result = bucketMapping.getBucket().query(query);
+            	N1qlParams params = N1qlParams.build().consistency(scanConsistency);
+            	OffsetPath select = Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1);
+                N1qlQueryResult result = bucket.query(N1qlQuery.simple(select, params));
                 if (!result.finalSuccess()) {
-                    throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()), result.info().errorCount());
+                	throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()), result.info().errorCount());
                 }
 
                 if (result.allRows().size() == 1) {
@@ -346,10 +361,19 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         Instant startTime = OperationDurationUtil.instance().now();
 
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        PagedResult<JsonObject> result = searchImpl(bucketMapping, key, scanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+
+    	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
+        PagedResult<JsonObject> result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+        if ((result == null) || (result.getEntriesCount() == 0)) {
+        	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
+        	if (!useScanConsistency2.equals(useScanConsistency)) {
+        		useScanConsistency = useScanConsistency2;
+                result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+        	}
+        }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, getScanConsistency(scanConsistency));
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency);
 
         return result;
 	}
@@ -357,8 +381,6 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	private <O> PagedResult<JsonObject> searchImpl(BucketMapping bucketMapping, String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
         Bucket bucket = bucketMapping.getBucket();
-
-    	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency);
 
         BatchOperation<O> ldapBatchOperation = null;
         if (batchOperationWraper != null) {
@@ -434,7 +456,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	
 	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
 	                    LOG.debug("Execution query: '" + query + "'");
-	                    lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(useScanConsistency)));
+	                    lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(scanConsistency)));
 	                    if (!lastResult.finalSuccess()) {
 	                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
 	                                lastResult.info().errorCount());
@@ -474,7 +496,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	                }
 	
 	                LOG.debug("Execution query: '" + query + "'");
-	                lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(useScanConsistency)));
+	                lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(scanConsistency)));
 	                if (!lastResult.finalSuccess()) {
 	                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
 	                            lastResult.info().errorCount());
@@ -502,7 +524,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     .where(finalExpression);
             try {
                 LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
-                N1qlQueryResult countResult = bucket.query(N1qlQuery.simple(selectCountQuery, N1qlParams.build().consistency(useScanConsistency)));
+                N1qlQueryResult countResult = bucket.query(N1qlQuery.simple(selectCountQuery, N1qlParams.build().consistency(scanConsistency)));
                 if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
                     throw new SearchException(
                             String.format("Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
@@ -540,7 +562,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return this.connectionProvider.isCertificateAttribute(attribute);
     }
 
-    private ScanConsistency getScanConsistency(ScanConsistency operationScanConsistency) {
+    private ScanConsistency getScanConsistency(ScanConsistency operationScanConsistency, boolean ignore) {
+    	if (ignore) {
+    		return ScanConsistency.NOT_BOUNDED;
+    	}
+
     	if (ignoreAttributeScanConsistency) {
         	return scanConsistency;
     	}
