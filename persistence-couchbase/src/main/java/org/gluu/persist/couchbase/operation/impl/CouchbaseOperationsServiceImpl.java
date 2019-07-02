@@ -88,10 +88,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         if (props.containsKey("connection.scan-consistency")) {
         	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency").toString());
         	this.scanConsistency = ScanConsistency.valueOf(scanConsistencyString);
-        	if (this.scanConsistency == null) {
-        		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
-        	}
         }
+    	if (this.scanConsistency == null) {
+    		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
+    	}
 
         if (props.containsKey("connection.ignore-attribute-scan-consistency")) {
         	this.ignoreAttributeScanConsistency = StringHelper.toBoolean(props.get("connection.ignore-attribute-scan-consistency").toString(), false);
@@ -322,7 +322,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	}
         }
 
-        String attemptInfo = getScanAttemptLogInfo(scanConsistency, secondTry, useScanConsistency);
+        String attemptInfo = getScanAttemptLogInfo(scanConsistency, useScanConsistency, secondTry);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency, attemptInfo);
@@ -378,7 +378,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	}
         }
 
-        String attemptInfo = getScanAttemptLogInfo(scanConsistency, secondTry, useScanConsistency);
+        String attemptInfo = getScanAttemptLogInfo(scanConsistency, useScanConsistency, secondTry);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency, attemptInfo);
@@ -611,13 +611,13 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return connectionProvider.isConnected();
     }
 
-	protected String getScanAttemptLogInfo(ScanConsistency scanConsistency, boolean secondTry, ScanConsistency useScanConsistency) {
+	protected String getScanAttemptLogInfo(ScanConsistency scanConsistency, ScanConsistency usedScanConsistency, boolean secondTry) {
 		String attemptInfo = "";
         if (secondTry) {
         	attemptInfo = ", attempt: second";
         } else {
         	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
-        	if (!useScanConsistency2.equals(useScanConsistency)) {
+        	if (!useScanConsistency2.equals(usedScanConsistency)) {
         		attemptInfo = ", attempt: first";
         	}
         }
