@@ -310,18 +310,20 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         
     	BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
 
+        boolean secondTry = false; 
     	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
         JsonObject result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
         if ((result == null) || result.isEmpty()) {
         	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
         	if (!useScanConsistency2.equals(useScanConsistency)) {
         		useScanConsistency = useScanConsistency2;
+                secondTry = true; 
                 result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
         	}
         }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency, (secondTry ? ", attempt: second" : ""));
 
         return result;
     }
@@ -362,6 +364,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
 
+        boolean secondTry = false;
     	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
         PagedResult<JsonObject> result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
         if ((result == null) || (result.getEntriesCount() == 0)) {
@@ -369,11 +372,12 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	if (!useScanConsistency2.equals(useScanConsistency)) {
         		useScanConsistency = useScanConsistency2;
                 result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+                secondTry = true;
         	}
         }
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency, (secondTry ? ", attempt: second" : ""));
 
         return result;
 	}
