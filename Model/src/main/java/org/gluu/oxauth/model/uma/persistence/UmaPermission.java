@@ -27,7 +27,7 @@ public class UmaPermission {
     private String dn;
     @AttributeName(name = "oxStatus")
     private String status;
-    @AttributeName(name = "oxTicket")
+    @AttributeName(name = "oxTicket", consistency = true)
     private String ticket;
     @AttributeName(name = "oxConfigurationCode")
     private String configurationCode;
