@@ -322,8 +322,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	}
         }
 
+        String attemptInfo = getScanAttemptLogInfo(scanConsistency, secondTry, useScanConsistency);
+
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency, (secondTry ? ", attempt: second" : ""));
+        OperationDurationUtil.instance().logDebug("Couchbase operation: lookup, duration: {}, bucket: {}, key: {}, attributes: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, attributes, useScanConsistency, attemptInfo);
 
         return result;
     }
@@ -376,8 +378,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	}
         }
 
+        String attemptInfo = getScanAttemptLogInfo(scanConsistency, secondTry, useScanConsistency);
+
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency, (secondTry ? ", attempt: second" : ""));
+        OperationDurationUtil.instance().logDebug("Couchbase operation: search, duration: {}, bucket: {}, key: {}, expression: {}, scope: {}, attributes: {}, orderBy: {}, batchOperationWraper: {}, returnDataType: {}, start: {}, count: {}, pageSize: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize, useScanConsistency, attemptInfo);
 
         return result;
 	}
@@ -606,5 +610,19 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     public boolean isConnected() {
         return connectionProvider.isConnected();
     }
+
+	protected String getScanAttemptLogInfo(ScanConsistency scanConsistency, boolean secondTry, ScanConsistency useScanConsistency) {
+		String attemptInfo = "";
+        if (secondTry) {
+        	attemptInfo = ", attempt: second";
+        } else {
+        	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
+        	if (!useScanConsistency2.equals(useScanConsistency)) {
+        		attemptInfo = ", attempt: first";
+        	}
+        }
+
+        return attemptInfo;
+	}
 
 }
