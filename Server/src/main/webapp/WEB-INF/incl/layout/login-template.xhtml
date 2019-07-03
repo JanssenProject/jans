@@ -9,7 +9,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title><ui:insert name="pageTitle" /></title>
-		<link rel="icon" href="#{request.contextPath}/servlet/favicon" />
+		<link rel="icon" href="#{request.contextPath}/servlet/favicon" type='image/x-icon'/>
 		<link type="text/css" rel="stylesheet"
 			href="#{oxAuthConfigurationService.getCssLocation()}/style.css" />
 		<link type="text/css" rel="stylesheet"
@@ -25,9 +25,6 @@
 			src="#{oxAuthConfigurationService.getJsLocation()}/bootstrap.min.js" />
 		<script
 			src="#{oxAuthConfigurationService.getJsLocation()}/platform.js" />
-
-		<ui:insert name="head" />
-
 		<style>
 .footer {
 	position: fixed;
