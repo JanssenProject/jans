@@ -63,7 +63,7 @@ public class OxAuthLogoServlet extends HttpServlet {
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File logoPath = new File(BASE_OXAUTH_LOGO_PATH + organization.getOxAuthLogoPath());
+		File logoPath = new File(organization.getOxAuthLogoPath());
 		if (!logoPath.exists()) {
 			return false;
 		}

@@ -64,7 +64,7 @@ public class OxAuthFaviconServlet extends HttpServlet {
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File faviconPath = new File(BASE_OXAUTH_FAVICON_PATH + organization.getOxAuthFaviconPath());
+		File faviconPath = new File(organization.getOxAuthFaviconPath());
 		if (!faviconPath.exists()) {
 			return false;
 		}
