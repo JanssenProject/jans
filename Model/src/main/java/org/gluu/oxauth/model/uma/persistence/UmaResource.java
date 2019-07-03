@@ -48,7 +48,7 @@ public class UmaResource {
     @AttributeName(name = "oxScopeExpression")
     private String scopeExpression;
 
-    @AttributeName(name = "oxAssociatedClient")
+    @AttributeName(name = "oxAssociatedClient", consistency = true)
     private List<String> clients;
 
     @AttributeName(name = "oxResource")
