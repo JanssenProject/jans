@@ -6,6 +6,9 @@ package org.gluu.oxd.common;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 import java.util.Arrays;
@@ -54,7 +57,10 @@ public enum ErrorResponseCode {
     INVALID_AUTHORIZATION_REDIRECT_URI(400, "invalid_authorization_redirect_uri", "Invalid authorization_redirect_uri (empty or blank)."),
     INVALID_SCOPE(400, "invalid_scope", "Invalid scope parameter (empty or blank)."),
     INVALID_ACR_VALUES(400, "invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
-    INVALID_ALGORITHM(400, "invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(SignatureAlgorithm.values())),
+    INVALID_SIGNATURE_ALGORITHM(400, "invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(SignatureAlgorithm.values())),
+    INVALID_KEY_ENCRYPTION_ALGORITHM(400, "invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(KeyEncryptionAlgorithm.values())),
+    INVALID_SUBJECT_TYPE(400, "invalid_subject_type", "Invalid subject type provided. Valid algorithms are: " + Arrays.toString(SubjectType.values())),
+    INVALID_BLOCK_ENCRYPTION_ALGORITHM(400, "invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(BlockEncryptionAlgorithm.values())),
     NO_CONNECT_DISCOVERY_RESPONSE(500, "no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
     NO_REGISTRATION_ENDPOINT(500, "invalid_request", "OP does not support dynamic client registration. Please register client manually and provide client_id and client_secret to register_site command."),
     NO_UMA_DISCOVERY_RESPONSE(500, "no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma2-configuration"),
