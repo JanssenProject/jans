@@ -147,8 +147,84 @@ paths:
               rpt_as_jwt:
                 type: boolean
                 description: specifies whether RPT should be return as JWT or not. Default value is false.
-
-
+              logo_uri:
+                type: string
+                description: specifies an URL that references a logo for the Client application.
+                example: "https://client.example.org/logo.png"
+              client_uri:
+                type: string
+                description: specifies an URL of the home page of the Client.
+                example: "https://client.example.org/page"
+              policy_uri:
+                type: string
+                description: specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                example: "https://client.example.org/page"
+              front_channel_logout_session_required:
+                type: boolean
+                description: specifies if front channel logout session required.
+                example: true
+              tos_uri:
+                type: string
+                description: specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms.
+                example: "https://client.example.org/page"
+              jwks:
+                type: string
+                description: Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.
+                example: "{\"key1\": \"value1\", \"key2\": \"value2\"}"
+              id_token_binding_cnf:
+                type: string
+                example: "4NRB1-0XZABZI9E6-5SM3R"
+              tls_client_auth_subject_dn:
+                type: string
+                example: "www.test.com"
+              run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims:
+                type: boolean
+                description: choose to run introspection script before access_token_as_jwt creation and include claims.
+                example: true
+              default_max_age:
+                type: integer
+                description: specifies the Default Maximum Authentication Age.
+                example: 1000000
+              require_auth_time:
+                type: boolean
+                description: specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.
+                example: true
+              initiate_login_uri:
+                type: string
+                description: specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                example: "https://client.example.org/authorization/page"
+              authorized_origins:
+                type: array
+                description: specifies authorized JavaScript origins.
+                items:
+                  type: string
+                  example: ["beem://www.test.com", "fb://app.local.url"]
+              access_token_lifetime:
+                type: integer
+                description: specifies the Client-specific access token expiration.
+                example: 100000000
+              software_id:
+                type: string
+                description: specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                example: "4NRB1-0XZABZI9E6-5SM3R"
+              software_version:
+                type: string
+                description: specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                example: "2.1"
+              software_statement:
+                type: string
+                description: specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+              custom_attributes:
+                type: object
+                description: specifies custom attribute map copy.
+                required:
+                - param1
+                - param2
+                properties:
+                  param1:
+                    type: string
+                  param2:
+                    type: string
       responses:
         200:
           description: OK
