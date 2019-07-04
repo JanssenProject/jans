@@ -127,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     if mfaOff:
                         logged_in = authenticationService.authenticate(user_name, user_password)
                     else:
-                        acr = self.getSuitableAcr(foundUser, platform_data['isMobile'])
+                        acr = self.getSuitableAcr(foundUser, platform_data)
                         if acr != None:
                             module = self.authenticators[acr]
                             logged_in = module.authenticate(module.configAttrs, requestParameters, step)
@@ -384,8 +384,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return deviceInf
 
 
-    def getSuitableAcr(self, user, onMobile):
+    def getSuitableAcr(self, user, deviceInf):
 
+        onMobile = deviceInf != None and 'isMobile' in deviceInf and deviceInf['isMobile']
         id = user.getUserId()
         strongest = -1
         acr = None
