@@ -33,7 +33,7 @@ public class Scope implements Serializable {
     @AttributeName
     private String displayName;
 
-    @AttributeName(name = "oxId")
+    @AttributeName(name = "oxId", consistency = true)
     private String id;
 
     @AttributeName(name = "oxIconUrl")
