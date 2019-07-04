@@ -69,9 +69,12 @@
 			    margin-top: 12px;
 			}
 			
-			.step_bx {
-				    margin: 0 20% auto;
-			}
+            .step_bx {
+                margin: 0 30% auto;
+                border-radius: 5px !important;
+                max-height: 80%;
+                margin-bottom: 50px;
+            }
         </style>
     </ui:define>
 
@@ -85,7 +88,6 @@
                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </h:panelGroup>
-			<div class="bs-docs-section">
 				<div class="container">
 					<div class="step_bx">
 						<h2>#{msgs['twilio.verification']}</h2>
@@ -98,7 +100,6 @@
 							<h:commandButton styleClass="btn btn-done" value="#{msgs['twilio.login']}" action="#{authenticator.authenticate}"/>
 					</div>
 				</div>
-			</div>
                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['twiliosms.termsPrivacy']}</a>

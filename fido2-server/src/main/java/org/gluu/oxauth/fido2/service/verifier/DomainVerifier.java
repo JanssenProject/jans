@@ -36,16 +36,32 @@ public class DomainVerifier {
         // but then clientDataOrigin is https://
 
         log.info("Domains comparison {} {}", domain, clientDataOrigin);
+        //Notes wrt #1114:
+        // "The RP ID of a public key credential determines its scope. I.e., it determines the set of origins on which the
+        //  public key credential may be exercised"
+        // See https://www.w3.org/TR/webauthn/#scope, https://html.spec.whatwg.org/multipage/origin.html, and
+        // https://url.spec.whatwg.org/#hosts-(domains-and-ip-addresses)
+
+        // It is assumed variable domain contains RP ID, and clientDataOrigin is the relying party origin as sent by user agent
+        // We check here if RP ID is a registrable domain suffix of the clientDataOrigin's effective domain or if it is
+        // equal to clientDataOrigin's effective domain
+
+        String effectiveDomain;
         try {
-            if (!domain.equals(new URL(clientDataOrigin).getHost())) {
-                throw new Fido2RPRuntimeException("Domains don't match");
-            }
-            return true;
+            effectiveDomain = new URL(clientDataOrigin).getHost();
         } catch (MalformedURLException e) {
-            if (!domain.equals(clientDataOrigin)) {
+            //clientDataOrigin does not conform to tuple origin syntax! assuming it contains the 4th tuple element, ie. domain
+            effectiveDomain = clientDataOrigin;
+        }
+
+        if (!domain.equals(effectiveDomain)) {
+            //Check registrable domain suffix rule
+            if (!effectiveDomain.endsWith("." + domain)) {
                 throw new Fido2RPRuntimeException("Domains don't match");
             }
-            return true;
         }
+        return true;
+
     }
+
 }
