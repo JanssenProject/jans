@@ -54,7 +54,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
 
                 SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(params.getAlgorithm());
                 if (algorithm == null) {
-                    throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
+                    throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
                 }
 
                 TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
