@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.client.model.RegistersiteCustomAttributes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
 /**
  * RegisterSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-23T12:57:28.203Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-07-04T09:36:12.523Z")
 public class RegisterSiteParams {
   @SerializedName("authorization_redirect_uri")
   private String authorizationRedirectUri = null;
@@ -105,6 +106,60 @@ public class RegisterSiteParams {
 
   @SerializedName("rpt_as_jwt")
   private Boolean rptAsJwt = null;
+
+  @SerializedName("logo_uri")
+  private String logoUri = null;
+
+  @SerializedName("client_uri")
+  private String clientUri = null;
+
+  @SerializedName("policy_uri")
+  private String policyUri = null;
+
+  @SerializedName("front_channel_logout_session_required")
+  private Boolean frontChannelLogoutSessionRequired = null;
+
+  @SerializedName("tos_uri")
+  private String tosUri = null;
+
+  @SerializedName("jwks")
+  private String jwks = null;
+
+  @SerializedName("id_token_binding_cnf")
+  private String idTokenBindingCnf = null;
+
+  @SerializedName("tls_client_auth_subject_dn")
+  private String tlsClientAuthSubjectDn = null;
+
+  @SerializedName("run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims")
+  private Boolean runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims = null;
+
+  @SerializedName("default_max_age")
+  private Integer defaultMaxAge = null;
+
+  @SerializedName("require_auth_time")
+  private Boolean requireAuthTime = null;
+
+  @SerializedName("initiate_login_uri")
+  private String initiateLoginUri = null;
+
+  @SerializedName("authorized_origins")
+  private List<String> authorizedOrigins = null;
+
+  @SerializedName("access_token_lifetime")
+  private Integer accessTokenLifetime = null;
+
+  @SerializedName("software_id")
+  private String softwareId = null;
+
+  @SerializedName("software_version")
+  private String softwareVersion = null;
+
+  @SerializedName("software_statement")
+  private String softwareStatement = null;
+
+  @SerializedName("custom_attributes")
+  private RegistersiteCustomAttributes customAttributes = null;
 
   public RegisterSiteParams authorizationRedirectUri(String authorizationRedirectUri) {
     this.authorizationRedirectUri = authorizationRedirectUri;
@@ -652,6 +707,338 @@ public class RegisterSiteParams {
     this.rptAsJwt = rptAsJwt;
   }
 
+  public RegisterSiteParams logoUri(String logoUri) {
+    this.logoUri = logoUri;
+    return this;
+  }
+
+  /**
+   * specifies an URL that references a logo for the Client application.
+   * @return logoUri
+   **/
+  @ApiModelProperty(value = "specifies an URL that references a logo for the Client application.")
+  public String getLogoUri() {
+    return logoUri;
+  }
+
+  public void setLogoUri(String logoUri) {
+    this.logoUri = logoUri;
+  }
+
+  public RegisterSiteParams clientUri(String clientUri) {
+    this.clientUri = clientUri;
+    return this;
+  }
+
+  /**
+   * specifies an URL of the home page of the Client.
+   * @return clientUri
+   **/
+  @ApiModelProperty(value = "specifies an URL of the home page of the Client.")
+  public String getClientUri() {
+    return clientUri;
+  }
+
+  public void setClientUri(String clientUri) {
+    this.clientUri = clientUri;
+  }
+
+  public RegisterSiteParams policyUri(String policyUri) {
+    this.policyUri = policyUri;
+    return this;
+  }
+
+  /**
+   * specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+   * @return policyUri
+   **/
+  @ApiModelProperty(value = "specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.")
+  public String getPolicyUri() {
+    return policyUri;
+  }
+
+  public void setPolicyUri(String policyUri) {
+    this.policyUri = policyUri;
+  }
+
+  public RegisterSiteParams frontChannelLogoutSessionRequired(Boolean frontChannelLogoutSessionRequired) {
+    this.frontChannelLogoutSessionRequired = frontChannelLogoutSessionRequired;
+    return this;
+  }
+
+  /**
+   * specifies if front channel logout session required.
+   * @return frontChannelLogoutSessionRequired
+   **/
+  @ApiModelProperty(value = "specifies if front channel logout session required.")
+  public Boolean isFrontChannelLogoutSessionRequired() {
+    return frontChannelLogoutSessionRequired;
+  }
+
+  public void setFrontChannelLogoutSessionRequired(Boolean frontChannelLogoutSessionRequired) {
+    this.frontChannelLogoutSessionRequired = frontChannelLogoutSessionRequired;
+  }
+
+  public RegisterSiteParams tosUri(String tosUri) {
+    this.tosUri = tosUri;
+    return this;
+  }
+
+  /**
+   * specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party&#39;s terms.
+   * @return tosUri
+   **/
+  @ApiModelProperty(value = "specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms.")
+  public String getTosUri() {
+    return tosUri;
+  }
+
+  public void setTosUri(String tosUri) {
+    this.tosUri = tosUri;
+  }
+
+  public RegisterSiteParams jwks(String jwks) {
+    this.jwks = jwks;
+    return this;
+  }
+
+  /**
+   * Client&#39;s JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.
+   * @return jwks
+   **/
+  @ApiModelProperty(value = "Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.")
+  public String getJwks() {
+    return jwks;
+  }
+
+  public void setJwks(String jwks) {
+    this.jwks = jwks;
+  }
+
+  public RegisterSiteParams idTokenBindingCnf(String idTokenBindingCnf) {
+    this.idTokenBindingCnf = idTokenBindingCnf;
+    return this;
+  }
+
+  /**
+   * Get idTokenBindingCnf
+   * @return idTokenBindingCnf
+   **/
+  @ApiModelProperty(value = "")
+  public String getIdTokenBindingCnf() {
+    return idTokenBindingCnf;
+  }
+
+  public void setIdTokenBindingCnf(String idTokenBindingCnf) {
+    this.idTokenBindingCnf = idTokenBindingCnf;
+  }
+
+  public RegisterSiteParams tlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
+    this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    return this;
+  }
+
+  /**
+   * Get tlsClientAuthSubjectDn
+   * @return tlsClientAuthSubjectDn
+   **/
+  @ApiModelProperty(value = "")
+  public String getTlsClientAuthSubjectDn() {
+    return tlsClientAuthSubjectDn;
+  }
+
+  public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
+    this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+  }
+
+  public RegisterSiteParams runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims) {
+    this.runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims;
+    return this;
+  }
+
+  /**
+   * choose to run introspection script before access_token_as_jwt creation and include claims.
+   * @return runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims
+   **/
+  @ApiModelProperty(value = "choose to run introspection script before access_token_as_jwt creation and include claims.")
+  public Boolean isRunIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims() {
+    return runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims;
+  }
+
+  public void setRunIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims) {
+    this.runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims;
+  }
+
+  public RegisterSiteParams defaultMaxAge(Integer defaultMaxAge) {
+    this.defaultMaxAge = defaultMaxAge;
+    return this;
+  }
+
+  /**
+   * specifies the Default Maximum Authentication Age.
+   * @return defaultMaxAge
+   **/
+  @ApiModelProperty(value = "specifies the Default Maximum Authentication Age.")
+  public Integer getDefaultMaxAge() {
+    return defaultMaxAge;
+  }
+
+  public void setDefaultMaxAge(Integer defaultMaxAge) {
+    this.defaultMaxAge = defaultMaxAge;
+  }
+
+  public RegisterSiteParams requireAuthTime(Boolean requireAuthTime) {
+    this.requireAuthTime = requireAuthTime;
+    return this;
+  }
+
+  /**
+   * specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.
+   * @return requireAuthTime
+   **/
+  @ApiModelProperty(value = "specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.")
+  public Boolean isRequireAuthTime() {
+    return requireAuthTime;
+  }
+
+  public void setRequireAuthTime(Boolean requireAuthTime) {
+    this.requireAuthTime = requireAuthTime;
+  }
+
+  public RegisterSiteParams initiateLoginUri(String initiateLoginUri) {
+    this.initiateLoginUri = initiateLoginUri;
+    return this;
+  }
+
+  /**
+   * specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+   * @return initiateLoginUri
+   **/
+  @ApiModelProperty(value = "specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.")
+  public String getInitiateLoginUri() {
+    return initiateLoginUri;
+  }
+
+  public void setInitiateLoginUri(String initiateLoginUri) {
+    this.initiateLoginUri = initiateLoginUri;
+  }
+
+  public RegisterSiteParams authorizedOrigins(List<String> authorizedOrigins) {
+    this.authorizedOrigins = authorizedOrigins;
+    return this;
+  }
+
+  public RegisterSiteParams addAuthorizedOriginsItem(String authorizedOriginsItem) {
+    if (this.authorizedOrigins == null) {
+      this.authorizedOrigins = new ArrayList<String>();
+    }
+    this.authorizedOrigins.add(authorizedOriginsItem);
+    return this;
+  }
+
+  /**
+   * specifies authorized JavaScript origins.
+   * @return authorizedOrigins
+   **/
+  @ApiModelProperty(value = "specifies authorized JavaScript origins.")
+  public List<String> getAuthorizedOrigins() {
+    return authorizedOrigins;
+  }
+
+  public void setAuthorizedOrigins(List<String> authorizedOrigins) {
+    this.authorizedOrigins = authorizedOrigins;
+  }
+
+  public RegisterSiteParams accessTokenLifetime(Integer accessTokenLifetime) {
+    this.accessTokenLifetime = accessTokenLifetime;
+    return this;
+  }
+
+  /**
+   * specifies the Client-specific access token expiration.
+   * @return accessTokenLifetime
+   **/
+  @ApiModelProperty(value = "specifies the Client-specific access token expiration.")
+  public Integer getAccessTokenLifetime() {
+    return accessTokenLifetime;
+  }
+
+  public void setAccessTokenLifetime(Integer accessTokenLifetime) {
+    this.accessTokenLifetime = accessTokenLifetime;
+  }
+
+  public RegisterSiteParams softwareId(String softwareId) {
+    this.softwareId = softwareId;
+    return this;
+  }
+
+  /**
+   * specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+   * @return softwareId
+   **/
+  @ApiModelProperty(value = "specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.")
+  public String getSoftwareId() {
+    return softwareId;
+  }
+
+  public void setSoftwareId(String softwareId) {
+    this.softwareId = softwareId;
+  }
+
+  public RegisterSiteParams softwareVersion(String softwareVersion) {
+    this.softwareVersion = softwareVersion;
+    return this;
+  }
+
+  /**
+   * specifies a version identifier string for the client software identified by &#39;software_id&#39;. The value of the &#39;software_version&#39; should change on any update to the client software identified by the same &#39;software_id&#39;.
+   * @return softwareVersion
+   **/
+  @ApiModelProperty(value = "specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.")
+  public String getSoftwareVersion() {
+    return softwareVersion;
+  }
+
+  public void setSoftwareVersion(String softwareVersion) {
+    this.softwareVersion = softwareVersion;
+  }
+
+  public RegisterSiteParams softwareStatement(String softwareStatement) {
+    this.softwareStatement = softwareStatement;
+    return this;
+  }
+
+  /**
+   * specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+   * @return softwareStatement
+   **/
+  @ApiModelProperty(value = "specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.")
+  public String getSoftwareStatement() {
+    return softwareStatement;
+  }
+
+  public void setSoftwareStatement(String softwareStatement) {
+    this.softwareStatement = softwareStatement;
+  }
+
+  public RegisterSiteParams customAttributes(RegistersiteCustomAttributes customAttributes) {
+    this.customAttributes = customAttributes;
+    return this;
+  }
+
+  /**
+   * Get customAttributes
+   * @return customAttributes
+   **/
+  @ApiModelProperty(value = "")
+  public RegistersiteCustomAttributes getCustomAttributes() {
+    return customAttributes;
+  }
+
+  public void setCustomAttributes(RegistersiteCustomAttributes customAttributes) {
+    this.customAttributes = customAttributes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -686,12 +1073,30 @@ public class RegisterSiteParams {
             Objects.equals(this.trustedClient, registerSiteParams.trustedClient) &&
             Objects.equals(this.accessTokenAsJwt, registerSiteParams.accessTokenAsJwt) &&
             Objects.equals(this.accessTokenSigningAlg, registerSiteParams.accessTokenSigningAlg) &&
-            Objects.equals(this.rptAsJwt, registerSiteParams.rptAsJwt);
+            Objects.equals(this.rptAsJwt, registerSiteParams.rptAsJwt) &&
+            Objects.equals(this.logoUri, registerSiteParams.logoUri) &&
+            Objects.equals(this.clientUri, registerSiteParams.clientUri) &&
+            Objects.equals(this.policyUri, registerSiteParams.policyUri) &&
+            Objects.equals(this.frontChannelLogoutSessionRequired, registerSiteParams.frontChannelLogoutSessionRequired) &&
+            Objects.equals(this.tosUri, registerSiteParams.tosUri) &&
+            Objects.equals(this.jwks, registerSiteParams.jwks) &&
+            Objects.equals(this.idTokenBindingCnf, registerSiteParams.idTokenBindingCnf) &&
+            Objects.equals(this.tlsClientAuthSubjectDn, registerSiteParams.tlsClientAuthSubjectDn) &&
+            Objects.equals(this.runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, registerSiteParams.runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims) &&
+            Objects.equals(this.defaultMaxAge, registerSiteParams.defaultMaxAge) &&
+            Objects.equals(this.requireAuthTime, registerSiteParams.requireAuthTime) &&
+            Objects.equals(this.initiateLoginUri, registerSiteParams.initiateLoginUri) &&
+            Objects.equals(this.authorizedOrigins, registerSiteParams.authorizedOrigins) &&
+            Objects.equals(this.accessTokenLifetime, registerSiteParams.accessTokenLifetime) &&
+            Objects.equals(this.softwareId, registerSiteParams.softwareId) &&
+            Objects.equals(this.softwareVersion, registerSiteParams.softwareVersion) &&
+            Objects.equals(this.softwareStatement, registerSiteParams.softwareStatement) &&
+            Objects.equals(this.customAttributes, registerSiteParams.customAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUris, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt);
+    return Objects.hash(authorizationRedirectUri, opHost, postLogoutRedirectUris, applicationType, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, redirectUris, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes);
   }
 
 
@@ -725,6 +1130,24 @@ public class RegisterSiteParams {
     sb.append("    accessTokenAsJwt: ").append(toIndentedString(accessTokenAsJwt)).append("\n");
     sb.append("    accessTokenSigningAlg: ").append(toIndentedString(accessTokenSigningAlg)).append("\n");
     sb.append("    rptAsJwt: ").append(toIndentedString(rptAsJwt)).append("\n");
+    sb.append("    logoUri: ").append(toIndentedString(logoUri)).append("\n");
+    sb.append("    clientUri: ").append(toIndentedString(clientUri)).append("\n");
+    sb.append("    policyUri: ").append(toIndentedString(policyUri)).append("\n");
+    sb.append("    frontChannelLogoutSessionRequired: ").append(toIndentedString(frontChannelLogoutSessionRequired)).append("\n");
+    sb.append("    tosUri: ").append(toIndentedString(tosUri)).append("\n");
+    sb.append("    jwks: ").append(toIndentedString(jwks)).append("\n");
+    sb.append("    idTokenBindingCnf: ").append(toIndentedString(idTokenBindingCnf)).append("\n");
+    sb.append("    tlsClientAuthSubjectDn: ").append(toIndentedString(tlsClientAuthSubjectDn)).append("\n");
+    sb.append("    runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims: ").append(toIndentedString(runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims)).append("\n");
+    sb.append("    defaultMaxAge: ").append(toIndentedString(defaultMaxAge)).append("\n");
+    sb.append("    requireAuthTime: ").append(toIndentedString(requireAuthTime)).append("\n");
+    sb.append("    initiateLoginUri: ").append(toIndentedString(initiateLoginUri)).append("\n");
+    sb.append("    authorizedOrigins: ").append(toIndentedString(authorizedOrigins)).append("\n");
+    sb.append("    accessTokenLifetime: ").append(toIndentedString(accessTokenLifetime)).append("\n");
+    sb.append("    softwareId: ").append(toIndentedString(softwareId)).append("\n");
+    sb.append("    softwareVersion: ").append(toIndentedString(softwareVersion)).append("\n");
+    sb.append("    softwareStatement: ").append(toIndentedString(softwareStatement)).append("\n");
+    sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
