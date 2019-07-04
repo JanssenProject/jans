@@ -25,7 +25,6 @@
 						<h:messages class="text-center"
 							style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;"
 							infoClass="text-center" errorClass="text-center" />
-						<h:inputHidden id="platform" />
 					</div>
 					<b:form horizontal="true" id="loginForm" style="padding:30px;">
 						<b:inputText placeholder="#{msgs['login.username']}" fieldId="loginForm:username"
@@ -71,6 +70,7 @@
 								</div>
 							</div>
 						</div>
+                        <h:inputHidden id="platform" />
 					</b:form>
 					<div class="row">
 						<div align="center" class="col-sm-offset-4 col-sm-9">
