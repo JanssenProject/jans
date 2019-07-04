@@ -3,10 +3,7 @@ package io.swagger.client.api;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiException;
-import io.swagger.client.model.RegisterSiteParams;
-import io.swagger.client.model.RegisterSiteResponse;
-import io.swagger.client.model.UpdateSiteParams;
-import io.swagger.client.model.UpdateSiteResponse;
+import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxauth.model.common.GrantType;
@@ -47,6 +44,28 @@ public class RegisterSiteTest {
         params.setScope(Lists.newArrayList("openid", "profile"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
+
+        params.setLogoUri("https://client.example.org/logo.png");
+        params.setClientUri("https://client.example.org/authorization/page3");
+        params.setPolicyUri("https://client.example.org/authorization/page3");
+        params.setFrontChannelLogoutSessionRequired(true);
+        params.setTosUri("https://localhost:5053/authorization/page3");
+        params.setJwks("{\"key1\": \"value1\", \"key2\": \"value2\"}");
+        params.setIdTokenBindingCnf("4NRB1-0XZABZI9E6-5SM3R");
+        params.setTlsClientAuthSubjectDn("www.test.com");
+        params.setDefaultMaxAge(100000000);
+        params.setRequireAuthTime(true);
+        params.setInitiateLoginUri("https://client.example.org/authorization/page2");
+        params.setAuthorizedOrigins(Lists.newArrayList("beem://www.test.com", "fb://app.local.url"));
+        params.setAccessTokenLifetime(100000000);
+        params.setSoftwareId("4NRB1-0XZABZI9E6-5SM3R");
+        params.setSoftwareVersion("2.0");
+
+        RegistersiteCustomAttributes customAttributes = new RegistersiteCustomAttributes();
+        customAttributes.setParam1("value1");
+        customAttributes.setParam2("value2");
+        params.setCustomAttributes(customAttributes);
+
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
