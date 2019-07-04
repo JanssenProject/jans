@@ -22,52 +22,26 @@
 	<ui:define name="body">
 		<h:form id="loginForm">
 			<h:panelGroup rendered="#{not identity.loggedIn}">
-				<div class="bs-docs-section">
-					<div class="container">
-						<h:messages style="color:red;" />
-						<div class="step_bx">
-							<h2>#{msgs['otp.verification']}</h2>
-							<p>#{msgs['otp.usedevice']}</p>
-							<img
-								src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
-								alt="ver_code" />
-							<h4>#{msgs['otp.entercode']}</h4>
-							<p>
-								<br />#{msgs['otp.getcode2']}
-							</p>
+                <div class="container">
+                    <h:messages style="color:red;" />
+                    <div class="step_bx">
+                        <h2>#{msgs['otp.verification']}</h2>
+                        <p>#{msgs['otp.usedevice']}</p>
+                        <img
+                            src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
+                            alt="ver_code" />
+                        <h4>#{msgs['otp.entercode']}</h4>
+                        <p>
+                            <br />#{msgs['otp.getcode2']}
+                        </p>
 
-							<input class="form-control" id="loginForm:otpCode"
-								name="loginForm:otpCode" type="text" autocomplete="off" />
-							<h:commandButton class="btn btn-done"
-								value="#{msgs['login.login']}"
-								action="#{authenticator.authenticate}" />
-						</div>
-					</div>
-				</div>
-				<div class="inner-form-container row-fluid"
-					style='display: #{(empty client.getPolicyUri() and empty client.getTosUri())? "none": ""'>
-					<ul class="offset2 span10">
-
-						<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-							<p>
-								<h:outputText value="#{msgs['common.agreePolicy']}" />
-								<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-										value="#{msgs['common.privacyPolicy']}" />
-								</a>
-							</p>
-						</h:panelGroup>
-
-						<h:panelGroup rendered='#{!empty client.getTosUri()}'>
-							<p>
-								<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-								<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-										value="#{msgs['common.termsOfService']}" />
-								</a>
-							</p>
-						</h:panelGroup>
-					</ul>
-
-				</div>
+                        <input class="form-control" id="loginForm:otpCode" style="margin-top:5px;"
+                            name="loginForm:otpCode" type="text" autocomplete="off" />
+                        <h:commandButton class="btn btn-primary col-sm-offset-3 col-sm-6"
+                                         style="margin-bottom:10px;" value="#{msgs['login.login']}"
+                                         action="#{authenticator.authenticate}" />
+                    </div>
+                </div>
 			</h:panelGroup>
 		</h:form>
 		<ui:include src="/casa/casa.xhtml">
@@ -80,5 +54,20 @@
 				otpCodeField.focus();
 			};
 		</script>
+        <style type="text/css">
+        .container {
+            margin: auto;
+            border-radius: 10px !important;
+            width: 50%;
+            border: 3px;
+            padding: 10px;
+        }
+
+        .step_bx {
+            width: 100%;
+            border-radius: 5px !important;
+            height: 60%;
+        }
+        </style>
 	</ui:define>
 </ui:composition>
