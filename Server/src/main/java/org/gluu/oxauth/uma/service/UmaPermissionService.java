@@ -134,19 +134,6 @@ public class UmaPermissionService {
         return null;
     }
 
-    public UmaPermission getPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
-        try {
-            final Filter filter = Filter.createEqualityFilter("oxConfigurationCode", p_configurationCode);
-            final List<UmaPermission> entries = ldapEntryManager.findEntries(clientDn, UmaPermission.class, filter);
-            if (entries != null && !entries.isEmpty()) {
-                return entries.get(0);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     public void deletePermission(String ticket) {
         try {
             final List<UmaPermission> permissions = getPermissionsByTicket(ticket);

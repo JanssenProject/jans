@@ -4,9 +4,10 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
-                template="/WEB-INF/incl/layout/template.xhtml">
+                template="/WEB-INF/incl/layout/login-extended-template.xhtml">
     <f:metadata>
-        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+                      if="#{not identity.loggedIn}" />
     </f:metadata>
     <ui:define name="head">
         <script>
@@ -42,12 +43,12 @@
             var request = '${identity.getWorkingParameter('super_gluu_request')}';
             var label = '${identity.getWorkingParameter('super_gluu_label')}';
             var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
-            
-            $(document).ready(function() {
-            		document.getElementById("subsequent").style.display = "";
 
-            		gluu_auth.renderQrCode('#susequentcontainer', request, qr_options, label);
-                    gluu_auth.startProgressBar('#susequentprogressbar', 60, onSignInCallback);
+            $(document).ready(function() {
+                document.getElementById("subsequent").style.display = "";
+
+                gluu_auth.renderQrCode('#susequentcontainer', request, qr_options, label);
+                gluu_auth.startProgressBar('#susequentprogressbar', 60, onSignInCallback);
                 gluu_auth.startSessionChecker(onSignInCallback, 60);
 
                 if (request == '') {
@@ -55,168 +56,75 @@
                 }
             });
 
+            function showQrDialog() {
+        		$( '#dialog').dialog({ width: 550 });
+            }
+
+            window.onload = function() {
+            	if ('${identity.getWorkingParameter('show_qr_by_default')}' == 'true') {
+            		showQrDialog();
+            	}
+            };
         </script>
 
         <style type="text/css">
-            .login-panel {
-                border-style: solid;
-                border-width: 1px;
-                padding: 1px;
-                background-color: #FFFFFF;
-                border-color: #C4C0B9;
-            }
+body {
+	width: 100%;
+}
 
-            .login-panel-header {
-                background-color: #D4CFC7;
-                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
-                background-position: left top;
-                background-repeat: repeat-x;
-                border-style: solid;
-                border-width: 1px;
-                padding: 2px;
-                border-color: #D4CFC7;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-                font-weight: bold;
-            }
+.body {
+	width: 100%;
+}
 
-            .login-panel-body {
-                padding: 10px;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-            }
-            .qr_bx {
-			    padding: 26px;
-			    border: 1px solid #f4f4f4;
-			    max-width: 1500px;
-			    margin: 0 auto;
-			}			
-			
-			.container {
-			    width: 1160px;
-			}
-			
-			.enrollbody {
-			    width: 1560px;
-			    margin: 0 auto;
-			}
-			a.sigin-a {
-			    background: #00b170;
-			    padding: 10px 33px;
-			    margin: 0 0 20px;
-			    color: #fff;
-			    font-weight: 600;
-			    text-transform: uppercase;
-			    font-size: 13px;
-			    text-decoration: none;
-			    border-radius: 4px;
-			}
-			.mid-wrapper {
-			    width: 100%;
-			    text-align: center;
-			}
-			
-            .button-wrap1 {
-			    width: 100%;
-			    text-align: center;
-			}
-            
-			span.contactadmin {
-			    display: block;
-			    margin: 30px 0 0;
-			    line-height:20px;
-			    color: black;
-			}
-			
-			.mid-wrapper p {
-			    font-size: 18px;
-			    margin-top: 20px;			    
-			    color: black;
-			}
-			.bs-docs-section p {
-			    text-align: center;
-			    margin-bottom: 36px;
-			    color: black;
-			}
-			p {
-			    margin: 0 0 10px;
-			        margin-top: 0px;
-			        margin-bottom: 10px;
-			}
-
-			
-			
-        </style>
+.qr_bx {
+	max-width: 95%;
+	margin: 10px;
+}
+</style>
     </ui:define>
-
     <ui:define name="pageTitle">oxAuth - Super-Gluu Login</ui:define>
-
     <ui:define name="body">
+        <h:panelGroup id="subsequent">
+            <div class="bs-docs-section">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mid-wrapper">
+								<span class="icon_01"> <img
+                                        src="#{oxAuthConfigurationService.getImgLocation()}/tube_1.jpg"
+                                        alt="" />
+								</span>
+                                <p style="line-height: 30px;">
+                                    A Super Gluu push notification has been sent to your <br />
+                                    registered device. Approve the push to login.
+                                </p>
+                            </div>
 
-        <form method="post" id="response" action="#{request.contextPath}/postlogin.htm">
-            <input type="hidden" id="auth_result" name="auth_result" />
-        </form>
-    <h:panelGroup id="subsequent">
-     <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
-		<div class="container">
-			<div class="navbar-header"> 
-				<a target="_blank"  class="navbar-brand"><img src="#{oxAuthConfigurationService.getImgLocation()}/logo.png" alt="logo"/></a>
-			</div>
-		</div>
-	</header>
-	
-	<div class="bs-docs-section">
-		<div class="container">
-		  <div class="row">
-		  	<div class="col-md-12">
-		  		<div class="mid-wrapper">
-		  			<span class="icon_01">
-		  			  <img src="#{oxAuthConfigurationService.getImgLocation()}/tube_1.jpg" alt=""/>
-		  			</span>
-                   <p style="line-height:30px;">A Super Gluu push notification has been sent to your <br/>
-                    registered device. Approve the push to login.</p>
-		  		</div>
+                            <div class="button-wrap1">
+                                <p>Didn't receive the push notification?</p>
+                                <a onclick="showQrDialog();" style="cursor: pointer;"
+                                   target="_blank" class="sigin-a">Scan QR code instead</a> <span
+                                    class="contactadmin"> If you no longer control the
+									device you registered,<br /> <a href="#">contact your Gluu
+										server admin</a> to enroll a new device
+								</span>
+                            </div>
 
-		  		<div class="button-wrap1">
-		  			<p>Didn't receive the push notification?</p>
-		  			<a onclick="$( '#dialog' ).dialog({ width: 550 });"  style="cursor: pointer;" target="_blank"  class="sigin-a">Scan QR code instead</a>
-		  			<span class="contactadmin">
-		  				If you no longer control the device you registered,<br/>
- contact your Gluu server admin to enroll a new device
-		  			</span>
-		  		</div>
+                        </div>
 
-		  	</div>
+                    </div>
 
-		  </div>
+                </div>
+            </div>
+            <ui:include src="/casa/casa.xhtml">
+                <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
+            </ui:include>
+        </h:panelGroup>
 
-		</div>
-	</div>
-	
-		<ui:include src="/casa/casa.xhtml">
-			    <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
-	</ui:include>
-	<div class="foot_bor">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-12">
-				  <div class="padding_spc">
-					<p>Gluu, Inc, | <a target="_blank" href="https://www.google.com/">Use subject to MIT LICENSE</a></p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-    
-    </h:panelGroup>
-    
-     <div id="dialog" style="display: none;" title="QR Code">
-        <div id="susequentcontainer"></div>
-        <div id="susequentprogressbar"></div>
-        
-   </div>
-    </ui:define>  
+        <div id="dialog" style="display: none;" title="QR Code">
+            <div id="susequentcontainer"></div>
+            <div id="susequentprogressbar"></div>
 
+        </div>
+    </ui:define>
 </ui:composition>

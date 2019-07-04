@@ -64,8 +64,8 @@ class PersonAuthentication(PersonAuthenticationType):
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
                         configAttrs.put("u2f_application_id", SimpleCustomProperty("u2f_application_id", u2f_application_id))
                     elif acr == self.ACR_SG:
-                        client_redirect_uri = configurationAttributes.get("supergluu_app_id").getValue2()
-                        configAttrs.put("client_redirect_uri", SimpleCustomProperty("client_redirect_uri", client_redirect_uri))
+                        application_id = configurationAttributes.get("supergluu_app_id").getValue2()
+                        configAttrs.put("application_id", SimpleCustomProperty("application_id", application_id))
 
                     if module.init(configAttrs):
                         module.configAttrs = configAttrs
@@ -127,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     if mfaOff:
                         logged_in = authenticationService.authenticate(user_name, user_password)
                     else:
-                        acr = self.getSuitableAcr(foundUser, platform_data['isMobile'])
+                        acr = self.getSuitableAcr(foundUser, platform_data)
                         if acr != None:
                             module = self.authenticators[acr]
                             logged_in = module.authenticate(module.configAttrs, requestParameters, step)
@@ -384,8 +384,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return deviceInf
 
 
-    def getSuitableAcr(self, user, onMobile):
+    def getSuitableAcr(self, user, deviceInf):
 
+        onMobile = deviceInf != None and 'isMobile' in deviceInf and deviceInf['isMobile']
         id = user.getUserId()
         strongest = -1
         acr = None
