@@ -365,7 +365,6 @@
 		</dependency>
 
 		<!-- oxLicense -->
-<!--
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxlicense-client</artifactId>
@@ -374,7 +373,7 @@
 			<groupId>org.gluu</groupId>
 			<artifactId>oxlicense-validator</artifactId>
 		</dependency>
--->
+
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
