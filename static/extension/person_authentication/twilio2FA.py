@@ -121,7 +121,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     
             except:
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
-                print 'TwilioSMS, Error finding mobile number for' % (user_name)
+                print 'TwilioSMS, Error finding mobile number for "%". Exception: %` % (user_name, sys.exc_info()[1])
                 return False
 
             # Generate Random six digit code and store it in array
