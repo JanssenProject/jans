@@ -117,11 +117,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 if  self.mobile_number == None:
                     self.mobile_number = foundUser.getAttribute("telephoneNumber")
                 if  self.mobile_number == None:
-                    print "TwilioSMS, Error finding mobile number for user '%'" % user_name    
+                    print "TwilioSMS, Error finding mobile number for user '%s'" % user_name    
                     
             except:
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
-                print 'TwilioSMS, Error finding mobile number for' % (user_name)
+                print 'TwilioSMS, Error finding mobile number for "%s". Exception: %s` % (user_name, sys.exc_info()[1])
                 return False
 
             # Generate Random six digit code and store it in array
