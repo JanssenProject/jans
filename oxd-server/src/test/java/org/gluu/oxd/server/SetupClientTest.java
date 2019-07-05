@@ -24,7 +24,7 @@ public class SetupClientTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void setupClient(String host, String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls) throws IOException {
+    public void setupClient(String host, String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls) {
         RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrls, logoutUrl);
         assertResponse(resp);
 

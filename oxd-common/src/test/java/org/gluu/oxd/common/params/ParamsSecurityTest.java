@@ -21,7 +21,7 @@ public class ParamsSecurityTest {
 
     private static final String PARAMS_PACKAGE = "org.gluu.oxd.common.params";
     private static final String CLASS_FILE_SUFFIX = ".class";
-    private static final List<Class> EXCLUSING_LIST = Arrays.<Class>asList(
+    private static final List<Class> EXCLUSING_LIST = Arrays.asList(
             GetClientTokenParams.class,
             GetRpParams.class,
             RegisterSiteParams.class,
@@ -45,7 +45,7 @@ public class ParamsSecurityTest {
         }
     }
 
-    private Set<Class> getAllParamsClasses() throws IOException {
+    private Set<Class> getAllParamsClasses() {
         final URL packageResource = Thread.currentThread().getContextClassLoader().getResource(StringUtils.replace(PARAMS_PACKAGE, ".", "/"));
         final File packageFile = new File(StringUtils.replace(packageResource.getFile(), "test-classes", "classes"));
         if (!packageFile.exists()) {

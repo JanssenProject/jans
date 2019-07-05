@@ -13,7 +13,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
-import java.io.IOException;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
@@ -28,7 +27,7 @@ public class GetTokensByCodeTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
+    public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrl, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
         GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
@@ -37,7 +36,7 @@ public class GetTokensByCodeTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
+    public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrl, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
         tokenByInvalidCode(client, site, userId, userSecret, CoreUtils.secureRandomString());

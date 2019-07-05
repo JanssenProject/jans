@@ -48,7 +48,7 @@ public enum CommandType {
 
     private final String value;
 
-    private CommandType(String p_value) {
+    CommandType(String p_value) {
         value = p_value;
     }
 

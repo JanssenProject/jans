@@ -9,7 +9,6 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class CheckIdTokenTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
+    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
 
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);

@@ -65,7 +65,7 @@ public class RpService {
         return Maps.newHashMap(rpMap);
     }
 
-    public void update(Rp rp) throws IOException {
+    public void update(Rp rp) {
         put(rp);
         persistenceService.update(rp);
     }
@@ -78,7 +78,7 @@ public class RpService {
         }
     }
 
-    public void create(Rp rp) throws IOException {
+    public void create(Rp rp) {
         if (StringUtils.isBlank(rp.getOxdId())) {
             rp.setOxdId(UUID.randomUUID().toString());
         }
