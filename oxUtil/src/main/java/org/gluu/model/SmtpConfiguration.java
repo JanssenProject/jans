@@ -108,6 +108,12 @@ public class SmtpConfiguration implements java.io.Serializable {
         this.requiresAuthentication = requiresAuthentication;
     }
 
+    public boolean isValid() {
+        return getHost() != null && getPort() != 0
+                && ((!isRequiresAuthentication())
+                || (getUserName() != null && getPassword() != null));
+    }
+
     public String getUserName() {
         return userName;
     }
