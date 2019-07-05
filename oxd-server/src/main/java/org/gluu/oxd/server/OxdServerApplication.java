@@ -34,7 +34,7 @@ public class OxdServerApplication extends Application<OxdServerConfiguration> {
         ServerLauncher.configureServices(configuration);
         environment.healthChecks().register("dummy", new HealthCheck() {
             @Override
-            protected Result check() throws Exception {
+            protected Result check() {
                 return Result.healthy();
             }
         });

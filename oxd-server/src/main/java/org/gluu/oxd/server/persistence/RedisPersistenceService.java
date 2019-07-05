@@ -111,7 +111,7 @@ public class RedisPersistenceService implements PersistenceService {
         return (String) redisProvider.get(key);
     }
 
-    public static RedisConfiguration asRedisConfiguration(OxdServerConfiguration configuration) throws Exception {        ;
+    public static RedisConfiguration asRedisConfiguration(OxdServerConfiguration configuration) throws Exception {
         return asRedisConfiguration(Jackson2.asOldNode(configuration.getStorageConfiguration()));
     }
 
