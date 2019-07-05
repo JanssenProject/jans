@@ -169,10 +169,7 @@ public class ValidationService {
     private static boolean isInstanceOfGetRpParamsWithList(IParams params) {
         if (params instanceof GetRpParams) {
             GetRpParams p = (GetRpParams) params;
-            if (p.getList() == null || !p.getList()) {
-                return false;
-            }
-            return true;
+            return p.getList() != null && p.getList();
         }
         return false;
     }

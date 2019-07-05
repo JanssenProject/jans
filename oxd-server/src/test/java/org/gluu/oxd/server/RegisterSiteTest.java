@@ -2,16 +2,15 @@ package org.gluu.oxd.server;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.RegisterSiteParams;
 import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.UpdateSiteResponse;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static junit.framework.Assert.assertNotNull;
@@ -29,7 +28,7 @@ public class RegisterSiteTest {
 
     @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void register(String host, String opHost, String redirectUrl,  String logoutUrl, String postLogoutRedirectUrls) throws IOException {
+    public void register(String host, String opHost, String redirectUrl,  String logoutUrl, String postLogoutRedirectUrls) {
         RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrls, logoutUrl, null);
         assertNotNull(resp);
 

@@ -37,7 +37,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
     }
 
     @Override
-    public IOpResponse execute(GetAccessTokenByRefreshTokenParams params) throws Exception {
+    public IOpResponse execute(GetAccessTokenByRefreshTokenParams params) {
         try {
             validate(params);
             final Rp rp = getRp();

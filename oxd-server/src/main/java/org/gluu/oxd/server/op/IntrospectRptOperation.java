@@ -23,7 +23,7 @@ public class IntrospectRptOperation extends BaseOperation<IntrospectRptParams> {
     }
 
     @Override
-    public IOpResponse execute(IntrospectRptParams params) throws Exception {
+    public IOpResponse execute(IntrospectRptParams params) {
         getValidationService().validate(params);
 
         CorrectRptIntrospectionResponse response = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());

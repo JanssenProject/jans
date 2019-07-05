@@ -28,7 +28,7 @@ public class IntrospectAccessTokenOperation extends BaseOperation<IntrospectAcce
     }
 
     @Override
-    public IOpResponse execute(IntrospectAccessTokenParams params) throws Exception {
+    public IOpResponse execute(IntrospectAccessTokenParams params) {
         getValidationService().validate(params);
 
         final IntrospectionService introspectionService = getInstance(IntrospectionService.class);
