@@ -53,9 +53,7 @@ public abstract class UmaToken {
 
         UmaToken umaToken = (UmaToken) o;
 
-        if (token != null ? !token.equals(umaToken.token) : umaToken.token != null) return false;
-
-        return true;
+        return token != null ? token.equals(umaToken.token) : umaToken.token == null;
     }
 
     @Override

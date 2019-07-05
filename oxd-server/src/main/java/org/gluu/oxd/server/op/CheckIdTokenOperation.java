@@ -31,7 +31,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
     }
 
     @Override
-    public IOpResponse execute(CheckIdTokenParams params) throws Exception {
+    public IOpResponse execute(CheckIdTokenParams params) {
         try {
             OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 

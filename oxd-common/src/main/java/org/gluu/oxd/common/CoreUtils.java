@@ -23,8 +23,10 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -194,7 +196,7 @@ public class CoreUtils {
         return httpClient;
     }
 
-    public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException, IOException, CertificateException {
+    public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException {
 //        System.setProperty("javax.net.debug", "SSL,handshake,trustmanager");
 
 //        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {

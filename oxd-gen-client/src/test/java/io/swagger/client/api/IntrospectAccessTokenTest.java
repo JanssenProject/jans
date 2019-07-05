@@ -87,7 +87,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         DevelopersApi client = Tester.api();
         RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-        GetClientTokenResponse tokenResponseData = this.getGetClientTokenResponseData(opHost, client, setupResponse);
+        GetClientTokenResponse tokenResponseData = getGetClientTokenResponseData(opHost, client, setupResponse);
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());
