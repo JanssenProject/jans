@@ -49,7 +49,10 @@ def is_hidden(c):
         return True
 
 def print_result(result, k, heading):
-        
+    
+    columnsl = columns[:]
+    columnsl.remove('operation')
+    
     sort_result(result)
 
     if args.type == 'text':
@@ -59,7 +62,7 @@ def print_result(result, k, heading):
     
         print '#'.rjust(3),
     
-        for c in columns:
+        for c in columnsl:
             if not is_hidden(c):
                 
                 if c=='key':
@@ -74,10 +77,12 @@ def print_result(result, k, heading):
 
                 print str(ln+1).rjust(3),
 
-                for c in columns:
+                for c in columnsl:
                     if not is_hidden(c):
                         if c == 'key':
                             print '    ',
+                        
+                        
                         print get_formatted_str(row[c]),
                     if c in footer:
                         footer[c] += row[c]
