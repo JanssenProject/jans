@@ -8,8 +8,6 @@ import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.server.Tester;
 
-import java.io.IOException;
-
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -29,7 +27,7 @@ public class GoogleTest {
     private static final String CLIENT_ID = "470707636610-pr4nn6dr82the6kuktqfr7lq4g7n9rb1.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "vJVYPI4Ybwc9a2YOesq2bRCa";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 //        ClientInterface client = Tester.newClient(HOST);
 //
 //        final RegisterSiteResponse site = registerSite(client);

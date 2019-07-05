@@ -327,11 +327,7 @@ public class Cli {
         if (cmd.hasOption("d")) {
             optionsCount++;
         }
-        if (optionsCount > 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return optionsCount > 1;
     }
 
     private static boolean hasListParameterValue(String[] args) {

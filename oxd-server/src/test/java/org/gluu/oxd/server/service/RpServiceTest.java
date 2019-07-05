@@ -51,7 +51,7 @@ public class RpServiceTest {
     }
 
     @Test
-    public void load() throws Exception {
+    public void load() {
         assertEquals(service.getRps().size(), 1);
     }
 

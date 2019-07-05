@@ -18,7 +18,7 @@ public class StateServiceTest {
     StateService stateService;
 
     @Test
-    public void generate() throws Exception {
+    public void generate() {
         generateState();
     }
 

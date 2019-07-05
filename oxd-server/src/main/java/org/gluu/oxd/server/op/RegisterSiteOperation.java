@@ -293,7 +293,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
-        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris() != null ? params.getPostLogoutRedirectUris() : Lists.<String>newArrayList());
+        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris() != null ? params.getPostLogoutRedirectUris() : Lists.newArrayList());
         request.setContacts(params.getContacts());
         request.setScope(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
