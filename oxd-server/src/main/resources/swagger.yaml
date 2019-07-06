@@ -292,14 +292,12 @@ paths:
               client_name:
                 type: string
                 example: "TestClientName"
-                description: Provide name of existing client.
               client_secret:
                 type: string
                 example: f436b936-03fc-433f-9772-53c2bc9e1c74
               client_registration_access_token:
                 type: string
                 example: d836df94-44b0-445a-848a-d43189839b17
-                description: Provide client_registration_access_token of existing client.
               client_registration_client_uri:
                 type: string
                 example: https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387
