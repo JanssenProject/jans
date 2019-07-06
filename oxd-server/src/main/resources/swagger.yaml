@@ -58,15 +58,17 @@ paths:
               authorization_redirect_uri:
                 type: string
                 example: https://client.example.org/cb
+                description: The only required parameter is the authorization_redirect_uri. This provide the URL where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).
               op_host:
                 type: string
                 example: https://<ophostname>
-                description: If missing, must be present in defaults
+                description: Provide the URL of OpenID Provider (OP). If missing, must be present in defaults.
               post_logout_redirect_uris:
                 type: array
                 items:
                   type: string
                 example: ["https://client.example.org/logout/page1", "https://client.example.org/logout/page2", "https://client.example.org/logout/page3"]
+                description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
               application_type:
                 type: string
                 example: web
@@ -75,63 +77,79 @@ paths:
                 items:
                   type: string
                 example: ["code"]
+                description: Provide a list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code response type.
               grant_types:
                 type: array
                 items:
                   type: string
                 example: ["authorization_code", "client_credentials"]
+                description: Provide a list of the OAuth 2.0 grant types that the Client is declaring that it will restrict itself to using.
               scope:
                 type: array
                 items:
                   type: string
                 example:  ["openid"]
+                description: Provide list of scope which are used during authentication to authorize access to resource.
               acr_values:
                 type: array
                 items:
                   type: string
                 example: ["basic"]
+                description: Provide Returns the Default requested Authentication Context Class Reference values.
               client_name:
                 type: string
                 description: oxd will generate its own non-human readable name by default if client_name is not specified
               client_jwks_uri:
                 type: string
+                description: Provide the URL for the Client's JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key's intended usage .
               client_token_endpoint_auth_method:
                 type: string
+                description: Provide the requested authentication method for the Token Endpoint. Valid values are none, client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt, access_token, tls_client_auth, self_signed_tls_client_auth.
+              client_token_endpoint_auth_signing_alg:
+                type: string
+                description: Provide the Requested Client Authentication method for the Token Endpoint. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.
               client_request_uris:
                 type: array
                 items:
                   type: string
+                description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
               client_frontchannel_logout_uris:
                 type: array
                 items:
                   type: string
+                description: Provide frontchannel logout uris.
               client_sector_identifier_uri:
                 type: string
+                description: Provide the URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP. The URL references a file with a single JSON array of redirect_uri values.
               contacts:
                 type: array
                 items:
                   type: string
                 example: ["foo_bar@spam.org"]
+                description: Provide a list of e-mail addresses for people allowed to administer the information for this Client
               redirect_uris:
                 type: array
                 items:
                   type: string
                 example: ["https://client.example.org/cb"]
+                description: Provide the list of redirection URIs.
               ui_locales:
                 type: array
                 items:
                   type: string
+                description: Provide ui_locales, which can be used to pass the localization from the client application to the server application in the authorize request.
               claims_locales:
                 type: array
                 items:
                   type: string
+                description: Provide claims_locales, which end-user's preferred languages and scripts for Claims being returned.
               claims_redirect_uri:
                 type: array
                 items:
                   type: string
               client_id:
                 type: string
-                description: client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set)
+                description: client id of existing client, ignores all other parameters and skips new client registration forcing to use existing client (client_secret is required if this parameter is set).
               client_secret:
                 type: string
                 description: client secret of existing client, must be used together with client_id
@@ -143,7 +161,7 @@ paths:
                 description: specifies whether access_token should be return as JWT or not. Default value is false.
               access_token_signing_alg:
                 type: string
-                description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
+                description: sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
               rpt_as_jwt:
                 type: boolean
                 description: specifies whether RPT should be return as JWT or not. Default value is false.
@@ -181,6 +199,33 @@ paths:
                 type: boolean
                 description: choose to run introspection script before access_token_as_jwt creation and include claims.
                 example: true
+              id_token_signed_response_alg:
+                type: string
+                description: choose the JWS alg algorithm (JWA) required for the ID Token issued to this client_id. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
+              id_token_encrypted_response_alg:
+                type: string
+                description: choose the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id. Valid values are RSA1_5, RSA-OAEP, A128KW, A256KW
+              id_token_encrypted_response_enc:
+                type: string
+                description: choose the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
+              user_info_signed_response_alg:
+                type: string
+                description: choose the JWS alg algorithm (JWA) required for UserInfo responses. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
+              user_info_encrypted_response_alg:
+                type: string
+                description: choose the JWE alg algorithm (JWA) required for encrypting UserInfo responses. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW
+              user_info_encrypted_response_enc:
+                type: string
+                description: choose the JWE enc algorithm (JWA) required for symmetric encryption of UserInfo responses. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
+              request_object_signing_alg:
+                type: string
+                description: choose the JWS alg algorithm (JWA) that must be required by the Authorization Server. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
+              request_object_encryption_alg:
+                type: string
+                description: choose the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW
+              request_object_encryption_enc:
+                type: string
+                description: choose the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
               default_max_age:
                 type: integer
                 description: specifies the Default Maximum Authentication Age.
@@ -247,12 +292,14 @@ paths:
               client_name:
                 type: string
                 example: "TestClientName"
+                description: Provide name of existing client.
               client_secret:
                 type: string
                 example: f436b936-03fc-433f-9772-53c2bc9e1c74
               client_registration_access_token:
                 type: string
                 example: d836df94-44b0-445a-848a-d43189839b17
+                description: Provide client_registration_access_token of existing client.
               client_registration_client_uri:
                 type: string
                 example: https://<op-hostname>/oxauth/restv1/register?client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387
