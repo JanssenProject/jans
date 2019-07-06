@@ -66,6 +66,15 @@ public class RegisterSiteTest {
         customAttributes.setParam2("value2");
         params.setCustomAttributes(customAttributes);
 
+        params.setIdTokenSignedResponseAlg("HS256");
+        params.setIdTokenEncryptedResponseAlg("RSA1_5");
+        params.setIdTokenEncryptedResponseEnc("A128CBC+HS256");
+        params.setUserInfoSignedResponseAlg("HS256");
+        params.setUserInfoEncryptedResponseAlg("RSA1_5");
+        params.setUserInfoEncryptedResponseEnc("A128CBC+HS256");
+        params.setRequestObjectSigningAlg("HS256");
+        params.setRequestObjectEncryptionAlg("RSA1_5");
+        params.setRequestObjectEncryptionEnc("A128CBC+HS256");
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
