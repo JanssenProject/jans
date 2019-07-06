@@ -28,7 +28,7 @@ import java.io.IOException;
  * specifies custom attribute map copy.
  */
 @ApiModel(description = "specifies custom attribute map copy.")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-07-04T09:36:12.523Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-07-06T05:18:25.296Z")
 public class RegistersiteCustomAttributes {
   @SerializedName("param1")
   private String param1 = null;
@@ -41,10 +41,10 @@ public class RegistersiteCustomAttributes {
     return this;
   }
 
-   /**
+  /**
    * Get param1
    * @return param1
-  **/
+   **/
   @ApiModelProperty(required = true, value = "")
   public String getParam1() {
     return param1;
@@ -59,10 +59,10 @@ public class RegistersiteCustomAttributes {
     return this;
   }
 
-   /**
+  /**
    * Get param2
    * @return param2
-  **/
+   **/
   @ApiModelProperty(required = true, value = "")
   public String getParam2() {
     return param2;
@@ -74,7 +74,7 @@ public class RegistersiteCustomAttributes {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -83,7 +83,7 @@ public class RegistersiteCustomAttributes {
     }
     RegistersiteCustomAttributes registersiteCustomAttributes = (RegistersiteCustomAttributes) o;
     return Objects.equals(this.param1, registersiteCustomAttributes.param1) &&
-        Objects.equals(this.param2, registersiteCustomAttributes.param2);
+            Objects.equals(this.param2, registersiteCustomAttributes.param2);
   }
 
   @Override
@@ -96,7 +96,7 @@ public class RegistersiteCustomAttributes {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegistersiteCustomAttributes {\n");
-    
+
     sb.append("    param1: ").append(toIndentedString(param1)).append("\n");
     sb.append("    param2: ").append(toIndentedString(param2)).append("\n");
     sb.append("}");
@@ -107,7 +107,7 @@ public class RegistersiteCustomAttributes {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
