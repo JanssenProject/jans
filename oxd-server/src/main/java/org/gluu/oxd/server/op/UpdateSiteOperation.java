@@ -63,7 +63,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             getRpService().update(rp);
 
             LOG.info("RP updated: " + rp);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to persist RP, params: " + params, e);
         }
     }

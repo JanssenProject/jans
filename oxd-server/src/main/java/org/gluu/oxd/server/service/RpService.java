@@ -5,11 +5,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.server.persistence.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.server.persistence.PersistenceService;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -73,7 +72,7 @@ public class RpService {
     public void updateSilently(Rp rp) {
         try {
             update(rp);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Failed to update site configuration: " + rp, e);
         }
     }
