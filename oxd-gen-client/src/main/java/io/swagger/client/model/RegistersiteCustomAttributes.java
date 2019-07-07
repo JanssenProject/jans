@@ -96,7 +96,7 @@ public class RegistersiteCustomAttributes {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegistersiteCustomAttributes {\n");
-    
+
     sb.append("    param1: ").append(toIndentedString(param1)).append("\n");
     sb.append("    param2: ").append(toIndentedString(param2)).append("\n");
     sb.append("}");
