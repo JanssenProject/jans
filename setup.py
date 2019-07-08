@@ -2144,6 +2144,15 @@ class Setup(object):
 
             self.idpWarFullPath = '%s/idp.war' % self.distGluuFolder
 
+            jettyIdpServiceName = 'idp'
+            jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)
+
+            self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName], True, True)
+            self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
+
+            # Prepare libraries needed to for command line IDP3 utilities
+            self.install_saml_libraries()
+
             # generate new keystore with AES symmetric key
             # there is one throuble with Shibboleth IDP 3.x - it doesn't load keystore from /etc/certs. It accepts %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver path format only.
             cmd = [self.cmd_java,'-classpath', '"{}"'.format(os.path.join(self.idp3Folder,'webapp/WEB-INF/lib/*')),
@@ -2154,15 +2163,6 @@ class Setup(object):
                     '--storepass', self.shibJksPass]
                 
             self.run(' '.join(cmd), shell=True)
-
-            jettyIdpServiceName = 'idp'
-            jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)
-
-            self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName], True, True)
-            self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
-
-            # Prepare libraries needed to for command line IDP3 utilities
-            self.install_saml_libraries()
 
             # chown -R jetty:jetty /opt/shibboleth-idp
             # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
