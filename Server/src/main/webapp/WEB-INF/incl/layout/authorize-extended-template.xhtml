@@ -20,13 +20,12 @@
 		<h:form id="authorizeForm">
 			<h:inputHidden id="session_id" value="#{authorizeAction.sessionId}" />
 			<ui:param name="client" value='#{_client}' />
-
 			<div class="notification_popup">
 				<div class="not_header"></div>
 				<div class="not_header">
 					<div>
 						<div class="login-logo">
-							<img style="width: 15%; height: 20%;" id="AppLogo"
+							<img style="max-height: 70px; padding-bottom: 2px;" id="AppLogo"
 								src="#{request.contextPath}/servlet/logo" />
 						</div>
 						<div class="bs-docs-section"
@@ -37,7 +36,6 @@
 					<h3>
 						<h:outputText value="#{msgs['authorize.requestForPermission']}" />
 					</h3>
-
 					<h:panelGroup layout="block" class="border_rad"
 						rendered='#{!empty client.getLogoUri()}'>
 						<h:graphicImage url='#{client.getLogoUri()}' width="65px"
@@ -53,7 +51,6 @@
 							</h:outputFormat>
 						</p>
 					</h3>
-
 					<ul>
 						<ui:fragment rendered="#{_scopes != null or _request != null}">
 							<ui:repeat var="_scope" value="#{_scopes}">
@@ -67,7 +64,6 @@
 									</table>
 								</li>
 							</ui:repeat>
-
 							<ui:repeat var="_requestedClaim" value="#{_requestedClaims}">
 								<li>
 									<table>
@@ -82,7 +78,6 @@
 									</table>
 								</li>
 							</ui:repeat>
-
 							<ui:fragment rendered="#{_request != null}">
 								<li>
 									<table>
@@ -96,7 +91,6 @@
 							</ui:fragment>
 						</ui:fragment>
 					</ul>
-
 					<h:panelGroup layout="block"
 						rendered='#{!empty client.getPolicyUri()}'>
 						<p>
@@ -106,7 +100,6 @@
 							</a>
 						</p>
 					</h:panelGroup>
-
 					<h:panelGroup layout="block"
 						rendered='#{!empty client.getTosUri()}'>
 						<p>
@@ -116,7 +109,6 @@
 							</a>
 						</p>
 					</h:panelGroup>
-
 					<div class="btn_rw">
 						<ui:insert name="controlButttons" />
 					</div>
