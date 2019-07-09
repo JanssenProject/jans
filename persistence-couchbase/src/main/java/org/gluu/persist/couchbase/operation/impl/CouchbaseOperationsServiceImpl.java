@@ -332,25 +332,30 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
 	private JsonObject lookupImpl(BucketMapping bucketMapping, String key, ScanConsistency scanConsistency, String... attributes) throws SearchException {
 		try {
+            Bucket bucket = bucketMapping.getBucket();
             if (ArrayHelper.isEmpty(attributes)) {
-                JsonDocument doc = bucketMapping.getBucket().get(key);
+                JsonDocument doc = bucket.get(key);
                 if (doc != null) {
                     return doc.content();
                 }
 
             } else {
-                Bucket bucket = bucketMapping.getBucket();
-
-            	N1qlParams params = N1qlParams.build().consistency(scanConsistency);
-            	OffsetPath select = Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1);
-                N1qlQueryResult result = bucket.query(N1qlQuery.simple(select, params));
-                if (!result.finalSuccess()) {
-                	throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()), result.info().errorCount());
+                JsonDocument doc = bucket.get(key);
+                if (doc != null) {
+                    return doc.content();
                 }
 
-                if (result.allRows().size() == 1) {
-                    return result.allRows().get(0).value();
-                }
+//            	N1qlParams params = N1qlParams.build().consistency(scanConsistency);
+//            	OffsetPath select = Select.select(attributes).from(Expression.i(bucketMapping.getBucketName())).useKeys(Expression.s(key)).limit(1);
+//                N1qlQueryResult result = bucket.query(N1qlQuery.simple(select, params));
+//                if (!result.finalSuccess()) {
+//                	throw new SearchException(String.format("Failed to lookup entry. Errors: %s", result.errors()), result.info().errorCount());
+//                }
+//
+//                if (result.allRows().size() == 1) {
+//                    return result.allRows().get(0).value();
+//                }
+
             }
         } catch (CouchbaseException ex) {
             throw new SearchException("Failed to lookup entry", ex);
