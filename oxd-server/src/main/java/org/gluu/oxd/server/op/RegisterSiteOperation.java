@@ -161,9 +161,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         redirectUris.add(params.getAuthorizationRedirectUri());
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
-            if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
-                redirectUris.addAll(params.getPostLogoutRedirectUris());
-            }
         }
         final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
         if (autoRegister != null && autoRegister && !redirectUris.isEmpty()) {
