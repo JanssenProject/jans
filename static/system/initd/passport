@@ -501,7 +501,7 @@ do_start () {
           			disown \$!
           			echo \$! > '$NODE_PID_FILE'"
       			else
-        			"${RUN_CMD[@]}" > /dev/null &
+        			exec /usr/bin/env "${RUN_CMD[@]}" > /dev/null &
         			disown $!
         			echo $! > "$NODE_PID_FILE"
       			fi
