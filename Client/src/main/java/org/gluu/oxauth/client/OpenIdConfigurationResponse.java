@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version July 10, 2019
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -39,6 +39,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String introspectionEndpoint;
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
+    private List<String> responseModesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
     private List<String> subjectTypesSupported;
@@ -81,6 +82,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
         scopesSupported = new ArrayList<String>();
         responseTypesSupported = new ArrayList<String>();
+        responseModesSupported = new ArrayList<>();
         grantTypesSupported = new ArrayList<String>();
         acrValuesSupported = new ArrayList<String>();
         subjectTypesSupported = new ArrayList<String>();
@@ -406,6 +408,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setResponseTypesSupported(List<String> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
+    }
+
+    public List<String> getResponseModesSupported() {
+        return responseModesSupported;
+    }
+
+    public void setResponseModesSupported(List<String> responseModesSupported) {
+        this.responseModesSupported = responseModesSupported;
     }
 
     /**
@@ -1019,6 +1029,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", scopesSupported=" + scopesSupported +
                 ", responseTypesSupported=" + responseTypesSupported +
+                ", responseModesSupported=" + responseModesSupported +
                 ", grantTypesSupported=" + grantTypesSupported +
                 ", acrValuesSupported=" + acrValuesSupported +
                 ", subjectTypesSupported=" + subjectTypesSupported +
