@@ -7,11 +7,9 @@
 package org.gluu.oxauth.servlet;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -20,6 +18,9 @@ import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.util.ServerUtil;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -39,7 +40,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version January 16, 2019
+ * @version July 10, 2019
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration")
 public class OpenIdConfiguration extends HttpServlet {
@@ -105,6 +106,14 @@ public class OpenIdConfiguration extends HttpServlet {
 			}
 			if (responseTypesSupported.length() > 0) {
 				jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
+			}
+
+			JSONArray responseModesSupported = new JSONArray();
+			for (ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
+				responseModesSupported.put(responseMode);
+			}
+			if (responseModesSupported.length() > 0) {
+				jsonObj.put(RESPONSE_MODES_SUPPORTED, responseModesSupported);
 			}
 
 			JSONArray grantTypesSupported = new JSONArray();
