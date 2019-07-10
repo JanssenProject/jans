@@ -109,8 +109,10 @@ public class OpenIdConfiguration extends HttpServlet {
 			}
 
 			JSONArray responseModesSupported = new JSONArray();
-			for (ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
-				responseModesSupported.put(responseMode);
+			if (appConfiguration.getResponseModesSupported() != null) {
+				for (ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
+					responseModesSupported.put(responseMode);
+				}
 			}
 			if (responseModesSupported.length() > 0) {
 				jsonObj.put(RESPONSE_MODES_SUPPORTED, responseModesSupported);
