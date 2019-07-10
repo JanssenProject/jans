@@ -31,6 +31,11 @@
         ["code", "token", "id_token"],
         ["id_token"]
     ],
+    "responseModesSupported":[
+        "query",
+        "fragment",
+        "form_post"
+    ],
     "grantTypesSupported":[
         "authorization_code",
         "implicit",
