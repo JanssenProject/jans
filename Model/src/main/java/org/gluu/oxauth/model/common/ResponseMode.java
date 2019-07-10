@@ -6,17 +6,18 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.gluu.persist.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version July 10, 2019
  */
-public enum ResponseMode implements HasParamName {
+public enum ResponseMode implements HasParamName, AttributeEnum {
 
     /**
      * In this mode, Authorization Response parameters are encoded in the query string added to the redirect_uri when
@@ -45,7 +46,7 @@ public enum ResponseMode implements HasParamName {
         }
     }
 
-    private ResponseMode(String value) {
+    ResponseMode(String value) {
         this.value = value;
     }
 
@@ -75,5 +76,15 @@ public enum ResponseMode implements HasParamName {
     @JsonValue
     public String toString() {
         return value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
+        return getByValue(value);
     }
 }
