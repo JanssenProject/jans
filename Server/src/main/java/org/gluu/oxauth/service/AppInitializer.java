@@ -169,9 +169,12 @@ public class AppInitializer {
 		configurationFactory.create();
 
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
-		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(localPersistenceEntryManager);
+		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		setDefaultAuthenticationMethod(localPersistenceEntryManager);
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
+
+		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
+		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Initialize python interpreter
 		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration()
@@ -261,11 +264,11 @@ public class AppInitializer {
 
 	private void reloadConfiguration() {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
+		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-				localPersistenceEntryManager.getOperationService());
-		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(
-				localPersistenceEntryManager);
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
+
+		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 
 		if (!this.persistenceAuthConfigs.equals(newPersistenceAuthConfigs)) {
 			recreatePersistenceAuthEntryManagers(newPersistenceAuthConfigs);
@@ -275,7 +278,7 @@ public class AppInitializer {
 					.fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 		}
 
-		setDefaultAuthenticationMethod(localPersistenceEntryManager);
+		setDefaultAuthenticationMethod(newConfiguration);
 	}
 
 	/*
@@ -524,13 +527,13 @@ public class AppInitializer {
 		return sb.toString();
 	}
 
-	private void setDefaultAuthenticationMethod(PersistenceEntryManager localPersistenceEntryManager) {
+	private void setDefaultAuthenticationMethod(GluuConfiguration configuration) {
 		String currentAuthMethod = null;
 		if (this.authenticationMode != null) {
 			currentAuthMethod = this.authenticationMode.getName();
 		}
 
-		String actualAuthMethod = getActualDefaultAuthenticationMethod(localPersistenceEntryManager);
+		String actualAuthMethod = getActualDefaultAuthenticationMethod(configuration);
 
 		if (!StringHelper.equals(currentAuthMethod, actualAuthMethod)) {
 			authenticationMode = null;
@@ -542,9 +545,7 @@ public class AppInitializer {
 		}
 	}
 
-	private String getActualDefaultAuthenticationMethod(PersistenceEntryManager localPersistenceEntryManager) {
-		GluuConfiguration configuration = loadConfiguration(localPersistenceEntryManager, "oxAuthenticationMode");
-
+	private String getActualDefaultAuthenticationMethod(GluuConfiguration configuration) {
 		if (configuration == null) {
 			return null;
 		}
@@ -577,11 +578,10 @@ public class AppInitializer {
 		return configuration;
 	}
 
-	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(
-			PersistenceEntryManager localPersistenceEntryManager) {
+	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(GluuConfiguration configuration) {
 		List<GluuLdapConfiguration> persistenceAuthConfigs = new ArrayList<GluuLdapConfiguration>();
 
-		List<oxIDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(localPersistenceEntryManager);
+		List<oxIDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
 		if (persistenceIdpAuthConfigs == null) {
 			return persistenceAuthConfigs;
 		}
@@ -596,9 +596,7 @@ public class AppInitializer {
 		return persistenceAuthConfigs;
 	}
 
-	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(PersistenceEntryManager localPersistenceEntryManager) {
-		GluuConfiguration configuration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication");
-
+	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
 		if ((configuration == null) || (configuration.getOxIDPAuthentication() == null)) {
 			return null;
 		}
