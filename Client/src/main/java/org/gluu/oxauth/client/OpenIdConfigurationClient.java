@@ -8,24 +8,23 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 
 import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
-
-import java.io.IOException;
 
 /**
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version July 10, 2019
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -126,6 +125,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 }
                 Util.addToListIfHas(getResponse().getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
                 Util.addToListIfHas(getResponse().getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
+                Util.addToListIfHas(getResponse().getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);
                 Util.addToListIfHas(getResponse().getGrantTypesSupported(), jsonObj, GRANT_TYPES_SUPPORTED);
                 Util.addToListIfHas(getResponse().getAcrValuesSupported(), jsonObj, ACR_VALUES_SUPPORTED);
                 Util.addToListIfHas(getResponse().getSubjectTypesSupported(), jsonObj, SUBJECT_TYPES_SUPPORTED);
