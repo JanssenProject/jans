@@ -7,7 +7,6 @@
 package org.gluu.oxauth.ws.rs;
 
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
@@ -27,7 +26,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version July 10, 2019
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
@@ -77,6 +76,7 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertTrue(response.getScopesSupported().size() > 0, "The scopesSupported is empty");
         assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
         assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
+        assertTrue(response.getResponseModesSupported().size() > 0, "The responseModesSupported is empty");
         assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
         assertTrue(response.getAcrValuesSupported().size() >= 0, "The acrValuesSupported is empty");
         assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
