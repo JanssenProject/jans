@@ -6,9 +6,10 @@
 
 package org.gluu.oxauth.model.configuration;
 
-import com.google.common.collect.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Lists;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.WebKeyStorage;
 import org.gluu.oxauth.model.error.ErrorHandlingMethod;
@@ -23,7 +24,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version May 7, 2019
+ * @version July 10, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -59,6 +60,7 @@ public class AppConfiguration implements Configuration {
 
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
+    private Set<ResponseMode> responseModesSupported;
     private Set<GrantType> grantTypesSupported;
     private List<String> subjectTypesSupported;
     private String defaultSubjectType;
@@ -534,6 +536,14 @@ public class AppConfiguration implements Configuration {
 
     public void setResponseTypesSupported(Set<Set<ResponseType>> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
+    }
+
+    public Set<ResponseMode> getResponseModesSupported() {
+        return responseModesSupported;
+    }
+
+    public void setResponseModesSupported(Set<ResponseMode> responseModesSupported) {
+        this.responseModesSupported = responseModesSupported;
     }
 
     public Set<GrantType> getGrantTypesSupported() {
