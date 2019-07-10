@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.configuration;
 
 /**
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version July 10, 2019
  */
 public interface ConfigurationResponseClaim {
 
@@ -27,6 +27,7 @@ public interface ConfigurationResponseClaim {
     String SCOPES_SUPPORTED = "scopes_supported";
     String SCOPE_TO_CLAIMS_MAPPING = "scope_to_claims_mapping";
     String RESPONSE_TYPES_SUPPORTED = "response_types_supported";
+    String RESPONSE_MODES_SUPPORTED = "response_modes_supported";
     String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     String ACR_VALUES_SUPPORTED = "acr_values_supported";
     String SUBJECT_TYPES_SUPPORTED = "subject_types_supported";
