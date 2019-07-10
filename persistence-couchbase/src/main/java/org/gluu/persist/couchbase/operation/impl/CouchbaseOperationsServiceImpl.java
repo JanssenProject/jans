@@ -10,8 +10,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
@@ -342,7 +345,16 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             } else {
                 JsonDocument doc = bucket.get(key);
                 if (doc != null) {
-                    return doc.content();
+                	Set<String> docAtributesKeep = new HashSet<String>(Arrays.asList(attributes));
+
+                	for (Iterator<String> it = doc.content().getNames().iterator(); it.hasNext();) {
+						String docAtribute = (String) it.next();
+						if (!docAtributesKeep.contains(docAtribute)) {
+							it.remove();
+						}
+					}
+
+                	return doc.content();
                 }
 
 //            	N1qlParams params = N1qlParams.build().consistency(scanConsistency);
