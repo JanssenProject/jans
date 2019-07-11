@@ -22,6 +22,8 @@ public class Provider {
 	private String passportStrategyId;
 	private boolean enabled = true;
 
+	private String callbackUrl;
+
 	@JsonProperty("logo_img")
 	private String logoImg = null;
 
@@ -119,4 +121,11 @@ public class Provider {
 		this.options = options;
 	}
 
+	public String getCallbackUrl() {
+		return callbackUrl;
+	}
+
+	public void setCallbackUrl(String callbackUrl) {
+		this.callbackUrl = callbackUrl;
+	}
 }
