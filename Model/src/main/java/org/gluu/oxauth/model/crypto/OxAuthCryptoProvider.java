@@ -7,16 +7,19 @@
 package org.gluu.oxauth.model.crypto;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
@@ -60,6 +63,8 @@ import static org.gluu.oxauth.model.jwk.JWKParameter.*;
  * @version February 12, 2019
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
+
+    public static final DefaultSignatureAlgorithmIdentifierFinder ALGORITHM_IDENTIFIER_FINDER = new DefaultSignatureAlgorithmIdentifierFinder();
 
     private KeyStore keyStore;
     private String keyStoreFile;
@@ -139,6 +144,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         String alias = UUID.randomUUID().toString();
 
+        final String aliasByAlgorithm = getAliasByAlgorithm(signatureAlgorithm);
+        if (StringUtils.isNotBlank(aliasByAlgorithm)) {
+            keyStore.deleteEntry(aliasByAlgorithm);
+        }
+
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
         FileOutputStream stream = new FileOutputStream(keyStoreFile);
         keyStore.store(stream, keyStoreSecret.toCharArray());
@@ -166,6 +176,23 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         jsonObject.put(CERTIFICATE_CHAIN, x5c);
 
         return jsonObject;
+    }
+
+    public String getAliasByAlgorithm(SignatureAlgorithm algorithm) throws KeyStoreException {
+        final AlgorithmIdentifier algorithmIdentifier = ALGORITHM_IDENTIFIER_FINDER.find(algorithm.getAlgorithm());
+        if (algorithmIdentifier == null) {
+            LOG.error("Failed to identify algorithm identifier for: " + algorithm.getAlgorithm());
+            return null;
+        }
+
+        for (String alias : Collections.list(keyStore.aliases())) {
+            final X509Certificate fetchedCert = (X509Certificate) keyStore.getCertificate(alias);
+            if (algorithmIdentifier.getAlgorithm().getId().equals(fetchedCert.getSigAlgOID())) {
+                return alias;
+            }
+        }
+
+        return null;
     }
 
     @Override
