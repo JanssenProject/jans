@@ -22,12 +22,12 @@ import static junit.framework.Assert.assertTrue;
 
 public class CheckIdTokenTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) {
+    public void test(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         String nonce = CoreUtils.secureRandomString();
         GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);

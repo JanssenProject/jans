@@ -26,29 +26,29 @@ import static org.testng.Assert.*;
 
 public class RpGetRptTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void simple(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
+    public void simple(String host, String opHost, String redirectUrls, String rsProtect) throws IOException {
 
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final RpGetRptResponse response = requestRpt(client, site, rsProtect);
 
         assertNotNull(response);
     }
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void rptAsJwt(String host, String opHost, String redirectUrl, String rsProtect) throws IOException, InvalidJwtException {
+    public void rptAsJwt(String host, String opHost, String redirectUrls, String rsProtect) throws IOException, InvalidJwtException {
 
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrl));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
         params.setRptAsJwt(true);
