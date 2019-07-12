@@ -18,12 +18,12 @@ import static org.testng.Assert.assertNotNull;
  */
 public class IntrospectRptTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
+    public void test(String host, String opHost, String redirectUrls, String rsProtect) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final RpGetRptResponse rptResponse = RpGetRptTest.requestRpt(client, site, rsProtect);
 
         IntrospectRptParams params = new IntrospectRptParams();
