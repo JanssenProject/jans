@@ -29,13 +29,13 @@ import java.util.List;
 /**
  * UpdateSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-05-23T12:57:28.203Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-07-11T13:31:30.809Z")
 public class UpdateSiteParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
 
-  @SerializedName("authorization_redirect_uri")
-  private String authorizationRedirectUri = null;
+  @SerializedName("redirect_uris")
+  private List<String> redirectUris = null;
 
   @SerializedName("post_logout_redirect_uris")
   private List<String> postLogoutRedirectUris = null;
@@ -87,10 +87,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get oxdId
    * @return oxdId
-   **/
+  **/
   @ApiModelProperty(example = "6F9619FF-8B86-D011-B42D-00CF4FC964FF", required = true, value = "")
   public String getOxdId() {
     return oxdId;
@@ -100,22 +100,30 @@ public class UpdateSiteParams {
     this.oxdId = oxdId;
   }
 
-  public UpdateSiteParams authorizationRedirectUri(String authorizationRedirectUri) {
-    this.authorizationRedirectUri = authorizationRedirectUri;
+  public UpdateSiteParams redirectUris(List<String> redirectUris) {
+    this.redirectUris = redirectUris;
     return this;
   }
 
-  /**
-   * Get authorizationRedirectUri
-   * @return authorizationRedirectUri
-   **/
-  @ApiModelProperty(example = "https://client.example.org/cb", value = "")
-  public String getAuthorizationRedirectUri() {
-    return authorizationRedirectUri;
+  public UpdateSiteParams addRedirectUrisItem(String redirectUrisItem) {
+    if (this.redirectUris == null) {
+      this.redirectUris = new ArrayList<String>();
+    }
+    this.redirectUris.add(redirectUrisItem);
+    return this;
   }
 
-  public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-    this.authorizationRedirectUri = authorizationRedirectUri;
+   /**
+   * Provide the list of redirection URIs.
+   * @return redirectUris
+  **/
+  @ApiModelProperty(example = "[\"https://client.example.org/cb\"]", value = "Provide the list of redirection URIs.")
+  public List<String> getRedirectUris() {
+    return redirectUris;
+  }
+
+  public void setRedirectUris(List<String> redirectUris) {
+    this.redirectUris = redirectUris;
   }
 
   public UpdateSiteParams postLogoutRedirectUris(List<String> postLogoutRedirectUris) {
@@ -131,10 +139,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get postLogoutRedirectUris
    * @return postLogoutRedirectUris
-   **/
+  **/
   @ApiModelProperty(example = "[\"https://client.example.org/logout/page1\",\"https://client.example.org/logout/page2\",\"https://client.example.org/logout/page3\"]", value = "")
   public List<String> getPostLogoutRedirectUris() {
     return postLogoutRedirectUris;
@@ -157,10 +165,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get responseTypes
    * @return responseTypes
-   **/
+  **/
   @ApiModelProperty(example = "[\"code\"]", value = "")
   public List<String> getResponseTypes() {
     return responseTypes;
@@ -183,10 +191,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get grantTypes
    * @return grantTypes
-   **/
+  **/
   @ApiModelProperty(example = "[\"authorization_code\",\"client_credentials\"]", value = "")
   public List<String> getGrantTypes() {
     return grantTypes;
@@ -209,10 +217,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get scope
    * @return scope
-   **/
+  **/
   @ApiModelProperty(example = "[\"openid\"]", value = "")
   public List<String> getScope() {
     return scope;
@@ -235,10 +243,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get acrValues
    * @return acrValues
-   **/
+  **/
   @ApiModelProperty(example = "[\"basic\"]", value = "")
   public List<String> getAcrValues() {
     return acrValues;
@@ -253,10 +261,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get clientJwksUri
    * @return clientJwksUri
-   **/
+  **/
   @ApiModelProperty(value = "")
   public String getClientJwksUri() {
     return clientJwksUri;
@@ -271,10 +279,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get clientTokenEndpointAuthMethod
    * @return clientTokenEndpointAuthMethod
-   **/
+  **/
   @ApiModelProperty(value = "")
   public String getClientTokenEndpointAuthMethod() {
     return clientTokenEndpointAuthMethod;
@@ -297,10 +305,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get clientRequestUris
    * @return clientRequestUris
-   **/
+  **/
   @ApiModelProperty(value = "")
   public List<String> getClientRequestUris() {
     return clientRequestUris;
@@ -315,10 +323,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get clientSectorIdentifierUri
    * @return clientSectorIdentifierUri
-   **/
+  **/
   @ApiModelProperty(value = "")
   public String getClientSectorIdentifierUri() {
     return clientSectorIdentifierUri;
@@ -341,10 +349,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get contacts
    * @return contacts
-   **/
+  **/
   @ApiModelProperty(example = "[\"foo_bar@spam.org\"]", value = "")
   public List<String> getContacts() {
     return contacts;
@@ -367,10 +375,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get uiLocales
    * @return uiLocales
-   **/
+  **/
   @ApiModelProperty(value = "")
   public List<String> getUiLocales() {
     return uiLocales;
@@ -393,10 +401,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * Get claimsLocales
    * @return claimsLocales
-   **/
+  **/
   @ApiModelProperty(value = "")
   public List<String> getClaimsLocales() {
     return claimsLocales;
@@ -411,10 +419,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * specifies whether access_token should be return as JWT or not. Default value is false.
    * @return accessTokenAsJwt
-   **/
+  **/
   @ApiModelProperty(value = "specifies whether access_token should be return as JWT or not. Default value is false.")
   public Boolean isAccessTokenAsJwt() {
     return accessTokenAsJwt;
@@ -429,10 +437,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
    * @return accessTokenSigningAlg
-   **/
+  **/
   @ApiModelProperty(value = "sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512")
   public String getAccessTokenSigningAlg() {
     return accessTokenSigningAlg;
@@ -447,10 +455,10 @@ public class UpdateSiteParams {
     return this;
   }
 
-  /**
+   /**
    * specifies whether RPT should be return as JWT or not. Default value is false.
    * @return rptAsJwt
-   **/
+  **/
   @ApiModelProperty(value = "specifies whether RPT should be return as JWT or not. Default value is false.")
   public Boolean isRptAsJwt() {
     return rptAsJwt;
@@ -462,7 +470,7 @@ public class UpdateSiteParams {
 
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -471,27 +479,27 @@ public class UpdateSiteParams {
     }
     UpdateSiteParams updateSiteParams = (UpdateSiteParams) o;
     return Objects.equals(this.oxdId, updateSiteParams.oxdId) &&
-            Objects.equals(this.authorizationRedirectUri, updateSiteParams.authorizationRedirectUri) &&
-            Objects.equals(this.postLogoutRedirectUris, updateSiteParams.postLogoutRedirectUris) &&
-            Objects.equals(this.responseTypes, updateSiteParams.responseTypes) &&
-            Objects.equals(this.grantTypes, updateSiteParams.grantTypes) &&
-            Objects.equals(this.scope, updateSiteParams.scope) &&
-            Objects.equals(this.acrValues, updateSiteParams.acrValues) &&
-            Objects.equals(this.clientJwksUri, updateSiteParams.clientJwksUri) &&
-            Objects.equals(this.clientTokenEndpointAuthMethod, updateSiteParams.clientTokenEndpointAuthMethod) &&
-            Objects.equals(this.clientRequestUris, updateSiteParams.clientRequestUris) &&
-            Objects.equals(this.clientSectorIdentifierUri, updateSiteParams.clientSectorIdentifierUri) &&
-            Objects.equals(this.contacts, updateSiteParams.contacts) &&
-            Objects.equals(this.uiLocales, updateSiteParams.uiLocales) &&
-            Objects.equals(this.claimsLocales, updateSiteParams.claimsLocales) &&
-            Objects.equals(this.accessTokenAsJwt, updateSiteParams.accessTokenAsJwt) &&
-            Objects.equals(this.accessTokenSigningAlg, updateSiteParams.accessTokenSigningAlg) &&
-            Objects.equals(this.rptAsJwt, updateSiteParams.rptAsJwt);
+        Objects.equals(this.redirectUris, updateSiteParams.redirectUris) &&
+        Objects.equals(this.postLogoutRedirectUris, updateSiteParams.postLogoutRedirectUris) &&
+        Objects.equals(this.responseTypes, updateSiteParams.responseTypes) &&
+        Objects.equals(this.grantTypes, updateSiteParams.grantTypes) &&
+        Objects.equals(this.scope, updateSiteParams.scope) &&
+        Objects.equals(this.acrValues, updateSiteParams.acrValues) &&
+        Objects.equals(this.clientJwksUri, updateSiteParams.clientJwksUri) &&
+        Objects.equals(this.clientTokenEndpointAuthMethod, updateSiteParams.clientTokenEndpointAuthMethod) &&
+        Objects.equals(this.clientRequestUris, updateSiteParams.clientRequestUris) &&
+        Objects.equals(this.clientSectorIdentifierUri, updateSiteParams.clientSectorIdentifierUri) &&
+        Objects.equals(this.contacts, updateSiteParams.contacts) &&
+        Objects.equals(this.uiLocales, updateSiteParams.uiLocales) &&
+        Objects.equals(this.claimsLocales, updateSiteParams.claimsLocales) &&
+        Objects.equals(this.accessTokenAsJwt, updateSiteParams.accessTokenAsJwt) &&
+        Objects.equals(this.accessTokenSigningAlg, updateSiteParams.accessTokenSigningAlg) &&
+        Objects.equals(this.rptAsJwt, updateSiteParams.rptAsJwt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, authorizationRedirectUri, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt);
+    return Objects.hash(oxdId, redirectUris, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt);
   }
 
 
@@ -499,9 +507,9 @@ public class UpdateSiteParams {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class UpdateSiteParams {\n");
-
+    
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
-    sb.append("    authorizationRedirectUri: ").append(toIndentedString(authorizationRedirectUri)).append("\n");
+    sb.append("    redirectUris: ").append(toIndentedString(redirectUris)).append("\n");
     sb.append("    postLogoutRedirectUris: ").append(toIndentedString(postLogoutRedirectUris)).append("\n");
     sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
@@ -525,7 +533,7 @@ public class UpdateSiteParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(java.lang.Object o) {
+  private String toIndentedString(Object o) {
     if (o == null) {
       return "null";
     }

@@ -24,10 +24,10 @@ import static junit.framework.Assert.assertNotNull;
  */
 public class UpdateSiteTest {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @BeforeClass
-    public static void beforeClass(String host, String opHost, String redirectUrl) {
-        SetUpTest.beforeSuite(host, opHost, redirectUrl);
+    public static void beforeClass(String host, String opHost, String redirectUrls) {
+        SetUpTest.beforeSuite(host, opHost, redirectUrls);
     }
 
     @AfterClass
@@ -45,7 +45,6 @@ public class UpdateSiteTest {
 
         final RegisterSiteParams registerParams = new RegisterSiteParams();
         registerParams.setOpHost(opHost);
-        registerParams.setAuthorizationRedirectUri(authorizationRedirectUri);
         registerParams.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         registerParams.setRedirectUris(Lists.newArrayList(authorizationRedirectUri, anotherRedirectUri, logoutUri));
         registerParams.setAcrValues(Lists.newArrayList("basic"));
@@ -61,12 +60,12 @@ public class UpdateSiteTest {
 
         Rp fetchedRp = fetchRp(host, oxdId);
 
-        assertEquals("https://client.example.com/cb", fetchedRp.getAuthorizationRedirectUri());
+        assertEquals(authorizationRedirectUri, fetchedRp.getRedirectUri());
         assertEquals(Lists.newArrayList("acrBefore"), fetchedRp.getAcrValues());
 
         final UpdateSiteParams updateParams = new UpdateSiteParams();
         updateParams.setOxdId(oxdId);
-        updateParams.setAuthorizationRedirectUri(anotherRedirectUri);
+        updateParams.setRedirectUris(Lists.newArrayList(anotherRedirectUri));
         updateParams.setScope(Lists.newArrayList("profile"));
         updateParams.setAcrValues(Lists.newArrayList("acrAfter"));
 
@@ -75,7 +74,7 @@ public class UpdateSiteTest {
 
         fetchedRp = fetchRp(host, oxdId);
 
-        assertEquals("https://client.example.com/another", fetchedRp.getAuthorizationRedirectUri());
+        assertEquals(anotherRedirectUri, fetchedRp.getRedirectUri());
         assertEquals(Lists.newArrayList("acrAfter"), fetchedRp.getAcrValues());
     }
 
