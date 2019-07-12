@@ -129,14 +129,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         params.setGrantTypes(grantTypes);
 
-        // authorization_redirect_uri
-        if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
-            params.setAuthorizationRedirectUri(fallback.getAuthorizationRedirectUri());
-        }
-        if (!Utils.isValidUrl(params.getAuthorizationRedirectUri())) {
-            throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_REDIRECT_URI);
-        }
-
         //post_logout_redirect_uri
         if (params.getPostLogoutRedirectUris() != null && params.getPostLogoutRedirectUris().isEmpty()
                 && fallback.getPostLogoutRedirectUris() != null && !fallback.getPostLogoutRedirectUris().isEmpty()) {
@@ -158,9 +150,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         // redirect_uris
         Set<String> redirectUris = Sets.newHashSet();
-        redirectUris.add(params.getAuthorizationRedirectUri());
-        if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
+        if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty() && params.getRedirectUris().stream().allMatch(uri -> Utils.isValidUrl(uri))) {
             redirectUris.addAll(params.getRedirectUris());
+        } else {
+            throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
         }
         final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
         if (autoRegister != null && autoRegister && !redirectUris.isEmpty()) {
@@ -522,6 +515,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
         rp.setContacts(params.getContacts());
         rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
+        rp.setRedirectUri(params.getRedirectUris().get(0));
         return request;
     }
 
@@ -533,7 +527,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setOxdId(siteId);
         rp.setOpHost(params.getOpHost());
         rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
-        rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         rp.setRedirectUris(params.getRedirectUris());
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");

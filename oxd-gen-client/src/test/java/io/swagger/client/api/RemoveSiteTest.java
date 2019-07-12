@@ -16,10 +16,10 @@ import static org.junit.Assert.*;
 public class RemoveSiteTest {
 
     @Test
-    @Parameters({"opHost", "redirectUrl"})
-    public void testRemoveSite(String opHost, String redirectUrl) throws Exception {
+    @Parameters({"opHost", "redirectUrls"})
+    public void testRemoveSite(String opHost, String redirectUrls) throws Exception {
         final DevelopersApi api = Tester.api();
-        RegisterSiteResponse response = RegisterSiteTest.registerSite(api, opHost, redirectUrl);
+        RegisterSiteResponse response = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
 
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(response.getOxdId());

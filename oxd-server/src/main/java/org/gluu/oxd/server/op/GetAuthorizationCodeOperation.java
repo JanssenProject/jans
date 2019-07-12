@@ -46,7 +46,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
-                site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), nonce);
+                site.getClientId(), site.getScope(), site.getRedirectUri(), nonce);
         request.setState(state);
         request.setAuthUsername(params.getUsername());
         request.setAuthPassword(params.getPassword());

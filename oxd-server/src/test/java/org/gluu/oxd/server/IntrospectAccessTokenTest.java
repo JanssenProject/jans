@@ -19,13 +19,13 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
  */
 public class IntrospectAccessTokenTest {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @Test
-    public void introspectAccessToken(String host, String opHost, String redirectUrl) {
+    public void introspectAccessToken(String host, String opHost, String redirectUrls) {
 
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrl);
+        RegisterSiteResponse setupResponse = SetupClientTest.setupClient(client, opHost, redirectUrls);
 
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);

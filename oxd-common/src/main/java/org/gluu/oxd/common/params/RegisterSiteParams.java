@@ -17,8 +17,6 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private String op_host;
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
-    @JsonProperty(value = "authorization_redirect_uri")
-    private String authorization_redirect_uri;
     @JsonProperty(value = "post_logout_redirect_uris")
     private List<String> post_logout_redirect_uris;
     @JsonProperty(value = "redirect_uris")
@@ -27,7 +25,6 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private List<String> response_types;
     @JsonProperty(value = "claims_redirect_uri")
     private List<String> claims_redirect_uri;
-
     @JsonProperty(value = "client_id")
     private String client_id;
     @JsonProperty(value = "client_secret")
@@ -258,14 +255,6 @@ public class RegisterSiteParams implements HasOxdIdParams {
 
     public void setClientJwksUri(String clientJwksUri) {
         this.client_jwks_uri = clientJwksUri;
-    }
-
-    public String getAuthorizationRedirectUri() {
-        return authorization_redirect_uri;
-    }
-
-    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-        this.authorization_redirect_uri = authorizationRedirectUri;
     }
 
     public List<String> getClaimsLocales() {
@@ -861,7 +850,6 @@ public class RegisterSiteParams implements HasOxdIdParams {
         return "RegisterSiteParams{" +
                 "op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
-                ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
                 ", post_logout_redirect_uris='" + post_logout_redirect_uris + '\'' +
                 ", redirect_uris=" + redirect_uris +
                 ", response_types=" + response_types +

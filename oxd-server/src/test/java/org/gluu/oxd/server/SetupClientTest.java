@@ -22,19 +22,18 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 public class SetupClientTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls"})
+    @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void setupClient(String host, String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls) {
-        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrl, postLogoutRedirectUrls, logoutUrl);
+    public void setupClient(String host, String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls) {
+        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
-        params.setRedirectUris(Arrays.asList(redirectUrl));
         params.setAcrValues(new ArrayList<String>());
         params.setScope(Lists.newArrayList("openid", "profile"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
@@ -52,15 +51,15 @@ public class SetupClientTest {
         notEmpty(resp.getOxdId());
     }
 
-    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl) {
-        return setupClient(client, opHost, redirectUrl, redirectUrl, "");
+    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrls) {
+        return setupClient(client, opHost, redirectUrls, redirectUrls, "");
     }
 
-    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrl, String postLogoutRedirectUrls, String logoutUri) {
+    public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUri) {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
