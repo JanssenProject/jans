@@ -44,7 +44,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());
-        tokenRequest.setRedirectUri(site.getAuthorizationRedirectUri());
+        tokenRequest.setRedirectUri(site.getRedirectUri());
         tokenRequest.setAuthUsername(site.getClientId());
         tokenRequest.setAuthPassword(site.getClientSecret());
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);

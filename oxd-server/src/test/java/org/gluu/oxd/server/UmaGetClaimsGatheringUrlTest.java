@@ -22,12 +22,12 @@ import static org.testng.Assert.assertTrue;
  */
 public class UmaGetClaimsGatheringUrlTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "paramRedirectUrl", "rsProtect"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
+    public void test(String host, String opHost, String paramRedirectUrl, String rsProtect) throws IOException {
 
         ClientInterface client = Tester.newClient(host);
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, paramRedirectUrl);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
@@ -36,7 +36,7 @@ public class UmaGetClaimsGatheringUrlTest {
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
-        params.setClaimsRedirectUri(redirectUrl);
+        params.setClaimsRedirectUri(paramRedirectUrl);
 
         final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params);
 
@@ -46,15 +46,15 @@ public class UmaGetClaimsGatheringUrlTest {
         assertTrue(StringUtils.isNotBlank(parameters.get("ticket")));
         assertTrue(StringUtils.isNotBlank(parameters.get("state")));
         assertTrue(StringUtils.isNotBlank(response.getState()));
-        assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
+        assertEquals(paramRedirectUrl, parameters.get("claims_redirect_uri"));
     }
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect", "state"})
+    @Parameters({"host", "opHost", "paramRedirectUrl", "rsProtect", "state"})
     @Test
-    public void testWithCustomStateParameter(String host, String opHost, String redirectUrl, String rsProtect, String state) throws IOException {
+    public void testWithCustomStateParameter(String host, String opHost, String paramRedirectUrl, String rsProtect, String state) throws IOException {
 
         ClientInterface client = Tester.newClient(host);
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, paramRedirectUrl);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
@@ -63,7 +63,7 @@ public class UmaGetClaimsGatheringUrlTest {
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
-        params.setClaimsRedirectUri(redirectUrl);
+        params.setClaimsRedirectUri(paramRedirectUrl);
         params.setState(state);
 
         final RpGetClaimsGatheringUrlResponse response = client.umaRpGetClaimsGatheringUrl(Tester.getAuthorization(), params);
@@ -74,7 +74,7 @@ public class UmaGetClaimsGatheringUrlTest {
         assertTrue(StringUtils.isNotBlank(parameters.get("ticket")));
         assertTrue(StringUtils.isNotBlank(parameters.get("state")));
         assertTrue(StringUtils.isNotBlank(response.getState()));
-        assertEquals(redirectUrl, parameters.get("claims_redirect_uri"));
+        assertEquals(paramRedirectUrl, parameters.get("claims_redirect_uri"));
         assertEquals(response.getState(), state);
     }
 }

@@ -53,12 +53,14 @@ paths:
           schema:
             type: object
             required:
-              - authorization_redirect_uri
+              - redirect_uris
             properties:
-              authorization_redirect_uri:
-                type: string
-                example: https://client.example.org/cb
-                description: The only required parameter is the authorization_redirect_uri. This provide the URL where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/cb"]
+                description: Provide the list of redirection URIs. The first URL is where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).
               op_host:
                 type: string
                 example: https://<ophostname>
@@ -127,12 +129,6 @@ paths:
                   type: string
                 example: ["foo_bar@spam.org"]
                 description: Provide a list of e-mail addresses for people allowed to administer the information for this Client
-              redirect_uris:
-                type: array
-                items:
-                  type: string
-                example: ["https://client.example.org/cb"]
-                description: Provide the list of redirection URIs.
               ui_locales:
                 type: array
                 items:
@@ -319,7 +315,6 @@ paths:
           description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
           schema:
             $ref: '#/definitions/ErrorResponse'
-
 
   /get-client-token:
     post:
@@ -545,9 +540,12 @@ paths:
               oxd_id:
                 type: string
                 example: 6F9619FF-8B86-D011-B42D-00CF4FC964FF
-              authorization_redirect_uri:
-                type: string
-                example: https://client.example.org/cb
+              redirect_uris:
+                type: array
+                items:
+                  type: string
+                example: ["https://client.example.org/cb"]
+                description: Provide the list of redirection URIs. The first URL is where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).
               post_logout_redirect_uris:
                 type: array
                 items:
@@ -718,7 +716,7 @@ paths:
                 type: string
               state:
                 type: string
-              authorization_redirect_uri:
+              redirect_uri:
                 type: string
                 example: https://client.example.org/cb
               custom_parameters:

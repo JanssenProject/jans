@@ -32,8 +32,8 @@ public class Rp implements Serializable {
     @JsonProperty(value = "access_token")
     private String accessToken;
 
-    @JsonProperty(value = "authorization_redirect_uri")
-    private String authorizationRedirectUri;
+    @JsonProperty(value = "redirect_uri")
+    private String redirectUri;
     @JsonProperty(value = "logout_redirect_uri")
     private String postLogoutRedirectUri;
     @JsonProperty(value = "logout_redirect_uris")
@@ -135,7 +135,7 @@ public class Rp implements Serializable {
         this.idToken = conf.idToken;
         this.accessToken = conf.accessToken;
 
-        this.authorizationRedirectUri = conf.authorizationRedirectUri;
+        this.redirectUri = conf.redirectUri;
         this.postLogoutRedirectUri = conf.postLogoutRedirectUri;
         this.postLogoutRedirectUris = conf.postLogoutRedirectUris;
         this.applicationType = conf.applicationType;
@@ -382,12 +382,12 @@ public class Rp implements Serializable {
         this.applicationType = applicationType;
     }
 
-    public String getAuthorizationRedirectUri() {
-        return authorizationRedirectUri;
+    public String getRedirectUri() {
+        return redirectUri;
     }
 
-    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-        this.authorizationRedirectUri = authorizationRedirectUri;
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
     }
 
     public List<String> getContacts() {
@@ -627,7 +627,7 @@ public class Rp implements Serializable {
                 ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
                 ", idToken='" + idToken + '\'' +
                 ", accessToken='" + accessToken + '\'' +
-                ", authorizationRedirectUri='" + authorizationRedirectUri + '\'' +
+                ", redirectUri='" + redirectUri + '\'' +
                 ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
                 ", postLogoutRedirectUris='" + postLogoutRedirectUris + '\'' +
                 ", applicationType='" + applicationType + '\'' +

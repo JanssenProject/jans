@@ -9,10 +9,10 @@ import org.testng.annotations.Parameters;
  */
 public class Base {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @BeforeClass
-    public static void beforeClass(String host, String opHost, String redirectUrl) {
-        SetUpTest.beforeSuite(host, opHost, redirectUrl);
+    public static void beforeClass(String host, String opHost, String redirectUrls) {
+        SetUpTest.beforeSuite(host, opHost, redirectUrls);
     }
 
     @AfterClass

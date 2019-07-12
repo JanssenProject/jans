@@ -31,13 +31,13 @@ import static org.testng.Assert.*;
 
 public class UmaFullTest {
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void test(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void test(String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
@@ -55,13 +55,13 @@ public class UmaFullTest {
         assertTrue(isNotBlank(response.getPct()));
     }
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void testWithInvalidTicket(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void testWithInvalidTicket(String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
@@ -78,13 +78,13 @@ public class UmaFullTest {
     }
 
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void testWithClaimTokenButNoTokenFormat(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void testWithClaimTokenButNoTokenFormat(String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
