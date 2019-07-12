@@ -24,12 +24,12 @@ import static org.testng.Assert.*;
 
 public class GetUserInfoTest {
 
-    @Parameters({"opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void test(String opHost, String redirectUrl, String userId, String userSecret) throws Exception {
+    public void test(String opHost, String redirectUrls, String userId, String userSecret) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
 
         final GetUserInfoParams params = new GetUserInfoParams();

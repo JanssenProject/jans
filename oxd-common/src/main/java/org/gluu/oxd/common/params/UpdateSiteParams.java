@@ -15,8 +15,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
-    @JsonProperty(value = "authorization_redirect_uri")
-    private String authorization_redirect_uri;
     @JsonProperty(value = "post_logout_redirect_uris")
     private List<String> post_logout_redirect_uris;
 
@@ -136,14 +134,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         this.client_jwks_uri = clientJwksUri;
     }
 
-    public String getAuthorizationRedirectUri() {
-        return authorization_redirect_uri;
-    }
-
-    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-        this.authorization_redirect_uri = authorizationRedirectUri;
-    }
-
     public List<String> getClaimsLocales() {
         return claims_locales;
     }
@@ -246,7 +236,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append("UpdateSiteParams");
         sb.append("{acr_values=").append(acr_values);
         sb.append(", oxd_id='").append(oxd_id).append('\'');
-        sb.append(", authorization_redirect_uri='").append(authorization_redirect_uri).append('\'');
         sb.append(", post_logout_redirect_uris='").append(post_logout_redirect_uris).append('\'');
         sb.append(", redirect_uris=").append(redirect_uris);
         sb.append(", response_types=").append(response_types);

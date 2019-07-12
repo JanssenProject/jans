@@ -20,12 +20,12 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 public class GetUserInfoTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String userId, String userSecret) {
+    public void test(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetTokensByCodeResponse2 tokens = requestTokens(client, site, userId, userSecret);
 
         GetUserInfoParams params = new GetUserInfoParams();

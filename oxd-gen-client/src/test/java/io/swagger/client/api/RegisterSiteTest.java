@@ -26,20 +26,19 @@ public class RegisterSiteTest {
 
     private String oxdId = null;
 
-    @Parameters({"opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
+    @Parameters({"opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register(String opHost, String redirectUrl, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public void register(String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
         DevelopersApi client = api();
 
-        registerSite(client, opHost, redirectUrl, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
+        registerSite(client, opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
 
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
-        params.setRedirectUris(Lists.newArrayList(redirectUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setAcrValues(new ArrayList<>());
         params.setScope(Lists.newArrayList("openid", "profile"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
@@ -97,17 +96,17 @@ public class RegisterSiteTest {
         assertNotNull(resp);
     }
 
-    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl) throws Exception {
-        return registerSite(apiClient, opHost, redirectUrl, redirectUrl, "", "", "");
+    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrls) throws Exception {
+        return registerSite(apiClient, opHost, redirectUrls, redirectUrls, "", "", "");
     }
 
-    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrl, String logoutUri, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public static RegisterSiteResponse registerSite(DevelopersApi apiClient, String opHost, String redirectUrls, String logoutUri, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
@@ -122,15 +121,15 @@ public class RegisterSiteTest {
         return resp;
     }
 
-    @Parameters({"opHost", "redirectUrl", "postLogoutRedirectUrls", "clientJwksUri"})
+    @Parameters({"opHost", "redirectUrls", "postLogoutRedirectUrls", "clientJwksUri"})
     @Test
-    public void registerWithInvalidAlgorithm(String opHost, String redirectUrl, String postLogoutRedirectUrls, String clientJwksUri) {
+    public void registerWithInvalidAlgorithm(String opHost, String redirectUrls, String postLogoutRedirectUrls, String clientJwksUri) {
 
         final DevelopersApi client = api();
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(""));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));

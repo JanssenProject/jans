@@ -32,8 +32,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private Map<String, String> custom_parameters;
     @JsonProperty(value = "params")
     private Map<String, String> params;
-    @JsonProperty(value = "authorization_redirect_uri")
-    private String authorization_redirect_uri;
+    @JsonProperty(value = "redirect_uri")
+    private String redirect_uri;
 
     public GetAuthorizationUrlParams() {
     }
@@ -94,14 +94,6 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
         this.acr_values = acrValues;
     }
 
-    public String getAuthorizationRedirectUri() {
-        return authorization_redirect_uri;
-    }
-
-    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
-        this.authorization_redirect_uri = authorizationRedirectUri;
-    }
-
     public Map<String, String> getParams() {
         return params;
     }
@@ -116,6 +108,14 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getRedirectUri() {
+        return redirect_uri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirect_uri = redirectUri;
     }
 
     @Override
@@ -147,7 +147,7 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", token='" + token + '\'' +
                 ", params=" + params +
                 ", custom_parameters=" + custom_parameters +
-                ", authorization_redirect_uri='" + authorization_redirect_uri + '\'' +
+                ", redirect_uri='" + redirect_uri + '\'' +
                 ", state='" + state + '\'' +
                 '}';
     }
