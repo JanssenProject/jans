@@ -21,13 +21,13 @@ import static org.testng.Assert.*;
 
 public class RpGetRptTest {
 
-    @Parameters({"opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void test(String opHost, String redirectUrl, String rsProtect) throws Exception {
+    public void test(String opHost, String redirectUrls, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final UmaRpGetRptResponse response = requestRpt(client, site, rsProtect);
 
         assertNotNull(response);
@@ -35,13 +35,13 @@ public class RpGetRptTest {
     }
 
 
-    @Parameters({"opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void testWithSameRpt(String opHost, String redirectUrl, String rsProtect) throws Exception {
+    public void testWithSameRpt(String opHost, String redirectUrls, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final UmaRpGetRptResponse firstResponse = requestRpt(client, site, rsProtect);
 
         final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);

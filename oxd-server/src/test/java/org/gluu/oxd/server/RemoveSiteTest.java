@@ -15,12 +15,12 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
  */
 public class RemoveSiteTest {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @Test
-    public void removeSiteTest(String host, String opHost, String redirectUrl) {
+    public void removeSiteTest(String host, String opHost, String redirectUrls) {
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse resp = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse resp = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         assertNotNull(resp);
 
         notEmpty(resp.getOxdId());

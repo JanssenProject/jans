@@ -18,12 +18,12 @@ import java.io.IOException;
 
 public class RsCheckAccessTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"host", "opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String rsProtect) throws IOException {
+    public void test(String host, String opHost, String redirectUrls, String rsProtect) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 

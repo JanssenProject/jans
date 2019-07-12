@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.manual;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
 import org.gluu.oxd.common.params.RegisterSiteParams;
@@ -62,7 +63,7 @@ public class GoogleTest {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(OP_HOST);
-        params.setAuthorizationRedirectUri(REDIRECT_URI);
+        params.setRedirectUris(Lists.newArrayList(REDIRECT_URI));
         params.setClientId(CLIENT_ID);
         params.setClientSecret(CLIENT_SECRET);
 

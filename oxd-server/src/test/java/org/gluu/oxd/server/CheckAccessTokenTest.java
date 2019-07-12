@@ -18,13 +18,13 @@ import static org.testng.AssertJUnit.assertTrue;
  */
 
 public class CheckAccessTokenTest {
-    @Parameters({"host", "redirectUrl", "userId", "userSecret", "opHost"})
+    @Parameters({"host", "redirectUrls", "userId", "userSecret", "opHost"})
     @Test
-    public void test(String host, String redirectUrl, String userId, String userSecret, String opHost) {
+    public void test(String host, String redirectUrls, String userId, String userSecret, String opHost) {
 
         ClientInterface client = Tester.newClient(host);
         String nonce = CoreUtils.secureRandomString();
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
 
         final CheckAccessTokenParams params = new CheckAccessTokenParams();

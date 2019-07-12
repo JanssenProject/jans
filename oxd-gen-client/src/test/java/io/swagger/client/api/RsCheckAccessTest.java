@@ -21,13 +21,13 @@ import static org.testng.Assert.*;
 
 public class RsCheckAccessTest {
 
-    @Parameters({"opHost", "redirectUrl", "rsProtect"})
+    @Parameters({"opHost", "redirectUrls", "rsProtect"})
     @Test
-    public void test(String opHost, String redirectUrl, String rsProtect) throws Exception {
+    public void test(String opHost, String redirectUrls, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 

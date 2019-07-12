@@ -25,20 +25,20 @@ import static org.junit.Assert.assertEquals;
 
 public class GetTokensByCodeTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrl, String userId, String userSecret) {
+    public void whenValidCodeIsUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
         refreshToken(tokensResponse, client, site.getOxdId());
     }
 
-    @Parameters({"host", "opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrl, String userId, String userSecret) {
+    public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         tokenByInvalidCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
     }
 
