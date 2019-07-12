@@ -61,6 +61,14 @@ objectClass: top
 objectClass: organizationalUnit
 ou: tokens
 
+################################
+
+# Authorizations data - LEVEL 2
+dn: ou=authorizations,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: authorizations
+
 
 ################################
 
