@@ -65,7 +65,7 @@ import static org.testng.Assert.*;
  */
 public abstract class BaseTest {
 	
-	private static int WAIT_OPERATION_TIMEOUT = 30;
+	private static int WAIT_OPERATION_TIMEOUT = 60;
 
     protected HtmlUnitDriver driver;
 
