@@ -103,6 +103,7 @@ public class ClientAuthorizationsService {
                 clientAuthorizations = new ClientAuthorizations();
                 clientAuthorizations.setId(UUID.randomUUID().toString());
                 clientAuthorizations.setClientId(clientId);
+                clientAuthorizations.setUserId(userInum);
                 clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
                 clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), userInum));
 
