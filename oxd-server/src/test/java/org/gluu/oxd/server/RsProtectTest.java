@@ -28,24 +28,24 @@ import static junit.framework.Assert.assertNotNull;
 
 public class RsProtectTest {
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void protect(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
+    public void protect(String host, String redirectUrls, String opHost, String rsProtect) throws IOException {
 
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
         RsCheckAccessTest.checkAccess(client, site);
     }
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void overwriteFalse(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
+    public void overwriteFalse(String host, String redirectUrls, String opHost, String rsProtect) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
         protectResources(client, site, resources);
@@ -64,12 +64,12 @@ public class RsProtectTest {
         throw new AssertionError("Expected 400 (bad request) but got successful result.");
     }
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void overwriteTrue(String host, String redirectUrl, String opHost, String rsProtect) throws IOException {
+    public void overwriteTrue(String host, String redirectUrls, String opHost, String rsProtect) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         List<RsResource> resources = UmaFullTest.resourceList(rsProtect).getResources();
         protectResources(client, site, resources);
@@ -83,23 +83,23 @@ public class RsProtectTest {
         assertNotNull(response);
     }
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtectScopeExpression"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtectScopeExpression"})
     @Test
-    public void protectWithScopeExpression(String host, String redirectUrl, String opHost, String rsProtectScopeExpression) throws IOException {
+    public void protectWithScopeExpression(String host, String redirectUrls, String opHost, String rsProtectScopeExpression) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
         RsCheckAccessTest.checkAccess(client, site);
     }
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtectScopeExpressionSecond"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtectScopeExpressionSecond"})
     @Test
-    public void protectWithScopeExpressionSeconds(String host, String redirectUrl, String opHost, String rsProtectScopeExpressionSecond) throws IOException {
+    public void protectWithScopeExpressionSeconds(String host, String redirectUrls, String opHost, String rsProtectScopeExpressionSecond) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond).getResources());
 

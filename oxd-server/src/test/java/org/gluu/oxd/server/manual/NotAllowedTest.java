@@ -46,7 +46,7 @@ public class NotAllowedTest {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost("https://ce-dev.gluu.org");
-        params.setAuthorizationRedirectUri("https://192.168.200.58:5053");
+        params.setRedirectUris(Lists.newArrayList("https://192.168.200.58:5053"));
         params.setScope(Lists.newArrayList("openid", "profile", "email", "address", "clientinfo", "mobile_phone", "phone", "uma_protection"));
         params.setPostLogoutRedirectUris(Lists.newArrayList("https://192.168.200.58:5053"));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList("https://192.168.200.58:5053/logout"));

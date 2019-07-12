@@ -20,13 +20,13 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
  */
 public class AccessTokenAsJwtTest {
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls", "postLogoutRedirectUrls"})
     @Test
-    public void getClientToken(String host, String opHost, String redirectUrl) throws InvalidJwtException {
+    public void getClientToken(String host, String opHost, String redirectUrls, String postLogoutRedirectUrls) throws InvalidJwtException {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
-        params.setAuthorizationRedirectUri(redirectUrl);
-        params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrl));
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setAccessTokenAsJwt(true);
         params.setTrustedClient(true);

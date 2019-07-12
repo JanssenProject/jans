@@ -25,12 +25,12 @@ import static org.testng.AssertJUnit.assertTrue;
  */
 
 public class GetAuthorizationUrlTest {
-    @Parameters({"host", "redirectUrl", "opHost"})
+    @Parameters({"host", "redirectUrls", "opHost"})
     @Test
-    public void test(String host, String redirectUrl, String opHost) {
+    public void test(String host, String redirectUrls, String opHost) {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
 
@@ -39,16 +39,16 @@ public class GetAuthorizationUrlTest {
         notEmpty(resp.getAuthorizationUrl());
     }
 
-    @Parameters({"host", "redirectUrl", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl"})
     @Test
-    public void testWithParameterAuthorizationUrl(String host, String redirectUrl, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl) {
+    public void testWithParameterAuthorizationUrl(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl) {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl,
-                StringUtils.isNotBlank(redirectUrls) ? Lists.newArrayList(redirectUrls.split(" ")) : null);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl,
+                logoutUrl);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setAuthorizationRedirectUri(paramRedirectUrl);
+        commandParams.setRedirectUri(paramRedirectUrl);
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
         assertNotNull(resp);
@@ -56,12 +56,12 @@ public class GetAuthorizationUrlTest {
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
     }
 
-    @Parameters({"host", "redirectUrl", "opHost"})
+    @Parameters({"host", "redirectUrls", "opHost"})
     @Test
-    public void testWithParams(String host, String redirectUrl, String opHost) throws IOException {
+    public void testWithParams(String host, String redirectUrls, String opHost) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
 
@@ -83,16 +83,15 @@ public class GetAuthorizationUrlTest {
     }
 
 
-    @Parameters({"host", "redirectUrl", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl", "state"})
+    @Parameters({"host", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl", "state"})
     @Test
-    public void testWithCustomStateParameter(String host, String redirectUrl, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl, String state) throws IOException {
+    public void testWithCustomStateParameter(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl, String state) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl,
-                StringUtils.isNotBlank(redirectUrls) ? Lists.newArrayList(redirectUrls.split(" ")) : null);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setAuthorizationRedirectUri(paramRedirectUrl);
+        commandParams.setRedirectUri(paramRedirectUrl);
         commandParams.setState(state);
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);

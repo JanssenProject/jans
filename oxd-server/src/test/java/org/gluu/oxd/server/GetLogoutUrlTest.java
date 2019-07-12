@@ -23,12 +23,12 @@ import static junit.framework.Assert.assertTrue;
 
 public class GetLogoutUrlTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, String opHost, String redirectUrl, String postLogoutRedirectUrl) throws IOException {
+    public void test(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "");
 
         final GetLogoutUrlParams params = new GetLogoutUrlParams();
         params.setOxdId(site.getOxdId());
