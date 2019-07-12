@@ -24,6 +24,9 @@ public class ClientAuthorizations implements Serializable {
     @AttributeName(name = "oxAuthClientId", consistency = true)
     private String clientId;
 
+    @AttributeName(name = "oxAuthUserId", consistency = true)
+    private String userId;
+
     @AttributeName(name = "oxAuthScope")
     private String[] scopes;
 
@@ -57,6 +60,14 @@ public class ClientAuthorizations implements Serializable {
 
     public void setScopes(String[] scopes) {
         this.scopes = scopes;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override
