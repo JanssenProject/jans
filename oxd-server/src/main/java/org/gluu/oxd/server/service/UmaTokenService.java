@@ -231,7 +231,7 @@ public class UmaTokenService {
 
         final String state = stateService.generateState();
 
-        final AuthorizationRequest request = new AuthorizationRequest(responseTypes, site.getClientId(), scopes(scopeType), site.getAuthorizationRedirectUri(), null);
+        final AuthorizationRequest request = new AuthorizationRequest(responseTypes, site.getClientId(), scopes(scopeType), site.getRedirectUri(), null);
         request.setState(state);
         request.setAuthUsername(site.getUserId());
         request.setAuthPassword(site.getUserSecret());
@@ -255,7 +255,7 @@ public class UmaTokenService {
             // 2. Request access token using the authorization code.
             final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
-            tokenRequest.setRedirectUri(site.getAuthorizationRedirectUri());
+            tokenRequest.setRedirectUri(site.getRedirectUri());
             tokenRequest.setAuthUsername(site.getClientId());
             tokenRequest.setAuthPassword(site.getClientSecret());
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);

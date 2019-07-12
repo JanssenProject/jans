@@ -28,9 +28,9 @@ public class SetUpTest {
     public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
 
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @BeforeSuite
-    public static void beforeSuite(String host, String opHost, String redirectUrl) {
+    public static void beforeSuite(String host, String opHost, String redirectUrls) {
         try {
             LOG.debug("Running beforeSuite ...");
             ServerLauncher.setSetUpSuite(true);
@@ -45,14 +45,14 @@ public class SetUpTest {
             removeExistingRps();
             LOG.debug("Existing RPs are removed.");
 
-            RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrl);
+            RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(host), opHost, redirectUrls);
             Tester.setSetupClient(setupClient, host, opHost);
             LOG.debug("SETUP_CLIENT is set in Tester.");
 
             Preconditions.checkNotNull(Tester.getAuthorization());
             LOG.debug("Tester's authorization is set.");
 
-            setupSwaggerSuite(Tester.getTargetHost(host), opHost, redirectUrl);
+            setupSwaggerSuite(Tester.getTargetHost(host), opHost, redirectUrls);
             LOG.debug("Finished beforeSuite!");
         } catch (Exception e) {
             LOG.error("Failed to start suite.", e);
@@ -60,12 +60,12 @@ public class SetUpTest {
         }
     }
 
-    private static void setupSwaggerSuite(String host, String opHost, String redirectUrl) {
+    private static void setupSwaggerSuite(String host, String opHost, String redirectUrls) {
         try {
             if (StringUtils.countMatches(host, ":") < 2 && "http://localhost".equalsIgnoreCase(host) || "http://127.0.0.1".equalsIgnoreCase(host) ) {
                 host = host + ":" + SetUpTest.SUPPORT.getLocalPort();
             }
-            io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrl); // manual swagger tests setup
+            io.swagger.client.api.SetUpTest.beforeSuite(host, opHost, redirectUrls); // manual swagger tests setup
             io.swagger.client.api.SetUpTest.setTokenProtectionEnabled(SUPPORT.getConfiguration().getProtectCommandsWithAccessToken());
         } catch (Throwable e) {
             LOG.error("Failed to setup swagger suite.");

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.server.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.RegisterClient;
@@ -126,21 +127,17 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         rp.setGrantType(params.getGrantType());
 
         Set<String> redirectUris = new HashSet<>();
-        if (StringUtils.isNotBlank(params.getAuthorizationRedirectUri())) {
-            redirectUris.add(params.getAuthorizationRedirectUri());
-            rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
-        } else if (StringUtils.isNotBlank(rp.getAuthorizationRedirectUri())) {
-            redirectUris.add(rp.getAuthorizationRedirectUri());
-        }
 
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
-            redirectUris.addAll(params.getRedirectUris());
-            if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
-                redirectUris.addAll(params.getPostLogoutRedirectUris());
+            if (!params.getRedirectUris().stream().allMatch(uri -> Utils.isValidUrl(uri))) {
+                throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
             }
 
-            request.setRedirectUris(Lists.newArrayList(redirectUris));
-            rp.setRedirectUris(Lists.newArrayList(redirectUris));
+            redirectUris.addAll(params.getRedirectUris());
+            List<String> redirectUriList = Lists.newArrayList(redirectUris);
+            request.setRedirectUris(redirectUriList);
+            rp.setRedirectUris(redirectUriList);
+            rp.setRedirectUri(redirectUriList.get(0));
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
