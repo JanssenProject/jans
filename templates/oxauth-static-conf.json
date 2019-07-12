@@ -5,6 +5,7 @@
         "groups":"ou=groups,o=gluu",
         "clients":"ou=clients,o=gluu",
         "tokens":"ou=tokens,o=gluu",
+        "authorizations": "ou=authorizations,o=gluu",
         "scopes":"ou=scopes,o=gluu",
         "attributes":"ou=attributes,o=gluu",
         "scripts": "ou=scripts,o=gluu",
