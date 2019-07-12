@@ -19,19 +19,19 @@ import static org.testng.AssertJUnit.assertNotNull;
 
 public class AuthorizationCodeFlowTest {
 
-    @Parameters({"host", "opHost", "redirectUrl", "clientId", "clientSecret", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret"})
     @Test(enabled = false)
-    public void test(String host, String opHost, String redirectUrl, String clientId, String clientSecret, String userId, String userSecret) {
+    public void test(String host, String opHost, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret) {
 
         ClientInterface client = org.gluu.oxd.server.Tester.newClient(host);
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final AuthorizationCodeFlowParams params = new AuthorizationCodeFlowParams();
         params.setOxdId(site.getOxdId());
         params.setClientId(clientId);
         params.setClientSecret(clientSecret);
         params.setNonce(UUID.randomUUID().toString());
-        params.setRedirectUrl(redirectUrl);
+        params.setRedirectUrl(redirectUrls.split(" ")[0]);
         params.setScope("openid");
         params.setUserId(userId);
         params.setUserSecret(userSecret);

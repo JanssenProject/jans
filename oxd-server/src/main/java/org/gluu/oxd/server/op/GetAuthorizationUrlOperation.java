@@ -51,12 +51,16 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             scope.addAll(site.getScope());
         }
 
-        if (StringUtils.isNotBlank(params.getAuthorizationRedirectUri()) && !site.getRedirectUris().contains(params.getAuthorizationRedirectUri())) {
+        if (StringUtils.isNotBlank(params.getRedirectUri()) && !Utils.isValidUrl(params.getRedirectUri())) {
+            throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
+        }
+
+        if (StringUtils.isNotBlank(params.getRedirectUri()) && !site.getRedirectUris().contains(params.getRedirectUri())) {
             throw new HttpException(ErrorResponseCode.REDIRECT_URI_IS_NOT_REGISTERED);
         }
 
         String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
-        String redirectUri = StringUtils.isNotBlank(params.getAuthorizationRedirectUri()) ? params.getAuthorizationRedirectUri() : site.getAuthorizationRedirectUri();
+        String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : site.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();

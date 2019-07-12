@@ -54,7 +54,7 @@ public enum ErrorResponseCode {
     INVALID_ACCESS_TOKEN(403, "invalid_access_token", "Invalid access_token. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE(500, "invalid_introspection_response", "AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later)."),
     INACTIVE_ACCESS_TOKEN(403, "inactive_access_token", "Inactive access_token. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
-    INVALID_AUTHORIZATION_REDIRECT_URI(400, "invalid_authorization_redirect_uri", "Invalid authorization_redirect_uri (empty or blank)."),
+    INVALID_REDIRECT_URI(400, "invalid_redirect_uri", "Invalid redirect_uri (empty, blank or invalid)."),
     INVALID_SCOPE(400, "invalid_scope", "Invalid scope parameter (empty or blank)."),
     INVALID_ACR_VALUES(400, "invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
     INVALID_SIGNATURE_ALGORITHM(400, "invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(SignatureAlgorithm.values())),

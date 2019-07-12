@@ -23,13 +23,13 @@ import static org.testng.Assert.assertTrue;
 
 public class UmaFullTest {
 
-    @Parameters({"host", "redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void test(String host, String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void test(String host, String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         ClientInterface client = Tester.newClient(host);
 
-        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
