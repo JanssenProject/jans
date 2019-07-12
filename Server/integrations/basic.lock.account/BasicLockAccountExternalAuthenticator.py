@@ -11,7 +11,7 @@ from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.service import CacheService
 from org.gluu.util import StringHelper
-from org.gluu.site.ldap.persistence.exception import AuthenticationException
+from org.gluu.persist.exception import AuthenticationException
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
