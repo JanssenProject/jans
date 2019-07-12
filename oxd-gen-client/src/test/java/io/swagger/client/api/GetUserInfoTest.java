@@ -42,12 +42,12 @@ public class GetUserInfoTest {
         assertNotNull(resp.get("sub"));
     }
 
-    @Parameters({"opHost", "redirectUrl"})
+    @Parameters({"opHost", "redirectUrls"})
     @Test
-    public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
+    public void testWithInvalidToken(String opHost, String redirectUrls) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
