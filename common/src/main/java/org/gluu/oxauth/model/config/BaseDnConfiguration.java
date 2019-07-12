@@ -33,6 +33,8 @@ public class BaseDnConfiguration {
     private String clients;
 	@XmlElement(name = "tokens")
 	private String tokens;
+    @XmlElement(name = "authorizations")
+    private String authorizations;
     @XmlElement(name = "scopes")
     private String scopes;
     @XmlElement(name = "attributes")
@@ -49,6 +51,14 @@ public class BaseDnConfiguration {
     private String metric;
     @XmlElement(name = "sectorIdentifiers")
     private String sectorIdentifiers;
+
+    public String getAuthorizations() {
+        return authorizations;
+    }
+
+    public void setAuthorizations(String authorizations) {
+        this.authorizations = authorizations;
+    }
 
     public String getUmaBase() {
         return umaBase;
