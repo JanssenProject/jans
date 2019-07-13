@@ -5626,6 +5626,8 @@
                 "oxId",
                 "oxAuthClientId",
                 "oxAuthUserId",
+                "oxAuthExpiration",
+                "oxDeletable",
                 "oxAuthScope"
             ],
             "must": [
