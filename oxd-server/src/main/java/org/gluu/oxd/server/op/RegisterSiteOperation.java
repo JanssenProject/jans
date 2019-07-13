@@ -149,7 +149,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         params.setResponseTypes(responseTypes);
 
         // redirect_uris
-        Set<String> redirectUris = Sets.newHashSet();
+        Set<String> redirectUris = Sets.newLinkedHashSet();
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty() && params.getRedirectUris().stream().allMatch(uri -> Utils.isValidUrl(uri))) {
             redirectUris.addAll(params.getRedirectUris());
         } else {
