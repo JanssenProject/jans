@@ -2,6 +2,7 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.server.Utils;
@@ -126,8 +127,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         request.setGrantTypes(grantTypes);
         rp.setGrantType(params.getGrantType());
 
-        Set<String> redirectUris = new HashSet<>();
-
+        Set<String> redirectUris = Sets.newLinkedHashSet();
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             if (!params.getRedirectUris().stream().allMatch(uri -> Utils.isValidUrl(uri))) {
                 throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
