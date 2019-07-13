@@ -21,7 +21,6 @@ import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
@@ -400,6 +399,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
             p_client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         }
+        if (requestObject.getKeepClientAuthorizationAfterExpiration() != null) {
+            p_client.getAttributes().setKeepClientAuthorizationAfterExpiration(requestObject.getKeepClientAuthorizationAfterExpiration());
+        }
         if (requestObject.getAccessTokenSigningAlg() != null) {
             p_client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
         }
@@ -699,6 +701,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, RPT_AS_JWT.toString(), client.isRptAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TLS_CLIENT_AUTH_SUBJECT_DN.toString(), client.getAttributes().getTlsClientAuthSubjectDn());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), client.getAttributes().getKeepClientAuthorizationAfterExpiration());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());

@@ -45,6 +45,9 @@ public class ClientAttributes implements Serializable {
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
+	    if (keepClientAuthorizationAfterExpiration == null) {
+            keepClientAuthorizationAfterExpiration = false;
+        }
         return keepClientAuthorizationAfterExpiration;
     }
 

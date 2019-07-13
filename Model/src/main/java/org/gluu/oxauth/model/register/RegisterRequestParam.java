@@ -267,6 +267,11 @@ public enum RegisterRequestParam {
     RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS("run_introspection_script_before_access_token_as_jwt_creation_and_include_claims"),
 
     /**
+     * boolean property which indicates whether to keep client authorization after expiration
+     */
+    KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION("keep_client_authorization_after_expiration"),
+
+    /**
      * String containing a space-separated list of scope values.
      */
     SCOPE("scope"),
