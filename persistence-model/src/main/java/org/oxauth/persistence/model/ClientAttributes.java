@@ -22,6 +22,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
 
+    @JsonProperty("keepClientAuthorizationAfterExpiration")
+    private Boolean keepClientAuthorizationAfterExpiration = false;
+
 	public String getTlsClientAuthSubjectDn() {
 		return tlsClientAuthSubjectDn;
 	}
@@ -41,11 +44,20 @@ public class ClientAttributes implements Serializable {
         this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     }
 
+    public Boolean getKeepClientAuthorizationAfterExpiration() {
+        return keepClientAuthorizationAfterExpiration;
+    }
+
+    public void setKeepClientAuthorizationAfterExpiration(Boolean keepClientAuthorizationAfterExpiration) {
+        this.keepClientAuthorizationAfterExpiration = keepClientAuthorizationAfterExpiration;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
                 ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 '}';
     }
 }
