@@ -8,6 +8,7 @@ package org.gluu.oxauth.service;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorizations;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
@@ -36,6 +37,9 @@ public class ClientAuthorizationsService {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private ClientService clientService;
 
     @Inject
     private StaticConfiguration staticConfiguration;
@@ -91,6 +95,8 @@ public class ClientAuthorizationsService {
     }
 
     public void add(String userInum, String clientId, Set<String> scopes, boolean persistInLdap) {
+        Client client = clientService.getClient(clientId);
+
         if (persistInLdap) {
             // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
             // If a client has pre-authorization=true, there is no point to create the entry under
@@ -107,6 +113,8 @@ public class ClientAuthorizationsService {
                 clientAuthorizations.setUserId(userInum);
                 clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
                 clientAuthorizations.setDn(createDn(clientAuthorizations.getId()));
+                clientAuthorizations.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
+                clientAuthorizations.setExpirationDate(client.getExpirationDate());
 
                 ldapEntryManager.persist(clientAuthorizations);
             } else if (clientAuthorizations.getScopes() != null) {
@@ -128,6 +136,8 @@ public class ClientAuthorizationsService {
                 clientAuthorizations.setUserId(userInum);
                 clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
                 clientAuthorizations.setDn(createDn(clientAuthorizations.getId()));
+                clientAuthorizations.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
+                clientAuthorizations.setExpirationDate(client.getExpirationDate());
 
                 cacheService.put(key, clientAuthorizations);
             } else if (clientAuthorizations.getScopes() != null) {
