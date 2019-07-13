@@ -2581,7 +2581,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.41 NAME 'oxClientAuthorizations'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ oxAuthClientId $ oxAuthScope $ oxAuthUserId )
+  MAY ( oxId $ oxAuthClientId $ oxAuthScope $ oxAuthUserId $ oxAuthExpiration $ oxDeletable )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.42 NAME 'oxSectorIdentifier'
   SUP ( top )
