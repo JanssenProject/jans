@@ -6,6 +6,7 @@ import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Javier Rojas Blum
@@ -29,6 +30,12 @@ public class ClientAuthorizations implements Serializable {
 
     @AttributeName(name = "oxAuthScope")
     private String[] scopes;
+
+    @AttributeName(name = "oxAuthExpiration")
+    private Date expirationDate;
+
+    @AttributeName(name = "oxDeletable")
+    private boolean deletable = true;
 
     public String getDn() {
         return dn;
@@ -68,6 +75,22 @@ public class ClientAuthorizations implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
     }
 
     @Override
