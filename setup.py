@@ -272,7 +272,7 @@ class Setup(object):
         self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
-        self.groupMappings = ['default', 'user', 'cache', 'statistic', 'site']
+        self.groupMappings = ['default', 'user', 'cache', 'statistic', 'site', 'authorizations']
         self.mappingLocations = { group: 'ldap' for group in self.groupMappings }  #default locations are OpenDJ
 
         # Gluu components installation status
@@ -687,6 +687,7 @@ class Setup(object):
                                 'cache': [],
                                 'statistic': [self.ldif_metric],
                                 'site': [self.ldif_site],
+                                'authorizations': []
                             }
 
 
@@ -4117,13 +4118,13 @@ class Setup(object):
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
-        
 
         bucketMappings = {
                             'user': 'people, groups',
                             'cache': 'cache',
                             'statistic': 'statistic',
                             'site': 'site',
+                            'authorizations': 'authorizations',
                         }
 
         couchbase_mappings = []
