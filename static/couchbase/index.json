@@ -11,7 +11,14 @@
     "mail",
     "inum",
     "displayName"
-  ], 
+  ],
+
+  "gluu_authorizations": [
+    "oxAuthExpiration",
+    "oxDeletable",
+    "oxAuthClientId",
+    "oxAuthUserId"
+  ],
 
   "gluu": [
     "objectClass", 
