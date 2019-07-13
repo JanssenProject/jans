@@ -160,7 +160,10 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), getRequest().getTlsClientAuthSubjectDn());
                 }
                 if (getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-                    requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+                    requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims().toString());
+                }
+                if (getRequest().getKeepClientAuthorizationAfterExpiration() != null) {
+                    requestBody.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), getRequest().getKeepClientAuthorizationAfterExpiration().toString());
                 }
                 if (getRequest().getIdTokenSignedResponseAlg() != null) {
                     requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());

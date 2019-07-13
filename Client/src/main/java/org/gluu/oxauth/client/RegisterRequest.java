@@ -58,6 +58,7 @@ public class RegisterRequest extends BaseRequest {
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
@@ -167,6 +168,14 @@ public class RegisterRequest extends BaseRequest {
 
     public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
         this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    public Boolean getKeepClientAuthorizationAfterExpiration() {
+        return keepClientAuthorizationAfterExpiration;
+    }
+
+    public void setKeepClientAuthorizationAfterExpiration(Boolean keepClientAuthorizationAfterExpiration) {
+        this.keepClientAuthorizationAfterExpiration = keepClientAuthorizationAfterExpiration;
     }
 
     /**
@@ -1161,6 +1170,9 @@ public class RegisterRequest extends BaseRequest {
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
         }
+        if (keepClientAuthorizationAfterExpiration != null) {
+            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
+        }
         if (claims != null && !claims.isEmpty()) {
             parameters.put(CLAIMS.toString(), implode(claims, " "));
         }
@@ -1332,6 +1344,7 @@ public class RegisterRequest extends BaseRequest {
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
+        result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
@@ -1417,6 +1430,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
+        }
+        if (keepClientAuthorizationAfterExpiration != null) {
+            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration);
         }
         if (StringUtils.isNotBlank(logoUri)) {
             parameters.put(LOGO_URI.toString(), logoUri);
