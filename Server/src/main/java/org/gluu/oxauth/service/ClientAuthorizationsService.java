@@ -7,7 +7,7 @@
 package org.gluu.oxauth.service;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.ldap.ClientAuthorizations;
+import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
@@ -25,7 +25,6 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version January 17, 2018
  */
-@Stateless
 @Named
 public class ClientAuthorizationsService {
 
@@ -63,7 +62,7 @@ public class ClientAuthorizationsService {
         }
     }
 
-    public ClientAuthorizations findClientAuthorizations(String userInum, String clientId, boolean persistInLdap) {
+    public ClientAuthorization find(String userInum, String clientId, boolean persistInLdap) {
         if (persistInLdap) {
             prepareBranch();
 
@@ -72,12 +71,12 @@ public class ClientAuthorizationsService {
                     Filter.createEqualityFilter("oxAuthUserId", userInum)
             );
 
-            List<ClientAuthorizations> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorizations.class, filter);
+            List<ClientAuthorization> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 // if more then one entry then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
                     log.error("Found more then one client authorization entry by client Id: {}" + clientId);
-                    for (ClientAuthorizations entry : entries) {
+                    for (ClientAuthorization entry : entries) {
                         log.error(entry.toString());
                     }
                 }
@@ -86,8 +85,8 @@ public class ClientAuthorizationsService {
         } else {
             String key = getCacheKey(userInum, clientId);
             Object cacheOjb = cacheService.get(key);
-            if (cacheOjb != null && cacheOjb instanceof ClientAuthorizations) {
-                return (ClientAuthorizations) cacheOjb;
+            if (cacheOjb != null && cacheOjb instanceof ClientAuthorization) {
+                return (ClientAuthorization) cacheOjb;
             }
         }
 
@@ -104,33 +103,33 @@ public class ClientAuthorizationsService {
             // ldap database, and serve no purpose.
             prepareBranch();
 
-            ClientAuthorizations clientAuthorizations = findClientAuthorizations(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorization = find(userInum, clientId, persistInLdap);
 
-            if (clientAuthorizations == null) {
-                clientAuthorizations = new ClientAuthorizations();
-                clientAuthorizations.setId(UUID.randomUUID().toString());
-                clientAuthorizations.setClientId(clientId);
-                clientAuthorizations.setUserId(userInum);
-                clientAuthorizations.setScopes(scopes.toArray(new String[scopes.size()]));
-                clientAuthorizations.setDn(createDn(clientAuthorizations.getId()));
-                clientAuthorizations.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
-                clientAuthorizations.setExpirationDate(client.getExpirationDate());
+            if (clientAuthorization == null) {
+                clientAuthorization = new ClientAuthorization();
+                clientAuthorization.setId(UUID.randomUUID().toString());
+                clientAuthorization.setClientId(clientId);
+                clientAuthorization.setUserId(userInum);
+                clientAuthorization.setScopes(scopes.toArray(new String[scopes.size()]));
+                clientAuthorization.setDn(createDn(clientAuthorization.getId()));
+                clientAuthorization.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
+                clientAuthorization.setExpirationDate(client.getExpirationDate());
 
-                ldapEntryManager.persist(clientAuthorizations);
-            } else if (clientAuthorizations.getScopes() != null) {
+                ldapEntryManager.persist(clientAuthorization);
+            } else if (clientAuthorization.getScopes() != null) {
                 Set<String> set = new HashSet<String>(scopes);
-                set.addAll(Arrays.asList(clientAuthorizations.getScopes()));
-                clientAuthorizations.setScopes(set.toArray(new String[set.size()]));
+                set.addAll(Arrays.asList(clientAuthorization.getScopes()));
+                clientAuthorization.setScopes(set.toArray(new String[set.size()]));
 
-                ldapEntryManager.merge(clientAuthorizations);
+                ldapEntryManager.merge(clientAuthorization);
             }
         } else {
             // Put client authorization in cache. oxAuth #662.
-            ClientAuthorizations clientAuthorizations = findClientAuthorizations(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorizations = find(userInum, clientId, persistInLdap);
             String key = getCacheKey(userInum, clientId);
 
             if (clientAuthorizations == null) {
-                clientAuthorizations = new ClientAuthorizations();
+                clientAuthorizations = new ClientAuthorization();
                 clientAuthorizations.setId(UUID.randomUUID().toString());
                 clientAuthorizations.setClientId(clientId);
                 clientAuthorizations.setUserId(userInum);
