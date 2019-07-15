@@ -25,7 +25,7 @@ import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.ldap.ClientAuthorizations;
+import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
@@ -481,13 +481,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 oAuth2AuditLog.setUsername(user.getUserId());
 
-                                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(
+                                ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                                         user.getAttribute("inum"),
                                         client.getClientId(),
                                         client.getPersistClientAuthorizations());
                                 if (scopes.size() > 0) {
-                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null) {
-                                        if (Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                    if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
+                                        if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
                                             sessionUser.addPermission(clientId, true);
                                         } else {
                                             redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
