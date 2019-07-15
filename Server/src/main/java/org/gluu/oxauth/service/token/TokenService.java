@@ -20,7 +20,6 @@ import org.gluu.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 10/03/2012
  */
-@Stateless
 @Named
 public class TokenService {
 
