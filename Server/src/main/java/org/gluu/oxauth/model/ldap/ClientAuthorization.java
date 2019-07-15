@@ -13,8 +13,8 @@ import java.util.Date;
  * @version October 16, 2015
  */
 @DataEntry
-@ObjectClass(value = "oxClientAuthorizations")
-public class ClientAuthorizations implements Serializable {
+@ObjectClass(value = "oxClientAuthorization")
+public class ClientAuthorization implements Serializable {
 
     @DN
     private String dn;
@@ -98,7 +98,7 @@ public class ClientAuthorizations implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ClientAuthorizations that = (ClientAuthorizations) o;
+        ClientAuthorization that = (ClientAuthorization) o;
 
         if (!dn.equals(that.dn)) return false;
         if (!id.equals(that.id)) return false;
