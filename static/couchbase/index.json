@@ -13,7 +13,7 @@
     "displayName"
   ],
 
-  "gluu_authorizations": [
+  "gluu_authorization": [
     "oxAuthExpiration",
     "oxDeletable",
     "oxAuthClientId",
