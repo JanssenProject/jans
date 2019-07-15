@@ -22,13 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.core.CouchbaseException;
-import com.couchbase.client.core.RequestCancelledException;
+import com.couchbase.client.core.message.internal.PingReport;
+import com.couchbase.client.core.message.internal.PingServiceHealth;
+import com.couchbase.client.core.message.internal.PingServiceHealth.PingState;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.bucket.BucketInfo;
+import com.couchbase.client.java.bucket.BucketManager;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
 import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.Statement;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
 
 /**
  * Perform cluster initialization and open required buckets
@@ -191,9 +194,14 @@ public class CouchbaseConnectionProvider {
             if (StringHelper.equalsIgnoreCase(bucketName, defaultBucket)) {
                 this.defaultBucketMapping = bucketMapping;
             }
+            
+            BucketManager bucketManager = bucket.bucketManager();
+            BucketInfo bucketInfo = bucketManager.info();
 
-            // Create primary index if needed
-            bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+            if (com.couchbase.client.java.bucket.BucketType.COUCHBASE == bucketInfo.type()) {
+	            // Create primary index if needed
+	            bucket.bucketManager().createN1qlPrimaryIndex(true, false);
+            }
         }
     }
 
@@ -217,11 +225,10 @@ public class CouchbaseConnectionProvider {
         }
 
         boolean isConnected = true;
-        Statement query = Select.select("1");
         for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
             try {
                 Bucket bucket = bucketMapping.getBucket();
-                if (bucket.isClosed() || !bucket.query(query).finalSuccess()) {
+                if (bucket.isClosed() || !isConnected(bucket)) {
                     LOG.error("Bucket '{}' is invalid", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -234,7 +241,18 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    public BucketMapping getBucketMapping(String baseName) {
+    private boolean isConnected(Bucket bucket) {
+    	PingReport pingReport = bucket.ping();
+    	for (PingServiceHealth pingServiceHealth : pingReport.services()) {
+    		if (PingState.OK != pingServiceHealth.state()) {
+    			return false;
+    		}
+    	}
+ 
+    	return true;
+	}
+
+	public BucketMapping getBucketMapping(String baseName) {
         BucketMapping bucketMapping = baseNameToBucketMapping.get(baseName);
         if (bucketMapping == null) {
             return null;
