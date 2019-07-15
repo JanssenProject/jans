@@ -5634,7 +5634,7 @@
                 "objectclass"
             ],
             "names": [
-                "oxClientAuthorizations"
+                "oxClientAuthorization"
             ],
             "oid": "oxObjectClass:41",
             "sup": [

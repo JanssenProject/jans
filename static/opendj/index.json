@@ -263,6 +263,13 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthUserId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	}
 
 ]
