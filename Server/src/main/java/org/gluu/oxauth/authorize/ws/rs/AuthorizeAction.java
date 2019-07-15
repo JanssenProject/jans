@@ -24,7 +24,7 @@ import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidJweException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.ldap.ClientAuthorizations;
+import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
@@ -333,12 +333,12 @@ public class AuthorizeAction {
                 return;
             }
 
-            ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(
+            ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
                     client.getClientId(),
                     client.getPersistClientAuthorizations());
-            if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                    Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+            if (clientAuthorization != null && clientAuthorization.getScopes() != null &&
+                    Arrays.asList(clientAuthorization.getScopes()).containsAll(
                             org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
                 permissionGranted(session);
                 return;
