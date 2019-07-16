@@ -143,13 +143,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         chain[0] = cert;
 
         String alias = UUID.randomUUID().toString();
+        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
         final String aliasByAlgorithm = getAliasByAlgorithm(signatureAlgorithm);
         if (StringUtils.isNotBlank(aliasByAlgorithm)) {
             keyStore.deleteEntry(aliasByAlgorithm);
         }
 
-        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
         FileOutputStream stream = new FileOutputStream(keyStoreFile);
         keyStore.store(stream, keyStoreSecret.toCharArray());
 
