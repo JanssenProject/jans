@@ -200,10 +200,10 @@ class Setup(object):
         self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.certFolder = '/etc/certs'
 
-        self.oxBaseDataFolder = "/var/ox"
-        self.oxPhotosFolder = "/var/ox/photos"
-        self.oxTrustRemovedFolder = "/var/ox/identity/removed"
-        self.oxTrustCacheRefreshFolder = "/var/ox/identity/cr-snapshots"
+        self.oxBaseDataFolder = "/var/gluu"
+        self.oxPhotosFolder = "/var/gluu/photos"
+        self.oxTrustRemovedFolder = "/var/gluu/identity/removed"
+        self.oxTrustCacheRefreshFolder = "/var/gluu/identity/cr-snapshots"
 
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'

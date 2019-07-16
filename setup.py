@@ -312,10 +312,10 @@ class Setup(object):
         self.gluu_properties_fn = '%s/gluu.properties' % self.configFolder
         self.gluu_hybrid_roperties = '%s/gluu-hybrid.properties' % self.configFolder
 
-        self.oxBaseDataFolder = "/var/ox"
-        self.oxPhotosFolder = "/var/ox/photos"
-        self.oxTrustRemovedFolder = "/var/ox/identity/removed"
-        self.oxTrustCacheRefreshFolder = "/var/ox/identity/cr-snapshots"
+        self.oxBaseDataFolder = "/var/gluu"
+        self.oxPhotosFolder = "/var/gluu/photos"
+        self.oxTrustRemovedFolder = "/var/gluu/identity/removed"
+        self.oxTrustCacheRefreshFolder = "/var/gluu/identity/cr-snapshots"
         self.cache_provider_type = 'IN_MEMORY'
 
         self.etc_hosts = '/etc/hosts'
