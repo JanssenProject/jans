@@ -4012,7 +4012,7 @@ class Setup(object):
                 for e in documents:
                     if bucket:
                         cur_bucket = bucket
-                    elif e[0].startswith('site_'):
+                    elif e[0].startswith('site_') or e[0].startswith('cache-refresh_'):
                         cur_bucket = 'gluu_site'
                     elif e[0].startswith('groups_') or e[0].startswith('people_'):
                         cur_bucket = 'gluu_user'
@@ -4123,7 +4123,7 @@ class Setup(object):
                             'user': 'people, groups',
                             'cache': 'cache',
                             'statistic': 'statistic',
-                            'site': 'site',
+                            'site': 'cache-refresh',
                             'authorization': 'authorizations',
                         }
 
