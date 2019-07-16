@@ -4018,7 +4018,7 @@ class Setup(object):
                         cur_bucket = 'gluu_user'
                     elif e[0].startswith('metric_'):
                         cur_bucket = 'gluu_statistic'
-                    elif e[0].startswith('authorization_'):
+                    elif e[0].startswith('authorizations_'):
                         cur_bucket = 'gluu_authorization'
                     elif e[0].startswith('cache_'):
                         cur_bucket = 'gluu_cache'
