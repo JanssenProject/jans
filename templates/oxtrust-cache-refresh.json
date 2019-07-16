@@ -11,7 +11,7 @@
         "maxConnections":10,
         "useSSL":true,
         "baseDNs":[
-            "ou=cache_refresh,o=site"
+            "ou=cache-refresh,o=site"
         ],
         "primaryKey":null,
         "localPrimaryKey":null,
