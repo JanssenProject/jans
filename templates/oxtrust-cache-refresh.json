@@ -11,7 +11,7 @@
         "maxConnections":10,
         "useSSL":true,
         "baseDNs":[
-            "o=site"
+            "ou=cache_refresh,o=site"
         ],
         "primaryKey":null,
         "localPrimaryKey":null,
@@ -34,6 +34,6 @@
     "useSearchLimit":false,
     "attributeMapping":[
     ],
-    "snapshotFolder":"/var/ox/identity/cr-snapshots",
+    "snapshotFolder":"/var/gluu/identity/cr-snapshots",
     "snapshotMaxCount":10
 }
