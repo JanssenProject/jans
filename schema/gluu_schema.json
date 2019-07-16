@@ -1724,12 +1724,13 @@
         },
         {
             "desc": "oxAuth Permission Granted Map",
-            "equality": "booleanMatch",
+            "equality": "caseIgnoreMatch",
             "names": [
                 "oxAuthPermissionGrantedMap"
             ],
             "oid": "oxAttribute:158",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "substr": "caseIgnoreSubstringsMatch",
             "x_origin": "Gluu created attribute"
         },
         {
