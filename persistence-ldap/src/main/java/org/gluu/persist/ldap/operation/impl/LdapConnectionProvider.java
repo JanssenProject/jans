@@ -151,7 +151,7 @@ public class LdapConnectionProvider {
             failoverSet = new FailoverServerSet(this.addresses, this.ports, connectionOptions);
         }
 
-        int maxConnections = Integer.parseInt(props.getProperty("maxconnections"));
+        int maxConnections = StringHelper.toInt(props.getProperty("maxconnections"), 10);
         this.connectionPool = createConnectionPoolWithWaitImpl(props, failoverSet, bindRequest, connectionOptions, maxConnections, sslUtil);
         if (this.connectionPool != null) {
             this.connectionPool.setCreateIfNecessary(true);
@@ -219,11 +219,7 @@ public class LdapConnectionProvider {
 
     private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest,
             LDAPConnectionOptions connectionOptions, int maxConnections, SSLUtil sslUtil) throws LDAPException {
-        String connectionPoolMaxWaitTime = props.getProperty("connection-pool-max-wait-time");
-        int connectionPoolMaxWaitTimeSeconds = 30;
-        if (StringHelper.isNotEmpty(connectionPoolMaxWaitTime)) {
-            connectionPoolMaxWaitTimeSeconds = Integer.parseInt(connectionPoolMaxWaitTime);
-        }
+        int connectionPoolMaxWaitTimeSeconds = StringHelper.toInt(props.getProperty("connection-pool-max-wait-time"), 30);
         LOG.debug("Using LDAP connection pool timeout: '" + connectionPoolMaxWaitTimeSeconds + "'");
 
         LDAPConnectionPool createdConnectionPool = null;
