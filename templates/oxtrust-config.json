@@ -41,7 +41,7 @@
 
     ],
 
-    "photoRepositoryRootDir":"/var/ox/photos",
+    "photoRepositoryRootDir":"/var/gluu/photos",
     "photoRepositoryThumbWidth":300,
     "photoRepositoryThumbHeight":300,
     "photoRepositoryCountLeveles":3,
@@ -51,7 +51,7 @@
 
     "spMetadataPath":"",
 
-    "logoLocation":"/var/ox/photos",
+    "logoLocation":"/var/gluu/photos",
 
     "gluuSpAttributes":[
 
@@ -71,7 +71,7 @@
     "idpLdapServer":"%(ldap_hostname)s:%(ldaps_port)s",
     "idpUserFields":"",
 
-    "ldifStore":"/var/ox/identity/removed",
+    "ldifStore":"/var/gluu/identity/removed",
 
     "caCertsLocation":"/usr/java/latest/jre/lib/security/cacerts",
     "caCertsPassphrase":"",
