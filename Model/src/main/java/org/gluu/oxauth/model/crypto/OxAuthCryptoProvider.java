@@ -145,9 +145,9 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         String alias = UUID.randomUUID().toString();
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String aliasByAlgorithm = getAliasByAlgorithm(signatureAlgorithm);
-        if (StringUtils.isNotBlank(aliasByAlgorithm)) {
-            keyStore.deleteEntry(aliasByAlgorithm);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(signatureAlgorithm, alias);
+        if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
+            keyStore.deleteEntry(oldAliasByAlgorithm);
         }
 
         FileOutputStream stream = new FileOutputStream(keyStoreFile);
@@ -178,7 +178,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return jsonObject;
     }
 
-    public String getAliasByAlgorithm(SignatureAlgorithm algorithm) throws KeyStoreException {
+    public String getAliasByAlgorithmForDeletion(SignatureAlgorithm algorithm, String newAlias) throws KeyStoreException {
         final AlgorithmIdentifier algorithmIdentifier = ALGORITHM_IDENTIFIER_FINDER.find(algorithm.getAlgorithm());
         if (algorithmIdentifier == null) {
             LOG.error("Failed to identify algorithm identifier for: " + algorithm.getAlgorithm());
@@ -186,6 +186,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         }
 
         for (String alias : Collections.list(keyStore.aliases())) {
+
+            if (newAlias.equals(alias)) { // skip newly created alias
+                continue;
+            }
+
             final X509Certificate fetchedCert = (X509Certificate) keyStore.getCertificate(alias);
             if (algorithmIdentifier.getAlgorithm().getId().equals(fetchedCert.getSigAlgOID())) {
                 return alias;
