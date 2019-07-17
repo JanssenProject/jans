@@ -4,8 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
@@ -26,8 +24,10 @@ import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.ServerLauncher;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.model.Pat;
-import org.gluu.oxd.server.model.UmaToken;
-import org.gluu.oxd.server.model.UmaTokenFactory;
+import org.gluu.oxd.server.model.Token;
+import org.gluu.oxd.server.model.TokenFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -145,7 +145,7 @@ public class UmaTokenService {
 
     public Pat obtainPat(String oxdId) {
         Rp site = rpService.getRp(oxdId);
-        UmaToken token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
+        Token token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
 
         site.setPat(token.getToken());
         site.setPatCreatedAt(new Date());
@@ -157,11 +157,44 @@ public class UmaTokenService {
         return (Pat) token;
     }
 
-    private UmaToken obtainToken(String oxdId, UmaScopeType scopeType, Rp site) {
+    public Token getOAuthToken(String oxdId) {
+        validationService.notBlankOxdId(oxdId);
+
+        Rp site = rpService.getRp(oxdId);
+
+        if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() > 0) {
+            Calendar expiredAt = Calendar.getInstance();
+            expiredAt.setTime(site.getOauthTokenCreatedAt());
+            expiredAt.add(Calendar.SECOND, site.getOauthTokenExpiresIn());
+
+            if (!CoreUtils.isExpired(expiredAt.getTime())) {
+                LOG.debug("OauthToken from site configuration, OauthToken: " + site.getOauthToken());
+                return new Token(site.getOauthToken(), "", site.getOauthTokenExpiresIn());
+            }
+        }
+
+        return obtainOauthToken(oxdId);
+    }
+
+    public Token obtainOauthToken(String oxdId) {
+        Rp site = rpService.getRp(oxdId);
+        Token token = obtainToken(oxdId, null, site);
+
+        site.setOauthToken(token.getToken());
+        site.setOauthTokenCreatedAt(new Date());
+        site.setOauthTokenExpiresIn(token.getExpiresIn());
+        site.setOauthTokenRefreshToken(token.getRefreshToken());
+
+        rpService.updateSilently(site);
+
+        return token;
+    }
+
+    private Token obtainToken(String oxdId, UmaScopeType scopeType, Rp site) {
 
         OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId);
 
-        final UmaToken token;
+        final Token token;
         if (useClientAuthentication(scopeType)) {
             token = obtainTokenWithClientCredentials(discovery, site, scopeType);
             LOG.trace("Obtained token with client authentication: " + token);
@@ -176,24 +209,23 @@ public class UmaTokenService {
     public boolean useClientAuthentication(UmaScopeType scopeType) {
         if (scopeType == UmaScopeType.PROTECTION) {
             return configuration.getUseClientAuthenticationForPat() != null && configuration.getUseClientAuthenticationForPat();
-        } else {
-            throw new RuntimeException("Unknown UMA scope type: " + scopeType);
         }
+        return true;
     }
 
-    private UmaToken obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
+    private Token obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
         final TokenClient tokenClient = new TokenClient(discovery.getTokenEndpoint());
         tokenClient.setExecutor(httpService.getClientExecutor());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(scopesAsString(scopeType), site.getClientId(), site.getClientSecret());
         if (response != null) {
             if (Util.allNotBlank(response.getAccessToken())) {
-                if (!response.getScope().contains(scopeType.getValue())) {
+                if (scopeType != null && !response.getScope().contains(scopeType.getValue())) {
                     LOG.error("oxd requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
                     LOG.error("Please check AS(oxauth) configuration and make sure UMA scope (uma_protection) is enabled.");
                     throw new RuntimeException("oxd requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
                 }
 
-                final UmaToken opResponse = UmaTokenFactory.newToken(scopeType);
+                final Token opResponse = TokenFactory.newToken(scopeType);
                 opResponse.setToken(response.getAccessToken());
                 opResponse.setRefreshToken(response.getRefreshToken());
                 opResponse.setExpiresIn(response.getExpiresIn());
@@ -209,7 +241,9 @@ public class UmaTokenService {
 
     private List<String> scopes(UmaScopeType scopeType) {
         final List<String> scopes = new ArrayList<String>();
-        scopes.add(scopeType.getValue());
+        if (scopeType != null) {
+            scopes.add(scopeType.getValue());
+        }
         scopes.add("openid");
         return scopes;
     }
@@ -222,7 +256,7 @@ public class UmaTokenService {
         return scopesAsString.trim();
     }
 
-    private UmaToken obtainTokenWithUserCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
+    private Token obtainTokenWithUserCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
 
         // 1. Request authorization and receive the authorization code.
         final List<ResponseType> responseTypes = Lists.newArrayList();
@@ -268,7 +302,7 @@ public class UmaTokenService {
             ClientUtils.showClient(authorizeClient);
 
             if (response2.getStatus() == 200 && Util.allNotBlank(response2.getAccessToken())) {
-                final UmaToken token = UmaTokenFactory.newToken(scopeType);
+                final Token token = TokenFactory.newToken(scopeType);
                 token.setToken(response2.getAccessToken());
                 token.setRefreshToken(response2.getRefreshToken());
                 token.setExpiresIn(response2.getExpiresIn());
