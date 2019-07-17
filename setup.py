@@ -463,7 +463,6 @@ class Setup(object):
         self.ldap_type = 'opendj'
         self.opendj_type = 'opendj'
         self.install_couchbase = None
-        self.persistence_type = 'opendj'
 
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
