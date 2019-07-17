@@ -4516,35 +4516,37 @@ class Setup(object):
 
 ############################   Main Loop   #################################################
 
-parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
-oxAuth and oxTrust to start. If setup.properties is found in this folder, these
-properties will automatically be used instead of the interactive setup.
-'''
-
-parser = argparse.ArgumentParser(description=parser_description)
-parser.add_argument('-d', help="Installation directory")
-parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
-parser.add_argument('-p', help="Install Passport", action='store_true')
-parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
-parser.add_argument('-f', help="Specify setup.properties file")
-parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
-parser.add_argument('-N', help="No apache httpd server", action='store_true')
-parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
-parser.add_argument('-w', help="Get the development head war files", action='store_true')
-parser.add_argument('-t', help="Load test data", action='store_true')
-parser.add_argument('-x', help="Load test data and exit", action='store_true')
-parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
-parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
-parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
-parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
-parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
-
-argsp = parser.parse_args()
 
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
 if __name__ == '__main__':
+
+    parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
+    oxAuth and oxTrust to start. If setup.properties is found in this folder, these
+    properties will automatically be used instead of the interactive setup.
+    '''
+
+    parser = argparse.ArgumentParser(description=parser_description)
+    parser.add_argument('-d', help="Installation directory")
+    parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
+    parser.add_argument('-p', help="Install Passport", action='store_true')
+    parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
+    parser.add_argument('-f', help="Specify setup.properties file")
+    parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
+    parser.add_argument('-N', help="No apache httpd server", action='store_true')
+    parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
+    parser.add_argument('-w', help="Get the development head war files", action='store_true')
+    parser.add_argument('-t', help="Load test data", action='store_true')
+    parser.add_argument('-x', help="Load test data and exit", action='store_true')
+    parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
+    parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
+    parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
+    parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+    parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
+
+    argsp = parser.parse_args()
+
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
