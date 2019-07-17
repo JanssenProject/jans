@@ -102,6 +102,15 @@ public class Rp implements Serializable {
     @JsonProperty(value = "uma_protected_resources")
     private List<UmaResource> umaProtectedResources = Lists.newArrayList();
 
+    @JsonProperty(value = "oauth_token")
+    private String oauthToken;
+    @JsonProperty(value = "oauth_token_expires_in")
+    private int oauthTokenExpiresIn;
+    @JsonProperty(value = "oauth_token_created_at")
+    private Date oauthTokenCreatedAt;
+    @JsonProperty(value = "oauth_token_refresh_token")
+    private String oauthTokenRefreshToken;
+
     @JsonProperty(value = "rpt")
     private String rpt;
     @JsonProperty(value = "rpt_token_type")
@@ -171,6 +180,11 @@ public class Rp implements Serializable {
         this.patExpiresIn = conf.patExpiresIn;
         this.patCreatedAt = conf.patCreatedAt;
         this.patRefreshToken = conf.patRefreshToken;
+
+        this.oauthToken = conf.oauthToken;
+        this.oauthTokenExpiresIn = conf.oauthTokenExpiresIn;
+        this.oauthTokenCreatedAt = conf.oauthTokenCreatedAt;
+        this.oauthTokenRefreshToken = conf.oauthTokenRefreshToken;
 
         this.rpt = conf.rpt;
         this.rptTokenType = conf.rptTokenType;
@@ -292,6 +306,38 @@ public class Rp implements Serializable {
 
     public void setPatCreatedAt(Date patCreatedAt) {
         this.patCreatedAt = patCreatedAt;
+    }
+
+    public String getOauthToken() {
+        return oauthToken;
+    }
+
+    public void setOauthToken(String oauthToken) {
+        this.oauthToken = oauthToken;
+    }
+
+    public int getOauthTokenExpiresIn() {
+        return oauthTokenExpiresIn;
+    }
+
+    public void setOauthTokenExpiresIn(int oauthTokenExpiresIn) {
+        this.oauthTokenExpiresIn = oauthTokenExpiresIn;
+    }
+
+    public Date getOauthTokenCreatedAt() {
+        return oauthTokenCreatedAt;
+    }
+
+    public void setOauthTokenCreatedAt(Date oauthTokenCreatedAt) {
+        this.oauthTokenCreatedAt = oauthTokenCreatedAt;
+    }
+
+    public String getOauthTokenRefreshToken() {
+        return oauthTokenRefreshToken;
+    }
+
+    public void setOauthTokenRefreshToken(String oauthTokenRefreshToken) {
+        this.oauthTokenRefreshToken = oauthTokenRefreshToken;
     }
 
     public String getSectorIdentifierUri() {
@@ -655,6 +701,10 @@ public class Rp implements Serializable {
                 ", patExpiresIn=" + patExpiresIn +
                 ", patCreatedAt=" + patCreatedAt +
                 ", patRefreshToken='" + patRefreshToken + '\'' +
+                ", oauthToken='" + oauthToken + '\'' +
+                ", oauthTokenExpiresIn=" + oauthTokenExpiresIn +
+                ", oauthTokenCreatedAt=" + oauthTokenCreatedAt +
+                ", oauthTokenRefreshToken='" + oauthTokenRefreshToken + '\'' +
                 ", umaProtectedResources=" + umaProtectedResources +
                 ", rpt='" + rpt + '\'' +
                 ", rptTokenType='" + rptTokenType + '\'' +

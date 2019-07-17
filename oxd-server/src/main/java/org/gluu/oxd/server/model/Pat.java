@@ -5,7 +5,7 @@ package org.gluu.oxd.server.model;
  * @version 0.9, 02/06/2016
  */
 
-public class Pat extends UmaToken {
+public class Pat extends Token {
 
     public Pat() {
     }

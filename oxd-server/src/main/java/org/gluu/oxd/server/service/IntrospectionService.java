@@ -41,14 +41,14 @@ public class IntrospectionService {
         final org.gluu.oxauth.client.service.IntrospectionService introspectionService = ProxyFactory.create(org.gluu.oxauth.client.service.IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
 
         try {
-            IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+            IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getOAuthToken(oxdId).getToken(), accessToken);
             return response; // we need local variable to force convertion here
         } catch (ClientResponseFailure e) {
             int status = e.getResponse().getStatus();
             LOG.debug("Failed to introspect token. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + status, e);
             if (retry && (status == 400 || status == 401)) {
-                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                umaTokenService.obtainPat(oxdId); // force to refresh PAT
+                LOG.debug("Try maybe OAuthToken is lost on AS, force refresh OAuthToken and re-try ...");
+                umaTokenService.obtainOauthToken(oxdId); // force to refresh OAuthToken
                 return introspectToken(oxdId, accessToken, false);
             } else {
                 throw e;
@@ -59,7 +59,7 @@ public class IntrospectionService {
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BackCompatibleIntrospectionService backCompatibleIntrospectionService = ClientFactory.instance().createBackCompatibleIntrospectionService(introspectionEndpoint, httpService.getClientExecutor());
-                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken("Bearer " + umaTokenService.getOAuthToken(oxdId).getToken(), accessToken);
                 LOG.trace("Handled compatibility issue. Response: " + backResponse);
 
                 IntrospectionResponse response = new IntrospectionResponse();
