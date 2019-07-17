@@ -6,15 +6,15 @@ import org.gluu.oxauth.model.uma.UmaScopeType;
  * @author Yuriy Zabrovarnyy
  */
 
-public class UmaTokenFactory {
+public class TokenFactory {
 
-    private UmaTokenFactory() {
+    private TokenFactory() {
     }
 
-    public static UmaToken newToken(UmaScopeType scopeType) {
+    public static Token newToken(UmaScopeType scopeType) {
         if (scopeType == UmaScopeType.PROTECTION) {
             return new Pat();
         }
-        throw new RuntimeException("Unknown scope type: " + scopeType);
+        return new Token();
     }
 }
