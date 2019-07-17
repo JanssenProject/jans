@@ -23,7 +23,6 @@ import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.BaseDnConfiguration;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.api.IdGenerator;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.
