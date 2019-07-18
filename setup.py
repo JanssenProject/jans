@@ -3141,6 +3141,7 @@ class Setup(object):
             keys = self.__dict__.keys()
             keys.sort()
             for key in keys:
+                key = str(key)
                 if key == 'couchbaseInstallOutput':
                     continue
                 if key == 'mappingLocations':
