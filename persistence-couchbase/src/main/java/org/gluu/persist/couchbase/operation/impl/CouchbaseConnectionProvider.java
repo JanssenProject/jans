@@ -30,8 +30,11 @@ import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.bucket.BucketInfo;
 import com.couchbase.client.java.bucket.BucketManager;
 import com.couchbase.client.java.env.CouchbaseEnvironment;
+import com.couchbase.client.java.query.N1qlQueryResult;
+import com.couchbase.client.java.query.N1qlQueryRow;
 import com.couchbase.client.java.query.Select;
 import com.couchbase.client.java.query.Statement;
+import com.couchbase.client.java.query.dsl.Expression;
 
 /**
  * Perform cluster initialization and open required buckets
@@ -239,7 +242,7 @@ public class CouchbaseConnectionProvider {
         for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
             try {
                 Bucket bucket = bucketMapping.getBucket();
-                if (bucket.isClosed() || !isConnected(bucket)) {
+                if (bucket.isClosed() || !isConnected(bucketMapping)) {
                     LOG.error("Bucket '{}' is invalid", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -252,15 +255,35 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    private boolean isConnected(Bucket bucket) {
-    	PingReport pingReport = bucket.ping();
-    	for (PingServiceHealth pingServiceHealth : pingReport.services()) {
-    		if (PingState.OK != pingServiceHealth.state()) {
-    			return false;
-    		}
-    	}
+    private boolean isConnected(BucketMapping bucketMapping) {
+        Bucket bucket = bucketMapping.getBucket();
+
+        BucketManager bucketManager = bucket.bucketManager();
+        BucketInfo bucketInfo = bucketManager.info();
+
+        boolean result = true;
+        if (com.couchbase.client.java.bucket.BucketType.COUCHBASE == bucketInfo.type()) {
+        	// Check indexes state
+	        Statement query = Select.select("state").from("system:indexes").where(Expression.path("state").eq(Expression.s("online")).not());
+	        N1qlQueryResult queryResult = bucket.query(query); 
+	        result = queryResult.finalSuccess();
+            
+            if (result) {
+            	result = queryResult.info().resultCount() == 0;
+            }
+        }
+
+        if (result) {
+	    	PingReport pingReport = bucket.ping();
+	    	for (PingServiceHealth pingServiceHealth : pingReport.services()) {
+	    		if (PingState.OK != pingServiceHealth.state()) {
+	    			result = false;
+	    			break;
+	    		}
+	    	}
+        }
  
-    	return true;
+    	return result;
 	}
 
 	public BucketMapping getBucketMapping(String baseName) {
