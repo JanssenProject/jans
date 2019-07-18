@@ -15,16 +15,12 @@ public class SearchException extends PersistenceException {
 
     private static final long serialVersionUID = 5017957214447362606L;
 
-    private int resultCode;
-
-    public SearchException(String message, Throwable ex, int resultCode) {
-        super(message, ex);
-        this.resultCode = resultCode;
+    public SearchException(String message, Throwable ex, int errorCode) {
+        super(message, ex, errorCode);
     }
 
-    public SearchException(String message, int resultCode) {
-        super(message);
-        this.resultCode = resultCode;
+    public SearchException(String message, int errorCode) {
+        super(message, errorCode);
     }
 
     public SearchException(String message) {
@@ -35,13 +31,8 @@ public class SearchException extends PersistenceException {
         super(message, ex);
     }
 
-    public SearchException(Throwable ex, int resultCode) {
-        super(ex);
-        this.resultCode = resultCode;
-    }
-
-    public final int getResultCode() {
-        return resultCode;
+    public SearchException(Throwable ex, int errorCode) {
+        super(ex, errorCode);
     }
 
 }

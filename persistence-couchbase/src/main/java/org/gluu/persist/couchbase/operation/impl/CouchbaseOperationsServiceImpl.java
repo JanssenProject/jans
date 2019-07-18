@@ -296,8 +296,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	
 	            N1qlQueryResult result = bucketMapping.getBucket().query(deleteQuery);
 	            if (!result.finalSuccess()) {
-	                throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Errors: %s", bucketMapping, result.errors()),
-	                        result.info().errorCount());
+                    throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Error: '%s', Error count: '%d'", deleteQuery, result.errors(),
+                    		result.info().errorCount()), result.errors().get(0).getInt("code"));
 	            }
 	        }
 	    	
@@ -385,7 +385,24 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         boolean secondTry = false;
     	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
-        PagedResult<JsonObject> result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+        PagedResult<JsonObject> result = null;
+        int attemps = 10;
+        do {
+			attemps--;
+			try {
+				result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper,
+						returnDataType, start, count, pageSize);
+			} catch (SearchException ex) {
+				if (ex.getErrorCode() != 5000) {
+					throw ex;
+				}
+				
+				LOG.warn("Waiting for Indexer Warmup...");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException ex2) {}
+			}
+        } while (attemps > 0);
         if ((result == null) || (result.getEntriesCount() == 0)) {
         	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
         	if (!useScanConsistency2.equals(useScanConsistency)) {
@@ -462,7 +479,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         List<N1qlQueryRow> searchResultList = new ArrayList<N1qlQueryRow>();
 
         if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
-	        N1qlQueryResult lastResult;
+	        N1qlQueryResult lastResult = null;
 	        if (pageSize > 0) {
 	            boolean collectSearchResult;
 	
@@ -483,8 +500,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	                    LOG.debug("Execution query: '" + query + "'");
 	                    lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(scanConsistency)));
 	                    if (!lastResult.finalSuccess()) {
-	                        throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", query, lastResult.errors()),
-	                                lastResult.info().errorCount());
+		                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: '%s', Error count: '%d'", query, lastResult.errors(),
+		                            lastResult.info().errorCount()), lastResult.errors().get(0).getInt("code"));
 	                    }
 	
 	                    lastSearchResultList = lastResult.allRows();
@@ -523,8 +540,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	                LOG.debug("Execution query: '" + query + "'");
 	                lastResult = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(scanConsistency)));
 	                if (!lastResult.finalSuccess()) {
-	                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: ", baseQuery, lastResult.errors()),
-	                            lastResult.info().errorCount());
+	                    throw new SearchException(String.format("Failed to search entries. Query: '%s'. Error: '%s', Error count: '%d'", baseQuery, lastResult.errors(),
+	                            lastResult.info().errorCount()), lastResult.errors().get(0).getInt("code"));
 	                }
 	
 	                searchResultList.addAll(lastResult.allRows());
@@ -551,9 +568,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
                 N1qlQueryResult countResult = bucket.query(N1qlQuery.simple(selectCountQuery, N1qlParams.build().consistency(scanConsistency)));
                 if (!countResult.finalSuccess() || (countResult.info().resultCount() != 1)) {
-                    throw new SearchException(
-                            String.format("Failed to calculate count entries. Query: '%s'. Error: ", selectCountQuery, countResult.errors()),
-                            countResult.info().errorCount());
+                    throw new SearchException(String.format("Failed to calculate count entries. Query: '%s'. Error: '%s', Error count: '%d'", selectCountQuery, countResult.errors(),
+                    		countResult.info().errorCount()), countResult.errors().get(0).getInt("code"));
                 }
                 result.setTotalEntriesCount(countResult.allRows().get(0).value().getInt("TOTAL"));
             } catch (CouchbaseException ex) {
