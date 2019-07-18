@@ -534,7 +534,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         } catch (SearchScopeException ex) {
             throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
-            if (!(ResultCode.NO_SUCH_OBJECT_INT_VALUE == ex.getResultCode())) {
+            if (!(ResultCode.NO_SUCH_OBJECT_INT_VALUE == ex.getErrorCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
             }
         }
