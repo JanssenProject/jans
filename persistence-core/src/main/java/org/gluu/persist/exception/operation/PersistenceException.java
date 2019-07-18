@@ -33,6 +33,11 @@ public class PersistenceException extends Exception {
         super(e);
     }
 
+	public PersistenceException(final Throwable e, final int errorCode) {
+        super(e);
+        this.errorCode = errorCode;
+	}
+
     /**
      * Constructor with detailed error
      *
@@ -42,6 +47,11 @@ public class PersistenceException extends Exception {
     public PersistenceException(final String message) {
         super(message);
     }
+
+	public PersistenceException(final String message, final int errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+	}
 
     /**
      * Constructor with error and wrapped exception
@@ -55,7 +65,12 @@ public class PersistenceException extends Exception {
         super(message, e);
     }
 
-    /**
+    public PersistenceException(final String message, final Throwable e, final int errorCode) {
+        super(message, e);
+        this.errorCode = errorCode;
+	}
+
+	/**
      * Get the LDAP error code
      *
      * @return The LDAP error code
