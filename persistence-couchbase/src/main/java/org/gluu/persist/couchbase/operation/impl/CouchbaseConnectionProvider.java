@@ -103,9 +103,6 @@ public class CouchbaseConnectionProvider {
             this.buckets = ArrayHelper.addItemToStringArray(buckets, defaultBucket);
         }
 
-        this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
-        this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
-
         openWithWaitImpl();
         LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
 
@@ -153,7 +150,12 @@ public class CouchbaseConnectionProvider {
 
             try {
                 open();
-                break;
+                if (isConnected()) {
+                	break;
+                } else {
+                    LOG.info("Failed to connect to Couchbase");
+                    destory();
+                }
             } catch (CouchbaseException ex) {
                 lastException = ex;
             }
@@ -173,6 +175,9 @@ public class CouchbaseConnectionProvider {
     }
 
     private void open() {
+        this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
+        this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
+
         this.cluster = CouchbaseCluster.create(couchbaseEnvironment, servers);
         cluster.authenticate(userName, userPassword);
 
@@ -206,17 +211,23 @@ public class CouchbaseConnectionProvider {
     }
 
     public boolean destory() {
-        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-            try {
-                bucketMapping.getBucket().close();
-            } catch (CouchbaseException ex) {
-                LOG.error("Failed to close bucket '{}'", bucketMapping.getBucketName(), ex);
-
-                return false;
-            }
-        }
-
-        return cluster.disconnect();
+    	boolean result = true;
+    	if (bucketToBaseNameMapping != null) {
+	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
+	            try {
+	                bucketMapping.getBucket().close();
+	            } catch (CouchbaseException ex) {
+	                LOG.error("Failed to close bucket '{}'", bucketMapping.getBucketName(), ex);
+	                result = false;
+	            }
+	        }
+    	}
+    	
+    	if (cluster != null) {
+    		result &= cluster.disconnect();
+    	}
+    	
+    	return result;
     }
 
     public boolean isConnected() {
