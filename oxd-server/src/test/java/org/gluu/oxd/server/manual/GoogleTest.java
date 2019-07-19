@@ -25,8 +25,8 @@ public class GoogleTest {
     private static final String OP_HOST = "https://accounts.google.com";
     private static final String REDIRECT_URI = "https://mytestproduct.com";
 
-    private static final String CLIENT_ID = "470707636610-pr4nn6dr82the6kuktqfr7lq4g7n9rb1.apps.googleusercontent.com";
-    private static final String CLIENT_SECRET = "vJVYPI4Ybwc9a2YOesq2bRCa";
+    private static final String CLIENT_ID = "";
+    private static final String CLIENT_SECRET = "";
 
     public static void main(String[] args) {
 //        ClientInterface client = Tester.newClient(HOST);
