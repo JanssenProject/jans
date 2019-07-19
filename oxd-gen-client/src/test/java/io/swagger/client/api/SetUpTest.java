@@ -18,15 +18,15 @@ public class SetUpTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);
 
-    @Parameters({"host", "opHost", "redirectUrl"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @BeforeSuite
-    public static void beforeSuite(String host, String opHost, String redirectUrl) {
+    public static void beforeSuite(String host, String opHost, String redirectUrls) {
         try {
             LOG.debug("Running beforeSuite ...");
             Tester.setHost(host);
             Tester.setOpHost(opHost);
 
-            RegisterSiteResponse clientSetupInfo = RegisterSiteTest.registerSite(Tester.api(), opHost, redirectUrl);
+            RegisterSiteResponse clientSetupInfo = RegisterSiteTest.registerSite(Tester.api(), opHost, redirectUrls);
             Tester.setSetupData(clientSetupInfo);
 
             Preconditions.checkNotNull(Tester.getAuthorization());

@@ -2,15 +2,16 @@
 
 # Stopping oxd-server
 # This will stop oxd-server if its have been removed by purge 
-if [ -e /var/run/oxd-server-4.0.beta.pid ]; then
-    kill -9 `cat /var/run/oxd-server-4.0.beta.pid` > /dev/null 2>&1
-    rm -rf /var/run/oxd-server-4.0.beta.pid > /dev/null 2>&1
+if [ -e /var/run/oxd-server.pid ]; then
+    kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+    rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
 fi
 
 # If purge selected remove all oxd files
 if [ "$1" = purge ]; then
     rm -rf /var/log/oxd-server > /dev/null 2>&1
-    rm -rf /etc/init.d/oxd-server-4.0.beta > /dev/null 2>&1
+    rm -rf /etc/init.d/oxd-server > /dev/null 2>&1
+    rm -rf /lib/systemd/system/oxd-server.service > /dev/null 2>&1
     rm -rf /opt/oxd-server > /dev/null 2>&1
 fi
 

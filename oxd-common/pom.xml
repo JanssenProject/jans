@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-common</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.beta-SNAPSHOT</version>
+    <version>4.0.b1</version>
     <name>oxD Common</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
-        <groupId>org.xdi</groupId>
+        <groupId>org.gluu</groupId>
         <artifactId>oxd</artifactId>
-        <version>4.0.beta-SNAPSHOT</version>
+        <version>4.0.b1</version>
     </parent>
 
     <build>
@@ -78,7 +78,7 @@
             <version>2.9.5</version>
         </dependency>
         <dependency>
-            <groupId>org.xdi</groupId>
+            <groupId>org.gluu</groupId>
             <artifactId>uma-rs-resteasy</artifactId>
         </dependency>
         <dependency>
@@ -86,11 +86,11 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.xdi</groupId>
+            <groupId>org.gluu</groupId>
             <artifactId>oxauth-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.xdi</groupId>
+            <groupId>org.gluu</groupId>
             <artifactId>oxcore-util</artifactId>
         </dependency>
         <dependency>
@@ -136,14 +136,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

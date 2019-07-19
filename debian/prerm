@@ -1,8 +1,17 @@
 #!/bin/sh -e
 
 # Stopping oxd-server
-if [ -x /etc/init.d/oxd-server-4.0.beta ]; then
-/etc/init.d/oxd-server-4.0.beta stop > /dev/null 2>&1 &
+if [ -e /var/run/oxd-server.pid ]; then
+    kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
+    rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
+fi
+
+if [ -e /etc/init.d/oxd-server ]; then
+    update-rc.d oxd-server remove > /dev/null 2>&1
+fi
+
+if [ -e /lib/systemd/system/oxd-server.service ]; then
+    systemctl disable oxd-server > /dev/null 2>&1 
 fi
 
 exit 0
