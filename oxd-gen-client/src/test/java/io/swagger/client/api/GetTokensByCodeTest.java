@@ -10,7 +10,7 @@ import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.CoreUtils;
+import org.gluu.oxd.common.CoreUtils;
 
 import static io.swagger.client.api.Tester.notEmpty;
 import static org.junit.Assert.assertNotNull;
@@ -26,13 +26,13 @@ public class GetTokensByCodeTest {
 
     private static final String AUTH_CODE_ENDPOINT = "/get-authorization-code";
 
-    @Parameters({"opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void test(String opHost, String redirectUrl, String userId, String userSecret) throws Exception {
+    public void test(String opHost, String redirectUrls, String userId, String userSecret) throws Exception {
 
         DevelopersApi client = Tester.api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
 
@@ -80,7 +80,7 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
+    public static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
                                String nonce, String authorization) throws Exception {
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);

@@ -3,7 +3,7 @@
 <suite name="oxD Common module Suite" parallel="tests">
     <test name="ParamsSecurityTest" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.common.params.ParamsSecurityTest"/>
+            <class name="org.gluu.oxd.common.params.ParamsSecurityTest"/>
         </classes>
     </test>
 </suite>

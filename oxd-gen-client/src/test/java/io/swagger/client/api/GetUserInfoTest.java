@@ -4,11 +4,12 @@ import io.swagger.client.ApiResponse;
 import io.swagger.client.model.GetTokensByCodeParams;
 import io.swagger.client.model.GetTokensByCodeResponse;
 import io.swagger.client.model.GetUserInfoParams;
-import io.swagger.client.model.GetUserInfoResponse;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.CoreUtils;
+import org.gluu.oxd.common.CoreUtils;
+
+import java.util.Map;
 
 import static io.swagger.client.api.Tester.*;
 import static org.testng.Assert.*;
@@ -23,40 +24,40 @@ import static org.testng.Assert.*;
 
 public class GetUserInfoTest {
 
-    @Parameters({"opHost", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"opHost", "redirectUrls", "userId", "userSecret"})
     @Test
-    public void test(String opHost, String redirectUrl, String userId, String userSecret) throws Exception {
+    public void test(String opHost, String redirectUrls, String userId, String userSecret) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
 
         final GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
 
-        final GetUserInfoResponse resp = client.getUserInfo(getAuthorization(site), params);
+        final Map<String, Object> resp = client.getUserInfo(getAuthorization(site), params);
         assertNotNull(resp);
-        assertFalse(resp.getClaims().isEmpty());
-        notEmpty(resp.getClaims().get("sub").get(0));
+        assertFalse(resp.isEmpty());
+        assertNotNull(resp.get("sub"));
     }
 
-    @Parameters({"opHost", "redirectUrl"})
+    @Parameters({"opHost", "redirectUrls"})
     @Test
-    public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
+    public void testWithInvalidToken(String opHost, String redirectUrls) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
         params.setAccessToken("blahBlah"); // invalid token
 
-        final ApiResponse<GetUserInfoResponse> apiResponse = client.getUserInfoWithHttpInfo(getAuthorization(site), params);
+        final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(getAuthorization(site), params);
         assertEquals(apiResponse.getStatusCode() , 200); // fixme should be 401
 
         assertNotNull(apiResponse.getData());
-        assertNull(apiResponse.getData().getClaims().get("sub"));
+        assertNull(apiResponse.getData().get("sub"));
     }
 
 
