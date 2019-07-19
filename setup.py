@@ -2922,13 +2922,16 @@ class Setup(object):
     def renderTemplate(self, filePath):
         self.renderTemplateInOut(filePath, self.templateFolder, self.outputFolder)
 
-    def render_templates(self):
+    def render_templates(self, templates=None):
         self.logIt("Rendering templates")
+
+        if not templates:
+            templates = self.ce_templates
 
         if self.persistence_type=='couchbase':
             self.ce_templates[self.ox_ldap_properties] = False
 
-        for fullPath in self.ce_templates.keys():
+        for fullPath in templates:
             try:
                 self.renderTemplate(fullPath)
             except:
