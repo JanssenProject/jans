@@ -2,4 +2,4 @@ oxd-server %VERSION% %DIST%; urgency=low
 
   * New version %VERSION%
 
- -- Adrian Alves <adrian@gluu.org>  Wed, 24 Feb 2016 23:36:36 -0500
+-- Adrian Alves <adrian@gluu.org> Wed, 24 Feb 2016 23:36:36 -0500
