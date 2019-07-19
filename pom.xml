@@ -2,21 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.xdi</groupId>
+    <groupId>org.gluu</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.beta-SNAPSHOT</version>
+    <version>4.0.b1</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>3.1.4.Final</oxCore.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable  -->
-        <jackson.version>1.9.9</jackson.version>
+        <oxCore.version>4.0.b1</oxCore.version>
+        <jackson.version>2.9.9</jackson.version>
         <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>3.1.4.Final</oxauth.version> <!-- stick to 3.1.4 for now, we need to switch to 4.0.0 when it gets stable -->
+        <oxauth.version>4.0.b1</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
@@ -67,32 +67,32 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
-                <version>3.1.4.Final</version>
+                <version>4.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxd-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxd-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxd-rp-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxd-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxauth-client</artifactId>
                 <version>${oxauth.version}</version>
                 <exclusions>
@@ -115,7 +115,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxauth-model</artifactId>
                 <version>${oxauth.version}</version>
                 <exclusions>
@@ -142,7 +142,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxcore-service</artifactId>
                 <version>${oxCore.version}</version>
                 <exclusions>
@@ -167,8 +167,8 @@
                         <artifactId>log4j-core</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.xdi</groupId>
-                        <artifactId>oxcore-ldap</artifactId>
+                        <groupId>org.gluu</groupId>
+                        <artifactId>oxcore-persistence-ldap</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.python</groupId>
@@ -193,7 +193,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxcore-util</artifactId>
                 <version>${oxCore.version}</version>
                 <exclusions>
@@ -220,12 +220,12 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.jackson</groupId>
+                <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core-asl</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.jackson</groupId>
+                <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
                 <version>${jackson.version}</version>
             </dependency>

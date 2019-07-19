@@ -15,11 +15,11 @@ import static junit.framework.Assert.*;
  */
 public class IntrospectAccessTokenTest extends BaseTestCase {
 
-    @Parameters({"opHost", "redirectUrl"})
+    @Parameters({"opHost", "redirectUrls"})
     @Test
-    public void introspectAccessToken(String opHost, String redirectUrl) throws Exception {
+    public void introspectAccessToken(String opHost, String redirectUrls) throws Exception {
         DevelopersApi client = Tester.api();
-        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         GetClientTokenResponse tokenResponse = getGetClientTokenResponseData(opHost, client, setupResponse);
         assertNotNull(tokenResponse);
         final String accessToken = tokenResponse.getAccessToken();
@@ -46,12 +46,12 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
     According to open id spec, introspect access token API, for authorized request with an invalid
     token, should not throw an error but should return the client as inactive.
      */
-    @Parameters({"opHost", "redirectUrl"})
+    @Parameters({"opHost", "redirectUrls"})
     @Test
     @ProtectionAccessTokenRequired
-    public void testWithInvalidToken(String opHost, String redirectUrl) throws Exception {
+    public void testWithInvalidToken(String opHost, String redirectUrls) throws Exception {
         DevelopersApi client = Tester.api();
-        RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse setupData = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         GetClientTokenResponse tokenResponse = getGetClientTokenResponseData(opHost, client, setupData);
         assertNotNull(tokenResponse);
@@ -79,15 +79,15 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
 //        assertFalse(apiIatResponse.getData().isActive());
     }
 
-    @Parameters({"opHost", "redirectUrl"})
+    @Parameters({"opHost", "redirectUrls"})
     @Test
     @ProtectionAccessTokenRequired
-    public void testWithInvalidAuthorization(String opHost, String redirectUrl) throws Exception {
+    public void testWithInvalidAuthorization(String opHost, String redirectUrls) throws Exception {
 
         DevelopersApi client = Tester.api();
-        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        RegisterSiteResponse setupResponse = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
-        GetClientTokenResponse tokenResponseData = this.getGetClientTokenResponseData(opHost, client, setupResponse);
+        GetClientTokenResponse tokenResponseData = getGetClientTokenResponseData(opHost, client, setupResponse);
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());

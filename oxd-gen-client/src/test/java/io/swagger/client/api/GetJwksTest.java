@@ -11,14 +11,13 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import static io.swagger.client.api.Tester.api;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * Test for checking JSON Web Key Set functionality
  *
  * @author Shoeb
- * @version 11/11/2018
+ * @version 12/02/2018
  */
 public class GetJwksTest {
 
@@ -34,7 +33,8 @@ public class GetJwksTest {
 
         final GetJwksResponse response = client.getJsonWebKeySet(Tester.getAuthorization(), params);
         assertNotNull(response);
-        assertNotNull(response.getJwks());
+        assertNotNull(response.getKeys());
+        assertFalse(response.getKeys().isEmpty());
 
     }
 
