@@ -8,8 +8,8 @@ import io.swagger.client.model.RegisterSiteParams;
 import io.swagger.client.model.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.jwt.Jwt;
 
 import static io.swagger.client.api.Tester.api;
 import static org.testng.Assert.*;
@@ -22,16 +22,16 @@ import static org.testng.Assert.*;
 public class AccessTokenAsJwtTest {
 
 
-    @Parameters({"opHost", "redirectUrl",  "postLogoutRedirectUrl"})
+    @Parameters({"opHost", "redirectUrls",  "postLogoutRedirectUrls"})
     @Test
-    public void testWithAccessTokenAsJwt(String opHost, String redirectUrl, String postLogoutRedirectUrl) throws Exception {
+    public void testWithAccessTokenAsJwt(String opHost, String redirectUrls, String postLogoutRedirectUrls) throws Exception {
 
         final DevelopersApi apiClient = api();
 
         final RegisterSiteParams siteParams = new io.swagger.client.model.RegisterSiteParams();
         siteParams.setOpHost(opHost);
-        siteParams.setAuthorizationRedirectUri(redirectUrl);
-        siteParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        siteParams.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        siteParams.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         siteParams.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         siteParams.setAccessTokenAsJwt(true);
         siteParams.setTrustedClient(true);

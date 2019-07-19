@@ -27,25 +27,25 @@ import static org.testng.Assert.*;
 
 public class RsProtectTest {
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void protect(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void protect(String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtect));
         RsCheckAccessTest.checkAccess(client, site);
 
     }
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void overwriteFalse(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void overwriteFalse(String redirectUrls, String opHost, String rsProtect) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final List<RsResource> resources = UmaFullTest.resourceList(rsProtect);
         protectResources(client, site, resources);
@@ -64,12 +64,12 @@ public class RsProtectTest {
 
     }
 
-    @Parameters({"redirectUrl", "opHost", "rsProtect"})
+    @Parameters({"redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void overwriteTrue(String redirectUrl, String opHost, String rsProtect) throws Exception {
+    public void overwriteTrue(String redirectUrls, String opHost, String rsProtect) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final List<RsResource> resources = UmaFullTest.resourceList(rsProtect);
         protectResources(client, site, resources);
@@ -83,12 +83,12 @@ public class RsProtectTest {
         assertNotNull(response);
     }
 
-    @Parameters({"redirectUrl", "opHost", "rsProtectScopeExpression"})
+    @Parameters({"redirectUrls", "opHost", "rsProtectScopeExpression"})
     @Test
-    public void protectWithScopeExpression(String redirectUrl, String opHost, String rsProtectScopeExpression) throws Exception {
+    public void protectWithScopeExpression(String redirectUrls, String opHost, String rsProtectScopeExpression) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression));
 
@@ -96,12 +96,12 @@ public class RsProtectTest {
 
     }
 
-    @Parameters({"redirectUrl", "opHost", "rsProtectScopeExpressionSecond"})
+    @Parameters({"redirectUrls", "opHost", "rsProtectScopeExpressionSecond"})
     @Test
-    public void protectWithScopeExpressionSeconds(String redirectUrl, String opHost, String rsProtectScopeExpressionSecond) throws Exception {
+    public void protectWithScopeExpressionSeconds(String redirectUrls, String opHost, String rsProtectScopeExpressionSecond) throws Exception {
         final DevelopersApi client = api();
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond));
 
