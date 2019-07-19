@@ -7,7 +7,7 @@ import io.swagger.client.model.UpdateSiteResponse;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ErrorResponseCode;
 
 import java.util.UUID;
 
@@ -16,10 +16,10 @@ import static org.junit.Assert.*;
 public class RemoveSiteTest {
 
     @Test
-    @Parameters({"opHost", "redirectUrl"})
-    public void testRemoveSite(String opHost, String redirectUrl) throws Exception {
+    @Parameters({"opHost", "redirectUrls"})
+    public void testRemoveSite(String opHost, String redirectUrls) throws Exception {
         final DevelopersApi api = Tester.api();
-        RegisterSiteResponse response = RegisterSiteTest.registerSite(api, opHost, redirectUrl);
+        RegisterSiteResponse response = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
 
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(response.getOxdId());

@@ -13,6 +13,7 @@ nonce_expiration_in_minutes: 5
 public_op_key_cache_expiration_in_minutes: 60
 protect_commands_with_access_token: false
 uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: true
+add_client_credentials_grant_type_automatically_during_client_registration: true
 migration_source_folder_path: ''
 storage: h2
 storage_configuration:
@@ -44,7 +45,6 @@ logging:
   # Logger-specific levels.
   loggers:
     org.gluu: TRACE
-    org.xdi: TRACE
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
