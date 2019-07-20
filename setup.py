@@ -45,6 +45,7 @@ import random
 import ssl
 import ldap
 import uuid
+from collections import OrderedDict
 
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
@@ -265,15 +266,14 @@ class Setup(object):
         os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
 
         # Component ithversions
-        self.jre_version = '181'
-        self.jetty_version = '9.4.12.v20180830'
+        self.jre_version = '221'
+        self.jetty_version = '9.4.19.v20190610'
         self.jython_version = '2.7.2a'
-        self.node_version = '9.9.0'
+        self.node_version = '12.6.0'
         self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
-        self.groupMappings = ['default', 'user', 'cache', 'statistic', 'site', 'authorization']
-        self.mappingLocations = { group: 'ldap' for group in self.groupMappings }  #default locations are OpenDJ
+
 
         # Gluu components installation status
         self.installOxAuth = True
@@ -670,25 +670,6 @@ class Setup(object):
                            self.lidf_oxtrust_api,
                            ]
 
-        self.mappingsLdif = {   
-                                'default': [
-                                        self.ldif_base, 
-                                         self.ldif_attributes,
-                                         self.ldif_scopes,
-                                         self.ldif_scripts,
-                                         self.ldif_clients,
-                                         self.ldif_configuration,
-                                         self.ldif_scim,
-                                         self.ldif_idp,
-                                         self.lidf_oxtrust_api,
-                                         ],
-                                'user': [self.ldif_people, self.ldif_groups],
-                                'cache': [],
-                                'statistic': [self.ldif_metric],
-                                'site': [self.ldif_site],
-                                'authorization': []
-                            }
-
 
         self.ce_templates = {self.oxauth_config_json: False,
                              self.gluu_python_readme: True,
@@ -743,6 +724,76 @@ class Setup(object):
                         }
 
         self.install_time_ldap = None
+        
+        
+        self.couchbaseBucketDict = OrderedDict((   
+                        ('default', { 'ldif':[
+                                            self.ldif_base, 
+                                            self.ldif_attributes,
+                                            self.ldif_scopes,
+                                            self.ldif_scripts,
+                                            self.ldif_clients,
+                                            self.ldif_configuration,
+                                            self.ldif_scim,
+                                            self.ldif_idp,
+                                            self.lidf_oxtrust_api,
+                                            ],
+                                      'memory_allocation': [0.05, 100], # [fraction, minimun_in_mb]
+                                      'mapping': '',
+                                      'document_key_prefix': []
+                                    }),
+
+                        ('user',     {   'ldif': [
+                                            self.ldif_people, 
+                                            self.ldif_groups
+                                            ],
+                                        'memory_allocation': [0.25, 500],
+                                        'mapping': 'people, groups',
+                                        'document_key_prefix': ['groups_', 'people_'],
+                                    }),
+
+                        ('cache',    {   'ldif': [],
+                                        'memory_allocation': [0.15, 400],
+                                        'mapping': 'cache',
+                                        'document_key_prefix': ['cache_'],
+                                    }),
+                        
+                        ('statistic', {   'ldif': [self.ldif_metric],
+                                        'memory_allocation': [0.05, 100],
+                                        'mapping': 'statistic',
+                                        'document_key_prefix': ['metric_'],
+                                    }),
+                        
+                        ('site',     {   'ldif': [self.ldif_site],
+                                        'memory_allocation': [0.05, 100],
+                                        'mapping': 'cache-refresh',
+                                        'document_key_prefix': ['site_', 'cache-refresh_'],
+                                        
+                                    }),
+
+                        ('authorization', { 'ldif': [],
+                                      'memory_allocation': [0.15, 400],
+                                      'mapping': 'authorizations',
+                                      'document_key_prefix': ['authorizations_'],
+                                    }),
+
+                        ('tokens',   { 'ldif': [],
+                                      'memory_allocation': [0.25, 500],
+                                      'mapping': 'tokens',
+                                      'document_key_prefix': ['tokens_'],
+                                    }),
+                        ('clients',  { 'ldif': [],
+                                    'memory_allocation': [0.05, 100],
+                                    'mapping': 'clients',
+                                    'document_key_prefix': ['clients_'],
+                                    }),
+                    ))
+                            
+        
+        
+        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
+
+        
 
     def __repr__(self):
         try:
@@ -2627,7 +2678,7 @@ class Setup(object):
                     self.install_couchbase = True
                 
                 if self.persistence_type == 'couchbase':
-                    self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
+                    self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
                 
         else:
             self.installLdap = False
@@ -2663,13 +2714,15 @@ class Setup(object):
         options = []
         options_text = []
         
-        for i, m in enumerate(self.groupMappings):
+        bucket_list = self.couchbaseBucketDict.keys()
+        
+        for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
         options_text = 'Use {0} to store {1}'.format(backend_types[0][0], ' '.join(options_text))
 
-        re_pattern = '^[1-{0}]+$'.format(len(self.groupMappings))
+        re_pattern = '^[1-{0}]+$'.format(len(self.couchbaseBucketDict))
 
         while True:
             prompt = self.getPrompt(options_text)
@@ -2678,10 +2731,10 @@ class Setup(object):
             else:
                 print "Please select one of {0}.".format(", ".join(options))
 
-        couchbase_mappings = self.groupMappings[:]
+        couchbase_mappings = bucket_list[:]
 
         for i in prompt:
-            m = self.groupMappings[int(i)-1]
+            m = bucket_list[int(i)-1]
             couchbase_mappings.remove(m)
 
         for m in couchbase_mappings:
@@ -2839,7 +2892,7 @@ class Setup(object):
                 self.promptForBackendMappings(backend_types)
             else:
                 self.persistence_type = 'couchbase'
-                self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
+                self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
         else:
 
             backend_types = self.getBackendTypes()
@@ -3647,12 +3700,12 @@ class Setup(object):
                 ldif_files = []
 
                 if self.mappingLocations['default'] == 'ldap':
-                    ldif_files += self.mappingsLdif['default']
+                    ldif_files += self.couchbaseBucketDict['default']['ldif']
 
                 ldap_mappings = self.getMappingType('ldap')
   
                 for group in ldap_mappings:
-                    ldif_files += self.mappingsLdif[group]
+                    ldif_files +=  self.couchbaseBucketDict[group]['ldif']
   
                 if not self.ldif_base in ldif_files:
                     ldif_files.insert(0, self.ldif_base)
@@ -4015,18 +4068,17 @@ class Setup(object):
                 for e in documents:
                     if bucket:
                         cur_bucket = bucket
-                    elif e[0].startswith('site_') or e[0].startswith('cache-refresh_'):
-                        cur_bucket = 'gluu_site'
-                    elif e[0].startswith('groups_') or e[0].startswith('people_'):
-                        cur_bucket = 'gluu_user'
-                    elif e[0].startswith('metric_'):
-                        cur_bucket = 'gluu_statistic'
-                    elif e[0].startswith('authorizations_'):
-                        cur_bucket = 'gluu_authorization'
-                    elif e[0].startswith('cache_'):
-                        cur_bucket = 'gluu_cache'
                     else:
-                        cur_bucket = 'gluu'
+                        n_ = e[0].find('_')
+                        document_key_prefix = e[0][:n_+1]
+                        self.couchbaseBucketDict['user']['document_key_prefix']
+                        
+                        for cb in self.couchbaseBucketDict:
+                            if document_key_prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
+                                cur_bucket = 'gluu_'+cb
+                                break
+                        else:
+                            cur_bucket = 'gluu'
 
                     query = ''
 
@@ -4121,22 +4173,16 @@ class Setup(object):
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
-
-        bucketMappings = {
-                            'user': 'people, groups',
-                            'cache': 'cache',
-                            'statistic': 'statistic',
-                            'site': 'cache-refresh',
-                            'authorization': 'authorizations',
-                        }
-
         couchbase_mappings = []
 
-        for group in self.groupMappings[1:]:
+        for group in self.couchbaseBucketDict.keys()[1:]:
             cb_key = 'couchbase_{}_mapping'.format(group)
             if self.mappingLocations[group] == 'couchbase':
-                couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, bucketMappings[group]))
-                self.templateRenderingDict[cb_key] = bucketMappings[group]
+                if self.couchbaseBucketDict[group]['mapping']:
+                    couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
+                    self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+                else:
+                     self.templateRenderingDict[cb_key] = ''
             else:
                 self.templateRenderingDict[cb_key] = ''
 
@@ -4198,14 +4244,14 @@ class Setup(object):
             bucketNumber += 1
             self.couchebaseCreateBucket('gluu', bucketRamsize=couchbaseClusterRamsize/bucketNumber)
             self.couchebaseCreateIndexes('gluu')
-            self.import_ldif_couchebase(self.mappingsLdif['default'], 'gluu')
+            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
             self.couchebaseCreateBucket(bucket, bucketRamsize=couchbaseClusterRamsize/bucketNumber)
             self.couchebaseCreateIndexes(bucket)
-            if self.mappingsLdif[group]:
-                self.import_ldif_couchebase(self.mappingsLdif[group], bucket)
+            if self.couchbaseBucketDict[group]['ldif']:
+                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         if self.installSaml:
             self.logIt("Creating couchbase readonly user for shib")
