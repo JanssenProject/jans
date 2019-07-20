@@ -100,11 +100,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 if self.jwtHasExpired(jwt):
                     return False
 
-                (user_profile, json) = self.getUserProfile(jwt)
+                (user_profile, jsonp) = self.getUserProfile(jwt)
                 if user_profile == None:
                     return False
 
-                return self.attemptAuthentication(identity, user_profile, json)
+                return self.attemptAuthentication(identity, user_profile, jsonp)
 
             #See passportlogin.xhtml
             provider = ServerUtil.getFirstValue(requestParameters, "loginForm:provider")
@@ -134,16 +134,16 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 2:
             mail = ServerUtil.getFirstValue(requestParameters, "loginForm:email")
-            json = identity.getWorkingParameter("passport_user_profile")
+            jsonp = identity.getWorkingParameter("passport_user_profile")
 
             if mail == None:
                 self.setMessageError(FacesMessage.SEVERITY_ERROR, "Email was missing in user profile")
-            elif json != None:
+            elif jsonp != None:
                 # Completion of profile takes place
-                user_profile = self.getProfileFromJson(json)
+                user_profile = json.loads(jsonp)
                 user_profile["mail"] = mail
 
-                return self.attemptAuthentication(identity, user_profile, json)
+                return self.attemptAuthentication(identity, user_profile, jsonp)
 
             print "Passport. authenticate for step 2. Failed: expected mail value in HTTP request and json profile in session"
             return False
@@ -470,17 +470,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getUserProfile. User profile missing in JWT token"
             user_profile = None
         else:
-            user_profile = self.getProfileFromJson(user_profile_json)
+            user_profile = json.loads(user_profile_json)
 
         return (user_profile, user_profile_json)
-
-
-    def getProfileFromJson(self, user_profile_json):
-        data = json.loads(user_profile_json)
-        user_profile = {}
-        for key in data.keys():
-            user_profile[key.lower()] = data[key]
-        return user_profile
 
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
