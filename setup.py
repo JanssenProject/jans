@@ -4213,15 +4213,24 @@ class Setup(object):
                     for name in obj['names']:
                         listAttrib.append(name)
 
+    def calculate_bucket_ramsize(self, bucket, total_ram):
+        calculated_size = int(self.couchbaseBucketDict[bucket]['memory_allocation'][0]*total_ram)
+        min_size = self.couchbaseBucketDict[bucket]['memory_allocation'][1]
+
+        if calculated_size < min_size:
+            return  min_size
+
+        return calculated_size
+
 
     def install_couchbase_server(self):
         # prepare multivalued list
         self.prepare_multivalued_list()
 
         if not self.remoteCouchbase:
-            
+
             self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-            
+
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.couchebaseCreateCluster()
@@ -4233,22 +4242,20 @@ class Setup(object):
         couchbaseClusterRamsize = system_info["memoryQuota"]
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
         couchbase_mappings = self.getMappingType('couchbase')
-        bucketNumber = len(couchbase_mappings)
-
-        #TO DO: calculations of bucketRamsize is neaded
 
         if self.mappingLocations['default'] != 'couchbase':
             couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            bucketNumber += 1
-            self.couchebaseCreateBucket('gluu', bucketRamsize=couchbaseClusterRamsize/bucketNumber)
+            bucketRamsize=self.calculate_bucket_ramsize('default', couchbaseClusterRamsize)
+            self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            self.couchebaseCreateBucket(bucket, bucketRamsize=couchbaseClusterRamsize/bucketNumber)
+            bucketRamsize=self.calculate_bucket_ramsize(group, couchbaseClusterRamsize)
+            self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
             if self.couchbaseBucketDict[group]['ldif']:
                 self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
