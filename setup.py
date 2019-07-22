@@ -4213,8 +4213,8 @@ class Setup(object):
                     for name in obj['names']:
                         listAttrib.append(name)
 
-    def calculate_bucket_ramsize(self, bucket, total_ram):
-        calculated_size = int(self.couchbaseBucketDict[bucket]['memory_allocation'][0]*total_ram)
+    def calculate_bucket_ramsize(self, bucket, total_ram, total_ratio):
+        calculated_size = int((self.couchbaseBucketDict[bucket]['memory_allocation'][0]/total_ratio)*total_ram)
         min_size = self.couchbaseBucketDict[bucket]['memory_allocation'][1]
 
         if calculated_size < min_size:
@@ -4243,18 +4243,27 @@ class Setup(object):
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
         couchbase_mappings = self.getMappingType('couchbase')
 
+        total_ratio = 0
+        for group in couchbase_mappings:
+             total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
+
+
         if self.mappingLocations['default'] != 'couchbase':
             couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            bucketRamsize=self.calculate_bucket_ramsize('default', couchbaseClusterRamsize)
+            bucketRamsize=self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
+
+
+
+
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize=self.calculate_bucket_ramsize(group, couchbaseClusterRamsize)
+            bucketRamsize=self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
             if self.couchbaseBucketDict[group]['ldif']:
