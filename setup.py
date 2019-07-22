@@ -3187,8 +3187,12 @@ class Setup(object):
 
         return output
 
-    def save_properties(self):
-        self.logIt('Saving properties to %s' % self.savedProperties)
+    def save_properties(self, prop_fn=None):
+        
+        if not prop_fn:
+            prop_fn = self.savedProperties
+
+        self.logIt('Saving properties to %s' % prop_fn)
         
         def getString(value):
             if isinstance(value, str):
@@ -3212,7 +3216,7 @@ class Setup(object):
                     if value != '':
                         p[key] = value
 
-            p.store(open(self.savedProperties, 'w'))
+            p.store(open(prop_fn, 'w'))
         except:
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
