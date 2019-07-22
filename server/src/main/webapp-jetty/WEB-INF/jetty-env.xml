@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN"
-   "http://www.eclipse.org/jetty/configure.dtd">
-<Configure id="webAppCtx" class="org.eclipse.jetty.webapp.WebAppContext">
-	<New id="beanManager" class="org.eclipse.jetty.plus.jndi.Resource">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<Configure id="webAppCtx"
+	class="org.eclipse.jetty.webapp.WebAppContext">
+	<New id="BeanManager" class="org.eclipse.jetty.plus.jndi.Resource">
 		<Arg>
 			<Ref id="webAppCtx" />
 		</Arg>
+
 		<Arg>BeanManager</Arg>
+
 		<Arg>
 			<New class="javax.naming.Reference">
 				<Arg>javax.enterprise.inject.spi.BeanManager</Arg>
@@ -15,4 +18,5 @@
 			</New>
 		</Arg>
 	</New>
+
 </Configure>
