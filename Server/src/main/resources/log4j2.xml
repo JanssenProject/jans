@@ -132,7 +132,7 @@
 			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.persist.ldap.operation.watch" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.gluu.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
 		</Logger>
 
