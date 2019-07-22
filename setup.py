@@ -1235,7 +1235,7 @@ class Setup(object):
             self.logIt("Could not set limits.")
             self.logIt(traceback.format_exc(), True)
 
-    def load_properties(self, fn):
+    def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
         p = Properties.Properties()
         try:
@@ -1247,18 +1247,18 @@ class Setup(object):
 
             properties_list = p.keys()
             for prop in properties_list:
-                try:
-                    self.__dict__[prop] = p[prop]
-                    
-                    if prop == 'mappingLocations':
-                        self.__dict__[prop] = json.loads(p[prop])                    
-                    if p[prop] == 'True':
-                        self.__dict__[prop] = True
-                    elif p[prop] == 'False':
-                        self.__dict__[prop] = False
-                except:
-                    self.logIt("Error loading property %s" % prop)
-                    self.logIt(traceback.format_exc(), True)
+                if not prop in no_update:
+                    try:
+                        self.__dict__[prop] = p[prop]
+                        if prop == 'mappingLocations':
+                            self.__dict__[prop] = json.loads(p[prop])                    
+                        if p[prop] == 'True':
+                            self.__dict__[prop] = True
+                        elif p[prop] == 'False':
+                            self.__dict__[prop] = False
+                    except:
+                        self.logIt("Error loading property %s" % prop)
+                        self.logIt(traceback.format_exc(), True)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
