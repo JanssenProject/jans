@@ -1476,6 +1476,11 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '775', jettyRunFolder])
         self.run([self.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
 
+        self.run(['rm', '-rf', '/opt/jetty/bin/jetty.sh'])
+        self.copyFile("%s/system/initd/jetty.sh" % self.staticFolder, "%s/bin/jetty.sh" % self.jetty_home)
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % self.jetty_home])
+        self.run([self.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
+
     def installNode(self):
         self.logIt("Installing node %s..." % self.node_version)
 
