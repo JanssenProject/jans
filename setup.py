@@ -4247,23 +4247,19 @@ class Setup(object):
         for group in couchbase_mappings:
              total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
 
-
         if self.mappingLocations['default'] != 'couchbase':
             couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            bucketRamsize=self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
 
-
-
-
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize=self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
             if self.couchbaseBucketDict[group]['ldif']:
@@ -4305,7 +4301,6 @@ class Setup(object):
         self.run(['unzip', '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run(['rm', '-rf', 'oxauth_test_client_keys.zip'])
         self.run(['chown', '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
-
 
 
         oxAuthConfDynamic_changes = (
