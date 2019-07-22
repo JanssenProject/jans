@@ -386,7 +386,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         boolean secondTry = false;
     	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
         PagedResult<JsonObject> result = null;
-        int attemps = 10;
+        int attemps = 20;
         do {
 			attemps--;
 			try {
