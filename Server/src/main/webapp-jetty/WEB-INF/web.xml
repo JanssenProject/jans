@@ -91,6 +91,7 @@
 		<auth-constraint />
 	</security-constraint>
 
+	<!-- Weld -->
 	<resource-env-ref>
 		<description>Object factory for the CDI Bean Manager</description>
 		<resource-env-ref-name>BeanManager</resource-env-ref-name>
