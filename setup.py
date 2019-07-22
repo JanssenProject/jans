@@ -331,7 +331,7 @@ class Setup(object):
         self.node_user_home = '/home/node'
         self.passport_initd_script = '%s/static/system/initd/passport' % self.install_dir
 
-        self.open_jdk_archive = 'OpenJDK11U-jdk_x64_linux_hotspot_11.0.2_7.tar.gz'
+        self.open_jdk_archive = 'OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.java_type = 'jre'
 
 
