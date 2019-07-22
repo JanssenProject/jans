@@ -339,6 +339,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
 	@Override
+	public void remove(String primaryKey) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+    	persistenceEntryManager.remove(primaryKey);
+	}
+
+	@Override
     public void removeDeleteSubscriber(DeleteNotifier subscriber) {
         if (this.persistenceEntryManagers == null) {
             return;
@@ -366,11 +372,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 
     @Override
 	protected void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
-        throw new UnsupportedOperationException("Method not implemented.");
-	}
-
-	@Override
-	public void remove(String dn) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
