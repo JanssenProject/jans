@@ -1260,12 +1260,6 @@ paths:
             required:
               - oxd_id
               - ticket
-              - claim_token
-              - claim_token_format
-              - pct
-              - rpt
-              - scope
-              - state
             properties:
               oxd_id:
                 type: string
@@ -1287,6 +1281,10 @@ paths:
                 example: ["openid"]
               state:
                 type: string
+              params:
+                type: object
+                additionalProperties:
+                  type: string
       responses:
         200:
           description: OK

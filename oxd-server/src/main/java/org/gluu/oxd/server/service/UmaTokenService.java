@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.Prompt;
@@ -26,14 +25,13 @@ import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.model.Pat;
 import org.gluu.oxd.server.model.Token;
 import org.gluu.oxd.server.model.TokenFactory;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -83,17 +81,46 @@ public class UmaTokenService {
             }
         }
 
-        final org.gluu.oxauth.client.uma.UmaTokenService tokenService = UmaClientFactory.instance().createTokenService(discovery, httpService.getClientExecutor());
-        final UmaTokenResponse tokenResponse = tokenService.requestRpt(
-                "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()),
-                GrantType.OXAUTH_UMA_TICKET.getValue(),
-                params.getTicket(),
-                params.getClaimToken(),
-                params.getClaimTokenFormat(),
-                params.getPct(),
-                params.getRpt(),
-                params.getScope() != null ? Utils.joinAndUrlEncode(params.getScope()) : null
-        );
+        ClientRequest client = new ClientRequest(discovery.getTokenEndpoint(), httpService.getClientExecutor());
+        client.header("Authorization", "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()))
+                .formParameter("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue())
+                .formParameter("ticket", params.getTicket());
+
+        if (params.getClaimToken() != null) {
+            client.formParameter("claim_token", params.getClaimToken());
+        }
+
+        if (params.getClaimTokenFormat() != null) {
+            client.formParameter("claim_token_format", params.getClaimTokenFormat());
+        }
+
+        if (params.getPct() != null) {
+            client.formParameter("pct", params.getPct());
+        }
+
+        if (params.getRpt() != null) {
+            client.formParameter("rpt", params.getRpt());
+        }
+
+        if (params.getScope() != null) {
+            client.formParameter("scope", Utils.joinAndUrlEncode(params.getScope()));
+        }
+
+        if (params.getParams() != null && !params.getParams().isEmpty()) {
+            for (Map.Entry<String, String> p : params.getParams().entrySet()) {
+                client.formParameter(p.getKey(), p.getValue());
+            }
+        }
+
+        ClientResponse<UmaTokenResponse> response = null;
+        try {
+            response = client.post(UmaTokenResponse.class);
+        } catch (Exception e) {
+            LOG.error("Failed to receive RPT response for rp: " + rp, e);
+            throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
+        }
+
+        UmaTokenResponse tokenResponse = response.getEntity();
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
             final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
