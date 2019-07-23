@@ -5,21 +5,23 @@ package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.common.params.RpGetRptParams;
+import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxd.common.Command;
-import org.gluu.oxd.common.params.RpGetRptParams;
-import org.gluu.oxd.common.response.IOpResponse;
-import javax.ws.rs.core.Response.Status;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,18 +44,22 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
         } catch (ClientResponseFailure ex) {
             LOG.trace(ex.getMessage(), ex);
             String entity = (String) ex.getResponse().getEntity(String.class);
-            final UmaNeedInfoResponse needInfo = parseNeedInfoSilently(entity);
-            if (needInfo != null) {
-                LOG.trace("Need info: " + entity);
-                throw new WebApplicationException(Response
-                        .status(getErrorCode(needInfo))
-                        .type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(Jackson2.asJson(needInfo))
-                        .build());
-            } else {
-                LOG.trace("No need_info error, re-throw exception ...", ex);
-                throw new WebApplicationException(entity, ex.getResponse().getStatus());
-            }
+            return handleRptError(ex.getResponse().getStatus(), entity);
+        }
+    }
+
+    public static IOpResponse handleRptError(int status, String entity) throws IOException {
+        final UmaNeedInfoResponse needInfo = parseNeedInfoSilently(entity);
+        if (needInfo != null) {
+            LOG.trace("Server response: " + entity);
+            throw new WebApplicationException(Response
+                    .status(getErrorCode(needInfo))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(Jackson2.asJson(needInfo))
+                    .build());
+        } else {
+            LOG.trace("No need_info error, re-throw ...");
+            throw new WebApplicationException(entity, status);
         }
     }
 
