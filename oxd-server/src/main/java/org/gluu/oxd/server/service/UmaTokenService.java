@@ -15,6 +15,7 @@ import org.gluu.oxauth.model.uma.UmaTokenResponse;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.gluu.oxd.common.params.RpGetRptParams;
 import org.gluu.oxd.common.response.RpGetRptResponse;
@@ -25,12 +26,13 @@ import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.model.Pat;
 import org.gluu.oxd.server.model.Token;
 import org.gluu.oxd.server.model.TokenFactory;
+import org.gluu.oxd.server.op.RpGetRptOperation;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -64,7 +66,7 @@ public class UmaTokenService {
         this.stateService = stateService;
     }
 
-    public RpGetRptResponse getRpt(RpGetRptParams params) throws UnsupportedEncodingException {
+    public RpGetRptResponse getRpt(RpGetRptParams params) throws Exception {
         Rp rp = rpService.getRp(params.getOxdId());
         UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(params.getOxdId());
 
@@ -112,15 +114,16 @@ public class UmaTokenService {
             }
         }
 
-        ClientResponse<UmaTokenResponse> response = null;
+        ClientResponse<String> response = null;
         try {
-            response = client.post(UmaTokenResponse.class);
+            response = client.post(String.class);
         } catch (Exception e) {
             LOG.error("Failed to receive RPT response for rp: " + rp, e);
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
         }
 
-        UmaTokenResponse tokenResponse = response.getEntity();
+        final String entityResponse = response.getEntity();
+        UmaTokenResponse tokenResponse = asTokenResponse(entityResponse);
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
             final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
@@ -145,10 +148,20 @@ public class UmaTokenService {
                 result.setUpdated(rp.getRptUpgraded());
                 return result;
             }
+        } else {
+            RpGetRptOperation.handleRptError(response.getStatus(), entityResponse);
         }
 
         LOG.error("Failed to get RPT for rp: " + rp);
         throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
+    }
+
+    private static UmaTokenResponse asTokenResponse(String entity) {
+        try {
+            return Jackson2.createJsonMapper().readValue(entity, UmaTokenResponse.class);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public Pat getPat(String oxdId) {
