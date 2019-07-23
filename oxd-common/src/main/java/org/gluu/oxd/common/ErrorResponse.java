@@ -26,6 +26,8 @@ public class ErrorResponse implements Serializable, IOpResponse {
     private String error_description;
     @JsonProperty(value = "details")
     private JsonNode details;
+    @JsonProperty(value = "reason")
+    private JsonNode reason;
 
     public ErrorResponse() {
     }
@@ -69,6 +71,14 @@ public class ErrorResponse implements Serializable, IOpResponse {
         this.details = details;
     }
 
+    public JsonNode getReason() {
+        return reason;
+    }
+
+    public void setReason(JsonNode reason) {
+        this.reason = reason;
+    }
+
     public <T> T detailsAs(Class<T> p_class) {
         if (details != null && p_class != null) {
             final String asString = details.toString();
@@ -88,6 +98,7 @@ public class ErrorResponse implements Serializable, IOpResponse {
                 "error='" + error + '\'' +
                 ", error_description='" + error_description + '\'' +
                 ", details=" + details +
+                ", reason=" + reason +
                 '}';
     }
 }
