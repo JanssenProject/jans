@@ -5,7 +5,9 @@ package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.server.HttpException;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
     @Override
     public IOpResponse execute(RpGetRptParams params) throws Exception {
         try {
+            validate(params);
             return getUmaTokenService().getRpt(params);
         } catch (ClientResponseFailure ex) {
             LOG.trace(ex.getMessage(), ex);
@@ -51,6 +54,17 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
                 LOG.trace("No need_info error, re-throw exception ...", ex);
                 throw new WebApplicationException(entity, ex.getResponse().getStatus());
             }
+        }
+    }
+
+    private void validate(RpGetRptParams params) {
+        if (StringUtils.isBlank(params.getTicket())) {
+            throw new HttpException(ErrorResponseCode.NO_UMA_TICKET_PARAMETER);
+        }
+
+        if ((StringUtils.isBlank(params.getClaimToken()) && StringUtils.isNotBlank(params.getClaimTokenFormat())) ||
+                StringUtils.isNotBlank(params.getClaimToken()) && StringUtils.isBlank(params.getClaimTokenFormat())) {
+            throw new HttpException(ErrorResponseCode.INVALID_CLAIM_TOKEN_OR_CLAIM_TOKEN_FORMAT);
         }
     }
 
