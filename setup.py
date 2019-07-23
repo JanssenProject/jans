@@ -3503,7 +3503,7 @@ class Setup(object):
                                           '-c',
                                           indexCmd])
             else:
-                self.logIt('NO indexes found %s' % self.indexJson, True)
+                self.logIt('NO indexes found %s' % self.openDjIndexJson, True)
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
