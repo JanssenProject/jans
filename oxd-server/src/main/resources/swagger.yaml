@@ -721,24 +721,12 @@ paths:
                 example: https://client.example.org/cb
               custom_parameters:
                 type: object
-                required:
-                  - param1
-                  - param2
-                properties:
-                  param1:
-                    type: string
-                  param2:
-                    type: string
+                additionalProperties:
+                  type: string
               params:
                 type: object
-                required:
-                - param1
-                - param2
-                properties:
-                  param1:
-                    type: string
-                  param2:
-                    type: string
+                additionalProperties:
+                  type: string
       responses:
         200:
           description: OK
