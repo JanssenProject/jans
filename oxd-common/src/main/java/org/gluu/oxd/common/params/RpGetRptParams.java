@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,8 +33,18 @@ public class RpGetRptParams implements HasAccessTokenParams {
     private String state;
     @JsonProperty(value = "token")
     private String token;
+    @JsonProperty(value = "params")
+    private Map<String, String> params;
 
     public RpGetRptParams() {
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
     }
 
     public String getToken() {
@@ -121,6 +132,7 @@ public class RpGetRptParams implements HasAccessTokenParams {
                 ", scope=" + scope +
                 ", state='" + state + '\'' +
                 ", token='" + token + '\'' +
+                ", params='" + params + '\'' +
                 '}';
     }
 }
