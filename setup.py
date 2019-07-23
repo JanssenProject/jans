@@ -1000,16 +1000,16 @@ class Setup(object):
         return return_value
 
 
-    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None):
+    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
-                self.run([self.systemctl, 'enable', serviceName])
+                self.run([self.systemctl, action, serviceName])
             else:
-                self.run(["/sbin/chkconfig", serviceName, "on"])
+                self.run(["/sbin/chkconfig", serviceName, "on" if action=='enable' else 'off'])
                 
         elif self.os_type+self.os_version in ('ubuntu18','debian9'):
-            self.run([self.systemctl, 'enable', serviceName])
+            self.run([self.systemctl, action, serviceName])
                 
         elif self.os_type in ['ubuntu', 'debian']:
             cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
