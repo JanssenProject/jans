@@ -460,7 +460,8 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = 'opendj'
-        self.opendj_type = 'opendj'
+        self.opendj_type = 'wrends'
+        self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
         self.install_couchbase = None
 
         self.opendj_ldap_binddn = 'cn=directory manager'
@@ -1434,7 +1435,9 @@ class Setup(object):
 
     def extractOpenDJ(self):        
         if self.opendj_type == 'opendj':
-            openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*3*gluu*.zip')))
+            self.logIt("Downloading Opendj")
+            openDJArchive = os.path.basename(self.opendj_download_link)
+            self.run(['wget', '-nv', self.opendj_download_link, '-O', os.path.join(self.distAppFolder, openDJArchive)])
         else:
             openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
         
