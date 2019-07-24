@@ -266,7 +266,7 @@ class Setup(object):
         os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
 
         # Component ithversions
-        self.jre_version = '221'
+        self.jre_version = '8.222.10.1'
         self.jetty_version = '9.4.19.v20190610'
         self.jython_version = '2.7.2a'
         self.node_version = '12.6.0'
@@ -286,7 +286,7 @@ class Setup(object):
 
         self.allowPreReleasedFeatures = False
 
-        self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
+        self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
 
         self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -1409,7 +1409,7 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         if self.java_type == 'jre':
-            jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
+            jreArchive = 'amazon-corretto-{}-linux-x64.tar.gz'.format(self.jre_version)
         else:
             jreArchive = self.open_jdk_archive
 
@@ -2852,8 +2852,7 @@ class Setup(object):
                 self.java_type = 'jre'
             else:
                 self.java_type = 'jdk'
-                self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
-                self.jreDestinationPath = '/opt/jdk-11.0.2+7'
+                self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
                 self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
                 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
