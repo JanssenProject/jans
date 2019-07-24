@@ -1436,8 +1436,9 @@ class Setup(object):
     def extractOpenDJ(self):        
         if self.opendj_type == 'opendj':
             self.logIt("Downloading Opendj")
-            openDJArchive = os.path.basename(self.opendj_download_link)
-            self.run(['wget', '-nv', self.opendj_download_link, '-O', os.path.join(self.distAppFolder, openDJArchive)])
+            openDJArchive_name = os.path.basename(self.opendj_download_link)
+            openDJArchive = os.path.join(self.distAppFolder, openDJArchive_name)
+            self.run(['wget', '-nv', self.opendj_download_link, '-O', openDJArchive])
         else:
             openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
         
@@ -4613,6 +4614,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
+    parser.add_argument('--opendj', help="Use OpenDJ as ldap server", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
     parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
@@ -4672,6 +4674,8 @@ if __name__ == '__main__':
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
 
+    if argsp.opendj:
+        setupOptions['opendj_type'] = 'opendj' 
 
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
