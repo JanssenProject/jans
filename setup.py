@@ -331,9 +331,8 @@ class Setup(object):
         self.node_user_home = '/home/node'
         self.passport_initd_script = '%s/static/system/initd/passport' % self.install_dir
 
-        self.open_jdk_archive = 'OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
+        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.java_type = 'jre'
-
 
         self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
@@ -1411,7 +1410,9 @@ class Setup(object):
         if self.java_type == 'jre':
             jreArchive = 'amazon-corretto-{}-linux-x64.tar.gz'.format(self.jre_version)
         else:
-            jreArchive = self.open_jdk_archive
+            self.logIt("Downloading " + self.open_jdk_archive_link)
+            jreArchive = os.path.basename(self.open_jdk_archive_link)
+            self.run(['wget', '-nv', self.open_jdk_archive_link, '-O', os.path.join(self.distAppFolder, jreArchive)])
 
         try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
@@ -1419,6 +1420,9 @@ class Setup(object):
         except:
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
+
+        if self.java_type == 'jdk':
+            self.jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
 
         self.run([self.cmd_ln, '-sf', self.jreDestinationPath, self.jre_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % self.jreDestinationPath])
@@ -2837,7 +2841,7 @@ class Setup(object):
             self.ldap_hostname = ldapHost
             self.installLdap = True
 
-        if setupOptions['allowPreReleasedFeatures'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
+        if setupOptions['allowPreReleasedFeatures']:
             while True:
                 java_type = self.getPrompt("Select Java type: 1.Jre-1.8   2.OpenJDK-11", '1')
                 if not java_type:
@@ -2852,7 +2856,6 @@ class Setup(object):
                 self.java_type = 'jre'
             else:
                 self.java_type = 'jdk'
-                self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
                 self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
                 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
