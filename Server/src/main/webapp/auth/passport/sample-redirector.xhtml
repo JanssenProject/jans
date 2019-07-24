@@ -1,17 +1,22 @@
-<html>
-<script>
-var cookiesArray = document.cookie.split(';')
-for (let cookie of cookiesArray) {
-	let c = cookie.split('=')
-	//alert(c[1])
-	if (c[0] == 'relayState' &amp;&amp; c[1].indexOf("http") == 0) {
-		document.cookie = 'relayState=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-		location.href = c[1]
-	}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html	lang="en"
+         xmlns="http://www.w3.org/1999/xhtml"
+         xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <script>
+let relayState = "#{cookie['relayState'].value}"
+
+if (relayState.length > 0) {
+	document.cookie = 'relayState=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+	location.href = decodeURIComponent(relayState)
 }
 
 </script>
-<body>
-If you are seeing this message, no <i>relayState</i> cookie was found. No final redirect could be made.
-</body>
+</h:head>
+
+<h:body>
+    If you are seeing this message, no <i>relayState</i> cookie was found. No final redirect could be made.
+</h:body>
+
 </html>
