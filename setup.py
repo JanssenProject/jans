@@ -2157,10 +2157,8 @@ class Setup(object):
 
             # Put latest SAML templates
             identityWar = 'identity.war'
-            distIdentityPath = '%s/%s' % (self.distGluuFolder, identityWar)
 
             self.createDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
-            
             self.createDirs('%s/identity/conf/shibboleth3/idp' % self.jetty_base)
             self.createDirs('%s/identity/conf/shibboleth3/sp' % self.jetty_base)
 
