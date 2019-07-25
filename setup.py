@@ -2159,8 +2159,6 @@ class Setup(object):
             identityWar = 'identity.war'
             distIdentityPath = '%s/%s' % (self.distGluuFolder, identityWar)
 
-            tmpIdentityDir = '%s/tmp_identity' % self.distGluuFolder
-
             self.createDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
             
             self.createDirs('%s/identity/conf/shibboleth3/idp' % self.jetty_base)
