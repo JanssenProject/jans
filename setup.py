@@ -270,7 +270,6 @@ class Setup(object):
         self.jetty_version = '9.4.19.v20190610'
         self.jython_version = '2.7.2a'
         self.node_version = '12.6.0'
-        self.opendj_version_number = '3.0.1.gluu'
         self.apache_version = None
         self.opendj_version = None
 
@@ -2162,33 +2161,10 @@ class Setup(object):
 
             tmpIdentityDir = '%s/tmp_identity' % self.distGluuFolder
 
-            self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
-            self.removeDirs(tmpIdentityDir)
-            self.createDirs(tmpIdentityDir)
-
-            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
-
-            self.run([self.cmd_jar,
-                      'xf',
-                      distIdentityPath], tmpIdentityDir)
-
-            self.logIt("Unpacking %s..." % 'oxtrust-configuration.jar')
-            self.run([self.cmd_jar,
-                      'xf',
-                      identityConfFilePattern], tmpIdentityDir)
-
-            self.logIt("Preparing SAML templates...")
-            self.removeDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
-            self.createDirs('%s/conf/shibboleth3/idp' % self.gluuBaseFolder)
-
-            # Put IDP templates to oxTrust conf folder
-            jettyIdentityServiceName = 'identity'
-            jettyIdentityServiceConf = '%s/%s/conf' % (self.jetty_base, jettyIdentityServiceName)
-            self.run([self.cmd_mkdir, '-p', jettyIdentityServiceConf])
-
-            self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/shibboleth3' % jettyIdentityServiceConf)
-
-            self.removeDirs(tmpIdentityDir)
+            self.createDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
+            
+            self.createDirs('%s/identity/conf/shibboleth3/idp' % self.jetty_base)
+            self.createDirs('%s/identity/conf/shibboleth3/sp' % self.jetty_base)
 
             # unpack IDP3 JAR with static configs
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
