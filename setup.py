@@ -1116,9 +1116,10 @@ class Setup(object):
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
     def logOSChanges(self, text):
-        F=open("os-changes.log","a")
-        F.write(text+"\n")
-        F.close()
+        fn = os.path.join(self.install_dir, 'os-changes.log')
+        with open(fn,'a') as W:
+            W.write(text+"\n")
+
 
     def backupFile(self, inFile, destFolder=None):
 
