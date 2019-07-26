@@ -58,8 +58,19 @@ public class UpdateSiteParams implements HasAccessTokenParams {
     private String access_token_signing_alg;
     @JsonProperty(value = "rpt_as_jwt")
     private Boolean rpt_as_jwt;
+    @JsonProperty(value = "claims_redirect_uri")
+    private List<String> claims_redirect_uri;
+
 
     public UpdateSiteParams() {
+    }
+
+    public List<String> getClaimsRedirectUri() {
+        return claims_redirect_uri;
+    }
+
+    public void setClaimsRedirectUri(List<String> claims_redirect_uri) {
+        this.claims_redirect_uri = claims_redirect_uri;
     }
 
     public Boolean getRptAsJwt() {
@@ -251,6 +262,7 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append(", access_token_as_jwt=").append(access_token_as_jwt);
         sb.append(", access_token_signing_alg=").append(access_token_signing_alg);
         sb.append(", rpt_as_jwt=").append(rpt_as_jwt);
+        sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
         sb.append('}');
         return sb.toString();
     }
