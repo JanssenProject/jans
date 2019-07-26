@@ -5,9 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.server.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
@@ -20,11 +17,12 @@ import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.UpdateSiteResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.HttpMethod;
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -145,6 +143,11 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             request.setDefaultAcrValues(params.getAcrValues());
         } else {
             request.setDefaultAcrValues(rp.getAcrValues());
+        }
+
+        if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
+            rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
+            request.setClaimsRedirectUris(params.getClaimsRedirectUri());
         }
 
         if (params.getAccessTokenAsJwt() != null) {
