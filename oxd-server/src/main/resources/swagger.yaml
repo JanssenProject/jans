@@ -603,6 +603,10 @@ paths:
               rpt_as_jwt:
                 type: boolean
                 description: specifies whether RPT should be return as JWT or not. Default value is false.
+              claims_redirect_uri:
+                type: array
+                items:
+                  type: string
 
       responses:
         200:
