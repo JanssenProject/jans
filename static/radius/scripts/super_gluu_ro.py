@@ -115,8 +115,8 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         identity = CdiUtil.bean(Identity)
         identity.setSessionId(sessionId)
         if not self.send_push_notification_to_user(sessionId,context):
-            context.setUser(None)
             print "Send push notification to user '%s' failed " % context.getUser().getUserId()
+            context.setUser(None)
             return False
         print "Super-Gluu-RO initiate_authentication complete"
         return True
