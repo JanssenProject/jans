@@ -67,7 +67,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
     @JsonProperty(value = "access_token_signing_alg")
     private String access_token_signing_alg;
     @JsonProperty(value = "rpt_as_jwt")
-    private Boolean rpt_as_jwt;
+    private Boolean rpt_as_jwt = false;
 
     @JsonProperty(value = "logo_uri")
     private String logo_uri;
@@ -76,7 +76,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
     @JsonProperty(value = "policy_uri")
     private String policy_uri;
     @JsonProperty(value = "front_channel_logout_session_required")
-    private Boolean front_channel_logout_session_required;
+    private Boolean front_channel_logout_session_required = false;
     @JsonProperty(value = "tos_uri")
     private String tos_uri;
     @JsonProperty(value = "jwks")
@@ -88,7 +88,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
     @JsonProperty(value = "subject_type")
     private String subject_type;
     @JsonProperty(value = "run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims")
-    private Boolean run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims;
+    private Boolean run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims = false;
     @JsonProperty(value = "id_token_signed_response_alg")
     private String id_token_signed_response_alg;
     @JsonProperty(value = "id_token_encrypted_response_alg")
@@ -110,7 +110,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
     @JsonProperty(value = "default_max_age")
     private Integer default_max_age;
     @JsonProperty(value = "require_auth_time")
-    private Boolean require_auth_time;
+    private Boolean require_auth_time = false;
     @JsonProperty(value = "initiate_login_uri")
     private String initiate_login_uri;
     @JsonProperty(value = "authorized_origins")
