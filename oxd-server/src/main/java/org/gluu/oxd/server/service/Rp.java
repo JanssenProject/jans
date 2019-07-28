@@ -131,6 +131,15 @@ public class Rp implements Serializable {
     private String accessTokenSigningAlg;
     @JsonProperty(value = "rpt_as_jwt")
     private Boolean rptAsJwt = false;
+    @JsonProperty(value = "front_channel_logout_session_required")
+    private Boolean frontChannelLogoutSessionRequired = false;
+    @JsonProperty(value = "run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims")
+    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    @JsonProperty(value = "require_auth_time")
+    private Boolean requireAuthTime = false;
+    @JsonProperty(value = "trusted_client")
+    private Boolean trustedClient = false;
+
 
     public Rp() {
     }
@@ -198,6 +207,10 @@ public class Rp implements Serializable {
         this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
         this.accessTokenAsJwt = conf.accessTokenAsJwt;
         this.accessTokenSigningAlg = conf.accessTokenSigningAlg;
+        this.frontChannelLogoutSessionRequired = conf.frontChannelLogoutSessionRequired;
+        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = conf.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+        this.requireAuthTime = conf.requireAuthTime;
+        this.trustedClient = conf.trustedClient;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -649,6 +662,38 @@ public class Rp implements Serializable {
         this.rptCreatedAt = rptCreatedAt;
     }
 
+    public Boolean getFrontChannelLogoutSessionRequired() {
+        return frontChannelLogoutSessionRequired;
+    }
+
+    public void setFrontChannelLogoutSessionRequired(Boolean frontChannelLogoutSessionRequired) {
+        this.frontChannelLogoutSessionRequired = frontChannelLogoutSessionRequired;
+    }
+
+    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
+        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
+        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    }
+
+    public Boolean getRequireAuthTime() {
+        return requireAuthTime;
+    }
+
+    public void setRequireAuthTime(Boolean requireAuthTime) {
+        this.requireAuthTime = requireAuthTime;
+    }
+
+    public Boolean getTrustedClient() {
+        return trustedClient;
+    }
+
+    public void setTrustedClient(Boolean trustedClient) {
+        this.trustedClient = trustedClient;
+    }
+
     public UmaResource umaResource(String path, String httpMethod) {
         List<UmaResource> copy = Lists.newArrayList(umaProtectedResources);
         Collections.reverse(copy);
@@ -718,6 +763,10 @@ public class Rp implements Serializable {
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
                 ", accessTokenAsJwt=" + accessTokenAsJwt +
                 ", accessTokenSigningAlg=" + accessTokenSigningAlg +
+
+                ", frontChannelLogoutSessionRequired=" + frontChannelLogoutSessionRequired +
+                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                ", requireAuthTime=" + requireAuthTime +
                 '}';
     }
 }
