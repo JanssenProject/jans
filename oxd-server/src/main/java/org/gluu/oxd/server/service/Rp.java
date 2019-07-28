@@ -763,7 +763,7 @@ public class Rp implements Serializable {
                 ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
                 ", accessTokenAsJwt=" + accessTokenAsJwt +
                 ", accessTokenSigningAlg=" + accessTokenSigningAlg +
-
+                ", trusted_client=" + trustedClient +
                 ", frontChannelLogoutSessionRequired=" + frontChannelLogoutSessionRequired +
                 ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
                 ", requireAuthTime=" + requireAuthTime +
