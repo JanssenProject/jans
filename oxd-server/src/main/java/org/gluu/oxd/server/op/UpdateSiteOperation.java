@@ -5,11 +5,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -104,14 +108,17 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
             for (String type : params.getResponseTypes()) {
                 responseTypes.add(ResponseType.fromString(type));
-
-                request.setResponseTypes(responseTypes);
-                rp.setResponseTypes(params.getResponseTypes());
             }
+            request.setResponseTypes(responseTypes);
+            rp.setResponseTypes(params.getResponseTypes());
+
         }
 
         if (params.getRptAsJwt() != null) {
             request.setRptAsJwt(params.getRptAsJwt());
+            rp.setRptAsJwt(params.getRptAsJwt());
+        } else {
+            request.setRptAsJwt(rp.getRptAsJwt());
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
@@ -148,11 +155,12 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
             rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
             request.setClaimsRedirectUris(params.getClaimsRedirectUri());
+        } else {
+            request.setClaimsRedirectUris(rp.getClaimsRedirectUri());
         }
-
         if (params.getAccessTokenAsJwt() != null) {
-            rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
             request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
+            rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
         } else {
             request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
         }
@@ -191,9 +199,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             rp.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
-        if (params.getClientLogoutUri() != null && !params.getClientLogoutUri().isEmpty()) {
-            rp.setFrontChannelLogoutUri(Lists.newArrayList(params.getClientLogoutUri()));
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
+        if (params.getClientFrontchannelLogoutUris() != null && !params.getClientFrontchannelLogoutUris().isEmpty()) {
+            rp.setFrontChannelLogoutUri(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
             request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
         }
@@ -201,6 +209,199 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
             request.setRequestUris(params.getClientRequestUris());
         }
+
+        if (params.getClientTokenEndpointAuthSigningAlg() != null) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+            rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());
+            request.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg()));
+        }
+
+        if (!Strings.isNullOrEmpty(params.getClientName())) {
+            request.setClientName(params.getClientName());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getLogoUri())) {
+            request.setLogoUri(params.getLogoUri());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getClientUri())) {
+            request.setClientUri(params.getClientUri());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getPolicyUri())) {
+            request.setPolicyUri(params.getPolicyUri());
+        }
+
+        if (params.getFrontChannelLogoutSessionRequired() != null) {
+            request.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
+            rp.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
+        } else {
+            request.setFrontChannelLogoutSessionRequired(rp.getFrontChannelLogoutSessionRequired());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getTosUri())) {
+            request.setTosUri(params.getTosUri());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getJwks())) {
+            request.setJwks(params.getJwks());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getIdTokenBindingCnf())) {
+            request.setIdTokenTokenBindingCnf(params.getIdTokenBindingCnf());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getTlsClientAuthSubjectDn())) {
+            request.setTlsClientAuthSubjectDn(params.getTlsClientAuthSubjectDn());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getSubjectType())) {
+            SubjectType subjectType = SubjectType.fromString(params.getSubjectType());
+            if (subjectType == null) {
+                LOG.error("Received invalid values in `subject_type` property. Value: " + params.getSubjectType() );
+                throw new HttpException(ErrorResponseCode.INVALID_SUBJECT_TYPE);
+            }
+            request.setSubjectType(subjectType);
+        }
+
+        if (params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
+            request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+            rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        } else {
+
+        }
+
+        if (!Strings.isNullOrEmpty(params.getIdTokenSignedResponseAlg())) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getIdTokenSignedResponseAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `id_token_signed_response_alg` property. Value: " + params.getIdTokenSignedResponseAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+            request.setIdTokenSignedResponseAlg(signatureAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getIdTokenEncryptedResponseAlg())) {
+            KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getIdTokenEncryptedResponseAlg());
+            if (keyEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `id_token_encrypted_response_alg` property. Value: " + params.getIdTokenEncryptedResponseAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
+            }
+            request.setIdTokenEncryptedResponseAlg(keyEncryptionAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getIdTokenEncryptedResponseEnc())) {
+            BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getIdTokenEncryptedResponseEnc());
+            if (blockEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `id_token_encrypted_response_enc` property. Value: " + params.getIdTokenEncryptedResponseEnc() );
+                throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
+            }
+            request.setIdTokenEncryptedResponseEnc(blockEncryptionAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getUserInfoSignedResponseAlg())) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getUserInfoSignedResponseAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `user_info_signed_response_alg` property. Value: " + params.getUserInfoSignedResponseAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+            request.setUserInfoSignedResponseAlg(signatureAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getUserInfoEncryptedResponseAlg())) {
+            KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getUserInfoEncryptedResponseAlg());
+            if (keyEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `user_info_encrypted_response_alg` property. Value: " + params.getUserInfoEncryptedResponseAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
+            }
+            request.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getUserInfoEncryptedResponseEnc())) {
+            BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getUserInfoEncryptedResponseEnc());
+            if (blockEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `user_info_encrypted_response_enc` property. Value: " + params.getUserInfoEncryptedResponseEnc() );
+                throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
+            }
+            request.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getRequestObjectSigningAlg())) {
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getRequestObjectSigningAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `request_object_signing_alg` property. Value: " + params.getRequestObjectSigningAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+            request.setRequestObjectSigningAlg(signatureAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getRequestObjectEncryptionAlg())) {
+            KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getRequestObjectEncryptionAlg());
+            if (keyEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `request_object_encryption_alg` property. Value: " + params.getRequestObjectEncryptionAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
+            }
+            request.setRequestObjectEncryptionAlg(keyEncryptionAlgorithms);
+        }
+
+        if (!Strings.isNullOrEmpty(params.getRequestObjectEncryptionEnc())) {
+            BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getRequestObjectEncryptionEnc());
+            if (blockEncryptionAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `request_object_encryption_enc` property. Value: " + params.getRequestObjectEncryptionEnc() );
+                throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
+            }
+            request.setRequestObjectEncryptionEnc(blockEncryptionAlgorithms);
+        }
+
+        if (params.getDefaultMaxAge() != null && NumberUtils.isNumber(params.getDefaultMaxAge().toString())) {
+            request.setDefaultMaxAge(params.getDefaultMaxAge());
+        }
+
+        if (params.getRequireAuthTime() != null) {
+            request.setRequireAuthTime(params.getRequireAuthTime());
+            rp.setRequireAuthTime(params.getRequireAuthTime());
+        } else {
+            request.setRequireAuthTime(rp.getRequireAuthTime());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
+            request.setInitiateLoginUri(params.getInitiateLoginUri());
+        }
+
+        if (params.getAuthorizedOrigins() != null && !params.getAuthorizedOrigins().isEmpty()) {
+            request.setAuthorizedOrigins(params.getAuthorizedOrigins());
+        }
+
+        if (params.getAccessTokenLifetime() != null && NumberUtils.isNumber(params.getAccessTokenLifetime().toString())) {
+            request.setAccessTokenLifetime(params.getAccessTokenLifetime());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getSoftwareId())) {
+            request.setSoftwareId(params.getSoftwareId());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getSoftwareVersion())) {
+            request.setSoftwareVersion(params.getSoftwareVersion());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getSoftwareStatement())) {
+            request.setSoftwareStatement(params.getSoftwareStatement());
+        }
+
+        if (params.getCustomAttributes() != null && !params.getCustomAttributes().isEmpty()) {
+            params.getCustomAttributes().entrySet().stream().forEach(e -> {
+                request.addCustomAttribute(e.getKey(), e.getValue());
+            });
+        }
+
+        if (params.getTrustedClient() != null && params.getTrustedClient()) {
+            request.addCustomAttribute("oxAuthTrustedClient", "true");
+            rp.setTrustedClient(params.getTrustedClient());
+        }
+
         return request;
     }
 }
