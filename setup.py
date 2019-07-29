@@ -3168,10 +3168,13 @@ class Setup(object):
 
         return output
 
-    def save_properties(self, prop_fn=None):
+    def save_properties(self, prop_fn=None, obj=None):
         
         if not prop_fn:
             prop_fn = self.savedProperties
+            
+        if not obj:
+            obj = self
 
         self.logIt('Saving properties to %s' % prop_fn)
         
@@ -3184,16 +3187,16 @@ class Setup(object):
                 return ''
         try:
             p = Properties.Properties()
-            keys = self.__dict__.keys()
+            keys = obj.__dict__.keys()
             keys.sort()
             for key in keys:
                 key = str(key)
                 if key == 'couchbaseInstallOutput':
                     continue
                 if key == 'mappingLocations':
-                    p[key] = json.dumps(self.__dict__[key])
+                    p[key] = json.dumps(obj.__dict__[key])
                 else:
-                    value = getString(self.__dict__[key])
+                    value = getString(obj.__dict__[key])
                     if value != '':
                         p[key] = value
 
