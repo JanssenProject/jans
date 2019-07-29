@@ -49,7 +49,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     /**
      * Base constructor
      *
-     * @param command commandclient_registration_access_token
+     * @param command command
      */
     protected RegisterSiteOperation(Command command, final Injector injector) {
         super(command, injector, RegisterSiteParams.class);
