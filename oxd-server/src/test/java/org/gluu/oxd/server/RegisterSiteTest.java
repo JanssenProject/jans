@@ -16,6 +16,7 @@ import java.util.*;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -46,16 +47,28 @@ public class RegisterSiteTest {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
+        params.setClientName("oxd-client-extension-up" + System.currentTimeMillis());
+        params.setClientTokenEndpointAuthMethod("client_secret_basic");
+        params.setClientTokenEndpointAuthSigningAlg("HS256");
+        params.setClaimsRedirectUri(Lists.newArrayList("https://client.example.org"));
+
+        params.setAccessTokenSigningAlg("HS256");
+        params.setRptAsJwt(true);
+        params.setAccessTokenAsJwt(true);
+        params.setFrontChannelLogoutSessionRequired(true);
+        params.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(true);
+        params.setRequireAuthTime(true);
+
         params.setLogoUri("https://client.example.org/authorization/page3");
         params.setClientUri("https://client.example.org/authorization/page3");
         params.setPolicyUri("https://client.example.org/authorization/page3");
-        params.setFrontChannelLogoutSessionRequired(true);
+
         params.setTosUri("https://client.example.org/authorization/page3");
         params.setJwks("{\"key1\": \"value1\", \"key2\": \"value2\"}");
         params.setIdTokenBindingCnf("4NRB1-0XZABZI9E6-5SM3R");
-        params.setTlsClientAuthSubjectDn("www.test.com");
+        params.setTlsClientAuthSubjectDn("www.test-updated.com");
         params.setSubjectType("pairwise");
-        params.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(true);
+
         params.setIdTokenSignedResponseAlg("HS256");
         params.setIdTokenEncryptedResponseAlg("RSA1_5");
         params.setIdTokenEncryptedResponseEnc("A128CBC+HS256");
@@ -66,7 +79,7 @@ public class RegisterSiteTest {
         params.setRequestObjectEncryptionAlg("RSA1_5");
         params.setRequestObjectEncryptionEnc("A128CBC+HS256");
         params.setDefaultMaxAge(100000000);
-        params.setRequireAuthTime(true);
+
         params.setInitiateLoginUri("https://client.example.org/authorization/page2");
         params.setAuthorizedOrigins(Lists.newArrayList("beem://www.test.com", "fb://app.local.url"));
         params.setAccessTokenLifetime(100000000);
@@ -96,6 +109,50 @@ public class RegisterSiteTest {
         final UpdateSiteParams params = new UpdateSiteParams();
         params.setOxdId(oxdId);
         params.setScope(Lists.newArrayList("profile"));
+
+        params.setClientName("oxd-client-updated-test");
+        params.setClientTokenEndpointAuthMethod("client_secret_basic");
+        params.setClientTokenEndpointAuthSigningAlg("HS256");
+        params.setClaimsRedirectUri(Lists.newArrayList("https://client.example.org/update"));
+
+        params.setAccessTokenSigningAlg("RS256");
+        params.setAccessTokenAsJwt(false);
+        params.setRptAsJwt(true);
+        params.setFrontChannelLogoutSessionRequired(false);
+        params.setRequireAuthTime(false);
+        params.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(true);
+
+        params.setLogoUri("https://client.example.org/authorization//update1");
+        params.setClientUri("https://client.example.org/authorization/update2");
+        params.setPolicyUri("https://client.example.org/authorization/update3");
+
+        params.setTosUri("https://client.example.org/authorization/update4");
+        params.setJwks("{\"key1\": \"value1\", \"key2\": \"value2\"}");
+        params.setIdTokenBindingCnf("4NRB1-0XZABZI9E6-5SM3R");
+        params.setTlsClientAuthSubjectDn("www.test.com");
+        params.setSubjectType("pairwise");
+
+        params.setIdTokenSignedResponseAlg("PS256");
+        params.setIdTokenEncryptedResponseAlg("A128KW");
+        params.setIdTokenEncryptedResponseEnc("A128CBC+HS256");
+        params.setUserInfoSignedResponseAlg("HS256");
+        params.setUserInfoEncryptedResponseAlg("RSA1_5");
+        params.setUserInfoEncryptedResponseEnc("A128CBC+HS256");
+        params.setRequestObjectSigningAlg("HS256");
+        params.setRequestObjectEncryptionAlg("RSA1_5");
+        params.setRequestObjectEncryptionEnc("A128CBC+HS256");
+        params.setDefaultMaxAge(200000000);
+
+        params.setInitiateLoginUri("https://client.example.org/authorization/page2");
+        params.setAuthorizedOrigins(Lists.newArrayList("beem://www.test-updated.com", "fb://updated.local.url"));
+        params.setAccessTokenLifetime(200000000);
+        params.setSoftwareId("4NRB1-0XZABZI9E6-5SM3R");
+        params.setSoftwareVersion("3.0");
+
+        Map<String, String> customAttributes = new HashMap<>();
+        customAttributes.put("key1", "v1");
+        customAttributes.put("key2", "v2");
+        params.setCustomAttributes(customAttributes);
 
         UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(), params);
         assertNotNull(resp);
