@@ -2735,7 +2735,7 @@ class Setup(object):
 
     def detect_hostname(self):
         if not self.ip:
-            self.ip = detect_ip()
+            self.ip = self.detect_ip()
 
         detectedHostname = None
 
