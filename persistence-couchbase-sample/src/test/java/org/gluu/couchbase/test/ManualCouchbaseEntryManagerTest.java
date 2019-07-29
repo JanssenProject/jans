@@ -1,14 +1,14 @@
 package org.gluu.couchbase.test;
 
-import org.gluu.model.GluuAttribute;
-import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
-import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
+
+import org.gluu.couchbase.model.SimpleClient;
+import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
+import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
+import org.testng.annotations.Test;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,7 +20,7 @@ public class ManualCouchbaseEntryManagerTest {
         CouchbaseEntryManager manager = createCouchbaseEntryManager();
 
         try {
-            List<GluuAttribute> attributeList = manager.findEntries("o=gluu", GluuAttribute.class, null);
+            List<SimpleClient> attributeList = manager.findEntries("o=gluu", SimpleClient.class, null);
             System.out.println(attributeList);
         } finally {
             manager.destroy();
