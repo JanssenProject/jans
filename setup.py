@@ -885,9 +885,9 @@ class Setup(object):
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
 
-    def get_ip(self):
-        testIP = None
+    def detect_ip(self):
         detectedIP = None
+
         try:
             testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
@@ -896,6 +896,12 @@ class Setup(object):
         except:
             self.logIt("No detected IP address", True)
             self.logIt(traceback.format_exc(), True)
+
+        return detectedIP
+
+    def get_ip(self):
+        testIP = None
+        detectedIP = self.detect_ip()
 
         while not testIP:
             if detectedIP:
@@ -2728,7 +2734,9 @@ class Setup(object):
 
 
     def detect_hostname(self):
-        self.ip = self.get_ip()
+        if not self.ip:
+            self.ip = detect_ip()
+
         detectedHostname = None
 
         try:
@@ -2747,6 +2755,10 @@ class Setup(object):
         promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
         if promptForMITLicense != 'y':
             sys.exit(0)
+
+        # IP address needed only for Apache2 and hosts file update
+        if self.installHttpd:
+            self.ip = self.get_ip()
 
         detectedHostname = self.detect_hostname()
 
