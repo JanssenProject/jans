@@ -67,14 +67,14 @@ public class CustomLibrariesLoader implements Serializable {
 
                 for (File jar : jars) {
                     method.invoke(webAppClassLoader, jar.toURI().toURL());
-                    log.debug("Loaded custom librarty '{}'", jar.toURI().toURL());
+                    log.debug("Loaded custom library '{}'", jar.toURI().toURL());
                 }
             }
 
             // Restore previous state
             method.setAccessible(false);
         } catch (Exception ex) {
-            log.error("Failed to register custom librarties");
+            log.error("Failed to register custom libraries");
         }
     }
 
