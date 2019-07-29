@@ -7,9 +7,11 @@ import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxauth.model.common.GrantType;
+import org.testng.collections.Maps;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 
 import static io.swagger.client.api.Tester.*;
 import static org.testng.Assert.*;
@@ -60,9 +62,10 @@ public class RegisterSiteTest {
         params.setSoftwareId("4NRB1-0XZABZI9E6-5SM3R");
         params.setSoftwareVersion("2.0");
 
-        RegistersiteCustomAttributes customAttributes = new RegistersiteCustomAttributes();
-        customAttributes.setParam1("value1");
-        customAttributes.setParam2("value2");
+        Map<String, String> customAttributes = Maps.newHashMap();
+        customAttributes.put("attr1", "val1");
+        customAttributes.put("attr2", "val2");
+
         params.setCustomAttributes(customAttributes);
 
         params.setIdTokenSignedResponseAlg("HS256");

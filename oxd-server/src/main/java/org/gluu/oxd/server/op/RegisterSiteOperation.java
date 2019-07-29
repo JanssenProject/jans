@@ -49,7 +49,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     /**
      * Base constructor
      *
-     * @param command command
+     * @param command commandclient_registration_access_token
      */
     protected RegisterSiteOperation(Command command, final Injector injector) {
         super(command, injector, RegisterSiteParams.class);
@@ -299,6 +299,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
+            rp.setTrustedClient(params.getTrustedClient());
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
@@ -358,6 +359,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (params.getFrontChannelLogoutSessionRequired() != null) {
             request.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
+            rp.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
         }
 
         if (!Strings.isNullOrEmpty(params.getTosUri())) {
@@ -476,6 +478,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (params.getRequireAuthTime() != null) {
             request.setRequireAuthTime(params.getRequireAuthTime());
+            rp.setRequireAuthTime(params.getRequireAuthTime());
+        } else {
+            request.setRequireAuthTime(rp.getRequireAuthTime());
         }
 
         if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
