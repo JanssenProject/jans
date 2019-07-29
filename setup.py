@@ -2727,16 +2727,8 @@ class Setup(object):
             self.mappingLocations[m] = 'couchbase'
 
 
-    def promptForProperties(self):
-
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
-        if promptForMITLicense != 'y':
-            sys.exit(0)
-        
-        # IP address needed only for Apache2 and hosts file update
-        if self.installHttpd:
-            self.ip = self.get_ip()
-
+    def detect_hostname(self):
+        self.ip = self.get_ip()
         detectedHostname = None
 
         try:
@@ -2747,6 +2739,16 @@ class Setup(object):
             except:
                 self.logIt("No detected hostname", True)
                 self.logIt(traceback.format_exc(), True)
+
+        return detectedHostname
+
+    def promptForProperties(self):
+
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
+        if promptForMITLicense != 'y':
+            sys.exit(0)
+
+        detectedHostname = self.detect_hostname()
 
         if detectedHostname == 'localhost':
             detectedHostname = None
