@@ -190,7 +190,7 @@
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
     "cleanServiceBatchChunkSize": 1000,
-    "keyRegenerationEnabled":false,
+    "keyRegenerationEnabled":true,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
