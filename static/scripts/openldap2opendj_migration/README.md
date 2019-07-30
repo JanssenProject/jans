@@ -20,7 +20,7 @@ Use the following commands to export data from OpenLDAP to LDIF
 
 ``` 
 # /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=gluu" "Objectclass=*" > /root/gluu.ldif
-# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
+# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=site" -w <adminPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
 ```
 
 Replace `<adminPassword>` with your Gluu admin password.
