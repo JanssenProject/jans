@@ -104,7 +104,7 @@ if package_type == 'deb':
     commands += [
             'curl https://repo.gluu.org/debian/gluu-apt.key | apt-key add -',
             'apt-get update',
-            'apt-get install -y oxd-server-4.0',
+            'apt-get install -y oxd-server',
         ]
 
 elif package_type == 'rpm':
@@ -113,7 +113,7 @@ elif package_type == 'rpm':
             'wget https://repo.gluu.org/rhel/RPM-GPG-KEY-GLUU -O /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-GLUU',
             'yum clean all',
-            'yum install -y oxd-server-4.0',
+            'yum install -y oxd-server',
         ]
 
 add_commands = []
