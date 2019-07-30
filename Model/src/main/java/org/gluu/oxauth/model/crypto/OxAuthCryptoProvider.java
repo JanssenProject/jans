@@ -212,6 +212,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             return Base64Util.base64urlencode(sig);
         } else { // EC or RSA
             PrivateKey privateKey = getPrivateKey(alias);
+            if (privateKey == null) {
+                final String error = "Failed to find private key by kid: " + alias +
+                        ", signatureAlgorithm: " + signatureAlgorithm +
+                        "(check whether web keys JSON in persistence corresponds to keystore file.)";
+                LOG.error(error);
+                throw new RuntimeException(error);
+            }
 
             Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
             signature.initSign(privateKey);
