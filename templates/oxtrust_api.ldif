@@ -35,7 +35,7 @@ objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Read Access
 inum: OO11-AABB
-oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read
+oxId: oxtrust-api-read
 oxUmaPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
 oxScopeType: uma
 
@@ -45,7 +45,7 @@ objectClass: oxAuthCustomScope
 objectClass: top
 displayName: API Write Access
 inum: 1122-BBCC
-oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-write
+oxId: oxtrust-api-write
 oxUmaPolicyScriptDn: inum=OO11-BAFE,ou=scripts,o=gluu
 oxScopeType: uma
 
