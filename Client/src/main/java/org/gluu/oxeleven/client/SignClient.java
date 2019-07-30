@@ -6,14 +6,11 @@
 
 package org.gluu.oxeleven.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.base.Strings;
-import org.jboss.resteasy.client.ClientRequest;
-import org.json.JSONObject;
-
 import javax.ws.rs.HttpMethod;
+
+import org.jboss.resteasy.client.ClientRequest;
+
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

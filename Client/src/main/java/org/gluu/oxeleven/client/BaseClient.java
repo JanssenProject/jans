@@ -6,16 +6,18 @@
 
 package org.gluu.oxeleven.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.ws.rs.HttpMethod;
+
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.logging.Logger;
 
-import javax.ws.rs.HttpMethod;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

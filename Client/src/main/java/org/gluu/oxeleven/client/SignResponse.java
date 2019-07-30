@@ -6,10 +6,10 @@
 
 package org.gluu.oxeleven.client;
 
-import org.json.JSONObject;
-import org.jboss.resteasy.client.ClientResponse;
-
 import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
+
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONObject;
 
 /**
  * @author Javier Rojas Blum

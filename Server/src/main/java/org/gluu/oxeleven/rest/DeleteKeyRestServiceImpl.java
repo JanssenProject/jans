@@ -16,10 +16,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import com.google.common.base.Strings;

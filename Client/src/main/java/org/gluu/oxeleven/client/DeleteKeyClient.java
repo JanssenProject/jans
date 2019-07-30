@@ -6,12 +6,13 @@
 
 package org.gluu.oxeleven.client;
 
-import com.google.common.base.Strings;
-import org.jboss.resteasy.client.ClientRequest;
+import static org.gluu.oxeleven.model.DeleteKeyRequestParam.KEY_ID;
 
 import javax.ws.rs.HttpMethod;
 
-import static org.gluu.oxeleven.model.DeleteKeyRequestParam.KEY_ID;
+import org.jboss.resteasy.client.ClientRequest;
+
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

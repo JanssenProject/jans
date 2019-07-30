@@ -6,14 +6,16 @@
 
 package org.gluu.oxeleven.client;
 
-import com.google.common.base.Strings;
-import org.gluu.oxeleven.model.DeleteKeyRequestParam;
-import org.gluu.oxeleven.util.StringUtils;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+
+import org.gluu.oxeleven.model.DeleteKeyRequestParam;
+import org.gluu.oxeleven.util.StringUtils;
+
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

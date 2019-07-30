@@ -6,10 +6,11 @@
 
 package org.gluu.oxeleven.client;
 
-import com.google.common.base.Strings;
+import javax.ws.rs.HttpMethod;
+
 import org.jboss.resteasy.client.ClientRequest;
 
-import javax.ws.rs.HttpMethod;
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

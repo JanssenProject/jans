@@ -6,10 +6,10 @@
 
 package org.gluu.oxeleven.client;
 
-import org.gluu.oxeleven.model.VerifySignatureRequestParam;
-
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+
+import org.gluu.oxeleven.model.VerifySignatureRequestParam;
 
 /**
  * @author Javier Rojas Blum

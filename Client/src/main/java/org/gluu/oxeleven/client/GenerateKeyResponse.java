@@ -6,13 +6,23 @@
 
 package org.gluu.oxeleven.client;
 
-import org.gluu.oxeleven.util.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
-import org.json.JSONObject;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.ALGORITHM;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.CERTIFICATE_CHAIN;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.CURVE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.EXPIRATION_TIME;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.EXPONENT;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_ID;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_TYPE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_USE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.MODULUS;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.X;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.Y;
 
 import java.util.List;
 
-import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
+import org.gluu.oxeleven.util.StringUtils;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONObject;
 
 /**
  * @author Javier Rojas Blum

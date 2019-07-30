@@ -6,13 +6,14 @@
 
 package org.gluu.oxeleven.client;
 
-import com.google.common.base.Strings;
-import org.jboss.resteasy.client.ClientRequest;
+import static org.gluu.oxeleven.model.GenerateKeyRequestParam.EXPIRATION_TIME;
+import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITHM;
 
 import javax.ws.rs.HttpMethod;
 
-import static org.gluu.oxeleven.model.GenerateKeyRequestParam.EXPIRATION_TIME;
-import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITHM;
+import org.jboss.resteasy.client.ClientRequest;
+
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum

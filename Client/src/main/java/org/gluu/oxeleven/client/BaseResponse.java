@@ -6,11 +6,11 @@
 
 package org.gluu.oxeleven.client;
 
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * @author Javier Rojas Blum
