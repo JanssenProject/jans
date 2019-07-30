@@ -6,6 +6,8 @@
 
 package org.gluu.oxeleven.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -148,4 +150,10 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     }
 
     public abstract String getHttpMethod();
+
+	public static String toPrettyJson(Object object) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+	}
+
 }

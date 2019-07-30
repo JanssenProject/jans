@@ -83,9 +83,4 @@ public class SignClient extends BaseClient<SignRequest, SignResponse> {
         return getResponse();
     }
 
-	public static String toPrettyJson(Object object) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-	}
-
 }

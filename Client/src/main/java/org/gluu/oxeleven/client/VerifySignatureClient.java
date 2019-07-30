@@ -64,7 +64,7 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
         }
 
         if (getRequest().getVerifySignatureRequestParam() != null) {
-            clientRequest.body(getRequest().getMediaType(), getRequest().getVerifySignatureRequestParam());
+            clientRequest.body(getRequest().getMediaType(), toPrettyJson(getRequest().getVerifySignatureRequestParam()));
         }
 
         // Call REST Service and handle response
