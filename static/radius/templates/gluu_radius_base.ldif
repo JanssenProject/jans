@@ -54,5 +54,7 @@ oxAuthRedirectURI: https://%(hostname)s/
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxIncludeClaimsInIdToken: true
 oxAuthTokenEndpointAuthSigningAlg: RS512
+oxAuthIdTokenSignedResponseAlg: RS512
+oxAuthResponseType: id_token
 oxAuthJwks::%(gluu_ro_client_base64_jwks)s
 
