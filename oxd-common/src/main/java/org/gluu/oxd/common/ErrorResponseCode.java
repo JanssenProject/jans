@@ -28,7 +28,7 @@ public enum ErrorResponseCode {
     BAD_REQUEST_STATE_NOT_VALID(400, "bad_request", "'state' is not registered."),
     BAD_REQUEST_INVALID_CODE(400, "bad_request", "'code' is invalid."),
     BAD_REQUEST_NO_REFRESH_TOKEN(400, "bad_request", "'refresh token' is empty or not specified."),
-    NO_ID_TOKEN_RETURNED(500, "no_id_token", "id_token is not returned by OP. Please check whether 'openid' scope is present for 'get_authorization_url' command as well as OP configuration."),
+    NO_ID_TOKEN_RETURNED(500, "no_id_token", "id_token is not returned. Please check: 1) OP log file for error (oxauth.log) 2) whether 'openid' scope is present for 'get_authorization_url' command"),
     NO_ID_TOKEN_PARAM(400, "no_id_token", "id_token is not provided in request to oxd."),
     NO_ACCESS_TOKEN_RETURNED(500, "no_access_token", "access_token is not returned by OP. Please check OP configuration."),
     ACCESS_TOKEN_INSUFFICIENT_SCOPE(403, "access_token_insufficient_scope", "access_token does not have `oxd` scope. Make sure a) scope exists on AS b) register_site is registered with 'oxd' scope c) get_client_token has 'oxd' scope in request"),

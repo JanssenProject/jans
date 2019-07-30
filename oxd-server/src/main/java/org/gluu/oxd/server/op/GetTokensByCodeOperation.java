@@ -59,7 +59,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
 
             if (Strings.isNullOrEmpty(response.getIdToken())) {
-                LOG.error("id_token is not returned. Please check whether 'openid' scope is present for 'get_authorization_url' command");
+                LOG.error("id_token is not returned. Please check: 1) OP log file for error (oxauth.log) 2) whether 'openid' scope is present for 'get_authorization_url' command");
                 throw new HttpException(ErrorResponseCode.NO_ID_TOKEN_RETURNED);
             }
 
