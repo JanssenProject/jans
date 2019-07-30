@@ -45,6 +45,7 @@ import random
 import ssl
 import ldap
 import uuid
+from collections import OrderedDict
 
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
@@ -265,15 +266,13 @@ class Setup(object):
         os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
 
         # Component ithversions
-        self.jre_version = '181'
-        self.jetty_version = '9.4.12.v20180830'
+        self.jre_version = '8.222.10.1'
+        self.jetty_version = '9.4.19.v20190610'
         self.jython_version = '2.7.2a'
-        self.node_version = '9.9.0'
-        self.opendj_version_number = '3.0.1.gluu'
+        self.node_version = '12.6.0'
         self.apache_version = None
         self.opendj_version = None
-        self.groupMappings = ['default', 'user', 'cache', 'statistic', 'site', 'authorization']
-        self.mappingLocations = { group: 'ldap' for group in self.groupMappings }  #default locations are OpenDJ
+
 
         # Gluu components installation status
         self.installOxAuth = True
@@ -286,7 +285,7 @@ class Setup(object):
 
         self.allowPreReleasedFeatures = False
 
-        self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
+        self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
 
         self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -331,9 +330,8 @@ class Setup(object):
         self.node_user_home = '/home/node'
         self.passport_initd_script = '%s/static/system/initd/passport' % self.install_dir
 
-        self.open_jdk_archive = 'OpenJDK11U-jdk_x64_linux_hotspot_11.0.2_7.tar.gz'
+        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.java_type = 'jre'
-
 
         self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
@@ -461,9 +459,9 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = 'opendj'
-        self.opendj_type = 'opendj'
+        self.opendj_type = 'wrends'
+        self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
         self.install_couchbase = None
-        self.persistence_type = 'opendj'
 
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
@@ -671,25 +669,6 @@ class Setup(object):
                            self.lidf_oxtrust_api,
                            ]
 
-        self.mappingsLdif = {   
-                                'default': [
-                                        self.ldif_base, 
-                                         self.ldif_attributes,
-                                         self.ldif_scopes,
-                                         self.ldif_scripts,
-                                         self.ldif_clients,
-                                         self.ldif_configuration,
-                                         self.ldif_scim,
-                                         self.ldif_idp,
-                                         self.lidf_oxtrust_api,
-                                         ],
-                                'user': [self.ldif_people, self.ldif_groups],
-                                'cache': [],
-                                'statistic': [self.ldif_metric],
-                                'site': [self.ldif_site],
-                                'authorization': []
-                            }
-
 
         self.ce_templates = {self.oxauth_config_json: False,
                              self.gluu_python_readme: True,
@@ -744,6 +723,76 @@ class Setup(object):
                         }
 
         self.install_time_ldap = None
+        
+        
+        self.couchbaseBucketDict = OrderedDict((   
+                        ('default', { 'ldif':[
+                                            self.ldif_base, 
+                                            self.ldif_attributes,
+                                            self.ldif_scopes,
+                                            self.ldif_scripts,
+                                            self.ldif_clients,
+                                            self.ldif_configuration,
+                                            self.ldif_scim,
+                                            self.ldif_idp,
+                                            self.lidf_oxtrust_api,
+                                            ],
+                                      'memory_allocation': [0.05, 100], # [fraction, minimun_in_mb]
+                                      'mapping': '',
+                                      'document_key_prefix': []
+                                    }),
+
+                        ('user',     {   'ldif': [
+                                            self.ldif_people, 
+                                            self.ldif_groups
+                                            ],
+                                        'memory_allocation': [0.25, 500],
+                                        'mapping': 'people, groups',
+                                        'document_key_prefix': ['groups_', 'people_'],
+                                    }),
+
+                        ('cache',    {   'ldif': [],
+                                        'memory_allocation': [0.15, 400],
+                                        'mapping': 'cache',
+                                        'document_key_prefix': ['cache_'],
+                                    }),
+                        
+                        ('statistic', {   'ldif': [self.ldif_metric],
+                                        'memory_allocation': [0.05, 100],
+                                        'mapping': 'statistic',
+                                        'document_key_prefix': ['metric_'],
+                                    }),
+                        
+                        ('site',     {   'ldif': [self.ldif_site],
+                                        'memory_allocation': [0.05, 100],
+                                        'mapping': 'cache-refresh',
+                                        'document_key_prefix': ['site_', 'cache-refresh_'],
+                                        
+                                    }),
+
+                        ('authorization', { 'ldif': [],
+                                      'memory_allocation': [0.15, 400],
+                                      'mapping': 'authorizations',
+                                      'document_key_prefix': ['authorizations_'],
+                                    }),
+
+                        ('tokens',   { 'ldif': [],
+                                      'memory_allocation': [0.25, 500],
+                                      'mapping': 'tokens',
+                                      'document_key_prefix': ['tokens_'],
+                                    }),
+                        ('clients',  { 'ldif': [],
+                                    'memory_allocation': [0.05, 100],
+                                    'mapping': 'clients',
+                                    'document_key_prefix': ['clients_'],
+                                    }),
+                    ))
+                            
+        
+        
+        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
+
+        
 
     def __repr__(self):
         try:
@@ -836,9 +885,9 @@ class Setup(object):
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
 
-    def get_ip(self):
-        testIP = None
+    def detect_ip(self):
         detectedIP = None
+
         try:
             testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
@@ -847,6 +896,12 @@ class Setup(object):
         except:
             self.logIt("No detected IP address", True)
             self.logIt(traceback.format_exc(), True)
+
+        return detectedIP
+
+    def get_ip(self):
+        testIP = None
+        detectedIP = self.detect_ip()
 
         while not testIP:
             if detectedIP:
@@ -950,16 +1005,16 @@ class Setup(object):
         return return_value
 
 
-    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None):
+    def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'red']:
             if self.os_initdaemon == 'systemd':
-                self.run([self.systemctl, 'enable', serviceName])
+                self.run([self.systemctl, action, serviceName])
             else:
-                self.run(["/sbin/chkconfig", serviceName, "on"])
+                self.run(["/sbin/chkconfig", serviceName, "on" if action=='enable' else 'off'])
                 
         elif self.os_type+self.os_version in ('ubuntu18','debian9'):
-            self.run([self.systemctl, 'enable', serviceName])
+            self.run([self.systemctl, action, serviceName])
                 
         elif self.os_type in ['ubuntu', 'debian']:
             cmd_list = ["/usr/sbin/update-rc.d", serviceName, 'defaults']
@@ -1066,9 +1121,10 @@ class Setup(object):
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
     def logOSChanges(self, text):
-        F=open("os-changes.log","a")
-        F.write(text+"\n")
-        F.close()
+        fn = os.path.join(self.install_dir, 'os-changes.log')
+        with open(fn,'a') as W:
+            W.write(text+"\n")
+
 
     def backupFile(self, inFile, destFolder=None):
 
@@ -1185,7 +1241,7 @@ class Setup(object):
             self.logIt("Could not set limits.")
             self.logIt(traceback.format_exc(), True)
 
-    def load_properties(self, fn):
+    def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
         p = Properties.Properties()
         try:
@@ -1197,18 +1253,18 @@ class Setup(object):
 
             properties_list = p.keys()
             for prop in properties_list:
-                try:
-                    self.__dict__[prop] = p[prop]
-                    
-                    if prop == 'mappingLocations':
-                        self.__dict__[prop] = json.loads(p[prop])                    
-                    if p[prop] == 'True':
-                        self.__dict__[prop] = True
-                    elif p[prop] == 'False':
-                        self.__dict__[prop] = False
-                except:
-                    self.logIt("Error loading property %s" % prop)
-                    self.logIt(traceback.format_exc(), True)
+                if not prop in no_update:
+                    try:
+                        self.__dict__[prop] = p[prop]
+                        if prop == 'mappingLocations':
+                            self.__dict__[prop] = json.loads(p[prop])                    
+                        if p[prop] == 'True':
+                            self.__dict__[prop] = True
+                        elif p[prop] == 'False':
+                            self.__dict__[prop] = False
+                    except:
+                        self.logIt("Error loading property %s" % prop)
+                        self.logIt(traceback.format_exc(), True)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -1359,9 +1415,11 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         if self.java_type == 'jre':
-            jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
+            jreArchive = 'amazon-corretto-{}-linux-x64.tar.gz'.format(self.jre_version)
         else:
-            jreArchive = self.open_jdk_archive
+            self.logIt("Downloading " + self.open_jdk_archive_link)
+            jreArchive = os.path.basename(self.open_jdk_archive_link)
+            self.run(['wget', '-nv', self.open_jdk_archive_link, '-O', os.path.join(self.distAppFolder, jreArchive)])
 
         try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
@@ -1369,6 +1427,9 @@ class Setup(object):
         except:
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
+
+        if self.java_type == 'jdk':
+            self.jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
 
         self.run([self.cmd_ln, '-sf', self.jreDestinationPath, self.jre_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % self.jreDestinationPath])
@@ -1380,7 +1441,10 @@ class Setup(object):
 
     def extractOpenDJ(self):        
         if self.opendj_type == 'opendj':
-            openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*3*gluu*.zip')))
+            self.logIt("Downloading Opendj")
+            openDJArchive_name = os.path.basename(self.opendj_download_link)
+            openDJArchive = os.path.join(self.distAppFolder, openDJArchive_name)
+            self.run(['wget', '-nv', self.opendj_download_link, '-O', openDJArchive])
         else:
             openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
         
@@ -1425,6 +1489,11 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', jettyRunFolder])
         self.run([self.cmd_chmod, '-R', '775', jettyRunFolder])
         self.run([self.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
+
+        self.run(['rm', '-rf', '/opt/jetty/bin/jetty.sh'])
+        self.copyFile("%s/system/initd/jetty.sh" % self.staticFolder, "%s/bin/jetty.sh" % self.jetty_home)
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % self.jetty_home])
+        self.run([self.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
 
     def installNode(self):
         self.logIt("Installing node %s..." % self.node_version)
@@ -2094,37 +2163,10 @@ class Setup(object):
 
             # Put latest SAML templates
             identityWar = 'identity.war'
-            distIdentityPath = '%s/%s' % (self.distGluuFolder, identityWar)
 
-            tmpIdentityDir = '%s/tmp_identity' % self.distGluuFolder
-
-            self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
-            self.removeDirs(tmpIdentityDir)
-            self.createDirs(tmpIdentityDir)
-
-            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
-
-            self.run([self.cmd_jar,
-                      'xf',
-                      distIdentityPath], tmpIdentityDir)
-
-            self.logIt("Unpacking %s..." % 'oxtrust-configuration.jar')
-            self.run([self.cmd_jar,
-                      'xf',
-                      identityConfFilePattern], tmpIdentityDir)
-
-            self.logIt("Preparing SAML templates...")
-            self.removeDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
-            self.createDirs('%s/conf/shibboleth3/idp' % self.gluuBaseFolder)
-
-            # Put IDP templates to oxTrust conf folder
-            jettyIdentityServiceName = 'identity'
-            jettyIdentityServiceConf = '%s/%s/conf' % (self.jetty_base, jettyIdentityServiceName)
-            self.run([self.cmd_mkdir, '-p', jettyIdentityServiceConf])
-
-            self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/shibboleth3' % jettyIdentityServiceConf)
-
-            self.removeDirs(tmpIdentityDir)
+            self.createDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
+            self.createDirs('%s/identity/conf/shibboleth3/idp' % self.jetty_base)
+            self.createDirs('%s/identity/conf/shibboleth3/sp' % self.jetty_base)
 
             # unpack IDP3 JAR with static configs
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
@@ -2628,7 +2670,7 @@ class Setup(object):
                     self.install_couchbase = True
                 
                 if self.persistence_type == 'couchbase':
-                    self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
+                    self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
                 
         else:
             self.installLdap = False
@@ -2664,13 +2706,15 @@ class Setup(object):
         options = []
         options_text = []
         
-        for i, m in enumerate(self.groupMappings):
+        bucket_list = self.couchbaseBucketDict.keys()
+        
+        for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
         options_text = 'Use {0} to store {1}'.format(backend_types[0][0], ' '.join(options_text))
 
-        re_pattern = '^[1-{0}]+$'.format(len(self.groupMappings))
+        re_pattern = '^[1-{0}]+$'.format(len(self.couchbaseBucketDict))
 
         while True:
             prompt = self.getPrompt(options_text)
@@ -2679,25 +2723,19 @@ class Setup(object):
             else:
                 print "Please select one of {0}.".format(", ".join(options))
 
-        couchbase_mappings = self.groupMappings[:]
+        couchbase_mappings = bucket_list[:]
 
         for i in prompt:
-            m = self.groupMappings[int(i)-1]
+            m = bucket_list[int(i)-1]
             couchbase_mappings.remove(m)
 
         for m in couchbase_mappings:
             self.mappingLocations[m] = 'couchbase'
 
 
-    def promptForProperties(self):
-
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
-        if promptForMITLicense != 'y':
-            sys.exit(0)
-        
-        # IP address needed only for Apache2 and hosts file update
-        if self.installHttpd:
-            self.ip = self.get_ip()
+    def detect_hostname(self):
+        if not self.ip:
+            self.ip = self.detect_ip()
 
         detectedHostname = None
 
@@ -2709,6 +2747,20 @@ class Setup(object):
             except:
                 self.logIt("No detected hostname", True)
                 self.logIt(traceback.format_exc(), True)
+
+        return detectedHostname
+
+    def promptForProperties(self):
+
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
+        if promptForMITLicense != 'y':
+            sys.exit(0)
+
+        # IP address needed only for Apache2 and hosts file update
+        if self.installHttpd:
+            self.ip = self.get_ip()
+
+        detectedHostname = self.detect_hostname()
 
         if detectedHostname == 'localhost':
             detectedHostname = None
@@ -2780,7 +2832,7 @@ class Setup(object):
             self.ldap_hostname = ldapHost
             self.installLdap = True
 
-        if setupOptions['allowPreReleasedFeatures'] and os.path.exists(os.path.join(self.distAppFolder, self.open_jdk_archive)):
+        if setupOptions['allowPreReleasedFeatures']:
             while True:
                 java_type = self.getPrompt("Select Java type: 1.Jre-1.8   2.OpenJDK-11", '1')
                 if not java_type:
@@ -2795,8 +2847,6 @@ class Setup(object):
                 self.java_type = 'jre'
             else:
                 self.java_type = 'jdk'
-                self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
-                self.jreDestinationPath = '/opt/jdk-11.0.2+7'
                 self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
                 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
@@ -2840,7 +2890,7 @@ class Setup(object):
                 self.promptForBackendMappings(backend_types)
             else:
                 self.persistence_type = 'couchbase'
-                self.mappingLocations = { group: 'couchbase' for group in self.groupMappings }
+                self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
         else:
 
             backend_types = self.getBackendTypes()
@@ -2923,13 +2973,16 @@ class Setup(object):
     def renderTemplate(self, filePath):
         self.renderTemplateInOut(filePath, self.templateFolder, self.outputFolder)
 
-    def render_templates(self):
+    def render_templates(self, templates=None):
         self.logIt("Rendering templates")
+
+        if not templates:
+            templates = self.ce_templates
 
         if self.persistence_type=='couchbase':
             self.ce_templates[self.ox_ldap_properties] = False
 
-        for fullPath in self.ce_templates.keys():
+        for fullPath in templates:
             try:
                 self.renderTemplate(fullPath)
             except:
@@ -3127,8 +3180,15 @@ class Setup(object):
 
         return output
 
-    def save_properties(self):
-        self.logIt('Saving properties to %s' % self.savedProperties)
+    def save_properties(self, prop_fn=None, obj=None):
+        
+        if not prop_fn:
+            prop_fn = self.savedProperties
+            
+        if not obj:
+            obj = self
+
+        self.logIt('Saving properties to %s' % prop_fn)
         
         def getString(value):
             if isinstance(value, str):
@@ -3139,19 +3199,20 @@ class Setup(object):
                 return ''
         try:
             p = Properties.Properties()
-            keys = self.__dict__.keys()
+            keys = obj.__dict__.keys()
             keys.sort()
             for key in keys:
+                key = str(key)
                 if key == 'couchbaseInstallOutput':
                     continue
                 if key == 'mappingLocations':
-                    p[key] = json.dumps(self.__dict__[key])
+                    p[key] = json.dumps(obj.__dict__[key])
                 else:
-                    value = getString(self.__dict__[key])
+                    value = getString(obj.__dict__[key])
                     if value != '':
                         p[key] = value
 
-            p.store(open(self.savedProperties, 'w'))
+            p.store(open(prop_fn, 'w'))
         except:
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -3438,7 +3499,7 @@ class Setup(object):
                                           '-c',
                                           indexCmd])
             else:
-                self.logIt('NO indexes found %s' % self.indexJson, True)
+                self.logIt('NO indexes found %s' % self.openDjIndexJson, True)
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
@@ -3644,12 +3705,12 @@ class Setup(object):
                 ldif_files = []
 
                 if self.mappingLocations['default'] == 'ldap':
-                    ldif_files += self.mappingsLdif['default']
+                    ldif_files += self.couchbaseBucketDict['default']['ldif']
 
                 ldap_mappings = self.getMappingType('ldap')
   
                 for group in ldap_mappings:
-                    ldif_files += self.mappingsLdif[group]
+                    ldif_files +=  self.couchbaseBucketDict[group]['ldif']
   
                 if not self.ldif_base in ldif_files:
                     ldif_files.insert(0, self.ldif_base)
@@ -4012,18 +4073,17 @@ class Setup(object):
                 for e in documents:
                     if bucket:
                         cur_bucket = bucket
-                    elif e[0].startswith('site_') or e[0].startswith('cache-refresh_'):
-                        cur_bucket = 'gluu_site'
-                    elif e[0].startswith('groups_') or e[0].startswith('people_'):
-                        cur_bucket = 'gluu_user'
-                    elif e[0].startswith('metric_'):
-                        cur_bucket = 'gluu_statistic'
-                    elif e[0].startswith('authorizations_'):
-                        cur_bucket = 'gluu_authorization'
-                    elif e[0].startswith('cache_'):
-                        cur_bucket = 'gluu_cache'
                     else:
-                        cur_bucket = 'gluu'
+                        n_ = e[0].find('_')
+                        document_key_prefix = e[0][:n_+1]
+                        self.couchbaseBucketDict['user']['document_key_prefix']
+                        
+                        for cb in self.couchbaseBucketDict:
+                            if document_key_prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
+                                cur_bucket = 'gluu_'+cb
+                                break
+                        else:
+                            cur_bucket = 'gluu'
 
                     query = ''
 
@@ -4118,22 +4178,16 @@ class Setup(object):
                     'gluuOptPythonFolder': self.gluuOptPythonFolder
                     }
 
-
-        bucketMappings = {
-                            'user': 'people, groups',
-                            'cache': 'cache',
-                            'statistic': 'statistic',
-                            'site': 'cache-refresh',
-                            'authorization': 'authorizations',
-                        }
-
         couchbase_mappings = []
 
-        for group in self.groupMappings[1:]:
+        for group in self.couchbaseBucketDict.keys()[1:]:
             cb_key = 'couchbase_{}_mapping'.format(group)
             if self.mappingLocations[group] == 'couchbase':
-                couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, bucketMappings[group]))
-                self.templateRenderingDict[cb_key] = bucketMappings[group]
+                if self.couchbaseBucketDict[group]['mapping']:
+                    couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
+                    self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+                else:
+                     self.templateRenderingDict[cb_key] = ''
             else:
                 self.templateRenderingDict[cb_key] = ''
 
@@ -4164,15 +4218,24 @@ class Setup(object):
                     for name in obj['names']:
                         listAttrib.append(name)
 
+    def calculate_bucket_ramsize(self, bucket, total_ram, total_ratio):
+        calculated_size = int((self.couchbaseBucketDict[bucket]['memory_allocation'][0]/total_ratio)*total_ram)
+        min_size = self.couchbaseBucketDict[bucket]['memory_allocation'][1]
+
+        if calculated_size < min_size:
+            return  min_size
+
+        return calculated_size
+
 
     def install_couchbase_server(self):
         # prepare multivalued list
         self.prepare_multivalued_list()
 
         if not self.remoteCouchbase:
-            
+
             self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-            
+
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.couchebaseCreateCluster()
@@ -4184,25 +4247,28 @@ class Setup(object):
         couchbaseClusterRamsize = system_info["memoryQuota"]
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
         couchbase_mappings = self.getMappingType('couchbase')
-        bucketNumber = len(couchbase_mappings)
 
-        #TO DO: calculations of bucketRamsize is neaded
+        total_ratio = 0
+        for group in couchbase_mappings:
+             total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
 
         if self.mappingLocations['default'] != 'couchbase':
             couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            bucketNumber += 1
-            self.couchebaseCreateBucket('gluu', bucketRamsize=couchbaseClusterRamsize/bucketNumber)
+            bucketRamsize = self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
+            self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
-            self.import_ldif_couchebase(self.mappingsLdif['default'], 'gluu')
+            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
+
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            self.couchebaseCreateBucket(bucket, bucketRamsize=couchbaseClusterRamsize/bucketNumber)
+            bucketRamsize = self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
+            self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
-            if self.mappingsLdif[group]:
-                self.import_ldif_couchebase(self.mappingsLdif[group], bucket)
+            if self.couchbaseBucketDict[group]['ldif']:
+                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         if self.installSaml:
             self.logIt("Creating couchbase readonly user for shib")
@@ -4240,7 +4306,6 @@ class Setup(object):
         self.run(['unzip', '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run(['rm', '-rf', 'oxauth_test_client_keys.zip'])
         self.run(['chown', '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
-
 
 
         oxAuthConfDynamic_changes = (
@@ -4516,35 +4581,38 @@ class Setup(object):
 
 ############################   Main Loop   #################################################
 
-parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
-oxAuth and oxTrust to start. If setup.properties is found in this folder, these
-properties will automatically be used instead of the interactive setup.
-'''
-
-parser = argparse.ArgumentParser(description=parser_description)
-parser.add_argument('-d', help="Installation directory")
-parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
-parser.add_argument('-p', help="Install Passport", action='store_true')
-parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
-parser.add_argument('-f', help="Specify setup.properties file")
-parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
-parser.add_argument('-N', help="No apache httpd server", action='store_true')
-parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
-parser.add_argument('-w', help="Get the development head war files", action='store_true')
-parser.add_argument('-t', help="Load test data", action='store_true')
-parser.add_argument('-x', help="Load test data and exit", action='store_true')
-parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
-parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
-parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
-parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
-parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
-
-argsp = parser.parse_args()
 
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
 if __name__ == '__main__':
+
+    parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
+    oxAuth and oxTrust to start. If setup.properties is found in this folder, these
+    properties will automatically be used instead of the interactive setup.
+    '''
+
+    parser = argparse.ArgumentParser(description=parser_description)
+    parser.add_argument('-d', help="Installation directory")
+    parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
+    parser.add_argument('-p', help="Install Passport", action='store_true')
+    parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
+    parser.add_argument('-f', help="Specify setup.properties file")
+    parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
+    parser.add_argument('-N', help="No apache httpd server", action='store_true')
+    parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
+    parser.add_argument('-w', help="Get the development head war files", action='store_true')
+    parser.add_argument('-t', help="Load test data", action='store_true')
+    parser.add_argument('-x', help="Load test data and exit", action='store_true')
+    parser.add_argument('--opendj', help="Use OpenDJ as ldap server", action='store_true')
+    parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
+    parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
+    parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
+    parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+    parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
+
+    argsp = parser.parse_args()
+
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
@@ -4596,6 +4664,8 @@ if __name__ == '__main__':
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
 
+    if argsp.opendj:
+        setupOptions['opendj_type'] = 'opendj' 
 
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):

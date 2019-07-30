@@ -2,7 +2,7 @@
 
 Used to change a Gluu Server from one hostname to another.
 
-**Currently tested to work with Gluu Server 3.1.2 using Ubuntu 16 and CentOS 7**
+**Currently tested to work with Gluu Server 3.1.x using Ubuntu 16 and CentOS 7**
 
 Requirements:
 
