@@ -192,7 +192,7 @@ public class AuthorizeAction {
 
     public void checkPermissionGranted() throws IOException {
         if ((clientId == null) || clientId.isEmpty()) {
-            log.error("Permission denied. client_id should be not empty.");
+            log.debug("Permission denied. client_id should be not empty.");
             permissionDenied();
             return;
         }
@@ -201,13 +201,13 @@ public class AuthorizeAction {
         try {
             client = clientService.getClient(clientId);
         } catch (EntryPersistenceException ex) {
-            log.error("Permission denied. Failed to find client by inum '{}' in LDAP.", clientId, ex);
+            log.debug("Permission denied. Failed to find client by inum '{}' in LDAP.", clientId, ex);
             permissionDenied();
             return;
         }
 
         if (client == null) {
-            log.error("Permission denied. Failed to find client_id '{}' in LDAP.", clientId);
+            log.debug("Permission denied. Failed to find client_id '{}' in LDAP.", clientId);
             permissionDenied();
             return;
         }
