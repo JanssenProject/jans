@@ -6,8 +6,12 @@
 
 package org.gluu.oxeleven.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.base.Strings;
 import org.jboss.resteasy.client.ClientRequest;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 
@@ -64,7 +68,7 @@ public class SignClient extends BaseClient<SignRequest, SignResponse> {
         }
 
         if (getRequest().getSignRequestParam() != null) {
-            clientRequest.body(getRequest().getMediaType(), getRequest().getSignRequestParam());
+            clientRequest.body(getRequest().getMediaType(), toPrettyJson(getRequest().getSignRequestParam()));
         }
 
         // Call REST Service and handle response
@@ -78,4 +82,10 @@ public class SignClient extends BaseClient<SignRequest, SignResponse> {
 
         return getResponse();
     }
+
+	public static String toPrettyJson(Object object) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+	}
+
 }
