@@ -438,5 +438,84 @@
             "description":"The user has registered device already.",
             "uri":null
         }
+    ],
+    "backchannelAuthentication":[
+        {
+            "id": "invalid_request",
+            "description": "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, contains more than one of the hints, or is otherwise malformed.",
+            "uri": null
+        },
+        {
+            "id": "invalid_scope",
+            "description": "The requested scope is invalid, unknown, or malformed.",
+            "uri": null
+        },
+        {
+            "id": "expired_login_hint_token",
+            "description": "The login_hint_token provided in the authentication request is not valid because it has expired.",
+            "uri": null
+        },
+        {
+            "id": "unknown_user_id",
+            "description": "The OpenID Provider is not able to identify which end-user the Client wishes to be authenticated by means of the hint provided in the request (login_hint_token, id_token_hint or login_hint).",
+            "uri": null
+        },
+        {
+            "id": "unauthorized_client",
+            "description": "The Client is not authorized to use this authentication flow.",
+            "uri": null
+        },
+        {
+            "id": "missing_user_code",
+            "description": "User code is required but was missing from the request.",
+            "uri": null
+        },
+        {
+            "id": "invalid_user_code",
+            "description": "User code was invalid.",
+            "uri": null
+        },
+        {
+            "id": "invalid_binding_message",
+            "description": "The binding message is invalid or unacceptable for use in the context of the given request.",
+            "uri": null
+        },
+        {
+            "id": "invalid_client",
+            "description": "Client authentication failed (e.g., invalid client credentials, unknown client, no client authentication included, or unsupported authentication method).",
+            "uri": null
+        },
+        {
+            "id": "unauthorized_end_user_device",
+            "description": "The end-user has not registered a device to receive push notifications.",
+            "uri": null
+        },
+        {
+            "id": "access_denied",
+            "description": "The resource owner or OpenID Provider denied the CIBA (Client Initiated Backchannel Authentication) request.",
+            "uri": null
+        }
+    ],
+    "backchannelDeviceRegistration":[
+        {
+            "id": "invalid_request",
+            "description": "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
+            "uri": null
+        },
+        {
+            "id": "unknown_user_id",
+            "description": "The OpenID Provider is not able to identify the end-user.",
+            "uri": null
+        },
+        {
+            "id": "unauthorized_client",
+            "description": "The Client is not authorized to use this authentication flow.",
+            "uri": null
+        },
+        {
+            "id": "access_denied",
+            "description": "The resource owner or OpenID Provider denied the request.",
+            "uri": null
+        }
     ]
 }
