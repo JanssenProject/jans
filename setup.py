@@ -4531,13 +4531,9 @@ class Setup(object):
         
         self.gluu_ro_pw = self.getPW()
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
-        
-        ldif_template_base = os.path.join(source_dir, 'templates/gluu_radius_base.ldif')
-        ldif_template_clients = os.path.join(source_dir, 'templates/gluu_radius_clients.ldif')
-        ldif_template_server = os.path.join(source_dir, 'templates/gluu_radius_server.ldif')
-        
+
         scripts_dir = os.path.join(source_dir,'scripts')
-        
+
         for scriptFile, scriptName in ( ('super_gluu_ro_session.py', 'super_gluu_ro_session_script'),
                             ('super_gluu_ro.py','super_gluu_ro_script'),
                           ):
@@ -4546,9 +4542,10 @@ class Setup(object):
             base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
             self.templateRenderingDict[scriptName] = base64ScriptFile
 
-        self.renderTemplateInOut(ldif_template_base, os.path.join(source_dir, 'templates'), self.outputFolder)
-        self.renderTemplateInOut(ldif_template_clients, os.path.join(source_dir, 'templates'), self.outputFolder)
-        self.renderTemplateInOut(ldif_template_server, os.path.join(source_dir, 'templates'), self.outputFolder)
+        for tmp_ in ('gluu_radius_base.ldif', 'gluu_radius_clients.ldif', 'gluu_radius_server.ldif'):
+            tmp_fn = os.path.join(source_dir, 'templates', tmp_)
+            self.renderTemplateInOut(tmp_fn, os.path.join(source_dir, 'templates'), self.outputFolder)
+        
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
 
         ldif_file_base = os.path.join(self.outputFolder, 'gluu_radius_base.ldif')
