@@ -40,21 +40,3 @@ objectClass: top
 oxScopeType: dynamic
 oxScriptDn: inum=5866-4202,ou=scripts,o=gluu
 
-dn: inum=%(gluu_radius_client_id)s,ou=clients,o=gluu
-objectClass: oxAuthClient
-objectClass: top
-displayName: Gluu RO OpenID Client
-inum: %(gluu_radius_client_id)s
-oxAuthClientSecret: %(gluu_ro_encoded_pw)s
-oxAuthAppType: native
-oxAuthGrantType: password
-oxAuthScope: inum=F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=63CD,ou=scopes,o=gluu
-oxAuthRedirectURI: https://%(hostname)s/
-oxAuthTokenEndpointAuthMethod: private_key_jwt
-oxIncludeClaimsInIdToken: true
-oxAuthTokenEndpointAuthSigningAlg: RS512
-oxAuthIdTokenSignedResponseAlg: RS512
-oxAuthResponseType: id_token
-oxAuthJwks::%(gluu_ro_client_base64_jwks)s
-
