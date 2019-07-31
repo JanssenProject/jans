@@ -153,7 +153,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             log.trace("Registration request = {}", requestParams);
 
             if (!appConfiguration.getDynamicRegistrationEnabled()) {
-                log.error("Dynamic client registration is disabled.");
+                log.info("Dynamic client registration is disabled.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic client registration is disabled.");
             }
 
@@ -177,7 +177,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
                 if (!registerParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
-                    log.error("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
+                    log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
                     throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
                 }
             }
