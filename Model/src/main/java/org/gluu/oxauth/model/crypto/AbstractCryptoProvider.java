@@ -47,6 +47,10 @@ public abstract class AbstractCryptoProvider {
 
     protected static final Logger LOG = Logger.getLogger(AbstractCryptoProvider.class);
 
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+        return generateKey(algorithm, expirationTime, Use.SIGNATURE);
+    }
+
     public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception;
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
@@ -87,6 +91,10 @@ public abstract class AbstractCryptoProvider {
         jwks.getKeyRequestParams().add(key);
 
         return jwks;
+    }
+
+    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
+        return generateJwks(keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
     }
 
     public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
