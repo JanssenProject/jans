@@ -1,0 +1,30 @@
+# SCIM Resource Server Client
+dn: inum=%(scim_rs_client_id)s,ou=clients,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+inum: %(scim_rs_client_id)s
+displayName: SCIM Resource Server Client
+oxAuthAppType: native
+oxAuthGrantType: client_credentials
+oxAuthIdTokenSignedResponseAlg: HS256
+oxAuthScope: inum=6D99,ou=scopes,o=gluu
+oxAuthJwks:: %(scim_rs_client_base64_jwks)s
+oxAuthTokenEndpointAuthMethod: private_key_jwt
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: false
+oxAuthRequireAuthTime: false
+
+# SCIM Requesting Party Client
+dn: inum=%(scim_rp_client_id)s,ou=clients,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+inum: %(scim_rp_client_id)s
+displayName: SCIM Requesting Party Client
+oxAuthAppType: native
+oxAuthGrantType: client_credentials
+oxAuthIdTokenSignedResponseAlg: HS256
+oxAuthJwks:: %(scim_rp_client_base64_jwks)s
+oxAuthTokenEndpointAuthMethod: private_key_jwt
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: false
+oxAuthRequireAuthTime: false

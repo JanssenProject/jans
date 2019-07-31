@@ -539,11 +539,12 @@ class Setup(object):
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
+        self.ldif_scim_clients = '%s/scim_clients.ldif' % self.outputFolder
+        
+        
         self.lidf_oxtrust_api = '%s/oxtrust_api.ldif' % self.outputFolder
-        
-        self.ldif_passport = '%s/passport.ldif' % self.outputFolder
-        self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
-        
+        self.ldif_oxtrust_api_clients = '%s/oxtrust_api_clients.ldif' % self.outputFolder
+
         self.ldif_scripts_casa = '%s/scripts_casa.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
@@ -604,8 +605,12 @@ class Setup(object):
 
         # oxPassport Configuration
         self.gluu_passport_base = '%s/passport' % self.node_base
+        
         self.ldif_passport_config = '%s/oxpassport-config.ldif' % self.outputFolder
-
+        self.ldif_passport = '%s/passport.ldif' % self.outputFolder
+        self.ldif_passport_clients = '%s/passport_clients.ldif' % self.outputFolder
+        self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
+        
         self.passport_rs_client_id = None
         self.passport_rs_client_jwks = None
         self.passport_rs_client_jks_fn = "%s/passport-rs.jks" % self.certFolder
@@ -665,8 +670,10 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
+                           self.ldif_scim_clients,
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
+                           self.ldif_oxtrust_api_clients,
                            ]
 
 
@@ -694,11 +701,13 @@ class Setup(object):
                              self.ldif_groups: False,
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
+                             self.ldif_scim_clients: False,
                              self.ldif_idp: False,
                              self.network: False,
                              self.casa_config: False,
                              self.ldif_scripts_casa: False,
                              self.lidf_oxtrust_api: False,
+                             self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,
                              self.data_source_properties: False
                              }
@@ -780,7 +789,11 @@ class Setup(object):
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
-                        ('clients',  { 'ldif': [self.ldif_clients],
+                        ('clients',  { 'ldif': [
+                                                self.ldif_clients,
+                                                self.ldif_oxtrust_api_clients,
+                                                self.ldif_scim_clients,
+                                                ],
                                     'memory_allocation': [0.05, 100],
                                     'mapping': 'clients',
                                     'document_key_prefix': ['clients_'],
@@ -2318,11 +2331,17 @@ class Setup(object):
         self.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
         self.renderTemplate(self.ldif_passport_config)
         self.renderTemplate(self.ldif_passport)
+        self.renderTemplate(self.ldif_passport_clients)
 
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config])
         else:
             self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
+
+        if self.mappingLocations['clients'] == 'ldap':
+            self.import_ldif_opendj([self.ldif_passport_clients])
+        else:
+            self.import_ldif_couchebase([self.ldif_passport_clients])
 
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -4514,6 +4533,7 @@ class Setup(object):
         self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
         
         ldif_template_base = os.path.join(source_dir, 'templates/gluu_radius_base.ldif')
+        ldif_template_clients = os.path.join(source_dir, 'templates/gluu_radius_clients.ldif')
         ldif_template_server = os.path.join(source_dir, 'templates/gluu_radius_server.ldif')
         
         scripts_dir = os.path.join(source_dir,'scripts')
@@ -4527,16 +4547,24 @@ class Setup(object):
             self.templateRenderingDict[scriptName] = base64ScriptFile
 
         self.renderTemplateInOut(ldif_template_base, os.path.join(source_dir, 'templates'), self.outputFolder)
+        self.renderTemplateInOut(ldif_template_clients, os.path.join(source_dir, 'templates'), self.outputFolder)
         self.renderTemplateInOut(ldif_template_server, os.path.join(source_dir, 'templates'), self.outputFolder)
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
 
         ldif_file_base = os.path.join(self.outputFolder, 'gluu_radius_base.ldif')
         ldif_file_server = os.path.join(self.outputFolder, 'gluu_radius_server.ldif')
+        ldif_file_clients = os.path.join(self.outputFolder, 'gluu_radius_clients.ldif')
         
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj([ldif_file_base])
         else:
             self.import_ldif_couchebase([ldif_file_base])
+
+        if self.mappingLocations['clients'] == 'ldap':
+            self.import_ldif_opendj([ldif_file_clients])
+        else:
+            self.import_ldif_couchebase([ldif_file_clients]) 
+
 
         if self.installGluuRadius:
             self.pbar.progress("Installing Gluu components: Radius", False)
