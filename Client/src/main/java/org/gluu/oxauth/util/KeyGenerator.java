@@ -10,9 +10,6 @@ import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxElevenCryptoProvider;
@@ -22,13 +19,16 @@ import org.gluu.oxauth.model.jwk.*;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.util.StringHelper;
-
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * Command example:
@@ -168,8 +168,7 @@ public class KeyGenerator {
 
 			for (Algorithm algorithm : signatureAlgorithms) {
 				SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
-				JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
-				// System.out.println(result);
+				JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
 
 				JSONWebKey key = new JSONWebKey();
 				key.setKid(result.getString(KEY_ID));
@@ -192,8 +191,7 @@ public class KeyGenerator {
 			for (Algorithm algorithm : encryptionAlgorithms) {
 			    KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
 			    JSONObject result = cryptoProvider.generateKey(algorithm,
-			            calendar.getTimeInMillis());
-			    // System.out.println(result);
+			            calendar.getTimeInMillis(), Use.ENCRYPTION);
 
 			    JSONWebKey key = new JSONWebKey();
 			    key.setKid(result.getString(KEY_ID));
