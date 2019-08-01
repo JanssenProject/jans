@@ -5818,7 +5818,27 @@
                 "top"
             ],
             "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "parent",
+                "classRef"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "samlAcrs"
+            ],
+            "oid": "oxObjectClass:54",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
         }
+        
+        
     ],
     "oidMacros": {
         "oxAttribute": "oxPublished:3",
