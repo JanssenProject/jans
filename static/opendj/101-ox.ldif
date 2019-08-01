@@ -2638,5 +2638,11 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.53 NAME 'oxFido2RegistrationEntry'
   MUST ( objectclass )
   MAY ( oxId $ creationDate $ displayName $ oxSessionStateId $ oxCodeChallenge $ oxCodeChallengeHash $ oxPublicKeyId $ personInum $ oxRegistrationData $ oxDeviceNotificationConf $ oxStatus )
   X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.54 NAME 'samlAcrs'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( parent $ classRef )
+  X-ORIGIN 'Gluu created objectclass' )
 
 
