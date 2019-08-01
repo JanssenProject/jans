@@ -5829,7 +5829,7 @@
                 "objectclass"
             ],
             "names": [
-                "samlAcrs"
+                "samlAcr"
             ],
             "oid": "oxObjectClass:54",
             "sup": [
