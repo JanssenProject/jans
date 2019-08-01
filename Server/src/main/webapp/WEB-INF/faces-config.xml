@@ -20,6 +20,9 @@
             <base-name>org.gluu.oxauth.i18n.CustomResourceBundle</base-name>
             <var>msgs</var>
         </resource-bundle>
+        <message-bundle>
+           OxtrustCustomValidationMessage
+        </message-bundle>
     </application>
     <factory>
         <exception-handler-factory>
