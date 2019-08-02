@@ -2642,7 +2642,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.54 NAME 'samlAcr'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( parent $ classRef )
+  MAY ( parent $ classRef $ inum )
   X-ORIGIN 'Gluu created objectclass' )
 
 
