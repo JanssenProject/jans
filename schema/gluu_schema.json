@@ -5823,7 +5823,8 @@
             "kind": "STRUCTURAL",
             "may": [
                 "parent",
-                "classRef"
+                "classRef",
+                "inum"
             ],
             "must": [
                 "objectclass"
