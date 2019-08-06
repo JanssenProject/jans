@@ -6,13 +6,14 @@
 
 package org.gluu.oxauth.model.crypto;
 
-import java.security.PrivateKey;
-
 import org.apache.commons.httpclient.HttpStatus;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxeleven.client.*;
+import org.json.JSONObject;
+
+import java.security.PrivateKey;
 
 /**
  * @author Javier Rojas Blum
@@ -36,7 +37,7 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(algorithm.toString());
         request.setExpirationTime(expirationTime);

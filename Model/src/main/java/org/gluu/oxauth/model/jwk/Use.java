@@ -30,6 +30,10 @@ public enum Use {
         this.paramName = paramName;
     }
 
+    public String getParamName() {
+        return paramName;
+    }
+
     /**
      * Returns the corresponding {@link Use} for a parameter use of the JWK endpoint.
      *
