@@ -138,7 +138,7 @@ public class AuthorizeService {
         try {
             final User user = userService.getUserByDn(session.getUserDn());
             if (user == null) {
-                log.error("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
+                log.debug("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
                 permissionDenied(session);
                 return;
             }

@@ -444,7 +444,7 @@ public class ConfigurationFactory {
 	}
 
 	private void generateWebKeys() {
-		log.error("Failed to load JWKS. Attempting to generate new JWKS...");
+		log.info("Failed to load JWKS. Attempting to generate new JWKS...");
 
 		String newWebKeys = null;
 		try {
