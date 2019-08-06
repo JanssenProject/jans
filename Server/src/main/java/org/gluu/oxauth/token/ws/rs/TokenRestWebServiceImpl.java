@@ -350,7 +350,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 scope,
                                 idToken));
                     } else {
-                        log.error("Invalid user", new RuntimeException("User is empty"));
+                        log.debug("Invalid user", new RuntimeException("User is empty"));
                         builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                     }
                 }

@@ -6,29 +6,11 @@
 
 package org.gluu.oxauth.service;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static org.gluu.oxauth.model.jwk.JWKParameter.KEY_ID;
-
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.config.Conf;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
@@ -36,7 +18,21 @@ import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -158,7 +154,7 @@ public class KeyGeneratorTimer {
                 if (expirationDate.before(now)) {
                     // The expired key is not added to the array of keys
                     log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
-                            key.getString(EXPIRATION_TIME));
+                            key.getLong(EXPIRATION_TIME));
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
                 } else {
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);

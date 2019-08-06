@@ -9,7 +9,8 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title><ui:insert name="pageTitle" /></title>
-		<link rel="icon" href="#{request.contextPath}/servlet/favicon" type='image/x-icon'/>
+		<link rel="icon" href="#{request.contextPath}/servlet/favicon"
+			type='image/x-icon' />
 		<link type="text/css" rel="stylesheet"
 			href="#{oxAuthConfigurationService.getCssLocation()}/style.css" />
 		<link type="text/css" rel="stylesheet"
@@ -26,15 +27,28 @@
 		<script
 			src="#{oxAuthConfigurationService.getJsLocation()}/platform.js" />
 		<style>
-.footer {
+body {
+	margin-bottom: 3% !important;
+}
+
+.site-footer {
 	position: fixed;
-	margin-top: 4%;
+	bottom: 0;
+	margin-top: 4% !important;
 	bottom: 0;
 	width: 100%;
 	color: white;
+	text-align: center;
 	height: 55px;
 	background-color: #00BE79;
-	height: 55px;
+	margin-top: 4% !important;
+}
+
+@media screen and (min-height: 720px) {
+	.footer {
+		position: absolute;
+		height: 5px !important;
+	}
 }
 </style>
 
@@ -52,18 +66,52 @@
 			<ui:insert name="body" />
 		</div>
 	</h:body>
-	<footer class="footer">
-	<div class="container">
-		<p style="margin-right: 20%; margin-left: 25% !important; padding: 20px; padding-top:0px !important;">
-			&copy; <a target="_blank"
-				href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
-					value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
-				target="_blank" href="#{client.policyUri}"><h:outputText
-					value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
-				target="_blank" href="#{client.tosUri}"><h:outputText
-					value="#{msgs['common.termsOfService']}" escape="false" /></a>
-		</p>
-	</div>
+	<footer class="site-footer" id="appFooter">
+	<p
+		style="margin-right: 20%; margin-left: 25% !important; padding: 20px; padding-top: 0px !important;">
+		&copy; <a target="_blank"
+			href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+				value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
+			target="_blank" href="#{client.policyUri}"><h:outputText
+				value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
+			target="_blank" href="#{client.tosUri}"><h:outputText
+				value="#{msgs['common.termsOfService']}" escape="false" /></a>
+	</p>
 	</footer>
+	<script type="text/javascript">
+		//<![CDATA[ 
+		$(document)
+				.ready(
+						function() {
+							$(window)
+									.scroll(
+											function() {
+												if (window.innerHeight < 620) {
+													document
+															.getElementById("appFooter").style.display = "none";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "block";
+												}
+
+											});
+
+							$(window)
+									.on(
+											'resize',
+											function() {
+												var win = $(this);
+												if (win.height() >= 620) {
+													document
+															.getElementById("appFooter").style.display = "block";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "none";
+												}
+											});
+						});
+
+		//]]>
+	</script>
 </f:view>
 </html>

@@ -47,6 +47,10 @@
 		<ui:insert name="head" />
 
 		<style>
+body {
+	margin-bottom: 3% !important;
+}
+
 .footer {
 	position: fixed;
 	margin-top: 5%;
@@ -72,9 +76,10 @@
 			<ui:insert name="body" />
 		</div>
 	</h:body>
-	<footer class="footer">
+	<footer class="footer" id="appFooter">
 	<div class="container">
-		<p style="margin-right: 20%; margin-left: 25% !important; padding: 20px; padding-top:0px !important;">
+		<p
+			style="margin-right: 20%; margin-left: 25% !important; padding: 20px; padding-top: 0px !important;">
 			&copy; <a target="_blank"
 				href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
 					value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
@@ -85,5 +90,40 @@
 		</p>
 	</div>
 	</footer>
+	<script type="text/javascript">
+		//<![CDATA[ 
+		$(document)
+				.ready(
+						function() {
+							$(window)
+									.scroll(
+											function() {
+												if (window.innerHeight < 620) {
+													document
+															.getElementById("appFooter").style.display = "none";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "block";
+												}
+
+											});
+
+							$(window)
+									.on(
+											'resize',
+											function() {
+												var win = $(this);
+												if (win.height() >= 620) {
+													document
+															.getElementById("appFooter").style.display = "block";
+												} else {
+													document
+															.getElementById("appFooter").style.display = "none";
+												}
+											});
+						});
+
+		//]]>
+	</script>
 </f:view>
 </html>
