@@ -59,7 +59,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Application calls it at end session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
-    #   authorizationGrant is org.gluu.oxauth.model.common.SessionId
+    #   sessionId is org.gluu.oxauth.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def endSession(self, httpRequest, sessionId, configurationAttributes):
         print "Application session. Starting external session end"
