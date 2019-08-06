@@ -116,7 +116,7 @@ public class RegisterParamsValidator {
                     try {
                         uri = new URI(redirectUri);
                     } catch (URISyntaxException e) {
-                        log.error("Failed to parse redirect_uri: {}, error: {}", redirectUri, e.getMessage());
+                        log.debug("Failed to parse redirect_uri: {}, error: {}", redirectUri, e.getMessage());
                         valid = false;
                         continue;
                     }
@@ -125,7 +125,7 @@ public class RegisterParamsValidator {
                         case WEB:
                             if (HTTP.equalsIgnoreCase(uri.getScheme())) {
                                 if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                    log.error("Invalid protocol for redirect_uri: " +
+                                    log.debug("Invalid protocol for redirect_uri: " +
                                             redirectUri +
                                             " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
                                     valid = false;
@@ -187,7 +187,7 @@ public class RegisterParamsValidator {
                     valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.debug(e.getMessage(), e);
                 valid = false;
             }
         }
@@ -246,7 +246,7 @@ public class RegisterParamsValidator {
 
         // preconditions
         if (redirectUris == null || redirectUris.isEmpty()) {
-            log.error("Preconditions of logout uri validation are failed.");
+            log.debug("Preconditions of logout uri validation are failed.");
             throwInvalidLogoutUri(errorResponseFactory);
             return;
         }
@@ -257,17 +257,17 @@ public class RegisterParamsValidator {
             URI uri = new URI(logoutUri);
 
             if (!redirectUriHosts.contains(uri.getHost())) {
-                log.error("logout uri host is not within redirect_uris, logout_uri: {}, redirect_uris: {}", logoutUri, redirectUris);
+                log.debug("logout uri host is not within redirect_uris, logout_uri: {}, redirect_uris: {}", logoutUri, redirectUris);
                 throwInvalidLogoutUri(errorResponseFactory);
                 return;
             }
 
             if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                log.error("logout uri schema is not https, logout_uri: {}", logoutUri);
+                log.debug("logout uri schema is not https, logout_uri: {}", logoutUri);
                 throwInvalidLogoutUri(errorResponseFactory);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.debug(e.getMessage(), e);
             throwInvalidLogoutUri(errorResponseFactory);
         }
     }

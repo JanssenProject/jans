@@ -35,6 +35,7 @@ import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtType;
@@ -373,7 +374,7 @@ public class CrossEncryptionTest {
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, keySet, SignatureAlgorithm.RS256, "audience");
         jwtSigner.setCryptoProvider(new AbstractCryptoProvider() {
             @Override
-            public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+            public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
                 return null;
             }
 
