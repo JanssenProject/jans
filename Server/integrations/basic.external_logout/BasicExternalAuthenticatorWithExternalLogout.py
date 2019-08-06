@@ -81,6 +81,8 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Basic (with external logout). Get external logout URL call"
         return "https://www.dummy.org/app/logout.htm"
 
+    # In order to get this method call RP should end_session request to https://<server>/oxauth/logout.htm enpoint
+    # instead of https://<server>/oxauth/restv1/end_session endpoint
     def logout(self, configurationAttributes, requestParameters):
         print "Basic (with external logout). Logout call"
         return True
