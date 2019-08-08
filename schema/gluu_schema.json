@@ -4100,17 +4100,6 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "Trust SMTP server",
-            "equality": "caseIgnoreMatch",
-            "names": [
-                "gluuSmtpServerTrust"
-            ],
-            "oid": "oxAttribute:379",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-            "x_origin": "Gluu created attribute"
-        },
-        {
             "desc": "Scope expression",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -4453,6 +4442,17 @@
                 "classRef"
             ],
             "oid": "oxAttribute:411",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+                {
+            "desc": "Trust SMTP server",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "gluuSmtpServerTrust"
+            ],
+            "oid": "oxAttribute:412",
+            "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
         }
