@@ -30,6 +30,7 @@ Replace `<adminPassword>` with your Gluu admin password.
 ```
 # /etc/init.d/identity stop
 # /etc/init.d/oxauth stop
+# /etc/init.d/idp stop [ If you have SAML ] 
 # /etc/init.d/solserver stop
 ```
 
@@ -98,11 +99,16 @@ Re-run the migration script with the `-p` argument to do post-migration finaliza
 # python openldap2opendj.py -p
 ```
 
+## SAML configuration
+
+Change `idp.authn.LDAP.trustCertificates = /etc/certs/openldap.crt` to `idp.authn.LDAP.trustCertificates = /etc/certs/opendj.crt` in `ldap.properties` file. Location: `/opt/shibboleth-idp/conf`
+
 ## Start the servers
 
 ```
 # /etc/init.d/oxauth start
 # /etc/init.d/identity start
+# /etc/init.d/idp start
 ```
 
 Try to log in to Gluu UI. If it's working as expected, remove OpenLDAP:
