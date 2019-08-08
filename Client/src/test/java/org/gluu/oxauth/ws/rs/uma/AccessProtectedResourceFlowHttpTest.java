@@ -168,10 +168,30 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         this.rpt = response.getAccessToken();
     }
 
+    @Test(dependsOnMethods = {"successfulRptRequest"})
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void repeatRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
+        showTitle("repeatRptRequest");
+        rsRegisterPermissions();
+        requestRptAndGetNeedsInfo(umaPatClientId, umaPatClientSecret);
+        claimsGathering(umaPatClientId);
+
+        showTitle("Request RPT with existing RPT ... ");
+
+        UmaTokenResponse response = tokenService.requestRpt(
+                "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                claimsGatheringTicket,
+                null, null, null, this.rpt, null);
+        assert_(response);
+
+        this.rpt = response.getAccessToken();
+    }
+
     /**
      * RPT status request
      */
-    @Test(dependsOnMethods = {"successfulRptRequest"})
+    @Test(dependsOnMethods = {"repeatRptRequest"})
     @Parameters()
     public void rptStatus() throws Exception {
         showTitle("rptStatus");
