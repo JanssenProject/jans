@@ -28,8 +28,9 @@ import org.testng.annotations.Test;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 
-import static org.testng.Assert.assertEquals;
 import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -176,14 +177,15 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         requestRptAndGetNeedsInfo(umaPatClientId, umaPatClientSecret);
         claimsGathering(umaPatClientId);
 
-        showTitle("Request RPT with existing RPT ... ");
+        showTitle("Request RPT with existing RPT (upgrade case) ... ");
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 claimsGatheringTicket,
-                null, null, null, this.rpt, null);
+                null, null, null, this.rpt, "oxd");
         assert_(response);
+        assertTrue(response.getUpgraded());
 
         this.rpt = response.getAccessToken();
     }

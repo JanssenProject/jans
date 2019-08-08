@@ -33,14 +33,21 @@ public class UmaRPT extends AbstractToken {
     @AttributeName(name = "oxUmaPermission")
     private List<String> permissions;
 
+    private String notHashedCode;
+
     public UmaRPT() {
         super(1);
     }
 
     public UmaRPT(String code, Date creationDate, Date expirationDate, String userId, String clientId) {
         super(code, creationDate, expirationDate);
+        this.notHashedCode = getCode();
         this.userId = userId;
         this.clientId = clientId;
+    }
+
+    public String getNotHashedCode() {
+        return notHashedCode;
     }
 
     public String getDn() {
