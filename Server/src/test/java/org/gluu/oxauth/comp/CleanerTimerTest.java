@@ -269,14 +269,14 @@ public class CleanerTimerTest extends BaseComponentTest {
         final UmaRPT rpt = umaRptService.createRPTAndPersist(client, Lists.newArrayList());
 
         // 2. RPT exists
-        assertNotNull(umaRptService.getRPTByCode(rpt.getCode()));
+        assertNotNull(umaRptService.getRPTByCode(rpt.getNotHashedCode()));
 
         // 3. clean up
         cleanerTimer.processImpl();
         cacheService.clear();
 
         // 4. RPT exists
-        assertNotNull(umaRptService.getRPTByCode(rpt.getCode()));
+        assertNotNull(umaRptService.getRPTByCode(rpt.getNotHashedCode()));
 
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.MINUTE, -10);
@@ -289,7 +289,7 @@ public class CleanerTimerTest extends BaseComponentTest {
         cacheService.clear();
 
         // 6. no RPT in persistence
-        assertNull(umaRptService.getRPTByCode(rpt.getCode()));
+        assertNull(umaRptService.getRPTByCode(rpt.getNotHashedCode()));
     }
 
     @Test
