@@ -89,7 +89,8 @@ public class UmaRptService {
             Preconditions.checkNotNull(rpt.getClientId());
 
             addBranchIfNeeded();
-            rpt.setDn(createDn(rpt.getCode()));
+            rpt.setDn(createDn(rpt.getNotHashedCode()));
+            rpt.setCode(TokenHashUtil.hash(rpt.getNotHashedCode()));
             ldapEntryManager.persist(rpt);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -121,13 +122,13 @@ public class UmaRptService {
         }
     }
 
-    public void addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {
-        addPermissionToRPT(rpt, permissions.toArray(new UmaPermission[permissions.size()]));
+    public boolean addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {
+        return addPermissionToRPT(rpt, permissions.toArray(new UmaPermission[permissions.size()]));
     }
 
-    public void addPermissionToRPT(UmaRPT rpt, UmaPermission... permission) {
+    public boolean addPermissionToRPT(UmaRPT rpt, UmaPermission... permission) {
         if (ArrayUtils.isEmpty(permission)) {
-            return;
+            return true;
         }
 
         final List<String> permissions = getPermissionDns(Arrays.asList(permission));
@@ -140,8 +141,10 @@ public class UmaRptService {
         try {
             ldapEntryManager.merge(rpt);
             log.trace("Persisted RPT: " + rpt);
+            return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return false;
         }
     }
 

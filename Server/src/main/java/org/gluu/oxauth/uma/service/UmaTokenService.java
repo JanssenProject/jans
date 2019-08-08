@@ -115,12 +115,10 @@ public class UmaTokenService {
             updatePermissionsWithClientRequestedScope(permissions, scopes);
             addPctToPermissions(permissions, pct);
 
-            final boolean upgraded;
+            boolean upgraded = false;
             if (rpt == null) {
                 rpt = rptService.createRPTAndPersist(client, permissions);
-                upgraded = false;
-            } else {
-                rptService.addPermissionToRPT(rpt, permissions);
+            } else if (rptService.addPermissionToRPT(rpt, permissions)) {
                 upgraded = true;
             }
 
