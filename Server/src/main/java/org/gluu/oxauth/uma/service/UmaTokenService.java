@@ -118,12 +118,13 @@ public class UmaTokenService {
             boolean upgraded = false;
             if (rpt == null) {
                 rpt = rptService.createRPTAndPersist(client, permissions);
+                rptCode = rpt.getNotHashedCode();
             } else if (rptService.addPermissionToRPT(rpt, permissions)) {
                 upgraded = true;
             }
 
             UmaTokenResponse response = new UmaTokenResponse();
-            response.setAccessToken(rpt.getCode());
+            response.setAccessToken(rptCode);
             response.setUpgraded(upgraded);
             response.setTokenType("Bearer");
             response.setPct(pct.getCode());
