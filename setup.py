@@ -755,7 +755,7 @@ class Setup(object):
                                             self.ldif_groups
                                             ],
                                         'memory_allocation': [0.25, 500],
-                                        'mapping': 'people, groups',
+                                        'mapping': 'people, group',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
@@ -780,22 +780,22 @@ class Setup(object):
 
                         ('authorization', { 'ldif': [],
                                       'memory_allocation': [0.15, 400],
-                                      'mapping': 'authorizations',
+                                      'mapping': 'authorization',
                                       'document_key_prefix': ['authorizations_'],
                                     }),
 
-                        ('tokens',   { 'ldif': [],
+                        ('token',   { 'ldif': [],
                                       'memory_allocation': [0.25, 500],
-                                      'mapping': 'tokens',
+                                      'mapping': 'token',
                                       'document_key_prefix': ['tokens_'],
                                     }),
-                        ('clients',  { 'ldif': [
+                        ('client',  { 'ldif': [
                                                 self.ldif_clients,
                                                 self.ldif_oxtrust_api_clients,
                                                 self.ldif_scim_clients,
                                                 ],
                                     'memory_allocation': [0.05, 100],
-                                    'mapping': 'clients',
+                                    'mapping': 'client',
                                     'document_key_prefix': ['clients_'],
                                     }),
                     ))
@@ -4270,10 +4270,12 @@ class Setup(object):
         for group in couchbase_mappings:
              total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
 
+
         if self.mappingLocations['default'] != 'couchbase':
             couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
+            total_ratio += self.couchbaseBucketDict['default']['memory_allocation'][0]
             bucketRamsize = self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
@@ -4512,8 +4514,7 @@ class Setup(object):
         radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
         
         self.raidus_client_jwks = self.gen_openid_jwks_jks_keys(radius_jks_fn, self.radius_jwt_pass)
-        
-        
+
         raidus_client_jwks = ''.join(self.raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
         
         raidus_client_jwks = json.loads(raidus_client_jwks)
@@ -4557,7 +4558,7 @@ class Setup(object):
         else:
             self.import_ldif_couchebase([ldif_file_base])
 
-        if self.mappingLocations['clients'] == 'ldap':
+        if self.mappingLocations['client'] == 'ldap':
             self.import_ldif_opendj([ldif_file_clients])
         else:
             self.import_ldif_couchebase([ldif_file_clients]) 
