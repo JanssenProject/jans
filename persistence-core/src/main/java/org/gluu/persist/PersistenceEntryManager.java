@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public interface PersistenceEntryManager extends EntityManager {
 
-    boolean authenticate(String bindprimaryKey, String password);
+    boolean authenticate(String primaryKey, String password);
     boolean authenticate(String primaryKey, String userName, String password);
 
 	void persist(Object entry);
@@ -36,7 +36,7 @@ public interface PersistenceEntryManager extends EntityManager {
     <T> int countEntries(Object entry);
 
     <T> int countEntries(String primaryKey, Class<T> entryClass, Filter filter);
-    <T> int countEntries(String primaryKey, Class<T> entryClass, Filter filter,  SearchScope scope);
+    <T> int countEntries(String primaryKey, Class<T> entryClass, Filter filter, SearchScope scope);
 
     <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
 
