@@ -63,7 +63,7 @@
 
 	<modules>
 		<module>oxUtil</module>
-		<module>oxFilter</module>
+		<module>persistence-filter</module>
 		<module>persistence-model</module>
 		<module>persistence-core</module>
 		<module>persistence-ldap</module>

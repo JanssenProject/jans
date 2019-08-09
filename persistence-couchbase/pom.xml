@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>oxcore-filter</artifactId>
+            <artifactId>oxcore-persistence-filter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
