@@ -292,33 +292,35 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT,"grant_type is not present in client."), oAuth2AuditLog);
                     }
 
+                    boolean authenticated = false;
                     User user = null;
                     if (authenticationFilterService.isEnabled()) {
                         String userDn = authenticationFilterService.processAuthenticationFilters(request.getParameterMap());
                         if (StringHelper.isNotEmpty(userDn)) {
                             user = userService.getUserByDn(userDn);
+                            authenticated = true;
                         }
                     }
 
-                    if (user == null) {
-                        boolean authenticated = authenticationService.authenticate(username, password);
-                        if (authenticated) {
-                            user = authenticationService.getAuthenticatedUser();
-                        }
+
+                    if (!authenticated) {
+	                    if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+	                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
+	                        context.setUser(user);
+	                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+	                            log.trace("RO PC - User is authenticated successfully by external script.");
+	                            user = context.getUser();
+	                        }
+	                    } else {
+	                    	authenticated = authenticationService.authenticate(username, password);
+	                        if (authenticated) {
+	                            user = authenticationService.getAuthenticatedUser();
+	                        }
+	                    	
+	                    }
                     }
 
-                    boolean authenticatedByRoScript = false;
-                    if (externalResourceOwnerPasswordCredentialsService.getCustomScriptConfigurations() != null && !externalResourceOwnerPasswordCredentialsService.getCustomScriptConfigurations().isEmpty()) {
-                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
-                        context.setUser(user);
-                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
-                            log.trace("RO PC - User is authenticated successfully by external script.");
-                            authenticatedByRoScript = true;
-                            user = context.getUser();
-                        }
-                    }
-
-                    if (user != null || authenticatedByRoScript) {
+                    if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
 
                         RefreshToken reToken = null;
