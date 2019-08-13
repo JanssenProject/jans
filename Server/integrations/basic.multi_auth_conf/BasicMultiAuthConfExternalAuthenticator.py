@@ -12,8 +12,9 @@ from org.gluu.oxauth.service import MetricService
 from org.gluu.model.metric import MetricType
 from org.gluu.util import StringHelper
 from org.gluu.util import ArrayHelper
-from org.gluu.model.ldap import GluuLdapConfiguration
-from java.util import Arrays
+from org.gluu.persist.service import PersistanceFactoryService
+from org.gluu.persist.ldap.impl import LdapEntryManagerFactory
+from java.util import Arrays, Properties
 
 import java
 import json
@@ -207,11 +208,26 @@ class PersonAuthentication(PersonAuthenticationType):
         ldapExtendedConfigurations = self.createLdapExtendedConfigurations(authConfiguration)
         
         appInitializer = CdiUtil.bean(AppInitializer)
+        persistanceFactoryService = CdiUtil.bean(PersistanceFactoryService)
+        ldapEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(LdapEntryManagerFactory)
+        persistenceType = ldapEntryManagerFactory.getPersistenceType()
 
         ldapExtendedEntryManagers = []
         for ldapExtendedConfiguration in ldapExtendedConfigurations:
-            ldapEntryManager = appInitializer.createLdapAuthEntryManager(ldapExtendedConfiguration["ldapConfiguration"])
-            ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapExtendedConfiguration["ldapConfiguration"], "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
+            ldapExtendedConfiguration = ldapExtendedConfiguration["ldapConfiguration"]
+
+            ldapProperties = Properties()
+            for key, value in ldapExtendedConfiguration.items():
+                value_string = value
+                if isinstance(value_string, list):
+                    value_string = ", ".join(value)
+                else:
+                    value_string = str(value)
+
+                ldapProperties.setProperty(persistenceType + "." + key, value_string)
+
+            ldapEntryManager = ldapEntryManagerFactory.createEntryManager(ldapProperties)
+            ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapExtendedConfiguration["ldapConfiguration"], "ldapProperties" : ldapProperties, "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
         
         return ldapExtendedEntryManagers
 
@@ -219,27 +235,9 @@ class PersonAuthentication(PersonAuthenticationType):
         ldapExtendedConfigurations = []
 
         for ldapConfiguration in authConfiguration["ldap_configuration"]:
-            configId = ldapConfiguration["configId"]
-            
-            servers = ldapConfiguration["servers"]
-
-            bindDN = None
-            bindPassword = None
-            useAnonymousBind = True
-            if (self.containsAttributeString(ldapConfiguration, "bindDN")):
-                useAnonymousBind = False
-                bindDN = ldapConfiguration["bindDN"]
-                bindPassword = ldapConfiguration["bindPassword"]
-
-            useSSL = ldapConfiguration["useSSL"]
-            maxConnections = ldapConfiguration["maxConnections"]
-            baseDNs = ldapConfiguration["baseDNs"]
             loginAttributes = ldapConfiguration["loginAttributes"]
             localLoginAttributes = ldapConfiguration["localLoginAttributes"]
             
-            ldapConfiguration = GluuLdapConfiguration(configId, bindDN, bindPassword, Arrays.asList(servers),
-                                                      maxConnections, useSSL, Arrays.asList(baseDNs),
-                                                      loginAttributes[0], localLoginAttributes[0], useAnonymousBind)
             ldapExtendedConfigurations.append({ "ldapConfiguration" : ldapConfiguration, "loginAttributes" : loginAttributes, "localLoginAttributes" : localLoginAttributes })
         
         return ldapExtendedConfigurations
