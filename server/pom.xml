@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>oxcore-server</artifactId>
 	<packaging>jar</packaging>
-	<name>oxServer</name>
+	<name>Web application specific classes</name>
 
 	<parent>
 		<groupId>org.gluu</groupId>
@@ -23,6 +23,13 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Jetty -->
+		<dependency>
+		    <groupId>org.eclipse.jetty</groupId>
+		    <artifactId>jetty-deploy</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

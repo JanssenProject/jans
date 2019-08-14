@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxserver.filters;
+package org.gluu.server.filters;
 
 import java.io.IOException;
 import java.net.URI;
