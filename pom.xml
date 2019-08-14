@@ -77,9 +77,10 @@
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>oxService</module>
-		<module>oxServer</module>
+		<module>server</module>
 		<module>oxJsfUtil</module>
 		<module>oxRadius</module>
+		<module>demo-cdi</module>
 	</modules>
 
 
@@ -316,6 +317,14 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
 				<version>4.0.5</version>
+			</dependency>
+
+			<!-- Jetty -->
+			<dependency>
+			    <groupId>org.eclipse.jetty</groupId>
+			    <artifactId>jetty-deploy</artifactId>
+			    <version>9.4.19.v20190610</version>
+				<scope>provided</scope>
 			</dependency>
 
 			<!-- Tests -->
