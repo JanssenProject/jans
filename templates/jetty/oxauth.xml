@@ -2,9 +2,9 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
 
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
-	<Set name="contextPath">/identity</Set>
+	<Set name="contextPath">/oxauth</Set>
 	<Set name="war">
-		<Property name="jetty.webapps" default="." />/identity.war
+		<Property name="jetty.webapps" default="." />/oxauth.war
 	</Set>
 	<Set name="extractWAR">true</Set>
 
