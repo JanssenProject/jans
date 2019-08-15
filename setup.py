@@ -1618,13 +1618,24 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
+        # Render web eources file
         try:
             web_resources = '%s_web_resources.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_resources)):
                 self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
-                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), self.jetty_base+"/"+serviceName+"/webapps")
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
+            self.setup.logIt(traceback.format_exc(), True)
+
+        # Render web context file
+        try:
+            web_context = '%s.xml' % serviceName
+            if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_context)):
+                self.renderTemplateInOut(web_context, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
+        except:
+            self.setup.logIt("Error rendering service '%s' context xml" % serviceName, True)
             self.setup.logIt(traceback.format_exc(), True)
 
         initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
