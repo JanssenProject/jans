@@ -2349,7 +2349,7 @@ class Setup(object):
         else:
             self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
 
-        if self.mappingLocations['clients'] == 'ldap':
+        if self.mappingLocations['client'] == 'ldap':
             self.import_ldif_opendj([self.ldif_passport_clients])
         else:
             self.import_ldif_couchebase([self.ldif_passport_clients])
