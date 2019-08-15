@@ -15,7 +15,6 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 08/14/2019
  */
 @ApplicationScoped
-@Named
 public class DemoApplicationService {
 
 	@Inject
