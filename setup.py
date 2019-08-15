@@ -340,12 +340,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
