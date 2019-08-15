@@ -164,7 +164,6 @@ public class AppInitializer {
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		log.debug("Initializing application services");
-		customLibrariesLoader.init();
 
 		configurationFactory.create();
 
