@@ -11,3 +11,24 @@ dn: ou=cas,ou=oxidp,o=gluu
 objectClass: top
 objectClass: organizationalUnit
 ou: cas
+
+dn: inum=F3FB, ou=samlAcrs,o=gluu
+objectClass: top
+objectClass: samlAcr
+parent: shibboleth.SAML2AuthnContextClassRef
+classRef: urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+inum: F3FB
+
+dn: inum=B227, ou=samlAcrs,o=gluu
+objectClass: top
+objectClass: samlAcr
+parent: shibboleth.SAML2AuthnContextClassRef
+classRef: urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol
+inum: B227
+
+dn: inum=FF64, ou=samlAcrs,o=gluu
+objectClass: top
+objectClass: samlAcr
+parent: shibboleth.SAML2AuthnContextClassRef
+classRef: urn:oasis:names:tc:SAML:2.0:ac:classes:Password
+inum: FF64
