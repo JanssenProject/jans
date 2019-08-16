@@ -4277,7 +4277,12 @@ class Setup(object):
 
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
-        couchbaseClusterRamsize = system_info["memoryQuota"]
+        
+        couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
+        
+        if couchbaseClusterRamsize < 2200:
+            sys.exit("Available quota on couchbase server is less than 2200 MB. Exiting installation")
+
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
         couchbase_mappings = self.getMappingType('couchbase')
 
