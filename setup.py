@@ -2903,11 +2903,14 @@ class Setup(object):
                 self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
                 print "    Checking Couchbase connection"
 
-                if self.cbm.test_connection():
-                    print ("    Successfully connected to Couchbase server")
+                cbm_result = self.cbm.test_connection()
+
+                if cbm_result.ok:
+                    print "    Successfully connected to Couchbase server"
                     break
                 else:
-                    print ("    Cant establish connection to Couchbase server with given parameters.")
+                    print "    Can't establish connection to Couchbase server with given parameters."
+                    print "**", cbm_result.reason
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
@@ -4172,12 +4175,13 @@ class Setup(object):
 
         for i in range(12):
             self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
-            if self.cbm.test_connection():
+            cbm_result = self.cbm.test_connection()
+            if cbm_result.ok:
                 return True
             else:
                 time.sleep(5)
 
-        sys.exit("Couchbase server was not ready. Giving up")
+        sys.exit("Couchbase server was not ready. Giving up" + str(cbm_result.reason))
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
