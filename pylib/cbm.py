@@ -32,9 +32,9 @@ class CBM:
 
         try:
             result = requests.get(api, auth=self.auth, verify=False)
-        except:
+        except Exception as e:
             result = FakeResult()
-            result.reason = 'Connection failed'
+            result.reason = 'Connection failed. Reason: ' + str(e.message)
 
         return result
 
@@ -95,8 +95,7 @@ class CBM:
 
     def test_connection(self):
         result = self._get('pools/')
-
-        return result.ok
+        return result 
 
 
     def initialize_node(self, path='/opt/couchbase/var/lib/couchbase/data',
