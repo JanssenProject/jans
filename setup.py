@@ -755,7 +755,7 @@ class Setup(object):
                                             self.ldif_groups
                                             ],
                                         'memory_allocation': [0.25, 500],
-                                        'mapping': 'people, group',
+                                        'mapping': 'people, groups',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
@@ -780,13 +780,13 @@ class Setup(object):
 
                         ('authorization', { 'ldif': [],
                                       'memory_allocation': [0.15, 400],
-                                      'mapping': 'authorization',
+                                      'mapping': 'authorizations',
                                       'document_key_prefix': ['authorizations_'],
                                     }),
 
                         ('token',   { 'ldif': [],
                                       'memory_allocation': [0.25, 500],
-                                      'mapping': 'token',
+                                      'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
                         ('client',  { 'ldif': [
@@ -795,7 +795,7 @@ class Setup(object):
                                                 self.ldif_scim_clients,
                                                 ],
                                     'memory_allocation': [0.05, 100],
-                                    'mapping': 'client',
+                                    'mapping': 'clients',
                                     'document_key_prefix': ['clients_'],
                                     }),
                     ))
