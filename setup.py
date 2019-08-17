@@ -745,7 +745,7 @@ class Setup(object):
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
                                             ],
-                                      'memory_allocation': [0.05, 100], # [fraction, minimun_in_mb]
+                                      'memory_allocation': 100, # [fraction, minimun_in_mb]
                                       'mapping': '',
                                       'document_key_prefix': []
                                     }),
@@ -754,38 +754,38 @@ class Setup(object):
                                             self.ldif_people, 
                                             self.ldif_groups
                                             ],
-                                        'memory_allocation': [0.25, 300],
+                                        'memory_allocation': 300,
                                         'mapping': 'people, groups',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
                         ('cache',    {   'ldif': [],
-                                        'memory_allocation': [0.15, 300],
+                                        'memory_allocation': 300,
                                         'mapping': 'cache',
                                         'document_key_prefix': ['cache_'],
                                     }),
                         
                         ('statistic', {   'ldif': [self.ldif_metric],
-                                        'memory_allocation': [0.05, 100],
+                                        'memory_allocation': 100,
                                         'mapping': 'statistic',
                                         'document_key_prefix': ['metric_'],
                                     }),
                         
                         ('site',     {   'ldif': [self.ldif_site],
-                                        'memory_allocation': [0.05, 100],
+                                        'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
                                         'document_key_prefix': ['site_', 'cache-refresh_'],
                                         
                                     }),
 
                         ('authorization', { 'ldif': [],
-                                      'memory_allocation': [0.15, 300],
+                                      'memory_allocation': 300,
                                       'mapping': 'authorizations',
                                       'document_key_prefix': ['authorizations_'],
                                     }),
 
                         ('token',   { 'ldif': [],
-                                      'memory_allocation': [0.25, 300],
+                                      'memory_allocation': 300,
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
@@ -794,7 +794,7 @@ class Setup(object):
                                                 self.ldif_oxtrust_api_clients,
                                                 self.ldif_scim_clients,
                                                 ],
-                                    'memory_allocation': [0.05, 100],
+                                    'memory_allocation': 100,
                                     'mapping': 'clients',
                                     'document_key_prefix': ['clients_'],
                                     }),
@@ -4006,7 +4006,7 @@ class Setup(object):
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
         result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
-        self.logIt("Creating bucket {0} with type {1} and ramszie {2}".format(bucketName, bucketType, bucketRamsize))
+        self.logIt("Creating bucket {0} with type {1} and ramsize {2}".format(bucketName, bucketType, bucketRamsize))
         if result.ok:
             self.couchbaseBuckets.append(bucketName)
             self.logIt("Bucket {} successfully created".format(bucketName))
@@ -4251,15 +4251,6 @@ class Setup(object):
                     for name in obj['names']:
                         listAttrib.append(name)
 
-    def calculate_bucket_ramsize(self, bucket, total_ram, total_ratio):
-        calculated_size = int((self.couchbaseBucketDict[bucket]['memory_allocation'][0]/total_ratio)*total_ram)
-        min_size = self.couchbaseBucketDict[bucket]['memory_allocation'][1]
-
-        if calculated_size < min_size:
-            return  min_size
-
-        return calculated_size
-
 
     def install_couchbase_server(self):
         # prepare multivalued list
@@ -4282,33 +4273,30 @@ class Setup(object):
         couchbase_mappings = self.getMappingType('couchbase')
 
         min_cb_ram = 0
-        total_ratio = 0
         
         for group in couchbase_mappings:
-             total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
-             min_cb_ram += self.couchbaseBucketDict[group]['memory_allocation'][1]
+             min_cb_ram += self.couchbaseBucketDict[group]['memory_allocation']
         
+        min_cb_ram += self.couchbaseBucketDict['default']['memory_allocation']
+
         if couchbaseClusterRamsize < min_cb_ram:
             sys.exit("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
 
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
+
+        min_cb_ram *= 1.0
         
-
-
         if self.mappingLocations['default'] != 'couchbase':
-            couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            total_ratio += self.couchbaseBucketDict['default']['memory_allocation'][0]
-            bucketRamsize = self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
-
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize = self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
             if self.couchbaseBucketDict[group]['ldif']:
