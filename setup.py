@@ -754,13 +754,13 @@ class Setup(object):
                                             self.ldif_people, 
                                             self.ldif_groups
                                             ],
-                                        'memory_allocation': [0.25, 500],
+                                        'memory_allocation': [0.25, 300],
                                         'mapping': 'people, groups',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
                         ('cache',    {   'ldif': [],
-                                        'memory_allocation': [0.15, 400],
+                                        'memory_allocation': [0.15, 300],
                                         'mapping': 'cache',
                                         'document_key_prefix': ['cache_'],
                                     }),
@@ -779,13 +779,13 @@ class Setup(object):
                                     }),
 
                         ('authorization', { 'ldif': [],
-                                      'memory_allocation': [0.15, 400],
+                                      'memory_allocation': [0.15, 300],
                                       'mapping': 'authorizations',
                                       'document_key_prefix': ['authorizations_'],
                                     }),
 
                         ('token',   { 'ldif': [],
-                                      'memory_allocation': [0.25, 500],
+                                      'memory_allocation': [0.25, 300],
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
@@ -4277,18 +4277,22 @@ class Setup(object):
 
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
-        
         couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
-        
-        if couchbaseClusterRamsize < 2200:
-            sys.exit("Available quota on couchbase server is less than 2200 MB. Exiting installation")
 
-        self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
         couchbase_mappings = self.getMappingType('couchbase')
 
+        min_cb_ram = 0
         total_ratio = 0
+        
         for group in couchbase_mappings:
              total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
+             min_cb_ram += self.couchbaseBucketDict[group]['memory_allocation'][1]
+        
+        if couchbaseClusterRamsize < min_cb_ram:
+            sys.exit("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
+
+        self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
+        
 
 
         if self.mappingLocations['default'] != 'couchbase':
