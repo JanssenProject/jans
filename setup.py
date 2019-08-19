@@ -4707,6 +4707,9 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
+    
+    if argsp.remote_ldap:
+        setupOptions['listenAllInterfaces'] = True
 
     if argsp.opendj:
         setupOptions['opendj_type'] = 'opendj' 
