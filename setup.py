@@ -282,6 +282,11 @@ class Setup(object):
         self.installSaml = False
         self.installOxAuthRP = False
         self.installPassport = False
+        self.installGluuRadius = False
+
+        self.gluuPassportEnabled = 'false'
+        self.gluuRadiusEnabled = 'false'
+        self.gluuSamlEnabled = 'false'
 
         self.allowPreReleasedFeatures = False
 
@@ -626,9 +631,6 @@ class Setup(object):
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
         self.passport_resource_id = None
-
-        # Gluu Radius
-        self.installGluuRadius = False
         
         self.oxauth_legacyIdTokenClaims = 'false'
         self.oxauth_openidScopeBackwardCompatibility =  'false'
@@ -2944,6 +2946,7 @@ class Setup(object):
         if promptForShibIDP == 'y':
             self.shibboleth_version = 'v3'
             self.installSaml = True
+            self.gluuSamlEnabled = 'true'
             if self.persistence_type in ('couchbase','hybrid'):
                 self.couchbaseShibUserPassword = self.getPW()
         else:
@@ -2958,6 +2961,7 @@ class Setup(object):
         promptForPassport = self.getPrompt("Install Passport?", "No")[0].lower()
         if promptForPassport == 'y':
             self.installPassport = True
+            self.gluuPassportEnabled = 'true'
         else:
             self.installPassport = False
 
@@ -2967,6 +2971,7 @@ class Setup(object):
             self.oxauth_legacyIdTokenClaims = 'true'
             self.oxauth_openidScopeBackwardCompatibility =  'true'
             self.enableRadiusScripts = 'true'
+            self.gluuRadiusEnabled = 'true'
         else:
             self.installGluuRadius = False
 
