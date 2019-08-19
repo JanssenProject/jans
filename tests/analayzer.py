@@ -221,7 +221,12 @@ def durations():
         if not operation in args.operation:
             continue
         
-        d = float(ls[2].strip()[12:-1])
+        ds = ls[2].strip()[12:-1]
+        if 'M' in ds:
+            m,s=ds.split('M')
+            d= float(m)*60 + float(s)
+        else:
+            d = float(ds)
 
         if d > args.min:
             if len(ls)>6:
