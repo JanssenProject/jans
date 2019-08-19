@@ -4219,15 +4219,17 @@ class Setup(object):
         couchbase_mappings = []
 
         for group in self.couchbaseBucketDict.keys()[1:]:
-            cb_key = 'couchbase_{}_mapping'.format(group)
-            if self.mappingLocations[group] == 'couchbase':
-                if self.couchbaseBucketDict[group]['mapping']:
-                    couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
-                    self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+            bucket = 'gluu' if group == 'default' else 'gluu_' + group
+            if bucket in self.couchbaseBuckets:
+                cb_key = 'couchbase_{}_mapping'.format(group)
+                if self.mappingLocations[group] == 'couchbase':
+                    if self.couchbaseBucketDict[group]['mapping']:
+                        couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
+                        self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+                    else:
+                         self.templateRenderingDict[cb_key] = ''
                 else:
-                     self.templateRenderingDict[cb_key] = ''
-            else:
-                self.templateRenderingDict[cb_key] = ''
+                    self.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
 
