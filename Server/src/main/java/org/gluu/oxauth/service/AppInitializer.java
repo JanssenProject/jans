@@ -56,6 +56,7 @@ import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
+import org.gluu.util.OxConstants;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
@@ -547,6 +548,10 @@ public class AppInitializer {
 	private String getActualDefaultAuthenticationMethod(GluuConfiguration configuration) {
 		if (configuration == null) {
 			return null;
+		}
+		
+		if (configuration.getAuthenticationMode() == null) {
+			return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME;
 		}
 
 		return configuration.getAuthenticationMode();
