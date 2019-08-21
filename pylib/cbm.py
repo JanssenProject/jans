@@ -109,7 +109,11 @@ class CBM:
 
     def rename_node(self, hostname='127.0.0.1'):
         data = {'hostname': hostname}
-        result = self._post('node/controller/rename', data)
+        try:
+            result = self._post('node/controller/rename', data)
+        except Exception as e:
+            result = FakeResult()
+            result.reason = 'Node rename failed. Reason: ' + str(e.message)
 
         return result
 
