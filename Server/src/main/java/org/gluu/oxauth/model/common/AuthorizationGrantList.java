@@ -34,7 +34,7 @@ import java.util.List;
  * Component to hold in memory authorization grant objects.
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version August 20, 2019
  */
 @Dependent
 public class AuthorizationGrantList implements IAuthorizationGrantList {
@@ -113,6 +113,28 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         grant.init(user, client);
 
         return grant;
+    }
+
+    @Override
+    public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
+        CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
+        grant.init(user, client, expiresIn);
+
+        CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
+        cacheService.put(Integer.toString(grant.getCIBAAuthenticationRequestId().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+        log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
+        return grant;
+    }
+
+    @Override
+    public CIBAGrant getCIBAGrant(String authenticationRequestId) {
+        Object cachedGrant = cacheService.get(null, CIBACacheGrant.cacheKey(authenticationRequestId, null));
+        if (cachedGrant == null) {
+            // retry one time : sometimes during high load cache client may be not fast enough
+            cachedGrant = cacheService.get(null, CIBACacheGrant.cacheKey(authenticationRequestId, null));
+            log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
+        }
+        return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
     }
 
     @Override

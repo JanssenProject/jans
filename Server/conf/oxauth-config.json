@@ -23,6 +23,8 @@
     "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
     "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
     "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
+    "backchannelAuthenticationEndpoint":"${config.oxauth.contextPath}/restv1/bc-authorize",
+    "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         ["code"],
@@ -44,7 +46,8 @@
         "password",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:openid:params:grant-type:ciba"
     ],
     "subjectTypesSupported":[
         "public",
@@ -171,7 +174,8 @@
         "password",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:openid:params:grant-type:ciba"
     ],
     "claimTypesSupported":[
         "normal"
@@ -286,5 +290,33 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "openidScopeBackwardCompatibility": false
+    "openidScopeBackwardCompatibility": false,
+    "backchannelTokenDeliveryModesSupported": ["poll", "ping", "push"],
+    "backchannelAuthenticationRequestSigningAlgValuesSupported": [
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "backchannelUserCodeParameterSupported": true,
+    "backchannelBindingMessagePattern": "^[A-Z]{1,10}$",
+    "backchannelAuthenticationResponseExpiresIn": 3600,
+    "backchannelAuthenticationResponseInterval": 2,
+    "backchannelLoginHintClaims": ["inum", "cn", "mail"],
+    "cibaEndUserNotificationConfig": {
+        "apiKey": "AIzaSyDwJtxZV-ApPlApt7HdXkleEZhseURgzHI",
+        "authDomain": "api-project-561176510817.firebaseapp.com",
+        "databaseURL": "https://api-project-561176510817.firebaseio.com",
+        "projectId": "api-project-561176510817",
+        "storageBucket": "api-project-561176510817.appspot.com",
+        "messagingSenderId": "561176510817",
+        "appId": "1:561176510817:web:8e327e72cd49e8d5",
+        "notificationUrl": "https://fcm.googleapis.com/fcm/send",
+        "notificationKey": "AAAAgqi6AWE:APA91bGNk9V_DA-DVoSmDJ0q2fQ4xHsEVSpU8ahcAfF67qH5g2AvJK_T7mWKhnX_DuDxJaMmq3CTanZ7RI8A3c27Hkc_0Ww5eus1cPO7Acs4vgTkUq5r7ZNSFveEVCFvtQgsttUpGaIf",
+        "publicVapidKey": "BOH-FKi3U-7cr5Wv3WeS8RJXXaGpf1R7tlgKSOvYCbFrJRaJER4kI_0xCNG22erHLAmiC78PAW53neERb3eiIO0"
+    }
 }

@@ -7,6 +7,8 @@
 package org.gluu.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -38,7 +40,7 @@ import java.util.Set;
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version April 19, 2017
+ * @version August 20, 2019
  */
 @Stateless
 @Named
@@ -95,14 +97,16 @@ public class RegisterParamsValidator {
     }
 
     /**
-     * @param applicationType     The Application Type: native or web.
-     * @param subjectType         Subject Type requested for responses to this Client.
-     * @param redirectUris        Redirection URI values used by the Client.
-     * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
-     *                            The URL contains a file with a single JSON array of redirect_uri values.
-     * @return Whether the Redirect URI parameters are valid or not.
+     * @param grantTypes          Grant Types that the Client is declaring that it will restrict itself to using.
+     *      * @param applicationType     The Application Type: native or web.
+     *      * @param subjectType         Subject Type requested for responses to this Client.
+     *      * @param redirectUris        Redirection URI values used by the Client.
+     *      * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
+     *      *                            The URL contains a file with a single JSON array of redirect_uri values.
+     *      * @return Whether the Redirect URI parameters are valid or not.
      */
-    public boolean validateRedirectUris(ApplicationType applicationType, SubjectType subjectType,
+    public boolean validateRedirectUris(List<GrantType> grantTypes, List<ResponseType> responseTypes,
+                                        ApplicationType applicationType, SubjectType subjectType,
                                         List<String> redirectUris, String sectorIdentifierUrl) {
         boolean valid = true;
         Set<String> redirectUriHosts = new HashSet<String>();
@@ -144,6 +148,10 @@ public class RegisterParamsValidator {
                     }
                 }
             }
+        } else if (!grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
+                !responseTypes.contains(ResponseType.CODE) && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN)) {
+            // It is valid for grant types: password, client_credentials, urn:ietf:params:oauth:grant-type:uma-ticket and urn:openid:params:grant-type:ciba
+            valid = true;
         } else {
             valid = false;
         }

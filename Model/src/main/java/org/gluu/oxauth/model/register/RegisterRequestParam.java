@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 
 public enum RegisterRequestParam {
@@ -303,7 +303,15 @@ public enum RegisterRequestParam {
      * A software statement containing client metadata values about the client software as claims.
      * This is a string value containing the entire signed JWT.
      */
-    SOFTWARE_STATEMENT("software_statement");
+    SOFTWARE_STATEMENT("software_statement"),
+
+    BACKCHANNEL_TOKEN_DELIVERY_MODE("backchannel_token_delivery_mode"),
+
+    BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT("backchannel_client_notification_endpoint"),
+
+    BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG("backchannel_authentication_request_signing_alg"),
+
+    BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter");
 
     /**
      * Parameter name
