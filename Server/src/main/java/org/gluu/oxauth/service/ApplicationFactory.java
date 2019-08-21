@@ -94,13 +94,17 @@ public class ApplicationFactory {
 
 		configurationService.decryptSmtpPassword(smtpConfiguration);
 
-    return smtpConfiguration;
+		return smtpConfiguration;
 	}
 
     public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
         PersistenceConfiguration persistenceConfiguration = configurationFactory.getPersistenceConfiguration();
 
         return persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceConfiguration);
+    }
+
+    public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory(Class<? extends PersistenceEntryManagerFactory> persistenceEntryManagerFactoryClass) {
+        return persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceEntryManagerFactoryClass);
     }
 
 }
