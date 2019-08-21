@@ -61,7 +61,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version August 20, 2019
  */
 public abstract class BaseTest {
 	
@@ -83,6 +83,7 @@ public abstract class BaseTest {
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
+    protected String backchannelAuthenticationEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
 
     // Form Interaction
@@ -206,6 +207,14 @@ public abstract class BaseTest {
 
     public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
         introspectionEndpoint = p_introspectionEndpoint;
+    }
+
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
     }
 
     public Map<String, List<String>> getScopeToClaimsMapping() {
@@ -766,6 +775,7 @@ public abstract class BaseTest {
             registrationEndpoint = response.getRegistrationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
+            backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
         } else {
@@ -783,6 +793,7 @@ public abstract class BaseTest {
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
+            backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
 
