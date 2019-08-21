@@ -28,7 +28,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxserver.filters.AbstractCorsFilter;
+import org.gluu.server.filters.AbstractCorsFilter;
 import org.gluu.util.StringHelper;
 
 /**
