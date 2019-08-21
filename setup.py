@@ -761,7 +761,7 @@ class Setup(object):
                                             self.ldif_groups
                                             ],
                                         'memory_allocation': 300,
-                                        'mapping': 'people, groups',
+                                        'mapping': 'people, groups, authorizations',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
