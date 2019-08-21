@@ -3968,9 +3968,15 @@ class Setup(object):
         else:
             self.logIt("Failed to initilize Couchbase Node, reason: "+ result.text, errorLog=True)
         
-
+        #wait a while for node initialization completed
+        time.sleep(2)
+        
         self.logIt("Renaming Couchbase Node")
         result = self.cbm.rename_node()
+        if not result.ok:
+            time.sleep(2)
+            result = self.cbm.rename_node()
+
         if result.ok:
             self.logIt("Couchbase Node was renamed")
         else:
