@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j">
+    <f:view locale="#{language.localeCode}">
+        <h:head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <title>oxAuth</title>
+
+            <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/site.css"/>
+            <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/authorize.css"/>
+            <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/font-awesome.css"/>
+
+            <!-- Bootstrap -->
+            <link href="#{oxAuthConfigurationService.cssLocation}/bootstrap.min.css" rel="stylesheet"/>
+
+            <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
+
+            <ui:insert name="head"/>
+        </h:head>
+        <h:body>
+            <div class="body">
+                <a4j:status startText="Loading..."
+                            startStyle="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px;"/>
+                <h:messages id="messages" globalOnly="true" styleClass="message"
+                            errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+                            rendered="#{showGlobalMessages != 'false'}"/>
+                <ui:insert name="body"/>
+            </div>
+        </h:body>
+    </f:view>
+</html>

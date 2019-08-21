@@ -1,0 +1,17 @@
+<!-- Marker file indicating CDI should be enabled -->
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+      http://xmlns.jcp.org/xml/ns/javaee
+      http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
+       bean-discovery-mode="annotated">
+    <interceptors>
+        <class>org.gluu.oxauth.configuration.CIBASupportInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBAConfigurationInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBARegisterParamsValidatorInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBARegisterClientMetadataInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBARegisterClientResponseInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBAAuthorizeParamsValidatorInterceptor</class>
+        <class>org.gluu.oxauth.configuration.CIBAEndUserNotificationInterceptor</class>
+    </interceptors>
+</beans>

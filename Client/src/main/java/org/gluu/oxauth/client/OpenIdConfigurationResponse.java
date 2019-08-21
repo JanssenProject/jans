@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version July 10, 2019
+ * @version August 20, 2019
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -72,6 +72,12 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
 
+    // CIBA
+    private String backchannelAuthenticationEndpoint;
+    private List<String> backchannelTokenDeliveryModesSupported;
+    private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+    private String backchannelUserCodeParameterSupported;
+
     /**
      * Constructs an OpenID Configuration Response.
      *
@@ -103,6 +109,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
         claimsLocalesSupported = new ArrayList<String>();
         uiLocalesSupported = new ArrayList<String>();
+        backchannelTokenDeliveryModesSupported = new ArrayList<>();
+        backchannelAuthenticationRequestSigningAlgValuesSupported = new ArrayList<>();
     }
 
     public static Map<String, List<String>> parseScopeToClaimsMapping(String p_scopeToClaimsJson) throws JSONException {
@@ -1012,6 +1020,38 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
     }
 
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
+    }
+
+    public List<String> getBackchannelTokenDeliveryModesSupported() {
+        return backchannelTokenDeliveryModesSupported;
+    }
+
+    public void setBackchannelTokenDeliveryModesSupported(List<String> backchannelTokenDeliveryModesSupported) {
+        this.backchannelTokenDeliveryModesSupported = backchannelTokenDeliveryModesSupported;
+    }
+
+    public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        return backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlgValuesSupported(List<String> backchannelAuthenticationRequestSigningAlgValuesSupported) {
+        this.backchannelAuthenticationRequestSigningAlgValuesSupported = backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public String getBackchannelUserCodeParameterSupported() {
+        return backchannelUserCodeParameterSupported;
+    }
+
+    public void setBackchannelUserCodeParameterSupported(String backchannelUserCodeParameterSupported) {
+        this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
+    }
+
     @Override
     public String toString() {
         return "OpenIdConfigurationResponse{" +
@@ -1060,7 +1100,11 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", requireRequestUriRegistration=" + requireRequestUriRegistration +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
-                ", scopeToClaimsMapping=" + scopeToClaimsMapping +
+                ", scopeToClaimsMapping=" + scopeToClaimsMapping + '\'' +
+                ", backchannelAuthenticationEndpoint=" + backchannelAuthenticationEndpoint + '\'' +
+                ", backchannelTokenDeliveryModesSupported=" + backchannelTokenDeliveryModesSupported + '\'' +
+                ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
+                ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 '}';
     }
 }
