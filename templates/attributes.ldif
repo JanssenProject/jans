@@ -898,7 +898,7 @@ displayName: User Status
 gluuAttributeEditType: admin
 gluuAttributeName: gluuStatus
 gluuAttributeOrigin: gluuPerson
-gluuAttributeType: boolean
+gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuSAML1URI: urn:mace:dir:attribute-def:gluuStatus
