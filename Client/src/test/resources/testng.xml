@@ -758,4 +758,15 @@
         </classes>
     </test>
 
+    <!-- CIBA -->
+    <test name="CIBA Configuration Test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.ConfigurationTest"/>
+        </classes>
+    </test>
+    <test name="CIBA Dynamic Client Registration Test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.RegistrationTest"/>
+        </classes>
+    </test>
 </suite>

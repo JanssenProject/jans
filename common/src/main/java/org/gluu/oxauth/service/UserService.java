@@ -30,10 +30,17 @@ import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+
 /**
  * Provides operations with users.
  *
- * @author Javier Rojas Blum Date: 11.30.2011
+ * @author Javier Rojas Blum
+ * @version @version August 20, 2019
  */
 @ApplicationScoped
 @Named
@@ -212,6 +219,42 @@ public class UserService {
             return null;
         }
     }
+
+	public User getUniqueUserByAttributes(List<String> attributeNames, String attributeValue) {
+		log.debug("Getting user information from LDAP: attributeNames = '{}', attributeValue = '{}'", attributeNames, attributeValue);
+
+		User user = null;
+
+		if (attributeNames != null) {
+			for (String attributeName : attributeNames) {
+				User searchUser = new User();
+				searchUser.setDn(staticConfiguration.getBaseDn().getPeople());
+
+				List<CustomAttribute> customAttributes =  new ArrayList<>();
+				customAttributes.add(new CustomAttribute(attributeName, attributeValue));
+
+				searchUser.setCustomAttributes(customAttributes);
+
+				try {
+					List<User> entries = ldapEntryManager.findEntries(searchUser);
+					log.debug("Found '{}' entries", entries.size());
+
+					if (entries.size() == 0) {
+						continue;
+					} else if (entries.size() == 1) {
+						user = entries.get(0);
+						break;
+					} else if (entries.size() > 0) {
+						break;
+					}
+				} catch (Exception e) {
+					log.debug(e.getMessage());
+				}
+			}
+		}
+
+		return user;
+	}
 
     public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");

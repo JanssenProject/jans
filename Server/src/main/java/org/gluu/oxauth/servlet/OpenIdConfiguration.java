@@ -8,6 +8,8 @@ package org.gluu.oxauth.servlet;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
+import org.gluu.oxauth.ciba.CIBAConfigurationProxy;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -40,7 +42,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version July 10, 2019
+ * @version August 14, 2019
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration")
 public class OpenIdConfiguration extends HttpServlet {
@@ -64,6 +66,12 @@ public class OpenIdConfiguration extends HttpServlet {
 
 	@Inject
 	private ExternalDynamicScopeService externalDynamicScopeService;
+
+	@Inject
+	private CIBASupportProxy cibaSupportProxy;
+
+	@Inject
+	private CIBAConfigurationProxy cibaConfigurationProxy;
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -120,7 +128,9 @@ public class OpenIdConfiguration extends HttpServlet {
 
 			JSONArray grantTypesSupported = new JSONArray();
 			for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
-				grantTypesSupported.put(grantType);
+				if (grantType != GrantType.CIBA || cibaSupportProxy.isCIBASupported()) {
+					grantTypesSupported.put(grantType);
+				}
 			}
 			if (grantTypesSupported.length() > 0) {
 				jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
@@ -293,6 +303,9 @@ public class OpenIdConfiguration extends HttpServlet {
 			jsonObj.put(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED, Boolean.TRUE);
 			jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED,
 					appConfiguration.getFrontChannelLogoutSessionSupported());
+
+			// CIBA Configuration
+			cibaConfigurationProxy.processConfiguration(jsonObj);
 
 			out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
 		} catch (JSONException e) {

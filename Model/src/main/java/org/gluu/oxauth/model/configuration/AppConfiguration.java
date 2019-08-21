@@ -24,7 +24,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 10, 2019
+ * @version August 20, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -187,6 +187,18 @@ public class AppConfiguration implements Configuration {
     private Fido2Configuration fido2Configuration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+
+    // CIBA
+    private String backchannelAuthenticationEndpoint;
+    private String backchannelDeviceRegistrationEndpoint;
+    private List<String> backchannelTokenDeliveryModesSupported;
+    private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+    private Boolean backchannelUserCodeParameterSupported;
+    private String backchannelBindingMessagePattern;
+    private int backchannelAuthenticationResponseExpiresIn;
+    private int backchannelAuthenticationResponseInterval;
+    private List<String> backchannelLoginHintClaims;
+    private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -1459,4 +1471,98 @@ public class AppConfiguration implements Configuration {
         this.errorHandlingMethod = errorHandlingMethod;
     }
 
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
+    }
+
+    public String getBackchannelDeviceRegistrationEndpoint() {
+        return backchannelDeviceRegistrationEndpoint;
+    }
+
+    public void setBackchannelDeviceRegistrationEndpoint(String backchannelDeviceRegistrationEndpoint) {
+        this.backchannelDeviceRegistrationEndpoint = backchannelDeviceRegistrationEndpoint;
+    }
+
+    public List<String> getBackchannelTokenDeliveryModesSupported() {
+        return backchannelTokenDeliveryModesSupported;
+    }
+
+    public void setBackchannelTokenDeliveryModesSupported(List<String> backchannelTokenDeliveryModesSupported) {
+        this.backchannelTokenDeliveryModesSupported = backchannelTokenDeliveryModesSupported;
+    }
+
+    public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        return backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlgValuesSupported(List<String> backchannelAuthenticationRequestSigningAlgValuesSupported) {
+        this.backchannelAuthenticationRequestSigningAlgValuesSupported = backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public Boolean getBackchannelUserCodeParameterSupported() {
+        return backchannelUserCodeParameterSupported;
+    }
+
+    public void setBackchannelUserCodeParameterSupported(Boolean backchannelUserCodeParameterSupported) {
+        this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
+    }
+
+    public String getBackchannelBindingMessagePattern() {
+        return backchannelBindingMessagePattern;
+    }
+
+    public void setBackchannelBindingMessagePattern(String backchannelBindingMessagePattern) {
+        this.backchannelBindingMessagePattern = backchannelBindingMessagePattern;
+    }
+
+    /**
+     * Returns a number with a positive integer value indicating the expiration time
+     * of the "auth_req_id" in seconds since the authentication request was received.
+     *
+     * @return Default expires_in value.
+     */
+    public int getBackchannelAuthenticationResponseExpiresIn() {
+        return backchannelAuthenticationResponseExpiresIn;
+    }
+
+    public void setBackchannelAuthenticationResponseExpiresIn(int backchannelAuthenticationResponseExpiresIn) {
+        this.backchannelAuthenticationResponseExpiresIn = backchannelAuthenticationResponseExpiresIn;
+    }
+
+    /**
+     * Returns a number with a positive integer value indicating the minimum amount
+     * of time in seconds that the Client must wait between polling requests to the
+     * token endpoint.
+     * This parameter will only be present if the Client is registered to use the
+     * Poll or Ping modes.
+     *
+     * @return Interval value.
+     */
+    public int getBackchannelAuthenticationResponseInterval() {
+        return backchannelAuthenticationResponseInterval;
+    }
+
+    public void setBackchannelAuthenticationResponseInterval(int backchannelAuthenticationResponseInterval) {
+        this.backchannelAuthenticationResponseInterval = backchannelAuthenticationResponseInterval;
+    }
+
+    public List<String> getBackchannelLoginHintClaims() {
+        return backchannelLoginHintClaims;
+    }
+
+    public void setBackchannelLoginHintClaims(List<String> backchannelLoginHintClaims) {
+        this.backchannelLoginHintClaims = backchannelLoginHintClaims;
+    }
+
+    public CIBAEndUserNotificationConfig getCibaEndUserNotificationConfig() {
+        return cibaEndUserNotificationConfig;
+    }
+
+    public void setCibaEndUserNotificationConfig(CIBAEndUserNotificationConfig cibaEndUserNotificationConfig) {
+        this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
+    }
 }

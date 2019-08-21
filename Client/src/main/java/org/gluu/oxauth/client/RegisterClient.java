@@ -29,7 +29,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -248,6 +248,20 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getClaims() != null && !getRequest().getClaims().isEmpty()) {
                     String spaceSeparatedClaims = implode(getRequest().getClaims(), " ");
                     requestBody.put(CLAIMS.toString(), spaceSeparatedClaims);
+                }
+
+                // CIBA
+                if (getRequest().getBackchannelTokenDeliveryMode() != null) {
+                    requestBody.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), getRequest().getBackchannelTokenDeliveryMode());
+                }
+                if (StringUtils.isNotBlank(getRequest().getBackchannelClientNotificationEndpoint())) {
+                    requestBody.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), getRequest().getBackchannelClientNotificationEndpoint());
+                }
+                if (getRequest().getBackchannelAuthenticationRequestSigningAlg() != null) {
+                    requestBody.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), getRequest().getBackchannelAuthenticationRequestSigningAlg());
+                }
+                if (getRequest().getBackchannelUserCodeParameter() != null) {
+                    requestBody.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), getRequest().getBackchannelUserCodeParameter());
                 }
 
                 // Custom params

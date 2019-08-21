@@ -19,7 +19,7 @@ import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
 import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -33,7 +33,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version January 16, 2019
+ * @version August 20, 2019
  */
 @Vetoed
 public class ErrorResponseFactory implements Configuration {
@@ -78,6 +78,10 @@ public class ErrorResponseFactory implements Configuration {
 
         log.error("Error not found, id: {}", type);
         return new ErrorMessage(type.getParameter(), type.getParameter(), null);
+    }
+
+    public String getErrorAsJson(IErrorType p_type) {
+        return getErrorResponse(p_type).toJSonString();
     }
 
     public String errorAsJson(IErrorType p_type, String reason) {
@@ -133,6 +137,8 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getUserInfo();
             } else if (type instanceof U2fErrorResponseType) {
                 list = messages.getFido();
+            } else if (type instanceof BackchannelAuthenticationErrorResponseType) {
+                list = messages.getBackchannelAuthentication();
             }
 
             if (list != null) {
