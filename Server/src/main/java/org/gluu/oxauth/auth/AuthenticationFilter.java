@@ -49,11 +49,26 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.apache.logging.log4j.util.Strings;
+
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
+
 /**
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version August 20, 2019
  */
-@WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo", "/restv1/revoke"}, displayName = "oxAuth")
+@WebFilter(
+        asyncSupported = true,
+        urlPatterns = {
+                "/restv1/authorize",
+                "/restv1/token",
+                "/restv1/userinfo",
+                "/restv1/revoke",
+                "/restv1/bc-authorize"},
+        displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
     public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
@@ -110,6 +125,7 @@ public class AuthenticationFilter implements Filter {
 
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
+            boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
@@ -145,6 +161,19 @@ public class AuthenticationFilter implements Filter {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
 
                     httpResponse.sendError(401, "Not authorized");
+                }
+            } else if (backchannelAuthenticationEnpoint) {
+                if (Strings.isNotBlank(authorizationHeader) && authorizationHeader.startsWith("Basic ")) {
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+                } else {
+                    String entity = errorResponseFactory.getErrorAsJson(INVALID_CLIENT);
+                    httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
+                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+                    httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
+                    httpResponse.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(entity.length()));
+                    PrintWriter out = httpResponse.getWriter();
+                    out.print(entity);
+                    out.flush();
                 }
             } else if (authorizationHeader != null) {
                 if (authorizationHeader.startsWith("Bearer ")) {
@@ -281,7 +310,8 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setPassword(password);
 
                         if (servletRequest.getRequestURI().endsWith("/token")
-                                || servletRequest.getRequestURI().endsWith("/revoke")) {
+                                || servletRequest.getRequestURI().endsWith("/revoke")
+                                || servletRequest.getRequestURI().endsWith("/bc-authorize")) {
                             Client client = clientService.getClient(username);
                             if (client == null
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {

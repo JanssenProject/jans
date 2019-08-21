@@ -18,16 +18,35 @@ import java.net.URLEncoder;
 /**
  * Base class for error responses.
  *
- * @author Javier Rojas Date: 09.22.2011
- *
+ * @author Javier Rojas Blum
+ * @version August 20, 2019
  */
 public abstract class ErrorResponse {
 
     private final static Logger log = LoggerFactory.getLogger(ErrorResponse.class);
 
+	private int status;
 	private String errorDescription;
 	private String errorUri;
 	private String reason;
+
+	/**
+	 * Return the HTTP response status code.
+	 *
+	 * @return The response status.
+	 */
+	public int getStatus() {
+		return status;
+	}
+
+	/**
+	 * Sets the HTTP response status code.
+	 *
+	 * @param status The response status.
+	 */
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
 	/**
 	 * Returns the error code of the response.
@@ -161,11 +180,10 @@ public abstract class ErrorResponse {
 				jsonObj.put("state", getState());
 			}
 
+			return jsonObj.toString(4).replace("\\/", "/");
 		} catch (JSONException e) {
 			log.error(e.getMessage(), e);
 			return null;
 		}
-
-		return jsonObj.toString();
 	}
 }

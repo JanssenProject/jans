@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/ciba-authorize-extended-template.xhtml">
+
+    <f:metadata>
+        <!-- Request parameters -->
+        <f:viewParam name="auth_req_id" value="#{cibaAuthorizeAction.authorizationRequestId}" />
+
+        <f:viewAction action="#{cibaAuthorizeAction.loadAuthorizationGrant}" />
+    </f:metadata>
+
+    <ui:param name="_client" value="#{cibaAuthorizeAction.client}" />
+    <ui:param name="_scopes" value="#{cibaAuthorizeAction.scopes}" />
+
+    <ui:define name="controlButttons">
+        <h:commandLink id="doNotAllowButton" class="button button-default"
+                       value="#{msgs['authorize.doNotAllow']}"
+                       action="#{cibaAuthorizeAction.permissionDenied}" />&nbsp;
+        <h:commandLink id="allowButton" class="button button-primary"
+                       value="#{msgs['authorize.allow']}"
+                       action="#{cibaAuthorizeAction.permissionGranted}" />
+    </ui:define>
+
+</ui:composition>

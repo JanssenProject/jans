@@ -6,13 +6,10 @@
 
 package org.gluu.oxauth.model.error;
 
-import org.gluu.oxauth.model.error.IErrorType;
-
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 19/09/2012
+ * @version August 20, 2019
  */
-
 public class DefaultErrorResponse extends ErrorResponse {
 
     private IErrorType type;

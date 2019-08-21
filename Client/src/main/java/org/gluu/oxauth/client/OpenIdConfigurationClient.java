@@ -24,7 +24,7 @@ import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version July 10, 2019
+ * @version August 20, 2019
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -174,6 +174,16 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 }
                 if (jsonObj.has(OP_TOS_URI)) {
                     getResponse().setOpTosUri(jsonObj.getString(OP_TOS_URI));
+                }
+
+                // CIBA
+                if (jsonObj.has(BACKCHANNEL_AUTHENTICATION_ENDPOINT)) {
+                    getResponse().setBackchannelAuthenticationEndpoint(jsonObj.getString(BACKCHANNEL_AUTHENTICATION_ENDPOINT));
+                }
+                Util.addToListIfHas(getResponse().getBackchannelTokenDeliveryModesSupported(), jsonObj, BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED);
+                Util.addToListIfHas(getResponse().getBackchannelAuthenticationRequestSigningAlgValuesSupported(), jsonObj, BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED);
+                if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
+                    getResponse().setBackchannelUserCodeParameterSupported(jsonObj.getString(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
                 }
             }
         } catch (JSONException e) {
