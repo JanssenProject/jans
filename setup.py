@@ -4049,14 +4049,12 @@ class Setup(object):
         tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
         with open(tmp_file, 'w') as W:
-
-            W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
             index_list = couchbase_index.get(bucket,[])
 
             if not 'dn' in index_list:
                 index_list.insert(0, 'dn')
 
-            index_names = ['def_primary']
+            index_names = []
             for ind in index_list:
                 index_name = 'def_{0}_{1}'.format(bucket, ind)
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
