@@ -5,12 +5,19 @@ import json
 import os
 import argparse
 
-columns = ['count', 't_sum', 't_avg', 'operation', 'key']
+columns = [
+            'count', 
+            't_sum', 
+            't_avg', 
+            'operation', 
+            'key'
+            ]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hide", choices=['count', 't_sum','t_avg','key'], nargs='+', help="Hide specified column")
 parser.add_argument("--log", choices=["http", "duration", "all"], default="all", help="Log to analayse")
 parser.add_argument("--sort", choices=columns + ['D'+c for c in columns], default='count', help="Sort criteria.")
+parser.add_argument("--groupby", choices=['bucket'], default='bucket', help="Goruping by criteria")
 parser.add_argument("--min", type=float, default=0, help="Duration below this time will be omitted")
 parser.add_argument("--operation", choices=['add', 'lookup','search','bind', 'modify'], default=['add', 'lookup','search','bind', 'modify'], nargs='+', help="Database operations to include")
 
@@ -211,15 +218,20 @@ def durations():
 
     rdict = {}
     operations = {}
+    buckets = {}
 
     for l in open(fn):
         ls = l.split(',')
         
         operation = ls[1].split('operation: ')[1]
+        bucket = ls[3].strip()[8:]
         
+        if not bucket in buckets:
+            buckets[bucket] = []
         
         if not operation in args.operation:
             continue
+        
         
         ds = ls[2].strip()[12:-1]
         if 'M' in ds:
@@ -241,15 +253,19 @@ def durations():
 
             operations[p] = operation
 
+
+    if args.groupby == 'bucket':
+        print "Grouped by", args.groupby
+
     sn = 0
     st = 0
 
     result = []
 
     for path in rdict:
+
         data = rdict[path]
-        n = len(data)
-        
+        n = len(data)        
         sn += n
         t = sum(data)
         a = t/n
