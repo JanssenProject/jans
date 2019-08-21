@@ -104,7 +104,11 @@ public abstract class LoggerService {
         }
     }
 
-    public void updateLoggerSeverityImpl() {
+    public void updateLoggerSeverity() {
+    	updateLoggerSeverityImpl();
+    }
+
+    private void updateLoggerSeverityImpl() {
         if (isDisableJdkLogger()) {
             disableJdkLogger();
         }

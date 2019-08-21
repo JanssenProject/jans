@@ -202,14 +202,6 @@ public class CouchbaseConnectionProvider {
             if (StringHelper.equalsIgnoreCase(bucketName, defaultBucket)) {
                 this.defaultBucketMapping = bucketMapping;
             }
-            
-            BucketManager bucketManager = bucket.bucketManager();
-            BucketInfo bucketInfo = bucketManager.info();
-
-            if (com.couchbase.client.java.bucket.BucketType.COUCHBASE == bucketInfo.type()) {
-	            // Create primary index if needed
-	            bucket.bucketManager().createN1qlPrimaryIndex(true, false);
-            }
         }
     }
 
