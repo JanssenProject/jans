@@ -58,7 +58,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 	public PersistenceConfiguration loadPersistenceConfiguration(String applicationPropertiesFile) {
 		PersistenceConfiguration currentPersistenceConfiguration = null;
 
-		String gluuFileName = determineGluuConfigurationFileName();
+		String gluuFileName = determineGluuConfigurationFileName(applicationPropertiesFile);
 		if (gluuFileName != null) {
 			currentPersistenceConfiguration = createPersistenceConfiguration(gluuFileName);
 		}
@@ -179,7 +179,13 @@ public class PersistanceFactoryService implements BaseFactoryService {
         }
 	}
 
-	private String determineGluuConfigurationFileName() {
+	private String determineGluuConfigurationFileName(String applicationPropertiesFile) {
+		String applicationFilePath = DIR + applicationPropertiesFile;
+		File applicationFile = new File(applicationFilePath);
+		if (applicationFile.exists()) {
+			return applicationFilePath;
+		}
+
 		File ldapFile = new File(GLUU_FILE_PATH);
 		if (ldapFile.exists()) {
 			return GLUU_FILE_PATH;
