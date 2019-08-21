@@ -104,7 +104,7 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
-	private static final String LDAP_PROPERTIES_FILE = DIR + "oxauth-ldap.properties";
+	private static final String LDAP_PROPERTIES_FILE = DIR + "oxauth.properties";
 
 	private final String CONFIG_FILE_NAME = "oxauth-config.json";
 	private final String ERRORS_FILE_NAME = "oxauth-errors.json";
