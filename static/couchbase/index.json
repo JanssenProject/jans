@@ -32,7 +32,6 @@
     "displayName", 
     "oxAuthRegistrationAccessToken", 
     "uid", 
-    "oxAuthGrantId", 
     "oxAuthAuthorizationCode", 
     "oxAuthClaimName", 
     "mail", 
@@ -56,8 +55,13 @@
     "oxAuthExpiration"
   ],
 
-  "cache": [
+  "gluu_cache": [
     "uniqueIdentifier"
+  ],
+
+  "gluu_token": [
+    "objectClass",
+    "oxAuthGrantId"
   ]
 
 }

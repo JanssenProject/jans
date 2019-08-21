@@ -32,9 +32,9 @@ class CBM:
 
         try:
             result = requests.get(api, auth=self.auth, verify=False)
-        except:
+        except Exception as e:
             result = FakeResult()
-            result.reason = 'Connection failed'
+            result.reason = 'Connection failed. Reason: ' + str(e.message)
 
         return result
 
@@ -95,8 +95,7 @@ class CBM:
 
     def test_connection(self):
         result = self._get('pools/')
-
-        return result.ok
+        return result 
 
 
     def initialize_node(self, path='/opt/couchbase/var/lib/couchbase/data',
@@ -110,7 +109,11 @@ class CBM:
 
     def rename_node(self, hostname='127.0.0.1'):
         data = {'hostname': hostname}
-        result = self._post('node/controller/rename', data)
+        try:
+            result = self._post('node/controller/rename', data)
+        except Exception as e:
+            result = FakeResult()
+            result.reason = 'Node rename failed. Reason: ' + str(e.message)
 
         return result
 
@@ -127,7 +130,7 @@ class CBM:
         return result
 
 
-    def setup_services(self, services=['kv','n1ql','index','fts']):
+    def setup_services(self, services=['kv','n1ql','index']):
         data = {'services': ','.join(services)}
         result = self._post('node/controller/setupServices', data)
 
