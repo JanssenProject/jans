@@ -746,8 +746,12 @@ class Setup(object):
                                             self.ldif_scim,
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
+                                            self.ldif_clients,
+                                            self.ldif_oxtrust_api_clients,
+                                            self.ldif_scim_clients,
+                                            self.ldif_metric,
                                             ],
-                                      'memory_allocation': 100, # [fraction, minimun_in_mb]
+                                      'memory_allocation': 100,
                                       'mapping': '',
                                       'document_key_prefix': []
                                     }),
@@ -766,13 +770,7 @@ class Setup(object):
                                         'mapping': 'cache',
                                         'document_key_prefix': ['cache_'],
                                     }),
-                        
-                        ('statistic', {   'ldif': [self.ldif_metric],
-                                        'memory_allocation': 100,
-                                        'mapping': 'statistic',
-                                        'document_key_prefix': ['metric_'],
-                                    }),
-                        
+
                         ('site',     {   'ldif': [self.ldif_site],
                                         'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
@@ -780,26 +778,12 @@ class Setup(object):
                                         
                                     }),
 
-                        ('authorization', { 'ldif': [],
-                                      'memory_allocation': 300,
-                                      'mapping': 'authorizations',
-                                      'document_key_prefix': ['authorizations_'],
-                                    }),
-
                         ('token',   { 'ldif': [],
                                       'memory_allocation': 300,
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
-                        ('client',  { 'ldif': [
-                                                self.ldif_clients,
-                                                self.ldif_oxtrust_api_clients,
-                                                self.ldif_scim_clients,
-                                                ],
-                                    'memory_allocation': 100,
-                                    'mapping': 'clients',
-                                    'document_key_prefix': ['clients_'],
-                                    }),
+
                     ))
                             
         
@@ -2347,14 +2331,10 @@ class Setup(object):
         self.renderTemplate(self.ldif_passport_clients)
 
         if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config])
+            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
         else:
-            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
+            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
 
-        if self.mappingLocations['client'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport_clients])
-        else:
-            self.import_ldif_couchebase([self.ldif_passport_clients])
 
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -4095,6 +4075,11 @@ class Setup(object):
         
         self.processedKeys = []
         
+        key_prefixes = {}
+        for cb in self.couchbaseBucketDict:
+            for prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
+                key_prefixes[prefix] = cb
+
         if not ldif_file_list:
             ldif_file_list = self.ldif_files[:]
         
@@ -4118,13 +4103,7 @@ class Setup(object):
                         n_ = e[0].find('_')
                         document_key_prefix = e[0][:n_+1]
                         self.couchbaseBucketDict['user']['document_key_prefix']
-                        
-                        for cb in self.couchbaseBucketDict:
-                            if document_key_prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
-                                cur_bucket = 'gluu_'+cb
-                                break
-                        else:
-                            cur_bucket = 'gluu'
+                        cur_bucket = key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
 
                     query = ''
 
@@ -4577,14 +4556,9 @@ class Setup(object):
         ldif_file_clients = os.path.join(self.outputFolder, 'gluu_radius_clients.ldif')
         
         if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([ldif_file_base])
+            self.import_ldif_opendj([ldif_file_base, ldif_file_clients])
         else:
-            self.import_ldif_couchebase([ldif_file_base])
-
-        if self.mappingLocations['client'] == 'ldap':
-            self.import_ldif_opendj([ldif_file_clients])
-        else:
-            self.import_ldif_couchebase([ldif_file_clients]) 
+            self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
 
 
         if self.installGluuRadius:
