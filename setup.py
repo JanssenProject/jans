@@ -819,7 +819,7 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            txt += 'Install Backend'.ljust(30) + repr(self.installLdap).rjust(35) + "\n"
+            txt += 'Install Backend'.ljust(30) + repr(self.installLdap or self.install_couchbase).rjust(35) + "\n"
             
             if (self.installLdap and not self.remoteLdap) or (self.install_couchbase and not self.remoteCouchbase):
                 txt += 'Backend Type'.ljust(30) + self.persistence_type.title().rjust(35) + "\n"
