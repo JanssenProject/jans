@@ -331,24 +331,6 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     }
 
     /**
-     * Returns the encoded client secret.
-     *
-     * @return The encoded client secret.
-     */
-    public String getEncodedClientSecret() {
-        return encodedClientSecret;
-    }
-
-    /**
-     * Sets the client secret.
-     *
-     * @param encodedClientSecret The encoded client secret.
-     */
-    public void setEncodedClientSecret(String encodedClientSecret) {
-        this.encodedClientSecret = encodedClientSecret;
-    }
-
-    /**
      * Returns the client secret.
      *
      * @return The client secret.
