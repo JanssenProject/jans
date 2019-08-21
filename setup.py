@@ -282,6 +282,11 @@ class Setup(object):
         self.installSaml = False
         self.installOxAuthRP = False
         self.installPassport = False
+        self.installGluuRadius = False
+
+        self.gluuPassportEnabled = 'false'
+        self.gluuRadiusEnabled = 'false'
+        self.gluuSamlEnabled = 'false'
 
         self.allowPreReleasedFeatures = False
 
@@ -340,12 +345,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
+                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                         'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,ext,websocket'},
+                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
                           'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                           'installed' : False
                           },
@@ -626,9 +631,6 @@ class Setup(object):
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
         self.passport_resource_id = None
-
-        # Gluu Radius
-        self.installGluuRadius = False
         
         self.oxauth_legacyIdTokenClaims = 'false'
         self.oxauth_openidScopeBackwardCompatibility =  'false'
@@ -745,7 +747,7 @@ class Setup(object):
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
                                             ],
-                                      'memory_allocation': [0.05, 100], # [fraction, minimun_in_mb]
+                                      'memory_allocation': 100, # [fraction, minimun_in_mb]
                                       'mapping': '',
                                       'document_key_prefix': []
                                     }),
@@ -754,47 +756,47 @@ class Setup(object):
                                             self.ldif_people, 
                                             self.ldif_groups
                                             ],
-                                        'memory_allocation': [0.25, 500],
+                                        'memory_allocation': 300,
                                         'mapping': 'people, groups',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
                         ('cache',    {   'ldif': [],
-                                        'memory_allocation': [0.15, 400],
+                                        'memory_allocation': 300,
                                         'mapping': 'cache',
                                         'document_key_prefix': ['cache_'],
                                     }),
                         
                         ('statistic', {   'ldif': [self.ldif_metric],
-                                        'memory_allocation': [0.05, 100],
+                                        'memory_allocation': 100,
                                         'mapping': 'statistic',
                                         'document_key_prefix': ['metric_'],
                                     }),
                         
                         ('site',     {   'ldif': [self.ldif_site],
-                                        'memory_allocation': [0.05, 100],
+                                        'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
                                         'document_key_prefix': ['site_', 'cache-refresh_'],
                                         
                                     }),
 
                         ('authorization', { 'ldif': [],
-                                      'memory_allocation': [0.15, 400],
+                                      'memory_allocation': 300,
                                       'mapping': 'authorizations',
                                       'document_key_prefix': ['authorizations_'],
                                     }),
 
-                        ('tokens',   { 'ldif': [],
-                                      'memory_allocation': [0.25, 500],
+                        ('token',   { 'ldif': [],
+                                      'memory_allocation': 300,
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
-                        ('clients',  { 'ldif': [
+                        ('client',  { 'ldif': [
                                                 self.ldif_clients,
                                                 self.ldif_oxtrust_api_clients,
                                                 self.ldif_scim_clients,
                                                 ],
-                                    'memory_allocation': [0.05, 100],
+                                    'memory_allocation': 100,
                                     'mapping': 'clients',
                                     'document_key_prefix': ['clients_'],
                                     }),
@@ -817,7 +819,7 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            txt += 'Install Backend'.ljust(30) + repr(self.installLdap).rjust(35) + "\n"
+            txt += 'Install Backend'.ljust(30) + repr(self.installLdap or self.install_couchbase).rjust(35) + "\n"
             
             if (self.installLdap and not self.remoteLdap) or (self.install_couchbase and not self.remoteCouchbase):
                 txt += 'Backend Type'.ljust(30) + self.persistence_type.title().rjust(35) + "\n"
@@ -1618,13 +1620,24 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
+        # Render web eources file
         try:
             web_resources = '%s_web_resources.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_resources)):
                 self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
-                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), self.jetty_base+"/"+serviceName+"/webapps")
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
+            self.setup.logIt(traceback.format_exc(), True)
+
+        # Render web context file
+        try:
+            web_context = '%s.xml' % serviceName
+            if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_context)):
+                self.renderTemplateInOut(web_context, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
+        except:
+            self.setup.logIt("Error rendering service '%s' context xml" % serviceName, True)
             self.setup.logIt(traceback.format_exc(), True)
 
         initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
@@ -2338,7 +2351,7 @@ class Setup(object):
         else:
             self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
 
-        if self.mappingLocations['clients'] == 'ldap':
+        if self.mappingLocations['client'] == 'ldap':
             self.import_ldif_opendj([self.ldif_passport_clients])
         else:
             self.import_ldif_couchebase([self.ldif_passport_clients])
@@ -2892,11 +2905,14 @@ class Setup(object):
                 self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
                 print "    Checking Couchbase connection"
 
-                if self.cbm.test_connection():
-                    print ("    Successfully connected to Couchbase server")
+                cbm_result = self.cbm.test_connection()
+
+                if cbm_result.ok:
+                    print "    Successfully connected to Couchbase server"
                     break
                 else:
-                    print ("    Cant establish connection to Couchbase server with given parameters.")
+                    print "    Can't establish connection to Couchbase server with given parameters."
+                    print "**", cbm_result.reason
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
@@ -2930,6 +2946,7 @@ class Setup(object):
         if promptForShibIDP == 'y':
             self.shibboleth_version = 'v3'
             self.installSaml = True
+            self.gluuSamlEnabled = 'true'
             if self.persistence_type in ('couchbase','hybrid'):
                 self.couchbaseShibUserPassword = self.getPW()
         else:
@@ -2944,6 +2961,7 @@ class Setup(object):
         promptForPassport = self.getPrompt("Install Passport?", "No")[0].lower()
         if promptForPassport == 'y':
             self.installPassport = True
+            self.gluuPassportEnabled = 'true'
         else:
             self.installPassport = False
 
@@ -2953,6 +2971,7 @@ class Setup(object):
             self.oxauth_legacyIdTokenClaims = 'true'
             self.oxauth_openidScopeBackwardCompatibility =  'true'
             self.enableRadiusScripts = 'true'
+            self.gluuRadiusEnabled = 'true'
         else:
             self.installGluuRadius = False
 
@@ -3853,16 +3872,16 @@ class Setup(object):
         install_list = []
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'ubuntu 18': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests',
-                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests'
+                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'ubuntu 18': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests bzip2',
+                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
+                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2'
                 }
         for package in package_list[self.os_type+' '+self.os_version].split():
             sout, serr = self.run_command(query_command.format(package))
@@ -3949,9 +3968,15 @@ class Setup(object):
         else:
             self.logIt("Failed to initilize Couchbase Node, reason: "+ result.text, errorLog=True)
         
-
+        #wait a while for node initialization completed
+        time.sleep(2)
+        
         self.logIt("Renaming Couchbase Node")
         result = self.cbm.rename_node()
+        if not result.ok:
+            time.sleep(2)
+            result = self.cbm.rename_node()
+
         if result.ok:
             self.logIt("Couchbase Node was renamed")
         else:
@@ -3992,7 +4017,7 @@ class Setup(object):
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
         result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
-        self.logIt("Creating bucket {0} with type {1} and ramszie {2}".format(bucketName, bucketType, bucketRamsize))
+        self.logIt("Creating bucket {0} with type {1} and ramsize {2}".format(bucketName, bucketType, bucketRamsize))
         if result.ok:
             self.couchbaseBuckets.append(bucketName)
             self.logIt("Bucket {} successfully created".format(bucketName))
@@ -4030,14 +4055,12 @@ class Setup(object):
         tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
         with open(tmp_file, 'w') as W:
-
-            W.write('CREATE PRIMARY INDEX def_primary on `%s` USING GSI WITH {"defer_build":true};\n' % (bucket))
             index_list = couchbase_index.get(bucket,[])
 
             if not 'dn' in index_list:
                 index_list.insert(0, 'dn')
 
-            index_names = ['def_primary']
+            index_names = []
             for ind in index_list:
                 index_name = 'def_{0}_{1}'.format(bucket, ind)
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
@@ -4161,12 +4184,13 @@ class Setup(object):
 
         for i in range(12):
             self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
-            if self.cbm.test_connection():
+            cbm_result = self.cbm.test_connection()
+            if cbm_result.ok:
                 return True
             else:
                 time.sleep(5)
 
-        sys.exit("Couchbase server was not ready. Giving up")
+        sys.exit("Couchbase server was not ready. Giving up" + str(cbm_result.reason))
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -4199,15 +4223,17 @@ class Setup(object):
         couchbase_mappings = []
 
         for group in self.couchbaseBucketDict.keys()[1:]:
-            cb_key = 'couchbase_{}_mapping'.format(group)
-            if self.mappingLocations[group] == 'couchbase':
-                if self.couchbaseBucketDict[group]['mapping']:
-                    couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
-                    self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+            bucket = 'gluu' if group == 'default' else 'gluu_' + group
+            if bucket in self.couchbaseBuckets:
+                cb_key = 'couchbase_{}_mapping'.format(group)
+                if self.mappingLocations[group] == 'couchbase':
+                    if self.couchbaseBucketDict[group]['mapping']:
+                        couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
+                        self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+                    else:
+                         self.templateRenderingDict[cb_key] = ''
                 else:
-                     self.templateRenderingDict[cb_key] = ''
-            else:
-                self.templateRenderingDict[cb_key] = ''
+                    self.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
 
@@ -4236,15 +4262,6 @@ class Setup(object):
                     for name in obj['names']:
                         listAttrib.append(name)
 
-    def calculate_bucket_ramsize(self, bucket, total_ram, total_ratio):
-        calculated_size = int((self.couchbaseBucketDict[bucket]['memory_allocation'][0]/total_ratio)*total_ram)
-        min_size = self.couchbaseBucketDict[bucket]['memory_allocation'][1]
-
-        if calculated_size < min_size:
-            return  min_size
-
-        return calculated_size
-
 
     def install_couchbase_server(self):
         # prepare multivalued list
@@ -4262,27 +4279,35 @@ class Setup(object):
 
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
-        couchbaseClusterRamsize = system_info["memoryQuota"]
-        self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
+        couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
+
         couchbase_mappings = self.getMappingType('couchbase')
 
-        total_ratio = 0
+        min_cb_ram = 0
+        
         for group in couchbase_mappings:
-             total_ratio += self.couchbaseBucketDict[group]['memory_allocation'][0]
+             min_cb_ram += self.couchbaseBucketDict[group]['memory_allocation']
+        
+        min_cb_ram += self.couchbaseBucketDict['default']['memory_allocation']
 
+        if couchbaseClusterRamsize < min_cb_ram:
+            sys.exit("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
+
+        self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
+
+        min_cb_ram *= 1.0
+        
         if self.mappingLocations['default'] != 'couchbase':
-            couchbaseClusterRamsize -= 100
             self.couchebaseCreateBucket('gluu', bucketRamsize=100)
         else:
-            bucketRamsize = self.calculate_bucket_ramsize('default', couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
             self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
-
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize = self.calculate_bucket_ramsize(group, couchbaseClusterRamsize, total_ratio)
+            bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
             if self.couchbaseBucketDict[group]['ldif']:
@@ -4512,8 +4537,7 @@ class Setup(object):
         radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
         
         self.raidus_client_jwks = self.gen_openid_jwks_jks_keys(radius_jks_fn, self.radius_jwt_pass)
-        
-        
+
         raidus_client_jwks = ''.join(self.raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
         
         raidus_client_jwks = json.loads(raidus_client_jwks)
@@ -4557,7 +4581,7 @@ class Setup(object):
         else:
             self.import_ldif_couchebase([ldif_file_base])
 
-        if self.mappingLocations['clients'] == 'ldap':
+        if self.mappingLocations['client'] == 'ldap':
             self.import_ldif_opendj([ldif_file_clients])
         else:
             self.import_ldif_couchebase([ldif_file_clients]) 
@@ -4687,6 +4711,9 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
+    
+    if argsp.remote_ldap:
+        setupOptions['listenAllInterfaces'] = True
 
     if argsp.opendj:
         setupOptions['opendj_type'] = 'opendj' 

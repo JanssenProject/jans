@@ -12,9 +12,9 @@ gluuVdsCacheRefreshEnabled: false
 gluuScimEnabled: false
 oxAuthenticationMode: auth_ldap_server
 oxTrustAuthenticationMode: auth_ldap_server
-gluuPassportEnabled: false
-gluuRadiusEnabled: false
-gluuSamlEnabled: false
+gluuPassportEnabled: %(gluuPassportEnabled)s
+gluuRadiusEnabled: %(gluuRadiusEnabled)s
+gluuSamlEnabled: %(gluuSamlEnabled)s
 oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
