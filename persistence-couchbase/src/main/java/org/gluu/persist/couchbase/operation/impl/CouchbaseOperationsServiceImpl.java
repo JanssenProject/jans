@@ -390,7 +390,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         do {
 			attemps--;
 			try {
-				result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper,
+				result = searchImpl(bucketMapping, key, useScanConsistency, expression, null /*scope*/, attributes, orderBy, batchOperationWraper,
 						returnDataType, start, count, pageSize);
 			} catch (SearchException ex) {
 				if (ex.getErrorCode() != 5000) {
