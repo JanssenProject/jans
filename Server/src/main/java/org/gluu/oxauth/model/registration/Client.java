@@ -331,7 +331,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
      * @param clientSecret The client secret.
      */
     public void setClientSecret(String clientSecret) {
-        clientSecret = this.clientSecret;
+    	this.clientSecret = clientSecret;
     }
 
     /**
