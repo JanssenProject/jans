@@ -38,7 +38,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     private String clientId;
 
     @AttributeName(name = "oxAuthClientSecret")
-    private String encodedClientSecret;
+    private String clientSecret;
 
     @AttributeName(name = "oxAuthLogoutURI")
     private String[] frontChannelLogoutUri;
@@ -322,7 +322,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
      * @return The client secret.
      */
     public String getClientSecret() {
-        return encodedClientSecret;
+        return clientSecret;
     }
 
     /**
@@ -331,7 +331,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
      * @param clientSecret The client secret.
      */
     public void setClientSecret(String clientSecret) {
-        encodedClientSecret = clientSecret;
+        clientSecret = this.clientSecret;
     }
 
     /**
