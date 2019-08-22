@@ -32,6 +32,12 @@
             <artifactId>oxcore-persistence-annotation</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
