@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version August 22, 2019
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -76,7 +76,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String backchannelAuthenticationEndpoint;
     private List<String> backchannelTokenDeliveryModesSupported;
     private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
-    private String backchannelUserCodeParameterSupported;
+    private Boolean backchannelUserCodeParameterSupported;
 
     /**
      * Constructs an OpenID Configuration Response.
@@ -1044,11 +1044,11 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.backchannelAuthenticationRequestSigningAlgValuesSupported = backchannelAuthenticationRequestSigningAlgValuesSupported;
     }
 
-    public String getBackchannelUserCodeParameterSupported() {
+    public Boolean getBackchannelUserCodeParameterSupported() {
         return backchannelUserCodeParameterSupported;
     }
 
-    public void setBackchannelUserCodeParameterSupported(String backchannelUserCodeParameterSupported) {
+    public void setBackchannelUserCodeParameterSupported(Boolean backchannelUserCodeParameterSupported) {
         this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
     }
 
