@@ -24,10 +24,25 @@ public class KeyShortcuter {
     {{
         // with markers
         put("Group", "_g");
+        put("Client", "_c");
         put("Type", "_t");
+        put("User", "_u");
+        put("Default", "_d");
 
         // without markers
-        put("Attribute", "attr");
+        put("Configuration", "Conf");
+        put("Attribute", "Attr");
+        put("Application", "App");
+        put("Request", "Req");
+        put("Response", "Resp");
+        put("Authentication", "Authn");
+        put("Authorization", "Authz");
+        put("Encrypted", "Enc");
+        put("Encryption", "Enc");
+        put("Signing", "Sig");
+        put("Expiration", "Exp");
+        put("Object", "Obj");
+        put("Token", "Tok");
     }};
 
     private KeyShortcuter() {
