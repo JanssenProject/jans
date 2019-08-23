@@ -5,20 +5,20 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.oxauth.service import EncryptionService
+from org.gluu.oxauth.security import Identity
+from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.util import StringHelper
+from org.gluu.oxauth.util import ServerUtil
+from org.gluu.oxauth.service import EncryptionService
 from java.util import Arrays
-from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
-from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from org.xdi.oxauth.cert.validation.model import ValidationStatus
-from org.xdi.oxauth.util import CertUtil
-from org.xdi.oxauth.service.net import HttpService
+from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
+from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from org.gluu.oxauth.cert.validation.model import ValidationStatus
+from org.gluu.oxauth.util import CertUtil
+from org.gluu.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys

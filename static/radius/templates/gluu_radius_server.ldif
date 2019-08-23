@@ -1,0 +1,17 @@
+dn: ou=oxradius,ou=configuration,o=gluu
+objectClass: oxRadiusServerConfiguration
+objectClass: top
+oxRadiusAccountingPort: 1813
+oxRadiusAuthenticationPort: 1812
+oxRadiusAcrValue: super_gluu_ro
+oxRadiusAuthenticationTimeout: 35000
+oxRadiusAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxRadiusAuthScope: inum=63CD,ou=scopes,o=gluu
+oxRadiusListenInterface: 0.0.0.0
+oxRadiusOpenIdBaseUrl: https://%(hostname)s/
+oxRadiusOpenidUsername: %(gluu_radius_client_id)s
+oxRadiusOpenidPassword: %(gluu_ro_encoded_pw)s
+
+dn: ou=radius_clients,o=gluu
+objectClass: organizationalUnit
+objectClass: top

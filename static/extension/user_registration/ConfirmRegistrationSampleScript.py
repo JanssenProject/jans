@@ -2,14 +2,14 @@
 # Copyright (c) 2016, Gluu
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.custom.script.type.user import UserRegistrationType
-from org.xdi.service import MailService
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.model.custom.script.type.user import UserRegistrationType
+from org.gluu.service import MailService
 from org.gluu.oxtrust.ldap.service import PersonService
-from org.xdi.ldap.model import GluuStatus
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model import GluuStatus
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.xdi.config.oxtrust import AppConfiguration
+from org.gluu.config.oxtrust import AppConfiguration
 from javax.faces.context import ExternalContext
 
 import java

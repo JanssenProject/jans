@@ -1,0 +1,9 @@
+    <bean id="siteDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+        p:driverClassName="%{idp.attribute.resolver.datasource.driverClass}"
+        p:url="%{idp.attribute.resolver.datasource.jdbcUrl}" p:username="%{idp.attribute.resolver.datasource.user}" p:password="%{idp.attribute.resolver.datasource.password}"
+        p:maxActive="10" p:maxIdle="5" p:maxWait="2000" p:testOnBorrow="true"
+        p:validationQuery="select 1" p:validationQueryTimeout="5">
+        <property name="connectionProperties">
+            <value>EnableSSL=true</value>
+        </property>
+    </bean>

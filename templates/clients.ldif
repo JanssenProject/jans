@@ -2,7 +2,7 @@
 # OX Clients Definition
 #########################
 
-dn: inum=%(oxauth_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+dn: inum=%(oxauth_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 displayName: oxTrust Admin GUI
@@ -13,17 +13,15 @@ oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/identity/ssologout
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
+oxAuthLogoutURI: https://%(hostname)s/identity/ssologout.htm
 oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
-oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
-oxAuthRedirectURI: https://%(hostname)s/identity/authentication/getauthcode
-oxAuthRedirectURI: https://%(hostname)s/cas/login
+oxAuthRedirectURI: https://%(hostname)s/identity/authcode.htm
 oxAuthRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims?authentication=true
 oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
-oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finishlogout
+oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/finishlogout.htm
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthTrustedClient: true
@@ -32,7 +30,7 @@ oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: true
 
 
-dn: inum=%(idp_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
+dn: inum=%(idp_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 displayName: IDP client
@@ -42,9 +40,9 @@ oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
 oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
