@@ -26,6 +26,7 @@ import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
+import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.key.impl.model.ParsedKey;
 import org.gluu.persist.model.*;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
@@ -172,9 +173,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 escapeValues(realValues);
 
                 if ((multivalued == null) || !multivalued) {
-                    jsonObject.put(attributeName, realValues[0]);
+                    jsonObject.put(toInternalAttribute(attributeName), realValues[0]);
                 } else {
-                    jsonObject.put(attributeName, JsonArray.from(realValues));
+                    jsonObject.put(toInternalAttribute(attributeName), JsonArray.from(realValues));
                 }
             }
         }
@@ -219,12 +220,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(Mutation.DICT_ADD, attributeName, multivalued, attributeValues);
+                    modification = createModification(Mutation.DICT_ADD, toInternalAttribute(attributeName), multivalued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.DELETE, oldAttributeName, multivalued, oldAttributeValues);
+                        modification = createModification(Mutation.DELETE, toInternalAttribute(oldAttributeName), multivalued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.REPLACE, attributeName, multivalued, attributeValues);
+                        modification = createModification(Mutation.REPLACE, toInternalAttribute(attributeName), multivalued, attributeValues);
                     }
                 }
 
@@ -280,7 +281,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null, ldapReturnAttributes);
+            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null, toInternalAttributes(ldapReturnAttributes));
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -391,7 +392,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             if (batchOperation != null) {
                 batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = operationService.search(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, currentLdapReturnAttributes,
+            searchResult = searchImpl(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
@@ -431,7 +432,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = operationService.search(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = searchImpl(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 1, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -442,6 +443,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         return (searchResult != null) && (searchResult.getEntriesCount() > 0);
     }
+
+	private <O> PagedResult<JsonObject> searchImpl(String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+            CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
+		return operationService.search(key, scanConsistency, expression, scope, toInternalAttributes(attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+	}
 
     protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<JsonObject> searchResult) {
         ParsedKey keyWithInum = toCouchbaseKey(baseDN);
@@ -534,7 +540,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		}
 
 		try {
-            PagedResult<JsonObject> searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(),
+            PagedResult<JsonObject> searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(),
                     SearchScope.SUB, null, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -595,7 +601,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         PagedResult<JsonObject> searchResult;
         try {
-            searchResult = operationService.search(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, null, null,
+            searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -813,6 +819,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 //        		realValues[i] = StringHelper.unescapeJson(realValues[i]);
 //        	}
 //        }
+	}
+	
+	private String toInternalAttribute(String attributeName) {
+		return KeyShortcuter.shortcut(attributeName);
+	}
+
+	private String[] toInternalAttributes(String[] attributeNames) {
+		if (ArrayHelper.isEmpty(attributeNames)) {
+			return attributeNames;
+		}
+		
+		String[] resultAttributeNames = new String[attributeNames.length];
+		
+		for (int i = 0; i < attributeNames.length; i++) {
+			resultAttributeNames[i] = KeyShortcuter.shortcut(attributeNames[i]);
+		}
+		
+		return resultAttributeNames;
 	}
 
 }
