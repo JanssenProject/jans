@@ -1,0 +1,85 @@
+#####################################################
+# Gluu Radius Service Configuration
+# Copyright (c) Gluu Inc. 
+#####################################################
+
+#####################################################
+# These are self-explanatory 
+#####################################################
+GLUU_RADIUS_SVC_NAME="Gluu Radius"
+GLUU_RADIUS_SVC_DESCRIPTION="Gluu Radius Server"
+
+#####################################################
+# JVM configuration. Specify the location of 
+# your JAVA_HOME and JAVA binary here 
+#####################################################
+JAVA_HOME=/opt/jre
+JAVA=$JAVA_HOME/bin/java
+JVM_ARGS=
+
+#####################################################
+# user and group under which Gluu Radius 
+# will run
+#####################################################
+GLUU_RADIUS_USER=radius
+GLUU_RADIUS_GROUP=gluu
+
+#####################################################
+# Gluu Radius PID file directory
+#####################################################
+GLUU_RADIUS_PID_DIR=/var/run
+
+#####################################################
+# Gluu Radius Installation Directory
+# This will be our working directory
+#####################################################
+GLUU_RADIUS_INSTALL_DIR=/opt/gluu/radius/
+
+
+#####################################################
+# Gluu Radius Configuration Directory
+#####################################################
+GLUU_RADIUS_CONFIG_DIR=/etc/gluu/conf/radius
+
+#####################################################
+# Gluu Radius application configuration file
+#####################################################
+GLUU_RADIUS_APP_CONFIG=$GLUU_RADIUS_CONFIG_DIR/gluu-radius.properties
+
+#####################################################
+#  Gluu Radius log4j2 configuration file 
+#####################################################
+GLUU_RADIUS_LOG4J2_CONFIG=$GLUU_RADIUS_CONFIG_DIR/gluu-radius-logging.xml
+
+#####################################################
+# Gluu Radius jar file 
+# Change this to reflect version bumps
+#####################################################
+GLUU_RADIUS_JAR=super-gluu-radius-server.jar
+
+#####################################################
+# Gluu Radius main class (Java)
+#####################################################
+GLUU_RADIUS_JAVA_MAIN=org.gluu.radius.ServerEntry
+
+
+#####################################################
+# Gluu Radius application options
+# We build them here from the options above 
+# no need to modify them
+#####################################################
+GLUU_RADIUS_LOG4J_PROPS="-Dlog4j.configurationFile=file:$GLUU_RADIUS_LOG4J2_CONFIG"
+GLUU_RADIUS_PROPS="$GLUU_RADIUS_LOG4J_PROPS"
+GLUU_RADIUS_CLASSPATH="-cp $GLUU_RADIUS_JAR"
+GLUU_RADIUS_OPTS="$JVM_OPTS $GLUU_RADIUS_PROPS $GLUU_RADIUS_CLASSPATH $GLUU_RADIUS_JAVA_MAIN $GLUU_RADIUS_APP_CONFIG"
+
+JAVA_OPTIONS="$GLUU_RADIUS_OPTS"
+
+RADIUS_HOME=/opt/jetty
+RADIUS_USER=$GLUU_RADIUS_USER
+RADIUS_GROUP=$GLUU_RADIUS_GROUP
+RADIUS_BASE=$GLUU_RADIUS_INSTALL_DIR
+
+TMPDIR=/opt/jetty-9.4/temp
+
+export PYTHON_HOME=/opt/jython

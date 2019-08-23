@@ -18,7 +18,7 @@ def generate(infile, schema_type=None):
     """Function generates the LDAP schema definitions from the JSON data
 
     Args:
-        schema_type (str): The schema type to be generated (openldap, opendj)
+        schema_type (str): The schema type to be generated (opendj)
     """
     fp = open(infile, 'r')
     json_text = fp.read()
@@ -32,19 +32,16 @@ def generate(infile, schema_type=None):
 
 
 def autogenerate():
-    """Function that generates the LDAP schemas for OpenDJ, OpenLDAP from the
+    """Function that generates the LDAP schemas for OpenDJ from the
     gluu_schema.json and custom_schema.json and puts them in their respective
     folders.
     """
-    openldap_folder = os.path.join(os.path.dirname(localdir), 'static/openldap/')
     opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/')
 
     fp = open(os.path.join(localdir, 'gluu_schema.json'), 'r')
     gluu_json = fp.read()
     fp.close()
     gen = SchemaGenerator(gluu_json)
-    with open(os.path.join(openldap_folder, 'gluu.schema'), 'w') as f:
-        f.write(gen.generate_schema().encode('utf-8'))
     with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
         f.write(gen.generate_ldif().encode('utf-8'))
 
@@ -52,8 +49,6 @@ def autogenerate():
     custom_json = fp.read()
     fp.close()
     gen = SchemaGenerator(custom_json)
-    with open(os.path.join(openldap_folder, 'custom.schema'), 'w') as f:
-        f.write(gen.generate_schema().encode('utf-8'))
     with open(os.path.join(opendj_folder, '77-customAttributes.ldif'), 'w') \
             as f:
         f.write(gen.generate_ldif().encode('utf-8'))
@@ -145,7 +140,7 @@ if __name__ == '__main__':
         choices=["autogenerate", "generate", "makejson", "makedocs", "test"])
     parser.add_argument(
         "--type", help="the schema type you want to generate",
-        choices=["openldap", "opendj"])
+        choices=["opendj"])
     parser.add_argument(
         "--filename", help="the input file for various actions")
     args = parser.parse_args()

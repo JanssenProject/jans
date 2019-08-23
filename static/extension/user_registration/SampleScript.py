@@ -4,9 +4,9 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.model.custom.script.type.user import UserRegistrationType
-from org.xdi.ldap.model import GluuStatus
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.user import UserRegistrationType
+from org.gluu.model import GluuStatus
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java

@@ -13,24 +13,18 @@
                 "host": "",
                 "username": "",
                 "password": "",
-                "port": ""
+                "port": 0
             }
         }
     },
 
-    "idpinitiated": {
+    "idpInitiated": {
         "openidclient": {
             "authorizationEndpoint": "https://%(hostname)s/oxauth/restv1/authorize",
             "clientId": "%(passport_rp_ii_client_id)s",
             "acrValues": "passport_saml"
         },
         "authorizationParams": [
-            {
-                "provider" : "IPD id",
-                "redirect_uri": "",
-                "response_type": "code",
-                "scope": ["openid", "user_name", "email"]
-            }
         ]
     },
 

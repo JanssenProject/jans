@@ -4,10 +4,10 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.model.custom.script.type.scope import DynamicScopeType
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.service import UserService
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.scope import DynamicScopeType
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.service import UserService
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
@@ -29,7 +29,7 @@ class DynamicScope(DynamicScopeType):
         return True   
 
     # Update Json Web token before signing/encrypring it
-    #   dynamicScopeContext is org.xdi.oxauth.service.external.context.DynamicScopeExternalContext
+    #   dynamicScopeContext is org.gluu.oxauth.service.external.context.DynamicScopeExternalContext
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def update(self, dynamicScopeContext, configurationAttributes):
         print "Dynamic scope. Update method"

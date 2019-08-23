@@ -20,7 +20,7 @@ Use the following commands to export data from OpenLDAP to LDIF
 
 ``` 
 # /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=gluu" "Objectclass=*" > /root/gluu.ldif
-# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=gluu" -w <adminPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
+# /opt/opendj/bin/ldapsearch -X -Z -D "cn=directory manager,o=site" -w <adminPassword> -h localhost -p 1636 -b "o=site" "Objectclass=*" > /root/site.ldif
 ```
 
 Replace `<adminPassword>` with your Gluu admin password.
@@ -30,6 +30,7 @@ Replace `<adminPassword>` with your Gluu admin password.
 ```
 # /etc/init.d/identity stop
 # /etc/init.d/oxauth stop
+# /etc/init.d/idp stop [ If you have SAML ] 
 # /etc/init.d/solserver stop
 ```
 
@@ -61,6 +62,8 @@ Ubuntu Users:
 ## Run the migration script:
 
 ```
+# export OPENDJ_JAVA_HOME=/opt/jre
+# export JAVA_HOME=/opt/jre
 # cd /install/community-edition-setup/
 # python openldap2opendj.py
 ```
@@ -96,14 +99,19 @@ Re-run the migration script with the `-p` argument to do post-migration finaliza
 # python openldap2opendj.py -p
 ```
 
+## SAML configuration
+
+Change `idp.authn.LDAP.trustCertificates = /etc/certs/openldap.crt` to `idp.authn.LDAP.trustCertificates = /etc/certs/opendj.crt` in `ldap.properties` file. Location: `/opt/shibboleth-idp/conf`
+
 ## Start the servers
 
 ```
 # /etc/init.d/oxauth start
 # /etc/init.d/identity start
+# /etc/init.d/idp start
 ```
 
-Try to log in to Gluu UI. If it's working as expected, remove OpenLDAP:
+Try to log in to Gluu UI and check your SSO operation. If it's working as expected, remove OpenLDAP:
 
 CentOS7:
 

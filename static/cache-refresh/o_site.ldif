@@ -3,8 +3,8 @@ objectClass: top
 objectClass: organization
 o: site
 
-dn: ou=people,o=site
-objectclass: top
-objectclass: organizationalUnit
+dn: ou=cache-refresh,o=site
+objectClass: top
+objectClass: organizationalUnit
 ou: people
 
