@@ -71,11 +71,13 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     private Properties props;
     private CouchbaseConnectionProvider connectionProvider;
 
-    private ScanConsistency scanConsistency;
-	private boolean ignoreAttributeScanConsistency;
-	private boolean disableScopeSupport;
+    private ScanConsistency scanConsistency = ScanConsistency.NOT_BOUNDED;
 
-	private boolean attemptWithoutAttributeScanConsistency;
+    private boolean ignoreAttributeScanConsistency = false;
+	private boolean attemptWithoutAttributeScanConsistency = true;
+	private boolean enableScopeSupport = false;
+	private boolean disableAttributeMapping = false;
+
 
     @SuppressWarnings("unused")
     private CouchbaseOperationsServiceImpl() {
@@ -92,26 +94,27 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	String scanConsistencyString = StringHelper.toUpperCase(props.get("connection.scan-consistency").toString());
         	this.scanConsistency = ScanConsistency.valueOf(scanConsistencyString);
         }
-    	if (this.scanConsistency == null) {
-    		this.scanConsistency = ScanConsistency.NOT_BOUNDED;
-    	}
 
         if (props.containsKey("connection.ignore-attribute-scan-consistency")) {
-        	this.ignoreAttributeScanConsistency = StringHelper.toBoolean(props.get("connection.ignore-attribute-scan-consistency").toString(), false);
+        	this.ignoreAttributeScanConsistency = StringHelper.toBoolean(props.get("connection.ignore-attribute-scan-consistency").toString(), this.ignoreAttributeScanConsistency);
         }
 
-        this.attemptWithoutAttributeScanConsistency = true;
         if (props.containsKey("connection.attempt-without-attribute-scan-consistency")) {
         	this.attemptWithoutAttributeScanConsistency = StringHelper.toBoolean(props.get("attempt-without-attribute-scan-consistency").toString(), this.attemptWithoutAttributeScanConsistency);
         }
 
-        if (props.containsKey("connection.disable-scope-support")) {
-        	this.disableScopeSupport = StringHelper.toBoolean(props.get("connection.disable-scope-support").toString(), false);
+        if (props.containsKey("connection.enable-scope-support")) {
+        	this.enableScopeSupport = StringHelper.toBoolean(props.get("connection.enable-scope-support").toString(), this.enableScopeSupport);
+        }
+
+        if (props.containsKey("connection.disable-attribute-mapping")) {
+        	this.disableAttributeMapping = StringHelper.toBoolean(props.get("connection.disable-attribute-mapping").toString(), this.disableAttributeMapping);
         }
 
         LOG.info("Option scanConsistency: " + scanConsistency);
         LOG.info("Option ignoreAttributeScanConsistency: " + ignoreAttributeScanConsistency);
-        LOG.info("Option disableScopeSupport: " + disableScopeSupport);
+        LOG.info("Option enableScopeSupport: " + enableScopeSupport);
+        LOG.info("Option disableAttributeMapping: " + disableAttributeMapping);
     }
 
     @Override
@@ -287,10 +290,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
 	private boolean deleteRecursivelyImpl(BucketMapping bucketMapping, String key) throws SearchException, EntryNotFoundException {
 		try {
-	        if (disableScopeSupport) {
-	        	LOG.warn("Removing only base key without sub-tree: " + key);
-	        	delete(key);
-	        } else {
+	        if (enableScopeSupport) {
 	            MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName()))
 	                    .where(Expression.path("META().id").like(Expression.s(key + "%")));
 	
@@ -299,6 +299,9 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                     throw new SearchException(String.format("Failed to delete entries. Query: '%s'. Error: '%s', Error count: '%d'", deleteQuery, result.errors(),
                     		result.info().errorCount()), result.errors().get(0).getInt("code"));
 	            }
+	        } else {
+	        	LOG.warn("Removing only base key without sub-tree: " + key);
+	        	delete(key);
 	        }
 	    	
             return true;
@@ -390,7 +393,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         do {
 			attemps--;
 			try {
-				result = searchImpl(bucketMapping, key, useScanConsistency, expression, null /*scope*/, attributes, orderBy, batchOperationWraper,
+				result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper,
 						returnDataType, start, count, pageSize);
 			} catch (SearchException ex) {
 				if (ex.getErrorCode() != 5000) {
@@ -437,11 +440,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
         
         Expression finalExpression = expression;
-        if (disableScopeSupport) { 
-            if (scope != null) {
-            	LOG.warn("Ignoring scope '" + scope + " for expression: " + expression);
-            }
-        } else {
+        if (enableScopeSupport) { 
 			Expression scopeExpression;
 			if (scope == null) {
 				scopeExpression = null;
@@ -455,6 +454,10 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 			if (scopeExpression != null) {
 				finalExpression = scopeExpression.and(expression);
 			}
+        } else {
+            if (scope != null) {
+            	LOG.warn("Ignoring scope '" + scope + " for expression: " + expression);
+            }
         }
 
         String[] select = attributes;
@@ -623,7 +626,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 		return scanConsistency;
 	}
 
-    @Override
+    public boolean isDisableAttributeMapping() {
+		return disableAttributeMapping;
+	}
+
+	@Override
     public boolean destroy() {
         boolean result = true;
 

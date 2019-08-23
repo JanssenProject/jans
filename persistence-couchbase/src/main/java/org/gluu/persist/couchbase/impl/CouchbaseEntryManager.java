@@ -822,11 +822,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 	
 	private String toInternalAttribute(String attributeName) {
+		if (operationService.isDisableAttributeMapping()) {
+			return attributeName;
+		}
+
 		return KeyShortcuter.shortcut(attributeName);
 	}
 
 	private String[] toInternalAttributes(String[] attributeNames) {
-		if (ArrayHelper.isEmpty(attributeNames)) {
+		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
 			return attributeNames;
 		}
 		
