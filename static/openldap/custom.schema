@@ -1,5 +1,0 @@
-objectclass ( 1.3.6.1.4.1.48710.1.4.101 NAME 'gluuCustomPerson'
-	SUP ( top )
-	AUXILIARY
-	MAY ( telephoneNumber $ mobile $ carLicense $ facsimileTelephoneNumber $ departmentNumber $ employeeType $ cn $ st $ manager $ street $ postOfficeBox $ employeeNumber $ preferredDeliveryMethod $ roomNumber $ secretary $ homePostalAddress $ l $ postalCode $ description $ title )
-	X-ORIGIN 'Gluu - Custom persom objectclass' )

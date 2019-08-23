@@ -4,12 +4,12 @@
 # Author: Jose Gonzalez
 # Author: Gasmyr Mougang
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.oxauth.util import ServerUtil
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
@@ -76,6 +76,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
+
+        facesMessages = CdiUtil.bean(FacesMessages)
+        facesMessages.setKeepMessages()
+
         session_attributes = self.identity.getSessionId().getSessionAttributes()
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
@@ -113,11 +117,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 if  self.mobile_number == None:
                     self.mobile_number = foundUser.getAttribute("telephoneNumber")
                 if  self.mobile_number == None:
-                    print "TwilioSMS, Error finding mobile number for user '%'" % user_name    
+                    print "TwilioSMS, Error finding mobile number for user '%s'" % user_name    
                     
             except:
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
-                print 'TwilioSMS, Error finding mobile number for' % (user_name)
+                print 'TwilioSMS, Error finding mobile number for "%s". Exception: %s` % (user_name, sys.exc_info()[1])`'
                 return False
 
             # Generate Random six digit code and store it in array
@@ -149,9 +153,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return False
         elif step == 2:
-
-            facesMessages = CdiUtil.bean(FacesMessages)
-            facesMessages.setKeepMessages()
             # Retrieve the session attribute
             print "TwilioSMS. Step 2 SMS/OTP Authentication"
             code = session_attributes.get("code")

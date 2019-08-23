@@ -3,11 +3,11 @@
 #
 # Author: Jose Gonzalez
 #
-from org.xdi.model.custom.script.type.scim import ScimType
-from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.model.custom.script.type.scim import ScimType
+from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.oxtrust.ldap.service import PersonService
-from org.xdi.service.cdi.util import CdiUtil
+from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxtrust.model import GluuCustomPerson
 
 import java

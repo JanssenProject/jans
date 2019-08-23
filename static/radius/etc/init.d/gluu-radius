@@ -1,0 +1,628 @@
+#!/usr/bin/env bash
+
+# LSB Tags
+### BEGIN INIT INFO
+# Provides:          gluu-radius
+# Required-Start:    $local_fs $network opendj
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Radius start script.
+# Description:       Start Radius web server.
+### END INIT INFO
+
+# Startup script for radius under *nix systems (it works under NT/cygwin too).
+
+##################################################
+# Set the name which is used by other variables.
+# Defaults to the file name without extension.
+##################################################
+NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
+
+# To get the service to restart correctly on reboot, uncomment below (3 lines):
+# ========================
+# chkconfig: 345 72 28
+# description: Radius 9 gluu-radius
+# processname: radius
+# ========================
+
+# Configuration files
+#
+# /etc/default/$NAME
+#   If it exists, this is read at the start of script. It may perform any
+#   sequence of shell commands, like setting relevant environment variables.
+#
+# $HOME/.$NAMErc (e.g. $HOME/.radiusrc)
+#   If it exists, this is read at the start of script. It may perform any
+#   sequence of shell commands, like setting relevant environment variables.
+#
+# /etc/$NAME.conf
+#   If found, and no configurations were given on the command line,
+#   the file will be used as this script's configuration.
+#   Each line in the file may contain:
+#     - A comment denoted by the pound (#) sign as first non-blank character.
+#     - The path to a regular file, which will be passed to radius as a
+#       config.xml file.
+#     - The path to a directory. Each *.xml file in the directory will be
+#       passed to radius as a config.xml file.
+#     - All other lines will be passed, as-is to the start.jar
+#
+#   The files will be checked for existence before being passed to radius.
+#
+# Configuration variables
+#
+# JAVA
+#   Command to invoke Java. If not set, java (from the PATH) will be used.
+#
+# JAVA_OPTIONS
+#   Extra options to pass to the JVM
+#
+# RADIUS_HOME
+#   Where Radius is installed. If not set, the script will try go
+#   guess it by looking at the invocation path for the script
+#   The java system property "radius.home" will be
+#   set to this value for use by configure.xml files, f.e.:
+#
+#    <Arg><Property name="radius.home" default="."/>/webapps/radius.war</Arg>
+#
+# RADIUS_BASE
+#   Where your Radius base directory is.  If not set, the value from
+#   $RADIUS_HOME will be used.
+#
+# RADIUS_RUN
+#   Where the $NAME.pid file should be stored. It defaults to the
+#   first available of /var/run, /usr/var/run, RADIUS_BASE and /tmp
+#   if not set.
+#
+# PIDFILE
+#   The Radius PID file, defaults to $RADIUS_RUN/$NAME.pid
+#
+# RADIUS_ARGS
+#   The default arguments to pass to radius.
+#   For example
+#      RADIUS_ARGS=radius.http.port=8080 radius.ssl.port=8443
+#
+# RADIUS_USER
+#   if set, then used as a username to run the server as
+#
+# RADIUS_SHELL
+#   If set, then used as the shell by su when starting the server.  Will have
+#   no effect if start-stop-daemon exists.  Useful when RADIUS_USER does not
+#   have shell access, e.g. /bin/false
+#
+# RADIUS_START_TIMEOUT
+#   Time spent waiting to see if startup was successful/failed. Defaults to 60 seconds
+#
+
+usage()
+{
+    echo "Usage: ${0##*/} [-d] {start|stop|run|restart|check|supervise} [ CONFIGS ... ] "
+    exit 1
+}
+
+[ $# -gt 0 ] || usage
+
+
+##################################################
+# Some utility functions
+##################################################
+findDirectory()
+{
+  local L OP=$1
+  shift
+  for L in "$@"; do
+    [ "$OP" "$L" ] || continue
+    printf %s "$L"
+    break
+  done
+}
+
+running()
+{
+  if [ -f "$1" ]
+  then
+    local PID=$(cat "$1" 2>/dev/null) || return 1
+    kill -0 "$PID" 2>/dev/null
+    return
+  fi
+  rm -f "$1"
+  return 1
+}
+
+started()
+{
+  # wait for 60s to see "STARTED" in PID file, needs radius-started.xml as argument
+  for ((T = 0; T < $(($3 / 4)); T++))
+  do
+    sleep 4
+    [ -z "$(grep STARTED $1 2>/dev/null)" ] || return 0
+    [ -z "$(grep STOPPED $1 2>/dev/null)" ] || return 1
+    [ -z "$(grep FAILED $1 2>/dev/null)" ] || return 1
+    local PID=$(cat "$2" 2>/dev/null) || return 1
+    kill -0 "$PID" 2>/dev/null || return 1
+    echo -n ". "
+  done
+
+  return 1;
+}
+
+
+readConfig()
+{
+  (( DEBUG )) && echo "Reading $1.."
+  source "$1"
+}
+
+dumpEnv()
+{
+    echo "JAVA                  =  $JAVA"
+    echo "JAVA_OPTIONS          =  ${JAVA_OPTIONS[*]}"
+    echo "RADIUS_HOME            =  $RADIUS_HOME"
+    echo "RADIUS_BASE            =  $RADIUS_BASE"
+    echo "RADIUS_START           =  $RADIUS_START"
+    echo "RADIUS_CONF            =  $RADIUS_CONF"
+    echo "RADIUS_ARGS            =  ${RADIUS_ARGS[*]}"
+    echo "RADIUS_RUN             =  $RADIUS_RUN"
+    echo "PIDFILE             =  $PIDFILE"
+    echo "RADIUS_START_LOG       =  $RADIUS_START_LOG"
+    echo "RADIUS_STATE           =  $RADIUS_STATE"
+    echo "RADIUS_START_TIMEOUT   =  $RADIUS_START_TIMEOUT"
+    echo "RUN_CMD               =  ${RUN_CMD[*]}"
+}
+
+
+
+##################################################
+# Get the action & configs
+##################################################
+CONFIGS=()
+NO_START=0
+DEBUG=0
+
+while [[ $1 = -* ]]; do
+  case $1 in
+    -d) DEBUG=1 ;;
+  esac
+  shift
+done
+ACTION=$1
+shift
+
+##################################################
+# Read any configuration files
+##################################################
+ETC=/etc
+if [ $UID != 0 ]
+then
+  ETC=$HOME/etc
+fi
+
+for CONFIG in {/etc,~/etc}/default/${NAME}{,9} $HOME/.${NAME}rc; do
+  if [ -f "$CONFIG" ] ; then
+    readConfig "$CONFIG"
+  fi
+done
+
+
+##################################################
+# Set tmp if not already set.
+##################################################
+TMPDIR=${TMPDIR:-/tmp}
+
+##################################################
+# Radius's hallmark
+##################################################
+RADIUS_INSTALL_TRACE_FILE="start.jar"
+
+
+##################################################
+# Try to determine RADIUS_HOME if not set
+##################################################
+if [ -z "$RADIUS_HOME" ]
+then
+  RADIUS_SH=$0
+  case "$RADIUS_SH" in
+    /*)     RADIUS_HOME=${RADIUS_SH%/*/*} ;;
+    ./*/*)  RADIUS_HOME=${RADIUS_SH%/*/*} ;;
+    ./*)    RADIUS_HOME=.. ;;
+    */*/*)  RADIUS_HOME=./${RADIUS_SH%/*/*} ;;
+    */*)    RADIUS_HOME=. ;;
+    *)      RADIUS_HOME=.. ;;
+  esac
+
+  if [ ! -f "$RADIUS_HOME/$RADIUS_INSTALL_TRACE_FILE" ]
+  then
+    RADIUS_HOME=
+  fi
+fi
+
+
+##################################################
+# No RADIUS_HOME yet? We're out of luck!
+##################################################
+if [ -z "$RADIUS_HOME" ]; then
+  echo "** ERROR: RADIUS_HOME not set, you need to set it or install in a standard location"
+  exit 1
+fi
+
+cd "$RADIUS_HOME"
+RADIUS_HOME=$PWD
+
+
+##################################################
+# Set RADIUS_BASE
+##################################################
+if [ -z "$RADIUS_BASE" ]; then
+  RADIUS_BASE=$RADIUS_HOME
+fi
+
+cd "$RADIUS_BASE"
+RADIUS_BASE=$PWD
+
+
+#####################################################
+# Check that radius is where we think it is
+#####################################################
+if [ ! -r "$RADIUS_HOME/$RADIUS_INSTALL_TRACE_FILE" ]
+then
+  echo "** ERROR: Oops! Radius doesn't appear to be installed in $RADIUS_HOME"
+  echo "** ERROR:  $RADIUS_HOME/$RADIUS_INSTALL_TRACE_FILE is not readable!"
+  exit 1
+fi
+
+##################################################
+# Try to find this script's configuration file,
+# but only if no configurations were given on the
+# command line.
+##################################################
+if [ -z "$RADIUS_CONF" ]
+then
+  if [ -f $ETC/${NAME}.conf ]
+  then
+    RADIUS_CONF=$ETC/${NAME}.conf
+  elif [ -f "$RADIUS_BASE/etc/radius.conf" ]
+  then
+    RADIUS_CONF=$RADIUS_BASE/etc/radius.conf
+  elif [ -f "$RADIUS_HOME/etc/radius.conf" ]
+  then
+    RADIUS_CONF=$RADIUS_HOME/etc/radius.conf
+  fi
+fi
+
+#####################################################
+# Find a location for the pid file
+#####################################################
+if [ -z "$RADIUS_RUN" ]
+then
+  RADIUS_RUN=$(findDirectory -w /var/run /usr/var/run $RADIUS_BASE /tmp $GLUU_RADIUS_PID_DIR)/radius
+  [ -d "$RADIUS_RUN" ] || mkdir $RADIUS_RUN
+fi
+
+#####################################################
+# define start log location
+#####################################################
+if [ -z "$RADIUS_START_LOG" ]
+then
+  RADIUS_START_LOG="$RADIUS_RUN/$NAME-start.log"
+fi
+
+#####################################################
+# Find a pid and state file
+#####################################################
+if [ -z "$PIDFILE" ]
+then
+  PIDFILE="$RADIUS_RUN/${NAME}.pid"
+fi
+
+if [ -z "$RADIUS_STATE" ]
+then
+  RADIUS_STATE=$RADIUS_BASE/${NAME}.state
+  touch $RADIUS_STATE
+  chown $RADIUS_USER:$RADIUS_GROUP $RADIUS_STATE
+fi
+
+case "`uname`" in
+CYGWIN*) RADIUS_STATE="`cygpath -w $RADIUS_STATE`";;
+esac
+
+
+RADIUS_ARGS=(${RADIUS_ARGS[*]} "radius.state=$RADIUS_STATE")
+
+##################################################
+# Get the list of config.xml files from radius.conf
+##################################################
+if [ -f "$RADIUS_CONF" ] && [ -r "$RADIUS_CONF" ]
+then
+  while read -r CONF
+  do
+    if expr "$CONF" : '#' >/dev/null ; then
+      continue
+    fi
+
+    if [ -d "$CONF" ]
+    then
+      # assume it's a directory with configure.xml files
+      # for example: /etc/radius.d/
+      # sort the files before adding them to the list of RADIUS_ARGS
+      for XMLFILE in "$CONF/"*.xml
+      do
+        if [ -r "$XMLFILE" ] && [ -f "$XMLFILE" ]
+        then
+          RADIUS_ARGS=(${RADIUS_ARGS[*]} "$XMLFILE")
+        else
+          echo "** WARNING: Cannot read '$XMLFILE' specified in '$RADIUS_CONF'"
+        fi
+      done
+    else
+      # assume it's a command line parameter (let start.jar deal with its validity)
+      RADIUS_ARGS=(${RADIUS_ARGS[*]} "$CONF")
+    fi
+  done < "$RADIUS_CONF"
+fi
+
+##################################################
+# Setup JAVA if unset
+##################################################
+if [ -z "$JAVA" ]
+then
+  JAVA=$(which java)
+fi
+
+if [ -z "$JAVA" ]
+then
+  echo "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.5) in your PATH." >&2
+  exit 1
+fi
+
+#####################################################
+# See if Deprecated RADIUS_LOGS is defined
+#####################################################
+if [ "$RADIUS_LOGS" ]
+then
+  echo "** WARNING: RADIUS_LOGS is Deprecated. Please configure logging within the radius base." >&2
+fi
+
+#####################################################
+# Set STARTED timeout
+#####################################################
+if [ -z "$RADIUS_START_TIMEOUT" ]
+then
+  RADIUS_START_TIMEOUT=60
+fi
+
+#####################################################
+# Are we running on Windows? Could be, with Cygwin/NT.
+#####################################################
+case "`uname`" in
+CYGWIN*) PATH_SEPARATOR=";";;
+*) PATH_SEPARATOR=":";;
+esac
+
+
+#####################################################
+# Add radius properties to Java VM options.
+#####################################################
+
+case "`uname`" in
+CYGWIN*)
+RADIUS_HOME="`cygpath -w $RADIUS_HOME`"
+RADIUS_BASE="`cygpath -w $RADIUS_BASE`"
+TMPDIR="`cygpath -w $TMPDIR`"
+;;
+esac
+
+JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Dradius.home=$RADIUS_HOME" "-Dradius.base=$RADIUS_BASE" "-Djava.io.tmpdir=$TMPDIR")
+
+#####################################################
+# This is how the Radius server will be started
+#####################################################
+
+RADIUS_START=$RADIUS_HOME/start.jar
+
+case "`uname`" in
+CYGWIN*) RADIUS_START="`cygpath -w $RADIUS_START`";;
+esac
+
+RUN_ARGS=(${JAVA_OPTIONS[@]} -jar "$RADIUS_START" ${RADIUS_ARGS[*]})
+RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
+
+#####################################################
+# Comment these out after you're happy with what
+# the script is doing.
+#####################################################
+if (( DEBUG ))
+then
+  dumpEnv
+fi
+
+##################################################
+# Do the action
+##################################################
+case "$ACTION" in
+  	start)
+    		echo -n "Starting Radius: "
+
+    		if (( NO_START )); then
+      			echo "Not starting ${NAME} - NO_START=1";
+      			exit
+    		fi
+
+    		if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1
+    		then
+      			unset CH_USER
+      			if [ -n "$RADIUS_USER" ]
+      			then
+        			CH_USER="-c$RADIUS_USER"
+      			fi
+
+                	start-stop-daemon --start \
+                        	--quiet \
+                        	--pidfile "$PIDFILE" \
+                        	--user $GLUU_RADIUS_USER \
+                        	--exec "${JAVA}" \
+                        	--test > /dev/null \
+                        	|| return 1
+	
+                	start-stop-daemon --start \
+                        	--quiet \
+                        	--make-pidfile \
+                        	--pidfile $PIDFILE \
+                        	--chuid $GLUU_RADIUS_USER \
+                        	--user  $GLUU_RADIUS_USER  \
+                        	--group $GLUU_RADIUS_GROUP \
+                        	--chdir "$GLUU_RADIUS_INSTALL_DIR" \
+                        	--background \
+                        	--exec "$JAVA" \
+                        	-- $GLUU_RADIUS_OPTS \
+                        	|| return 2
+
+			echo "STARTED" > "$RADIUS_STATE"
+	
+    		else
+
+      			if running $PIDFILE
+      			then
+        			echo "Already Running $(cat $PIDFILE)!"
+        			exit 1
+      			fi
+
+      			if [ -n "$RADIUS_USER" ] && [ `whoami` != "$RADIUS_USER" ]
+      			then
+        			unset SU_SHELL
+        			if [ "$RADIUS_SHELL" ]
+        			then
+          				SU_SHELL="-s $RADIUS_SHELL"
+        			fi
+
+        			touch "$PIDFILE"
+        			chown "$RADIUS_USER" "$PIDFILE"
+        			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
+        			su - "$RADIUS_USER" $SU_SHELL -c "
+          			cd "$RADIUS_BASE"
+          			exec ${RUN_CMD[*]} start-log-file=\"$RADIUS_START_LOG\" > /dev/null &
+          			disown \$!
+          			echo \$! > \"$PIDFILE\"
+				echo "STARTED" > \"$RADIUS_STATE\""
+      			else
+          			cd "$RADIUS_BASE"
+        			"${RUN_CMD[@]}" > /dev/null &
+        			disown $!
+        			echo $! > "$PIDFILE"
+				echo "STARTED" > "$RADIUS_STATE"
+      			fi
+
+    		fi
+
+    		if expr "${RADIUS_ARGS[*]}" : '.*radius-started.xml.*' >/dev/null
+    		then
+      			if started "$RADIUS_STATE" "$PIDFILE" "$RADIUS_START_TIMEOUT"
+      			then
+        			echo "OK `date`"
+      			else
+        			echo "FAILED `date`"
+        			exit 1
+      			fi
+    		else
+      			echo "ok `date`"
+    		fi
+
+    	;;
+
+  stop)
+    	echo -n "Stopping Radius: "
+    	if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1; then
+      		start-stop-daemon -K -p"$PIDFILE" -d"$RADIUS_HOME" -a "$JAVA" -s HUP
+	
+      		TIMEOUT=30
+      		while running "$PIDFILE"; do
+        		if (( TIMEOUT-- == 0 )); then
+          			start-stop-daemon -K -p"$PIDFILE" -d"$RADIUS_HOME" -a "$JAVA" -s KILL
+        		fi
+
+        		sleep 1
+      		done
+    	else
+      		if [ ! -f "$PIDFILE" ] ; then
+        		echo "ERROR: no pid found at $PIDFILE"
+        		exit 1
+      		fi
+
+      		PID=$(cat "$PIDFILE" 2>/dev/null)
+      		if [ -z "$PID" ] ; then
+        		echo "ERROR: no pid id found in $PIDFILE"
+        		exit 1
+      		fi
+      		kill "$PID" 2>/dev/null
+
+      		TIMEOUT=30
+      		while running $PIDFILE; do
+        		if (( TIMEOUT-- == 0 )); then
+          			kill -KILL "$PID" 2>/dev/null
+        		fi
+
+        		sleep 1
+      		done
+    	fi
+
+    	rm -f "$PIDFILE"
+    	rm -f "$RADIUS_STATE"
+    	echo OK
+
+    	;;
+
+  restart)
+    	RADIUS_SH=$0
+    	> "$RADIUS_STATE"
+
+    	"$RADIUS_SH" stop "$@"
+    	"$RADIUS_SH" start "$@"
+
+    	;;
+
+  supervise)
+    	#
+    	# Under control of daemontools supervise monitor which
+    	# handles restarts and shutdowns via the svc program.
+    	#
+    	exec "${RUN_CMD[@]}"
+	
+    	;;
+
+  run|demo)
+    	echo "Running Radius: "
+	
+    	if running "$PIDFILE"
+    	then
+      		echo Already Running $(cat "$PIDFILE")!
+      		exit 1
+    	fi
+
+    	exec "${RUN_CMD[@]}"
+    	;;
+
+  check|status)
+    	if running "$PIDFILE"
+    	then
+      		echo "Radius running pid=$(< "$PIDFILE")"
+    	else
+      		echo "Radius NOT running"
+    	fi
+    	echo
+    	dumpEnv
+    	echo
+
+    	if running "$PIDFILE"
+    	then
+      		exit 0
+    	fi
+    	exit 1
+	
+    	;;
+
+  *)
+    	usage
+
+    	;;
+esac
+
+exit 0

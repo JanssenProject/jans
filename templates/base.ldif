@@ -1,180 +1,176 @@
 # TOP - LEVEL 1
+################################
+# Organization data - LEVEL 1
+################################
 dn: o=gluu
-objectclass: organization
-objectclass: top
-o: gluu
-
-######################################
-######################################
-# Appliance Configuratoin - LEVEL 2
-######################################
-dn: ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: appliances
-
-######################################
-
-################################
-################################
-# Organization data - LEVEL 2
-################################
-dn: o=%(inumOrg)s,o=gluu
 objectClass: top
+objectClass: organization
 objectClass: gluuOrganization
-o: %(inumOrg)s
+o: gluu
 gluuThemeColor: 166309
-gluuManagerGroup: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+gluuManagerGroup: inum=60B7,ou=groups,o=gluu
 gluuOrgShortName: %(orgName)s
-gluuAddPersonCapability: enabled
 description: Welcome to oxTrust!
 displayName: %(orgName)s
-scimAuthMode: basic
-scimStatus: disabled
 
 ################################
 
-# People data - LEVEL 3
-dn: ou=people,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalunit
+# People data - LEVEL 2
+dn: ou=people,o=gluu
+objectClass: top
+objectClass: organizationalunit
 ou: people
 
 ################################
 
-# Groups data - LEVEL 3
-dn: ou=groups,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalunit
+# Groups data - LEVEL 2
+dn: ou=groups,o=gluu
+objectClass: top
+objectClass: organizationalunit
 ou: groups
 
 ################################
 
-# User Attribute Metadata - LEVEL 3
-dn: ou=attributes,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# User Attribute Metadata - LEVEL 2
+dn: ou=attributes,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: attributes
 
 ################################
 
-# Oauth2 Scopes - LEVEL 3
-dn: ou=scopes,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# Oauth2 Scopes - LEVEL 2
+dn: ou=scopes,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: scopes
 
 ################################
 
-# Client data - LEVEL 3
-dn: ou=clients,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# Client data - LEVEL 2
+dn: ou=clients,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: clients
 
 ################################
 
-# Session data - LEVEL 3
-dn: ou=session,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: session
+# Token data - LEVEL 2
+dn: ou=tokens,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: tokens
 
-# Custom scripts - LEVEL 3
-dn: ou=scripts,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+################################
+
+# Authorizations data - LEVEL 2
+dn: ou=authorizations,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: authorizations
+
+
+################################
+
+# Custom scripts - LEVEL 2
+dn: ou=scripts,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: scripts
 
 ################################
 
-# UMA data - LEVEL 3
+# Reset password requests - LEVEL 2
+dn: ou=resetPasswordRequests,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: resetPasswordRequests
+
+################################
+
+# UMA data - LEVEL 2
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
-dn: ou=uma,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+dn: ou=uma,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: uma
 
-# UMA scope data - LEVEL 4
-dn: ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: scopes
-
-# UMA resources - LEVEL 4
-dn: ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# UMA resources - LEVEL 3
+dn: ou=resources,ou=uma,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: resources
 
-################################
-
-# OX UMA Hosts - LEVEL 3
-# Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
-dn: ou=hosts,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: hosts
+# UMA pct  - LEVEL 3
+dn: ou=pct,ou=uma,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: pct
 
 ################################
 
-# oxPush Data - LEVEL 3
-dn: ou=push,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# oxPush Data - LEVEL 2
+dn: ou=push,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: push
 
-# oxPush application Data - LEVEL 4
-dn: ou=application,ou=push,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# oxPush application Data - LEVEL 3
+dn: ou=application,ou=push,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: application
 
-# oxPush device Data - LEVEL 4
-dn: ou=device,ou=push,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# oxPush device Data - LEVEL 3
+dn: ou=device,ou=push,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: device
 
 ################################
 
-# U2F data - LEVEL 3
+# U2F data - LEVEL 2
 # Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
-dn: ou=u2f,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+dn: ou=u2f,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: u2f
 
-# U2F registration requests - LEVEL 4
-dn: ou=registration_requests,ou=u2f,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# U2F registration requests - LEVEL 3
+dn: ou=registration_requests,ou=u2f,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: registration_requests
 
-# U2F authentication requests - LEVEL 4
-dn: ou=authentication_requests,ou=u2f,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# U2F authentication requests - LEVEL 3
+dn: ou=authentication_requests,ou=u2f,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: authentication_requests
 
-# U2F registered devices - LEVEL 4
-dn: ou=registered_devices,ou=u2f,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
+# U2F registered devices - LEVEL 3
+dn: ou=registered_devices,ou=u2f,o=gluu
+objectClass: top
+objectClass: organizationalUnit
 ou: registered_devices
 
 ################################
 
-# Metric data - LEVEL 3
-dn: ou=metric,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalunit
+# Metric data - LEVEL 2
+dn: ou=metric,o=gluu
+objectClass: top
+objectClass: organizationalunit
 ou: metric
 
 ################################
 
-# Sector Identifiers - LEVEL 3
-dn: ou=sector_identifiers,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalunit
+# Sector Identifiers - LEVEL 2
+dn: ou=sector_identifiers,o=gluu
+objectClass: top
+objectClass: organizationalunit
 ou: sector_identifiers
+
+dn: ou=samlAcrs,o=gluu
+objectClass: top
+objectClass: organizationalunit
+ou: samlAcrs
