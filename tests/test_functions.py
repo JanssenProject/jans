@@ -4,7 +4,6 @@ from setup import getOpts
 
 def test_getOpts():
     """Options:
-        -a   Install Asimba
         -r   Install oxAuth RP
         -c   Install CAS
         -d   specify the directory where community-edition-setup is located.
@@ -27,13 +26,9 @@ def test_getOpts():
         'installLDAP': True,
         'installHTTPD': True,
         'installSaml': False,
-        'installAsimba': False,
         'installCas': False,
         'installOxAuthRP': False
     }
-
-    setupOptions = getOpts(['-a'], setupOptions)
-    assert_true(setupOptions['installAsimba'])
 
     setupOptions = getOpts(['-r'], setupOptions)
     assert_true(setupOptions['installOxAuthRP'])

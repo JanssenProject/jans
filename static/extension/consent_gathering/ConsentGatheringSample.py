@@ -4,10 +4,10 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.authz import ConsentGatheringType
-from org.xdi.util import StringHelper
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
+from org.gluu.model.custom.script.type.authz import ConsentGatheringType
+from org.gluu.util import StringHelper
 
 import java
 import random
@@ -34,7 +34,7 @@ class ConsentGathering(ConsentGatheringType):
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): # context is reference of org.xdi.oxauth.service.external.context.ConsentGatheringContext
+    def authorize(self, step, context): # context is reference of org.gluu.oxauth.service.external.context.ConsentGatheringContext
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:

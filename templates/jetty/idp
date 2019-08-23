@@ -1,6 +1,6 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms%(idp_min_heap_mem)sm -Xmx%(idp_max_heap_mem)sm -XX:MaxMetaspaceSize=%(idp_max_meta_mem)sm -XX:+DisableExplicitGC -XX:+UseG1GC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/idp"
+JAVA_OPTIONS="-server -Xss24m -Xms%(idp_min_heap_mem)sm -Xmx%(idp_max_heap_mem)sm -XX:MaxMetaspaceSize=%(idp_max_meta_mem)sm -XX:MaxGCPauseMillis=400 -XX:+UseParallelGC -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/idp"
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/idp

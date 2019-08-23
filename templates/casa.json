@@ -6,8 +6,7 @@
     "authz_redirect_uri" : "https://%(hostname)s/casa"
   },
   "ldap_settings" : {
-    "salt" : "%(configFolder)s/salt",
-    "ox-ldap_location" : "%(configFolder)s/ox-ldap.properties"
+    "salt" : "%(configFolder)s/salt"
   },
   "log_level" : "INFO"
 }
