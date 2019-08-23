@@ -18,7 +18,7 @@ import org.gluu.persist.reflect.util.ReflectHelper;
  * @author Yuriy Movchan Date: 05/10/2019
  * @param <E>
  */
-public class StandalonePersistanceFactoryService<E> extends PersistanceFactoryService {
+public class StandalonePersistanceFactoryService extends PersistanceFactoryService {
 
 	private HashMap<String, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryNames;
 	private HashMap<Class<? extends PersistenceEntryManagerFactory>, PersistenceEntryManagerFactory> persistenceEntryManagerFactoryTypes;
