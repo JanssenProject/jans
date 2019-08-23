@@ -4,7 +4,7 @@
 # Author: Yuriy Zabrovarnyy
 #
 
-from org.xdi.model.custom.script.type.uma import UmaClaimsGatheringType
+from org.gluu.model.custom.script.type.uma import UmaClaimsGatheringType
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
@@ -29,7 +29,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
     # Main gather method. Must return True (if gathering performed successfully) or False (if fail).
     # Method must set claim into context (via context.putClaim('name', value)) in order to persist it (otherwise it will be lost).
     # All user entered values can be access via Map<String, String> context.getPageClaims()
-    def gather(self, step, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaGatherContext
+    def gather(self, step, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaGatherContext
         print "Claims-Gathering. Gathering ..."
 
         if step == 1:

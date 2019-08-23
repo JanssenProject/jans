@@ -1,14 +1,14 @@
 # Author: ThumbSignIn
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import AuthenticationService
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.util import ServerUtil
+from org.gluu.service.cdi.util import CdiUtil
+from org.gluu.oxauth.security import Identity
+from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.oxauth.service import AuthenticationService
+from org.gluu.util import StringHelper
+from org.gluu.oxauth.util import ServerUtil
 from com.pramati.ts.thumbsignin_java_sdk import ThumbsigninApiController
 from org.json import JSONObject
-from org.xdi.oxauth.model.util import Base64Util
+from org.gluu.oxauth.model.util import Base64Util
 from java.lang import String
 
 import java

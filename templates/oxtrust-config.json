@@ -1,16 +1,13 @@
 {
-    "orgInum":"%(inumOrg)s",
     "orgIname":"",
     "orgSupportEmail":"%(admin_email)s",
-
-    "applianceInum":"%(inumAppliance)s",
 
     "baseDN":"o=gluu",
 
     "baseEndpoint":"https://%(hostname)s/identity/restv1",
 
     "idpUrl":"https://%(hostname)s",
-    "applianceUrl":"https://%(hostname)s",
+    "applicationUrl":"https://%(hostname)s",
 
     "keystorePath":"%(shibJksFn)s",
     "keystorePassword":"%(shibJksPass)s",
@@ -31,7 +28,7 @@
     "persistSVN":false,
 
     "allowPersonModification":true,
-    "updateApplianceStatus":true,
+    "updateStatus":true,
 
     "clientAssociationAttribute":"inum",
 
@@ -44,7 +41,7 @@
 
     ],
 
-    "photoRepositoryRootDir":"/var/ox/photos",
+    "photoRepositoryRootDir":"/var/gluu/photos",
     "photoRepositoryThumbWidth":300,
     "photoRepositoryThumbHeight":300,
     "photoRepositoryCountLeveles":3,
@@ -54,7 +51,7 @@
 
     "spMetadataPath":"",
 
-    "logoLocation":"/var/ox/photos",
+    "logoLocation":"/var/gluu/photos",
 
     "gluuSpAttributes":[
 
@@ -74,7 +71,7 @@
     "idpLdapServer":"%(ldap_hostname)s:%(ldaps_port)s",
     "idpUserFields":"",
 
-    "ldifStore":"/var/ox/identity/removed",
+    "ldifStore":"/var/gluu/identity/removed",
 
     "caCertsLocation":"/usr/java/latest/jre/lib/security/cacerts",
     "caCertsPassphrase":"",
@@ -95,8 +92,8 @@
     "oxAuthClientPassword":"%(oxauthClient_encoded_pw)s",
     "oxAuthClientScope":"openid+profile+email+user_name",
 
-    "loginRedirectUrl":"https://%(hostname)s/identity/authentication/getauthcode",
-    "logoutRedirectUrl":"https://%(hostname)s/identity/authentication/finishlogout",
+    "loginRedirectUrl":"https://%(hostname)s/identity/authcode.htm",
+    "logoutRedirectUrl":"https://%(hostname)s/identity/finishlogout.htm",
 
     "umaIssuer":"https://%(hostname)s",
 
@@ -107,12 +104,14 @@
     "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
     "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
 
-    "passportUmaClientId":"%(passport_rs_client_id)s",
-    "passportUmaClientKeyId":"",
-    "passportUmaResourceId":"0f963ecc-93f0-49c1-beae-ad2006abbb99",
-    "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
-    "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
-    "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
+    %(passport_oxtrust_config)s
+
+    "apiUmaClientId":"%(oxtrust_resource_server_client_id)s",
+    "apiUmaClientKeyId":"",
+    "apiUmaResourceId":"%(oxtrust_resource_id)s",
+    "apiUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/oxtrust-api-read",
+    "apiUmaClientKeyStoreFile":"%(api_rs_client_jks_fn)s",
+    "apiUmaClientKeyStorePassword":"%(api_rs_client_jks_pass_encoded)s",
 
     "cssLocation":"",
     "jsLocation":"",
@@ -134,6 +133,7 @@
     "clientBlackList": ["*.attacker.com/*"],
 
     "scimTestMode":false,
+    "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200
     },

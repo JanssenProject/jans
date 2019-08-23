@@ -1,0 +1,14 @@
+[Unit]
+Description=Gluu Radius service
+Requires=oxauth.service
+After=oxauth.service
+
+[Service]
+Type=forking
+ExecStart=/etc/init.d/gluu-radius start
+ExecStop=/etc/init.d/gluu-radius stop
+User=radius
+Group=gluu
+
+[Install]
+WantedBy=multi-user.target

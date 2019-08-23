@@ -5,7 +5,7 @@
 #
 #
 
-from org.xdi.model.custom.script.type.introspection import IntrospectionType
+from org.gluu.model.custom.script.type.introspection import IntrospectionType
 from java.lang import String
 
 class Introspection(IntrospectionType):
@@ -30,7 +30,7 @@ class Introspection(IntrospectionType):
     # This method is called after introspection response is ready. This method can modify introspection response.
     # Note :
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of org.xdi.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of org.gluu.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/GluuFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
         responseAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True

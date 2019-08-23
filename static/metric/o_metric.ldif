@@ -4,7 +4,7 @@ objectClass: organization
 o: site
 
 dn: ou=statistic,o=metric
-objectclass: top
-objectclass: organizationalUnit
+objectClass: top
+objectClass: organizationalUnit
 ou: statistic
 
