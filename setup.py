@@ -101,6 +101,17 @@ class ProgressBar:
         sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
         sys.stdout.flush()
 
+with open('static/couchbase/maps.json') as f:
+    map_list = json.load(f)
+
+map_dict = dict(map_list)
+
+
+def get_mapped_entry(entry):
+    for key in entry:
+        if key in map_dict:
+            mapped_key = map_dict[key]
+            entry[mapped_key] = entry.pop(key)
 
 def getTypedValue(dtype, val):
     retVal = val
@@ -198,7 +209,7 @@ def get_documents_from_ldif(ldif_file):
 
                     entry[k] = oc_list[0]
 
-
+            get_mapped_entry(entry)
             documents.append((key, entry))
 
     return documents
