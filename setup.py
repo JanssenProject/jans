@@ -195,12 +195,14 @@ def get_mapped_entry(entry):
             if map_key in key:
                 mapped_key = key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
                 entry[mapped_key] = entry.pop(key)
+                break
                 
     for key in entry:
         for prefix in key_shortcuter_rules['prefixes']:
             if key.startswith(prefix):
                 mapped_key = key.replace(prefix, '',1)
                 entry[mapped_key] = entry.pop(key)
+                break
 
 def getTypedValue(dtype, val):
     retVal = val
