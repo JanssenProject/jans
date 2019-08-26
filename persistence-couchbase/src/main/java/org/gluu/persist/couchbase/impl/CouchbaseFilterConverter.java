@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
 import com.couchbase.client.java.query.dsl.Expression;
 
 /**
@@ -43,7 +42,13 @@ public class CouchbaseFilterConverter {
     
     private LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 
-    public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+	private CouchbaseEntryManager couchbaseEntryManager;
+
+    public CouchbaseFilterConverter(CouchbaseEntryManager couchbaseEntryManager) {
+    	this.couchbaseEntryManager = couchbaseEntryManager;
+	}
+
+	public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	return convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap, null);
     }
 
@@ -143,28 +148,28 @@ public class CouchbaseFilterConverter {
         if (FilterType.EQUALITY == type) {
         	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
             if (currentGenericFilter.isMultiValued() || Boolean.TRUE.equals(isMultiValuedDetected)) {
-                return ConvertedExpression.build(Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(currentGenericFilter.getAttributeName()))), requiredConsistency);
+                return ConvertedExpression.build(Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(toInternalAttribute(currentGenericFilter)))), requiredConsistency);
             } else if (Boolean.FALSE.equals(isMultiValuedDetected)) {
-            	return ConvertedExpression.build(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else {
                 Expression exp1 = Expression
-                        .par(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).eq(buildTypedExpression(currentGenericFilter)));
+                        .par(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)));
                 Expression exp2 = Expression
-                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(Expression.path(currentGenericFilter.getAttributeName())));
+                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(Expression.path(toInternalAttribute(currentGenericFilter))));
                 return ConvertedExpression.build(Expression.par(exp1.or(exp2)), requiredConsistency);
             }
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return ConvertedExpression.build(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).lte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).lte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return ConvertedExpression.build(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).gte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).gte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
         }
 
         if (FilterType.PRESENCE == type) {
-            return ConvertedExpression.build(Expression.path(Expression.path(currentGenericFilter.getAttributeName())).isNotMissing(), requiredConsistency);
+            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).isNotMissing(), requiredConsistency);
         }
 
         if (FilterType.APPROXIMATE_MATCH == type) {
@@ -189,11 +194,15 @@ public class CouchbaseFilterConverter {
             if (currentGenericFilter.getSubFinal() != null) {
                 like.append(currentGenericFilter.getSubFinal());
             }
-            return ConvertedExpression.build(Expression.path(Expression.path(currentGenericFilter.getAttributeName()).like(Expression.s(like.toString()))), requiredConsistency);
+            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)).like(Expression.s(like.toString()))), requiredConsistency);
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));
     }
+
+	private String toInternalAttribute(Filter filter) {
+		return couchbaseEntryManager.toInternalAttribute(filter.getAttributeName());
+	}
 
 	private Expression buildTypedExpression(Filter currentGenericFilter) {
 		if (currentGenericFilter.getAssertionValue() instanceof Boolean) {
