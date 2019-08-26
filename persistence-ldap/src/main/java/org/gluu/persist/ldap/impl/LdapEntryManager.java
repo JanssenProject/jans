@@ -24,10 +24,10 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryDeleteException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
-import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
@@ -35,13 +35,12 @@ import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
-import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.PagedResult;
-import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -304,12 +303,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 subscriber.onAfterRemove(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
     @Override
-	public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+	public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) {
         if (StringHelper.isEmptyString(baseDN)) {
             throw new MappingException("Base DN to find entries is null");
         }
@@ -335,11 +334,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     0, 100, count, null, null);
 
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+            throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
         if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-            throw new EntryPersistenceException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+            throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         return searchResult.getEntryCount();
@@ -360,7 +359,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 removeSubtreeThroughIteration(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
@@ -376,7 +375,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         } catch (SearchScopeException ex) {
             throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
         }
 
         List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntryCount());
