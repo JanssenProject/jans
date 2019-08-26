@@ -23,6 +23,7 @@ public class KeyShortcuter {
     public static final String CONF_FILE_NAME = "key-shortcuter-rules.json";
 
     private static final BiMap<String, String> MAP = HashBiMap.create();
+    private static final BiMap<String, String> INVERSE_MAP = MAP.inverse();
 
     private KeyShortcuter() {
     }
@@ -39,8 +40,7 @@ public class KeyShortcuter {
     }
 
     public static String fromShortcut(String shortcut) {
-        final String originalKey = MAP.inverse().get(shortcut);
-        return originalKey != null ? originalKey : shortcut;
+        return INVERSE_MAP.getOrDefault(shortcut, shortcut);
     }
 
     public static String shortcut(String key) {
