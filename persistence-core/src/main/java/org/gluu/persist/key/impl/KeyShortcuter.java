@@ -1,10 +1,12 @@
 package org.gluu.persist.key.impl;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -14,52 +16,40 @@ import java.util.Map;
  */
 public class KeyShortcuter {
 
-    // Order important !
-    private static final List<String> PREFIXES = Lists.newArrayList(
-            "gluu", "oxAuth", "oxTrust", "ox"
-    );
+    private static final Logger LOG = LoggerFactory.getLogger(KeyShortcuter.class);
 
-    // Order important !
-    private static final Map<String, String> REPLACES = new HashMap<String, String>()
-    {{
-        // with markers
-        put("Group", "_g");
-        put("Client", "_c");
-        put("Type", "_t");
-        put("User", "_u");
-        put("Default", "_d");
-
-        // without markers
-        put("Configuration", "Conf");
-        put("Attribute", "Attr");
-        put("Application", "App");
-        put("Request", "Req");
-        put("Response", "Resp");
-        put("Authentication", "Authn");
-        put("Authorization", "Authz");
-        put("Encrypted", "Enc");
-        put("Encryption", "Enc");
-        put("Signing", "Sig");
-        put("Expiration", "Exp");
-        put("Object", "Obj");
-        put("Token", "Tok");
-    }};
+    public static final String CONF_FILE_NAME = "key-shortcuter-rules.json";
 
     private KeyShortcuter() {
     }
 
+    private static KeyShortcuterConf conf = load();
+
+    private static KeyShortcuterConf load() {
+        try (InputStream is = KeyShortcuter.class.getResourceAsStream("/" + CONF_FILE_NAME)) {
+            return Util.createJsonMapper().readValue(is, KeyShortcuterConf.class);
+        } catch (IOException e) {
+            LOG.error("Failed to load key shortcuter configuration from file: " + CONF_FILE_NAME, e);
+            return null;
+        }
+    }
+
     public static String shortcut(String key) {
+        if (conf == null) {
+            LOG.error("Failed to load key shortcuter configuration from file: " + CONF_FILE_NAME);
+            return key;
+        }
         if (StringUtils.isBlank(key)) {
             return key;
         }
 
-        for (String prefix : PREFIXES) {
+        for (String prefix : conf.getPrefixes()) {
             if (key.startsWith(prefix)) {
                 key = StringUtils.removeStart(key, prefix);
             }
         }
 
-        for (Map.Entry<String, String> replace : REPLACES.entrySet()) {
+        for (Map.Entry<String, String> replace : conf.getReplaces().entrySet()) {
             key = StringUtils.replace(key, replace.getKey(), replace.getValue());
         }
 
