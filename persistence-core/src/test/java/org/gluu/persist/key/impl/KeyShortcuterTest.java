@@ -71,6 +71,5 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("reqObjEncAlg"), "oxAuthRequestObjectEncryptionAlg");
         assertEquals(fromShortcut("tok_t"), "oxAuthTokenType");
         assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
-
     }
 }
