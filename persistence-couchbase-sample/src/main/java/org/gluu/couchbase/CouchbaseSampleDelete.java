@@ -1,21 +1,9 @@
 package org.gluu.couchbase;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Properties;
 
-import org.gluu.couchbase.model.SimpleAttribute;
-import org.gluu.couchbase.model.SimpleGrant;
-import org.gluu.couchbase.model.SimpleSession;
-import org.gluu.couchbase.model.SimpleUser;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
-import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
-import org.gluu.persist.model.PagedResult;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -31,41 +19,14 @@ public final class CouchbaseSampleDelete {
     private CouchbaseSampleDelete() {
     }
 
-    private static Properties getSampleConnectionProperties() {
-        Properties connectionProperties = new Properties();
-
-        connectionProperties.put("couchbase.servers", "cb-dev-backend.gluu.org");
-        connectionProperties.put("couchbase.auth.userName", "admin");
-        connectionProperties.put("couchbase.auth.userPassword", "jun8azar");
-//        connectionProperties.put("couchbase.buckets", "gluu");
-        connectionProperties.put("couchbase.buckets", "gluu, gluu_cache");
-
-        connectionProperties.put("couchbase.bucket.default", "gluu");
-//        connectionProperties.put("couchbase.bucket.gluu.mapping", "people, groups");
-        connectionProperties.put("couchbase.bucket.gluu_cache.mapping", "cache");
-
-        connectionProperties.put("couchbase.password.encryption.method", "CRYPT-SHA-256");
-
-        return connectionProperties;
-    }
-
-    public static CouchbaseEntryManager createCouchbaseEntryManager() {
-        CouchbaseEntryManagerFactory couchbaseEntryManagerFactory = new CouchbaseEntryManagerFactory();
-        couchbaseEntryManagerFactory.create();
-        Properties connectionProperties = getSampleConnectionProperties();
-
-        CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerFactory.createEntryManager(connectionProperties);
-        LOG.debug("Created CouchbaseEntryManager: " + couchbaseEntryManager);
-
-        return couchbaseEntryManager;
-    }
-
     public static void main(String[] args) {
+        // Prepare sample connection details
+        CouchbaseSampleEntryManager couchbaseSampleEntryManager = new CouchbaseSampleEntryManager();
 
         // Create Couchbase entry manager
-    	String baseDn = "ou=cache,o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu";
+        CouchbaseEntryManager couchbaseEntryManager = couchbaseSampleEntryManager.createCouchbaseEntryManager();
 
-    	CouchbaseEntryManager couchbaseEntryManager = CouchbaseSampleDelete.createCouchbaseEntryManager();
+        String baseDn = "ou=cache,o=gluu";
 		Filter filter = Filter.createANDFilter(
 		        Filter.createEqualityFilter("oxDeletable", true),
 				Filter.createLessOrEqualFilter("oxAuthExpiration", couchbaseEntryManager.encodeTime(baseDn, new Date()))
