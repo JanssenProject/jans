@@ -1,5 +1,7 @@
 package org.gluu.persist.key.impl;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.util.Util;
 import org.slf4j.Logger;
@@ -20,6 +22,8 @@ public class KeyShortcuter {
 
     public static final String CONF_FILE_NAME = "key-shortcuter-rules.json";
 
+    private static final BiMap<String, String> MAP = HashBiMap.create();
+
     private KeyShortcuter() {
     }
 
@@ -34,6 +38,11 @@ public class KeyShortcuter {
         }
     }
 
+    public static String fromShortcut(String shortcut) {
+        final String originalKey = MAP.inverse().get(shortcut);
+        return originalKey != null ? originalKey : shortcut;
+    }
+
     public static String shortcut(String key) {
         if (conf == null) {
             LOG.error("Failed to load key shortcuter configuration from file: " + CONF_FILE_NAME);
@@ -42,6 +51,12 @@ public class KeyShortcuter {
         if (StringUtils.isBlank(key)) {
             return key;
         }
+
+        if (MAP.containsKey(key)) {
+            return MAP.get(key);
+        }
+
+        String copy = key;
 
         for (String prefix : conf.getPrefixes()) {
             if (key.startsWith(prefix)) {
@@ -54,6 +69,12 @@ public class KeyShortcuter {
         }
 
         key = lowercaseFirstChar(key);
+        try {
+            MAP.put(copy, key);
+        } catch (IllegalArgumentException e) {
+            LOG.error("Found duplicate for key: " + key + ", duplicate from: " + MAP.inverse().get(key));
+            return copy; // skip shortcuting and return original key
+        }
         return key;
     }
 
