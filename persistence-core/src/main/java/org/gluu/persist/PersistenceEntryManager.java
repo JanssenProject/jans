@@ -76,7 +76,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void remove(Object entry);
     void remove(String dn);
-	<T> int remove(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException;
+	<T> int remove(String dn, Class<T> entryClass, Filter filter, int count);
     void removeRecursively(String primaryKey);
 
     boolean hasBranchesSupport(String primaryKey);

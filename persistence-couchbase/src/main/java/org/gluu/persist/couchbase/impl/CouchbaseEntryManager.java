@@ -260,7 +260,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 subscriber.onAfterRemove(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
@@ -275,21 +275,21 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 subscriber.onAfterRemove(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
     @Override
-	public <T> int remove(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
-        if (StringHelper.isEmptyString(dn)) {
-            throw new MappingException("Base DN to delete entries is null");
-        }
+	public <T> int remove(String dn, Class<T> entryClass, Filter filter, int count) {
+		if (StringHelper.isEmptyString(dn)) {
+			throw new MappingException("Base DN to delete entries is null");
+		}
 
-        // Remove entries by filter
-        return removeImpl(dn, entryClass, filter, count);
+		// Remove entries by filter
+		return removeImpl(dn, entryClass, filter, count);
 	}
 
-    protected <T> int removeImpl(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+    protected <T> int removeImpl(String dn, Class<T> entryClass, Filter filter, int count) {
         // Check entry class
         checkEntryClass(entryClass, false);
 
@@ -319,7 +319,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		try {
 			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+            throw new EntryDeleteException(String.format("Failed to convert filter %s to expression", searchFilter));
 		}
         
         try {
