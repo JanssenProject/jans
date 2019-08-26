@@ -13,15 +13,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.watch.OperationDurationUtil;
+import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.EntryNotFoundException;
 import org.gluu.persist.exception.operation.PersistenceException;
@@ -55,6 +56,7 @@ import com.couchbase.client.java.query.dsl.path.GroupByPath;
 import com.couchbase.client.java.query.dsl.path.LimitPath;
 import com.couchbase.client.java.query.dsl.path.MutateLimitPath;
 import com.couchbase.client.java.query.dsl.path.OffsetPath;
+import com.couchbase.client.java.query.dsl.path.ReturningPath;
 import com.couchbase.client.java.subdoc.DocumentFragment;
 import com.couchbase.client.java.subdoc.MutateInBuilder;
 import com.couchbase.client.java.subdoc.MutationSpec;
@@ -276,6 +278,45 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	}
 
     @Override
+    public int delete(String key, ScanConsistency scanConsistency, Expression expression, int count) throws DeleteException {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
+    	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, false);
+
+    	int result = deleteImpl(bucketMapping, key, useScanConsistency, expression, count);
+
+        String attemptInfo = getScanAttemptLogInfo(scanConsistency, useScanConsistency, false);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: delete_search, duration: {}, bucket: {}, key: {}, expression: {}, count: {}, consistency: {}{}", duration, bucketMapping.getBucketName(), key, expression, count, useScanConsistency, attemptInfo);
+
+        return result;
+    }
+
+    private int deleteImpl(BucketMapping bucketMapping, String key, ScanConsistency scanConsistency, Expression expression, int count) throws DeleteException {
+        Bucket bucket = bucketMapping.getBucket();
+
+        Expression finalExpression = expression;
+        if (enableScopeSupport) { 
+			Expression scopeExpression = Expression.path("META().id").like(Expression.s(key + "%"));
+			finalExpression = scopeExpression.and(expression);
+        }
+
+        MutateLimitPath deleteQuery = Delete.deleteFrom(Expression.i(bucketMapping.getBucketName())).where(finalExpression);
+        ReturningPath query = deleteQuery.limit(count);
+        LOG.debug("Execution query: '" + query + "'");
+
+        N1qlQueryResult result = bucket.query(N1qlQuery.simple(query, N1qlParams.build().consistency(scanConsistency)));
+        if (!result.finalSuccess()) {
+            throw new DeleteException(String.format("Failed to delete entries. Query: '%s'. Error: '%s', Error count: '%d'", query, result.errors(),
+            		result.info().errorCount()), result.errors().get(0).getInt("code"));
+        }
+
+        return result.info().mutationCount();
+	}
+
+    @Override
     public boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
 
@@ -438,7 +479,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
                 LOG.trace("Search in whole DB tree", new Exception());
             }
         }
-        
+
         Expression finalExpression = expression;
         if (enableScopeSupport) { 
 			Expression scopeExpression;

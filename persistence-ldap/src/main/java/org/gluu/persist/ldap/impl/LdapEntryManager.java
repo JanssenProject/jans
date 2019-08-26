@@ -24,12 +24,14 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryDeleteException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
+import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
@@ -39,6 +41,7 @@ import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -301,11 +304,49 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 subscriber.onAfterRemove(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
     @Override
+	public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        // Find entries
+        Filter searchFilter;
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(filter, objectClasses);
+        } else {
+            searchFilter = filter;
+        }
+
+        DeleteBatchOperation batchOperation = new DeleteBatchOperation<DeletableEntity>(this);
+        SearchResult searchResult = null;
+        try {
+            LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
+                    propertiesAnnotations);
+            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
+                    0, 100, count, null, LdapOperationsServiceImpl.DN);
+
+        } catch (Exception ex) {
+            throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+        }
+
+        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+        }
+
+        return batchOperation.getCountEntries();
+    }
+
+	@Override
     public void removeRecursively(String dn) {
         try {
             if (this.operationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
@@ -320,7 +361,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 removeSubtreeThroughIteration(dn);
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
@@ -336,7 +377,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         } catch (SearchScopeException ex) {
             throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
+            throw new EntryDeleteException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
         }
 
         List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntryCount());
@@ -351,7 +392,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
     }
 
-    @Override
+	@Override
     protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
         try {
             // Load entry
@@ -396,12 +437,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     propertiesAnnotations);
             searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
                     start, chunkSize, count, null, currentLdapReturnAttributes);
-
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+        }
+
+        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         if (searchResult.getEntryCount() == 0) {
@@ -862,7 +903,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return objecClassSet.toArray(new String[0]);
 	}
 
-	private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
+	private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;
 
@@ -880,5 +921,41 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return countEntries;
         }
     }
+
+	private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<DeletableEntity> {
+
+		private int countEntries = 0;
+		private LdapEntryManager ldapEntryManager;
+
+        public DeleteBatchOperation(LdapEntryManager ldapEntryManager) {
+        	this.ldapEntryManager = ldapEntryManager;
+		}
+
+        @Override
+		public void performAction(List<DeletableEntity> entries) {
+			for (DeletableEntity entity : entries) {
+				try {
+					if (ldapEntryManager.hasBranchesSupport(entity.getDn())) {
+						ldapEntryManager.removeRecursively(entity.getDn());
+					} else {
+						ldapEntryManager.remove(entity.getDn());
+					}
+					LOG.trace("Removed {}", entity.getDn());
+				} catch (Exception e) {
+					LOG.error("Failed to remove entry, dn: " + entity.getDn(), e);
+				}
+			}
+		}
+
+        @Override
+        public boolean collectSearchResult(int size) {
+            countEntries += size;
+            return false;
+        }
+
+        public int getCountEntries() {
+            return countEntries;
+        }
+	}
 
 }
