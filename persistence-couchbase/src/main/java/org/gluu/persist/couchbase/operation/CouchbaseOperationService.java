@@ -13,6 +13,7 @@ import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.EntryNotFoundException;
 import org.gluu.persist.exception.operation.PersistenceException;
@@ -50,6 +51,7 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, PersistenceException;
 
     boolean delete(String key) throws EntryNotFoundException;
+	int delete(String key, ScanConsistency scanConsistency, Expression expression, int count) throws DeleteException;
     boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException;
 
     JsonObject lookup(String key, ScanConsistency scanConsistency, String... attributes) throws SearchException;
