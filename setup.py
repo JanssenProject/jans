@@ -54,6 +54,10 @@ from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
 
 
+#check disk space 40GB
+#2 cpu unit
+#ram size 4 GB
+
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
@@ -109,9 +113,11 @@ map_dict = dict(map_list)
 
 def get_mapped_entry(entry):
     for key in entry:
-        if key in map_dict:
-            mapped_key = map_dict[key]
-            entry[mapped_key] = entry.pop(key)
+        for map_key in map_dict:
+            if map_key in key:
+                mapped_key = key.replace(map_key, map_dict[map_key])
+                entry[mapped_key] = entry.pop(key)
+                break
 
 def getTypedValue(dtype, val):
     retVal = val
