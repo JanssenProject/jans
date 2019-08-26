@@ -46,6 +46,8 @@ import ssl
 import ldap
 import uuid
 import multiprocessing
+import StringIO
+import zipfile
 
 from collections import OrderedDict
 from pylib.ldif import LDIFParser, LDIFWriter
@@ -101,7 +103,7 @@ current_number_of_cpu = multiprocessing.cpu_count()
 
 if current_number_of_cpu < suggested_number_of_cpu:
     sys.exit("{0}Attention: Available CPU Units was determined to be {1}. "
-             "This is less then the required CPU Units of {2} GB.\n Please "
+             "his is less then the required CPU Units of {2}.\n Please "
              "update your resources and re-run setup.by.{3}".format(
                                                     colors.DANGER,
                                                     current_number_of_cpu, 
@@ -160,19 +162,38 @@ class ProgressBar:
         sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
         sys.stdout.flush()
 
-with open('static/couchbase/maps.json') as f:
-    map_list = json.load(f)
+def get_key_shortcuter_rules():
+    ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
+    oxauth_zf = zipfile.ZipFile(ox_auth_war_file)
 
-map_dict = dict(map_list)
+    for file_info in oxauth_zf.infolist():
+        if 'oxcore-persistence-core' in file_info.filename:
+            oxcore_persistence_core_path = file_info.filename
+            break
 
+    oxcore_persistence_core_content = oxauth_zf.read(oxcore_persistence_core_path)
+    oxcore_persistence_core_io = StringIO.StringIO(oxcore_persistence_core_content)
+    oxcore_persistence_core_zf = zipfile.ZipFile(oxcore_persistence_core_io)
+    key_shortcuter_rules_str = oxcore_persistence_core_zf.read('key-shortcuter-rules.json')
+    key_shortcuter_rules = json.loads(key_shortcuter_rules_str)
+
+    return key_shortcuter_rules
+
+
+key_shortcuter_rules = get_key_shortcuter_rules()
 
 def get_mapped_entry(entry):
     for key in entry:
-        for map_key in map_dict:
+        for map_key in key_shortcuter_rules['replaces']:
             if map_key in key:
-                mapped_key = key.replace(map_key, map_dict[map_key])
+                mapped_key = key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
                 entry[mapped_key] = entry.pop(key)
-                break
+                
+    for key in entry:
+        for prefix in key_shortcuter_rules['prefixes']:
+            if key.startswith(prefix):
+                mapped_key = key.replace(prefix, '',1)
+                entry[mapped_key] = entry.pop(key)
 
 def getTypedValue(dtype, val):
     retVal = val
