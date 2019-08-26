@@ -313,7 +313,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             		result.info().errorCount()), result.errors().get(0).getInt("code"));
         }
 
-        return result.info().resultCount();
+        return result.info().mutationCount();
 	}
 
     @Override
