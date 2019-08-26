@@ -52,8 +52,9 @@ public class KeyShortcuter {
             return key;
         }
 
-        if (MAP.containsKey(key)) {
-            return MAP.get(key);
+        final String cachedShortcut = MAP.get(key);
+        if (cachedShortcut != null) {
+            return cachedShortcut;
         }
 
         String copy = key;
