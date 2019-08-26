@@ -45,27 +45,82 @@ import random
 import ssl
 import ldap
 import uuid
-from collections import OrderedDict
+import multiprocessing
 
+from collections import OrderedDict
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
 from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
 
+class colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    DANGER = '\033[31m'
 
-#check disk space 40GB
-#2 cpu unit
-#ram size 4 GB
+suggested_mem_size = 4 # in GB
+suggested_number_of_cpu = 2
+suggested_free_disk_space = 40 #in GB
+
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
+
+### initial check
 
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
 if file_max < 64000:
-    sys.exit("""
-Maximum number of files that can be opened on this computer is less than 64000.
-Please increase number of file-max on the host system and re-run setup.py""")
+    sys.exit("Maximum number of files that can be opened on this computer is "
+              "less than 64000. Please increase number of file-max on the "
+              "host system and re-run setup.py".format(colors.DANGER,
+                                                            colors.ENDC))
+
+current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+current_mem_size = current_mem_bytes / (1024.**3) #in GB
+
+if current_mem_size < suggested_mem_size:
+    print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
+           "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
+                                                    current_mem_size, 
+                                                    suggested_mem_size,
+                                                    colors.ENDC)
+
+
+    result = raw_input("Proceed anyways? [Y|n] ")
+    if result and result[0].lower() == 'n':
+        sys.exit()
+
+current_number_of_cpu = multiprocessing.cpu_count()
+
+if current_number_of_cpu < suggested_number_of_cpu:
+    sys.exit("{0}Attention: Available CPU Units was determined to be {1}. "
+             "This is less then the required CPU Units of {2} GB.\n Please "
+             "update your resources and re-run setup.by.{3}".format(
+                                                    colors.DANGER,
+                                                    current_number_of_cpu, 
+                                                    suggested_number_of_cpu,
+                                                    colors.ENDC))
+
+st = os.statvfs('/')
+available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
+
+if available_disk_space < suggested_free_disk_space:
+    sys.exit("{0}Attention: Available free disk space was determined to be {1} "
+           "GB. This is less than the required disk space of {2} GB.\nPlease "
+           "free some space and re-run setup.py.{3}".format(
+                                                    colors.DANGER,
+                                                    available_disk_space,
+                                                    suggested_free_disk_space,
+                                                    colors.ENDC))
+
+### end of initial check
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -220,17 +275,6 @@ def get_documents_from_ldif(ldif_file):
 
     return documents
 
-def get_ram_size():
-    mem_total = None
-
-    with open('/proc/meminfo') as f:
-        meminfo = f.read()
-    matched = re.search(r'^MemTotal:\s+(\d+)', meminfo)
-
-    if matched: 
-        mem_total = int(matched.groups()[0]) / 1024
-
-    return mem_total
 
 class Setup(object):
     def __init__(self, install_dir=None):
