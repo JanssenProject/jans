@@ -27,6 +27,7 @@ import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConnectionException;
+import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
@@ -306,6 +307,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
+	public <T> int remove(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
     public void removeRecursively(String dn) {
         try {
             if (this.operationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
@@ -351,7 +358,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
     }
 
-    @Override
+	@Override
     protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
         try {
             // Load entry

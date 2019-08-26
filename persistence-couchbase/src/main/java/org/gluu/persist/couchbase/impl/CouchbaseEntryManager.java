@@ -21,8 +21,10 @@ import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryDeleteException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
@@ -55,7 +57,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
-    private static final CouchbaseFilterConverter FILTER_CONVERTER = new CouchbaseFilterConverter();
+    private final CouchbaseFilterConverter FILTER_CONVERTER;
     private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter();
 
     private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -65,6 +67,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     protected CouchbaseEntryManager(CouchbaseOperationsServiceImpl operationService) {
         this.operationService = operationService;
+        this.FILTER_CONVERTER = new CouchbaseFilterConverter(this);
         subscribers = new LinkedList<DeleteNotifier>();
     }
 
@@ -277,6 +280,58 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
+	public <T> int remove(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+        if (StringHelper.isEmptyString(dn)) {
+            throw new MappingException("Base DN to delete entries is null");
+        }
+
+        // Remove entries by filter
+        return removeImpl(dn, entryClass, filter, count);
+	}
+
+    protected <T> int removeImpl(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+        // Check entry class
+        checkEntryClass(entryClass, false);
+
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+
+        Filter searchFilter;
+        if (objectClasses.length > 0) {
+        	 LOG.trace("Filter: {}", filter);
+            searchFilter = addObjectClassFilter(filter, objectClasses);
+        } else {
+            searchFilter = filter;
+        }
+
+        // Find entries
+        LOG.trace("-------------------------------------------------------");
+        LOG.trace("Filter: {}", filter);
+        LOG.trace("objectClasses count: {} ", objectClasses.length);
+        LOG.trace("objectClasses: {}", objectClasses.toString());
+        LOG.trace("Search filter: {}", searchFilter);
+
+		// Prepare properties types to allow build filter properly
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
+        ParsedKey keyWithInum = toCouchbaseKey(dn);
+        ConvertedExpression convertedExpression;
+		try {
+			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
+		} catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
+		}
+        
+        try {
+        	int processed = operationService.delete(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), count);
+        	
+        	return processed;
+        } catch (Exception ex) {
+            throw new EntryDeleteException(String.format("Failed to delete entries with key: %s, expression: %s", keyWithInum.getKey(), convertedExpression), ex);
+        }
+    }
+
+	@Override
     protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
         try {
             // Load entry
@@ -343,17 +398,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
+
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         String[] currentLdapReturnAttributes = ldapReturnAttributes;
         if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
             currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
         }
-
-        // Find entries
-        LOG.trace("-------------------------------------------------------");
-        LOG.trace("Filter: {}", filter);
-        LOG.trace("objectClasses count: {} ", objectClasses.length);
-        LOG.trace("objectClasses: {}", objectClasses.toString());
 
         Filter searchFilter;
         if (objectClasses.length > 0) {
@@ -362,7 +412,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         } else {
             searchFilter = filter;
         }
+
+        // Find entries
+        LOG.trace("-------------------------------------------------------");
+        LOG.trace("Filter: {}", filter);
+        LOG.trace("objectClasses count: {} ", objectClasses.length);
+        LOG.trace("objectClasses: {}", objectClasses.toString());
         LOG.trace("Search filter: {}", searchFilter);
+
         // Prepare default sort
         Sort[] defaultSort = getDefaultSort(entryClass);
 
@@ -821,7 +878,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 //        }
 	}
 	
-	private String toInternalAttribute(String attributeName) {
+	public String toInternalAttribute(String attributeName) {
 		if (operationService.isDisableAttributeMapping()) {
 			return attributeName;
 		}
