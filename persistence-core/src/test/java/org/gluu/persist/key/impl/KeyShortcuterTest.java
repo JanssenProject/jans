@@ -2,6 +2,7 @@ package org.gluu.persist.key.impl;
 
 import org.testng.annotations.Test;
 
+import static org.gluu.persist.key.impl.KeyShortcuter.fromShortcut;
 import static org.gluu.persist.key.impl.KeyShortcuter.shortcut;
 import static org.testng.Assert.assertEquals;
 
@@ -17,6 +18,13 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxAuthLogoutSessionRequired"), "logoutSessionRequired");
         assertEquals(shortcut("oxIconUrl"), "iconUrl");
         assertEquals(shortcut("oxTrustActive"), "active");
+
+        // reverse
+        assertEquals(fromShortcut("attr_t"), "gluuAttributeType");
+        assertEquals(fromShortcut("app_t"), "oxAuthAppType");
+        assertEquals(fromShortcut("logoutSessionRequired"), "oxAuthLogoutSessionRequired");
+        assertEquals(fromShortcut("iconUrl"), "oxIconUrl");
+        assertEquals(fromShortcut("active"), "oxTrustActive");
     }
 
     @Test
@@ -27,6 +35,14 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxAuthUserId"), "_uId");
         assertEquals(shortcut("oxAuthUserDN"), "_uDN");
         assertEquals(shortcut("oxAuthDefaultAcrValues"), "_dAcrValues");
+
+        // reverse
+        assertEquals(fromShortcut("_gVisibility"), "gluuGroupVisibility");
+        assertEquals(fromShortcut("trusted_c"), "oxAuthTrustedClient");
+        assertEquals(fromShortcut("subject_t"), "oxAuthSubjectType");
+        assertEquals(fromShortcut("_uId"), "oxAuthUserId");
+        assertEquals(fromShortcut("_uDN"), "oxAuthUserDN");
+        assertEquals(fromShortcut("_dAcrValues"), "oxAuthDefaultAcrValues");
     }
 
     @Test
@@ -42,5 +58,19 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxAuthRequestObjectEncryptionAlg"), "reqObjEncAlg");
         assertEquals(shortcut("oxAuthTokenType"), "tok_t");
         assertEquals(shortcut("oxAuthTokenEndpointAuthSigningAlg"), "tokEndpointAuthSigAlg");
+
+        // reverse
+        assertEquals(fromShortcut("smtpConf"), "oxSmtpConfiguration");
+        assertEquals(fromShortcut("confApp"), "oxTrustConfApplication");
+        assertEquals(fromShortcut("_uInfoEncRespAlg"), "oxAuthUserInfoEncryptedResponseAlg");
+        assertEquals(fromShortcut("authnTime"), "oxAuthAuthenticationTime");
+        assertEquals(fromShortcut("iDPAuthn"), "oxIDPAuthentication");
+        assertEquals(fromShortcut("skipAuthz"), "oxAuthSkipAuthorization");
+        assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
+        assertEquals(fromShortcut("linkExpDate"), "oxLinkExpirationDate");
+        assertEquals(fromShortcut("reqObjEncAlg"), "oxAuthRequestObjectEncryptionAlg");
+        assertEquals(fromShortcut("tok_t"), "oxAuthTokenType");
+        assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
+
     }
 }
