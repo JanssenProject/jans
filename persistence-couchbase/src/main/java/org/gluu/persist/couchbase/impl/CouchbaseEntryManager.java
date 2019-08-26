@@ -7,13 +7,19 @@
 
 package org.gluu.persist.couchbase.impl;
 
-import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.Sort;
-import com.couchbase.client.java.subdoc.MutationSpec;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
 import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
@@ -24,14 +30,19 @@ import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryDeleteException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.MappingException;
-import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
 import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.key.impl.model.ParsedKey;
-import org.gluu.persist.model.*;
+import org.gluu.persist.model.AttributeData;
+import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.DefaultBatchOperation;
+import org.gluu.persist.model.PagedResult;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -39,12 +50,13 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
+import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
+import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.Sort;
+import com.couchbase.client.java.subdoc.MutationSpec;
 
 /**
  * Couchbase Entry Manager
@@ -525,7 +537,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             count++;
             JsonObject entry = searchResultEntries[i];
             // String key = entry.getString(CouchbaseOperationService.META_DOC_ID);
-            String dn = entry.getString(CouchbaseOperationService.DN);
+            String dn = entry.getString(fromInternalAttribute(CouchbaseOperationService.DN));
             entriesAttributes.put(dn, getAttributeDataList(entry));
 
             // Remove reference to allow java clean up object
@@ -553,8 +565,10 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
 
         List<AttributeData> result = new ArrayList<AttributeData>();
-        for (String attributeName : entry.getNames()) {
-            Object attributeObject = entry.get(attributeName);
+        for (String shortAttributeName : entry.getNames()) {
+        	Object attributeObject = entry.get(shortAttributeName);
+
+        	String attributeName = fromInternalAttribute(shortAttributeName);
 
             Object[] attributeValueObjects;
             if (attributeObject == null) {
@@ -886,7 +900,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		return KeyShortcuter.shortcut(attributeName);
 	}
 
-	private String[] toInternalAttributes(String[] attributeNames) {
+	public String[] toInternalAttributes(String[] attributeNames) {
 		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
 			return attributeNames;
 		}
@@ -895,6 +909,28 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		
 		for (int i = 0; i < attributeNames.length; i++) {
 			resultAttributeNames[i] = KeyShortcuter.shortcut(attributeNames[i]);
+		}
+		
+		return resultAttributeNames;
+	}
+	
+	public String fromInternalAttribute(String shortAttributeName) {
+		if (operationService.isDisableAttributeMapping()) {
+			return shortAttributeName;
+		}
+
+		return KeyShortcuter.fromShortcut(shortAttributeName);
+	}
+
+	public String[] fromInternalAttributes(String[] shortAttributeNames) {
+		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(shortAttributeNames)) {
+			return shortAttributeNames;
+		}
+		
+		String[] resultAttributeNames = new String[shortAttributeNames.length];
+		
+		for (int i = 0; i < shortAttributeNames.length; i++) {
+			resultAttributeNames[i] = KeyShortcuter.fromShortcut(shortAttributeNames[i]);
 		}
 		
 		return resultAttributeNames;
