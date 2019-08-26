@@ -318,7 +318,7 @@ public class AuthorizeAction {
             facesContext.responseComplete();
         }
 
-        final User user = userService.getUserByDn(session.getUserDn());
+        final User user = sessionIdService.getUser(session);
         log.trace("checkPermissionGranted, user = " + user);
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
