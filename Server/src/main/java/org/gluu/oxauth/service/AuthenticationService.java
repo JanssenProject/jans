@@ -447,8 +447,7 @@ public class AuthenticationService {
 
 		SessionId newSessionId;
 		if (sessionId == null) {
-			newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(),
-					sessionIdAttributes);
+			newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(), sessionIdAttributes);
 		} else {
 			// TODO: Remove after 2.4.5
 			String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
@@ -458,6 +457,7 @@ public class AuthenticationService {
 		}
 
 		identity.setSessionId(sessionId);
+        newSessionId.setUser(user);
 
 		return newSessionId;
 	}
@@ -557,7 +557,7 @@ public class AuthenticationService {
 			return;
 		}
 
-		User user = userService.getUserByDn(sessionUser.getUserDn());
+		User user = sessionIdService.getUser(sessionUser);
 
 		log.info("Attempting to redirect user: User: {}", user);
 
@@ -576,7 +576,7 @@ public class AuthenticationService {
 		if (p_sessionId != null) {
 			try {
 				if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
-					final User user = userService.getUserByDn(p_sessionId.getUserDn());
+					final User user = sessionIdService.getUser(p_sessionId);
 					if (user != null) {
 						return user;
 					} else { // if there is no user than session is invalid
