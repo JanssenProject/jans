@@ -196,8 +196,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 QueryStringDecoder.decode(httpRequest.getQueryString()));
 
         SessionId sessionUser = identity.getSessionId();
-        User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
-                userService.getUserByDn(sessionUser.getUserDn()) : null;
+        User user = sessionIdService.getUser(sessionUser);
 
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
@@ -692,6 +691,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             sessionUser.setUserDn(null);
+            sessionUser.setUser(null);
             sessionUser.setSessionAttributes(requestParameterMap);
             boolean persisted = sessionIdService.persistSessionId(sessionUser, !prompts.contains(Prompt.NONE));
             if (persisted) {
@@ -821,6 +821,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         if (sessionUser != null) {
             sessionUser.setUserDn(null);
+            sessionUser.setUser(null);
             sessionUser.setAuthenticationTime(null);
         }
 

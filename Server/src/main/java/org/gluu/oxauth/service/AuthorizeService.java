@@ -136,7 +136,7 @@ public class AuthorizeService {
     public void permissionGranted(HttpServletRequest httpRequest, final SessionId session) {
         log.trace("permissionGranted");
         try {
-            final User user = userService.getUserByDn(session.getUserDn());
+            final User user = sessionIdService.getUser(session);
             if (user == null) {
                 log.debug("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
                 permissionDenied(session);

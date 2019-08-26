@@ -6,18 +6,6 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.model.GluuStatus;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.StaticConfiguration;
@@ -29,6 +17,12 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.annotation.Nullable;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Provides operations with users.
@@ -116,20 +110,6 @@ public class UserService {
 		User user = getUser(userId, "inum");
 
 		return getUserInum(user);
-	}
-
-	public String getUserNameByInum(String inum) {
-		if (StringHelper.isEmpty(inum)) {
-			return null;
-		}
-		
-		String userDn = getDnForUser(inum);
-		User user = getUserByDn(userDn, "uid");
-		if (user == null) {
-			return null;
-		}
-
-		return user.getUserId();
 	}
 
     public User updateUser(User user) {
