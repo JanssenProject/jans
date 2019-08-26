@@ -346,7 +346,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	public <T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+	public <T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
     	return persistenceEntryManager.remove(primaryKey, entryClass, filter, count);
 	}
