@@ -31,6 +31,7 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
+import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
@@ -325,13 +326,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         } else {
             searchFilter = filter;
         }
+
+        DeleteBatchOperation batchOperation = new DeleteBatchOperation<DeletableEntity>(this);
         SearchResult searchResult = null;
         try {
-        	DeleteBatchOperation batchOperation = new DeleteBatchOperation<DeletableEntity>(this);
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
             searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
-                    0, 100, count, null, null);
+                    0, 100, count, null, LdapOperationsServiceImpl.DN);
 
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -341,7 +343,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
-        return searchResult.getEntryCount();
+        return batchOperation.getCountEntries();
     }
 
 	@Override
