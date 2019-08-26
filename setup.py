@@ -103,25 +103,31 @@ current_number_of_cpu = multiprocessing.cpu_count()
 
 if current_number_of_cpu < suggested_number_of_cpu:
 
-    sys.exit("{0}Attention: Available CPU Units found was {1}. "
-             "This is less than the required amount of {2} CPU Units.\n Please "
-             "update your resources and re-run setup.by.{3}".format(
-                                                    colors.DANGER,
+    print ("{0}Warning: Available CPU Units found was {1}. "
+        "This is less than the required amount of {2} CPU Units.{3}".format(
+                                                    colors.WARNING,
                                                     current_number_of_cpu, 
                                                     suggested_number_of_cpu,
                                                     colors.ENDC))
+                                                    
+    result = raw_input("Proceed anyways? [Y|n] ")
+    if result and result[0].lower() == 'n':
+        sys.exit()
 
 st = os.statvfs('/')
 available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
 
 if available_disk_space < suggested_free_disk_space:
-    sys.exit("{0}Attention: Available free disk space was determined to be {1} "
-           "GB. This is less than the required disk space of {2} GB.\nPlease "
-           "free some space and re-run setup.py.{3}".format(
-                                                    colors.DANGER,
+    print ("{0}Warning: Available free disk space was determined to be {1} "
+        "GB. This is less than the required disk space of {2} GB.{3}".format(
+                                                    colors.WARNING,
                                                     available_disk_space,
                                                     suggested_free_disk_space,
                                                     colors.ENDC))
+
+    result = raw_input("Proceed anyways? [Y|n] ")
+    if result and result[0].lower() == 'n':
+        sys.exit()
 
 ### end of initial check
 
