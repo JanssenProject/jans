@@ -19,6 +19,7 @@ import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConfigurationException;
+import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
 import org.gluu.persist.key.impl.model.ParsedKey;
@@ -342,6 +343,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	public void remove(String primaryKey) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
     	persistenceEntryManager.remove(primaryKey);
+	}
+
+	@Override
+	public <T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+    	return persistenceEntryManager.remove(primaryKey, entryClass, filter, count);
 	}
 
 	@Override
