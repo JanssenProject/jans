@@ -35,9 +35,11 @@ import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.PagedResult;
+import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
@@ -307,10 +309,41 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-	public <T> int remove(String dn, Class<T> entryClass, Filter filter, int count) throws DeleteException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public <T> int remove(String baseDN, Class<T> entryClass, Filter filter, int count) throws DeleteException {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        // Find entries
+        Filter searchFilter;
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(filter, objectClasses);
+        } else {
+            searchFilter = filter;
+        }
+        SearchResult searchResult = null;
+        try {
+        	DeleteBatchOperation batchOperation = new DeleteBatchOperation<DeletableEntity>(this);
+            LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
+                    propertiesAnnotations);
+            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
+                    0, 100, count, null, null);
+
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+        }
+
+        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            throw new EntryPersistenceException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+        }
+
+        return searchResult.getEntryCount();
+    }
 
 	@Override
     public void removeRecursively(String dn) {
@@ -403,12 +436,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     propertiesAnnotations);
             searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
                     start, chunkSize, count, null, currentLdapReturnAttributes);
-
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+        }
+
+        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         if (searchResult.getEntryCount() == 0) {
@@ -869,7 +902,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return objecClassSet.toArray(new String[0]);
 	}
 
-	private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
+	private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
         private int countEntries = 0;
 
@@ -887,5 +920,41 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return countEntries;
         }
     }
+
+	private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<DeletableEntity> {
+
+		private int countEntries = 0;
+		private LdapEntryManager ldapEntryManager;
+
+        public DeleteBatchOperation(LdapEntryManager ldapEntryManager) {
+        	this.ldapEntryManager = ldapEntryManager;
+		}
+
+        @Override
+		public void performAction(List<DeletableEntity> entries) {
+			for (DeletableEntity entity : entries) {
+				try {
+					if (ldapEntryManager.hasBranchesSupport(entity.getDn())) {
+						ldapEntryManager.removeRecursively(entity.getDn());
+					} else {
+						ldapEntryManager.remove(entity.getDn());
+					}
+					LOG.trace("Removed {}", entity.getDn());
+				} catch (Exception e) {
+					LOG.error("Failed to remove entry, dn: " + entity.getDn(), e);
+				}
+			}
+		}
+
+        @Override
+        public boolean collectSearchResult(int size) {
+            countEntries += size;
+            return false;
+        }
+
+        public int getCountEntries() {
+            return countEntries;
+        }
+	}
 
 }
