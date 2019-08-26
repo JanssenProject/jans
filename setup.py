@@ -100,8 +100,8 @@ if current_mem_size < suggested_mem_size:
 current_number_of_cpu = multiprocessing.cpu_count()
 
 if current_number_of_cpu < suggested_number_of_cpu:
-    sys.exit("{0}Attention: Available CPU Units was determined to be {1}. "
-             "This is less then the required CPU Units of {2} GB.\n Please "
+    sys.exit("{0}Attention: Available CPU Units found was {1}. "
+             "This is less than the required amount of {2} CPU Units.\n Please "
              "update your resources and re-run setup.by.{3}".format(
                                                     colors.DANGER,
                                                     current_number_of_cpu, 
