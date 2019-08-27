@@ -13,6 +13,7 @@ import org.gluu.persist.annotation.*;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.InvalidArgumentException;
 import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
@@ -412,7 +413,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		checkEntryClass(entryClass, true);
-
 		try {
 			List<AttributeData> results = find(primaryKey, ldapReturnAttributes);
 			return (results != null) && (results.size() > 0);
@@ -1310,7 +1310,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	protected <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {
-		return getEntryClassAnnotations(entryClass, "property_", LDAP_ENTRY_PROPERTY_ANNOTATIONS);
+        final List<PropertyAnnotation> annotations = getEntryClassAnnotations(entryClass, "property_", LDAP_ENTRY_PROPERTY_ANNOTATIONS);
+        KeyShortcuter.initIfNeeded(entryClass, annotations);
+        return annotations;
 	}
 
 	protected <T> List<PropertyAnnotation> getEntryDnAnnotations(Class<T> entryClass) {
