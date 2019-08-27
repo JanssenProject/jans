@@ -18,6 +18,7 @@ import javax.persistence.Query;
 
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.operation.DeleteException;
+import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
@@ -25,6 +26,7 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.ArrayHelper;
 
 /**
  * Methods which Entry Manager must provide
@@ -100,6 +102,12 @@ public interface PersistenceEntryManager extends EntityManager {
     String[] exportEntry(String primaryKey);
 
     PersistenceOperationService getOperationService();
+
+    String toInternalAttribute(String attributeName);
+	String[] toInternalAttributes(String[] attributeNames);
+
+	String fromInternalAttribute(String internalAttributeName);
+	String[] fromInternalAttributes(String[] internalAttributeNames);
 
     boolean destroy();
 
