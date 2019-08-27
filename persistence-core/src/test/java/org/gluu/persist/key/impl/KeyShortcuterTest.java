@@ -13,6 +13,7 @@ public class KeyShortcuterTest {
 
     @Test
     public void prefixDropped() {
+        assertEquals(shortcut("gluuAttributeName"), "attrName");
         assertEquals(shortcut("gluuAttributeType"), "attr_t");
         assertEquals(shortcut("oxAuthAppType"), "app_t");
         assertEquals(shortcut("oxAuthLogoutSessionRequired"), "logoutSessionRequired");
@@ -20,6 +21,7 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxTrustActive"), "active");
 
         // reverse
+        assertEquals(fromShortcut("attrName"), "gluuAttributeName");
         assertEquals(fromShortcut("attr_t"), "gluuAttributeType");
         assertEquals(fromShortcut("app_t"), "oxAuthAppType");
         assertEquals(fromShortcut("logoutSessionRequired"), "oxAuthLogoutSessionRequired");
