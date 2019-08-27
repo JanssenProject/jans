@@ -4256,6 +4256,8 @@ class Setup(object):
                     self.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
+        couchbase_test_mappings = [ 'config.' + mapping for mapping in couchbase_mappings ]
+        prop_dict['couchbase_test_mappings'] = '\n'.join(couchbase_test_mappings)
 
         return prop_dict
         
