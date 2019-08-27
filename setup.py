@@ -190,19 +190,25 @@ def get_key_shortcuter_rules():
 key_shortcuter_rules = get_key_shortcuter_rules()
 
 def get_mapped_entry(entry):
-    for key in entry:
+    rEntry = copy.deepcopy(entry)
+    
+    for key in rEntry:
         for map_key in key_shortcuter_rules['replaces']:
             if map_key in key:
                 mapped_key = key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
-                entry[mapped_key] = entry.pop(key)
+                mapped_key = mapped_key[0].lower() + mapped_key[1:]
+                rEntry[mapped_key] = rEntry.pop(key)
                 break
-                
-    for key in entry:
+
+    for key in rEntry:
         for prefix in key_shortcuter_rules['prefixes']:
             if key.startswith(prefix):
                 mapped_key = key.replace(prefix, '',1)
-                entry[mapped_key] = entry.pop(key)
+                mapped_key = mapped_key[0].lower() + mapped_key[1:]
+                rEntry[mapped_key] = rEntry.pop(key)
                 break
+
+    return rEntry
 
 def getTypedValue(dtype, val):
     retVal = val
@@ -300,8 +306,8 @@ def get_documents_from_ldif(ldif_file):
 
                     entry[k] = oc_list[0]
 
-            get_mapped_entry(entry)
-            documents.append((key, entry))
+            mapped_entry = get_mapped_entry(entry)
+            documents.append((key, mapped_entry))
 
     return documents
 
