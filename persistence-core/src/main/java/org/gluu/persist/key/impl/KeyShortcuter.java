@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,9 +108,7 @@ public class KeyShortcuter {
             // Process properties with @AttributesList annotation
             annotation = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributesList.class);
     		if (annotation != null) {
-				Map<String, AttributeName> attributesConfiguration = new HashMap<String, AttributeName>();
-				for (AttributeName attributeConfiguration : ((AttributesList) annotation)
-						.attributesConfiguration()) {
+				for (AttributeName attributeConfiguration : ((AttributesList) annotation).attributesConfiguration()) {
 	                shortcut(attributeConfiguration.name());
 				}
     		}
