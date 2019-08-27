@@ -60,6 +60,8 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxAuthRequestObjectEncryptionAlg"), "reqObjEncAlg");
         assertEquals(shortcut("oxAuthTokenType"), "tok_t");
         assertEquals(shortcut("oxAuthTokenEndpointAuthSigningAlg"), "tokEndpointAuthSigAlg");
+        assertEquals(shortcut("oxDeletable"), "del");
+        assertEquals(shortcut("description"), "desc");
 
         // reverse
         assertEquals(fromShortcut("smtpConf"), "oxSmtpConfiguration");
@@ -73,5 +75,7 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("reqObjEncAlg"), "oxAuthRequestObjectEncryptionAlg");
         assertEquals(fromShortcut("tok_t"), "oxAuthTokenType");
         assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
+        assertEquals(fromShortcut("del"), "oxDeletable");
+        assertEquals(fromShortcut("desc"), "description");
     }
 }

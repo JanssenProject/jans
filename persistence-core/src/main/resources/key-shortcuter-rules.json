@@ -23,6 +23,8 @@
     "Signing": "Sig",
     "Expiration": "Exp",
     "Object": "Obj",
-    "Token": "Tok"
+    "Token": "Tok",
+    "Deletable": "del",
+    "description" : "desc"
   }
 }
