@@ -103,12 +103,6 @@ public interface PersistenceEntryManager extends EntityManager {
 
     PersistenceOperationService getOperationService();
 
-    String toInternalAttribute(String attributeName);
-	String[] toInternalAttributes(String[] attributeNames);
-
-	String fromInternalAttribute(String internalAttributeName);
-	String[] fromInternalAttributes(String[] internalAttributeNames);
-
     boolean destroy();
 
     default void clear() {
