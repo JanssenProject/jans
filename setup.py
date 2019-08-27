@@ -67,69 +67,13 @@ class colors:
     UNDERLINE = '\033[4m'
     DANGER = '\033[31m'
 
-suggested_mem_size = 4 # in GB
+suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
 
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
-### initial check
-
-file_max = int(open("/proc/sys/fs/file-max").read().strip())
-
-if file_max < 64000:
-    sys.exit("Maximum number of files that can be opened on this computer is "
-              "less than 64000. Please increase number of file-max on the "
-              "host system and re-run setup.py".format(colors.DANGER,
-                                                            colors.ENDC))
-
-current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-current_mem_size = current_mem_bytes / (1024.**3) #in GB
-
-if current_mem_size < suggested_mem_size:
-    print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
-           "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
-                                                    current_mem_size, 
-                                                    suggested_mem_size,
-                                                    colors.ENDC)
-
-
-    result = raw_input("Proceed anyways? [Y|n] ")
-    if result and result[0].lower() == 'n':
-        sys.exit()
-
-current_number_of_cpu = multiprocessing.cpu_count()
-
-if current_number_of_cpu < suggested_number_of_cpu:
-
-    print ("{0}Warning: Available CPU Units found was {1}. "
-        "This is less than the required amount of {2} CPU Units.{3}".format(
-                                                    colors.WARNING,
-                                                    current_number_of_cpu, 
-                                                    suggested_number_of_cpu,
-                                                    colors.ENDC))
-                                                    
-    result = raw_input("Proceed anyways? [Y|n] ")
-    if result and result[0].lower() == 'n':
-        sys.exit()
-
-st = os.statvfs('/')
-available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
-
-if available_disk_space < suggested_free_disk_space:
-    print ("{0}Warning: Available free disk space was determined to be {1} "
-        "GB. This is less than the required disk space of {2} GB.{3}".format(
-                                                    colors.WARNING,
-                                                    available_disk_space,
-                                                    suggested_free_disk_space,
-                                                    colors.ENDC))
-
-    result = raw_input("Proceed anyways? [Y|n] ")
-    if result and result[0].lower() == 'n':
-        sys.exit()
-
-### end of initial check
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -4704,6 +4648,63 @@ class Setup(object):
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
+
+def resource_checkings():
+
+    file_max = int(open("/proc/sys/fs/file-max").read().strip())
+
+    if file_max < 64000:
+        sys.exit("Maximum number of files that can be opened on this computer is "
+                  "less than 64000. Please increase number of file-max on the "
+                  "host system and re-run setup.py".format(colors.DANGER,
+                                                                colors.ENDC))
+
+    current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+    current_mem_size = current_mem_bytes / (1024.**3) #in GB
+
+    if current_mem_size < suggested_mem_size:
+        print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
+               "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
+                                                        current_mem_size, 
+                                                        suggested_mem_size,
+                                                        colors.ENDC)
+
+
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+    current_number_of_cpu = multiprocessing.cpu_count()
+
+    if current_number_of_cpu < suggested_number_of_cpu:
+
+        print ("{0}Warning: Available CPU Units found was {1}. "
+            "This is less than the required amount of {2} CPU Units.{3}".format(
+                                                        colors.WARNING,
+                                                        current_number_of_cpu, 
+                                                        suggested_number_of_cpu,
+                                                        colors.ENDC))
+                                                        
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+    st = os.statvfs('/')
+    available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
+
+    if available_disk_space < suggested_free_disk_space:
+        print ("{0}Warning: Available free disk space was determined to be {1} "
+            "GB. This is less than the required disk space of {2} GB.{3}".format(
+                                                        colors.WARNING,
+                                                        available_disk_space,
+                                                        suggested_free_disk_space,
+                                                        colors.ENDC))
+
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+
 if __name__ == '__main__':
 
     parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
@@ -4732,6 +4733,7 @@ if __name__ == '__main__':
 
     argsp = parser.parse_args()
 
+    resource_checkings()
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
