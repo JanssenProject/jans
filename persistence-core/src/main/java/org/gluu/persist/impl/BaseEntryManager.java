@@ -1669,6 +1669,26 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return key.hashCode();
 	}
 
+	@Override
+	public String toInternalAttribute(String attributeName) {
+		return attributeName;
+	}
+
+	@Override
+	public String[] toInternalAttributes(String[] attributeNames) {
+		return attributeNames;
+	}
+
+	@Override
+	public String fromInternalAttribute(String internalAttributeName) {
+		return internalAttributeName;
+	}
+
+	@Override
+	public String[] fromInternalAttributes(String[] internalAttributeNames) {
+		return internalAttributeNames;
+	}
+
 	protected byte[][] toBinaryValues(String[] attributeValues) {
 		byte[][] binaryValues = new byte[attributeValues.length][];
 

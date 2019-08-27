@@ -891,7 +891,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 //        	}
 //        }
 	}
-	
+
 	public String toInternalAttribute(String attributeName) {
 		if (operationService.isDisableAttributeMapping()) {
 			return attributeName;
@@ -913,24 +913,24 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		
 		return resultAttributeNames;
 	}
-	
-	public String fromInternalAttribute(String shortAttributeName) {
+
+	public String fromInternalAttribute(String internalAttributeName) {
 		if (operationService.isDisableAttributeMapping()) {
-			return shortAttributeName;
+			return internalAttributeName;
 		}
 
-		return KeyShortcuter.fromShortcut(shortAttributeName);
+		return KeyShortcuter.fromShortcut(internalAttributeName);
 	}
 
-	public String[] fromInternalAttributes(String[] shortAttributeNames) {
-		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(shortAttributeNames)) {
-			return shortAttributeNames;
+	public String[] fromInternalAttributes(String[] internalAttributeNames) {
+		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
+			return internalAttributeNames;
 		}
 		
-		String[] resultAttributeNames = new String[shortAttributeNames.length];
+		String[] resultAttributeNames = new String[internalAttributeNames.length];
 		
-		for (int i = 0; i < shortAttributeNames.length; i++) {
-			resultAttributeNames[i] = KeyShortcuter.fromShortcut(shortAttributeNames[i]);
+		for (int i = 0; i < internalAttributeNames.length; i++) {
+			resultAttributeNames[i] = KeyShortcuter.fromShortcut(internalAttributeNames[i]);
 		}
 		
 		return resultAttributeNames;
