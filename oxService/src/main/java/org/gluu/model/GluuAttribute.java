@@ -39,9 +39,6 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName(name = "oxAttributeType")
-	private String type;
-
 	@AttributeName
 	private String lifetime;
 
@@ -139,14 +136,6 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	public void setInum(String inum) {
 		this.inum = inum;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public String getLifetime() {
