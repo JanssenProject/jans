@@ -723,12 +723,6 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.124 NAME 'oxAmHost'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.125 NAME 'oxAttributeType'
-  DESC 'NameId or attribute'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.126 NAME 'oxAuthClaimName'
   DESC 'Used by oxAuth in conjunction with gluuttributeName to map claims to attributes in LDAP.'
   EQUALITY caseIgnoreMatch
@@ -2398,7 +2392,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'gluuAttribute'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI $ gluuSAML2URI $ gluuStatus $ iname $ inum $ oxAttributeType $ oxMultivaluedAttribute $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
+  MAY ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI $ gluuSAML2URI $ gluuStatus $ iname $ inum $ oxMultivaluedAttribute $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.7 NAME 'gluuSAMLconfig'
   SUP ( top )
