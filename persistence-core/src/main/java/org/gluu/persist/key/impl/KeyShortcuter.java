@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.AttributesList;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.util.Util;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,11 +99,24 @@ public class KeyShortcuter {
         }
 
         for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+    		// Process properties with AttributeName annotation
             Annotation annotation = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributeName.class);
-            if (annotation instanceof AttributeName) {
+            if (annotation != null) {
                 shortcut(((AttributeName) annotation).name());
+                continue;
             }
+
+            // Process properties with @AttributesList annotation
+            annotation = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributesList.class);
+    		if (annotation != null) {
+				Map<String, AttributeName> attributesConfiguration = new HashMap<String, AttributeName>();
+				for (AttributeName attributeConfiguration : ((AttributesList) annotation)
+						.attributesConfiguration()) {
+	                shortcut(attributeConfiguration.name());
+				}
+    		}
         }
+
 
         PROCESSED_ENTRIES.add(entryClass);
     }
