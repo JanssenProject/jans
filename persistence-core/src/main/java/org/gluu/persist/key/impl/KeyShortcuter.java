@@ -2,13 +2,19 @@ package org.gluu.persist.key.impl;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +27,8 @@ public class KeyShortcuter {
     private static final Logger LOG = LoggerFactory.getLogger(KeyShortcuter.class);
 
     public static final String CONF_FILE_NAME = "key-shortcuter-rules.json";
+
+    private static final List<Class> PROCESSED_ENTRIES = Lists.newArrayList();
 
     private static final BiMap<String, String> MAP = HashBiMap.create();
     private static final BiMap<String, String> INVERSE_MAP = MAP.inverse();
@@ -81,5 +89,20 @@ public class KeyShortcuter {
 
     public static String lowercaseFirstChar(String key) {
         return Character.toLowerCase(key.charAt(0)) + key.substring(1);
+    }
+
+    public static <T> void initIfNeeded(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations) {
+        if (entryClass == null || propertiesAnnotations == null || PROCESSED_ENTRIES.contains(entryClass)) {
+            return;
+        }
+
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            Annotation annotation = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributeName.class);
+            if (annotation instanceof AttributeName) {
+                shortcut(((AttributeName) annotation).name());
+            }
+        }
+
+        PROCESSED_ENTRIES.add(entryClass);
     }
 }
