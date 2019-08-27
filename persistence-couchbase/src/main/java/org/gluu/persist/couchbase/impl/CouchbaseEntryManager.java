@@ -516,7 +516,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, ParsedKey baseDn,
             JsonObject... searchResultEntries) {
-        KeyShortcuter.initIfNeeded(entryClass, propertiesAnnotations);
         List<T> result = new ArrayList<T>(searchResultEntries.length);
         Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
 

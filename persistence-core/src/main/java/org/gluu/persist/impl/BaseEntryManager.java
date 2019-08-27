@@ -182,7 +182,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Class<?> entryClass = entry.getClass();
 		checkEntryClass(entryClass, isSchemaUpdate);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        KeyShortcuter.initIfNeeded(entryClass, propertiesAnnotations);
 
 		Object dnValue = getDNValue(entry, entryClass);
 
@@ -414,7 +413,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		checkEntryClass(entryClass, true);
-        KeyShortcuter.initIfNeeded(entryClass, getEntryPropertyAnnotations(entryClass));
 		try {
 			List<AttributeData> results = find(primaryKey, ldapReturnAttributes);
 			return (results != null) && (results.size() > 0);
@@ -580,7 +578,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 		}
 
-        KeyShortcuter.initIfNeeded(entryClass, propertiesAnnotations);
 		List<AttributeData> ldapAttributes = find(primaryKey.toString(), currentLdapReturnAttributes);
 
 		entriesAttributes.put(String.valueOf(primaryKey), ldapAttributes);
@@ -1313,7 +1310,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	protected <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {
-		return getEntryClassAnnotations(entryClass, "property_", LDAP_ENTRY_PROPERTY_ANNOTATIONS);
+        final List<PropertyAnnotation> annotations = getEntryClassAnnotations(entryClass, "property_", LDAP_ENTRY_PROPERTY_ANNOTATIONS);
+        KeyShortcuter.initIfNeeded(entryClass, annotations);
+        return annotations;
 	}
 
 	protected <T> List<PropertyAnnotation> getEntryDnAnnotations(Class<T> entryClass) {
