@@ -131,18 +131,18 @@ def get_key_shortcuter_rules():
     return key_shortcuter_rules
 
 
-key_shortcuter_rules = get_key_shortcuter_rules()
-
 def get_mapped_entry(entry):
     rEntry = copy.deepcopy(entry)
     
     for key in rEntry:
+        mapped_key = key
         for map_key in key_shortcuter_rules['replaces']:
-            if map_key in key:
-                mapped_key = key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
-                mapped_key = mapped_key[0].lower() + mapped_key[1:]
-                rEntry[mapped_key] = rEntry.pop(key)
-                break
+            if map_key in mapped_key:
+                mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
+                
+        if mapped_key != key:
+            mapped_key = mapped_key[0].lower() + mapped_key[1:]
+            rEntry[mapped_key] = rEntry.pop(key)
 
     for key in rEntry:
         for prefix in key_shortcuter_rules['prefixes']:
@@ -151,6 +151,7 @@ def get_mapped_entry(entry):
                 mapped_key = mapped_key[0].lower() + mapped_key[1:]
                 rEntry[mapped_key] = rEntry.pop(key)
                 break
+
 
     return rEntry
 
@@ -4736,6 +4737,7 @@ if __name__ == '__main__':
     argsp = parser.parse_args()
 
     resource_checkings()
+    key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
