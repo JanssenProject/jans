@@ -37,6 +37,8 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxAuthUserId"), "_uId");
         assertEquals(shortcut("oxAuthUserDN"), "_uDN");
         assertEquals(shortcut("oxAuthDefaultAcrValues"), "_dAcrValues");
+        assertEquals(shortcut("uniqueIdentifier"), "_id");
+        assertEquals(shortcut("oxId"), "id");
 
         // reverse
         assertEquals(fromShortcut("_gVisibility"), "gluuGroupVisibility");
@@ -45,6 +47,8 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("_uId"), "oxAuthUserId");
         assertEquals(fromShortcut("_uDN"), "oxAuthUserDN");
         assertEquals(fromShortcut("_dAcrValues"), "oxAuthDefaultAcrValues");
+        assertEquals(fromShortcut("_id"), "uniqueIdentifier");
+        assertEquals(fromShortcut("id"), "oxId");
     }
 
     @Test
