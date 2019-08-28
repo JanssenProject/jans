@@ -25,6 +25,7 @@
     "Object": "Obj",
     "Token": "Tok",
     "Deletable": "del",
-    "description" : "desc"
+    "description" : "desc",
+    "uniqueIdentifier": "_id"
   }
 }
