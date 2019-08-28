@@ -10,9 +10,9 @@
                       if="#{not identity.loggedIn}" />
     </f:metadata>
     <ui:define name="head">
-        <script src="js/base64js.js" />
-        <script src="js/base64url.js" />
-        <script src="js/webauthn.js" />
+        <script src="../auth/fido2/js/base64js.js" />
+        <script src="../auth/fido2/js/base64url.js" />
+        <script src="../auth/fido2/js/webauthn.js" />
 
         <script>
 			var attestation_request = ${identity.getWorkingParameter('fido2_attestation_request')};
