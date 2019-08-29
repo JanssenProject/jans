@@ -60,6 +60,9 @@ public class KeyShortcuter {
         if (StringUtils.isBlank(key)) {
             return key;
         }
+        if (conf.getExclusions().contains(key)) {
+            return key;
+        }
 
         final String cachedShortcut = MAP.get(key);
         if (cachedShortcut != null) {

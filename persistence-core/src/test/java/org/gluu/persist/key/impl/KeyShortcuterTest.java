@@ -54,7 +54,7 @@ public class KeyShortcuterTest {
     @Test
     public void shortcutsWithoutMarkers() {
         assertEquals(shortcut("oxSmtpConfiguration"), "smtpConf");
-        assertEquals(shortcut("oxTrustConfApplication"), "confApp");
+        assertEquals(shortcut("oxTrustConfApplication"), "oxTrustConfApplication");
         assertEquals(shortcut("oxAuthUserInfoEncryptedResponseAlg"), "_uInfoEncRespAlg");
         assertEquals(shortcut("oxAuthAuthenticationTime"), "authnTime");
         assertEquals(shortcut("oxIDPAuthentication"), "iDPAuthn");
@@ -69,7 +69,7 @@ public class KeyShortcuterTest {
 
         // reverse
         assertEquals(fromShortcut("smtpConf"), "oxSmtpConfiguration");
-        assertEquals(fromShortcut("confApp"), "oxTrustConfApplication");
+        assertEquals(fromShortcut("oxTrustConfApplication"), "oxTrustConfApplication");
         assertEquals(fromShortcut("_uInfoEncRespAlg"), "oxAuthUserInfoEncryptedResponseAlg");
         assertEquals(fromShortcut("authnTime"), "oxAuthAuthenticationTime");
         assertEquals(fromShortcut("iDPAuthn"), "oxIDPAuthentication");
