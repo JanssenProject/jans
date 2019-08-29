@@ -219,7 +219,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
-
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
                     modification = createModification(Mutation.DICT_ADD, toInternalAttribute(attributeName), multivalued, attributeValues);
