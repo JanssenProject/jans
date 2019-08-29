@@ -60,9 +60,6 @@ public class KeyShortcuter {
         if (StringUtils.isBlank(key)) {
             return key;
         }
-        if (conf.getExclusions().contains(key)) {
-            return key;
-        }
 
         final String cachedShortcut = MAP.get(key);
         if (cachedShortcut != null) {
@@ -70,6 +67,12 @@ public class KeyShortcuter {
         }
 
         String copy = key;
+
+        final String exclusion = conf.getExclusions().get(key);
+        if (StringUtils.isNotBlank(exclusion)) {
+            MAP.put(copy, exclusion);
+            return exclusion;
+        }
 
         for (String prefix : conf.getPrefixes()) {
             if (key.startsWith(prefix)) {
