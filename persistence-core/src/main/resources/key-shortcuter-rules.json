@@ -27,5 +27,24 @@
     "Deletable": "del",
     "description" : "desc",
     "uniqueIdentifier": "_id"
-  }
+  },
+  "exclusions": [
+    "oxSoftwareVersion",
+    "oxTrustFaviconPath",
+    "oxAuthFaviconPath",
+    "oxTrustLogoPath",
+    "oxAuthLogoPath",
+    "oxApplicationType",
+    "oxTrustLocale",
+    "oxTrustnickname",
+    "oxTrustMiddleName",
+    "gluuUrl",
+    "oxTrustRole",
+    "oxAuthX509URL",
+    "oxAuthX509PEM",
+    "oxTrustConfApplication",
+    "gluuStatus",
+    "gluuFaviconImage",
+    "oxAssociatedClient"
+  ]
 }
