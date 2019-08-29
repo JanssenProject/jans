@@ -28,7 +28,8 @@
     "description" : "desc",
     "uniqueIdentifier": "_id",
     "Password": "Pass",
-    "Address": "Addr"
+    "Address": "Addr",
+    "Lifetime": "Life"
   },
   "exclusions": {
     "oxSoftwareVersion": "softwareVer",
