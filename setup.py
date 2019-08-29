@@ -136,15 +136,20 @@ def get_mapped_entry(entry):
     
     for key in rEntry:
         mapped_key = key
-        for map_key in key_shortcuter_rules['replaces']:
-            if map_key in mapped_key:
-                mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
+        if key in key_shortcuter_rules['exclusions']:
+            mapped_key = key_shortcuter_rules['exclusions'][key]
+        else:
+            for map_key in key_shortcuter_rules['replaces']:
+                if map_key in mapped_key:
+                    mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
                 
         if mapped_key != key:
             mapped_key = mapped_key[0].lower() + mapped_key[1:]
             rEntry[mapped_key] = rEntry.pop(key)
 
     for key in rEntry:
+        if key in key_shortcuter_rules['exclusions']:
+            continue
         for prefix in key_shortcuter_rules['prefixes']:
             if key.startswith(prefix):
                 mapped_key = key.replace(prefix, '',1)
