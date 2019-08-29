@@ -134,7 +134,7 @@ def get_key_shortcuter_rules():
 def get_mapped_entry(entry):
     rEntry = copy.deepcopy(entry)
     
-    for key in rEntry:
+    for key in rEntry.keys():
         mapped_key = key
         if key in key_shortcuter_rules['exclusions']:
             mapped_key = key_shortcuter_rules['exclusions'][key]
@@ -147,7 +147,7 @@ def get_mapped_entry(entry):
             mapped_key = mapped_key[0].lower() + mapped_key[1:]
             rEntry[mapped_key] = rEntry.pop(key)
 
-    for key in rEntry:
+    for key in rEntry.keys():
         if key in key_shortcuter_rules['exclusions']:
             continue
         for prefix in key_shortcuter_rules['prefixes']:
