@@ -26,7 +26,9 @@
     "Token": "Tok",
     "Deletable": "del",
     "description" : "desc",
-    "uniqueIdentifier": "_id"
+    "uniqueIdentifier": "_id",
+    "Password": "Pass",
+    "Address": "Addr"
   },
   "exclusions": [
     "oxSoftwareVersion",
