@@ -39,6 +39,7 @@
     "oxTrustnickname",
     "oxTrustMiddleName",
     "gluuUrl",
+    "oxUrl",
     "oxTrustRole",
     "oxAuthX509URL",
     "oxAuthX509PEM",
