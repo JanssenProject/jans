@@ -30,24 +30,24 @@
     "Password": "Pass",
     "Address": "Addr"
   },
-  "exclusions": [
-    "oxSoftwareVersion",
-    "oxTrustFaviconPath",
-    "oxAuthFaviconPath",
-    "oxTrustLogoPath",
-    "oxAuthLogoPath",
-    "oxApplicationType",
-    "oxTrustLocale",
-    "oxTrustnickname",
-    "oxTrustMiddleName",
-    "gluuUrl",
-    "oxUrl",
-    "oxTrustRole",
-    "oxAuthX509URL",
-    "oxAuthX509PEM",
-    "oxTrustConfApplication",
-    "gluuStatus",
-    "gluuFaviconImage",
-    "oxAssociatedClient"
-  ]
+  "exclusions": {
+    "oxSoftwareVersion": "softwareVer",
+    "oxTrustFaviconPath": "_trFaviconPath",
+    "oxAuthFaviconPath": "_auFaviconPath",
+    "oxTrustLogoPath": "_trLogoPath",
+    "oxAuthLogoPath": "_auLogoPath",
+    "oxApplicationType": "application_t",
+    "oxTrustLocale": "_trLocale",
+    "oxTrustnickname": "_trNickName",
+    "oxTrustMiddleName": "_trMiddleName",
+    "gluuUrl": "_gUrl",
+    "oxUrl": "oxUrl",
+    "oxTrustRole": "_trRole",
+    "oxAuthX509URL": "_auX509URL",
+    "oxAuthX509PEM": "_auX509PEM",
+    "oxTrustConfApplication": "_trConfApp",
+    "gluuStatus": "_gStatus",
+    "gluuFaviconImage": "_gFaviconImage",
+    "oxAssociatedClient": "ass_c"
+  }
 }
