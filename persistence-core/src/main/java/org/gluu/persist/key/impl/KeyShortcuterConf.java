@@ -14,6 +14,8 @@ public class KeyShortcuterConf {
     private List<String> prefixes;
     @JsonProperty
     private Map<String, String> replaces;
+    @JsonProperty
+    private List<String> exclusions;
 
     public List<String> getPrefixes() {
         return prefixes;
@@ -31,11 +33,20 @@ public class KeyShortcuterConf {
         this.replaces = replaces;
     }
 
+    public List<String> getExclusions() {
+        return exclusions;
+    }
+
+    public void setExclusions(List<String> exclusions) {
+        this.exclusions = exclusions;
+    }
+
     @Override
     public String toString() {
         return "KeyShortcuterConf{" +
                 "prefixes=" + prefixes +
                 ", replaces=" + replaces +
+                ", exclusions=" + exclusions +
                 '}';
     }
 }
