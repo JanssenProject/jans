@@ -164,7 +164,7 @@ public class UmaPctService {
         if (StringUtils.isBlank(pctCode)) {
             throw new IllegalArgumentException("PCT code is null or blank.");
         }
-        return String.format("oxAuthTokenCode=%s,%s", pctCode, branchBaseDn());
+        return String.format("tknCde=%s,%s", pctCode, branchBaseDn());
     }
 
     public String branchBaseDn() {
