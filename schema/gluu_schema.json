@@ -5423,7 +5423,7 @@
                 "scp",
                 "tknCde",
                 "tknTyp",
-                "uid",
+                "usrId",
                 "clnId",
                 "acr",
                 "uuid",
@@ -5455,7 +5455,7 @@
                 "exp",
                 "del",
                 "tknCde",
-                "uid",
+                "usrId",
                 "oxUmaPermission",
                 "uuid"
             ],
