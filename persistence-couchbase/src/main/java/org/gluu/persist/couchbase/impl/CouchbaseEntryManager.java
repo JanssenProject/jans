@@ -879,47 +879,51 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 
 	public String toInternalAttribute(String attributeName) {
-		if (operationService.isDisableAttributeMapping()) {
-			return attributeName;
-		}
-
-		return KeyShortcuter.shortcut(attributeName);
+		return attributeName;
+//		if (operationService.isDisableAttributeMapping()) {
+//			return attributeName;
+//		}
+//
+//		return KeyShortcuter.shortcut(attributeName);
 	}
 
 	public String[] toInternalAttributes(String[] attributeNames) {
-		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
-			return attributeNames;
-		}
-		
-		String[] resultAttributeNames = new String[attributeNames.length];
-		
-		for (int i = 0; i < attributeNames.length; i++) {
-			resultAttributeNames[i] = KeyShortcuter.shortcut(attributeNames[i]);
-		}
-		
-		return resultAttributeNames;
+		return attributeNames;
+//		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
+//			return attributeNames;
+//		}
+//		
+//		String[] resultAttributeNames = new String[attributeNames.length];
+//		
+//		for (int i = 0; i < attributeNames.length; i++) {
+//			resultAttributeNames[i] = KeyShortcuter.shortcut(attributeNames[i]);
+//		}
+//		
+//		return resultAttributeNames;
 	}
 
 	public String fromInternalAttribute(String internalAttributeName) {
-		if (operationService.isDisableAttributeMapping()) {
-			return internalAttributeName;
-		}
-
-		return KeyShortcuter.fromShortcut(internalAttributeName);
+		return internalAttributeName;
+//		if (operationService.isDisableAttributeMapping()) {
+//			return internalAttributeName;
+//		}
+//
+//		return KeyShortcuter.fromShortcut(internalAttributeName);
 	}
 
 	public String[] fromInternalAttributes(String[] internalAttributeNames) {
-		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
-			return internalAttributeNames;
-		}
-		
-		String[] resultAttributeNames = new String[internalAttributeNames.length];
-		
-		for (int i = 0; i < internalAttributeNames.length; i++) {
-			resultAttributeNames[i] = KeyShortcuter.fromShortcut(internalAttributeNames[i]);
-		}
-		
-		return resultAttributeNames;
+		return internalAttributeNames;
+//		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
+//			return internalAttributeNames;
+//		}
+//		
+//		String[] resultAttributeNames = new String[internalAttributeNames.length];
+//		
+//		for (int i = 0; i < internalAttributeNames.length; i++) {
+//			resultAttributeNames[i] = KeyShortcuter.fromShortcut(internalAttributeNames[i]);
+//		}
+//		
+//		return resultAttributeNames;
 	}
 
 }
