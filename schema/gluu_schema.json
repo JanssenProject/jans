@@ -2028,7 +2028,7 @@
             "desc": "oxAuth Token Type",
             "equality": "caseIgnoreMatch",
             "names": [
-                "tknType"
+                "tknTyp"
             ],
             "oid": "oxAttribute:182",
             "substr": "caseIgnoreSubstringsMatch",
@@ -5421,7 +5421,7 @@
                 "nnc",
                 "scp",
                 "tknCde",
-                "tknType",
+                "tknTyp",
                 "uid",
                 "clnId",
                 "acr",
