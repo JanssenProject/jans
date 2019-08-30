@@ -256,8 +256,8 @@ def get_documents_from_ldif(ldif_file):
 
                     entry[k] = oc_list[0]
 
-            mapped_entry = get_mapped_entry(entry)
-            documents.append((key, mapped_entry))
+            #mapped_entry = get_mapped_entry(entry)
+            documents.append((key, entry))
 
     return documents
 
@@ -4742,7 +4742,7 @@ if __name__ == '__main__':
     argsp = parser.parse_args()
 
     resource_checkings()
-    key_shortcuter_rules = get_key_shortcuter_rules()
+    #key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
