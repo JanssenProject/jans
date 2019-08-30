@@ -11,7 +11,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class KeyShortcuterTest {
 
-    @Test
+    //@Test
     public void prefixDropped() {
         assertEquals(shortcut("gluuAttributeName"), "attrName");
         assertEquals(shortcut("gluuAttributeType"), "attr_t");
@@ -29,7 +29,7 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("active"), "oxTrustActive");
     }
 
-    @Test
+    //@Test
     public void shortcutsWithMarkers() {
         assertEquals(shortcut("gluuGroupVisibility"), "_gVisibility");
         assertEquals(shortcut("oxAuthTrustedClient"), "trusted_c");
@@ -51,7 +51,7 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("id"), "oxId");
     }
 
-    @Test
+    //@Test
     public void shortcutsWithoutMarkers() {
         assertEquals(shortcut("oxSmtpConfiguration"), "smtpConf");
         assertEquals(shortcut("oxTrustConfApplication"), "_trConfApp");
