@@ -26,9 +26,9 @@ public class UmaRPT extends AbstractToken {
 
     @DN
     private String dn;
-    @AttributeName(name = "oxAuthUserId")
+    @AttributeName(name = "uid")
     private String userId;
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "clnId")
     private String clientId;
     @AttributeName(name = "oxUmaPermission")
     private List<String> permissions;

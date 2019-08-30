@@ -214,7 +214,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsOfClient(String p_clientId) {
         try {
             final String baseDn = clientService.buildClientDn(p_clientId);
-            return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("oxAuthTokenCode"));
+            return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("tknCde"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -250,7 +250,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
         try {
-            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthGrantId", p_grantId));
+            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", p_grantId));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -259,7 +259,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.hash(p_authorizationCode)));
+            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(p_authorizationCode)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -269,7 +269,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
         List<TokenLdap> grants = new ArrayList<TokenLdap>();
         try {
-            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthSessionDn", sessionDn));
+            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("ssnId", sessionDn));
             if (ldapGrants != null) {
                 grants.addAll(ldapGrants);
             }
