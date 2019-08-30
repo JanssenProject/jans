@@ -1107,7 +1107,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.186 NAME 'oxAuthUserDN'
   EQUALITY distinguishedNameMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.187 NAME 'oxAuthUserId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.187 NAME ( 'oxAuthUserId' 'usrId' )
   DESC 'oxAuth user id'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
