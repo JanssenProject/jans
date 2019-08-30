@@ -38,7 +38,7 @@ public class RequestMessageLdap extends BaseEntry {
     @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
 
     public RequestMessageLdap() {
