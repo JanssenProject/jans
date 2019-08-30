@@ -95,7 +95,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     }
 
     private String createDn(String key) {
-        return String.format("uniqueIdentifier=%s,%s", key, baseDn);
+        return String.format("uuid=%s,%s", key, baseDn);
     }
 
     private static String hashKey(String key) {
