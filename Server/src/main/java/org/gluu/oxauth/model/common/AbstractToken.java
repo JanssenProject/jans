@@ -33,20 +33,21 @@ import java.util.Date;
  */
 public abstract class AbstractToken implements Serializable, Deletable {
 
-    @AttributeName(name = "oxAuthTokenCode", consistency = true)
+    @AttributeName(name = "tknCde", consistency = true)
     private String code;
-    @AttributeName(name = "oxAuthCreation")
+    @AttributeName(name = "iat")
     private Date creationDate;
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
     private boolean revoked;
     private boolean expired;
 
-    @AttributeName(name = "oxAuthenticationMode")
+    @AttributeName(name = "amr")
     private String authMode;
 
+    @AttributeName(name = "ssnId")
     private String sessionDn;
     private String x5ts256;
 

@@ -66,13 +66,13 @@ public class UmaResource {
     @AttributeName(name = "oxType")
     private String type;
 
-    @AttributeName(name = "oxAuthCreation")
+    @AttributeName(name = "iat")
     private Date creationDate;
 
     @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
 
     public boolean isDeletable() {
