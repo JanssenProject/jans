@@ -12,7 +12,7 @@ import java.util.List;
  * Created by eugeniuparvan on 1/12/17.
  */
 @DataEntry
-@ObjectClass(value = "oxAuthToken")
+@ObjectClass(value = "token")
 public class SimpleTokenCouchbase implements Serializable {
 
     private static final long serialVersionUID = 6726419630327625172L;

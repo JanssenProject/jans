@@ -42,7 +42,7 @@ public class SimpleSessionState implements Serializable {
     @AttributeName(name = "oxAuthUserDN")
     private String userDn;
 
-    @AttributeName(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
     @AttributeName(name = "oxAuthSessionState")

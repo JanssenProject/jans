@@ -44,7 +44,7 @@ public final class LdapSampleDelete {
 
         String baseDn = "ou=cache,o=gluu";
 		Filter filter = Filter.createANDFilter(
-		        Filter.createEqualityFilter("oxDeletable", true),
+		        Filter.createEqualityFilter("del", true),
 				Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, new Date(System.currentTimeMillis() + 2 * 24 * 60 * 60 * 1000)))
         );
 

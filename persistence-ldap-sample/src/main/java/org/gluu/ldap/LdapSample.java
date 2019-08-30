@@ -64,7 +64,7 @@ public final class LdapSample {
         List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
         LOG.debug("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" },
+        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "grtId" },
                 null, 10, 0, 0);
         LOG.debug("Found grants: " + grants.size());
 

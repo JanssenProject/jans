@@ -85,7 +85,7 @@ public final class CouchbaseSample {
         LOG.info("Found sessions: " + sessions.size());
 
         List<SimpleGrant> grants = couchbaseEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB,
-                new String[] { "oxAuthGrantId" }, null, 1, 0, 0);
+                new String[] { "grtId" }, null, 1, 0, 0);
         LOG.info("Found grants: " + grants.size());
 
         try {

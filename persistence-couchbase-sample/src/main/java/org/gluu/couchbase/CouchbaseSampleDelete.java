@@ -28,7 +28,7 @@ public final class CouchbaseSampleDelete {
 
         String baseDn = "ou=cache,o=gluu";
 		Filter filter = Filter.createANDFilter(
-		        Filter.createEqualityFilter("oxDeletable", true),
+		        Filter.createEqualityFilter("del", true),
 				Filter.createLessOrEqualFilter("oxAuthExpiration", couchbaseEntryManager.encodeTime(baseDn, new Date()))
         );
 
