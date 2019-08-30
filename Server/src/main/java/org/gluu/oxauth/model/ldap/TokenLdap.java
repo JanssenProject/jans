@@ -27,7 +27,7 @@ public class TokenLdap implements Serializable {
     private String dn;
     @AttributeName(name = "grtId", consistency = true)
     private String grantId;
-    @AttributeName(name = "uid")
+    @AttributeName(name = "usrId")
     private String userId;
     @AttributeName(name = "clnId")
     private String clientId;
