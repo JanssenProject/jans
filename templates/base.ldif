@@ -4,7 +4,6 @@
 ################################
 dn: o=gluu
 objectClass: top
-objectClass: organization
 objectClass: gluuOrganization
 o: gluu
 gluuThemeColor: 166309
