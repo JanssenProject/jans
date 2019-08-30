@@ -84,7 +84,7 @@ public class UmaPctService {
 
     public UmaPCT getByCode(String pctCode) {
         try {
-            final Filter filter = Filter.createEqualityFilter("oxAuthTokenCode", pctCode);
+            final Filter filter = Filter.createEqualityFilter("tknCde", pctCode);
             final List<UmaPCT> entries = ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);

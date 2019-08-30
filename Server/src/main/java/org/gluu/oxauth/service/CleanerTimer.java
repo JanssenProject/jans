@@ -168,12 +168,15 @@ public class CleanerTimer {
 					};
 
 					Filter filter = Filter.createANDFilter(
-					        Filter.createEqualityFilter("oxDeletable", true),
-							Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now))
-                    );
+					        Filter.createEqualityFilter("del", true),
+					        Filter.createORFilter(
+					        		Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now)),
+					        		Filter.createLessOrEqualFilter("exp", ldapEntryManager.encodeTime(baseDn, now))
+					        		
+                    ));
 
 					ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB,
-							new String[] { "oxAuthExpiration", "oxDeletable" }, batchOperation, 0, chunkSize,
+							new String[] { "exp", "oxAuthExpiration", "del" }, batchOperation, 0, chunkSize,
 							chunkSize);
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
