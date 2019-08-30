@@ -322,6 +322,7 @@ class Setup(object):
 
 
         # Gluu components installation status
+        self.loadData = True
         self.installOxAuth = True
         self.installOxTrust = True
         self.installLdap = False
@@ -3479,6 +3480,11 @@ class Setup(object):
             self.deleteLdapPw()
 
     def import_ldif_opendj(self, ldif_file_list=[]):
+
+        #We won't load data to secondary cluster nodes
+        if not self.loadData:
+            return
+        
         if not ldif_file_list:
             self.logIt("Importing userRoot LDIF data")
         else:
@@ -4736,7 +4742,7 @@ if __name__ == '__main__':
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
     parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
-
+    parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     argsp = parser.parse_args()
 
     resource_checkings()
@@ -4760,7 +4766,8 @@ if __name__ == '__main__':
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
-        'loadTestDataExit': False
+        'loadTestDataExit': False,
+        'loadData': True,
     }
 
     if argsp.d:
@@ -4791,6 +4798,9 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
+
+    if argsp.no_data:
+        setupOptions['loadData'] = False
     
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
