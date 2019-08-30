@@ -20,55 +20,55 @@ import java.util.Date;
  */
 
 @DataEntry
-@ObjectClass(value = "oxAuthToken")
+@ObjectClass(value = "token")
 public class TokenLdap implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "oxAuthGrantId", consistency = true)
+    @AttributeName(name = "grtId", consistency = true)
     private String grantId;
-    @AttributeName(name = "oxAuthUserId")
+    @AttributeName(name = "uid")
     private String userId;
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "clnId")
     private String clientId;
-    @AttributeName(name = "oxAuthCreation")
+    @AttributeName(name = "iat")
     private Date creationDate;
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
-    @AttributeName(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "authnTime")
     private Date authenticationTime;
-    @AttributeName(name = "oxAuthScope")
+    @AttributeName(name = "scp")
     private String scope;
-    @AttributeName(name = "oxAuthTokenCode", consistency = true)
+    @AttributeName(name = "tknCde", consistency = true)
     private String tokenCode;
-    @AttributeName(name = "oxAuthTokenType")
+    @AttributeName(name = "tknTyp")
     private String tokenType;
-    @AttributeName(name = "oxAuthGrantType")
+    @AttributeName(name = "grtTyp")
     private String grantType;
-    @AttributeName(name = "oxAuthJwtRequest")
+    @AttributeName(name = "jwtReq")
     private String jwtRequest;
-    @AttributeName(name = "oxAuthAuthorizationCode", consistency = true)
+    @AttributeName(name = "authzCode", consistency = true)
     private String authorizationCode;
-    @AttributeName(name = "oxAuthNonce")
+    @AttributeName(name = "nnc")
     private String nonce;
-    @AttributeName(name = "oxCodeChallenge")
+    @AttributeName(name = "chlng")
     private String codeChallenge;
-    @AttributeName(name = "oxCodeChallengeMethod")
+    @AttributeName(name = "chlngMth")
     private String codeChallengeMethod;
-    @AttributeName(name = "oxAuthClaims")
+    @AttributeName(name = "clms")
     private String claims;
-    @AttributeName(name = "oxIdTokenTokenBindingCnf")
+    @AttributeName(name = "tknBndCnf")
     private String tokenBindingHash;
 
-    @AttributeName(name = "oxAuthenticationMode")
+    @AttributeName(name = "amr")
     private String authMode;
 
-    @AttributeName(name = "oxAuthSessionDn", consistency = true)
+    @AttributeName(name = "ssnId", consistency = true)
     private String sessionDn;
 
-    @AttributeName(name = "oxAttributes")
+    @AttributeName(name = "attr")
     @JsonObject
     private TokenAttributes attributes;
 
