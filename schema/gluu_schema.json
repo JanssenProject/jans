@@ -2081,7 +2081,8 @@
             "desc": "oxAuth user id",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthUserId"
+                "oxAuthUserId",
+                "usrId"
             ],
             "oid": "oxAttribute:187",
             "substr": "caseIgnoreSubstringsMatch",
