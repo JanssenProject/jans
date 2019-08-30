@@ -89,14 +89,12 @@
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	},
-
 	{
-		"attribute": "oxAuthTokenCode",
+		"attribute": "tknCde",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	},
-
     {
     	"attribute": "oxSectorIdentifier",
         "type": "string",
