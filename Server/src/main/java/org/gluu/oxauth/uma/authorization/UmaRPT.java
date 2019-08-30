@@ -26,7 +26,7 @@ public class UmaRPT extends AbstractToken {
 
     @DN
     private String dn;
-    @AttributeName(name = "uid")
+    @AttributeName(name = "usrId")
     private String userId;
     @AttributeName(name = "clnId")
     private String clientId;
