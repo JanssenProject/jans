@@ -62,7 +62,7 @@ public class TokenLdap implements Serializable {
     @AttributeName(name = "tknBndCnf")
     private String tokenBindingHash;
 
-    @AttributeName(name = "amr")
+    @AttributeName(name = "acr")
     private String authMode;
 
     @AttributeName(name = "ssnId", consistency = true)

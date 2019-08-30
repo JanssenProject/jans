@@ -62,7 +62,7 @@ public class GrantService {
     }
 
     public String buildDn(String p_hashedToken) {
-        return String.format("oxAuthTokenCode=%s,", p_hashedToken) + tokenBaseDn();
+        return String.format("tknCde=%s,", p_hashedToken) + tokenBaseDn();
     }
 
     public String tokenBaseDn() {
