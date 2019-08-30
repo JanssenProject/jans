@@ -12,7 +12,7 @@ import java.util.List;
  * Created by eugeniuparvan on 1/12/17.
  */
 @DataEntry
-@ObjectClass(value = "oxAuthToken")
+@ObjectClass(value = "token")
 public class SimpleTokenLdap implements Serializable {
 
     @AttributesList(name = "name", value = "values", sortByName = true)

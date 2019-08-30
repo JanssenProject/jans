@@ -10,20 +10,20 @@ import java.io.Serializable;
 import java.util.Date;
 
 @DataEntry
-@ObjectClass(value = "oxCacheEntity")
+@ObjectClass(value = "cache")
 public class NativePersistenceCacheEntity implements Serializable, Deletable {
 
     @DN
     private String dn;
-    @AttributeName(name = "uniqueIdentifier")
+    @AttributeName(name = "uuid")
     private String id;
-    @AttributeName(name = "oxAuthCreation")
+    @AttributeName(name = "iat")
     private Date creationDate;
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
-    @AttributeName(name = "oxData")
+    @AttributeName(name = "dat")
     private String data;
 
     public String getDn() {

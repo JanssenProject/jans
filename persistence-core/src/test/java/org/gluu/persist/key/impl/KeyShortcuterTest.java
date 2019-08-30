@@ -34,7 +34,7 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("gluuGroupVisibility"), "_gVisibility");
         assertEquals(shortcut("oxAuthTrustedClient"), "trusted_c");
         assertEquals(shortcut("oxAuthSubjectType"), "subject_t");
-        assertEquals(shortcut("oxAuthUserId"), "_uId");
+        assertEquals(shortcut("uid"), "_uId");
         assertEquals(shortcut("oxAuthUserDN"), "_uDN");
         assertEquals(shortcut("oxAuthDefaultAcrValues"), "_dAcrValues");
         assertEquals(shortcut("uniqueIdentifier"), "_id");
@@ -44,7 +44,7 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("_gVisibility"), "gluuGroupVisibility");
         assertEquals(fromShortcut("trusted_c"), "oxAuthTrustedClient");
         assertEquals(fromShortcut("subject_t"), "oxAuthSubjectType");
-        assertEquals(fromShortcut("_uId"), "oxAuthUserId");
+        assertEquals(fromShortcut("_uId"), "uid");
         assertEquals(fromShortcut("_uDN"), "oxAuthUserDN");
         assertEquals(fromShortcut("_dAcrValues"), "oxAuthDefaultAcrValues");
         assertEquals(fromShortcut("_id"), "uniqueIdentifier");
@@ -57,15 +57,15 @@ public class KeyShortcuterTest {
         assertEquals(shortcut("oxTrustConfApplication"), "_trConfApp");
         assertEquals(shortcut("oxTrustConfApplication"), "_trConfApp"); // same again by intention
         assertEquals(shortcut("oxAuthUserInfoEncryptedResponseAlg"), "_uInfoEncRespAlg");
-        assertEquals(shortcut("oxAuthAuthenticationTime"), "authnTime");
+        assertEquals(shortcut("authnTime"), "authnTime");
         assertEquals(shortcut("oxIDPAuthentication"), "iDPAuthn");
         assertEquals(shortcut("oxAuthSkipAuthorization"), "skipAuthz");
         assertEquals(shortcut("oxAuthTokenEndpointAuthSigningAlg"), "tokEndpointAuthSigAlg");
         assertEquals(shortcut("oxLinkExpirationDate"), "linkExpDate");
         assertEquals(shortcut("oxAuthRequestObjectEncryptionAlg"), "reqObjEncAlg");
-        assertEquals(shortcut("oxAuthTokenType"), "tok_t");
+        assertEquals(shortcut("tknTyp"), "tok_t");
         assertEquals(shortcut("oxAuthTokenEndpointAuthSigningAlg"), "tokEndpointAuthSigAlg");
-        assertEquals(shortcut("oxDeletable"), "del");
+        assertEquals(shortcut("del"), "del");
         assertEquals(shortcut("description"), "desc");
 
         // reverse
@@ -73,15 +73,15 @@ public class KeyShortcuterTest {
         assertEquals(fromShortcut("_trConfApp"), "oxTrustConfApplication");
         assertEquals(fromShortcut("_trConfApp"), "oxTrustConfApplication");// same again by intention
         assertEquals(fromShortcut("_uInfoEncRespAlg"), "oxAuthUserInfoEncryptedResponseAlg");
-        assertEquals(fromShortcut("authnTime"), "oxAuthAuthenticationTime");
+        assertEquals(fromShortcut("authnTime"), "authnTime");
         assertEquals(fromShortcut("iDPAuthn"), "oxIDPAuthentication");
         assertEquals(fromShortcut("skipAuthz"), "oxAuthSkipAuthorization");
         assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
         assertEquals(fromShortcut("linkExpDate"), "oxLinkExpirationDate");
         assertEquals(fromShortcut("reqObjEncAlg"), "oxAuthRequestObjectEncryptionAlg");
-        assertEquals(fromShortcut("tok_t"), "oxAuthTokenType");
+        assertEquals(fromShortcut("tok_t"), "tknTyp");
         assertEquals(fromShortcut("tokEndpointAuthSigAlg"), "oxAuthTokenEndpointAuthSigningAlg");
-        assertEquals(fromShortcut("del"), "oxDeletable");
+        assertEquals(fromShortcut("del"), "del");
         assertEquals(fromShortcut("desc"), "description");
     }
 }
