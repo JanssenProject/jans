@@ -6,7 +6,7 @@
     "creationDate", 
     "ou", 
     "uid", 
-    "oxDeletable", 
+    "del", 
     "oxAuthExpiration", 
     "mail",
     "inum",
@@ -15,7 +15,7 @@
 
   "gluu_authorization": [
     "oxAuthExpiration",
-    "oxDeletable",
+    "del",
     "oxAuthClientId",
     "oxAuthUserId"
   ],
@@ -24,22 +24,23 @@
     "objectClass", 
     "oxScriptType", 
     "oxAuthExpiration", 
-    "oxAuthCreation", 
+    "iat", 
     "oxAuthClientSecretExpiresAt", 
     "creationDate", 
-    "oxAuthTokenCode", 
+    "tknCde", 
     "inum", 
     "displayName", 
     "oxAuthRegistrationAccessToken", 
     "uid", 
-    "oxAuthAuthorizationCode", 
+    "authzCode", 
     "oxAuthClaimName", 
     "mail", 
     "oxId", 
     "oxTicket", 
-    "oxDeletable",
-    "oxAuthSessionDn",
-    "oxAuthClientId"
+    "del",
+    "ssnId",
+    "oxAuthClientId",
+    "clnId"
   ], 
 
   "gluu_site": [
@@ -51,17 +52,18 @@
     "objectClass", 
     "ou", 
     "oxStartDate", 
-    "oxDeletable", 
+    "del", 
     "oxAuthExpiration"
   ],
 
   "gluu_cache": [
-    "uniqueIdentifier"
+    "objectClass",
+    "uuid"
   ],
 
   "gluu_token": [
     "objectClass",
-    "oxAuthGrantId"
+    "grtId"
   ]
 
 }
