@@ -77,7 +77,7 @@ public class UmaRptService {
     private boolean containsBranch = false;
 
     public String createDn(String tokenCode) {
-        return String.format("oxAuthTokenCode=%s,%s", TokenHashUtil.hash(tokenCode), branchDn());
+        return String.format("tknCde=%s,%s", TokenHashUtil.hash(tokenCode), branchDn());
     }
 
     public String branchDn() {
