@@ -42,6 +42,13 @@
 	},
 
 	{
+		"attribute": "uuid",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxId",
 		"type": "string",
 		"index": ["equality"],
@@ -56,6 +63,13 @@
 	},
 
 	{
+		"attribute": "clnId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxAuthClientSecretExpiresAt",
 		"type": "date",
 		"index": ["ordering"],
@@ -63,14 +77,14 @@
 	},
 
 	{
-		"attribute": "oxAuthGrantId",
+		"attribute": "grtId",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	},
 
 	{
-		"attribute": "oxAuthAuthorizationCode",
+		"attribute": "authzCode",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
@@ -189,7 +203,7 @@
 	},
 
 	{
-		"attribute": "oxAuthSessionDn",
+		"attribute": "ssnId",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
@@ -211,6 +225,13 @@
 
 	{
 		"attribute": "oxCodeChallenge",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "chlng",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
@@ -268,6 +289,13 @@
 	{
 		"attribute": "oxAuthUserId",
 		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "del",
+		"type": "boolean",
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	}
