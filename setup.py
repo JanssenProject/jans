@@ -4088,9 +4088,6 @@ class Setup(object):
         with open(tmp_file, 'w') as W:
             index_list = couchbase_index.get(bucket,[])
 
-            if not 'dn' in index_list:
-                index_list.insert(0, 'dn')
-
             index_names = []
             for ind in index_list:
                 index_name = 'def_{0}_{1}'.format(bucket, ind)
