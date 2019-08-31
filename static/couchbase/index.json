@@ -4,10 +4,8 @@
     "objectClass", 
     "oxStatus", 
     "creationDate", 
-    "ou", 
     "uid", 
     "del", 
-    "oxAuthExpiration", 
     "mail",
     "inum",
     "displayName"
@@ -50,20 +48,15 @@
 
   "gluu_statistic": [
     "objectClass", 
-    "ou", 
     "oxStartDate", 
     "del", 
     "oxAuthExpiration"
   ],
 
   "gluu_cache": [
-    "objectClass",
-    "uuid"
   ],
 
   "gluu_token": [
-    "objectClass",
-    "grtId"
   ]
 
 }
