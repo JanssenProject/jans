@@ -12,6 +12,8 @@ ces_dir = '/install/community-edition-setup'
 
 parser = argparse.ArgumentParser(description="This script extracts community-edition-setup package and runs setup.py without arguments")
 parser.add_argument('-o', help="download latest package from github and override current community-edition-setup", action='store_true')
+parser.add_argument('--args', help="Arguments to be passed to setup.py")
+
 argsp = parser.parse_args()
     
 if argsp.o:
@@ -21,6 +23,7 @@ if argsp.o:
         back_dir = ces_dir+'.back.'+run_time
         print "Backing up", ces_dir, "to", back_dir
         os.rename(ces_dir, back_dir)
+
 
 if not os.path.exists(ces_dir):
 
@@ -60,4 +63,9 @@ if not os.path.exists(ces_dir):
     ces_cur_dir = max(ces_dir_list)
     os.rename(ces_cur_dir, ces_dir)
 
-os.system('/install/community-edition-setup/setup.py')
+cmd = '/install/community-edition-setup/setup.py'
+if argsp.args:
+    cmd += ' ' + argsp.args
+    
+print "Executing command", cmd
+os.system(cmd)
