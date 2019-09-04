@@ -5,14 +5,17 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.gluu.oxd.mock.guice.MockAppModule;
+import org.gluu.oxd.server.op.OpClientFactory;
+import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.service.RpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Guice;
 import org.testng.annotations.Parameters;
-import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.gluu.oxd.server.persistence.PersistenceService;
-import org.gluu.oxd.server.service.RpService;
 
 /**
  * Main class to set up and tear down suite.
@@ -20,7 +23,6 @@ import org.gluu.oxd.server.service.RpService;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 21/08/2013
  */
-
 public class SetUpTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);
@@ -28,13 +30,18 @@ public class SetUpTest {
     public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
 
 
-    @Parameters({"host", "opHost", "redirectUrls"})
+    @Parameters({"host", "opHost", "redirectUrls", "isLoadTest"})
     @BeforeSuite
-    public static void beforeSuite(String host, String opHost, String redirectUrls) {
+    public static void beforeSuite(String host, String opHost, String redirectUrls, boolean isLoadTest) {
         try {
             LOG.debug("Running beforeSuite ...");
+            if(isLoadTest) {
+                ServerLauncher.setInjector(new MockAppModule());
+            }
             ServerLauncher.setSetUpSuite(true);
-
+            System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            OpClientFactory factory = ServerLauncher.getInjector().getInstance(OpClientFactory.class);
+            System.out.println(factory.createAuthorizeClient(""));
             SUPPORT = new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
                     ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml"),
                     ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
