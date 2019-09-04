@@ -3,8 +3,9 @@
 <suite name="oxD Suite" parallel="false">
 
     <parameter name="host" value="http://localhost"/>
-    <parameter name="opHost" value="https://${test.server.name}"/>
+    <parameter name="opHost" value="https://ce-dev6.gluu.org"/>
     <parameter name="opDiscoveryPath" value=""/>
+    <parameter name="isLoadTest" value="true"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
@@ -27,6 +28,11 @@
                value="{'rule':{'not':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}"/>
     <parameter name="clientJwksUri" value="${clientJwksUri}"/>
     <parameter name="accessTokenSigningAlg" value="${accessTokenSigningAlg}"/>
+
+    <listeners>
+        <listener class-name="org.gluu.oxd.mock.listener.EnableMocksListener"></listener>
+    </listeners>
+
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
         <classes>
@@ -247,6 +253,10 @@
             <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
         </classes>
     </test>
-
-
+    <!-- Mock tests-->
+    <test name="Authorization Code Flow Test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.mock.AuthorizationCodeFlowTest"/>
+        </classes>
+    </test>
 </suite>

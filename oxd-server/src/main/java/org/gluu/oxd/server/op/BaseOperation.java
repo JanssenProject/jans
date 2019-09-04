@@ -99,6 +99,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return new OxAuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
     }
 
+    public OpClientFactory getOpClientFactory() {
+        return getInstance(OpClientFactory.class);
+    }
+
     public Rp getRp() {
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);

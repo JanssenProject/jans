@@ -24,10 +24,10 @@ import static junit.framework.Assert.assertNotNull;
  */
 public class UpdateSiteTest {
 
-    @Parameters({"host", "opHost", "redirectUrls"})
+    @Parameters({"host", "opHost", "redirectUrls", "isLoadTest"})
     @BeforeClass
-    public static void beforeClass(String host, String opHost, String redirectUrls) {
-        SetUpTest.beforeSuite(host, opHost, redirectUrls);
+    public static void beforeClass(String host, String opHost, String redirectUrls, boolean isLoadTest) {
+        SetUpTest.beforeSuite(host, opHost, redirectUrls, isLoadTest);
     }
 
     @AfterClass
