@@ -28,6 +28,9 @@ if argsp.o:
         print "Backing up", ces_dir, "to", back_dir
         os.rename(ces_dir, back_dir)
 
+
+ces_dir = '/install/community-edition-setup'
+
 github_base_url = 'https://github.com/GluuFederation/community-edition-setup/archive/'
 arhchive_name = 'master.zip'
 
@@ -76,17 +79,15 @@ if 1:
 
     ces = max(ces_list)
 
-
-    print "Extracting community-edition-setup package"
-
-
     zf = zipfile.ZipFile(ces)
 
     namelist = zf.namelist()
 
     parent_dir = namelist[0]
     zf.close()
-    
+
+    if not os.path.exists(ces_dir):
+        os.makedirs(ces_dir)
     
     print "Extracting community-edition-setup package"
     os.system('unzip -o -q {0} -d /install'.format(ces))
