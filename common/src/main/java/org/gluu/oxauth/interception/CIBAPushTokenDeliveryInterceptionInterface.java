@@ -8,9 +8,10 @@ package org.gluu.oxauth.interception;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public interface CIBAPushTokenDeliveryInterceptionInterface {
 
-    void pushTokenDelivery(String authReqId);
+    void pushTokenDelivery(String authReqId, String clientNotificationEndpoint, String clientNotificationToken,
+                           String accessToken, String refreshToken, String idToken, Integer expiresIn);
 }

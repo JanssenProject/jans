@@ -50,7 +50,7 @@ import java.util.Arrays;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -197,7 +197,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 }
                             };
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
+                                    nonce, null, accToken, null, null,
+                                    authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -246,7 +247,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     appConfiguration.getLegacyIdTokenClaims());
 
                             idToken = authorizationGrant.createIdToken(
-                            		null, null, accToken, null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                            		null, null, accToken, null,
+                                    null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -277,7 +279,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                 appConfiguration.getLegacyIdTokenClaims());
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                                null, null, null, null,
+                                null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -341,7 +344,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                     appConfiguration.getLegacyIdTokenClaims());
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                                    null, null, null, null,
+                                    null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
                         }
 
                         oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
