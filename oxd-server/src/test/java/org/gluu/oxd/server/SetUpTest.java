@@ -39,9 +39,7 @@ public class SetUpTest {
                 ServerLauncher.setInjector(new MockAppModule());
             }
             ServerLauncher.setSetUpSuite(true);
-            System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-            OpClientFactory factory = ServerLauncher.getInjector().getInstance(OpClientFactory.class);
-            System.out.println(factory.createAuthorizeClient(""));
+
             SUPPORT = new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
                     ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml"),
                     ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
