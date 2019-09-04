@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 
 public interface IAuthorizationGrant {
@@ -41,8 +41,9 @@ public interface IAuthorizationGrant {
 
     RefreshToken createRefreshToken();
 
-    IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                          AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing);
+    IdToken createIdToken(
+            String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing);
 
     RefreshToken getRefreshToken(String refreshTokenCode);
 

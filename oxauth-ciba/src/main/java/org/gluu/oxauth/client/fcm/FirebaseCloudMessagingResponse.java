@@ -21,13 +21,13 @@ import static org.gluu.oxauth.model.ciba.FirebaseCloudMessagingResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class FirebaseCloudMessagingResponse extends BaseResponse {
 
     private static final Logger LOG = Logger.getLogger(FirebaseCloudMessagingResponse.class);
 
-    private String multicastId;
+    private Long multicastId;
     private int success;
     private int failure;
     private List<Result> results;
@@ -47,7 +47,7 @@ public class FirebaseCloudMessagingResponse extends BaseResponse {
                 JSONObject jsonObj = new JSONObject(p_json);
 
                 if (jsonObj.has(MULTICAST_ID)) {
-                    multicastId = jsonObj.getString(MULTICAST_ID);
+                    multicastId = jsonObj.getLong(MULTICAST_ID);
                 }
                 if (jsonObj.has(SUCCESS)) {
                     success = jsonObj.getInt(SUCCESS);

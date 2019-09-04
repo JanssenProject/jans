@@ -40,7 +40,7 @@ import java.util.Set;
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 @Stateless
 @Named
@@ -60,21 +60,26 @@ public class RegisterParamsValidator {
     /**
      * Validates the parameters for a register request.
      *
-     * @param applicationType     The Application Type: native or web.
-     * @param subjectType         The subject_type requested for responses to this Client.
-     * @param redirectUris        Space-separated list of redirect URIs.
-     * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
-     *                            The URL contains a file with a single JSON array of redirect_uri values.
+     * @param applicationType The Application Type: native or web.
+     * @param subjectType     The subject_type requested for responses to this Client.
+     * @param grantTypes      Grant Types that the Client is declaring that it will restrict itself to using.
+     * @param redirectUris    Space-separated list of redirect URIs.
      * @return Whether the parameters of client register is valid or not.
      */
-    public Pair<Boolean, String> validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
-                                                              List<String> redirectUris, String sectorIdentifierUrl) {
+    public Pair<Boolean, String> validateParamsClientRegister(
+            ApplicationType applicationType, SubjectType subjectType,
+            List<GrantType> grantTypes, List<ResponseType> responseTypes,
+            List<String> redirectUris) {
         if (applicationType == null) {
             return new Pair<>(false, "application_type is not valid.");
         }
 
-        if (redirectUris == null || redirectUris.isEmpty()) {
-            return new Pair<>(false, "Redirect uris are empty.");
+        if (grantTypes != null &&
+                (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
+                || responseTypes.contains(ResponseType.CODE) || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
+            if (redirectUris == null || redirectUris.isEmpty()) {
+                return new Pair<>(false, "Redirect uris are empty.");
+            }
         }
 
         if (subjectType == null || !appConfiguration.getSubjectTypesSupported().contains(subjectType.toString())) {
@@ -98,12 +103,12 @@ public class RegisterParamsValidator {
 
     /**
      * @param grantTypes          Grant Types that the Client is declaring that it will restrict itself to using.
-     *      * @param applicationType     The Application Type: native or web.
-     *      * @param subjectType         Subject Type requested for responses to this Client.
-     *      * @param redirectUris        Redirection URI values used by the Client.
-     *      * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
-     *      *                            The URL contains a file with a single JSON array of redirect_uri values.
-     *      * @return Whether the Redirect URI parameters are valid or not.
+     * @param applicationType     The Application Type: native or web.
+     * @param subjectType         Subject Type requested for responses to this Client.
+     * @param redirectUris        Redirection URI values used by the Client.
+     * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
+     *                            The URL contains a file with a single JSON array of redirect_uri values.
+     * @return Whether the Redirect URI parameters are valid or not.
      */
     public boolean validateRedirectUris(List<GrantType> grantTypes, List<ResponseType> responseTypes,
                                         ApplicationType applicationType, SubjectType subjectType,

@@ -46,7 +46,7 @@ import java.util.UUID;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -90,11 +90,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         super.init(user, authorizationGrantType, client, authenticationTime);
     }
 
-    public IdToken createIdToken(IAuthorizationGrant grant, String nonce,
-                                 AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                 Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
-        JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, state,
-                scopes, includeIdTokenClaims, preProcessing);
+    public IdToken createIdToken(
+            IAuthorizationGrant grant, String nonce,
+            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+        JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, refreshToken,
+                state, scopes, includeIdTokenClaims, preProcessing);
         return new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
@@ -133,7 +134,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private void saveCIBAInCache() {
-        CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant)this, appConfiguration);
+        CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
         cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
     }
 
@@ -155,24 +156,24 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-	private void initTokenFromGrant(TokenLdap token) {
+    private void initTokenFromGrant(TokenLdap token) {
         final String nonce = getNonce();
         if (nonce != null) {
-        	token.setNonce(nonce);
+            token.setNonce(nonce);
         }
-		token.setScope(getScopesAsString());
-		token.setAuthMode(getAcrValues());
-		token.setSessionDn(getSessionDn());
-		token.setAuthenticationTime(getAuthenticationTime());
-		token.setCodeChallenge(getCodeChallenge());
-		token.setCodeChallengeMethod(getCodeChallengeMethod());
-		token.setClaims(getClaims());
+        token.setScope(getScopesAsString());
+        token.setAuthMode(getAcrValues());
+        token.setSessionDn(getSessionDn());
+        token.setAuthenticationTime(getAuthenticationTime());
+        token.setCodeChallenge(getCodeChallenge());
+        token.setCodeChallengeMethod(getCodeChallengeMethod());
+        token.setClaims(getClaims());
 
-		final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
-		if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
-		    token.setJwtRequest(jwtRequest.getEncodedJwt());
-		}
-	}
+        final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
+        if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
+            token.setJwtRequest(jwtRequest.getEncodedJwt());
+        }
+    }
 
     @Override
     public AccessToken createAccessToken(String certAsPem, ExecutionContext context) {
@@ -253,11 +254,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
+    public IdToken createIdToken(
+            String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
         try {
-            final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, state,
-                    getScopes(), includeIdTokenClaims, preProcessing);
+            final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, refreshToken,
+                    state, getScopes(), includeIdTokenClaims, preProcessing);
             final String acrValues = authorizationGrant.getAcrValues();
             final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {

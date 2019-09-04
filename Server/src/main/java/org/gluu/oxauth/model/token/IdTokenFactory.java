@@ -30,14 +30,9 @@ import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.AbstractToken;
-import org.gluu.oxauth.model.common.AccessToken;
-import org.gluu.oxauth.model.common.AuthorizationCode;
-import org.gluu.oxauth.model.common.IAuthorizationGrant;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -85,7 +80,7 @@ import com.google.common.collect.Lists;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version May 3, 2019
+ * @version September 4, 2019
  */
 @Stateless
 @Named
@@ -121,9 +116,13 @@ public class IdTokenFactory {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
-    public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                     AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                     Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    @Inject
+    private CIBASupportProxy cibaSupportProxy;
+
+    public Jwt generateSignedIdToken(
+            IAuthorizationGrant authorizationGrant, String nonce,
+            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
@@ -285,6 +284,14 @@ public class IdTokenFactory {
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
+        if (cibaSupportProxy.isCIBASupported() && authorizationGrant instanceof CIBAGrant) {
+            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), jwtSigner.getSignatureAlgorithm());
+            jwt.getClaims().setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
+
+            CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
+            jwt.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
+        }
+
         return jwtSigner.sign();
     }
 
@@ -311,9 +318,10 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                        AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                        Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    public Jwe generateEncryptedIdToken(
+            IAuthorizationGrant authorizationGrant, String nonce,
+            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header
@@ -484,6 +492,14 @@ public class IdTokenFactory {
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
+        if (cibaSupportProxy.isCIBASupported() && authorizationGrant instanceof CIBAGrant) {
+            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), null);
+            jwe.getClaims().setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
+
+            CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
+            jwe.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
+        }
+
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
@@ -518,17 +534,18 @@ public class IdTokenFactory {
         return jwe;
     }
 
-    public JsonWebResponse createJwr(IAuthorizationGrant grant, String nonce,
-                                     AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                     Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    public JsonWebResponse createJwr(
+            IAuthorizationGrant grant, String nonce,
+            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
         final Client grantClient = grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
             return generateEncryptedIdToken(
-                    grant, nonce, authorizationCode, accessToken, state, scopes, includeIdTokenClaims, preProcessing);
+                    grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
         } else {
             return generateSignedIdToken(
-                    grant, nonce, authorizationCode, accessToken, state, scopes, includeIdTokenClaims, preProcessing);
+                    grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
         }
     }
 
