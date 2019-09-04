@@ -324,7 +324,7 @@
     "backchannelBindingMessagePattern": "^[A-Z]{1,10}$",
     "backchannelAuthenticationResponseExpiresIn": 3600,
     "backchannelAuthenticationResponseInterval": 2,
-    "backchannelLoginHintClaims": ["inum", "cn", "mail"],
+    "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEndUserNotificationConfig": {
         "apiKey": "AIzaSyDwJtxZV-ApPlApt7HdXkleEZhseURgzHI",
         "authDomain": "api-project-561176510817.firebaseapp.com",
