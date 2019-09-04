@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 
 public class Util {
@@ -117,6 +117,12 @@ public class Util {
     public static void addToJSONObjectIfNotNull(JSONObject p_jsonObject, String key, Object value) throws JSONException {
         if (p_jsonObject != null && value != null && StringUtils.isNotBlank(key)) {
             p_jsonObject.put(key, value);
+        }
+    }
+
+    public static void addToJSONObjectIfNotNull(JSONObject p_jsonObject, String key, AttributeEnum value) throws JSONException {
+        if (p_jsonObject != null && value != null && StringUtils.isNotBlank(key)) {
+            p_jsonObject.put(key, value.getValue());
         }
     }
 

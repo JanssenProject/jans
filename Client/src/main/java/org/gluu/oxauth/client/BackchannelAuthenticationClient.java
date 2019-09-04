@@ -21,7 +21,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * Encapsulates functionality to make backchannel authentication request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthenticationRequest, BackchannelAuthenticationResponse> {
 
@@ -115,10 +115,10 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
                 getResponse().setAuthReqId(jsonObj.getString(AUTH_REQ_ID));
             }
             if (jsonObj.has(EXPIRES_IN)) {
-                getResponse().setExpiresIn(new Integer(jsonObj.getString(EXPIRES_IN)));
+                getResponse().setExpiresIn(jsonObj.getInt(EXPIRES_IN));
             }
             if (jsonObj.has(INTERVAL)) {
-                getResponse().setInterval(new Integer(jsonObj.getString(INTERVAL)));
+                getResponse().setInterval(jsonObj.getInt(INTERVAL));
             }
         }
 
