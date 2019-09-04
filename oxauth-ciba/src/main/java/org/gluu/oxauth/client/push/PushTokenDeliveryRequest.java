@@ -7,6 +7,7 @@
 package org.gluu.oxauth.client.push;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.gluu.oxauth.client.BaseRequest;
 import org.gluu.oxauth.model.common.TokenType;
 import org.json.JSONException;
@@ -16,7 +17,7 @@ import static org.gluu.oxauth.model.ciba.PushTokenDeliveryRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class PushTokenDeliveryRequest extends BaseRequest {
 
@@ -27,6 +28,10 @@ public class PushTokenDeliveryRequest extends BaseRequest {
     private String refreshToken;
     private Integer expiresIn;
     private String idToken;
+
+    public PushTokenDeliveryRequest() {
+        setContentType(ContentType.APPLICATION_JSON.toString());
+    }
 
     public String getClientNotificationToken() {
         return clientNotificationToken;

@@ -71,7 +71,7 @@ import org.gluu.oxauth.ciba.CIBASupportProxy;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -200,8 +200,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
 
-            final Pair<Boolean, String> validateResult = registerParamsValidator.validateParamsClientRegister(r.getApplicationType(), r.getSubjectType(),
-                    r.getRedirectUris(), r.getSectorIdentifierUri());
+            final Pair<Boolean, String> validateResult = registerParamsValidator.validateParamsClientRegister(
+                    r.getApplicationType(), r.getSubjectType(),
+                    r.getGrantTypes(), r.getResponseTypes(),
+                    r.getRedirectUris());
             if (!validateResult.getFirst()) {
                 log.trace("Client parameters are invalid, returns invalid_request error. Reason: " + validateResult.getSecond());
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, validateResult.getSecond());

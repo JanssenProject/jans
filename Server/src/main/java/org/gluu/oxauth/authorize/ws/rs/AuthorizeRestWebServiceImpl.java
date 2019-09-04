@@ -65,7 +65,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -594,8 +594,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                     }
                                     IdToken idToken = authorizationGrant.createIdToken(
-                                            nonce, authorizationCode, newAccessToken, state,
-                                            authorizationGrant, includeIdTokenClaims,
+                                            nonce, authorizationCode, newAccessToken, null,
+                                            state, authorizationGrant, includeIdTokenClaims,
                                             TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
 
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
