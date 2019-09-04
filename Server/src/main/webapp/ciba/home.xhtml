@@ -1,6 +1,7 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <html xmlns="http://www.w3.org/1999/xhtml">
 
@@ -14,6 +15,9 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
         <script src="https://code.getmdl.io/1.1.3/material.min.js"></script>
 
+        <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/site.css"/>
+        <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/authorize.css"/>
+        <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/font-awesome.css"/>
         <link rel="stylesheet" href="/stylesheet/ciba.css" />
 
         <link rel="manifest" href="/ciba/manifest.json" />
@@ -32,6 +36,10 @@
 
         <main class="mdl-layout__content mdl-color--grey-100">
             <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-grid">
+
+                <h:messages id="globalMessages" globalOnly="true" styleClass="message"
+                            errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+                            rendered="#{showGlobalMessages != 'false'}"/>
 
                 <!-- Container for the Table of content -->
                 <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop">

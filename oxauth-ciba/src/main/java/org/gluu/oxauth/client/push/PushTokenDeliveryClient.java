@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest, PushTokenDeliveryResponse> {
 
@@ -42,7 +42,6 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
             clientRequest.setHttpMethod(getHttpMethod());
 
             clientRequest.header("Content-Type", getRequest().getContentType());
-            clientRequest.accept(getRequest().getMediaType());
 
             if (StringUtils.isNotBlank(getRequest().getClientNotificationToken())) {
                 clientRequest.header("Authorization", "Bearer " + getRequest().getClientNotificationToken());

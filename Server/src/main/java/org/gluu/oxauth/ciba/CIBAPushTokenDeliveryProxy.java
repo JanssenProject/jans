@@ -14,7 +14,7 @@ import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 @Stateless
 @Named
@@ -22,6 +22,7 @@ public class CIBAPushTokenDeliveryProxy implements CIBAPushTokenDeliveryIntercep
 
     @Override
     @CIBAPushTokenDeliveryInterception
-    public void pushTokenDelivery(String authReqId) {
+    public void pushTokenDelivery(String authReqId, String clientNotificationEndpoint, String clientNotificationToken,
+                                  String accessToken, String refreshToken, String idToken, Integer expiresIn) {
     }
 }

@@ -10,8 +10,7 @@ import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.oxauth.ciba.CIBAPushTokenDeliveryProxy;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.CIBAGrant;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.StringUtils;
@@ -30,7 +29,7 @@ import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 @RequestScoped
 @Named("cibaAuthorizeAction")
@@ -115,12 +114,32 @@ public class CIBAAuthorizeAction {
         authorizationGrant.setUserAuthorization(true);
         authorizationGrant.save();
 
-        cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                authorizationGrant.getCIBAAuthenticationRequestId().getCode()
-        );
+        if (authorizationGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+
+            RefreshToken refreshToken = authorizationGrant.createRefreshToken();
+            log.debug("Issuing refresh token: {}", refreshToken.getCode());
+
+            //AccessToken accessToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+            AccessToken accessToken = authorizationGrant.createAccessToken(null, new ExecutionContext(null, null));
+            log.debug("Issuing access token: {}", accessToken.getCode());
+
+            IdToken idToken = authorizationGrant.createIdToken(
+                    null, null, accessToken, refreshToken,
+                    null, authorizationGrant, false, null);
+
+            cibaPushTokenDeliveryProxy.pushTokenDelivery(
+                    authorizationGrant.getCIBAAuthenticationRequestId().getCode(),
+                    authorizationGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                    authorizationGrant.getClientNotificationToken(),
+                    accessToken.getCode(),
+                    refreshToken.getCode(),
+                    idToken.getCode(),
+                    accessToken.getExpiresIn()
+            );
+        }
 
         facesMessages.add(FacesMessage.SEVERITY_INFO, "Permission granted.");
-        facesService.redirect("/ciba/authorizeResponse.xhtml");
+        facesService.redirect("/ciba/home.xhtml");
     }
 
     public void permissionDenied() {
@@ -130,7 +149,7 @@ public class CIBAAuthorizeAction {
         authorizationGrant.save();
 
         facesMessages.add(FacesMessage.SEVERITY_INFO, "Permission denied.");
-        facesService.redirect("/ciba/authorizeResponse.xhtml");
+        facesService.redirect("/ciba/home.xhtml");
     }
 
     public String getAuthorizationRequestId() {

@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 @Interceptor
 @CIBAPushTokenDeliveryInterception
@@ -51,7 +51,13 @@ public class CIBAPushTokenDeliveryInterceptor implements CIBAPushTokenDeliveryIn
 
         try {
             String authReqId = (String) ctx.getParameters()[0];
-            pushTokenDelivery(authReqId);
+            String clientNotificationEndpoint = (String) ctx.getParameters()[1];
+            String clientNotificationToken = (String) ctx.getParameters()[2];
+            String accessToken = (String) ctx.getParameters()[3];
+            String refreshToken = (String) ctx.getParameters()[4];
+            String idToken = (String) ctx.getParameters()[5];
+            Integer expiresIn = (Integer) ctx.getParameters()[6];
+            pushTokenDelivery(authReqId, clientNotificationEndpoint, clientNotificationToken, accessToken, refreshToken, idToken, expiresIn);
             ctx.proceed();
         } catch (Exception e) {
             log.error("Failed to process CIBA support.", e);
@@ -61,18 +67,17 @@ public class CIBAPushTokenDeliveryInterceptor implements CIBAPushTokenDeliveryIn
     }
 
     @Override
-    public void pushTokenDelivery(String authReqId) {
+    public void pushTokenDelivery(String authReqId, String clientNotificationEndpoint, String clientNotificationToken,
+                                  String accessToken, String refreshToken, String idToken, Integer expiresIn) {
         PushTokenDeliveryRequest pushTokenDeliveryRequest = new PushTokenDeliveryRequest();
 
-        //pushTokenDeliveryRequest.setClientNotificationToken(authorizationGrant.getClientNotificationToken());
+        pushTokenDeliveryRequest.setClientNotificationToken(clientNotificationToken);
         pushTokenDeliveryRequest.setAuthReqId(authReqId);
-        //pushTokenDeliveryRequest.setAccessToken(authorizationGrant.getAccessToken());
+        pushTokenDeliveryRequest.setAccessToken(accessToken);
         pushTokenDeliveryRequest.setTokenType(TokenType.BEARER);
-        pushTokenDeliveryRequest.setRefreshToken(null);
-        pushTokenDeliveryRequest.setExpiresIn(3600);
-        pushTokenDeliveryRequest.setIdToken(null);
-
-        String clientNotificationEndpoint = "https://ce.gluu.info/oxauth-ciba-client-test/client-notification-endpoint"; //authorizationGrant.getClientNotificationEndpoint();
+        pushTokenDeliveryRequest.setRefreshToken(refreshToken);
+        pushTokenDeliveryRequest.setExpiresIn(expiresIn);
+        pushTokenDeliveryRequest.setIdToken(idToken);
 
         PushTokenDeliveryClient pushTokenDeliveryClient = new PushTokenDeliveryClient(clientNotificationEndpoint);
         pushTokenDeliveryClient.setRequest(pushTokenDeliveryRequest);

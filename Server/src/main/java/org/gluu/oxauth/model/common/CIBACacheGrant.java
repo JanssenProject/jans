@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version September 4, 2019
  */
 public class CIBACacheGrant implements Serializable {
 
@@ -28,6 +28,7 @@ public class CIBACacheGrant implements Serializable {
 
     private String sessionDn;
     private int expiresIn = 1;
+    private String clientNotificationToken;
 
     public CIBACacheGrant() {
     }
@@ -43,6 +44,7 @@ public class CIBACacheGrant implements Serializable {
         scopes = grant.getScopes();
         grantId = grant.getGrantId();
         sessionDn = grant.getSessionDn();
+        clientNotificationToken = grant.getClientNotificationToken();
     }
 
     private void initExpiresIn(CIBAGrant grant, AppConfiguration appConfiguration) {
@@ -61,6 +63,7 @@ public class CIBACacheGrant implements Serializable {
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
+        grant.setClientNotificationToken(clientNotificationToken);
 
         return grant;
     }
