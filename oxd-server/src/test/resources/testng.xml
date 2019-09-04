@@ -3,9 +3,9 @@
 <suite name="oxD Suite" parallel="false">
 
     <parameter name="host" value="http://localhost"/>
-    <parameter name="opHost" value="https://ce-dev6.gluu.org"/>
+    <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="opDiscoveryPath" value=""/>
-    <parameter name="isLoadTest" value="true"/>
+    <parameter name="isLoadTest" value="false"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
@@ -29,9 +29,9 @@
     <parameter name="clientJwksUri" value="${clientJwksUri}"/>
     <parameter name="accessTokenSigningAlg" value="${accessTokenSigningAlg}"/>
 
-    <listeners>
+    <!--<listeners>
         <listener class-name="org.gluu.oxd.mock.listener.EnableMocksListener"></listener>
-    </listeners>
+    </listeners>-->
 
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
