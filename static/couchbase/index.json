@@ -84,6 +84,8 @@
       "grtId"
     ],
     "static" : [
+    [["grtId"], "objectClass= \"token\""]
+    
     ]
   },
 
@@ -91,7 +93,7 @@
     "attributes":[
     ],
     "static":[
-      [["exp"], ["`del` = true"]]
+      [["exp"], "`del` = true"]
     ]
   }
 
