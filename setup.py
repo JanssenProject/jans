@@ -4086,10 +4086,10 @@ class Setup(object):
         tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
         with open(tmp_file, 'w') as W:
-            index_list = couchbase_index.get(bucket,[])
+            index_list = couchbase_index.get(bucket,{})
 
             index_names = []
-            for ind in index_list:
+            for ind in index_list['attributes']:
                 index_name = 'def_{0}_{1}'.format(bucket, ind)
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
                 index_names.append(index_name)
