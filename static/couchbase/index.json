@@ -1,63 +1,98 @@
 {
+  "gluu_user": {
+    "attributes": [
+        "objectClass", 
+        "oxStatus", 
+        "creationDate", 
+        "uid", 
+        "del", 
+        "mail",
+        "inum",
+        "displayName"
+    ],
+    "static" : [
+    ]
+  },
 
-  "gluu_user": [
-    "objectClass", 
-    "oxStatus", 
-    "creationDate", 
-    "uid", 
-    "del", 
-    "mail",
-    "inum",
-    "displayName"
-  ],
+  "gluu_authorization": {
+     "attributes": [
+        "oxAuthExpiration",
+        "del",
+        "oxAuthClientId",
+        "oxAuthUserId"
+      ],
+    "static" : [
+    ]
+  },
 
-  "gluu_authorization": [
-    "oxAuthExpiration",
-    "del",
-    "oxAuthClientId",
-    "oxAuthUserId"
-  ],
+  "gluu": {
+    "attributes": [
+        "objectClass", 
+        "oxScriptType", 
+        "oxAuthExpiration", 
+        "iat", 
+        "oxAuthClientSecretExpiresAt", 
+        "creationDate", 
+        "tknCde", 
+        "inum", 
+        "displayName", 
+        "oxAuthRegistrationAccessToken", 
+        "uid", 
+        "authzCode", 
+        "oxAuthClaimName", 
+        "mail", 
+        "oxId", 
+        "oxTicket", 
+        "del",
+        "ssnId",
+        "oxAuthClientId",
+        "clnId"
+    ],
+    "static" : [
+    ]
+  },
 
-  "gluu": [
-    "objectClass", 
-    "oxScriptType", 
-    "oxAuthExpiration", 
-    "iat", 
-    "oxAuthClientSecretExpiresAt", 
-    "creationDate", 
-    "tknCde", 
-    "inum", 
-    "displayName", 
-    "oxAuthRegistrationAccessToken", 
-    "uid", 
-    "authzCode", 
-    "oxAuthClaimName", 
-    "mail", 
-    "oxId", 
-    "oxTicket", 
-    "del",
-    "ssnId",
-    "oxAuthClientId",
-    "clnId"
-  ], 
+  "gluu_site": {
+    "attributes": [
+        "objectClass", 
+        "inum"
+    ], 
+    "static" : [
+    ]
+  },
 
-  "gluu_site": [
-    "objectClass", 
-    "inum"
-  ], 
+  "gluu_statistic": {
+    "attributes": [
+        "objectClass", 
+        "oxStartDate", 
+        "del", 
+        "oxAuthExpiration"
+    ],
+    "static" : [
+    ]
+  },
 
-  "gluu_statistic": [
-    "objectClass", 
-    "oxStartDate", 
-    "del", 
-    "oxAuthExpiration"
-  ],
+  "gluu_cache": {
+    "attributes":[
+    ],
+    "static" : [
+    ]
+  },
 
-  "gluu_cache": [
-  ],
+  "gluu_token": {
+    "attributes": [
+      "grtId"
+    ],
+    "static" : [
+    ]
+  },
 
-  "gluu_token": [
-  "grtId"
-  ]
+  "__common__": {
+    "attributes":[
+    ],
+    "static":[
+      [["exp"], ["`del` = true"]]
+    ]
+  }
 
 }
