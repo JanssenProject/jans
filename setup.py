@@ -1581,7 +1581,7 @@ class Setup(object):
         if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if self.remoteLdap and self.remoteCouchbase:
+        if self.remoteLdap or self.remoteCouchbase:
             changeTo = ''
 
         if changeTo != None:
