@@ -741,7 +741,6 @@ class Setup(object):
                              self.apache2_ssl_conf: False,
                              self.apache2_24_conf: False,
                              self.apache2_ssl_24_conf: False,
-                             self.etc_hosts: False,
                              self.etc_hostname: False,
                              self.ldif_base: False,
                              self.ldif_attributes: False,
@@ -3727,7 +3726,15 @@ class Setup(object):
 
             self.run(['/bin/hostname', self.hostname])
 
-        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+        hostname_file_content = self.readFile(self.etc_hosts)
+
+        with open(self.etc_hosts,'w') as w:
+            for l in hostname_file_content.splitlines():
+                if not self.hostname in l:
+                    w.write(l+'\n')
+
+            w.write('{}\t{}\n'.format(self.ip, self.hostname))
+
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
 
