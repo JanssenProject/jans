@@ -74,7 +74,7 @@ class PersonAuthentication(PersonAuthenticationType):
         validOtpConfiguration = self.loadOtpConfiguration(configurationAttributes)
         if not validOtpConfiguration:
             return False
-        
+
         print "OTP. Initialized successfully"
         return True
 
@@ -111,13 +111,13 @@ class PersonAuthentication(PersonAuthenticationType):
             #enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
             #if StringHelper.isNotEmpty(enrollment_mode):
             #    otp_auth_method = "enroll"
-            
+
             if otp_auth_method == "authenticate":
                 user_enrollments = self.findEnrollments(authenticated_user.getUserId())
                 if len(user_enrollments) == 0:
                     otp_auth_method = "enroll"
                     print "OTP. Authenticate for step 1. There is no OTP enrollment for user '%s'. Changing otp_auth_method to '%s'" % (authenticated_user.getUserId(), otp_auth_method)
-                    
+
             if otp_auth_method == "enroll":
                 print "OTP. Authenticate for step 1. Setting count steps: '%s'" % 3
                 identity.setWorkingParameter("otp_count_login_steps", 3)
@@ -250,10 +250,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
             identity = CdiUtil.bean(Identity)
-    
+
             otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             print "OTP. Gep page for step 2. otp_auth_method: '%s'" % otp_auth_method
-    
+
             if otp_auth_method == 'enroll':
                 return "/auth/otp/enroll.xhtml"
             else:
@@ -291,7 +291,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         finally:
             f.close()
-        
+
         # Check configuration file settings
         try:
             self.hotpConfiguration = otpConfiguration["hotp"]

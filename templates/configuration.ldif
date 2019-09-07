@@ -1,6 +1,5 @@
 dn: ou=configuration,o=gluu
 objectClass: top
-objectClass: organizationalUnit
 objectClass: gluuConfiguration
 ou: configuration
 gluuMaxLogSize: 200
