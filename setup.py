@@ -3730,7 +3730,7 @@ class Setup(object):
 
         with open(self.etc_hosts,'w') as w:
             for l in hostname_file_content.splitlines():
-                if not self.hostname in l:
+                if not self.hostname in l.split():
                     w.write(l+'\n')
 
             w.write('{}\t{}\n'.format(self.ip, self.hostname))
