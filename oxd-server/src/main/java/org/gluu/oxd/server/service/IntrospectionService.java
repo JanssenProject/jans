@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
+import org.gluu.oxd.server.op.OpClientFactory;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.spi.ReaderException;
@@ -24,12 +25,14 @@ public class IntrospectionService {
     private HttpService httpService;
     private UmaTokenService umaTokenService;
     private DiscoveryService discoveryService;
+    private OpClientFactory opClientFactory;
 
     @Inject
-    public IntrospectionService(HttpService httpService, UmaTokenService umaTokenService, DiscoveryService discoveryService) {
+    public IntrospectionService(HttpService httpService, UmaTokenService umaTokenService, DiscoveryService discoveryService, OpClientFactory opClientFactory) {
         this.httpService = httpService;
         this.umaTokenService = umaTokenService;
         this.discoveryService = discoveryService;
+        this.opClientFactory = opClientFactory;
     }
 
     public IntrospectionResponse introspectToken(String oxdId, String accessToken) {
@@ -93,7 +96,7 @@ public class IntrospectionService {
         final UmaMetadata metadata = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         try {
-            final CorrectRptIntrospectionService introspectionService = ClientFactory.instance().createCorrectRptStatusService(metadata, httpService.getClientExecutor());
+            final CorrectRptIntrospectionService introspectionService = opClientFactory.createClientFactory().createCorrectRptStatusService(metadata, httpService.getClientExecutor());
             return introspectionService.requestRptStatus("Bearer " + umaTokenService.getPat(oxdId).getToken(), rpt, "");
         } catch (ClientResponseFailure e) {
             int httpStatus = e.getResponse().getStatus();
