@@ -6,12 +6,18 @@ import sys
 import os
 import argparse
 import time
+import zipfile
+from urlparse import urljoin
+
 
 run_time = time.strftime("%Y-%m-%d_%H-%M-%S")
 ces_dir = '/install/community-edition-setup'
 
 parser = argparse.ArgumentParser(description="This script extracts community-edition-setup package and runs setup.py without arguments")
 parser.add_argument('-o', help="download latest package from github and override current community-edition-setup", action='store_true')
+parser.add_argument('--args', help="Arguments to be passed to setup.py")
+parser.add_argument('-b', help="Github branch name, e.g. version_4.0.b4")
+
 argsp = parser.parse_args()
     
 if argsp.o:
@@ -22,8 +28,38 @@ if argsp.o:
         print "Backing up", ces_dir, "to", back_dir
         os.rename(ces_dir, back_dir)
 
-if not os.path.exists(ces_dir):
 
+ces_dir = '/install/community-edition-setup'
+
+github_base_url = 'https://github.com/GluuFederation/community-edition-setup/archive/'
+arhchive_name = 'master.zip'
+
+
+if argsp.b:
+    arhchive_name = argsp.b+'.zip'
+
+download_link = urljoin(github_base_url, arhchive_name)
+
+
+def get_path_list(path):
+    folders = []
+    while 1:
+        path, folder = os.path.split(path)
+
+        if folder != '':
+            folders.append(folder)
+        else:
+            if path != '':
+                folders.append(path)
+
+            break
+
+    folders.reverse()
+
+    return folders
+
+
+if 1:
     ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
 
     if not ces_list:
@@ -34,30 +70,43 @@ if not os.path.exists(ces_dir):
             dl = 'y'
         
         if not dl.strip() or dl.lower()[0]=='y':
-            print "Downloading..."
-            os.system('wget -nv https://github.com/GluuFederation/community-edition-setup/archive/master.zip -O /opt/dist/gluu/community-edition-setup-master.zip')
-            ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
+            print "Downloading ", download_link
+            os.system('wget -nv {0} -O /opt/dist/gluu/{1}'.format(download_link, arhchive_name))
+            ces_list = [os.path.join('/opt/dist/gluu', arhchive_name)]
         else:
             print "Exiting..."
             sys.exit()
 
     ces = max(ces_list)
 
-    if not os.path.exists('/install'):
-        os.mkdir('/install')
+    zf = zipfile.ZipFile(ces)
 
+    namelist = zf.namelist()
+
+    parent_dir = namelist[0]
+    zf.close()
+
+    if not os.path.exists(ces_dir):
+        os.makedirs(ces_dir)
+    
     print "Extracting community-edition-setup package"
     os.system('unzip -o -q {0} -d /install'.format(ces))
-    ces_dir_list = glob.glob('/install/community-edition-setup*')
+
+    source_dir = os.path.join('/install',parent_dir)
     
-    for d in ces_dir_list[:]:
-        if '.back.' in d:
-            ces_dir_list.remove(d)
+    if not os.path.exists(source_dir):
+        sys.exit("Unzip failed. Exting")
+    
 
-    if not ces_dir_list:
-        print "community-edition-setup package was not extracted properly. Exiting."
+    cmd = 'cp -r -f {}* /install/community-edition-setup'.format(source_dir)
+    os.system(cmd)
+    os.system('rm -r -f '+source_dir)
 
-    ces_cur_dir = max(ces_dir_list)
-    os.rename(ces_cur_dir, ces_dir)
 
-os.system('/install/community-edition-setup/setup.py')
+cmd = '/install/community-edition-setup/setup.py'
+
+if argsp.args:
+    cmd += ' ' + argsp.args
+    
+print "Executing command", cmd
+os.system(cmd)
