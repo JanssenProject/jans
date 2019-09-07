@@ -259,4 +259,9 @@
             <class name="org.gluu.oxd.mock.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
+    <test name="UMA - Mock Full Flow Test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.mock.UmaFullTest"/>
+        </classes>
+    </test>
 </suite>
