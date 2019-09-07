@@ -2,10 +2,19 @@ package org.gluu.oxd.server.op;
 
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxd.rs.protect.resteasy.PatProvider;
+import org.gluu.oxd.rs.protect.resteasy.ResourceRegistrar;
+import org.gluu.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
+import org.gluu.oxd.rs.protect.resteasy.ServiceProvider;
+import org.gluu.oxd.server.introspection.ClientFactory;
 import org.gluu.oxd.server.service.PublicOpKeyService;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
 
 public interface OpClientFactory {
     public TokenClient createTokenClient(String url);
+
+    public TokenClient createTokenClientWithUmaProtectionScope(String url);
 
     public UserInfoClient createUserInfoClient(String url);
 
@@ -15,5 +24,13 @@ public interface OpClientFactory {
 
     public AuthorizeClient createAuthorizeClient(String url);
 
+    public ResourceRegistrar createResourceRegistrar(PatProvider patProvider, ServiceProvider serviceProvider);
+
     public Validator createValidator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService);
+
+    public RptPreProcessInterceptor createRptPreProcessInterceptor(ResourceRegistrar resourceRegistrar);
+
+    public ClientFactory createClientFactory();
+
+    public ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception;
 }
