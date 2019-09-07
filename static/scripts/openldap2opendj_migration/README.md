@@ -111,7 +111,7 @@ Change `idp.authn.LDAP.trustCertificates = /etc/certs/openldap.crt` to `idp.auth
 # /etc/init.d/idp start
 ```
 
-Try to log in to Gluu UI. If it's working as expected, remove OpenLDAP:
+Try to log in to Gluu UI and check your SSO operation. If it's working as expected, remove OpenLDAP:
 
 CentOS7:
 

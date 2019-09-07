@@ -45,23 +45,35 @@ import random
 import ssl
 import ldap
 import uuid
-from collections import OrderedDict
+import multiprocessing
+import StringIO
+import zipfile
 
+from collections import OrderedDict
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
 from pylib import Properties
 from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
 
+class colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    DANGER = '\033[31m'
+
+suggested_mem_size = 3.7 # in GB
+suggested_number_of_cpu = 2
+suggested_free_disk_space = 40 #in GB
+
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
-file_max = int(open("/proc/sys/fs/file-max").read().strip())
-
-if file_max < 64000:
-    sys.exit("""
-Maximum number of files that can be opened on this computer is less than 64000.
-Please increase number of file-max on the host system and re-run setup.py""")
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -101,6 +113,52 @@ class ProgressBar:
         sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
         sys.stdout.flush()
 
+def get_key_shortcuter_rules():
+    ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
+    oxauth_zf = zipfile.ZipFile(ox_auth_war_file)
+
+    for file_info in oxauth_zf.infolist():
+        if 'oxcore-persistence-core' in file_info.filename:
+            oxcore_persistence_core_path = file_info.filename
+            break
+
+    oxcore_persistence_core_content = oxauth_zf.read(oxcore_persistence_core_path)
+    oxcore_persistence_core_io = StringIO.StringIO(oxcore_persistence_core_content)
+    oxcore_persistence_core_zf = zipfile.ZipFile(oxcore_persistence_core_io)
+    key_shortcuter_rules_str = oxcore_persistence_core_zf.read('key-shortcuter-rules.json')
+    key_shortcuter_rules = json.loads(key_shortcuter_rules_str)
+
+    return key_shortcuter_rules
+
+
+def get_mapped_entry(entry):
+    rEntry = copy.deepcopy(entry)
+    
+    for key in rEntry.keys():
+        mapped_key = key
+        if key in key_shortcuter_rules['exclusions']:
+            mapped_key = key_shortcuter_rules['exclusions'][key]
+        else:
+            for map_key in key_shortcuter_rules['replaces']:
+                if map_key in mapped_key:
+                    mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
+                
+        if mapped_key != key:
+            mapped_key = mapped_key[0].lower() + mapped_key[1:]
+            rEntry[mapped_key] = rEntry.pop(key)
+
+    for key in rEntry.keys():
+        if key in key_shortcuter_rules['exclusions']:
+            continue
+        for prefix in key_shortcuter_rules['prefixes']:
+            if key.startswith(prefix):
+                mapped_key = key.replace(prefix, '',1)
+                mapped_key = mapped_key[0].lower() + mapped_key[1:]
+                rEntry[mapped_key] = rEntry.pop(key)
+                break
+
+
+    return rEntry
 
 def getTypedValue(dtype, val):
     retVal = val
@@ -198,22 +256,11 @@ def get_documents_from_ldif(ldif_file):
 
                     entry[k] = oc_list[0]
 
-
+            #mapped_entry = get_mapped_entry(entry)
             documents.append((key, entry))
 
     return documents
 
-def get_ram_size():
-    mem_total = None
-
-    with open('/proc/meminfo') as f:
-        meminfo = f.read()
-    matched = re.search(r'^MemTotal:\s+(\d+)', meminfo)
-
-    if matched: 
-        mem_total = int(matched.groups()[0]) / 1024
-
-    return mem_total
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -275,6 +322,7 @@ class Setup(object):
 
 
         # Gluu components installation status
+        self.loadData = True
         self.installOxAuth = True
         self.installOxTrust = True
         self.installLdap = False
@@ -693,7 +741,6 @@ class Setup(object):
                              self.apache2_ssl_conf: False,
                              self.apache2_24_conf: False,
                              self.apache2_ssl_24_conf: False,
-                             self.etc_hosts: False,
                              self.etc_hostname: False,
                              self.ldif_base: False,
                              self.ldif_attributes: False,
@@ -746,8 +793,12 @@ class Setup(object):
                                             self.ldif_scim,
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
+                                            self.ldif_clients,
+                                            self.ldif_oxtrust_api_clients,
+                                            self.ldif_scim_clients,
+                                            self.ldif_metric,
                                             ],
-                                      'memory_allocation': 100, # [fraction, minimun_in_mb]
+                                      'memory_allocation': 100,
                                       'mapping': '',
                                       'document_key_prefix': []
                                     }),
@@ -757,7 +808,7 @@ class Setup(object):
                                             self.ldif_groups
                                             ],
                                         'memory_allocation': 300,
-                                        'mapping': 'people, groups',
+                                        'mapping': 'people, groups, authorizations',
                                         'document_key_prefix': ['groups_', 'people_'],
                                     }),
 
@@ -766,13 +817,7 @@ class Setup(object):
                                         'mapping': 'cache',
                                         'document_key_prefix': ['cache_'],
                                     }),
-                        
-                        ('statistic', {   'ldif': [self.ldif_metric],
-                                        'memory_allocation': 100,
-                                        'mapping': 'statistic',
-                                        'document_key_prefix': ['metric_'],
-                                    }),
-                        
+
                         ('site',     {   'ldif': [self.ldif_site],
                                         'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
@@ -780,26 +825,12 @@ class Setup(object):
                                         
                                     }),
 
-                        ('authorization', { 'ldif': [],
-                                      'memory_allocation': 300,
-                                      'mapping': 'authorizations',
-                                      'document_key_prefix': ['authorizations_'],
-                                    }),
-
                         ('token',   { 'ldif': [],
                                       'memory_allocation': 300,
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
-                        ('client',  { 'ldif': [
-                                                self.ldif_clients,
-                                                self.ldif_oxtrust_api_clients,
-                                                self.ldif_scim_clients,
-                                                ],
-                                    'memory_allocation': 100,
-                                    'mapping': 'clients',
-                                    'document_key_prefix': ['clients_'],
-                                    }),
+
                     ))
                             
         
@@ -1549,7 +1580,7 @@ class Setup(object):
         if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if self.remoteLdap and self.remoteCouchbase:
+        if self.remoteLdap or self.remoteCouchbase:
             changeTo = ''
 
         if changeTo != None:
@@ -2347,14 +2378,10 @@ class Setup(object):
         self.renderTemplate(self.ldif_passport_clients)
 
         if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config])
+            self.import_ldif_opendj([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
         else:
-            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config])
+            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
 
-        if self.mappingLocations['client'] == 'ldap':
-            self.import_ldif_opendj([self.ldif_passport_clients])
-        else:
-            self.import_ldif_couchebase([self.ldif_passport_clients])
 
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -3333,14 +3360,12 @@ class Setup(object):
                           ['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                           ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
+                          ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                           ]
                           
         if self.mappingLocations['site'] == 'ldap':
             config_changes.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
-        
-        if self.mappingLocations['statistic'] == 'ldap':
-            config_changes.append(['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
-                          
+
                           
         config_changes += [
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
@@ -3454,6 +3479,11 @@ class Setup(object):
             self.deleteLdapPw()
 
     def import_ldif_opendj(self, ldif_file_list=[]):
+
+        #We won't load data to secondary cluster nodes
+        if not self.loadData:
+            return
+        
         if not ldif_file_list:
             self.logIt("Importing userRoot LDIF data")
         else:
@@ -3696,7 +3726,15 @@ class Setup(object):
 
             self.run(['/bin/hostname', self.hostname])
 
-        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+        hostname_file_content = self.readFile(self.etc_hosts)
+
+        with open(self.etc_hosts,'w') as w:
+            for l in hostname_file_content.splitlines():
+                if not self.hostname in l:
+                    w.write(l+'\n')
+
+            w.write('{}\t{}\n'.format(self.ip, self.hostname))
+
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
 
@@ -4055,18 +4093,23 @@ class Setup(object):
         tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
         with open(tmp_file, 'w') as W:
-            index_list = couchbase_index.get(bucket,[])
-
-            if not 'dn' in index_list:
-                index_list.insert(0, 'dn')
+            index_list = couchbase_index.get(bucket,{})
 
             index_names = []
-            for ind in index_list:
+            for ind in index_list['attributes']:
                 index_name = 'def_{0}_{1}'.format(bucket, ind)
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, ind))
                 index_names.append(index_name)
 
-            W.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
+            if index_names:
+                W.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
+
+            sic = 1
+            for attribs, wherec in index_list['static']:
+                attrquoted = ['`{}`'.format(a) for a in attribs]
+                attrquoteds = ', '.join(attrquoted)
+                query = 'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3})\n'.format(bucket, sic, attrquoteds, wherec)
+                W.write(query)
 
         self.couchbaseExecQuery(tmp_file)
 
@@ -4095,6 +4138,11 @@ class Setup(object):
         
         self.processedKeys = []
         
+        key_prefixes = {}
+        for cb in self.couchbaseBucketDict:
+            for prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
+                key_prefixes[prefix] = cb
+
         if not ldif_file_list:
             ldif_file_list = self.ldif_files[:]
         
@@ -4118,13 +4166,7 @@ class Setup(object):
                         n_ = e[0].find('_')
                         document_key_prefix = e[0][:n_+1]
                         self.couchbaseBucketDict['user']['document_key_prefix']
-                        
-                        for cb in self.couchbaseBucketDict:
-                            if document_key_prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
-                                cur_bucket = 'gluu_'+cb
-                                break
-                        else:
-                            cur_bucket = 'gluu'
+                        cur_bucket = key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
 
                     query = ''
 
@@ -4236,6 +4278,8 @@ class Setup(object):
                     self.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
+        couchbase_test_mappings = [ 'config.' + mapping for mapping in couchbase_mappings ]
+        prop_dict['couchbase_test_mappings'] = '\n'.join(couchbase_test_mappings)
 
         return prop_dict
         
@@ -4577,14 +4621,9 @@ class Setup(object):
         ldif_file_clients = os.path.join(self.outputFolder, 'gluu_radius_clients.ldif')
         
         if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([ldif_file_base])
+            self.import_ldif_opendj([ldif_file_base, ldif_file_clients])
         else:
-            self.import_ldif_couchebase([ldif_file_base])
-
-        if self.mappingLocations['client'] == 'ldap':
-            self.import_ldif_opendj([ldif_file_clients])
-        else:
-            self.import_ldif_couchebase([ldif_file_clients]) 
+            self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
 
 
         if self.installGluuRadius:
@@ -4633,6 +4672,63 @@ class Setup(object):
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
+
+def resource_checkings():
+
+    file_max = int(open("/proc/sys/fs/file-max").read().strip())
+
+    if file_max < 64000:
+        sys.exit("Maximum number of files that can be opened on this computer is "
+                  "less than 64000. Please increase number of file-max on the "
+                  "host system and re-run setup.py".format(colors.DANGER,
+                                                                colors.ENDC))
+
+    current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+    current_mem_size = current_mem_bytes / (1024.**3) #in GB
+
+    if current_mem_size < suggested_mem_size:
+        print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
+               "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
+                                                        current_mem_size, 
+                                                        suggested_mem_size,
+                                                        colors.ENDC)
+
+
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+    current_number_of_cpu = multiprocessing.cpu_count()
+
+    if current_number_of_cpu < suggested_number_of_cpu:
+
+        print ("{0}Warning: Available CPU Units found was {1}. "
+            "This is less than the required amount of {2} CPU Units.{3}".format(
+                                                        colors.WARNING,
+                                                        current_number_of_cpu, 
+                                                        suggested_number_of_cpu,
+                                                        colors.ENDC))
+                                                        
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+    st = os.statvfs('/')
+    available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
+
+    if available_disk_space < suggested_free_disk_space:
+        print ("{0}Warning: Available free disk space was determined to be {1} "
+            "GB. This is less than the required disk space of {2} GB.{3}".format(
+                                                        colors.WARNING,
+                                                        available_disk_space,
+                                                        suggested_free_disk_space,
+                                                        colors.ENDC))
+
+        result = raw_input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+
 if __name__ == '__main__':
 
     parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
@@ -4658,9 +4754,11 @@ if __name__ == '__main__':
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
     parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
-
+    parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     argsp = parser.parse_args()
 
+    resource_checkings()
+    #key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
         'install_dir': os.path.dirname(os.path.realpath(__file__)),
@@ -4680,7 +4778,8 @@ if __name__ == '__main__':
         'listenAllInterfaces': False,
         'remoteCouchbase': False,
         'remoteLdap': False,
-        'loadTestDataExit': False
+        'loadTestDataExit': False,
+        'loadData': True,
     }
 
     if argsp.d:
@@ -4711,6 +4810,9 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['remoteCouchbase'] = argsp.remote_couchbase
     setupOptions['remoteLdap'] = argsp.remote_ldap
+
+    if argsp.no_data:
+        setupOptions['loadData'] = False
     
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True

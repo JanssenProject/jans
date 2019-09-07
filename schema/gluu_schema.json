@@ -1354,17 +1354,6 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "NameId or attribute",
-            "equality": "caseIgnoreMatch",
-            "names": [
-                "oxAttributeType"
-            ],
-            "oid": "oxAttribute:125",
-            "substr": "caseIgnoreSubstringsMatch",
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-            "x_origin": "Gluu created attribute"
-        },
-        {
             "desc": "Used by oxAuth in conjunction with gluuttributeName to map claims to attributes in LDAP.",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -1390,7 +1379,7 @@
             "desc": "oxAuth Authentication Time",
             "equality": "generalizedTimeMatch",
             "names": [
-                "oxAuthAuthenticationTime"
+                "authnTime"
             ],
             "oid": "oxAttribute:128",
             "ordering": "generalizedTimeOrderingMatch",
@@ -1401,7 +1390,7 @@
             "desc": "oxAuth authorization code",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthAuthorizationCode"
+                "authzCode"
             ],
             "oid": "oxAttribute:129",
             "substr": "caseIgnoreSubstringsMatch",
@@ -1438,6 +1427,18 @@
             ],
             "multivalued": true,
             "oid": "oxAttribute:132",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Client id",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "clnId"
+            ],
+            "multivalued": true,
+            "oid": "oxAttribute:413",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -1550,7 +1551,7 @@
             "desc": "oxAuth Creation",
             "equality": "generalizedTimeMatch",
             "names": [
-                "oxAuthCreation"
+                "iat"
             ],
             "oid": "oxAttribute:142",
             "ordering": "generalizedTimeOrderingMatch",
@@ -1590,10 +1591,21 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "oxAuth Expiration",
+            "equality": "generalizedTimeMatch",
+            "names": [
+                "exp"
+            ],
+            "oid": "oxAttribute:416",
+            "ordering": "generalizedTimeOrderingMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "oxAuth grant id",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthGrantId"
+                "grtId"
             ],
             "oid": "oxAttribute:146",
             "substr": "caseIgnoreSubstringsMatch",
@@ -1607,6 +1619,17 @@
                 "oxAuthGrantType"
             ],
             "oid": "oxAttribute:147",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Grant Type",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "grtTyp"
+            ],
+            "oid": "oxAttribute:414",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -1682,7 +1705,7 @@
             "desc": "oxAuth JWT Request",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthJwtRequest"
+                "jwtReq"
             ],
             "oid": "oxAttribute:154",
             "substr": "caseIgnoreSubstringsMatch",
@@ -1704,7 +1727,7 @@
             "desc": "oxAuth nonce",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthNonce"
+                "nnc"
             ],
             "oid": "oxAttribute:156",
             "substr": "caseIgnoreSubstringsMatch",
@@ -1902,6 +1925,18 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "oxAuth Attribute Scope",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "scp"
+            ],
+            "multivalued": true,
+            "oid": "oxAttribute:415",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "OX Attribute Scope type",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -1960,7 +1995,7 @@
             "desc": "oxAuth Token Code",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthTokenCode"
+                "tknCde"
             ],
             "oid": "oxAttribute:179",
             "substr": "caseIgnoreSubstringsMatch",
@@ -1993,7 +2028,7 @@
             "desc": "oxAuth Token Type",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthTokenType"
+                "tknTyp"
             ],
             "oid": "oxAttribute:182",
             "substr": "caseIgnoreSubstringsMatch",
@@ -2046,7 +2081,8 @@
             "desc": "oxAuth user id",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthUserId"
+                "oxAuthUserId",
+                "usrId"
             ],
             "oid": "oxAttribute:187",
             "substr": "caseIgnoreSubstringsMatch",
@@ -2114,6 +2150,16 @@
                 "oxAuthenticationMode"
             ],
             "oid": "oxAttribute:193",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "acr"
+            ],
+            "oid": "oxAttribute:417",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -2201,6 +2247,17 @@
                 "oxGuid"
             ],
             "oid": "oxAttribute:201",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Unique identifier",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "uuid"
+            ],
+            "oid": "oxAttribute:421",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -3743,6 +3800,17 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "OX data",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "dat"
+            ],
+            "oid": "oxAttribute:420",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "OX PKCE code challenge",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -3754,10 +3822,21 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "OX PKCE code challenge",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "chlng"
+            ],
+            "oid": "oxAttribute:418",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "OX PKCE code challenge method",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxCodeChallengeMethod"
+                "chlngMth"
             ],
             "oid": "oxAttribute:344",
             "substr": "caseIgnoreSubstringsMatch",
@@ -3812,7 +3891,7 @@
             "desc": "oxAuth Session DN",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthSessionDn"
+                "ssnId"
             ],
             "oid": "oxAttribute:349",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4007,6 +4086,17 @@
             "desc": "Attributes",
             "equality": "caseIgnoreMatch",
             "names": [
+                "attr"
+            ],
+            "oid": "oxAttribute:419",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Attributes",
+            "equality": "caseIgnoreMatch",
+            "names": [
                 "userRandomKey"
             ],
             "oid": "oxAttribute:370",
@@ -4071,7 +4161,7 @@
             "desc": "oxAuth Claims",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxAuthClaims"
+                "clms"
             ],
             "oid": "oxAttribute:376",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4191,7 +4281,7 @@
             "desc": "oxauth - Token Binding Id Hash",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxIdTokenTokenBindingCnf"
+                "tknBndCnf"
             ],
             "oid": "oxAttribute:388",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4327,10 +4417,10 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "oxDeletable",
+            "desc": "del",
             "equality": "booleanMatch",
             "names": [
-                "oxDeletable"
+                "del"
             ],
             "oid": "oxAttribute:401",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
@@ -4795,7 +4885,6 @@
                 "gluuStatus",
                 "iname",
                 "inum",
-                "oxAttributeType",
                 "oxMultivaluedAttribute",
                 "oxNameIdType",
                 "oxSCIMCustomAttribute",
@@ -5058,7 +5147,7 @@
                 "oxAuthClientSecret",
                 "oxAuthClientSecretExpiresAt",
                 "oxAuthExpiration",
-                "oxDeletable",
+                "del",
                 "oxAuthClientURI",
                 "oxAuthContact",
                 "oxAuthDefaultAcrValues",
@@ -5104,7 +5193,7 @@
                 "oxAuthLogoutSessionRequired",
                 "oxdId",
                 "oxAuthAuthorizedOrigins",
-                "oxIdTokenTokenBindingCnf",
+                "tknBndCnf",
                 "oxAccessTokenAsJwt",
                 "oxAccessTokenSigningAlg",
                 "oxAccessTokenLifetime",
@@ -5159,7 +5248,7 @@
                 "oxAuthSessionId",
                 "oxLastAccessTime",
                 "oxAuthUserDN",
-                "oxAuthAuthenticationTime",
+                "authnTime",
                 "oxState",
                 "oxSessionState",
                 "oxAuthPermissionGranted",
@@ -5260,9 +5349,9 @@
                 "oxRevision",
                 "oxType",
                 "oxScopeExpression",
-                "oxAuthCreation",
+                "iat",
                 "oxAuthExpiration",
-                "oxDeletable",
+                "del",
                 "description"
             ],
             "must": [
@@ -5281,7 +5370,7 @@
             "kind": "STRUCTURAL",
             "may": [
                 "oxAuthExpiration",
-                "oxDeletable",
+                "del",
                 "oxAuthUmaScope",
                 "oxConfigurationCode",
                 "oxResourceSetId",
@@ -5304,8 +5393,8 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAuthGrantId",
-                "oxAuthCreation"
+                "grtId",
+                "iat"
             ],
             "must": [
                 "objectclass"
@@ -5322,34 +5411,34 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAuthAuthenticationTime",
-                "oxAuthAuthorizationCode",
-                "oxAuthCreation",
-                "oxAuthExpiration",
-                "oxDeletable",
-                "oxAuthGrantId",
-                "oxAuthGrantType",
-                "oxAuthJwtRequest",
-                "oxAuthNonce",
-                "oxAuthScope",
-                "oxAuthTokenCode",
-                "oxAuthTokenType",
-                "oxAuthUserId",
-                "oxAuthClientId",
-                "oxAuthenticationMode",
-                "uniqueIdentifier",
-                "oxCodeChallenge",
-                "oxCodeChallengeMethod",
-                "oxAuthClaims",
-                "oxAuthSessionDn",
-                "oxAttributes",
-                "oxIdTokenTokenBindingCnf"
+                "authnTime",
+                "authzCode",
+                "iat",
+                "exp",
+                "del",
+                "grtId",
+                "grtTyp",
+                "jwtReq",
+                "nnc",
+                "scp",
+                "tknCde",
+                "tknTyp",
+                "usrId",
+                "clnId",
+                "acr",
+                "uuid",
+                "chlng",
+                "chlngMth",
+                "clms",
+                "ssnId",
+                "attr",
+                "tknBndCnf"
             ],
             "must": [
                 "objectclass"
             ],
             "names": [
-                "oxAuthToken"
+                "token"
             ],
             "oid": "oxObjectClass:27",
             "sup": [
@@ -5360,15 +5449,15 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAuthAuthenticationTime",
-                "oxAuthClientId",
-                "oxAuthCreation",
-                "oxAuthExpiration",
-                "oxDeletable",
-                "oxAuthTokenCode",
-                "oxAuthUserId",
+                "authnTime",
+                "clnId",
+                "iat",
+                "exp",
+                "del",
+                "tknCde",
+                "usrId",
                 "oxUmaPermission",
-                "uniqueIdentifier"
+                "uuid"
             ],
             "must": [
                 "objectclass"
@@ -5473,9 +5562,9 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAuthCreation",
+                "iat",
                 "oxAuthExpiration",
-                "oxDeletable",
+                "del",
                 "oxProxyAccessToken",
                 "oxProxyClientId"
             ],
@@ -5595,7 +5684,7 @@
                 "oxDeviceData",
                 "oxCounter",
                 "oxStatus",
-                "oxDeletable",
+                "del",
                 "oxAuthExpiration",
                 "creationDate",
                 "oxLastAccessTime",
@@ -5622,7 +5711,7 @@
                 "oxRequestId",
                 "oxRequest",
                 "oxSessionStateId",
-                "oxDeletable",
+                "del",
                 "oxAuthExpiration",
                 "personInum",
                 "creationDate"
@@ -5648,7 +5737,7 @@
                 "oxApplicationType",
                 "oxMetricType",
                 "creationDate",
-                "oxDeletable",
+                "del",
                 "oxAuthExpiration",
                 "oxData"
             ],
@@ -5671,7 +5760,7 @@
                 "oxAuthClientId",
                 "oxAuthUserId",
                 "oxAuthExpiration",
-                "oxDeletable",
+                "del",
                 "oxAuthScope"
             ],
             "must": [
@@ -5749,11 +5838,11 @@
         {
             "kind":"STRUCTURAL",
             "may":[
-                "oxAuthClientId",
-                "oxAuthCreation",
-                "oxAuthExpiration",
-                "oxDeletable",
-                "oxAuthTokenCode",
+                "clnId",
+                "iat",
+                "exp",
+                "del",
+                "tknCde",
                 "oxClaimValues"
             ],
             "must":[
@@ -5771,17 +5860,17 @@
         {
             "kind":"STRUCTURAL",
             "may":[
-                "uniqueIdentifier",
-                "oxAuthCreation",
-                "oxAuthExpiration",
-                "oxDeletable",
-                "oxData"
+                "uuid",
+                "iat",
+                "exp",
+                "del",
+                "dat"
             ],
             "must":[
                 "objectclass"
             ],
             "names":[
-                "oxCacheEntity"
+                "cache"
             ],
             "oid":"oxObjectClass:51",
             "sup":[
