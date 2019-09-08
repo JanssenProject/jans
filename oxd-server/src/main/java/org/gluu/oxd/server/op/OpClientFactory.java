@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.op;
 
 import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.rs.protect.resteasy.PatProvider;
 import org.gluu.oxd.rs.protect.resteasy.ResourceRegistrar;
@@ -20,7 +21,7 @@ public interface OpClientFactory {
 
     public RegisterClient createRegisterClient(String url);
 
-    public OpenIdConfigurationClient createOpenIdConfigurationClient(String url);
+    public OpenIdConfigurationClient createOpenIdConfigurationClient(String url) throws Exception;
 
     public AuthorizeClient createAuthorizeClient(String url);
 
@@ -31,6 +32,8 @@ public interface OpClientFactory {
     public RptPreProcessInterceptor createRptPreProcessInterceptor(ResourceRegistrar resourceRegistrar);
 
     public ClientFactory createClientFactory();
+
+    public UmaClientFactory createUmaClientFactory();
 
     public ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception;
 }
