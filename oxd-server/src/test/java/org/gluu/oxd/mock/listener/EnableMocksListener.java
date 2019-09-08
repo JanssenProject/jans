@@ -14,12 +14,12 @@ public class EnableMocksListener implements IAnnotationTransformer {
     public void transform(ITestAnnotation annotation, Class testClass,
                           Constructor testConstructor, Method testMethod){
 
-        System.out.println("===============>"+testMethod.getName());
-        System.out.println("***************>"+isTestDisabled(testMethod.getName()));
-        if (isTestDisabled(testMethod.getName())) {
-            annotation.setEnabled(false);
-        } else {
-            annotation.setEnabled(true);
+        if (testMethod != null) {
+            if (isTestDisabled(testMethod.getName())) {
+                annotation.setEnabled(false);
+            } else {
+                annotation.setEnabled(true);
+            }
         }
     }
 
