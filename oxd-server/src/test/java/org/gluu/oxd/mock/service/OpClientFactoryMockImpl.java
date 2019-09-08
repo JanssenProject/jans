@@ -5,9 +5,12 @@ import org.assertj.core.util.Lists;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
 import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.uma.UmaClientFactory;
+import org.gluu.oxauth.client.uma.UmaMetadataService;
 import org.gluu.oxauth.model.common.TokenType;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.gluu.oxd.rs.protect.Condition;
@@ -104,8 +107,16 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
     }
 
     @Override
-    public OpenIdConfigurationClient createOpenIdConfigurationClient(String url) {
-        return null;
+    public OpenIdConfigurationClient createOpenIdConfigurationClient(String url) throws Exception {
+
+        OpenIdConfigurationClient client = mock(OpenIdConfigurationClient.class);
+
+        OpenIdConfigurationResponse response = new OpenIdConfigurationResponse(200);
+        response.setEntity("DUMMY_ENTITY");
+        response.setRegistrationEndpoint("DUMMY_REGISTRATION_ENDPOINT");
+        response.setEndSessionEndpoint("DUMMY_ENDSESSION_ENDPOINT");
+        when(client.execOpenIdConfiguration()).thenReturn(response);
+        return client;
     }
 
     @Override
@@ -168,6 +179,18 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         when(correctRptIntrospectionService.requestRptStatus(any(), any(), any())).thenReturn(correctRptIntrospectionResponse);
 
         return clientFactory;
+    }
+
+    public UmaClientFactory createUmaClientFactory() {
+        UmaClientFactory umaClientFactory = mock(UmaClientFactory.class);
+        UmaMetadataService umaMetadataService = mock(UmaMetadataService.class);
+
+        UmaMetadata umaMetadata = new UmaMetadata();
+
+        when(umaClientFactory.createMetadataService(any(), any())).thenReturn(umaMetadataService);
+        when(umaMetadataService.getMetadata()).thenReturn(umaMetadata);
+
+        return umaClientFactory;
     }
 
     public ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception {
