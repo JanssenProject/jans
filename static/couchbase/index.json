@@ -81,7 +81,8 @@
 
   "gluu_token": {
     "attributes": [
-      "grtId"
+      "grtId",
+      "oxAuthExpiration"
     ],
     "static" : [
     [["grtId"], "objectClass= \"token\""]
