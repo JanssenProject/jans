@@ -6,15 +6,12 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.gluu.oxd.mock.guice.MockAppModule;
-import org.gluu.oxd.server.op.OpClientFactory;
 import org.gluu.oxd.server.persistence.PersistenceService;
 import org.gluu.oxd.server.service.RpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Guice;
 import org.testng.annotations.Parameters;
 
 /**
