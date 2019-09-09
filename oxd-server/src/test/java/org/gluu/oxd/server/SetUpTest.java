@@ -30,14 +30,11 @@ public class SetUpTest {
     public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
 
 
-    @Parameters({"host", "opHost", "redirectUrls", "isLoadTest"})
+    @Parameters({"host", "opHost", "redirectUrls"})
     @BeforeSuite
-    public static void beforeSuite(String host, String opHost, String redirectUrls, boolean isLoadTest) {
+    public static void beforeSuite(String host, String opHost, String redirectUrls) {
         try {
             LOG.debug("Running beforeSuite ...");
-            if(isLoadTest) {
-                ServerLauncher.setInjector(new MockAppModule());
-            }
             ServerLauncher.setSetUpSuite(true);
 
             SUPPORT = new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,

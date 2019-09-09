@@ -30,7 +30,7 @@ import static org.testng.Assert.assertTrue;
 public class UmaFullTest {
 
     @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
-    @Test(enabled = false)
+    @Test
     public void mockTest(String host, String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         ClientInterface client = Tester.newClient(host);
