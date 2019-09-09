@@ -1,7 +1,6 @@
 package org.gluu.oxd.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxd.client.ClientInterface;
@@ -10,17 +9,13 @@ import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.GetLogoutUriResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.gluu.oxd.server.GetTokensByCodeTest;
-import org.gluu.oxd.server.RegisterSiteTest;
 import org.gluu.oxd.server.Tester;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.net.URLEncoder;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
@@ -31,7 +26,7 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 public class AuthorizationCodeFlowTest {
 
     @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
-    @Test(enabled = false)
+    @Test
     public void mockTest(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
          //Register client
