@@ -18,7 +18,7 @@ import org.gluu.persist.annotation.AttributeEnum;
  */
 public enum ScriptLocationType implements AttributeEnum {
 
-    DB("db", "Database"), FILE("file", "File");
+    LDAP("ldap", "Database"), FILE("file", "File");
 
     private String value;
     private String displayName;
