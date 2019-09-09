@@ -59,54 +59,47 @@ def get_path_list(path):
     return folders
 
 
-if 1:
-    ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
 
-    if not ces_list:
-        if not argsp.o:
-            print "community-edition-setup package was not found"
-            dl = raw_input("Download from github? (Y/n) ")
-        else:
-            dl = 'y'
-        
-        if not dl.strip() or dl.lower()[0]=='y':
-            print "Downloading ", download_link
-            os.system('wget -nv {0} -O /opt/dist/gluu/{1}'.format(download_link, arhchive_name))
-            ces_list = [os.path.join('/opt/dist/gluu', arhchive_name)]
-        else:
-            print "Exiting..."
-            sys.exit()
+ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
 
-    ces = max(ces_list)
-
-    zf = zipfile.ZipFile(ces)
-
-    namelist = zf.namelist()
-
-    parent_dir = namelist[0]
-    zf.close()
-
-    if not os.path.exists(ces_dir):
-        os.makedirs(ces_dir)
+if not ces_list:
+    if not argsp.o:
+        print "community-edition-setup package was not found"
+        dl = raw_input("Download from github? (Y/n) ")
+    else:
+        dl = 'y'
     
-    print "Extracting community-edition-setup package"
-    os.system('unzip -o -q {0} -d /install'.format(ces))
+    if not dl.strip() or dl.lower()[0]=='y':
+        print "Downloading ", download_link
+        os.system('wget -nv {0} -O /opt/dist/gluu/{1}'.format(download_link, arhchive_name))
+        ces_list = [os.path.join('/opt/dist/gluu', arhchive_name)]
+    else:
+        print "Exiting..."
+        sys.exit()
 
-    source_dir = os.path.join('/install',parent_dir)
-    
-    if not os.path.exists(source_dir):
-        sys.exit("Unzip failed. Exting")
-    
+ces = max(ces_list)
 
-    cmd = 'cp -r -f {}* /install/community-edition-setup'.format(source_dir)
-    os.system(cmd)
-    os.system('rm -r -f '+source_dir)
+zf = zipfile.ZipFile(ces)
+
+namelist = zf.namelist()
+
+parent_dir = namelist[0]
+zf.close()
+
+if not os.path.exists(ces_dir):
+    os.makedirs(ces_dir)
+
+print "Extracting community-edition-setup package"
+os.system('unzip -o -q {0} -d /install'.format(ces))
+
+source_dir = os.path.join('/install',parent_dir)
+
+if not os.path.exists(source_dir):
+    sys.exit("Unzip failed. Exting")
 
 
-cmd = '/install/community-edition-setup/setup.py'
-
-if argsp.args:
-    cmd += ' ' + argsp.args
-    
-print "Executing command", cmd
+cmd = 'cp -r -f {}* /install/community-edition-setup'.format(source_dir)
 os.system(cmd)
+os.system('rm -r -f '+source_dir)
+
+
