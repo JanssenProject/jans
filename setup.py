@@ -185,7 +185,7 @@ def getTypedValue(dtype, val):
             val += 'Z'
 
         dt = datetime.datetime.strptime(val, date_format)
-        retVal = dt.isoformat()
+        retVal = dt.isoformat() + '+000'
 
     elif dtype == 'boolean':
         if retVal.lower() in ('true', 'yes', '1', 'on'):
