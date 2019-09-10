@@ -131,7 +131,7 @@ public class RegistrationPersistenceService {
         final String challenge = registrationData.getChallenge();
 
         String dn = getDnForRegistrationEntry(userInum, id);
-        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, null, registrationData, challenge);
+        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, null, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
         
