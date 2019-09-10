@@ -48,6 +48,7 @@ import uuid
 import multiprocessing
 import StringIO
 import zipfile
+import datetime
 
 from collections import OrderedDict
 from pylib.ldif import LDIFParser, LDIFWriter
@@ -174,6 +175,18 @@ def getTypedValue(dtype, val):
             retVal = int(retVal)
         except:
             pass
+    elif dtype == 'datetime':
+        if '.' in val:
+            date_format = '%Y%m%d%H%M%S.%fZ'
+        else:
+            date_format = '%Y%m%d%H%M%SZ'
+        
+        if not val.lower().endswith('z'):
+            val += 'Z'
+
+        dt = datetime.datetime.strptime(val, date_format)
+        retVal = dt.isoformat()
+
     elif dtype == 'boolean':
         if retVal.lower() in ('true', 'yes', '1', 'on'):
             retVal = True
