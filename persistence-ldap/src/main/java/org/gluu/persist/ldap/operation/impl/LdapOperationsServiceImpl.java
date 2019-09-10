@@ -478,9 +478,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         OperationDurationUtil.instance().logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
 
         return result;
-}
+    }
 
-    private List<SearchResultEntry> searchSearchResultEntryListImpl(String dn, Filter filter, SearchScope scope, int startIndex, int count,
+    private List<SearchResultEntry> searchSearchResultEntryListImpl(String dn, Filter filter, SearchScope scope, int start, int count,
             int pageSize, String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPException, Exception {
         //This method does not assume that count <= pageSize as occurs in SCIM, but it's more general
 
@@ -495,7 +495,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         SearchRequest searchRequest = new SearchRequest(dn, scope, filter, attributes);
 
         int totalResults = 0;
-        int start = startIndex - 1;  // I hate one-based index positioning
 
         do {
             //Keep searching while we reach start index...
@@ -547,7 +546,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         // Get results info
         vlvResponse.setEntriesCount(searchResultEntryList.size());
         vlvResponse.setTotalEntriesCount(totalResults);
-        vlvResponse.setStart(startIndex);
+        vlvResponse.setStart(start);
 
         releaseConnection(conn);
         return searchResultEntryList;
