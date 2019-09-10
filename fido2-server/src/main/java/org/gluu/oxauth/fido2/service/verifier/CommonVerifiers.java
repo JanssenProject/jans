@@ -333,7 +333,7 @@ public class CommonVerifiers {
         return value;
     }
 
-    public String verifyThatString(JsonNode node) {
+    protected String verifyThatString(JsonNode node) {
         if (!node.isTextual()) {
             if (node.fieldNames().hasNext()) {
                 throw new Fido2RPRuntimeException("Invalid field " + node.fieldNames().next());
@@ -347,7 +347,7 @@ public class CommonVerifiers {
 
     public String verifyThatString(JsonNode node, String fieldName) {
         JsonNode fieldNode = node.get(fieldName);
-        if (fieldNode == null) {
+        if ((fieldNode == null || fieldNode.isNull())) {
             throw new Fido2RPRuntimeException("Invalid \"" + fieldName + "\"");
         }
 
@@ -364,7 +364,7 @@ public class CommonVerifiers {
     }
 
     public String verifyAuthData(JsonNode node) {
-        if (node.isNull()) {
+        if ((node == null) || node.isNull()) {
             throw new Fido2RPRuntimeException("Empty auth data");
         }
 
@@ -373,6 +373,13 @@ public class CommonVerifiers {
             throw new Fido2RPRuntimeException("Invalid field " + node);
         }
         return data;
+    }
+
+    public JsonNode verifyAuthStatement(JsonNode node) {
+        if ((node == null) || node.isNull()) {
+            throw new Fido2RPRuntimeException("Empty auth statement");
+        }
+        return node;
     }
 
     public String verifyThatBinary(JsonNode node) {
@@ -408,7 +415,7 @@ public class CommonVerifiers {
     }
 
     public int verifyAlgorithm(JsonNode alg, int registeredAlgorithmType) {
-        if (alg.isNull()) {
+        if ((alg == null) || alg.isNull()) {
             throw new Fido2RPRuntimeException("Wrong algorithm");
         }
         int algorithmType = Integer.parseInt(alg.asText());
@@ -419,7 +426,7 @@ public class CommonVerifiers {
     }
 
     public String verifyBase64String(JsonNode node) {
-        if (node.isNull()) {
+        if ((node == null) || node.isNull()) {
             throw new Fido2RPRuntimeException("Invalid data");
         }
         String value = verifyThatBinary(node);
@@ -509,11 +516,9 @@ public class CommonVerifiers {
 
         if (clientJsonNode.hasNonNull("tokenBinding")) {
         	JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
-            if (tokenBindingNode.hasNonNull("status")) {
-            	verifyThatString(tokenBindingNode.get("status"));
-            }
+        	verifyThatString(tokenBindingNode.get("status"), "status");
             if (tokenBindingNode.hasNonNull("id")) {
-            	verifyThatString(tokenBindingNode.get("id"));
+            	verifyThatString(tokenBindingNode.get("id"), "id");
             }
         }
 
