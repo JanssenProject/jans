@@ -76,17 +76,16 @@
     "attributes":[
     ],
     "static" : [
+      [["oxAuthExpiration"], "objectClass= \"cache\""]
     ]
   },
 
   "gluu_token": {
     "attributes": [
-      "grtId",
-      "oxAuthExpiration"
+      "grtId"
     ],
     "static" : [
-    [["grtId"], "objectClass= \"token\""]
-    
+      [["grtId"], "objectClass= \"token\""]
     ]
   },
 
