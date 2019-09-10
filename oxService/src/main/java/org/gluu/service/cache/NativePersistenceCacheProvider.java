@@ -5,9 +5,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -19,7 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
 
 @ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
@@ -200,26 +198,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     public void cleanup(final Date now, int batchSize) {
         log.debug("Start NATIVE_PERSISTENCE clean up");
         try {
-            BatchOperation<NativePersistenceCacheEntity> batchOperation = new ProcessBatchOperation<NativePersistenceCacheEntity>() {
-                @Override
-                public void performAction(List<NativePersistenceCacheEntity> entries) {
-                    for (NativePersistenceCacheEntity entity : entries) {
-                        try {
-                            GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                            GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                            expirationDate.setTime(entity.getExpirationDate());
-                            if (expirationDate.before(now)) {
-                                log.debug("Removing NATIVE_PERSISTENCE entity: {}, Expiration date: {}", entity.getDn(), entity.getExpirationDate());
-                                ldapEntryManager.remove(entity);
-                            }
-                        } catch (Exception e) {
-                            log.error("Failed to remove entry", e);
-                        }
-                    }
-                }
-            };
             Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now));
-            ldapEntryManager.findEntries(baseDn, NativePersistenceCacheEntity.class, filter, SearchScope.SUB, null, batchOperation, 0, 0, batchSize);
+            ldapEntryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
+
             log.debug("End NATIVE_PERSISTENCE clean up");
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);
