@@ -17,9 +17,6 @@ import org.gluu.oxauth.service.fido.u2f.RequestService;
 import org.gluu.oxauth.uma.service.UmaPctService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
@@ -40,7 +37,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -140,6 +136,7 @@ public class CleanerTimer {
         int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
         if (chunkSize <= 0)
             chunkSize = BATCH_SIZE;
+
         try {
             Date now = new Date();
 
@@ -148,36 +145,15 @@ public class CleanerTimer {
 					log.debug("Start clean up for baseDn: " + baseDn);
 					final Stopwatch started = Stopwatch.createStarted();
 
-					BatchOperation<DeletableEntity> batchOperation = new ProcessBatchOperation<DeletableEntity>() {
-						@Override
-						public void performAction(List<DeletableEntity> entries) {
-							for (DeletableEntity entity : entries) {
-								try {
-									if (ldapEntryManager.hasBranchesSupport(entity.getDn())) {
-										ldapEntryManager.removeRecursively(entity.getDn());
-									} else {
-										ldapEntryManager.remove(entity.getDn());
-									}
-									log.trace("Removed {}", entity.getDn());
-                                    cacheService.remove(entity.getDn());
-								} catch (Exception e) {
-									log.error("Failed to remove entry, dn: " + entity.getDn(), e);
-								}
-							}
-						}
-					};
+                    Filter filter = Filter.createANDFilter(
+                            Filter.createEqualityFilter("del", true),
+                            Filter.createORFilter(
+                                    Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now)),
+                                    Filter.createLessOrEqualFilter("exp", ldapEntryManager.encodeTime(baseDn, now))
 
-					Filter filter = Filter.createANDFilter(
-					        Filter.createEqualityFilter("del", true),
-					        Filter.createORFilter(
-					        		Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now)),
-					        		Filter.createLessOrEqualFilter("exp", ldapEntryManager.encodeTime(baseDn, now))
-					        		
-                    ));
+                            ));
 
-					ldapEntryManager.findEntries(baseDn, DeletableEntity.class, filter, SearchScope.SUB,
-							new String[] { "exp", "oxAuthExpiration", "del" }, batchOperation, 0, chunkSize,
-							chunkSize);
+                    ldapEntryManager.remove(baseDn, DeletableEntity.class, filter, chunkSize);
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
 				} catch (Exception e) {
