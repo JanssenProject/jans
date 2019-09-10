@@ -103,7 +103,7 @@ public class AssertionService {
         JsonNode userHandle = params.get("response").get("userHandle");
         if (userHandle != null && params.get("response").hasNonNull("userHandle")) {
             // This can be null for U2F authenticators
-            commonVerifiers.verifyThatString(userHandle);
+            commonVerifiers.verifyThatString(userHandle, "userHandle");
         }
 
         JsonNode clientDataJSONNode;
