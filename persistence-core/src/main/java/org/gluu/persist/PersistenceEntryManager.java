@@ -42,6 +42,9 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	<T> T merge(T entry);
 
+	@Deprecated
+	boolean contains(Object entity);
+
     <T> boolean contains(String primaryKey, Class<T> entryClass);
     <T> boolean contains(String primaryKey, Class<T> entryClass, Filter filter);
 
