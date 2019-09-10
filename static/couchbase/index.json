@@ -11,6 +11,7 @@
         "displayName"
     ],
     "static" : [
+      [["uid"], "objectClass= \"gluuPerson\""]
     ]
   },
 
