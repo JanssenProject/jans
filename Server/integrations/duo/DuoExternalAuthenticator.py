@@ -91,7 +91,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Duo. Authenticate for step 1"
 
-            # Check if user authenticated alreadyin another custom script
+            # Check if user authenticated already in another custom script
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 credentials = identity.getCredentials()
