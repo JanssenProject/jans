@@ -199,9 +199,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         log.debug("Start NATIVE_PERSISTENCE clean up");
         try {
             Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now));
-            ldapEntryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
+            final int removedCount = ldapEntryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
 
-            log.debug("End NATIVE_PERSISTENCE clean up");
+            log.debug("End NATIVE_PERSISTENCE clean up, items removed: " + removedCount);
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);
         }
