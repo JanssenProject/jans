@@ -878,7 +878,8 @@ class Setup(object):
     def initialize(self):
         self.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
         if not os.path.exists(self.distFolder):
-            sys.exit("Please ensure that you are running this script inside Gluu container.")
+            print "Please ensure that you are running this script inside Gluu container."
+            sys.exit(1)
 
 
     def set_ownership(self):
@@ -4231,8 +4232,8 @@ class Setup(object):
                 return True
             else:
                 time.sleep(5)
-
-        sys.exit("Couchbase server was not ready. Giving up" + str(cbm_result.reason))
+        print "Couchbase server was not ready. Giving up" + str(cbm_result.reason)
+        sys.exit(1)
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
@@ -4335,7 +4336,8 @@ class Setup(object):
         min_cb_ram += self.couchbaseBucketDict['default']['memory_allocation']
 
         if couchbaseClusterRamsize < min_cb_ram:
-            sys.exit("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
+            print "Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram)
+            sys.exit(1)
 
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
 
@@ -4528,7 +4530,8 @@ class Setup(object):
         print "Loading test data"
         prop_file = os.path.join(self.install_dir, 'setup.properties.last')
         if not os.path.exists(prop_file):
-            sys.exit("setup.properties.last were not found, exiting.")
+            print "setup.properties.last were not found, exiting."
+            sys.exit(1)
 
         self.load_properties(prop_file)
         self.createLdapPw()
@@ -4678,11 +4681,11 @@ def resource_checkings():
     file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
     if file_max < 64000:
-        sys.exit("Maximum number of files that can be opened on this computer is "
+        print("Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "
                   "host system and re-run setup.py".format(colors.DANGER,
                                                                 colors.ENDC))
-
+        sys.exit(1)
     current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
     current_mem_size = current_mem_bytes / (1024.**3) #in GB
 
