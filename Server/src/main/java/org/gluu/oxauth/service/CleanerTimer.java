@@ -153,9 +153,9 @@ public class CleanerTimer {
 
                             ));
 
-                    ldapEntryManager.remove(baseDn, DeletableEntity.class, filter, chunkSize);
+                    final int removed = ldapEntryManager.remove(baseDn, DeletableEntity.class, filter, chunkSize);
 
-					log.debug("Finished clean up for baseDn: {}, takes: {}ms", baseDn, started.elapsed(TimeUnit.MILLISECONDS));
+					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 				} catch (Exception e) {
 					log.error("Failed to process clean up for baseDn: " + baseDn, e);
 				}
