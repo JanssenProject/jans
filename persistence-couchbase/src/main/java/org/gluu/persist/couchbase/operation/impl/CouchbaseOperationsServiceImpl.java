@@ -567,7 +567,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	                    if ((count > 0) && (resultCount >= count)) {
 	                        break;
 	                    }
-	                } while ((lastSearchResultList.size() > 0) && (lastSearchResultList.size() > 0));
+	                } while (lastSearchResultList.size() > 0);
 	            } catch (CouchbaseException ex) {
 	                throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
 	            }
