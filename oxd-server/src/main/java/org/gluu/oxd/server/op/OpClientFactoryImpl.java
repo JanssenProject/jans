@@ -2,6 +2,9 @@ package org.gluu.oxd.server.op;
 
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
+import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.rs.protect.resteasy.PatProvider;
 import org.gluu.oxd.rs.protect.resteasy.ResourceRegistrar;
@@ -53,8 +56,12 @@ public class OpClientFactoryImpl implements OpClientFactory {
         return UmaClientFactory.instance();
     }
 
-    public Validator createValidator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService) {
-        return new Validator(idToken, discoveryResponse, keyService);
+    public JwkClient createJwkClient(String url) {
+        return new JwkClient(url);
+    }
+
+    public RSASigner createRSASigner(SignatureAlgorithm signatureAlgorithm, RSAPublicKey rsaPublicKey) {
+        return new RSASigner(signatureAlgorithm, rsaPublicKey);
     }
 
     public RptPreProcessInterceptor createRptPreProcessInterceptor(ResourceRegistrar resourceRegistrar) {
