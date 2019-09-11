@@ -3,6 +3,7 @@ package org.gluu.oxd.server.service;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import org.gluu.oxd.server.op.OpClientFactory;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +25,15 @@ public class PublicOpKeyService {
 
     private final Cache<Pair<String, String>, RSAPublicKey> cache;
     private final HttpService httpService;
+    private OpClientFactory opClientFactory;
 
     @Inject
-    public PublicOpKeyService(ConfigurationService configurationService, HttpService httpService) {
+    public PublicOpKeyService(ConfigurationService configurationService, HttpService httpService, OpClientFactory opClientFactory) {
         this.cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(configurationService.get().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
                 .build();
         this.httpService = httpService;
+        this.opClientFactory = opClientFactory;
     }
 
 
@@ -46,7 +49,7 @@ public class PublicOpKeyService {
 
             RSAPublicKey publicKey = null;
 
-            JwkClient jwkClient = new JwkClient(jwkSetUri);
+            JwkClient jwkClient = opClientFactory.createJwkClient(jwkSetUri);
             jwkClient.setExecutor(new ApacheHttpClient4Executor(httpService.getHttpClient()));
             JwkResponse jwkResponse = jwkClient.exec();
             if (jwkResponse != null && jwkResponse.getStatus() == 200) {

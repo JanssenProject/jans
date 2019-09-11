@@ -1,14 +1,15 @@
 package org.gluu.oxd.mock.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.assertj.core.util.Lists;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaMetadataService;
 import org.gluu.oxauth.model.common.TokenType;
-import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.Jackson2;
@@ -20,8 +21,6 @@ import org.gluu.oxd.rs.protect.resteasy.*;
 import org.gluu.oxd.server.introspection.ClientFactory;
 import org.gluu.oxd.server.introspection.CorrectRptIntrospectionService;
 import org.gluu.oxd.server.op.OpClientFactory;
-import org.gluu.oxd.server.op.Validator;
-import org.gluu.oxd.server.service.PublicOpKeyService;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -34,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OpClientFactoryMockImpl implements OpClientFactory {
+
     @Override
     public TokenClient createTokenClient(String url) {
         TokenClient client = mock(TokenClient.class);
@@ -44,7 +44,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         response.setExpiresIn(50000);
         response.setRefreshToken(null);
         response.setScope("openid");
-        response.setIdToken("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiaVFPZDJ2aEtWVWFzRVRCRDZEbjV0ZyIsImF1ZCI6IjIwNDE5ZDRkLTRhMGItNGIyOC05MjgwLTkzNmNlZDBkNjVmZSIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1Njc1MDY4MTUsImlzcyI6Imh0dHBzOi8vY2UtZGV2Ni5nbHV1Lm9yZyIsImV4cCI6MTU2NzUxMDQxOCwiaWF0IjoxNTY3NTA2ODE4LCJub25jZSI6IjVqOTlyMW9tb2Q1azQ3MTFmMnB1ZDMzZTBhIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.Wt_pUXW1BJyjcq2WJUMIYZwzEUeAmrDe8SaWM-RC7T86TmnQOnz0JMgEEN1J9ONsJNMdf8WJZDaqWXu2tVqHh1IrWmZ-U8_36HxcgPXy65yLho0hzCdjPp_KVTdttQhOmLvqn9x_NO8p06wBjm3d5T6xOgtxOjR0c4lqMOBDh3_jb9UH5ZLHRosx9pFCluylPjok8BREmOI_YnUJKHWz2Js9juWBnE94s50EOb7JuyVHvIDvVkrfh0YRZw61idaRQYzfEzwQQYJz6MF2xd4eHT3f-iB5ZBYdrtOPk0691ogLL3HbO_pCfjvsf4QVD0Q-4rlcSJ004ORyR77cgrBSAA");
+        response.setIdToken("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiMnI1clZ2STdpMWxfcnNXZUV4bGRuUSIsImF1ZCI6IjZiNTc4YTliLTc1MTMtNDc3YS05YTdmLTEzNDNiNDg3Y2FmOCIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1NjgxODUzMjcsImlzcyI6Imh0dHBzOi8vZHVtbXktaXNzdWVyLm9yZyIsImV4cCI6MTk2ODE4ODkzMCwiaWF0IjoxNTY4MTg1MzMwLCJub25jZSI6IjdyNDZ1dDZlbXU5Z2kxMWduODA0NHVtNjQwIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.Pp_rWPjTs0JWpomQIfHRrzE47cJcOQMO6otYyocgWgOUbzE0ttoS8dYvthU1LtkDdA8sBSX5rhB1CGugeSqvKdij6vLeJmE-A4G0OwfwrE7ROHLsbPpuGULJuIEwXgAZXdtoBwsNmK01Nu6ATEMgREl8dYPCRQ9divjQGLKAGLA");
         response.setStatus(200);
 
         when(client.exec()).thenReturn(response);
@@ -64,9 +64,34 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         response.setRefreshToken(null);
         response.setScope("uma_protection");
         response.setIdToken("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiaVFPZDJ2aEtWVWFzRVRCRDZEbjV0ZyIsImF1ZCI6IjIwNDE5ZDRkLTRhMGItNGIyOC05MjgwLTkzNmNlZDBkNjVmZSIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1Njc1MDY4MTUsImlzcyI6Imh0dHBzOi8vY2UtZGV2Ni5nbHV1Lm9yZyIsImV4cCI6MTU2NzUxMDQxOCwiaWF0IjoxNTY3NTA2ODE4LCJub25jZSI6IjVqOTlyMW9tb2Q1azQ3MTFmMnB1ZDMzZTBhIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.Wt_pUXW1BJyjcq2WJUMIYZwzEUeAmrDe8SaWM-RC7T86TmnQOnz0JMgEEN1J9ONsJNMdf8WJZDaqWXu2tVqHh1IrWmZ-U8_36HxcgPXy65yLho0hzCdjPp_KVTdttQhOmLvqn9x_NO8p06wBjm3d5T6xOgtxOjR0c4lqMOBDh3_jb9UH5ZLHRosx9pFCluylPjok8BREmOI_YnUJKHWz2Js9juWBnE94s50EOb7JuyVHvIDvVkrfh0YRZw61idaRQYzfEzwQQYJz6MF2xd4eHT3f-iB5ZBYdrtOPk0691ogLL3HbO_pCfjvsf4QVD0Q-4rlcSJ004ORyR77cgrBSAA");
+        //response.setIdToken("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdF9oYXNoIjoiaVFPZDJ2aEtWVWFzRVRCRDZEbjV0ZyIsImF1ZCI6IjIwNDE5ZDRkLTRhMGItNGIyOC05MjgwLTkzNmNlZDBkNjVmZSIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1Njc1MDY4MTUsImlzcyI6Imh0dHBzOi8vY2UtZGV2Ni5nbHV1Lm9yZyIsImV4cCI6MTk2NzUxMDQxOCwiaWF0IjoxNTY3NTA2ODE4LCJub25jZSI6IjVqOTlyMW9tb2Q1azQ3MTFmMnB1ZDMzZTBhIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.rxyKrMvfdScDkzyGQG9Mhc-qxjzOimqrsBTpKfTRpUM");
         response.setStatus(200);
 
         when(client.execClientCredentialsGrant(any(), any(), any())).thenReturn(response);
+
+        return client;
+    }
+
+    @Override
+    public JwkClient createJwkClient(String url) {
+        JwkClient client = mock(JwkClient.class);
+
+        JwkResponse jwkResponse = mock(JwkResponse.class);
+        when(jwkResponse.getStatus()).thenReturn(200);
+
+        RSAPublicKey rsaPublicKey = mock(RSAPublicKey.class);
+        when(jwkResponse.getPublicKey(any())).thenReturn(rsaPublicKey);
+
+        when(client.exec()).thenReturn(jwkResponse);
+
+        return client;
+    }
+
+    @Override
+    public RSASigner createRSASigner(SignatureAlgorithm signatureAlgorithm, RSAPublicKey rsaPublicKey) {
+        RSASigner client = mock(RSASigner.class);
+        when(client.validate(any())).thenReturn(true);
+        when(client.validateAccessToken(any(), any())).thenReturn(true);
 
         return client;
     }
@@ -88,7 +113,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
 
         RegisterResponse response = new RegisterResponse();
 
-        response.setClientId("67c0f792-4f03-4146-b31b-575c8da21ca6");
+        response.setClientId("6b578a9b-7513-477a-9a7f-1343b487caf8");
         response.setClientSecret("DUMMY_CLIENT_SECRET_"+ System.currentTimeMillis());
         response.setRegistrationAccessToken("DUMMY_REGISTRATION_ACCESS_TOKEN");
         response.setRegistrationClientUri("https://www.dummy-op-server.xyz/oxauth/restv1/register?client_id=@!8DBF.24EB.FA0E.1BFF!0001!32B7.932A!0008!AB90.6BF3.8E32.7A13");
@@ -115,6 +140,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         response.setEntity("DUMMY_ENTITY");
         response.setRegistrationEndpoint("DUMMY_REGISTRATION_ENDPOINT");
         response.setEndSessionEndpoint("DUMMY_ENDSESSION_ENDPOINT");
+        response.setIssuer("https://dummy-issuer.org");
         when(client.execOpenIdConfiguration()).thenReturn(response);
         return client;
     }
@@ -142,12 +168,6 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         when(client.getResourceMapCopy()).thenReturn(resourceMapCopy);
         when(client.getIdMapCopy()).thenReturn(resourceIdMap);
 
-        return client;
-    }
-
-    public Validator createValidator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService) {
-        Validator client = mock(Validator.class);
-        //when(client.validateIdToken(any())).thenReturn(null);
         return client;
     }
 
