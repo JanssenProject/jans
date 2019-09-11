@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
@@ -84,13 +83,7 @@ public class ScopeService {
      * @return Scope
      */
     public org.oxauth.persistence.model.Scope getScopeByDn(String dn) {
-        org.oxauth.persistence.model.Scope scope = fromCacheByDn(dn);
-        if (scope == null) {
-        	scope = ldapEntryManager.find(org.oxauth.persistence.model.Scope.class, dn);
-        	putInCache(scope);
-        }
-        
-        return scope;
+        return cacheService.getWithPut(dn, () -> ldapEntryManager.find(org.oxauth.persistence.model.Scope.class, dn), 60);
     }
 
     /**
@@ -114,24 +107,20 @@ public class ScopeService {
      * @return scope
      */
     public org.oxauth.persistence.model.Scope getScopeById(String id) {
-        org.oxauth.persistence.model.Scope scope = fromCacheByName(id);
-        if (scope == null) {
-	        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-	
-	        org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
-	        scopeExample.setDn(scopesBaseDN);
-	        scopeExample.setId(id);
-	
-	        List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
-	        if ((scopes != null) && (scopes.size() > 0)) {
-	        	scope = scopes.get(0);
-	        }
-	        
-	        putInCache(scope);
-        }
+        return cacheService.getWithPut(id, () -> {
+            String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
-        return scope;
-    }    
+            org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
+            scopeExample.setDn(scopesBaseDN);
+            scopeExample.setId(id);
+
+            List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
+            if ((scopes != null) && (scopes.size() > 0)) {
+                return scopes.get(0);
+            }
+            return null;
+        }, 60);
+    }
     
     /**
      * Get scope by oxAuthClaims
@@ -166,18 +155,6 @@ public class ScopeService {
 		return result;
 	}
 
-    private void putInCache(org.oxauth.persistence.model.Scope scope) {
-    	if (scope == null) {
-    		return;
-    	}
-
-    	try {
-            cacheService.put(60, getScopeNameCacheKey(scope.getId()), scope, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-            cacheService.put(60,getScopeDnCacheKey(scope.getDn()), scope, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-        } catch (Exception ex) {
-            log.error("Failed to put scope in cache, scope: '{}'", scope, ex);
-        }
-    }
     private void putInCache(String claimDn, List<org.oxauth.persistence.model.Scope> scopes) {
     	if (scopes == null) {
     		return;
@@ -188,26 +165,6 @@ public class ScopeService {
             cacheService.put(key, scopes);
         } catch (Exception ex) {
             log.error("Failed to put scopes in cache, claimDn: '{}'", claimDn, ex);
-        }
-    }
-
-    private org.oxauth.persistence.model.Scope fromCacheByDn(String dn) {
-        try {
-            String key = getScopeDnCacheKey(dn);
-            return (org.oxauth.persistence.model.Scope) cacheService.get(key);
-        } catch (Exception ex) {
-            log.error("Failed to get scope from cache, scopeDn: '{}'", dn, ex);
-            return null;
-        }
-    }
-
-    private org.oxauth.persistence.model.Scope fromCacheByName(String name) {
-        try {
-            String key = getScopeNameCacheKey(name);
-            return (org.oxauth.persistence.model.Scope) cacheService.get(key);
-        } catch (Exception ex) {
-            log.error("Failed to get scope from cache, name: '{}'", name, ex);
-            return null;
         }
     }
 
@@ -225,13 +182,4 @@ public class ScopeService {
     private static String getClaimDnCacheKey(String claimDn) {
         return "claim_dn" + StringHelper.toLowerCase(claimDn);
     }
-
-    private static String getScopeNameCacheKey(String name) {
-        return "scope_name_" + StringHelper.toLowerCase(name);
-    }
-
-    private static String getScopeDnCacheKey(String dn) {
-        return "scope_dn_" + StringHelper.toLowerCase(dn);
-    }
-
 }
