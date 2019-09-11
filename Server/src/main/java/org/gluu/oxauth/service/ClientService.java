@@ -7,7 +7,6 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
-import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
@@ -45,9 +44,6 @@ import java.util.*;
 public class ClientService {
 
 	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
-
-	private static final String CACHE_CLIENT_NAME = "ClientCache";
-	private static final String CACHE_CLIENT_FILTER_NAME = "ClientFilterCache";
 
 	@Inject
 	private Logger log;
@@ -175,40 +171,7 @@ public class ClientService {
 	 * @return Client
 	 */
 	public Client getClientByDn(String dn) {
-		Client client = fromCache(dn);
-		if (client == null) {
-			try {
-				client = ldapEntryManager.find(Client.class, dn);
-				putInCache(client);
-			} catch (Exception ex) {
-				log.debug(ex.getMessage());
-			}
-		} else {
-			log.trace("Get client from cache by Dn '{}'", dn);
-		}
-
-		return client;
-	}
-
-	private void putInCache(Client client) {
-		if (client == null) {
-			return;
-		}
-
-		try {
-			cacheService.put(60, client.getDn(), client, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-		} catch (Exception e) {
-			log.error("Failed to put client in cache, client:" + client, e);
-		}
-	}
-
-	private Client fromCache(String dn) {
-		try {
-			return (Client) cacheService.get(dn);
-		} catch (Exception e) {
-			log.error("Failed to fetch client from cache, dn: " + dn, e);
-			return null;
-		}
+	    return cacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
 	}
 
 	public org.gluu.persist.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
