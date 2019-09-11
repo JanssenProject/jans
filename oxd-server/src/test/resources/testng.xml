@@ -3,7 +3,7 @@
 <suite name="oxD Suite" parallel="false">
 
     <parameter name="host" value="http://localhost"/>
-    <parameter name="opHost" value="https://ce-dev6.gluu.org"/>
+    <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="opDiscoveryPath" value=""/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
