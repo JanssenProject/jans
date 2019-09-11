@@ -2742,7 +2742,7 @@ class Setup(object):
                     sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
                     self.install_couchbase = True
                 
-                if self.persistence_type == 'couchbase':
+                if persistence_type == 'couchbase':
                     self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
 
                 self.persistence_type = persistence_type
