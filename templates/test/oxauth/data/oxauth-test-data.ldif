@@ -219,11 +219,11 @@ member: inum=B1F3-AEAE-B798,ou=people,o=gluu
 ######################################
 # Clients
 ######################################
-dn: inum=FF81-2D39,ou=clients,o=gluu
+dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Client (don't remove)
-inum: FF81-2D39
+inum: %(oxauthClient_4_inum)s
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_4_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
@@ -248,11 +248,11 @@ oxAuthScope: inum=6D99,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
-dn: inum=AB77-1A2B,ou=clients,o=gluu
+dn: inum=%(oxauthClient_2_inum)s,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Resource Server Client (don't remove)
-inum: AB77-1A2B
+inum: %(oxauthClient_2_inum)s
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_2_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
@@ -268,11 +268,11 @@ oxAuthScope: inum=6D99,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
-dn: inum=3E20,ou=clients,o=gluu
+dn: inum=%(oxauthClient_3_inum)s,ou=clients,o=gluu
 objectClass: top
 objectClass: oxAuthClient
 displayName: oxAuth Test Requesting Party Client (don't remove)
-inum: 3E20
+inum: %(oxauthClient_3_inum)s
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_3_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
