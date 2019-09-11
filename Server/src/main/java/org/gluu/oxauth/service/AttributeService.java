@@ -7,7 +7,6 @@
 package org.gluu.oxauth.service;
 
 import org.gluu.model.GluuAttribute;
-import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
@@ -47,16 +46,7 @@ public class AttributeService extends org.gluu.service.AttributeService {
      * @return GluuAttribute
      */
     public GluuAttribute getAttributeByDn(String dn) {
-        GluuAttribute gluuAttribute = (GluuAttribute) cacheService.get(dn);
-
-        if (gluuAttribute == null) {
-            gluuAttribute = ldapEntryManager.find(GluuAttribute.class, dn);
-            cacheService.put(60, dn, gluuAttribute, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-        } else {
-            log.trace("Get attribute from cache by Dn '{}'", dn);
-        }
-
-        return gluuAttribute;
+        return cacheService.getWithPut(dn, () -> ldapEntryManager.find(GluuAttribute.class, dn), 60);
     }
 
     public GluuAttribute getByLdapName(String name) {
