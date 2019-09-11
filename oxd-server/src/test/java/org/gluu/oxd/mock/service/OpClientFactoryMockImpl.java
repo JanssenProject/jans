@@ -1,5 +1,6 @@
 package org.gluu.oxd.mock.service;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
@@ -24,6 +25,8 @@ import org.gluu.oxd.server.op.OpClientFactory;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -33,6 +36,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OpClientFactoryMockImpl implements OpClientFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OpClientFactoryMockImpl.class);
 
     @Override
     public TokenClient createTokenClient(String url) {
@@ -245,7 +250,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Failed to parse uma-rs-protect resource json .", e);
         }
         return rsResourceMap;
     }
@@ -266,7 +271,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Failed to parse uma-rs-protect resource json .", e);
         }
         return rsIdMap;
     }
