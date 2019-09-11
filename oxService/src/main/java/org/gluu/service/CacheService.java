@@ -14,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * Provides operations with cache
@@ -39,6 +40,23 @@ public class CacheService implements CacheInterface {
         }
 
         return cacheProvider.get(key);
+    }
+
+    public <T> T get(String key, Supplier<T> loadFunction) {
+        if (loadFunction == null) {
+            return (T) get(key);
+        }
+
+        if (CacheProviderType.NATIVE_PERSISTENCE == cacheProvider.getProviderType()) {
+            return loadFunction.get();
+        }
+
+        final Object value = get(key);
+        if (value != null) {
+            return (T) value;
+        }
+
+        return loadFunction.get();
     }
 
     public void put(int expirationInSeconds, String key, Object object) {
