@@ -221,19 +221,19 @@ public class RegistrationPersistenceService {
         ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         // Cleaning empty branches
-        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
-            @Override
-            public void performAction(List<SimpleBranch> entries) {
-                for (SimpleBranch p : entries) {
-                    try {
-                        ldapEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
-        ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyRegistrationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
+//        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
+//            @Override
+//            public void performAction(List<SimpleBranch> entries) {
+//                for (SimpleBranch p : entries) {
+//                    try {
+//                        ldapEntryManager.remove(p);
+//                    } catch (Exception e) {
+//                        log.error("Failed to remove entry", e);
+//                    }
+//                }
+//            }
+//        };
+//        ldapEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyRegistrationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
     }
 
     private Filter getExpiredRegistrationFilter(String baseDn) {
