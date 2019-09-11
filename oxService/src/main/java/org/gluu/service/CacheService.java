@@ -53,11 +53,17 @@ public class CacheService implements CacheInterface {
 
         final Object value = get(key);
         if (value != null) {
-            put(expirationInSeconds, key, value);
+            log.trace("Loaded from cache, key: " + key);
             return (T) value;
-        }
+        } else {
+            final T loaded = loadFunction.get();
+            if (loaded == null) {
+                return null;
+            }
 
-        return loadFunction.get();
+            put(expirationInSeconds, key, loaded);
+            return loaded;
+        }
     }
 
     public void put(int expirationInSeconds, String key, Object object) {
