@@ -4125,6 +4125,7 @@ class Setup(object):
                 attrquoteds = ', '.join(attrquoted)
                 query = 'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3})\n'.format(bucket, sic, attrquoteds, wherec)
                 W.write(query)
+                sic += 1
 
         self.couchbaseExecQuery(tmp_file)
 

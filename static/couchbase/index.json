@@ -1,17 +1,19 @@
 {
   "gluu_user": {
     "attributes": [
-        ["objectClass"], 
-        ["oxStatus"], 
-        ["creationDate"], 
-        ["uid"], 
-        ["del"], 
-        ["mail"],
-        ["inum"],
-        ["displayName"]
+      ["objectClass"], 
+      ["oxStatus"], 
+      ["creationDate"], 
+      ["uid"], 
+      ["del"], 
+      ["mail"],
+      ["inum"],
+      ["displayName"],
+      ["del","exp"]
     ],
     "static" : [
-      [["uid"], "objectClass= \"gluuPerson\""]
+      [["uid"], "objectClass = \"gluuPerson\""],
+      [["exp", "oxAuthExpiration"], "del=true"]
     ]
   },
 
@@ -28,31 +30,35 @@
 
   "gluu": {
     "attributes": [
-        ["objectClass"],
-        ["oxScriptType"], 
-        ["oxAuthExpiration"], 
-        ["iat"], 
-        ["oxAuthClientSecretExpiresAt"], 
-        ["creationDate"], 
-        ["tknCde"], 
-        ["inum"], 
-        ["displayName"], 
-        ["oxAuthRegistrationAccessToken"], 
-        ["uid"], 
-        ["authzCode"], 
-        ["oxAuthClaimName"], 
-        ["mail"], 
-        ["oxId"], 
-        ["oxTicket"], 
-        ["del"],
-        ["ssnId"],
-        ["oxAuthClientId"],
-        ["clnId"],
-        ["del","oxAuthExpiration"],
-        ["del","exp"]
+      ["objectClass"],
+      ["oxScriptType"], 
+      ["oxAuthExpiration"], 
+      ["iat"], 
+      ["oxAuthClientSecretExpiresAt"], 
+      ["creationDate"], 
+      ["tknCde"], 
+      ["inum"], 
+      ["displayName"], 
+      ["oxAuthRegistrationAccessToken"], 
+      ["uid"], 
+      ["authzCode"], 
+      ["oxAuthClaimName"], 
+      ["mail"], 
+      ["oxId"], 
+      ["oxTicket"], 
+      ["del"],
+      ["ssnId"],
+      ["oxAuthClientId"],
+      ["clnId"],
+      ["del","exp"],
+      ["objectClass","creationDate","oxStatus"]
     ],
     "static" : [
-       [["oxScriptType"], "objectClass= \"oxCustomScript\""]
+      [["creationDate"], "objectClass = \"gluuPasswordResetRequest\""],
+      [["oxScriptType"], "objectClass = \"oxCustomScript\""],
+      [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
+      [["exp", "oxAuthExpiration"], "del=true"]
+        
     ]
   },
 
@@ -67,10 +73,10 @@
 
   "gluu_statistic": {
     "attributes": [
-        ["objectClass"], 
-        ["oxStartDate"], 
-        ["del"], 
-        ["oxAuthExpiration"]
+      ["objectClass"], 
+      ["oxStartDate"], 
+      ["del"], 
+      ["oxAuthExpiration"]
     ],
     "static" : [
     ]
@@ -80,16 +86,17 @@
     "attributes":[
     ],
     "static" : [
-      [["oxAuthExpiration"], "objectClass= \"cache\""]
     ]
   },
 
   "gluu_token": {
     "attributes": [
-      ["grtId"]
+      ["del","exp"]
     ],
     "static" : [
-      [["grtId"], "objectClass= \"token\""]
+      [["exp", "oxAuthExpiration"], "del=true"],
+      [["grtId"], "objectClass = \"token\""]
+    
     ]
   },
 
@@ -97,7 +104,6 @@
     "attributes":[
     ],
     "static":[
-      [["exp"], "`del` = true"]
     ]
   }
 
