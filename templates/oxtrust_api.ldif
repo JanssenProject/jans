@@ -23,7 +23,7 @@ dn: oxId=%(oxtrust_resource_id)s,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: oxTrust api Resource
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
+owner: inum=%(admin_inum)s,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/api_logo.png
 oxAssociatedClient: inum=%(oxtrust_resource_server_client_id)s,ou=clients,o=gluu
 oxAuthUmaScope: inum=OO11-AABB,ou=scopes,o=gluu
