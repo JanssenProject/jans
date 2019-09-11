@@ -9,6 +9,7 @@
       ["mail"],
       ["inum"],
       ["displayName"],
+      ["sn"],
       ["del","exp"]
     ],
     "static" : [
