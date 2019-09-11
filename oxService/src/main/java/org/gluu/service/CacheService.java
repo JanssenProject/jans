@@ -42,7 +42,7 @@ public class CacheService implements CacheInterface {
         return cacheProvider.get(key);
     }
 
-    public <T> T get(String key, Supplier<T> loadFunction) {
+    public <T> T getWithPut(String key, Supplier<T> loadFunction, int expirationInSeconds) {
         if (loadFunction == null) {
             return (T) get(key);
         }
@@ -53,6 +53,7 @@ public class CacheService implements CacheInterface {
 
         final Object value = get(key);
         if (value != null) {
+            put(expirationInSeconds, key, value);
             return (T) value;
         }
 
