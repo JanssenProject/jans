@@ -8,7 +8,6 @@ package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
@@ -73,7 +72,6 @@ public class UmaResourceService {
     public void addResource(UmaResource resource) {
         validate(resource);
         ldapEntryManager.persist(resource);
-        putInCache(resource);
     }
 
     public void validate(UmaResource resource) {
@@ -158,19 +156,12 @@ public class UmaResourceService {
     }
 
     public UmaResource getResourceById(String id) {
-
-        UmaResource fromCache = fromCache(getDnForResource(id));
-        if (fromCache != null) {
-            log.trace("UMA Resource from cache, id: " + id);
-            return fromCache;
-        }
-
         prepareBranch();
 
         try {
-            final UmaResource resource = ldapEntryManager.find(UmaResource.class, getDnForResource(id));
+            final String key = getDnForResource(id);
+            final UmaResource resource = cacheService.getWithPut(key, () -> ldapEntryManager.find(UmaResource.class, key), RESOURCE_CACHE_EXPIRATION_IN_SECONDS);
             if (resource != null) {
-                putInCache(resource);
                 return resource;
             }
         } catch (Exception e) {
@@ -200,30 +191,5 @@ public class UmaResourceService {
     public String getBaseDnForResource() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
         return String.format("ou=resources,%s", umaBaseDn);
-    }
-
-    private void putInCache(UmaResource resource) {
-        if (resource == null || StringUtils.isBlank(resource.getDn())) {
-            return;
-        }
-
-        try {
-            cacheService.put(RESOURCE_CACHE_EXPIRATION_IN_SECONDS, resource.getDn(), resource, Constants.SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE);
-        } catch (Exception e) {
-            log.error("Failed to put client in cache, client:" + resource, e);
-        }
-    }
-
-    private UmaResource fromCache(String dn) {
-        try {
-            if (StringUtils.isBlank(dn)) {
-                return null;
-            }
-
-            return (UmaResource) cacheService.get(dn);
-        } catch (Exception e) {
-            log.error("Failed to fetch client from cache, dn: " + dn, e);
-            return null;
-        }
     }
 }
