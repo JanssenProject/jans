@@ -2724,15 +2724,15 @@ class Setup(object):
                     if not option in options:
                         print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
 
-                self.persistence_type = backend_types[int(option)-1][1]
+                persistence_type = backend_types[int(option)-1][1]
 
-                if self.persistence_type == 'wrends':
+                if persistence_type == 'wrends':
                     self.opendj_type = 'wrends'
 
-                if self.persistence_type in ('opendj', 'wrends', 'hybrid'):
+                if persistence_type in ('opendj', 'wrends', 'hybrid'):
                     self.installLdap = True
 
-                if self.persistence_type in ('couchbase', 'hybrid'):
+                if persistence_type in ('couchbase', 'hybrid'):
                     self.cache_provider_type = 'NATIVE_PERSISTENCE'
                     print ('  Please note that you have to update your firewall configuration to\n'
                             '  allow connections to the following ports:\n'
@@ -2744,6 +2744,11 @@ class Setup(object):
                 
                 if self.persistence_type == 'couchbase':
                     self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
+
+                self.persistence_type = persistence_type
+                
+                if self.persistence_type in ('opendj', 'wrends'):
+                    self.persistence_type = 'ldap'
                 
         else:
             self.installLdap = False
@@ -4394,7 +4399,7 @@ class Setup(object):
         scim_test_ldif = os.path.join(self.outputFolder, 'test/scim-client/data/scim-test-data.ldif')    
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
 
-        if self.persistence_type in ('opendj', 'hybrid'):
+        if self.persistence_type in ('opendj', 'wrends', 'ldap', 'hybrid'):
             self.import_ldif_opendj(ldif_files)
         elif self.persistence_type in ('couchbase', 'hybrid'):
             self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
