@@ -58,6 +58,7 @@ public class AuthorizationCodeFlowTest {
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setIdTokenSignedResponseAlg("HS256");
         params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
@@ -72,7 +73,7 @@ public class AuthorizationCodeFlowTest {
     private GetTokensByCodeResponse2 requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
 
         final String state = CoreUtils.secureRandomString();
-        final String nonce = "rrsenukn8h9hjmscjf5gq9i5tu";
+        final String nonce = "7r46ut6emu9gi11gn8044um640";
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
         params.setOxdId(site.getOxdId());
