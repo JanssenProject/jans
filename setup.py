@@ -303,7 +303,12 @@ class Setup(object):
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
-        self.templateRenderingDict = {'passport_oxtrust_config':''}
+        self.templateRenderingDict = {
+                                        'passport_oxtrust_config': '',
+                                        'oxauthClient_2_inum': 'AB77-1A2B',
+                                        'oxauthClient_3_inum': '3E20',
+                                        'oxauthClient_4_inum': 'FF81-2D39',
+                                     }
 
         # OS commands
         self.cmd_ln = '/bin/ln'
@@ -1776,14 +1781,15 @@ class Setup(object):
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords")
+        hostname = self.hostname.split('.')[0]
         try:
-            self.templateRenderingDict['oxauthClient_2_pw'] = self.getPW()
+            self.templateRenderingDict['oxauthClient_2_pw'] = self.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname
             self.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_2_pw'])
 
-            self.templateRenderingDict['oxauthClient_3_pw'] = self.getPW()
+            self.templateRenderingDict['oxauthClient_3_pw'] =  self.templateRenderingDict['oxauthClient_3_inum'] + '-' + hostname
             self.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_3_pw'])
 
-            self.templateRenderingDict['oxauthClient_4_pw'] = self.getPW()
+            self.templateRenderingDict['oxauthClient_4_pw'] = self.templateRenderingDict['oxauthClient_4_inum'] + '-' + hostname
             self.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
