@@ -84,8 +84,10 @@
 
   "gluu_cache": {
     "attributes":[
+      ["del","exp"]
     ],
     "static" : [
+      [["exp", "oxAuthExpiration"], "del=true"]
     ]
   },
 
