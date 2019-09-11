@@ -61,7 +61,11 @@ public class CacheService implements CacheInterface {
                 return null;
             }
 
-            put(expirationInSeconds, key, loaded);
+            try {
+                put(expirationInSeconds, key, loaded);
+            } catch (Exception e) {
+                log.error("Failed to put object into cache, key: " + key, e); // we don't want prevent returning loaded value due to failure with put
+            }
             return loaded;
         }
     }
