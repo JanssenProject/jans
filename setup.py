@@ -482,7 +482,7 @@ class Setup(object):
         self.encoded_shib_jks_pw = None
         self.application_max_ram = None    # in MB
         self.encode_salt = None
-
+        self.admin_inum = None
 
         self.ldapBaseFolderldapPass = None
 
@@ -1036,7 +1036,8 @@ class Setup(object):
             self.oxtrust_requesting_party_client_id = '0008-'  + str(uuid.uuid4())
         if not self.oxtrust_resource_id:
             self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
-
+        if not self.admin_inum:
+            self.admin_inum = str(uuid.uuid4())
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
