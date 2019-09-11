@@ -31,6 +31,4 @@ public final class Constants {
 	public static final String REMOTE_IP = "remote_ip";
 	public static final String AUTHENTICATED_USER = "auth_user";
 
-	public static final boolean SKIP_CACHE_PUT_FOR_NATIVE_PERSISTENCE = true;
-
 }
