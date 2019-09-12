@@ -915,6 +915,8 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '440', realCertFolder])
         self.run([self.cmd_chmod, 'a+X', realCertFolder])
 
+        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
@@ -923,6 +925,7 @@ class Setup(object):
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
+
 
     def set_permissions(self):
         self.logIt("Changing permissions")
@@ -943,11 +946,15 @@ class Setup(object):
         if self.os_type in ['debian', 'ubuntu']:
             self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
+
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             realIdp3BinFolder = "%s/bin" % realIdp3Folder;
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
+
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
     def detect_ip(self):
         detectedIP = None
@@ -4688,11 +4695,14 @@ class Setup(object):
             else:
                 self.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
                 self.run([self.systemctl, 'daemon-reload'])
-                
+            
+            #create empty gluu-radius.private-key.pem
+            gluu_radius_private_key_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
+            self.writeFile(gluu_radius_private_key_fn, '')
+            
             self.run([self.cmd_chown, '-R', 'radius:gluu', radius_dir])
             self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
             self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
-            self.run([self.cmd_chown, 'root:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
 
             self.enable_service_at_start('gluu-radius')
 
