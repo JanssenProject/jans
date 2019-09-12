@@ -11,6 +11,7 @@ from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.config.oxtrust import AppConfiguration
 from javax.faces.context import ExternalContext
+from org.gluu.oxtrust.ldap.service import ConfigurationService
 
 import java
 
@@ -35,7 +36,8 @@ class UserRegistration(UserRegistrationType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def initRegistration(self, user, requestParameters, configurationAttributes):
         print "User Confirm registration. Init method"
-
+        #hostName = requestParameters.get("hostName")[0]
+        #print "HostName Initialization : %s" % hostName
         return True
 
     # User registration pre method
@@ -44,7 +46,6 @@ class UserRegistration(UserRegistrationType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def preRegistration(self, user, requestParameters, configurationAttributes):
         print "User Confirm registration. Pre method"
-        
         userStatus = GluuStatus.INACTIVE
 
         # Disable/Enable registered user
@@ -59,18 +60,13 @@ class UserRegistration(UserRegistrationType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def postRegistration(self, user, requestParameters, configurationAttributes):
         print "User Confirm registration. Post method"
-        appConfiguration = CdiUtil.bean(AppConfiguration)
-        try:
-            hostName = appConfiguration.getApplianceUrl()
-        except:
-            hostName= requestParameters.get("hostName")[0];
-            
-        print "HostName: %s" % hostName   
         externalContext = CdiUtil.bean(ExternalContext)
-        contextPath = externalContext.getRequest().getContextPath() 
+        contextPath = externalContext.getRequest().getContextPath()
+        hostName =  externalContext.getRequestServerName()
+        print "HostName from context : %s" % hostName
         mailService = CdiUtil.bean(MailService)
         subject = "Registration confirmation"
-        activationLink = "%s%s/confirm/registration?code=%s" %(hostName, contextPath, self.guid)
+        activationLink = "https://%s%s/confirm/registration.htm?code=%s" %(hostName, contextPath, self.guid)
         body = "<h2 style='margin-left:10%%;color: #337ab7;'>Welcome</h2><hr style='width:80%%;border: 1px solid #337ab7;'></hr><div style='text-align:center;'><p>Dear <span style='color: #337ab7;'>%s</span>,</p><p>Your Account has been created, welcome to <span style='color: #337ab7;'>%s</span>.</p><p>You are just one step way from activating your account on <span style='color: #337ab7;'>%s</span>.</p><p>Click the button and start using your account.</p></div><a class='btn' href='%s'><button style='background: #337ab7; color: white; margin-left: 30%%; border-radius: 5px; border: 0px; padding: 5px;' type='button'>Activate your account now!</button></a>"  % (user.getUid(), hostName, hostName, activationLink)
         print "User Confirm registration. Post method. Attempting to send e-mail to '%s' message '%s'" % (user.getMail(), body)
         mailService.sendMail(user.getMail(), None, subject, body, body);
@@ -78,7 +74,6 @@ class UserRegistration(UserRegistrationType):
 
     def confirmRegistration(self, user, requestParameters, configurationAttributes):
         print "User Confirm registration. Confirm method"
-
         code_array = requestParameters.get("code")
         if ArrayHelper.isEmpty(code_array):
             print "User Confirm registration. Confirm method. code is empty"
