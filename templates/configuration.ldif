@@ -21,7 +21,7 @@ oxIDPAuthentication: {"type": "auth",
   "name": null,
   "level": 0,
   "priority": 1,
-  "enabled": true,
+  "enabled": false,
   "version": 0,
   "config": {"configId": "auth_ldap_server",
             "servers": ["%(ldap_hostname)s:%(ldaps_port)s"],
@@ -33,7 +33,7 @@ oxIDPAuthentication: {"type": "auth",
             "primaryKey": "uid",
             "localPrimaryKey": "uid",
             "useAnonymousBind": false,
-            "enabled": true}
+            "enabled": false}
   }
 oxLogViewerConfig: {
   "log_template":[
