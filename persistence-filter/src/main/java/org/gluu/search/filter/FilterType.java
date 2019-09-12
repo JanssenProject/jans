@@ -8,7 +8,7 @@ package org.gluu.search.filter;
 public enum FilterType {
 
     RAW(""), PRESENCE("*"), EQUALITY("="), LESS_OR_EQUAL("<="), GREATER_OR_EQUAL(">="), APPROXIMATE_MATCH("~"), SUBSTRING("="), NOT("!"),
-    OR("|"), AND("&");
+    OR("|"), AND("&"), LOWERCASE("lowercase");
 
     private String sign;
 
