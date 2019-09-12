@@ -4136,8 +4136,16 @@ class Setup(object):
 
             index_names = []
             for ind in index_list['attributes']:
-                attr_ = ','.join(['`{}`'.format(a) for a in ind])
-                index_name = 'def_{0}_{1}'.format(bucket, '_'.join(ind))
+                if '(' in ''.join(ind):
+                    attr_ = ind[0]
+                    index_name_ = ind[0].replace('(','_').replace(')','_').replace('`','').lower()
+                    if index_name_.endswith('_'):
+                        index_name_ = index_name_[:-1]
+                    index_name = 'def_{0}_{1}'.format(bucket, index_name_)
+                else:
+                    attr_ = ','.join(['`{}`'.format(a) for a in ind])
+                    index_name = 'def_{0}_{1}'.format(bucket, '_'.join(ind))
+
                 W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, attr_))
                 index_names.append(index_name)
 
