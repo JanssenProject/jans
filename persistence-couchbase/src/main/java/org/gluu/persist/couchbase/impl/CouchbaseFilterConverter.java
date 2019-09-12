@@ -156,14 +156,14 @@ public class CouchbaseFilterConverter {
             	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else if (hasSubFilters && (isMultiValuedDetected == null)) {
         		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
-            	return ConvertedExpression.build(Expression.path(nameConvertedExpression).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            	return ConvertedExpression.build(nameConvertedExpression.expression().eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else {
             	Expression nameExpression;
-            	if (ArrayHelper.isEmpty(currentGenericFilter.getFilters())) {
-            		nameExpression = Expression.path(toInternalAttribute(currentGenericFilter));
-            	} else {
+            	if (hasSubFilters) {
             		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
             		nameExpression = nameConvertedExpression.expression();
+            	} else {
+            		nameExpression = Expression.path(toInternalAttribute(currentGenericFilter));
             	}
                 Expression exp1 = Expression
                         .par(Expression.path(nameExpression).eq(buildTypedExpression(currentGenericFilter)));
