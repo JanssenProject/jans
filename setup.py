@@ -2971,6 +2971,10 @@ class Setup(object):
 
                 if cbm_result.ok:
                     print "    Successfully connected to Couchbase server"
+                    print("{0}Note: The password used for the admin user in "
+                        "Couchbase is also\nassigned to the admin user in "
+                        "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
+                    
                     break
                 else:
                     print "    Can't establish connection to Couchbase server with given parameters."
@@ -4729,9 +4733,9 @@ def resource_checkings():
     file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
     if file_max < 64000:
-        print("Maximum number of files that can be opened on this computer is "
+        print("{0}Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "
-                  "host system and re-run setup.py".format(colors.DANGER,
+                  "host system and re-run setup.py{1}".format(colors.DANGER,
                                                                 colors.ENDC))
         sys.exit(1)
     current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
