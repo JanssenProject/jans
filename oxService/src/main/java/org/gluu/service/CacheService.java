@@ -14,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * Provides operations with cache
@@ -39,6 +40,34 @@ public class CacheService implements CacheInterface {
         }
 
         return cacheProvider.get(key);
+    }
+
+    public <T> T getWithPut(String key, Supplier<T> loadFunction, int expirationInSeconds) {
+        if (loadFunction == null) {
+            return (T) get(key);
+        }
+
+        if (CacheProviderType.NATIVE_PERSISTENCE == cacheProvider.getProviderType()) {
+            return loadFunction.get();
+        }
+
+        final Object value = get(key);
+        if (value != null) {
+            log.trace("Loaded from cache, key: " + key);
+            return (T) value;
+        } else {
+            final T loaded = loadFunction.get();
+            if (loaded == null) {
+                return null;
+            }
+
+            try {
+                put(expirationInSeconds, key, loaded);
+            } catch (Exception e) {
+                log.error("Failed to put object into cache, key: " + key, e); // we don't want prevent returning loaded value due to failure with put
+            }
+            return loaded;
+        }
     }
 
     public void put(int expirationInSeconds, String key, Object object) {
