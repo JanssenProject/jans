@@ -42,6 +42,8 @@ import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.JsonService;
 import org.gluu.service.PythonService;
@@ -377,7 +379,7 @@ public class AppInitializer {
 		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs);
 
 		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
-			PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
+			PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class)
 					.createEntryManager(persistenceAuthProperties.get(i));
 			log.debug("Created {}#{}: {}", new Object[] { ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i,
 					persistenceAuthEntryManager });
