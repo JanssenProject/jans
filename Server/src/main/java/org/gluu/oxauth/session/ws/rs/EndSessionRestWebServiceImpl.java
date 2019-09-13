@@ -113,7 +113,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         try {
             if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
-                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(entity).build();
+                return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).entity(entity).build();
             }
         } catch (URISyntaxException e) {
             log.error("Can't perform redirect", e);
