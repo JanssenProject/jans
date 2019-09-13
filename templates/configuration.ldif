@@ -9,8 +9,8 @@ gluuManageIdentityPermission: true
 gluuFederationHostingEnabled: disabled
 gluuVdsCacheRefreshEnabled: false
 gluuScimEnabled: false
-oxAuthenticationMode: auth_ldap_server
-oxTrustAuthenticationMode: auth_ldap_server
+oxAuthenticationMode: simple_password_auth
+oxTrustAuthenticationMode: simple_password_auth
 gluuPassportEnabled: %(gluuPassportEnabled)s
 gluuRadiusEnabled: %(gluuRadiusEnabled)s
 gluuSamlEnabled: %(gluuSamlEnabled)s
