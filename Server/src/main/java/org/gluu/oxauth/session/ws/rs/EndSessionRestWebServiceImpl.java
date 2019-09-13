@@ -109,16 +109,16 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
         log.debug(reason);
-        final String entity = errorResponseFactory.errorAsJson(error, reason);
-
         try {
             if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
-                return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).entity(entity).build();
+                String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
+                postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
             }
         } catch (URISyntaxException e) {
             log.error("Can't perform redirect", e);
         }
-        return Response.status(Response.Status.BAD_REQUEST).entity(entity).build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.errorAsJson(error, reason)).build();
     }
 
     /**
