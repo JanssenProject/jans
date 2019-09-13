@@ -84,7 +84,7 @@ public class UserService {
 			return null;
 		}
 
-		Filter userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), userId);
+		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
 		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, userUidFilter, returnAttributes);
 		log.debug("Found {} entries for user id = {}", entries.size(), userId);
