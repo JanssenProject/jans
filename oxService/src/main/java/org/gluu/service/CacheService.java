@@ -70,14 +70,7 @@ public class CacheService implements CacheInterface {
         }
     }
 
-    public void put(int expirationInSeconds, String key, Object object) {
-        put(expirationInSeconds, key, object, false);
-    }
-
-	public void put(int expirationInSeconds, String key, Object object, boolean skipPutOnNativePersistence) {
-		if (skipPutOnNativePersistence && (CacheProviderType.NATIVE_PERSISTENCE == cacheProvider.getProviderType())) {
-			return;
-		}
+	public void put(int expirationInSeconds, String key, Object object) {
 		if (cacheProvider != null) {
 			cacheProvider.put(expirationInSeconds, key, object);
 		}
@@ -105,7 +98,7 @@ public class CacheService implements CacheInterface {
     }
 
     public void put(String key, Object object) {
-        put(60, key, object, false);
+        put(DEFAULT_EXPIRATION, key, object);
     }
 
     @Deprecated // we keep it only for back-compatibility of scripts code
