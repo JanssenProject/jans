@@ -90,21 +90,28 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
-        log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
-                idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
+        try {
+            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
+                    idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
-        validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
-        validateSessionIdRequestParameter(sessionId, postLogoutRedirectUri);
+            validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
+            validateSessionIdRequestParameter(sessionId, postLogoutRedirectUri);
 
-        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, postLogoutRedirectUri);
+            final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, postLogoutRedirectUri);
 
-        auditLogging(httpRequest, pair);
+            auditLogging(httpRequest, pair);
 
-        if (pair.getFirst() == null && pair.getSecond() == null) {
-            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
+            if (pair.getFirst() == null && pair.getSecond() == null) {
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
+            }
+
+            return httpBased(postLogoutRedirectUri, state, pair);
+        } catch (WebApplicationException e) {
+            if (e.getResponse() != null)
+                return e.getResponse();
+
+            throw e;
         }
-
-        return httpBased(postLogoutRedirectUri, state, pair);
     }
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
