@@ -99,7 +99,11 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     public String getErrorAsQueryString(IErrorType p_type, String p_state) {
-        return getErrorResponse(p_type, p_state, "").toQueryString();
+        return getErrorAsQueryString(p_type, p_state, "");
+    }
+
+    public String getErrorAsQueryString(IErrorType p_type, String p_state, String reason) {
+        return getErrorResponse(p_type, p_state, reason).toQueryString();
     }
 
     public DefaultErrorResponse getErrorResponse(IErrorType type, String p_state, String reason) {
