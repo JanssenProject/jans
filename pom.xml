@@ -522,7 +522,7 @@
 
     <profiles>
         <profile>
-            <id>run-load-tests</id>
+            <id>run-test-with-mocked-op-clients</id>
             <activation>
                 <property>
                     <name>benchmark</name>
