@@ -37,6 +37,12 @@ public class Filter {
         this.filterString = filterString;
     }
 
+    public Filter(FilterType type, Filter filter, Object assertionValue) {
+        this(type);
+        this.filters = new Filter[] { filter };
+        this.assertionValue = assertionValue;
+	}
+
     public Filter(FilterType type, String attributeName, Object assertionValue) {
         this(type);
         this.attributeName = attributeName;
@@ -51,7 +57,7 @@ public class Filter {
         this.subFinal = subFinal;
     }
 
-    /*
+	/*
      * This method force filter to use specific syntax. It's not useful when we need
      * to support different persistent mechanisms
      */
@@ -68,8 +74,16 @@ public class Filter {
         return new Filter(FilterType.EQUALITY, attributeName, assertionValue);
     }
 
+    public static Filter createEqualityFilter(final Filter filter, final Object assertionValue) {
+        return new Filter(FilterType.EQUALITY, filter, assertionValue);
+    }
+
     public static Filter createNOTFilter(final Filter filter) {
         return new Filter(FilterType.NOT, filter);
+    }
+
+    public static Filter createLowercaseFilter(final String attributeName) {
+        return new Filter(FilterType.LOWERCASE, attributeName, null);
     }
 
     public static Filter createLessOrEqualFilter(final String attributeName, final Object assertionValue) {
