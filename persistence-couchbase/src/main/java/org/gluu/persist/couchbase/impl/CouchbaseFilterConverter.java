@@ -23,12 +23,14 @@ import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
+import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.functions.StringFunctions;
 
 /**
  * Filter to Couchbase expressions convert
@@ -141,21 +143,32 @@ public class CouchbaseFilterConverter {
 
 	                    return ConvertedExpression.build(Expression.par(result), requiredConsistency);
                 	}
-                }
+            	}
             }
         }
 
         if (FilterType.EQUALITY == type) {
+        	boolean hasSubFilters = ArrayHelper.isNotEmpty(currentGenericFilter.getFilters());
         	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
             if (currentGenericFilter.isMultiValued() || Boolean.TRUE.equals(isMultiValuedDetected)) {
                 return ConvertedExpression.build(Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(toInternalAttribute(currentGenericFilter)))), requiredConsistency);
             } else if (Boolean.FALSE.equals(isMultiValuedDetected)) {
             	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            } else if (hasSubFilters && (isMultiValuedDetected == null)) {
+        		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
+            	return ConvertedExpression.build(nameConvertedExpression.expression().eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else {
+            	Expression nameExpression;
+            	if (hasSubFilters) {
+            		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
+            		nameExpression = nameConvertedExpression.expression();
+            	} else {
+            		nameExpression = Expression.path(toInternalAttribute(currentGenericFilter));
+            	}
                 Expression exp1 = Expression
-                        .par(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)));
+                        .par(Expression.path(nameExpression).eq(buildTypedExpression(currentGenericFilter)));
                 Expression exp2 = Expression
-                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(Expression.path(toInternalAttribute(currentGenericFilter))));
+                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(nameExpression));
                 return ConvertedExpression.build(Expression.par(exp1.or(exp2)), requiredConsistency);
             }
         }
@@ -197,10 +210,22 @@ public class CouchbaseFilterConverter {
             return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)).like(Expression.s(like.toString()))), requiredConsistency);
         }
 
+        if (FilterType.LOWERCASE == type) {
+        	return ConvertedExpression.build(StringFunctions.lower(currentGenericFilter.getAttributeName()), requiredConsistency);
+        }
+
         throw new SearchException(String.format("Unknown filter type '%s'", type));
     }
 
 	private String toInternalAttribute(Filter filter) {
+		if (ArrayHelper.isNotEmpty(filter.getFilters())) {
+			
+			
+		}
+		if (couchbaseEntryManager == null) {
+			return filter.getAttributeName();
+		}
+
 		return couchbaseEntryManager.toInternalAttribute(filter.getAttributeName());
 	}
 
@@ -217,7 +242,7 @@ public class CouchbaseFilterConverter {
 	}
 
 	private Boolean determineMultiValuedByType(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
-		if (propertiesAnnotationsMap == null) {
+		if ((attributeName == null) || (propertiesAnnotationsMap == null)) {
 			return null;
 		}
 
@@ -238,7 +263,11 @@ public class CouchbaseFilterConverter {
 	}
 
 	private boolean isRequiredConsistency(Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
-    	String attributeName = filter.getAttributeName();
+		if (propertiesAnnotationsMap == null) {
+			return false;
+		}
+
+		String attributeName = filter.getAttributeName();
     	PropertyAnnotation propertyAnnotation = propertiesAnnotationsMap.get(attributeName);
 		if ((propertyAnnotation == null) || (propertyAnnotation.getParameterType() == null)) {
 			return false;

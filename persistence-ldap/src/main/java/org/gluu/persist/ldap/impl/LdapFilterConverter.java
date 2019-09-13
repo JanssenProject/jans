@@ -5,6 +5,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
+import org.gluu.util.ArrayHelper;
 
 /**
  * Filter to LDAP filter convert
@@ -44,7 +45,13 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-            return com.unboundid.ldap.sdk.Filter.createEqualityFilter(genericFilter.getAttributeName(), String.valueOf(genericFilter.getAssertionValue()));
+        	String attributeName;
+        	if (ArrayHelper.isEmpty(genericFilter.getFilters())) {
+        		attributeName = genericFilter.getAttributeName();
+        	} else {
+        		attributeName = convertToLdapFilter(genericFilter.getFilters()[0]).getAttributeName();
+        	}
+            return com.unboundid.ldap.sdk.Filter.createEqualityFilter(attributeName, String.valueOf(genericFilter.getAssertionValue()));
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
@@ -66,6 +73,11 @@ public class LdapFilterConverter {
         if (FilterType.SUBSTRING == type) {
             return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(),
                     genericFilter.getSubAny(), genericFilter.getSubFinal());
+        }
+
+        if (FilterType.LOWERCASE == type) {
+        	// Return Dummy filter because LDAP is case in sensitive
+        	return com.unboundid.ldap.sdk.Filter.createPresenceFilter(genericFilter.getAttributeName());
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type), com.unboundid.ldap.sdk.ResultCode.PROTOCOL_ERROR_INT_VALUE);
