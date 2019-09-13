@@ -93,25 +93,32 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
-        validateIdTokenHint(idTokenHint);
-        validateSessionIdRequestParameter(sessionId);
+        validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
+        validateSessionIdRequestParameter(sessionId, postLogoutRedirectUri);
 
-        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse);
+        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, postLogoutRedirectUri);
 
         auditLogging(httpRequest, pair);
 
-        //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
-        // yuriyz : we have to re-visit this since it doesn't look safe to redirect error to uri which is not validated.
-        if (pair.getFirst() == null && pair.getSecond() == null && StringUtils.isNotBlank(postLogoutRedirectUri) && allowPostLogoutRedirect(postLogoutRedirectUri)) {
-            try {
-                String error = errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, "");
-                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(error).build();
-            } catch (URISyntaxException e) {
-                log.error("Can't perform redirect", e);
-            }
+        if (pair.getFirst() == null && pair.getSecond() == null) {
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
         }
 
         return httpBased(postLogoutRedirectUri, state, pair);
+    }
+
+    private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
+        log.debug(reason);
+        final String entity = errorResponseFactory.errorAsJson(error, reason);
+
+        try {
+            if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
+                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(entity).build();
+            }
+        } catch (URISyntaxException e) {
+            log.error("Can't perform redirect", e);
+        }
+        return Response.status(Response.Status.BAD_REQUEST).entity(entity).build();
     }
 
     /**
@@ -119,26 +126,29 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
      * allowPostLogoutRedirectWithoutValidation = true and post_logout_redirect_uri is white listed
      */
     private boolean allowPostLogoutRedirect(String postLogoutRedirectUri) {
+        if (StringUtils.isBlank(postLogoutRedirectUri)) {
+            return false;
+        }
+
         final Boolean allowPostLogoutRedirectWithoutValidation = appConfiguration.getAllowPostLogoutRedirectWithoutValidation();
         return allowPostLogoutRedirectWithoutValidation != null &&
                 allowPostLogoutRedirectWithoutValidation &&
                 new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
     }
 
-    private void validateSessionIdRequestParameter(String sessionId) {
+    private void validateSessionIdRequestParameter(String sessionId, String postLogoutRedirectUri) {
         // session_id is not required but if it is present then we must validate it #831
         if (StringUtils.isNotBlank(sessionId)) {
             SessionId sessionIdObject = sessionIdService.getSessionId(sessionId);
             if (sessionIdObject == null) {
                 final String reason = "session_id parameter in request is not valid. Logout is rejected. session_id parameter in request can be skipped or otherwise valid value must be provided.";
                 log.error(reason);
-                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
-                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
             }
         }
     }
 
-    private void validateIdTokenHint(String idTokenHint) {
+    private void validateIdTokenHint(String idTokenHint, String postLogoutRedirectUri) {
         // id_token_hint is not required but if it is present then we must validate it #831
         if (StringUtils.isNotBlank(idTokenHint)) {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
@@ -150,9 +160,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
                 if (authorizationGrant == null) {
                     final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
-                    log.error(reason);
-                    throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
-                            errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+                    throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
                 }
             }
         }
@@ -189,7 +197,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 build();
     }
 
-    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse, String postLogoutRedirectUri) {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
             Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
@@ -204,9 +212,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
         if (ldapSessionId == null) {
             final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
-            log.debug(reason);
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(
-                    errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason)).build());
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
         }
 
         boolean isExternalLogoutPresent;
