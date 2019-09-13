@@ -56,14 +56,6 @@ public class ConfigurationService {
 	}
 
 	/**
-	 * Check if LDAP server contains configuration with specified attributes
-	 * @return True if configuration with specified attributes exist
-	 */
-	public boolean containsConfiguration(GluuConfiguration configuration) {
-		return ldapEntryManager.contains(configuration);
-	}
-
-	/**
 	 * Get configuration by inum
 	 * @param inum Configuration Inum
 	 * @return Configuration
