@@ -6,11 +6,13 @@
 
 package org.gluu.oxauth.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -83,7 +85,11 @@ public class ScopeService {
      * @return Scope
      */
     public org.oxauth.persistence.model.Scope getScopeByDn(String dn) {
-        return cacheService.getWithPut(dn, () -> ldapEntryManager.find(org.oxauth.persistence.model.Scope.class, dn), 60);
+        final Scope scope = cacheService.getWithPut(dn, () -> ldapEntryManager.find(Scope.class, dn), 60);
+        if (scope != null && StringUtils.isNotBlank(scope.getId())) {
+            cacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
+        }
+        return scope;
     }
 
     /**
@@ -106,20 +112,26 @@ public class ScopeService {
      * @param id
      * @return scope
      */
-    public org.oxauth.persistence.model.Scope getScopeById(String id) {
-        return cacheService.getWithPut(id, () -> {
-            String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+    public Scope getScopeById(String id) {
+        final Object cached = cacheService.get(id);
+        if (cached != null)
+            return (Scope) cached;
 
-            org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
-            scopeExample.setDn(scopesBaseDN);
-            scopeExample.setId(id);
 
-            List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
-            if ((scopes != null) && (scopes.size() > 0)) {
-                return scopes.get(0);
-            }
-            return null;
-        }, 60);
+        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+
+        org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
+        scopeExample.setDn(scopesBaseDN);
+        scopeExample.setId(id);
+
+        List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
+        if ((scopes != null) && (scopes.size() > 0)) {
+            final Scope scope = scopes.get(0);
+            cacheService.put(id, scope);
+            cacheService.put(scope.getDn(), scope);
+            return scope;
+        }
+        return null;
     }
     
     /**
