@@ -207,7 +207,7 @@ public class CouchbaseFilterConverter {
             if (currentGenericFilter.getSubFinal() != null) {
                 like.append(currentGenericFilter.getSubFinal());
             }
-            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)).like(Expression.s(like.toString()))), requiredConsistency);
+            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)).like(Expression.s(StringHelper.escapeJson(like.toString())))), requiredConsistency);
         }
 
         if (FilterType.LOWERCASE == type) {
