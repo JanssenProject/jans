@@ -13,6 +13,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,11 @@ public final class CouchbaseSample {
         CouchbaseEntryManager couchbaseEntryManager = couchbaseSampleEntryManager.createCouchbaseEntryManager();
 
         SimpleUser newUser = new SimpleUser();
-        newUser.setDn(String.format("inum=%s,ou=people,o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", System.currentTimeMillis()));
+        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());
         newUser.setUserPassword("test");
-        newUser.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList("London", "Texas", "Kiev")));
-        newUser.getCustomAttributes().add(new CustomAttribute("test", "test_value"));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", Arrays.asList("London", "Texas", "Kiev")));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("test", "test_value"));
         couchbaseEntryManager.persist(newUser);
 
 //        SimpleUser dummyUser = couchbaseEntryManager.find(SimpleUser.class, "inum=test,o=test,o=gluu");
@@ -57,10 +58,10 @@ public final class CouchbaseSample {
             LOG.info("Updating: " + user.getUserId());
 
             String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
-            user.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList(values)));
-            user.getCustomAttributes().add(new CustomAttribute("test", "test_value"));
-            user.getCustomAttributes().add(new CustomAttribute("test2", "test_value2"));
-            user.getCustomAttributes().add(new CustomAttribute("test3", "test_value3"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", Arrays.asList(values)));
+            user.getCustomAttributes().add(new CustomObjectAttribute("test", "test_value"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("test2", "test_value2"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("test3", "test_value3"));
             user.setUserId("user1");
             user.setUserPassword("test");
 
@@ -69,7 +70,7 @@ public final class CouchbaseSample {
 
         for (SimpleUser user : users) {
             boolean result1 = couchbaseEntryManager.authenticate(user.getDn(), "test");
-            boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", user.getUserId(), "test");
+            boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=gluu", user.getUserId(), "test");
             System.out.println("authetication result: " + result1 + ", " + result2);
         }
 

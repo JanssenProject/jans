@@ -19,16 +19,13 @@ public class CouchbaseSampleEntryManager {
 
         connectionProperties.put("couchbase.servers", "localhost");
         connectionProperties.put("couchbase.auth.userName", "admin");
-        connectionProperties.put("couchbase.auth.userPassword", "test");
+        connectionProperties.put("couchbase.auth.userPassword", "secret");
 //        connectionProperties.put("couchbase.buckets", "gluu");
-        connectionProperties.put("couchbase.buckets", "gluu, gluu_site, gluu_user, gluu_session, gluu_statistic");
+        connectionProperties.put("couchbase.buckets", "gluu, gluu_user, gluu_token");
 
         connectionProperties.put("couchbase.bucket.default", "gluu");
-//        connectionProperties.put("couchbase.bucket.gluu.mapping", "people, groups");
         connectionProperties.put("couchbase.bucket.gluu_user.mapping", "people, groups");
-        connectionProperties.put("couchbase.bucket.gluu_session.mapping", "sessions");
-        connectionProperties.put("couchbase.bucket.gluu_statistic.mapping", "statistic");
-        connectionProperties.put("couchbase.bucket.gluu_site.mapping", "site");
+        connectionProperties.put("couchbase.bucket.gluu_token.mapping", "sessions");
 
         connectionProperties.put("couchbase.password.encryption.method", "CRYPT-SHA-256");
 
