@@ -142,8 +142,8 @@ public class AuthenticationService {
 		metricService.incCounter(metricType);
 
 		if (protectionServiceEnabled) {
-			authenticationProtectionService.storeAttempt(userName, authenticated);
-			authenticationProtectionService.doDelayIfNeeded(userName);
+			authenticationProtectionService.storeAttempt(userId, authenticated);
+			authenticationProtectionService.doDelayIfNeeded(userId);
 		}
 
 		return authenticated;
@@ -259,6 +259,41 @@ public class AuthenticationService {
 	 * Utility method which can be used in custom scripts
 	 */
 	public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
+			String keyValue, String password, String primaryKey, String localPrimaryKey) {
+		boolean authenticated = false;
+		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
+
+		com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+		try {
+			authenticated = authenticateImpl(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+		} finally {
+			timerContext.stop();
+		}
+
+		String userId = keyValue;
+		if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
+			userId = identity.getUser().getUserId();
+		}
+		setAuthenticatedUserSessionAttribute(userId, authenticated);
+
+		MetricType metricType;
+		if (authenticated) {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		}
+
+		metricService.incCounter(metricType);
+
+		if (protectionServiceEnabled) {
+			authenticationProtectionService.storeAttempt(userId, authenticated);
+			authenticationProtectionService.doDelayIfNeeded(userId);
+		}
+
+		return authenticated;
+	}
+
+	private boolean authenticateImpl(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
 			String keyValue, String password, String primaryKey, String localPrimaryKey) {
 		log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey,
 				keyValue, System.identityHashCode(credentials));
