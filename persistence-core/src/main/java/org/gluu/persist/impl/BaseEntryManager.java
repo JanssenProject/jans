@@ -1154,27 +1154,45 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			return null;
 		}
 
+		Object[] attributeValues = getAttributeValues(propertyName, jsonObject, propertyValue);
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
+					ldapAttributeName, Arrays.toString(attributeValues)));
+		}
+
+		if (attributeValues.length == 0) {
+			attributeValues = new String[] {};
+		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
+			return null;
+		}
+
+		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
+	}
+
+	private Object[] getAttributeValues(String propertyName, boolean jsonObject, Object propertyValue) {
 		Object[] attributeValues = new Object[1];
-		if (propertyValue instanceof String) {
-			attributeValues[0] = StringHelper.toString(propertyValue);
-		} else if (propertyValue instanceof Boolean) {
-			attributeValues[0] = propertyValue;
-		} else if (propertyValue instanceof Integer) {
-			attributeValues[0] = propertyValue;
-		} else if (propertyValue instanceof Long) {
-			attributeValues[0] = propertyValue;
-		} else if (propertyValue instanceof Date) {
-			attributeValues[0] = encodeTime((Date) propertyValue);
+		
+		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues);
+		if (nativeType) {
+			// It did conversion in getNativeAttributeValue method already
 		} else if (propertyValue instanceof String[]) {
 			attributeValues = (String[]) propertyValue;
+		} else if (propertyValue instanceof Object[]) {
+			attributeValues = (Object[]) propertyValue;
 		} else if (propertyValue instanceof List<?>) {
 			attributeValues = new Object[((List<?>) propertyValue).size()];
 			int index = 0;
+			Object nativeAttributeValue[] = new Object[1];
 			for (Object tmpPropertyValue : (List<?>) propertyValue) {
 				if (jsonObject) {
 					attributeValues[index++] = convertValueToJson(tmpPropertyValue);
 				} else {
-					attributeValues[index++] = StringHelper.toString(tmpPropertyValue);
+					if (getNativeAttributeValue(tmpPropertyValue, nativeAttributeValue)) {
+						attributeValues[index++] = nativeAttributeValue[0];
+					} else {
+						attributeValues[index++] = StringHelper.toString(tmpPropertyValue);
+					}
 				}
 			}
 		} else if (propertyValue instanceof AttributeEnum) {
@@ -1192,19 +1210,31 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
 					+ " return type or has annotation JsonObject");
 		}
+		return attributeValues;
+	}
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
-					ldapAttributeName, Arrays.toString(attributeValues)));
+	/*
+	 * This method doesn't produces new object to avoid extra garbage creation
+	 */
+	private boolean getNativeAttributeValue(Object propertyValue, Object[] resultValue) {
+		// Clean result
+		resultValue[0] = null;
+
+		if (propertyValue instanceof String) {
+			resultValue[0] = StringHelper.toString(propertyValue);
+		} else if (propertyValue instanceof Boolean) {
+			resultValue[0] = propertyValue;
+		} else if (propertyValue instanceof Integer) {
+			resultValue[0] = propertyValue;
+		} else if (propertyValue instanceof Long) {
+			resultValue[0] = propertyValue;
+		} else if (propertyValue instanceof Date) {
+			resultValue[0] = encodeTime((Date) propertyValue);
+		} else {
+			return false;
 		}
 
-		if (attributeValues.length == 0) {
-			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
-			return null;
-		}
-
-		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
+		return true;
 	}
 
 	protected Object convertValueToJson(Object propertyValue) {
