@@ -104,6 +104,8 @@ public interface PersistenceEntryManager extends EntityManager {
 
     String[] exportEntry(String primaryKey);
 
+    void importEntry(String dn,List<AttributeData> data);
+
     PersistenceOperationService getOperationService();
 
     boolean destroy();

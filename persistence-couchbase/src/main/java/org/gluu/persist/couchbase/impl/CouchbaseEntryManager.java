@@ -736,6 +736,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
         }
     }
+    @Override
+    public void importEntry(String dn,List<AttributeData> datas) {
+        try {
+            persist(dn,datas);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to import entry: %s", dn), ex);
+        }
+    }
 
     private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap);
