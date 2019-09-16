@@ -10,13 +10,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.AttributesList;
 import org.gluu.persist.annotation.CustomObjectClass;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.util.StringHelper;
 
 /**
@@ -39,7 +39,7 @@ public class SimpleUser implements Serializable {
     private String userPassword;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -68,19 +68,19 @@ public class SimpleUser implements Serializable {
         this.userPassword = userPassword;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
-    public String getAttribute(String ldapAttribute) {
-        String attribute = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (customAttribute.getName().equals(ldapAttribute)) {
+    public Object getAttribute(String attributeName) {
+    	Object attribute = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (customAttribute.getName().equals(attributeName)) {
                     attribute = customAttribute.getValue();
                     break;
                 }
@@ -90,11 +90,11 @@ public class SimpleUser implements Serializable {
         return attribute;
     }
 
-    public List<String> getAttributeValues(String ldapAttribute) {
-        List<String> values = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
+    public List<Object> getAttributeValues(String attributeName) {
+        List<Object> values = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
                     values = customAttribute.getValues();
                     break;
                 }
