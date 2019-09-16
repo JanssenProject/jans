@@ -37,6 +37,11 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
+    public boolean containsKey(String keyId) {
+        return false;
+    }
+
+    @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(algorithm.toString());
