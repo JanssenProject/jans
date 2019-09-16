@@ -11,34 +11,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Javier Rojas Date: 12.5.2011
- * @author Yuriy Movchan Date: 04/08/2014
+ * @author Yuriy Movchan Date: 09/16/2019
 */
-public class CustomAttribute implements Serializable, Comparable<CustomAttribute> {
+public class CustomObjectAttribute implements Serializable, Comparable<CustomObjectAttribute> {
 
-    private static final long serialVersionUID = 1468450094325306154L;
+    private static final long serialVersionUID = -1238450094325306154L;
 
     private String name;
-    private List<String> values;
+    private List<Object> values;
 
-    public CustomAttribute() {
+    public CustomObjectAttribute() {
     }
 
-    public CustomAttribute(String name) {
+    public CustomObjectAttribute(String name) {
         this.name = name;
     }
 
-    public CustomAttribute(String name, String value) {
+    public CustomObjectAttribute(String name, Object value) {
         this.name = name;
         setValue(value);
     }
 
-    public CustomAttribute(String name, List<String> values) {
+    public CustomObjectAttribute(String name, List<Object> values) {
         this.name = name;
         this.values = values;
     }
 
-    public String getValue() {
+    public Object getValue() {
         if (this.values == null) {
             return null;
         }
@@ -50,16 +49,16 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         return null;
     }
 
-    public void setValue(String value) {
-        this.values = new ArrayList<String>();
+    public void setValue(Object value) {
+        this.values = new ArrayList<Object>();
         this.values.add(value);
     }
 
-    public List<String> getValues() {
+    public List<Object> getValues() {
         return values;
     }
 
-    public void setValues(List<String> values) {
+    public void setValues(List<Object> values) {
         this.values = values;
     }
 
@@ -77,12 +76,12 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         }
 
         if (values.size() == 1) {
-            return values.get(0);
+            return values.get(0).toString();
         }
 
-        StringBuilder sb = new StringBuilder(values.get(0));
+        StringBuilder sb = new StringBuilder(values.get(0).toString());
         for (int i = 1; i < values.size(); i++) {
-            sb.append(", ").append(values.get(i));
+            sb.append(", ").append(values.get(i).toString());
         }
 
         return sb.toString();
@@ -97,7 +96,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
             return false;
         }
 
-        CustomAttribute that = (CustomAttribute) o;
+        CustomObjectAttribute that = (CustomObjectAttribute) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) {
             return false;
@@ -116,7 +115,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         return String.format("Attribute [name=%s, values=%s]", name, values);
     }
 
-    public int compareTo(CustomAttribute o) {
+    public int compareTo(CustomObjectAttribute o) {
         return name.compareTo(o.name);
     }
 }
