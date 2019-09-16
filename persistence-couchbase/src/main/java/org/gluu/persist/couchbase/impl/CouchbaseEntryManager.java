@@ -571,8 +571,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long) ||
             		(attributeObject instanceof JsonObject)) {
                     attributeValueObjects = new Object[] { attributeObject };
+            	} else if (attributeObject instanceof String) {
+               		Object value = attributeObject.toString();
+                    try {
+                    	value = jsonDateFormat.parse(attributeObject.toString());
+                    } catch (ParseException ex) {}
+            		attributeValueObjects = new Object[] { value };
             	} else {
-            		attributeValueObjects = new Object[] { attributeObject.toString() };
+               		Object value = attributeObject.toString();
+            		attributeValueObjects = new Object[] { value };
             	}
             }
             
