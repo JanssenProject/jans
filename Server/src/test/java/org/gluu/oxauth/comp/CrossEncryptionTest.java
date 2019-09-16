@@ -379,6 +379,11 @@ public class CrossEncryptionTest {
             }
 
             @Override
+            public boolean containsKey(String keyId) {
+                return false;
+            }
+
+            @Override
             public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
                 RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
 

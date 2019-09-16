@@ -154,7 +154,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(KEY_TYPE, algorithm.getFamily());
         jsonObject.put(KEY_ID, alias);
-        jsonObject.put(KEY_USE, Use.SIGNATURE);
+        jsonObject.put(KEY_USE, use.getParamName());
         jsonObject.put(ALGORITHM, algorithm.getParamName());
         jsonObject.put(EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
@@ -190,6 +190,20 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean containsKey(String keyId) {
+        try {
+            if (StringUtils.isBlank(keyId)){
+                return false;
+            }
+
+            return keyStore.containsAlias(keyId);
+        } catch (KeyStoreException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     @Override

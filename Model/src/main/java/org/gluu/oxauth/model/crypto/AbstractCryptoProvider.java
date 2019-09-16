@@ -59,6 +59,8 @@ public abstract class AbstractCryptoProvider {
 
     public abstract boolean deleteKey(String keyId) throws Exception;
 
+    public abstract boolean containsKey(String keyId);
+
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
@@ -94,12 +96,17 @@ public abstract class AbstractCryptoProvider {
     }
 
     public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
-        return generateJwks(keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
+        JSONArray keys = new JSONArray();
+        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
+        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.ENCRYPTION);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(JSON_WEB_KEY_SET, keys);
+
+        return jsonObject;
     }
 
-    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
-        JSONArray keys = new JSONArray();
-
+    public static void generateJwks(JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
         GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
         expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
@@ -171,11 +178,6 @@ public abstract class AbstractCryptoProvider {
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JSON_WEB_KEY_SET, keys);
-
-        return jsonObject;
     }
 
     public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
