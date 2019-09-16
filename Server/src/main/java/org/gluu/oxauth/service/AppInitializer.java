@@ -41,7 +41,10 @@ import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.JsonService;
 import org.gluu.service.PythonService;
@@ -285,10 +288,11 @@ public class AppInitializer {
 	 * Utility method which can be used in custom scripts
 	 */
 	public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-		Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig);
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+		Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
-		PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
-				.createEntryManager(persistenceConnectionProperties);
+		PersistenceEntryManager persistenceAuthEntryManager = 
+				persistenceEntryManagerFactory.createEntryManager(persistenceConnectionProperties);
 		log.debug("Created custom authentication PersistenceEntryManager: {}", persistenceAuthEntryManager);
 
 		return persistenceAuthEntryManager;
@@ -373,12 +377,14 @@ public class AppInitializer {
 		if (this.persistenceAuthConfigs.size() == 0) {
 			return persistenceAuthEntryManagers;
 		}
+		
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
 
-		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs);
+		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs, persistenceEntryManagerFactory.getPersistenceType());
 
 		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
-			PersistenceEntryManager persistenceAuthEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
-					.createEntryManager(persistenceAuthProperties.get(i));
+			PersistenceEntryManager persistenceAuthEntryManager = 
+					persistenceEntryManagerFactory.createEntryManager(persistenceAuthProperties.get(i));
 			log.debug("Created {}#{}: {}", new Object[] { ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i,
 					persistenceAuthEntryManager });
 
@@ -467,12 +473,12 @@ public class AppInitializer {
 		persistenceAuthConfigInstance.destroy(oldPersistenceAuthConfigs);
 	}
 
-	private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> persistenceAuthConfigs) {
+	private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> persistenceAuthConfigs, String persistenceType) {
 		List<Properties> result = new ArrayList<Properties>();
 
 		// Prepare connection providers per LDAP authentication configuration
 		for (GluuLdapConfiguration persistenceAuthConfig : persistenceAuthConfigs) {
-			Properties decrypytedConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig);
+			Properties decrypytedConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceType);
 
 			result.add(decrypytedConnectionProperties);
 		}
@@ -480,20 +486,21 @@ public class AppInitializer {
 		return result;
 	}
 
-	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration persistenceAuthConfig) {
+	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration persistenceAuthConfig, String persistenceType) {
+		String prefix = persistenceType + ".";
 		FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
 		Properties properties = (Properties) configuration.getProperties().clone();
 		if (persistenceAuthConfig != null) {
-			properties.setProperty("servers", buildServersString(persistenceAuthConfig.getServers()));
+			properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
 
 			String bindDn = persistenceAuthConfig.getBindDN();
 			if (StringHelper.isNotEmpty(bindDn)) {
-				properties.setProperty("bindDN", bindDn);
-				properties.setProperty("bindPassword", persistenceAuthConfig.getBindPassword());
+				properties.setProperty(prefix + "bindDN", bindDn);
+				properties.setProperty(prefix + "bindPassword", persistenceAuthConfig.getBindPassword());
 			}
-			properties.setProperty("useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
-			properties.setProperty("maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
+			properties.setProperty(prefix + "useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
+			properties.setProperty(prefix + "maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();
