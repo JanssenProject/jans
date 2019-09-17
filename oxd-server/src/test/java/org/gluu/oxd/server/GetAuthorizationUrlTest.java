@@ -56,14 +56,15 @@ public class GetAuthorizationUrlTest {
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
     }
 
-    @Parameters({"host", "redirectUrls", "opHost"})
+    @Parameters({"host", "redirectUrls", "opHost", "responseTypes"})
     @Test
-    public void testWithParams(String host, String redirectUrls, String opHost) throws IOException {
+    public void testWithParamsAndResponseType(String host, String redirectUrls, String opHost, String responseTypes) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
+        commandParams.setResponseTypes(Lists.newArrayList(responseTypes.split(" ")));
 
         Map<String, String> params = new HashMap<>();
         params.put("max_age", "70");
