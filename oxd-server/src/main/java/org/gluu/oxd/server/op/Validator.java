@@ -32,14 +32,16 @@ public class Validator {
     private final OpenIdConfigurationResponse discoveryResponse;
     private final PublicOpKeyService keyService;
     private RSASigner rsaSigner;
+    private static OpClientFactory opClientFactory;
 
-    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService) {
+    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory) {
         Preconditions.checkNotNull(idToken);
         Preconditions.checkNotNull(discoveryResponse);
 
         this.idToken = idToken;
         this.discoveryResponse = discoveryResponse;
         this.keyService = keyService;
+        this.opClientFactory = opClientFactory;
         this.rsaSigner = createRSASigner(idToken, discoveryResponse, keyService);
     }
 
@@ -72,7 +74,7 @@ public class Validator {
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
 
         final RSAPublicKey publicKey = keyService.getRSAPublicKey(jwkUrl, kid);
-        return new RSASigner(signatureAlgorithm, publicKey);
+        return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
     }
 
     public void validateNonce(StateService stateService) {
