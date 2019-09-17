@@ -50,7 +50,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
 
-        final TokenClient tokenClient = new TokenClient(discoveryResponse.getTokenEndpoint());
+        final TokenClient tokenClient = getOpClientFactory().createTokenClient(discoveryResponse.getTokenEndpoint());
         tokenClient.setExecutor(getHttpService().getClientExecutor());
         tokenClient.setRequest(tokenRequest);
         final TokenResponse response = tokenClient.exec();
@@ -70,8 +70,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             }
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
-
-            final Validator validator = new Validator(idToken, discoveryResponse, getKeyService());
+            final Validator validator = new Validator(idToken, discoveryResponse, getKeyService(), getOpClientFactory());
             validator.validateNonce(getStateService());
             validator.validateIdToken(site.getClientId());
             validator.validateAccessToken(response.getAccessToken());
