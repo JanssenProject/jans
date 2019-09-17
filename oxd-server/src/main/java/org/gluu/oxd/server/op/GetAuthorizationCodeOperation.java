@@ -56,7 +56,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         getStateService().putNonce(nonce);
         getStateService().putState(state);
 
-        final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint());
+        final AuthorizeClient authorizeClient = getOpClientFactory().createAuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
         authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response = authorizeClient.exec();
