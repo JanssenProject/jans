@@ -26,6 +26,7 @@
     <parameter name="incorrectScopeExpression"
                value="{'rule':{'not':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}"/>
     <parameter name="clientJwksUri" value="${clientJwksUri}"/>
+    <parameter name="responseTypes" value="code id_token token"/>
     <parameter name="accessTokenSigningAlg" value="${accessTokenSigningAlg}"/>
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
