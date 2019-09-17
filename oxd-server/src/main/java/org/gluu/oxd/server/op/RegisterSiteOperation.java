@@ -245,7 +245,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             throw new HttpException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }
 
-        final RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        final RegisterClient registerClient = getOpClientFactory().createRegisterClient(registrationEndpoint);
         registerClient.setRequest(createRegisterClientRequest(params));
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();

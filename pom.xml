@@ -520,4 +520,34 @@
         </pluginManagement>
     </build>
 
+    <profiles>
+        <profile>
+            <id>run-test-with-mocked-op-clients</id>
+            <activation>
+                <property>
+                    <name>benchmark</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <version>2.12.4</version>
+                            <configuration>
+                                <skipTests>false</skipTests>
+                                <failIfNoTests>false</failIfNoTests>
+                                <trimStackTrace>false</trimStackTrace>
+                                <suiteXmlFiles>
+                                    <suiteXmlFile>target/test-classes/testng-load.xml</suiteXmlFile>
+                                </suiteXmlFiles>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
