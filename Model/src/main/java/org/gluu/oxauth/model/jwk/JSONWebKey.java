@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.model.jwk;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.model.util.Util;
-
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -213,7 +213,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
 
         jsonObj.put(KEY_ID, kid);
         jsonObj.put(KEY_TYPE, kty);
-        jsonObj.put(KEY_USE, use);
+        jsonObj.put(KEY_USE, use.getParamName());
         jsonObj.put(ALGORITHM, alg);
         jsonObj.put(EXPIRATION_TIME, exp);
         jsonObj.put(CURVE, crv);
