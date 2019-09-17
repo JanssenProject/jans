@@ -94,6 +94,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(ConfigurationService.class);
     }
 
+    public UpdateRegisteredClientService getUpdateRegisteredClientService() {
+        return getInstance(UpdateRegisteredClientService.class);
+    }
+
     public OxAuthCryptoProvider getCryptoProvider() throws Exception {
         OxdServerConfiguration conf = getConfigurationService().get();
         return new OxAuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
