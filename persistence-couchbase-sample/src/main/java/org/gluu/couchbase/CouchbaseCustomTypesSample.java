@@ -2,11 +2,14 @@ package org.gluu.couchbase;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.gluu.couchbase.model.SimpleUser;
+import org.gluu.couchbase.model.UserRole;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.base.CustomObjectAttribute;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,9 @@ public final class CouchbaseCustomTypesSample {
         newUser.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
         newUser.getCustomAttributes().add(new CustomObjectAttribute("enabled", false));
         newUser.getCustomAttributes().add(new CustomObjectAttribute("age", 18));
+        
+        newUser.setUserRole(UserRole.ADMIN);
+
         couchbaseEntryManager.persist(newUser);
 
         LOG.info("Added User '{}' with uid '{}' and key '{}'", newUser, newUser.getUserId(), newUser.getDn());
@@ -55,6 +61,16 @@ public final class CouchbaseCustomTypesSample {
                 LOG.info("Found boolean custom attribute '{}' with value '{}'", customAttribute.getName(), customAttribute.getValue());
         	}
         	
+        }
+
+        // Find added dummy user by numeric attribute
+        Filter filter = Filter.createGreaterOrEqualFilter("age", 16);
+        List<SimpleUser> foundUsers = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
+        if (foundUsers.size() > 0) {
+        	foundUser = foundUsers.get(0);
+        	LOG.info("Found User '{}' by filter '{}' with uid '{}' and key '{}'", foundUser, filter, foundUser, foundUser);
+        } else {
+        	LOG.error("Can't find User by filter '{}'", filter);
         }
     }
 
