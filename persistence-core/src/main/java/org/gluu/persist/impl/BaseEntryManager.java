@@ -702,7 +702,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			Class<?> parameterType = getSetterPropertyType(entryClass, propertyName);
 			boolean multiValued = isMultiValued(parameterType);
 
-			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, multiValued, false);
+			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, multiValued, false, false);
 			if (attribute != null) {
 				for (String objectClass : attribute.getStringValues()) {
 					if (objectClass != null) {
@@ -1148,7 +1148,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
-			Object entry, boolean multiValued, boolean jsonObject) {
+			Object entry, boolean multiValued, boolean jsonObject, boolean detectMultivalued) {
 		Object propertyValue = propertyValueGetter.get(entry);
 		if (propertyValue == null) {
 			return null;
@@ -1166,6 +1166,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
 			return null;
 		}
+		
+		if (detectMultivalued) {
+			multiValued = isAttributeMultivalued(attributeValues);
+		}
 
 		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
 	}
@@ -1175,7 +1179,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues);
 		if (nativeType) {
-			// It did conversion in getNativeAttributeValue method already
+			// We do conversion in getNativeAttributeValue method already
 		} else if (propertyValue instanceof String[]) {
 			attributeValues = (String[]) propertyValue;
 		} else if (propertyValue instanceof Object[]) {
@@ -1235,6 +1239,15 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		return true;
+	}
+
+	private boolean isAttributeMultivalued(Object[] values) {
+		if (values.length > 1) {
+			return true;
+			
+		}
+
+		return false;
 	}
 
 	protected Object convertValueToJson(Object propertyValue) {
@@ -1306,7 +1319,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
-		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject);
+		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject, false);
 
 		return attribute;
 	}
@@ -1348,7 +1361,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		for (Object entryAttribute : (List<?>) propertyValue) {
 			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
-					entryAttribute, false);
+					entryAttribute, false, true);
 			if (attribute != null) {
 				listAttributes.add(attribute);
 			}
@@ -1437,13 +1450,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private AttributeData getAttributeData(String propertyName, Getter propertyNameGetter, Getter propertyValueGetter,
-			Object entry, boolean jsonObject) {
+			Object entry, boolean jsonObject, boolean detectMultivalued) {
 		Object ldapAttributeName = propertyNameGetter.get(entry);
 		if (ldapAttributeName == null) {
 			return null;
 		}
 
-		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, false, jsonObject);
+		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, false, jsonObject, detectMultivalued);
 	}
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
