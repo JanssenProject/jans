@@ -213,7 +213,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
 
         jsonObj.put(KEY_ID, kid);
         jsonObj.put(KEY_TYPE, kty);
-        jsonObj.put(KEY_USE, use.getParamName());
+        jsonObj.put(KEY_USE, use != null ? use.getParamName() : "");
         jsonObj.put(ALGORITHM, alg);
         jsonObj.put(EXPIRATION_TIME, exp);
         jsonObj.put(CURVE, crv);
