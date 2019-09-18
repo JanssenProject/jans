@@ -37,6 +37,9 @@ public class SimpleUser implements Serializable {
 
     @AttributeName(name = "userPassword")
     private String userPassword;
+    
+    @AttributeName(name = "role")
+    private UserRole userRole; 
 
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
@@ -68,7 +71,15 @@ public class SimpleUser implements Serializable {
         this.userPassword = userPassword;
     }
 
-    public List<CustomObjectAttribute> getCustomAttributes() {
+    public UserRole getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(UserRole userRole) {
+		this.userRole = userRole;
+	}
+
+	public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
