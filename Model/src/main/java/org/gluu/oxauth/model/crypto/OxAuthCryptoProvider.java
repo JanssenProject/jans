@@ -167,7 +167,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            jsonObject.put(CURVE, signatureAlgorithm.getCurve());
+            jsonObject.put(CURVE, signatureAlgorithm.getCurve().getName());
             jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         }
