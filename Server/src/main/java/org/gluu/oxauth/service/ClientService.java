@@ -171,7 +171,12 @@ public class ClientService {
 	 * @return Client
 	 */
 	public Client getClientByDn(String dn) {
-	    return cacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
+	    try {
+            return cacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
+        } catch (Exception e) {
+	        log.trace(e.getMessage(), e);
+	        return null;
+        }
 	}
 
 	public org.gluu.persist.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
