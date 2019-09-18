@@ -34,6 +34,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private Map<String, String> params;
     @JsonProperty(value = "redirect_uri")
     private String redirect_uri;
+    @JsonProperty(value = "response_types")
+    private List<String> response_types;
 
     public GetAuthorizationUrlParams() {
     }
@@ -118,6 +120,14 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
         this.redirect_uri = redirectUri;
     }
 
+    public List<String> getResponseTypes() {
+        return response_types;
+    }
+
+    public void setResponseTypes(List<String> responseTypes) {
+        this.response_types = responseTypes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -149,6 +159,7 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", custom_parameters=" + custom_parameters +
                 ", redirect_uri='" + redirect_uri + '\'' +
                 ", state='" + state + '\'' +
+                ", response_types=" + response_types + '\'' +
                 '}';
     }
 }
