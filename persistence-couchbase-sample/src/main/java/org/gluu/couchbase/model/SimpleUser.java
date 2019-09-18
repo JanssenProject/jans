@@ -41,6 +41,9 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "role")
     private UserRole userRole; 
 
+    @AttributeName(name = "notes")
+    private List<String> notes; 
+
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
@@ -77,6 +80,14 @@ public class SimpleUser implements Serializable {
 
 	public void setUserRole(UserRole userRole) {
 		this.userRole = userRole;
+	}
+
+	public List<String> getNotes() {
+		return notes;
+	}
+
+	public void setNotes(List<String> notes) {
+		this.notes = notes;
 	}
 
 	public List<CustomObjectAttribute> getCustomAttributes() {

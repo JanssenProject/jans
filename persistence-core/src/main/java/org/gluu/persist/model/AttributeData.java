@@ -19,7 +19,7 @@ import org.gluu.util.StringHelper;
 public class AttributeData {
     private final String name;
     private final Object[] values;
-    private final Boolean multiValued;
+    private Boolean multiValued;
 
     public AttributeData(String name, Object[] values) {
     	this(name, values, null);
@@ -57,6 +57,10 @@ public class AttributeData {
 
         return this.values[0];
     }
+
+	public void setMultiValued(Boolean multiValued) {
+		this.multiValued = multiValued;
+	}
 
 	public Boolean isMultiValued() {
 		return multiValued;

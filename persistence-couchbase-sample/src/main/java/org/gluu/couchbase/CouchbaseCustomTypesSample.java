@@ -42,6 +42,7 @@ public final class CouchbaseCustomTypesSample {
         newUser.getCustomAttributes().add(new CustomObjectAttribute("age", 18));
         
         newUser.setUserRole(UserRole.ADMIN);
+        newUser.setNotes(Arrays.asList("note 1", "note 2", "note 3"));
 
         couchbaseEntryManager.persist(newUser);
 
