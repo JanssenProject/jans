@@ -49,18 +49,22 @@ public class GetAuthorizationUrlTest {
         assertEquals(parameters.get("state"), state);
     }
 
-    @Parameters({"redirectUrls", "opHost", "responseTypes"})
+    @Parameters({"redirectUrls", "opHost"})
     @Test
-    public void testWithResposeType(String redirectUrls, String opHost, String responseTypes) throws Exception {
+    public void testWithResposeType(String redirectUrls, String opHost) throws Exception {
         DevelopersApi api = Tester.api();
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setResponseTypes(Lists.newArrayList(responseTypes.split(" ")));
+        commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
 
         final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
         assertNotNull(resp);
         Tester.notEmpty(resp.getAuthorizationUrl());
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(parameters.get("response_type").contains("code"));
+        assertTrue(parameters.get("response_type").contains("token"));
     }
 }
