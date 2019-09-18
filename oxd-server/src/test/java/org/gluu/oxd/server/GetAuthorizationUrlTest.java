@@ -56,15 +56,33 @@ public class GetAuthorizationUrlTest {
         assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
     }
 
-    @Parameters({"host", "redirectUrls", "opHost", "responseTypes"})
+    @Parameters({"host", "redirectUrls", "opHost"})
     @Test
-    public void testWithParamsAndResponseType(String host, String redirectUrls, String opHost, String responseTypes) throws IOException {
+    public void testWithResponseType(String host, String redirectUrls, String opHost) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setResponseTypes(Lists.newArrayList(responseTypes.split(" ")));
+        commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
+
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(parameters.get("response_type").contains("code"));
+        assertTrue(parameters.get("response_type").contains("token"));
+    }
+
+    @Parameters({"host", "redirectUrls", "opHost"})
+    @Test
+    public void testWithParams(String host, String redirectUrls, String opHost) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
 
         Map<String, String> params = new HashMap<>();
         params.put("max_age", "70");
