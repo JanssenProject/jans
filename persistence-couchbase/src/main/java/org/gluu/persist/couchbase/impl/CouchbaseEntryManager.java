@@ -625,7 +625,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                		Object value = attributeObject.toString();
                     try {
                     	value = jsonDateFormat.parse(attributeObject.toString());
-                    } catch (ParseException ex) {}
+                    } catch (Exception ex) {}
             		attributeValueObjects = new Object[] { value };
             	} else {
                		Object value = attributeObject.toString();
