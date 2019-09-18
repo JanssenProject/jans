@@ -7,17 +7,17 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.PublicKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.jboss.resteasy.client.ClientExecutor;
-
-import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+
+import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * Encapsulates functionality to make JWK request calls to an authorization
@@ -112,9 +112,16 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
     }
 
     public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId) {
+        return getECDSAPublicKey(jwkSetUrl, keyId, null);
+    }
+
+    public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId, ClientExecutor clientExecutor) {
         ECDSAPublicKey publicKey = null;
 
         JwkClient jwkClient = new JwkClient(jwkSetUrl);
+        if (clientExecutor != null) {
+            jwkClient.setExecutor(clientExecutor);
+        }
         JwkResponse jwkResponse = jwkClient.exec();
         if (jwkResponse != null && jwkResponse.getStatus() == 200) {
             PublicKey pk = jwkResponse.getPublicKey(keyId);
