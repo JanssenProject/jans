@@ -38,6 +38,7 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
+
+    @Inject
+    private Logger log;
 
     private final CouchbaseFilterConverter FILTER_CONVERTER;
     private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter();
@@ -146,6 +150,52 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         remove(dnValue.toString());
     }
+
+    protected void saveAttributes(String dn, List<AttributeData> attributes) {
+        JsonObject jsonObject = JsonObject.create();
+        for (AttributeData attribute : attributes) {
+            String attributeName = attribute.getName();
+            int length = attribute.getValues().length;
+            Object[] attributeValues = attribute.getValues();
+            Boolean multivalued = attribute.isMultiValued();
+            if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
+                Object[] realValues = attributeValues;
+                Object realValue="";
+                if(length==1){
+                    realValue = new Object[] { realValues[0] }[0];
+                }
+                // We need to store only one objectClass value in Couchbase
+                if (StringHelper.equals(CouchbaseOperationService.OBJECT_CLASS, attributeName)) {
+                    if (!ArrayHelper.isEmpty(realValues)) {
+                        realValues = new Object[] { realValues[0] };
+                        realValue = "gluuAttribute";
+                        multivalued = false;
+                    }
+                }
+                // Process userPassword
+                if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
+                    realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
+                    realValue = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
+                }
+                if ((multivalued == null) || !multivalued) {
+                    jsonObject.put(toInternalAttribute(attributeName), realValue);
+                } else {
+                    jsonObject.put(toInternalAttribute(attributeName), JsonArray.from(realValues));
+                }
+            }
+        }
+        jsonObject.put(CouchbaseOperationService.DN, dn);
+        // Persist entry
+        try {
+            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject);
+            if (!result) {
+                throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
+            }
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex);
+        }
+    }
+
 
     @Override
     protected void persist(String dn, List<AttributeData> attributes) {
@@ -739,7 +789,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public void importEntry(String dn,List<AttributeData> datas) {
         try {
-            persist(dn,datas);
+            saveAttributes(dn,datas);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to import entry: %s", dn), ex);
         }
