@@ -6,11 +6,32 @@
 
 package org.gluu.oxauth.auth;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -27,16 +48,6 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLDecoder;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -167,7 +178,6 @@ public class AuthenticationFilter implements Filter {
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            sendError(httpResponse);
         }
     }
 
