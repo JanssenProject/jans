@@ -102,6 +102,8 @@
             window.onload = function () {
                 var userNameField = document.getElementById("loginForm:username");
                 var passwordField = document.getElementById("loginForm:password");
+
+                passwordField.value = "";
                 var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
                 if (userName) {
                     userNameField.value = userName;
