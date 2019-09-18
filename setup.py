@@ -3765,14 +3765,16 @@ class Setup(object):
 
             self.run(['/bin/hostname', self.hostname])
 
-        hostname_file_content = self.readFile(self.etc_hosts)
+        if not os.path.exists(self.readFile(self.etc_hosts)):
+            self.writeFile(self.etc_hosts, '{}\t{}\n'.format(self.ip, self.hostname))
+        else:
+            hostname_file_content = self.readFile(self.etc_hosts)
+            with open(self.etc_hosts,'w') as w:
+                for l in hostname_file_content.splitlines():
+                    if not self.hostname in l.split():
+                        w.write(l+'\n')
 
-        with open(self.etc_hosts,'w') as w:
-            for l in hostname_file_content.splitlines():
-                if not self.hostname in l.split():
-                    w.write(l+'\n')
-
-            w.write('{}\t{}\n'.format(self.ip, self.hostname))
+                w.write('{}\t{}\n'.format(self.ip, self.hostname))
 
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
