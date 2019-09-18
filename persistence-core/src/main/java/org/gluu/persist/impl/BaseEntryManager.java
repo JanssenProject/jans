@@ -1363,6 +1363,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
 					entryAttribute, false, true);
 			if (attribute != null) {
+				// Detect if attribute has more than one value
+				boolean multivalued = attribute.getValues().length > 1; 
+				attribute.setMultiValued(multivalued);
+
 				listAttributes.add(attribute);
 			}
 		}
