@@ -436,6 +436,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 			try {
 				result = searchImpl(bucketMapping, key, useScanConsistency, expression, scope, attributes, orderBy, batchOperationWraper,
 						returnDataType, start, count, pageSize);
+				break;
 			} catch (SearchException ex) {
 				if (ex.getErrorCode() != 5000) {
 					throw ex;
