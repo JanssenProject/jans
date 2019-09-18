@@ -9,7 +9,6 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
-import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
@@ -60,15 +59,18 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             throw new HttpException(ErrorResponseCode.REDIRECT_URI_IS_NOT_REGISTERED);
         }
 
-        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
-            site.setResponseTypes(params.getResponseTypes());
-            persistRp(site, createUpdateSiteParamsObject(params));
+        List<String> responseTypes = Lists.newArrayList();
+        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()
+                && site.getResponseTypes().containsAll(params.getResponseTypes())) {
+            responseTypes.addAll(params.getResponseTypes());
+        } else {
+            responseTypes.addAll(site.getResponseTypes());
         }
 
         String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : site.getRedirectUri();
 
-        authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
+        authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
         authorizationEndpoint += "&client_id=" + site.getClientId();
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
@@ -106,25 +108,5 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             LOG.error("acr value is null for site: " + site);
             return new ArrayList<>();
         }
-    }
-
-    private void persistRp(Rp rp, UpdateSiteParams params) {
-
-        try {
-            getUpdateRegisteredClientService().updateRegisteredClient(rp, params);
-            getRpService().update(rp);
-
-            LOG.info("RP updated: " + rp);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to persist RP, params: " + params, e);
-        }
-    }
-
-    private UpdateSiteParams createUpdateSiteParamsObject(GetAuthorizationUrlParams params) {
-        UpdateSiteParams updateSiteParams = new UpdateSiteParams();
-        updateSiteParams.setOxdId(params.getOxdId());
-        updateSiteParams.setResponseTypes(params.getResponseTypes());
-
-        return updateSiteParams;
     }
 }
