@@ -823,6 +823,12 @@ paths:
               redirect_uri:
                 type: string
                 example: https://client.example.org/cb
+              response_types:
+                type: array
+                items:
+                  type: string
+                example: ["code"]
+                description: Provide a list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code response type.
               custom_parameters:
                 type: object
                 additionalProperties:

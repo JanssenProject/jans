@@ -58,6 +58,25 @@ public class GetAuthorizationUrlTest {
 
     @Parameters({"host", "redirectUrls", "opHost"})
     @Test
+    public void testWithResponseType(String host, String redirectUrls, String opHost) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
+
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(parameters.get("response_type").contains("code"));
+        assertTrue(parameters.get("response_type").contains("token"));
+    }
+
+    @Parameters({"host", "redirectUrls", "opHost"})
+    @Test
     public void testWithParams(String host, String redirectUrls, String opHost) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
