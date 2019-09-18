@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.crypto;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -61,6 +62,8 @@ import static org.gluu.oxauth.model.jwk.JWKParameter.*;
  * @version February 12, 2019
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
+
+    protected static final Logger LOG = Logger.getLogger(OxAuthCryptoProvider.class);
 
     private KeyStore keyStore;
     private String keyStoreFile;
@@ -138,12 +141,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
 
-        String alias = UUID.randomUUID().toString() + getKidSuffix(use, signatureAlgorithm);
+        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(signatureAlgorithm, alias, use);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
+            LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
         }
 
         FileOutputStream stream = new FileOutputStream(keyStoreFile);
@@ -174,11 +178,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return jsonObject;
     }
 
-    private static String getKidSuffix(Use use, SignatureAlgorithm signatureAlgorithm) {
-        return "_" + use.getParamName().toLowerCase() + "_" + signatureAlgorithm.getName().toLowerCase();
+    private static String getKidSuffix(Use use, Algorithm algorithm) {
+        return "_" + use.getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
     }
 
-    public String getAliasByAlgorithmForDeletion(SignatureAlgorithm algorithm, String newAlias, Use use) throws KeyStoreException {
+    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, Use use) throws KeyStoreException {
         for (String alias : Collections.list(keyStore.aliases())) {
 
             if (newAlias.equals(alias)) { // skip newly created alias
@@ -199,8 +203,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 return false;
             }
 
-            return keyStore.containsAlias(keyId);
-        } catch (KeyStoreException e) {
+            return keyStore.getKey(keyId, keyStoreSecret.toCharArray()) != null;
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
