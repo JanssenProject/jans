@@ -1175,7 +1175,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues);
 		if (nativeType) {
-			// It did conversion in getNativeAttributeValue method already
+			// We do conversion in getNativeAttributeValue method already
 		} else if (propertyValue instanceof String[]) {
 			attributeValues = (String[]) propertyValue;
 		} else if (propertyValue instanceof Object[]) {
@@ -1350,6 +1350,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
 					entryAttribute, false);
 			if (attribute != null) {
+				// Detect if attribute has more than one value
+				boolean multivalued = attribute.getValues().length > 1; 
+				attribute.setMultiValued(multivalued);
+
 				listAttributes.add(attribute);
 			}
 		}
