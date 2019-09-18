@@ -11,12 +11,14 @@ import org.gluu.oxd.common.response.UpdateSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -170,6 +172,7 @@ public class RegisterSiteTest {
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
