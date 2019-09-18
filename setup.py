@@ -3765,7 +3765,7 @@ class Setup(object):
 
             self.run(['/bin/hostname', self.hostname])
 
-        if not os.path.exists(self.readFile(self.etc_hosts)):
+        if not os.path.exists(self.etc_hosts):
             self.writeFile(self.etc_hosts, '{}\t{}\n'.format(self.ip, self.hostname))
         else:
             hostname_file_content = self.readFile(self.etc_hosts)
