@@ -498,7 +498,7 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 			}
         } else {
             if (scope != null) {
-            	LOG.warn("Ignoring scope '" + scope + " for expression: " + expression);
+            	LOG.debug("Ignoring scope '" + scope + " for expression: " + expression);
             }
         }
 
