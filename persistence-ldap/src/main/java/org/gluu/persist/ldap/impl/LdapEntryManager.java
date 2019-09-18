@@ -857,6 +857,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return ldif;
     }
 
+    @Override
+    public void importEntry(String dn, List<AttributeData> data) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
+
     public int getSupportedLDAPVersion() {
         return this.operationService.getSupportedLDAPVersion();
     }
