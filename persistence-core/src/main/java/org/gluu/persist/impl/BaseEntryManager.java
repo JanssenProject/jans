@@ -6,33 +6,10 @@
 
 package org.gluu.persist.impl;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.annotation.AttributeEnum;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.AttributesList;
-import org.gluu.persist.annotation.CustomObjectClass;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.annotation.SchemaEntry;
+import org.gluu.persist.annotation.*;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.InvalidArgumentException;
 import org.gluu.persist.exception.MappingException;
@@ -50,7 +27,11 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Abstract Entry Manager
@@ -1482,7 +1463,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		} else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
 			propertyValueSetter.set(entry, toLongValue(attribute));
 		} else if (parameterType.equals(Date.class)) {
-			propertyValueSetter.set(entry, decodeTime(String.valueOf(attribute.getValue())));
+			propertyValueSetter.set(entry, attribute.getValue() instanceof Date ? (Date) attribute.getValue() : decodeTime(String.valueOf(attribute.getValue())));
 		} else if (parameterType.equals(String[].class)) {
 			propertyValueSetter.set(entry, attribute.getStringValues());
 		} else if (ReflectHelper.assignableFrom(parameterType, List.class)) {

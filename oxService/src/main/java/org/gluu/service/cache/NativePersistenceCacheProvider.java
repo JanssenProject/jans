@@ -28,7 +28,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private CacheConfiguration cacheConfiguration;
 
     @Inject
-    PersistenceEntryManager ldapEntryManager;
+    PersistenceEntryManager entryManager;
 
     private String baseDn;
 
@@ -43,12 +43,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             }
 
             String branchDn = String.format("ou=cache,%s", baseDn);
-            if (!ldapEntryManager.contains(branchDn, SimpleBranch.class)) {
+            if (!entryManager.contains(branchDn, SimpleBranch.class)) {
                 SimpleBranch branch = new SimpleBranch();
                 branch.setOrganizationalUnitName("cache");
                 branch.setDn(branchDn);
 
-                ldapEntryManager.persist(branch);
+                entryManager.persist(branch);
             }
 
             baseDn = branchDn;
@@ -67,14 +67,14 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Override
     public PersistenceEntryManager getDelegate() {
-        return ldapEntryManager;
+        return entryManager;
     }
 
     @Override
     public Object get(String key) {
         try {
             key = hashKey(key);
-            NativePersistenceCacheEntity entity = ldapEntryManager.find(NativePersistenceCacheEntity.class, createDn(key));
+            NativePersistenceCacheEntity entity = entryManager.find(NativePersistenceCacheEntity.class, createDn(key));
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
@@ -123,7 +123,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setDeletable(true);
 
             silentlyRemoveEntityIfExists(entity.getDn());
-            ldapEntryManager.persist(entity);
+            entryManager.persist(entity);
         } catch (Exception e) {
             log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
@@ -131,8 +131,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     private boolean silentlyRemoveEntityIfExists(String dn) {
         try {
-            if (ldapEntryManager.find(NativePersistenceCacheEntity.class, dn) != null) {
-                ldapEntryManager.removeRecursively(dn);
+            if (entryManager.find(NativePersistenceCacheEntity.class, dn) != null) {
+                entryManager.removeRecursively(dn);
                 return true;
             }
         } catch (Exception e) {
@@ -198,8 +198,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     public void cleanup(final Date now, int batchSize) {
         log.debug("Start NATIVE_PERSISTENCE clean up");
         try {
-            Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now));
-            final int removedCount = ldapEntryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
+            Filter filter = Filter.createLessOrEqualFilter("oxAuthExpiration", entryManager.encodeTime(baseDn, now));
+            final int removedCount = entryManager.remove(baseDn, NativePersistenceCacheEntity.class, filter, batchSize);
 
             log.debug("End NATIVE_PERSISTENCE clean up, items removed: " + removedCount);
         } catch (Exception e) {
@@ -213,4 +213,18 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         return CacheProviderType.NATIVE_PERSISTENCE;
     }
 
+    /* required for tests */
+    public void setEntryManager(PersistenceEntryManager entryManager) {
+        this.entryManager = entryManager;
+    }
+
+    /* required for tests */
+    public void setBaseDn(String baseDn) {
+        this.baseDn = baseDn;
+    }
+
+    /* required for tests */
+    public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
+        this.cacheConfiguration = cacheConfiguration;
+    }
 }
