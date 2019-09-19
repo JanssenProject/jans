@@ -15,7 +15,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class CouchbaseNativeCacheTest {
 
-    @Test(enabled = true) // manual
+    @Test(enabled = false) // manual
     public void couchbaseCacheProvider() throws IOException {
         CouchbaseEntryManager manager = createCouchbaseEntryManager();
 
@@ -55,7 +55,7 @@ public class CouchbaseNativeCacheTest {
     // MODIFY ACCORDING TO YOUR SERVER
     public static Properties loadProperties() throws IOException {
         Properties properties = new Properties();
-        properties.put("couchbase.auth.userPassword", "jun8azar");
+        properties.put("couchbase.auth.userPassword", "");
 
         try (InputStream is = CouchbaseNativeCacheTest.class.getResourceAsStream("cb-dev-backend.gluu.org.properties")) {
             properties.load(is);
