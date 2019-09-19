@@ -25,6 +25,17 @@
 				</includes>
 			</resource>
 		</resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/services/*</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+        </testResources>
 	</build>
 
 	<dependencies>
@@ -39,6 +50,11 @@
 			<artifactId>oxcore-persistence-ldap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>oxcore-persistence-couchbase</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>oxcore-util</artifactId>
