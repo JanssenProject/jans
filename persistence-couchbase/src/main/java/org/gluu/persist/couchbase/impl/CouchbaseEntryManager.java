@@ -7,13 +7,20 @@
 
 package org.gluu.persist.couchbase.impl;
 
-import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.Sort;
-import com.couchbase.client.java.subdoc.MutationSpec;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import javax.inject.Inject;
+
 import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
@@ -27,10 +34,15 @@ import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
-import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.key.impl.model.ParsedKey;
-import org.gluu.persist.model.*;
+import org.gluu.persist.model.AttributeData;
+import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.DefaultBatchOperation;
+import org.gluu.persist.model.PagedResult;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -38,13 +50,13 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
+import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
+import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.Sort;
+import com.couchbase.client.java.subdoc.MutationSpec;
 
 /**
  * Couchbase Entry Manager
@@ -150,7 +162,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         remove(dnValue.toString());
     }
-
+/*
     protected void saveAttributes(String dn, List<AttributeData> attributes) {
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
@@ -196,7 +208,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-
+*/
     @Override
     protected void persist(String dn, List<AttributeData> attributes) {
         JsonObject jsonObject = JsonObject.create();
@@ -770,29 +782,25 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public String[] exportEntry(String dn) {
+    public List<AttributeData> exportEntry(String dn) {
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
             JsonObject entry = operationService.lookup(keyWithInum.getKey(), null);
-            Map<String, Object> map = entry.toMap();
-            List<String> result = new ArrayList<String>(map.size());
-            for (Entry<String, Object> attr : map.entrySet()) {
-                result.add(attr.getKey() + ": " + attr.getValue());
-            }
 
-            return result.toArray(new String[result.size()]);
+            List<AttributeData> result = getAttributeDataList(entry);
+            if (result != null) {
+                return result;
+            }
+            
+            return null;
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
         }
     }
     @Override
-    public void importEntry(String dn,List<AttributeData> datas) {
-        try {
-            saveAttributes(dn,datas);
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to import entry: %s", dn), ex);
-        }
+    public void importEntry(String dn, List<AttributeData> attributes) {
+    	persist(dn, attributes);
     }
 
     private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {

@@ -846,20 +846,24 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public String[] exportEntry(String dn) {
-        String[] ldif = null;
+    public List<AttributeData> exportEntry(String dn) {
         try {
-            ldif = this.operationService.lookup(dn, (String[]) null).toLDIF();
-        } catch (ConnectionException e) {
-            LOG.error("Failed get ldif from " + dn, e);
-        }
+        	SearchResultEntry searchResultEntry = this.operationService.lookup(dn, (String[]) null);
 
-        return ldif;
+            List<AttributeData> result = getAttributeDataList(searchResultEntry);
+            if (result != null) {
+                return result;
+            }
+            
+            return null;
+        } catch (ConnectionException ex) {
+            throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
+        }
     }
 
     @Override
     public void importEntry(String dn, List<AttributeData> data) {
-        throw new UnsupportedOperationException("Method not implemented.");
+    	persist(dn, data);
     }
 
     public int getSupportedLDAPVersion() {
