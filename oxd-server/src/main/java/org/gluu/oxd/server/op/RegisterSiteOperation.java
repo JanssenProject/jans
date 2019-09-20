@@ -302,6 +302,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp.setTrustedClient(params.getTrustedClient());
         }
 
+        if (StringUtils.isNotBlank(rp.getOxdId())) {
+            request.addCustomAttribute("oxd_id", rp.getOxdId());
+        }
+
         List<GrantType> grantTypes = Lists.newArrayList();
         for (String grantType : params.getGrantTypes()) {
             grantTypes.add(GrantType.fromString(grantType));
