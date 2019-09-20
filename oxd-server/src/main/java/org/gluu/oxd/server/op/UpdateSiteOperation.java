@@ -402,6 +402,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             rp.setTrustedClient(params.getTrustedClient());
         }
 
+        if (StringUtils.isNotBlank(rp.getOxdId())) {
+            request.addCustomAttribute("oxd_id", rp.getOxdId());
+        }
+
         return request;
     }
 }
