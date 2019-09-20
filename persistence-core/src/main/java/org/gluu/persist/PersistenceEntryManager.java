@@ -102,9 +102,9 @@ public interface PersistenceEntryManager extends EntityManager {
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
-    String[] exportEntry(String primaryKey);
+    List<AttributeData> exportEntry(String dn);
 
-    void importEntry(String dn,List<AttributeData> data);
+    void importEntry(String dn, List<AttributeData> data);
 
     PersistenceOperationService getOperationService();
 

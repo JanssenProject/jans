@@ -179,7 +179,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
 	@Override
-    public String[] exportEntry(String dn) {
+    public List<AttributeData> exportEntry(String dn) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
     	return persistenceEntryManager.exportEntry(dn);
     }
