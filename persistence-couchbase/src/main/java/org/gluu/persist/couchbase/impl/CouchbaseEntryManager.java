@@ -162,53 +162,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         remove(dnValue.toString());
     }
-/*
-    protected void saveAttributes(String dn, List<AttributeData> attributes) {
-        JsonObject jsonObject = JsonObject.create();
-        for (AttributeData attribute : attributes) {
-            String attributeName = attribute.getName();
-            int length = attribute.getValues().length;
-            Object[] attributeValues = attribute.getValues();
-            Boolean multivalued = attribute.isMultiValued();
-            if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
-                Object[] realValues = attributeValues;
-                Object realValue="";
-                if(length==1){
-                    realValue = new Object[] { realValues[0] }[0];
-                }
-                // We need to store only one objectClass value in Couchbase
-                if (StringHelper.equals(CouchbaseOperationService.OBJECT_CLASS, attributeName)) {
-                    if (!ArrayHelper.isEmpty(realValues)) {
-                        realValues = new Object[] { realValues[0] };
-                        realValue = "gluuAttribute";
-                        multivalued = false;
-                    }
-                }
-                // Process userPassword
-                if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
-                    realValue = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
-                }
-                if ((multivalued == null) || !multivalued) {
-                    jsonObject.put(toInternalAttribute(attributeName), realValue);
-                } else {
-                    jsonObject.put(toInternalAttribute(attributeName), JsonArray.from(realValues));
-                }
-            }
-        }
-        jsonObject.put(CouchbaseOperationService.DN, dn);
-        // Persist entry
-        try {
-            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject);
-            if (!result) {
-                throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex);
-        }
-    }
 
-*/
     @Override
     protected void persist(String dn, List<AttributeData> attributes) {
         JsonObject jsonObject = JsonObject.create();
