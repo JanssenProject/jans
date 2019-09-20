@@ -1180,6 +1180,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues);
 		if (nativeType) {
 			// We do conversion in getNativeAttributeValue method already
+		} else if (propertyValue instanceof AttributeEnum) {
+			attributeValues[0] = ((AttributeEnum) propertyValue).getValue();
+		} else if (propertyValue instanceof AttributeEnum[]) {
+			AttributeEnum[] propertyValues = (AttributeEnum[]) propertyValue;
+			attributeValues = new String[propertyValues.length];
+			for (int i = 0; i < propertyValues.length; i++) {
+				attributeValues[i] = (propertyValues[i] == null) ? null : propertyValues[i].getValue();
+			}
 		} else if (propertyValue instanceof String[]) {
 			attributeValues = (String[]) propertyValue;
 		} else if (propertyValue instanceof Object[]) {
@@ -1198,14 +1206,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 						attributeValues[index++] = StringHelper.toString(tmpPropertyValue);
 					}
 				}
-			}
-		} else if (propertyValue instanceof AttributeEnum) {
-			attributeValues[0] = ((AttributeEnum) propertyValue).getValue();
-		} else if (propertyValue instanceof AttributeEnum[]) {
-			AttributeEnum[] propertyValues = (AttributeEnum[]) propertyValue;
-			attributeValues = new String[propertyValues.length];
-			for (int i = 0; i < propertyValues.length; i++) {
-				attributeValues[i] = (propertyValues[i] == null) ? null : propertyValues[i].getValue();
 			}
 		} else if (jsonObject) {
 			attributeValues[0] = convertValueToJson(propertyValue);
