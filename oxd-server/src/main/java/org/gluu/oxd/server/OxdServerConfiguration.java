@@ -3,7 +3,10 @@ package org.gluu.oxd.server;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import io.dropwizard.Configuration;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OxdServerConfiguration extends Configuration {
@@ -42,6 +45,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration = true;
     @JsonProperty(value = "migration_source_folder_path")
     private String migrationSourceFolderPath;
+    @JsonProperty(value = "allowed_op_hosts")
+    private List<String> allowedOpHosts = Lists.newArrayList();
     @JsonProperty(value = "storage")
     private String storage;
     @JsonProperty(value = "storage_configuration")
@@ -208,6 +213,15 @@ public class OxdServerConfiguration extends Configuration {
     public void setAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration(Boolean addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration) {
         this.addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration = addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration;
     }
+
+    public List<String> getAllowedOpHosts() {
+        return allowedOpHosts;
+    }
+
+    public void setAllowedOpHosts(List<String> allowedOpHosts) {
+        this.allowedOpHosts = allowedOpHosts;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -228,8 +242,9 @@ public class OxdServerConfiguration extends Configuration {
                 ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
-                ", storageConfiguration=" + storageConfiguration +
-                ", defaultSiteConfig=" + defaultSiteConfig +
+                ", storageConfiguration=" + storageConfiguration + '\'' +
+                ", defaultSiteConfig=" + defaultSiteConfig + '\'' +
+                ", allowedOpHosts=" + allowedOpHosts + '\'' +
                 ", addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration=" + addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration +
                 '}';
     }
