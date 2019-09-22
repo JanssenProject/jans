@@ -227,6 +227,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             }
 
             getRpService().create(rp);
+        } catch (HttpException e) {
+            throw e;
         } catch (Exception e) {
             LOG.error("Failed to persist site configuration, params: " + params, e);
             throw new RuntimeException(e);
