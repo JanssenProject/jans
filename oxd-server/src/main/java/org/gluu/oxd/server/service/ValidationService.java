@@ -2,8 +2,6 @@ package org.gluu.oxd.server.service;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.model.common.IntrospectionResponse;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.*;
@@ -11,6 +9,12 @@ import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.ServerLauncher;
 import org.gluu.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,6 +23,7 @@ import org.gluu.util.Pair;
 public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
+    final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
 
     private void notNull(IParams params) {
         if (params == null) {
@@ -35,6 +40,23 @@ public class ValidationService {
     public void notBlankOpHost(String opHost) {
         if (Strings.isNullOrEmpty(opHost)) {
             throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
+        }
+    }
+
+    public void isOpHostAllowed(String opHost) {
+        List<String> allowedOpHosts = configuration.getAllowedOpHosts();
+        if (!Strings.isNullOrEmpty(opHost) && !allowedOpHosts.isEmpty()) {
+            if (!allowedOpHosts.stream().anyMatch(allowedUrl ->
+                {
+                    try {
+                        return (new URL(allowedUrl)).equals(new URL(opHost));
+                    } catch (MalformedURLException e) {
+                        throw new HttpException(ErrorResponseCode.INVALID_ALLOWED_OP_HOST_URL);
+                    }
+                }
+            )) {
+                throw new HttpException(ErrorResponseCode.RESTRICTED_OP_HOST);
+            }
         }
     }
 
@@ -97,7 +119,6 @@ public class ValidationService {
      * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
      */
     private boolean validate(HasAccessTokenParams params) {
-        final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             return false; // skip validation since protectCommandsWithAccessToken=false
         }
@@ -163,6 +184,7 @@ public class ValidationService {
 
         notBlankOxdId(rp.getOxdId());
         notBlankOpHost(rp.getOpHost());
+        isOpHostAllowed(rp.getOpHost());
         return rp;
     }
 
@@ -174,3 +196,4 @@ public class ValidationService {
         return false;
     }
 }
+
