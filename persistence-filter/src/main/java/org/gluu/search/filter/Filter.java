@@ -192,6 +192,11 @@ public class Filter {
         return this;
     }
 
+    public Filter notMultiValued() {
+        this.multiValued = false;
+        return this;
+    }
+
     @Override
     public String toString() {
         if (FilterType.RAW == this.type) {
