@@ -14,6 +14,7 @@
   "protect_commands_with_access_token": false,
   "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client":true,
   "migration_source_folder_path":"",
+  "allowed_op_hosts": [],
   "storage":"h2",
   "storage_configuration": {
     "dbFileLocation":"u:\\opt\\oxd-server\\bin\\oxd_db"

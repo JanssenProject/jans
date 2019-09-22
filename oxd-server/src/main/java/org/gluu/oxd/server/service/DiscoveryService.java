@@ -5,15 +5,14 @@ package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.server.op.OpClientFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.op.OpClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.ws.rs.WebApplicationException;
@@ -66,6 +65,7 @@ public class DiscoveryService {
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
+        validationService.isOpHostAllowed(opHost);
 
         try {
             final OpenIdConfigurationResponse r = map.get(opHost);
@@ -104,6 +104,7 @@ public class DiscoveryService {
 
     public UmaMetadata getUmaDiscovery(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
+        validationService.isOpHostAllowed(opHost);
 
         try {
             final UmaMetadata r = umaMap.get(opHost);
