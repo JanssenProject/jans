@@ -76,7 +76,7 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.LOWERCASE == type) {
-        	// Return Dummy filter because LDAP is case in sensitive
+        	// Return Dummy filter because case sensitivity is defined at LDAP schema level
         	return com.unboundid.ldap.sdk.Filter.createPresenceFilter(genericFilter.getAttributeName());
         }
 
