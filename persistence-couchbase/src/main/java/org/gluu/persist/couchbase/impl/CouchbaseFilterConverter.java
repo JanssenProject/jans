@@ -150,9 +150,9 @@ public class CouchbaseFilterConverter {
         if (FilterType.EQUALITY == type) {
         	boolean hasSubFilters = ArrayHelper.isNotEmpty(currentGenericFilter.getFilters());
         	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
-            if (currentGenericFilter.isMultiValued() || Boolean.TRUE.equals(isMultiValuedDetected)) {
+            if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
                 return ConvertedExpression.build(Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(toInternalAttribute(currentGenericFilter)))), requiredConsistency);
-            } else if (Boolean.FALSE.equals(isMultiValuedDetected)) {
+            } else if (Boolean.FALSE.equals(currentGenericFilter.getMultiValued()) || Boolean.FALSE.equals(isMultiValuedDetected)) {
             	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else if (hasSubFilters && (isMultiValuedDetected == null)) {
         		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
@@ -282,4 +282,5 @@ public class CouchbaseFilterConverter {
 		return false;
 
 	}
+
 }
