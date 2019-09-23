@@ -39,26 +39,31 @@ public final class SAMLMetadataParser {
             return null;
         }
         EntityIDHandler handler = parseMetadata(metadataFile);
-
-        List<String> entityIds = handler.getEntityIDs();
-
-        if (entityIds == null || entityIds.isEmpty()) {
-            LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+        if(handler!=null){
+            List<String> entityIds = handler.getEntityIDs();
+            if (entityIds == null || entityIds.isEmpty()) {
+                LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            }
+            return entityIds;
+        }else{
+           return null;
         }
-
-        return entityIds;
     }
 
     public static List<String> getSpEntityIdFromMetadataFile(File metadataFile) {
         EntityIDHandler handler = parseMetadata(metadataFile);
+        if(handler!=null){
+            List<String> entityIds = handler.getSpEntityIDs();
 
-        List<String> entityIds = handler.getSpEntityIDs();
+            if (entityIds == null || entityIds.isEmpty()) {
+                LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            }
 
-        if (entityIds == null || entityIds.isEmpty()) {
-            LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            return entityIds;
+        }else {
+            return null;
         }
 
-        return entityIds;
     }
 
     public static EntityIDHandler parseMetadata(File metadataFile) {
@@ -66,7 +71,6 @@ public final class SAMLMetadataParser {
             LOG.error("Failed to get entityId from metadata file: " + metadataFile.getAbsolutePath());
             return null;
         }
-
         InputStream is = null;
         try {
             is = FileUtils.openInputStream(metadataFile);
@@ -86,7 +90,6 @@ public final class SAMLMetadataParser {
         try {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             SAXParser saxParser = saxParserFactory.newSAXParser();
-
             handler = new EntityIDHandler();
             saxParser.parse(is, handler);
         } catch (IOException ex) {
@@ -100,6 +103,7 @@ public final class SAMLMetadataParser {
             IOUtils.closeQuietly(is);
         }
 
+
         return handler;
     }
 
@@ -112,7 +116,6 @@ public final class SAMLMetadataParser {
         if (metadata == null) {
             return null;
         }
-
         InputStream is = new StringBufferInputStream(metadata);
         return parseMetadata(is);
     }
