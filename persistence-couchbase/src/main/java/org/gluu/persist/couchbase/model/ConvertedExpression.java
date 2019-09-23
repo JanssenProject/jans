@@ -37,4 +37,9 @@ public class ConvertedExpression {
 		this.consistency = consistency;
 	}
 
+	@Override
+	public String toString() {
+		return "ConvertedExpression [expression=" + expression + ", consistency=" + consistency + "]";
+	}
+
 }
