@@ -33,13 +33,17 @@ if  len(sys.argv)<2:
     parser.exit(1)
 
 
-from setup import Setup
+from setup import *
 
 setupObj = Setup('.')
 
 setupObj.setup = setupObj
 
 setupObj.load_properties('/install/community-edition-setup/setup.properties.last')
+attribDataTypes.startup('.')
+
+setupObj.cbm = CBM(setupObj.couchbase_hostname, setupObj.couchebaseClusterAdmin, setupObj.ldapPass)
+
 
 if not hasattr(setupObj, 'ldap_type'):
     setupObj.ldap_type = 'open_ldap'
@@ -124,23 +128,8 @@ def installPassport():
         print "Passport is already installed on this system"
         sys.exit()
 
-    
     print "Installing Passport ..."
-    proc = subprocess.Popen('echo "" | /opt/jre/bin/keytool -list -v -keystore /etc/certs/passport-rp.jks', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    alias_l=''
-
-    jks = {'keys': []}
-
-    for l in proc.stdout.readlines():
-        if l.startswith('Alias name:'):
-            alias_l = l
-        if 'SHA512withRSA' in l:
-            alias = alias_l[11:].strip()
-            jks['keys'].append({'kid': alias, 'alg': 'RS512'})
-            break
-
-    setupObj.passport_rp_client_jwks = [json.dumps(jks)]
-    
+    setupObj.generate_passport_configuration()
     setupObj.install_passport()
     print "Passport installation done"
 
