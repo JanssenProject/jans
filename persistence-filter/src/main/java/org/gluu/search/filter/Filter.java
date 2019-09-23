@@ -21,7 +21,7 @@ public class Filter {
     private String[] subAny;
     private String subFinal;
 
-    private boolean multiValued = false;
+    private Boolean multiValued;
 
     public Filter(FilterType type) {
         this.type = type;
@@ -183,17 +183,17 @@ public class Filter {
         this.subFinal = subFinal;
     }
 
-    public final boolean isMultiValued() {
+    public final Boolean getMultiValued() {
         return multiValued;
     }
 
     public Filter multiValued() {
-        this.multiValued = true;
+        this.multiValued = Boolean.TRUE;
         return this;
     }
 
     public Filter notMultiValued() {
-        this.multiValued = false;
+        this.multiValued = Boolean.FALSE;
         return this;
     }
 
