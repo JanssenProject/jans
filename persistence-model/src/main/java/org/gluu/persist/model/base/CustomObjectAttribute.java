@@ -36,9 +36,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 
     public CustomObjectAttribute(String name, List<Object> values) {
         this.name = name;
-        this.values = values;
-        
-        this.multiValued = (values != null) && (values.size() > 1); 
+        setValues(values);
     }
 
     public Object getValue() {
@@ -65,8 +63,6 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 
     public void setValues(List<Object> values) {
         this.values = values;
-        this.multiValued = true;
-
         this.multiValued = (values != null) && (values.size() > 1); 
     }
 
