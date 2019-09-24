@@ -44,7 +44,7 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "notes")
     private List<String> notes; 
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", multiValued = "multivalued", sortByName = true)
     private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
     @CustomObjectClass
@@ -124,6 +124,30 @@ public class SimpleUser implements Serializable {
         }
 
         return values;
+    }
+
+    public void setAttributeValue(String attributeName, Object attributeValue) {
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
+                	customAttribute.setValue(attributeValue);
+                    return;
+                }
+            }
+            customAttributes.add(new CustomObjectAttribute(attributeName, attributeValue));
+        }
+    }
+
+    public void setAttributeValues(String attributeName, List<Object> attributeValues) {
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
+                	customAttribute.setValues(attributeValues);
+                    return;
+                }
+            }
+            customAttributes.add(new CustomObjectAttribute(attributeName, attributeValues));
+        }
     }
 
     public String[] getCustomObjectClasses() {

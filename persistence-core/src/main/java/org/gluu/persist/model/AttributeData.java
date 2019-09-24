@@ -62,47 +62,47 @@ public class AttributeData {
 		this.multiValued = multiValued;
 	}
 
-	public Boolean isMultiValued() {
+	public Boolean getMultiValued() {
 		return multiValued;
 	}
 
 	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + Arrays.hashCode(values);
-        return result;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((multiValued == null) ? 0 : multiValued.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + Arrays.deepHashCode(values);
+		return result;
+	}
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AttributeData other = (AttributeData) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        if (!ArrayHelper.equalsIgnoreOrder(getStringValues(), other.getStringValues())) {
-            return false;
-        }
-        return true;
-    }
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AttributeData other = (AttributeData) obj;
+		if (multiValued == null) {
+			if (other.multiValued != null)
+				return false;
+		} else if (!multiValued.equals(other.multiValued))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (!Arrays.deepEquals(values, other.values))
+			return false;
+		return true;
+	}
 
     @Override
-    public String toString() {
-        return String.format("Attribute [name=%s, values=%s]", name, Arrays.toString(values));
-    }
+	public String toString() {
+		return "AttributeData [name=" + name + ", values=" + Arrays.toString(values) + ", multiValued=" + multiValued + "]";
+	}
 
 }
