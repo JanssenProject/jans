@@ -2,6 +2,8 @@ package org.gluu.search.filter;
 
 import java.util.List;
 
+import org.gluu.util.ArrayHelper;
+
 /**
  * Simple filter without dependency to specific persistence filter mechanism
  *
@@ -218,8 +220,13 @@ public class Filter {
         }
         if ((FilterType.EQUALITY == this.type) || (FilterType.LESS_OR_EQUAL == this.type)
                 || (FilterType.GREATER_OR_EQUAL == this.type)) {
-            return sb.append(this.attributeName).append(this.type.getSign()).append(this.assertionValue).append(')')
-                    .toString();
+        	if (ArrayHelper.isNotEmpty(this.filters)) {
+        		return sb.append(this.filters[0].toString()).append(this.type.getSign()).append(this.assertionValue).append(')')
+                .toString();
+        	} else {
+	            return sb.append(this.attributeName).append(this.type.getSign()).append(this.assertionValue).append(')')
+	                    .toString();
+        	}
         }
 
         if (FilterType.PRESENCE == this.type) {
@@ -251,6 +258,10 @@ public class Filter {
             sb.append(')');
 
             return sb.toString().replaceAll("\\*\\*","*");
+        }
+
+        if (FilterType.LOWERCASE == this.type) {
+            return sb.append(this.attributeName).toString();
         }
 
         return super.toString();
