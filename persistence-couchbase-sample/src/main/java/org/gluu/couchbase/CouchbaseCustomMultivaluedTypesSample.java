@@ -53,9 +53,9 @@ public final class CouchbaseCustomMultivaluedTypesSample {
 		foundUser.setAttributeValues("fuzzy", Arrays.asList("fuzzy_value_1", "fuzzy_value_2"));
 		foundUser.setAttributeValue("simple", "simple");
 		
-		CustomObjectAttribute multivaluedSingleValue = new CustomObjectAttribute("multivalued", "multivalued_single_valued");
-		multivaluedSingleValue.setMultivalued(true);
-		foundUser.getCustomAttributes().add(multivaluedSingleValue);
+		CustomObjectAttribute multiValuedSingleValue = new CustomObjectAttribute("multivalued", "multivalued_single_valued");
+		multiValuedSingleValue.setMultiValued(true);
+		foundUser.getCustomAttributes().add(multiValuedSingleValue);
 		couchbaseEntryManager.merge(foundUser);
 		LOG.info("Updated custom attributes '{}'", foundUser.getCustomAttributes());
 

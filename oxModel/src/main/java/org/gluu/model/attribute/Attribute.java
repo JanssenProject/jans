@@ -108,7 +108,7 @@ public class Attribute extends Entry implements Serializable {
     private Boolean oxSCIMCustomAttribute;
 
     @AttributeName(name = "oxMultivaluedAttribute")
-    private Boolean multivaluedAttribute;
+    private Boolean multiValuedAttribute;
 
     @JsonObject
     @AttributeName(name = "oxValidation")
@@ -285,12 +285,12 @@ public class Attribute extends Entry implements Serializable {
         this.oxSCIMCustomAttribute = oxSCIMCustomAttribute;
     }
 
-    public Boolean getMultivaluedAttribute() {
-        return multivaluedAttribute;
+    public Boolean getMultiValuedAttribute() {
+        return multiValuedAttribute;
     }
 
-    public void setMultivaluedAttribute(Boolean multivaluedAttribute) {
-        this.multivaluedAttribute = multivaluedAttribute;
+    public void setMultiValuedAttribute(Boolean multivaluedAttribute) {
+        this.multiValuedAttribute = multivaluedAttribute;
     }
 
     public String getGluuTooltip() {
@@ -329,7 +329,7 @@ public class Attribute extends Entry implements Serializable {
         result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
         result = prime * result + ((origin == null) ? 0 : origin.hashCode());
         result = prime * result + ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
-        result = prime * result + ((multivaluedAttribute == null) ? 0 : multivaluedAttribute.hashCode());
+        result = prime * result + ((multiValuedAttribute == null) ? 0 : multiValuedAttribute.hashCode());
         result = prime * result + ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute.hashCode());
         result = prime * result + ((salt == null) ? 0 : salt.hashCode());
         result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());

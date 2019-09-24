@@ -169,7 +169,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
-            Boolean multivalued = attribute.getMultiValued();
+            Boolean multiValued = attribute.getMultiValued();
             
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
@@ -179,7 +179,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 if (StringHelper.equals(CouchbaseOperationService.OBJECT_CLASS, attributeName)) {
                 	if (!ArrayHelper.isEmpty(realValues)) {
                 		realValues = new Object[] { realValues[0] };
-                		multivalued = false;
+                		multiValued = false;
                 	}
                 }
 
@@ -190,7 +190,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 escapeValues(realValues);
 
-                if ((multivalued == null) || !multivalued) {
+                if ((multiValued == null) || !multiValued) {
                     jsonObject.put(toInternalAttribute(attributeName), realValues[0]);
                 } else {
                     jsonObject.put(toInternalAttribute(attributeName), JsonArray.from(realValues));
@@ -221,11 +221,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 String attributeName = null;
                 Object[] attributeValues = null;
-                Boolean multivalued = null;
+                Boolean multiValued = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
-                    multivalued = attribute.getMultiValued();
+                    multiValued = attribute.getMultiValued();
                 }
 
                 String oldAttributeName = null;
@@ -237,12 +237,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
                 MutationSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(Mutation.DICT_ADD, toInternalAttribute(attributeName), multivalued, attributeValues);
+                    modification = createModification(Mutation.DICT_ADD, toInternalAttribute(attributeName), multiValued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.DELETE, toInternalAttribute(oldAttributeName), multivalued, oldAttributeValues);
+                        modification = createModification(Mutation.DELETE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.REPLACE, toInternalAttribute(attributeName), multivalued, attributeValues);
+                        modification = createModification(Mutation.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
                     }
                 }
 
@@ -572,7 +572,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         	String attributeName = fromInternalAttribute(shortAttributeName);
 
-        	Boolean multivalued = null;
+        	Boolean multiValued = null;
             Object[] attributeValueObjects;
             if (attributeObject == null) {
                 attributeValueObjects = NO_OBJECTS;
@@ -584,7 +584,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             		resultList.add(it.next());
 				}
                 attributeValueObjects = resultList.toArray(NO_OBJECTS);
-                multivalued = Boolean.TRUE;
+                multiValued = Boolean.TRUE;
             } else {
             	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long) ||
             		(attributeObject instanceof JsonObject)) {
@@ -604,8 +604,8 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             unescapeValues(attributeValueObjects);
 
             AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueObjects);
-            if (multivalued != null) {
-            	tmpAttribute.setMultiValued(multivalued);
+            if (multiValued != null) {
+            	tmpAttribute.setMultiValued(multiValued);
             }
             result.add(tmpAttribute);
         }
