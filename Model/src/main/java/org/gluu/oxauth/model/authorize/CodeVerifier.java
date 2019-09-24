@@ -44,7 +44,7 @@ public class CodeVerifier {
                     return type;
                 }
             }
-            return null;
+            return PLAIN;
         }
     }
 
