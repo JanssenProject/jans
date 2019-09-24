@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Yuriy Movchan Date: 09/16/2019
  */
-public final class CouchbaseCustomMultivaluedTypesSample {
+public final class CouchbaseCustomMultiValuedTypesSample {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
-	private CouchbaseCustomMultivaluedTypesSample() {
+	private CouchbaseCustomMultiValuedTypesSample() {
 	}
 
 	public static void main(String[] args) {
