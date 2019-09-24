@@ -374,7 +374,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (gluuAttribute != null) {
                         String ldapClaimName = gluuAttribute.getName();
 
-                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
+                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -407,7 +407,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultivaluedAttribute());
+                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
                         if (attribute != null) {
                             if (attribute instanceof JSONArray) {
                                 JSONArray jsonArray = (JSONArray) attribute;
@@ -512,7 +512,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
                     } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                        final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
+                        final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
                         if (value instanceof String) {
                             attribute = Boolean.parseBoolean(String.valueOf(value));
                         } else {
@@ -520,12 +520,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         }
                     } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
+                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
                         if (attributeValue != null) {
                             attribute = format.parse(attributeValue.toString());
                         }
                     } else {
-                        attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultivaluedAttribute());
+                        attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
                     }
 
                     if (attribute != null) {
