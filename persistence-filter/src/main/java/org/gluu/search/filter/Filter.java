@@ -192,8 +192,8 @@ public class Filter {
         return this;
     }
 
-    public Filter notMultiValued() {
-        this.multiValued = Boolean.FALSE;
+    public Filter multiValued(Boolean multiValued) {
+        this.multiValued = multiValued;
         return this;
     }
 
