@@ -107,7 +107,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	private Boolean oxSCIMCustomAttribute;
 
 	@AttributeName(name = "oxMultivaluedAttribute")
-	private Boolean oxMultivaluedAttribute;
+	private Boolean oxMultiValuedAttribute;
 
 	@Transient
 	private boolean custom;
@@ -290,12 +290,12 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.oxSCIMCustomAttribute = oxSCIMCustomAttribute;
 	}
 
-	public Boolean getOxMultivaluedAttribute() {
-		return oxMultivaluedAttribute == null ? false : oxMultivaluedAttribute;
+	public Boolean getOxMultiValuedAttribute() {
+		return oxMultiValuedAttribute == null ? false : oxMultiValuedAttribute;
 	}
 
-	public void setOxMultivaluedAttribute(Boolean oxMultivaluedAttribute) {
-		this.oxMultivaluedAttribute = oxMultivaluedAttribute;
+	public void setOxMultiValuedAttribute(Boolean oxMultiValuedAttribute) {
+		this.oxMultiValuedAttribute = oxMultiValuedAttribute;
 	}
 
 	public boolean isCustom() {
@@ -386,7 +386,7 @@ public class GluuAttribute extends Entry implements Serializable {
 		result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
 		result = prime * result + ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
-		result = prime * result + ((oxMultivaluedAttribute == null) ? 0 : oxMultivaluedAttribute.hashCode());
+		result = prime * result + ((oxMultiValuedAttribute == null) ? 0 : oxMultiValuedAttribute.hashCode());
 		result = prime * result + ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute.hashCode());
 		result = prime * result + (requred ? 1231 : 1237);
 		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
