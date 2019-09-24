@@ -44,7 +44,7 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "notes")
     private List<String> notes; 
 
-    @AttributesList(name = "name", value = "values", multiValued = "multivalued", sortByName = true)
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
     @CustomObjectClass
