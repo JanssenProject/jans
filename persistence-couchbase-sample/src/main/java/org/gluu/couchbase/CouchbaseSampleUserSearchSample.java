@@ -1,6 +1,5 @@
 package org.gluu.couchbase;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +9,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.couchbase.model.SimpleSessionState;
 import org.gluu.couchbase.model.SimpleUser;
 import org.gluu.log.LoggingHelper;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
@@ -61,8 +59,8 @@ public final class CouchbaseSampleUserSearchSample {
 	                    	long userUid = Math.round(Math.random() * countUsers);
 	                    	String uid = String.format("user%06d", userUid);
 	                        try {
-//		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), uid);
-		                        Filter filter = Filter.createEqualityFilter("uid", uid);
+		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), uid);
+//		                        Filter filter = Filter.createEqualityFilter("uid", uid);
 		                        List<SimpleUser> foundUsers = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		                        if (foundUsers.size() > 0) {
 		                        	successResult.incrementAndGet();
