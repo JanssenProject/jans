@@ -702,7 +702,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			Class<?> parameterType = getSetterPropertyType(entryClass, propertyName);
 			boolean multiValued = isMultiValued(parameterType);
 
-			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, multiValued, false, false);
+			AttributeData attribute = getAttributeData(propertyName, propertyName, getter, entry, multiValued, false);
 			if (attribute != null) {
 				for (String objectClass : attribute.getStringValues()) {
 					if (objectClass != null) {
@@ -783,6 +783,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			results.add(entry);
 
 			dnSetter.set(entry, dn);
+
+			// Remove processed DN  attribute
+			attributesMap.remove(dnProperty);
 
 			// Set loaded properties to entry
 
@@ -896,8 +899,21 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 							continue;
 						}
 
+						String entryPropertyMultivalued = ((AttributesList) ldapAttribute).multiValued();
+						Setter entryPropertyMultivaluedSetter = null;
+						if (StringHelper.isNotEmpty(entryPropertyMultivalued)) {
+							entryPropertyMultivaluedSetter = getSetter(entryItemType, entryPropertyMultivalued);
+						}
+						if (entryPropertyMultivaluedSetter != null) {
+							Class<?> parameterType = ReflectHelper.getSetterType(entryPropertyMultivaluedSetter);
+							if (!parameterType.equals(Boolean.TYPE)) {
+								throw new MappingException(
+										"Entry should has getter for property " + propertyName + "." + entryPropertyMultivalued + " with boolean type");
+							}
+						}
+
 						Object listItem = getListItem(propertyName, entryPropertyNameSetter, entryPropertyValueSetter,
-								entryItemType, entryAttribute);
+								entryPropertyMultivaluedSetter, entryItemType, entryAttribute);
 						if (listItem != null) {
 							propertyValue.add(listItem);
 						}
@@ -1148,7 +1164,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
-			Object entry, boolean multiValued, boolean jsonObject, boolean detectMultivalued) {
+			Object entry, boolean multiValued, boolean jsonObject) {
 		Object propertyValue = propertyValueGetter.get(entry);
 		if (propertyValue == null) {
 			return null;
@@ -1165,10 +1181,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributeValues = new String[] {};
 		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
 			return null;
-		}
-		
-		if (detectMultivalued) {
-			multiValued = isAttributeMultivalued(attributeValues);
 		}
 
 		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
@@ -1319,7 +1331,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
-		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject, false);
+		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject);
 
 		return attribute;
 	}
@@ -1359,13 +1371,31 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					"Entry should has getter for property " + propertyName + "." + entryPropertyValue);
 		}
 
+		String entryPropertyMultivalued = ((AttributesList) ldapAttribute).multiValued();
+		Getter entryPropertyMultivaluedGetter = null;
+		if (StringHelper.isNotEmpty(entryPropertyMultivalued)) {
+			entryPropertyMultivaluedGetter = getGetter(elementType, entryPropertyMultivalued);
+		}
+		if (entryPropertyMultivaluedGetter != null) {
+			Class<?> propertyType = entryPropertyMultivaluedGetter.getReturnType();
+			if (!propertyType.equals(Boolean.TYPE)) {
+				throw new MappingException(
+						"Entry should has getter for property " + propertyName + "." + entryPropertyMultivalued + " with boolean type");
+			}
+		}
+
 		for (Object entryAttribute : (List<?>) propertyValue) {
 			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
-					entryAttribute, false, true);
+					entryAttribute, false);
 			if (attribute != null) {
-				// Detect if attribute has more than one value
-				boolean multivalued = attribute.getValues().length > 1; 
-				attribute.setMultiValued(multivalued);
+				if (entryPropertyMultivaluedGetter != null) {
+					boolean multiValued = (boolean) entryPropertyMultivaluedGetter.get(entryAttribute);
+					attribute.setMultiValued(multiValued);
+				} else {
+					// Detect if attribute has more than one value
+					boolean multiValued = attribute.getValues().length > 1; 
+					attribute.setMultiValued(multiValued);
+				}
 
 				listAttributes.add(attribute);
 			}
@@ -1454,13 +1484,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private AttributeData getAttributeData(String propertyName, Getter propertyNameGetter, Getter propertyValueGetter,
-			Object entry, boolean jsonObject, boolean detectMultivalued) {
+			Object entry, boolean jsonObject) {
 		Object ldapAttributeName = propertyNameGetter.get(entry);
 		if (ldapAttributeName == null) {
 			return null;
 		}
 
-		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, false, jsonObject, detectMultivalued);
+		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, false, jsonObject);
 	}
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
@@ -1589,7 +1619,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private Object getListItem(String propertyName, Setter propertyNameSetter, Setter propertyValueSetter,
-			Class<?> classType, AttributeData attribute) {
+			Setter entryPropertyMultivaluedSetter, Class<?> classType, AttributeData attribute) {
 		if (attribute == null) {
 			return null;
 		}
@@ -1602,6 +1632,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 		propertyNameSetter.set(result, attribute.getName());
 		setPropertyValue(propertyName, propertyValueSetter, result, attribute, false);
+		
+		if ((entryPropertyMultivaluedSetter != null) && (attribute.getMultiValued() != null)) {
+			entryPropertyMultivaluedSetter.set(result, attribute.getMultiValued());
+		}
 
 		return result;
 	}
@@ -1767,7 +1801,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			String attributeName = attribute.getName();
 			for (Object value : attribute.getValues()) {
 				Filter filter = Filter.createEqualityFilter(attributeName, value);
-				if ((attribute.isMultiValued() != null) && attribute.isMultiValued()) {
+				if ((attribute.getMultiValued() != null) && attribute.getMultiValued()) {
 					filter.multiValued();
 				}
 
