@@ -182,10 +182,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
         } catch (WebApplicationException e) {
             if (pair.getFirst() != null) { // session_id was found and removed
-                String reason = "Session was removed successfully but redirect to post_logout_redirect_uri fails since AS failed to validate it against clients associated with session (which was just removed).";
+                String reason = "Session was removed successfully but post_logout_redirect_uri validation fails since AS failed to validate it against clients associated with session (which was just removed).";
                 log.error(reason, e);
-                throw new WebApplicationException(Response.status(Response.Status.OK).entity(
-                        errorResponseFactory.errorAsJson(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, reason)).build());
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, reason));
             } else {
                 throw e;
             }
