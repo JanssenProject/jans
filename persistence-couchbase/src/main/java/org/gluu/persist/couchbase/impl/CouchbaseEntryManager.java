@@ -169,7 +169,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
             Object[] attributeValues = attribute.getValues();
-            Boolean multivalued = attribute.isMultiValued();
+            Boolean multivalued = attribute.getMultiValued();
             
 
             if (ArrayHelper.isNotEmpty(attributeValues) && (attributeValues[0] != null)) {
@@ -225,7 +225,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
-                    multivalued = attribute.isMultiValued();
+                    multivalued = attribute.getMultiValued();
                 }
 
                 String oldAttributeName = null;
@@ -572,6 +572,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         	String attributeName = fromInternalAttribute(shortAttributeName);
 
+        	Boolean multivalued = null;
             Object[] attributeValueObjects;
             if (attributeObject == null) {
                 attributeValueObjects = NO_OBJECTS;
@@ -583,6 +584,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             		resultList.add(it.next());
 				}
                 attributeValueObjects = resultList.toArray(NO_OBJECTS);
+                multivalued = Boolean.TRUE;
             } else {
             	if ((attributeObject instanceof Boolean) || (attributeObject instanceof Integer) || (attributeObject instanceof Long) ||
             		(attributeObject instanceof JsonObject)) {
@@ -602,6 +604,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             unescapeValues(attributeValueObjects);
 
             AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueObjects);
+            if (multivalued != null) {
+            	tmpAttribute.setMultiValued(multivalued);
+            }
             result.add(tmpAttribute);
         }
 

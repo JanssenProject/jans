@@ -18,6 +18,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
     private static final long serialVersionUID = -1238450094325306154L;
 
     private String name;
+    private boolean multivalued;
     private List<Object> values;
 
     public CustomObjectAttribute() {
@@ -30,11 +31,14 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
     public CustomObjectAttribute(String name, Object value) {
         this.name = name;
         setValue(value);
+        this.multivalued = false;
     }
 
     public CustomObjectAttribute(String name, List<Object> values) {
         this.name = name;
         this.values = values;
+        
+        this.multivalued = (values != null) && (values.size() > 1); 
     }
 
     public Object getValue() {
@@ -52,6 +56,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
     public void setValue(Object value) {
         this.values = new ArrayList<Object>();
         this.values.add(value);
+        this.multivalued = false;
     }
 
     public List<Object> getValues() {
@@ -60,6 +65,9 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 
     public void setValues(List<Object> values) {
         this.values = values;
+        this.multivalued = true;
+
+        this.multivalued = (values != null) && (values.size() > 1); 
     }
 
     public final String getName() {
@@ -70,7 +78,15 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
         this.name = name;
     }
 
-    public String getDisplayValue() {
+    public boolean isMultivalued() {
+		return multivalued;
+	}
+
+	public void setMultivalued(boolean multivalued) {
+		this.multivalued = multivalued;
+	}
+
+	public String getDisplayValue() {
         if (values == null) {
             return "";
         }
@@ -83,6 +99,30 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
         for (int i = 1; i < values.size(); i++) {
             sb.append(", ").append(values.get(i).toString());
         }
+
+        return sb.toString();
+    }
+
+	private String toStringValue() {
+        if (values == null) {
+            return "";
+        }
+
+        if (values.size() == 1) {
+        	if (multivalued) {
+        		return "[" + values.get(0).toString() + "]";
+        	}
+            return values.get(0).toString();
+        }
+
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < values.size(); i++) {
+        	if (i > 0) {
+        		sb.append(", ");
+        	}
+            sb.append(values.get(i).toString());
+        }
+        sb.append("]");
 
         return sb.toString();
     }
@@ -112,7 +152,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 
     @Override
     public String toString() {
-        return String.format("Attribute [name=%s, values=%s]", name, values);
+        return String.format("Attribute [name=%s, multivalued=%s, value=%s]", name, multivalued, toStringValue());
     }
 
     public int compareTo(CustomObjectAttribute o) {

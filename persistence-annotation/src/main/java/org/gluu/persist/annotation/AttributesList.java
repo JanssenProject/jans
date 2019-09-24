@@ -31,6 +31,11 @@ public @interface AttributesList {
     String value();
 
     /**
+     * (Optional) The class property name which contains Persistance attribute value.
+     */
+    String multiValued() default "";
+
+    /**
      * (Optional) Holds additional configuration for Persistance attributes. Defaults
      * value not provides additional configuration.
      */
