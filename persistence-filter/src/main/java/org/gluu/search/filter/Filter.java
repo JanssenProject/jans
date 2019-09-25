@@ -261,7 +261,7 @@ public class Filter {
         }
 
         if (FilterType.LOWERCASE == this.type) {
-            return sb.append(this.attributeName).toString();
+            return sb.append("lower(\"").append(this.attributeName).append("\")").toString();
         }
 
         return super.toString();
