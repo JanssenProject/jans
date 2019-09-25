@@ -90,15 +90,21 @@ public abstract class MetricService implements Serializable {
     }
 
     public void addBranch(String branchDn, String ou) {
-        SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName(ou);
-        branch.setDn(branchDn);
-
-        getEntryManager().persist(branch);
+    	if (getEntryManager().hasBranchesSupport(branchDn)) {
+	        SimpleBranch branch = new SimpleBranch();
+	        branch.setOrganizationalUnitName(ou);
+	        branch.setDn(branchDn);
+	
+	        getEntryManager().persist(branch);
+    	}
     }
 
     public boolean containsBranch(String branchDn) {
-        return getEntryManager().contains(branchDn, SimpleBranch.class);
+    	if (getEntryManager().hasBranchesSupport(branchDn)) {
+            return getEntryManager().contains(branchDn, SimpleBranch.class);
+    	} else {
+    		return true;
+    	}
     }
 
     public void createBranch(String branchDn, String ou) {
