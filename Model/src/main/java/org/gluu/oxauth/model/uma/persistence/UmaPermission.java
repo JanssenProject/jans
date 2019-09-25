@@ -9,6 +9,7 @@ package org.gluu.oxauth.model.uma.persistence;
 import com.google.common.collect.Maps;
 import org.gluu.persist.annotation.*;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -19,7 +20,7 @@ import java.util.*;
  */
 @DataEntry
 @ObjectClass(value = "oxUmaResourcePermission")
-public class UmaPermission {
+public class UmaPermission implements Serializable {
 
     public static final String PCT = "pct";
 
