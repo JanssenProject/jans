@@ -13,6 +13,7 @@ import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "oxUmaResource")
-public class UmaResource {
+public class UmaResource implements Serializable {
 
     @DN
     private String dn;
