@@ -690,7 +690,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                 }
             }
 
-            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings);
+            boolean multiValued = attributeValueStrings.length > 1;
+            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings, multiValued);
             result.add(tmpAttribute);
         }
 
