@@ -431,7 +431,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         LOG.trace("-------------------------------------------------------");
         LOG.trace("Filter: {}", filter);
         LOG.trace("objectClasses count: {} ", objectClasses.length);
-        LOG.trace("objectClasses: {}", objectClasses.toString());
+        LOG.trace("objectClasses: {}", ArrayHelper.toString(objectClasses));
         LOG.trace("Search filter: {}", searchFilter);
 
         // Prepare default sort
