@@ -82,8 +82,6 @@ public class AttributeData {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		AttributeData other = (AttributeData) obj;
 		if ((multiValued != null) && (other.multiValued != null)) {
 			if (!multiValued.equals(other.multiValued))
@@ -94,8 +92,21 @@ public class AttributeData {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (!Arrays.deepEquals(values, other.values))
+
+		if ((values == null) && (other.values == null)) {
+			return true;
+		}
+		
+		if ((values == null) || (other.values == null) || values.length != other.values.length) {
 			return false;
+		}
+		
+		for (int i = 0; i < values.length; i++) {
+			if (!StringHelper.equals(String.valueOf(values[i]), String.valueOf(other.values[i]))) {
+				return false;
+			}
+		}
+
 		return true;
 	}
 
