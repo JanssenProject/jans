@@ -572,7 +572,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         	String attributeName = fromInternalAttribute(shortAttributeName);
 
-        	Boolean multiValued = null;
+        	Boolean multiValued = Boolean.FALSE;
             Object[] attributeValueObjects;
             if (attributeObject == null) {
                 attributeValueObjects = NO_OBJECTS;
