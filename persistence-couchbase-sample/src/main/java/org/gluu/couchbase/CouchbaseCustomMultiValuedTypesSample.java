@@ -1,11 +1,13 @@
 package org.gluu.couchbase;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.gluu.couchbase.model.SimpleUser;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.base.CustomObjectAttribute;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,11 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 		LOG.info("Found User '{}' with uid '{}' and key '{}'", foundUpdatedUser, foundUpdatedUser.getUserId(), foundUpdatedUser.getDn());
 
 		LOG.info("Cusom attributes '{}'", foundUpdatedUser.getCustomAttributes());
+		
+		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), "jon");
+		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
+		System.out.println(foundUpdatedUsers);
+		
 	}
 
 }
