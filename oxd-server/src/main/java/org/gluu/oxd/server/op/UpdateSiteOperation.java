@@ -200,10 +200,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getClientFrontchannelLogoutUris() != null && !params.getClientFrontchannelLogoutUris().isEmpty()) {
-            rp.setFrontChannelLogoutUri(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
+            rp.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
-            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
+            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
