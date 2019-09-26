@@ -3336,6 +3336,7 @@ class Setup(object):
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
+
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
@@ -3356,6 +3357,10 @@ class Setup(object):
             self.logIt("Error running LDAP setup script", True)
             self.logIt(traceback.format_exc(), True)
 
+        #Append self.jre_home to OpenDj java.properties        
+        opendj_java_properties_fn = os.path.join(self.ldapBaseFolder, 'config/java.properties')
+        with open(opendj_java_properties_fn,'a') as f:
+            f.write('\ndefault.java-home={}\n'.format(self.jre_home))
 
         if self.opendj_type == 'opendj':
 
