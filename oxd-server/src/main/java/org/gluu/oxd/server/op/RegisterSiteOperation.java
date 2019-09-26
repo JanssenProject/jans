@@ -149,6 +149,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         params.setResponseTypes(responseTypes);
 
         // redirect_uris
+        if (params.getRedirectUris() == null || params.getRedirectUris().isEmpty()) {
+            params.setRedirectUris(fallback.getRedirectUris());
+        }
         Set<String> redirectUris = Sets.newLinkedHashSet();
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty() && params.getRedirectUris().stream().allMatch(uri -> Utils.isValidUrl(uri))) {
             redirectUris.addAll(params.getRedirectUris());
@@ -171,6 +174,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         params.setRedirectUris(Lists.newArrayList(redirectUris));
 
         // claims_redirect_uri
+        if ((params.getClaimsRedirectUri() == null || params.getClaimsRedirectUri().isEmpty()) && (fallback.getClaimsRedirectUri() != null && !fallback.getClaimsRedirectUri().isEmpty())) {
+            params.setClaimsRedirectUri(fallback.getClaimsRedirectUri());
+        }
         Set<String> claimsRedirectUris = Sets.newHashSet();
         if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
             claimsRedirectUris.addAll(params.getClaimsRedirectUri());
@@ -206,8 +212,208 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         // claims_locales
-        if (params.getClaimsLocales() == null || params.getClaimsLocales().isEmpty()) {
+        if ((params.getClaimsLocales() == null || params.getClaimsLocales().isEmpty()) && (fallback.getClaimsLocales() != null && !fallback.getClaimsLocales().isEmpty())) {
             params.setClaimsLocales(fallback.getClaimsLocales());
+        }
+
+        //client_name
+        if (StringUtils.isBlank(params.getClientName()) && StringUtils.isNotBlank(fallback.getClientName())) {
+            params.setClientName(fallback.getClientName());
+        }
+
+        //client_jwks_uri
+        if (StringUtils.isBlank(params.getClientJwksUri()) && StringUtils.isNotBlank(fallback.getClientJwksUri())) {
+            params.setClientJwksUri(fallback.getClientJwksUri());
+        }
+
+        //token_endpoint_auth_method
+        if (StringUtils.isBlank(params.getClientTokenEndpointAuthMethod()) && StringUtils.isNotBlank(fallback.getTokenEndpointAuthMethod())) {
+            params.setClientTokenEndpointAuthMethod(fallback.getTokenEndpointAuthMethod());
+        }
+
+        //token_endpoint_auth_signing_alg
+        if (StringUtils.isBlank(params.getClientTokenEndpointAuthSigningAlg()) && StringUtils.isNotBlank(fallback.getTokenEndpointAuthSigningAlg())) {
+            params.setClientTokenEndpointAuthSigningAlg(fallback.getTokenEndpointAuthSigningAlg());
+        }
+
+        //request_uris
+        if ((params.getClientRequestUris() == null || params.getClientRequestUris().isEmpty()) && (fallback.getRequestUris() != null && !fallback.getRequestUris().isEmpty())) {
+            params.setClientRequestUris(fallback.getRequestUris());
+        }
+
+        //front_channel_logout_uris
+        if ((params.getClientFrontchannelLogoutUris() == null || params.getClientFrontchannelLogoutUris().isEmpty()) && (fallback.getFrontChannelLogoutUris() != null && !fallback.getFrontChannelLogoutUris().isEmpty())) {
+            params.setClientFrontchannelLogoutUris(fallback.getFrontChannelLogoutUris());
+        }
+
+        //sector_identifier_uri
+        if (StringUtils.isBlank(params.getClientSectorIdentifierUri()) && StringUtils.isNotBlank(fallback.getSectorIdentifierUri())) {
+            params.setClientSectorIdentifierUri(fallback.getSectorIdentifierUri());
+        }
+
+        //client_id
+        if (StringUtils.isBlank(params.getClientId()) && StringUtils.isNotBlank(fallback.getClientId())) {
+            params.setClientId(fallback.getClientId());
+        }
+
+        //client_secret
+        if (StringUtils.isBlank(params.getClientSecret()) && StringUtils.isNotBlank(fallback.getClientSecret())) {
+            params.setClientSecret(fallback.getClientSecret());
+        }
+
+        //access_token_signing_alg
+        if (StringUtils.isBlank(params.getAccessTokenSigningAlg()) && StringUtils.isNotBlank(fallback.getAccessTokenSigningAlg())) {
+            params.setAccessTokenSigningAlg(fallback.getAccessTokenSigningAlg());
+        }
+
+        //logo_uri
+        if (StringUtils.isBlank(params.getLogoUri()) && StringUtils.isNotBlank(fallback.getLogoUri())) {
+            params.setLogoUri(fallback.getLogoUri());
+        }
+
+        //client_uri
+        if (StringUtils.isBlank(params.getClientUri()) && StringUtils.isNotBlank(fallback.getClientUri())) {
+            params.setClientUri(fallback.getClientUri());
+        }
+
+        //policy_uri
+        if (StringUtils.isBlank(params.getPolicyUri()) && StringUtils.isNotBlank(fallback.getPolicyUri())) {
+            params.setPolicyUri(fallback.getPolicyUri());
+        }
+
+        //tos_uri
+        if (StringUtils.isBlank(params.getTosUri()) && StringUtils.isNotBlank(fallback.getTosUri())) {
+            params.setTosUri(fallback.getTosUri());
+        }
+
+        //jwks
+        if (StringUtils.isBlank(params.getJwks()) && StringUtils.isNotBlank(fallback.getJwks())) {
+            params.setJwks(fallback.getJwks());
+        }
+
+        //id_token_binding_cnf
+        if (StringUtils.isBlank(params.getIdTokenBindingCnf()) && StringUtils.isNotBlank(fallback.getIdTokenBindingCnf())) {
+            params.setIdTokenBindingCnf(fallback.getIdTokenBindingCnf());
+        }
+
+        //tls_client_auth_subject_dn
+        if (StringUtils.isBlank(params.getTlsClientAuthSubjectDn()) && StringUtils.isNotBlank(fallback.getTlsClientAuthSubjectDn())) {
+            params.setTlsClientAuthSubjectDn(fallback.getTlsClientAuthSubjectDn());
+        }
+
+        //id_token_signed_response_alg
+        if (StringUtils.isBlank(params.getIdTokenSignedResponseAlg()) && StringUtils.isNotBlank(fallback.getIdTokenSignedResponseAlg())) {
+            params.setIdTokenSignedResponseAlg(fallback.getIdTokenSignedResponseAlg());
+        }
+
+        //id_token_encrypted_response_alg
+        if (StringUtils.isBlank(params.getIdTokenEncryptedResponseAlg()) && StringUtils.isNotBlank(fallback.getIdTokenEncryptedResponseAlg())) {
+            params.setIdTokenEncryptedResponseAlg(fallback.getIdTokenEncryptedResponseAlg());
+        }
+
+        //id_token_encrypted_response_enc
+        if (StringUtils.isBlank(params.getIdTokenEncryptedResponseEnc()) && StringUtils.isNotBlank(fallback.getIdTokenEncryptedResponseEnc())) {
+            params.setIdTokenEncryptedResponseEnc(fallback.getIdTokenEncryptedResponseEnc());
+        }
+
+        //user_info_signed_response_alg
+        if (StringUtils.isBlank(params.getUserInfoSignedResponseAlg()) && StringUtils.isNotBlank(fallback.getUserInfoSignedResponseAlg())) {
+            params.setUserInfoSignedResponseAlg(fallback.getUserInfoSignedResponseAlg());
+        }
+
+        //user_info_encrypted_response_alg
+        if (StringUtils.isBlank(params.getUserInfoEncryptedResponseAlg()) && StringUtils.isNotBlank(fallback.getUserInfoEncryptedResponseAlg())) {
+            params.setUserInfoEncryptedResponseAlg(fallback.getUserInfoEncryptedResponseAlg());
+        }
+
+        //user_info_encrypted_response_enc
+        if (StringUtils.isBlank(params.getUserInfoEncryptedResponseEnc()) && StringUtils.isNotBlank(fallback.getUserInfoEncryptedResponseEnc())) {
+            params.setUserInfoEncryptedResponseEnc(fallback.getUserInfoEncryptedResponseEnc());
+        }
+
+        //request_object_signing_alg
+        if (StringUtils.isBlank(params.getRequestObjectSigningAlg()) && StringUtils.isNotBlank(fallback.getRequestObjectSigningAlg())) {
+            params.setRequestObjectSigningAlg(fallback.getRequestObjectSigningAlg());
+        }
+
+        //request_object_encryption_alg
+        if (StringUtils.isBlank(params.getRequestObjectEncryptionAlg()) && StringUtils.isNotBlank(fallback.getRequestObjectEncryptionAlg())) {
+            params.setRequestObjectEncryptionAlg(fallback.getRequestObjectEncryptionAlg());
+        }
+
+        //request_object_encryption_enc
+        if (StringUtils.isBlank(params.getRequestObjectEncryptionEnc()) && StringUtils.isNotBlank(fallback.getRequestObjectEncryptionEnc())) {
+            params.setRequestObjectEncryptionEnc(fallback.getRequestObjectEncryptionEnc());
+        }
+
+        //default_max_age
+        if (params.getDefaultMaxAge() == null && fallback.getDefaultMaxAge() != null) {
+            params.setDefaultMaxAge(fallback.getDefaultMaxAge());
+        }
+
+        //initiate_login_uri
+        if (StringUtils.isBlank(params.getInitiateLoginUri()) && StringUtils.isNotBlank(fallback.getInitiateLoginUri())) {
+            params.setInitiateLoginUri(fallback.getInitiateLoginUri());
+        }
+
+        //authorized_origins
+        if ((params.getAuthorizedOrigins() == null || params.getAuthorizedOrigins().isEmpty()) && (fallback.getAuthorizedOrigins() != null && !fallback.getAuthorizedOrigins().isEmpty())) {
+            params.setAuthorizedOrigins(fallback.getAuthorizedOrigins());
+        }
+
+        //access_token_lifetime
+        if (params.getAccessTokenLifetime() == null && fallback.getAccessTokenLifetime() != null) {
+            params.setAccessTokenLifetime(fallback.getAccessTokenLifetime());
+        }
+
+        //software_id
+        if (StringUtils.isBlank(params.getSoftwareId()) && StringUtils.isNotBlank(fallback.getSoftwareId())) {
+            params.setSoftwareId(fallback.getSoftwareId());
+        }
+
+        //software_version
+        if (StringUtils.isBlank(params.getSoftwareVersion()) && StringUtils.isNotBlank(fallback.getSoftwareVersion())) {
+            params.setSoftwareVersion(fallback.getSoftwareVersion());
+        }
+
+        //software_statement
+        if (StringUtils.isBlank(params.getSoftwareStatement()) && StringUtils.isNotBlank(fallback.getSoftwareStatement())) {
+            params.setSoftwareStatement(fallback.getSoftwareStatement());
+        }
+
+        //custom_attributes
+        if ((params.getCustomAttributes() == null || params.getCustomAttributes().isEmpty()) && (fallback.getCustomAttributes() != null && !fallback.getCustomAttributes().isEmpty())) {
+            params.setCustomAttributes(fallback.getCustomAttributes());
+        }
+
+        //trusted_client
+        if (params.getTrustedClient() == null) {
+            params.setTrustedClient(fallback.getTrustedClient());
+        }
+
+        //access_token_as_jwt
+        if (params.getAccessTokenAsJwt() == null) {
+            params.setAccessTokenAsJwt(fallback.getAccessTokenAsJwt());
+        }
+
+        //rpt_as_jwt
+        if (params.getRptAsJwt() == null) {
+            params.setRptAsJwt(fallback.getRptAsJwt());
+        }
+
+        //front_channel_logout_session_required
+        if (params.getFrontChannelLogoutSessionRequired() == null) {
+            params.setFrontChannelLogoutSessionRequired(fallback.getFrontChannelLogoutSessionRequired());
+        }
+
+        //run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims
+        if (params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() == null) {
+            params.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(fallback.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        }
+
+        //require_auth_time
+        if (params.getRequireAuthTime() == null) {
+            params.setRequireAuthTime(fallback.getRequireAuthTime());
         }
     }
 
@@ -315,11 +521,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setGrantTypes(grantTypes);
 
         if (params.getClientFrontchannelLogoutUris() != null) {
-            rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
+            rp.setFrontChannelLogoutUris(params.getClientFrontchannelLogoutUris());
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
-            if (rp.getFrontChannelLogoutUri() != null) {
-                request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
+            if (rp.getFrontChannelLogoutUris() != null) {
+                request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
             }
         }
 
@@ -542,7 +748,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
         rp.setUmaProtectedResources(new ArrayList<UmaResource>());
-        rp.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUris());
+        rp.setFrontChannelLogoutUris(params.getClientFrontchannelLogoutUris());
 
         if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
             rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
