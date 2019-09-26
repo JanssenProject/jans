@@ -34,6 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.ACR_SMS = "twilio_sms"
         self.ACR_OTP = "otp"
         self.ACR_U2F = "u2f"
+        self.ACR_SMPP = "smpp"
 
         self.modulePrefix = "casa-external_"
 
