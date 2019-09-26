@@ -784,7 +784,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 			dnSetter.set(entry, dn);
 
-			// Remove processed DN  attribute
+			// Remove processed DN attribute
 			attributesMap.remove(dnProperty);
 
 			// Set loaded properties to entry
@@ -1504,7 +1504,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
 		if (parameterType.equals(String.class)) {
-			propertyValueSetter.set(entry, String.valueOf(attribute.getValue()));
+			Object value = attribute.getValue();
+			if (value instanceof Date) {
+				value = encodeTime((Date) value);
+			}
+			propertyValueSetter.set(entry, String.valueOf(value));
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
 			propertyValueSetter.set(entry, toBooleanValue(attribute));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
