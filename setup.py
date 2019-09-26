@@ -4754,7 +4754,7 @@ def resource_checkings():
                                                                 colors.ENDC))
         sys.exit(1)
     current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-    current_mem_size = current_mem_bytes / (1024.**3) #in GB
+    current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 
     if current_mem_size < suggested_mem_size:
         print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
