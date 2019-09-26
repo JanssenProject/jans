@@ -77,9 +77,11 @@
             }
         </style>
     </ui:define>
-    <ui:define name="pageTitle">#{msgs['smpp.pageTitle']}</ui:define>
+
+    <ui:define name="pageTitle">#{msgs['otp_sms.pageTitle']}</ui:define>
+
     <ui:define name="body">
-        <h:form id="SmppSmsloginForm">
+        <h:form id="OtpSmsloginForm">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
@@ -88,42 +90,23 @@
                         </h:panelGroup>
 				<div class="container">
 					<div class="step_bx">
-						<h2>#{msgs['smpp.verification']}</h2>
-						<p>#{msgs['smpp.usedevice']}</p>
+						<h2>#{msgs['otp_sms.verification']}</h2>
+						<p>#{msgs['otp_sms.usedevice']}</p>
 						<img
 							src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
 							alt="phone-ver" />
-						<h4>#{msgs['otp_sms.choose']}</h4>
-						<div id="phones"></div>
-
-							<h:commandButton styleClass="btn btn-done" value="#{msgs['otp_sms.send']}" action="#{authenticator.authenticate}"/>
+						<h4>Enter the code sent via SMS</h4>
+							<input name="passcode" type="text" class="form-control" placeholder="Enter the 6 digit code" autocomplete="off" />
+							<h:commandButton styleClass="btn btn-done" value="#{msgs['otp_sms.login']}" action="#{authenticator.authenticate}"/>
 					</div>
 				</div>
                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['smpp.termsPrivacy']}</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['otp_sms.termsPrivacy']}</a>
                             </p>
                         </h:panelGroup>
             </h:panelGroup>
-            <h:inputHidden id="indexOfNumber" value="0" />
         </h:form>
-        <script type="text/javascript">
-        	var ast = "XXXXXX ";
-        	var numbs = "${identity.getWorkingParameter('choppedNos')}";
-        	numbs = numbs.split(",");
-        	for (var i=0; i &lt; numbs.length; i++) {
-        		var checked = (i == 0) ? "checked" : "";
-        		//very ugly... yes
-        		var line ='&lt;input type="radio" id="optionPhone" name="optionPhone" onchange="changeOption(' + i + ')"' + checked +  '/&gt; '
-        		line = '&lt;label&gt;' + line + ast + numbs[i] + '&lt;/label&gt;';        		
-        		line = '&lt;div class="checkbox"&gt;' + line + '&lt;/&gt;';
-        		var option = $(line);
-        		$('#phones').append(option);
-        	}
-        	function changeOption(index) {        
-        		document.getElementById("SmppSmsloginForm:indexOfNumber").value = index;
-        	}
-        </script>
         <ui:include src="/casa/casa.xhtml">
             <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
         </ui:include>
