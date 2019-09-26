@@ -3953,49 +3953,62 @@ class Setup(object):
         install_command, update_command, query_command, check_text = self.get_install_commands()
 
 
-        install_list = []
+        install_list = {'mondatory': [], 'optional': []}
 
         package_list = {
-                'debian 9': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'debian 8': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'ubuntu 14': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'ubuntu 16': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'ubuntu 18': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests bzip2',
-                'centos 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'centos 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'red 6': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'red 7': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2',
-                'fedora 22': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2'
+                'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'ubuntu 14': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests bzip2', 'optional': 'memcached'},
+                'centos 6': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'red 6': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
+                'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 }
-        for package in package_list[self.os_type+' '+self.os_version].split():
-            sout, serr = self.run_command(query_command.format(package))
-            if check_text in sout+serr:
-                self.logIt('Package {0} was not installed'.format(package))
-                install_list.append(package)
-            else:
-                self.logIt('Package {0} was installed'.format(package))
 
-        if install_list:
+        os_type_version = self.os_type+' '+self.os_version
 
-            install = True
+        for install_type in install_list:
+            for package in package_list[os_type_version][install_type].split():
+                sout, serr = self.run_command(query_command.format(package))
+                if check_text in sout+serr:
+                    self.logIt('Package {0} was not installed'.format(package))
+                    install_list[install_type].append(package)
+                else:
+                    self.logIt('Package {0} was installed'.format(package))
 
-            if not setupOptions['noPrompt']:
+        install = {'mondatory': True, 'optional': False}
 
-                print "The following packages are required for Gluu Server"
-                print "\n".join(install_list)
-                r = raw_input("Do you want to install these now? [Y/n] ")
-                if r.lower()=='n':
-                    install = False
-                    print("Can not proceed without installing required packages. Exiting ...")
-                    sys.exit()
+        for install_type in install_list:
+            if install_list[install_type]:
+                packages = " ".join(install_list[install_type])
 
-            if install:
-                self.logIt("Installing packages")
-                if not self.os_type == 'fedora':
-                    sout, serr = self.run_command(update_command)
-                self.run_command(install_command.format(" ".join(install_list)))
+                if not setupOptions['noPrompt']:
+                    if install_type == 'mondatory':
+                        print "The following packages are required for Gluu Server"
+                        print packages
+                        r = raw_input("Do you want to install these now? [Y/n] ")
+                        if r and r.lower()=='n':
+                            install[install_type] = False
+                            if install_type == 'mondatory':
+                                print("Can not proceed without installing required packages. Exiting ...")
+                                sys.exit()
 
+                    elif install_type == 'optional':
+                        print "You may need the following packages"
+                        print packages
+                        r = raw_input("Do you want to install these now? [y/N] ")
+                        if r and r.lower()=='y':
+                            install[install_type] = True
 
+                if install[install_type]:
+                    self.logIt("Installing packages " + packages)
+                    print "Installing packages", packages
+                    if not self.os_type == 'fedora':
+                        sout, serr = self.run_command(update_command)
+                    self.run_command(install_command.format(packages))
 
         self.run_command('pip install pyDes')
 
