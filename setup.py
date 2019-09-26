@@ -3937,8 +3937,8 @@ class Setup(object):
         if self.os_type in ('ubuntu', 'debian'):
             install_command = 'DEBIAN_FRONTEND=noninteractive apt-get install -y {0}'
             update_command = 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
-            query_command = 'dpkg -l {0}'
-            check_text = 'no packages found matching'
+            query_command = 'dpkg-query -W -f=\'${{Status}}\' {} 2>/dev/null | grep -c "ok installed"'
+            check_text = '0'
 
         elif self.os_type in ('centos', 'red', 'fedora'):
             install_command = 'yum install -y {0}'
