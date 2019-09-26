@@ -825,7 +825,7 @@ public class Authenticator {
         facesMessages.add(severity, message);
     }
 
-    public String getTwilioNumber() {
+    public String getMaskedNumber() {
         String result = getFullNumber();
         if (result != null && result.length() > 7) {
             String sub = result.substring(4, 6);
