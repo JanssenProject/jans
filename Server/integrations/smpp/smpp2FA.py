@@ -344,7 +344,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
-            return "/auth/smpp/smpp.xhtml"
+            return "/auth/otp_sms/otp_sms.xhtml"
 
         return ""
 
