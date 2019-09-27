@@ -1530,7 +1530,8 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				}
 				propertyValueSetter.set(entry, jsonValues);
 			} else {
-				propertyValueSetter.set(entry, Arrays.asList(attribute.getValues()));
+				List<?> resultValues = attributeToTypedList(ReflectHelper.getListType(propertyValueSetter), attribute);
+				propertyValueSetter.set(entry, resultValues);
 			}
 		} else if (ReflectHelper.assignableFrom(parameterType, AttributeEnum.class)) {
 			try {
@@ -1570,6 +1571,26 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List<String>, AttributeEnum or AttributeEnum[]"
 					+ " parameter type or has annotation JsonObject");
 		}
+	}
+	
+	private List<?> attributeToTypedList(Class<?> listType, AttributeData attributeData) {
+		if (listType.equals(String.class)) {
+			ArrayList<String> result = new ArrayList<String>();
+			for (Object value : attributeData.getValues()) {
+				String resultValue;
+				if (value instanceof Date) {
+					resultValue = encodeTime((Date) value);
+				} else {
+					resultValue = String.valueOf(value);
+				}
+
+				result.add(resultValue);
+			}
+			
+			return result;
+		}
+
+		return Arrays.asList(attributeData.getValues());
 	}
 
 	private Boolean toBooleanValue(AttributeData attribute) {
