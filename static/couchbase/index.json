@@ -99,8 +99,8 @@
     ],
     "static" : [
       [["exp", "oxAuthExpiration"], "del=true"],
-      [["grtId"], "objectClass = \"token\""]
-    
+      [["grtId"], "objectClass = \"token\""],
+      [["ssnId"], "objectClass = \"token\""]
     ]
   },
 
