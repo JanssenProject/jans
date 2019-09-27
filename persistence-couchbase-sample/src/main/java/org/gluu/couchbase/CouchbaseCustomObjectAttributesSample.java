@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Yuriy Movchan Date: 09/24/2019
  */
-public final class CouchbaseCustomTypesSample {
+public final class CouchbaseCustomObjectAttributesSample {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
-	private CouchbaseCustomTypesSample() {
+	private CouchbaseCustomObjectAttributesSample() {
 	}
 
 	public static void main(String[] args) {
@@ -52,7 +52,7 @@ public final class CouchbaseCustomTypesSample {
 		SimpleUser foundUser = couchbaseEntryManager.find(SimpleUser.class, newUser.getDn());
 		LOG.info("Found User '{}' with uid '{}' and key '{}'", foundUser, foundUser.getUserId(), foundUser.getDn());
 
-		LOG.info("Cusom attributes '{}'", foundUser.getCustomAttributes());
+		LOG.info("Custom attributes '{}'", foundUser.getCustomAttributes());
 		for (CustomObjectAttribute customAttribute : foundUser.getCustomAttributes()) {
 			if (customAttribute.getValue() instanceof Date) {
 				LOG.info("Found date custom attribute '{}' with value '{}'", customAttribute.getName(), customAttribute.getValue());
