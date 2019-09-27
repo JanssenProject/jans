@@ -44,7 +44,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         }
 
         if (this.values.size() > 0) {
-            return this.values.get(0);
+            return String.valueOf(this.values.get(0));
         }
 
         return null;

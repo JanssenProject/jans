@@ -66,7 +66,7 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 		LOG.info("Found User '{}' with uid '{}' and key '{}'", foundUpdatedUser, foundUpdatedUser.getUserId(), foundUpdatedUser.getDn());
 
 		LOG.info("Cusom attributes '{}'", foundUpdatedUser.getCustomAttributes());
-		
+
 		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), "jon");
 		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
 		System.out.println(foundUpdatedUsers);
