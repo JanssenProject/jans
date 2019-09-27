@@ -1535,9 +1535,8 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.257 NAME 'oxTicket'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.258 NAME 'oxTrustActive'
-  EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.259 NAME 'oxTrustCacheRefreshServerIpAddress'
   EQUALITY caseIgnoreMatch
