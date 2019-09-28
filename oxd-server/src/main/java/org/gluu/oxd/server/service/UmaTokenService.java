@@ -320,8 +320,6 @@ public class UmaTokenService {
         authorizeClient.setRequest(request);
         final AuthorizationResponse response1 = authorizeClient.exec();
 
-        ClientUtils.showClient(authorizeClient);
-
         final String scope = response1.getScope();
         final String authorizationCode = response1.getCode();
         if (!state.equals(response1.getState())) {
@@ -343,7 +341,6 @@ public class UmaTokenService {
             tokenClient1.setRequest(tokenRequest);
             tokenClient1.setExecutor(httpService.getClientExecutor());
             final TokenResponse response2 = tokenClient1.exec();
-            ClientUtils.showClient(authorizeClient);
 
             if (response2.getStatus() == 200 && Util.allNotBlank(response2.getAccessToken())) {
                 final Token token = TokenFactory.newToken(scopeType);

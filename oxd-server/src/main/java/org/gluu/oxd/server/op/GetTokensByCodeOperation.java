@@ -54,7 +54,6 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenClient.setExecutor(getHttpService().getClientExecutor());
         tokenClient.setRequest(tokenRequest);
         final TokenResponse response = tokenClient.exec();
-        ClientUtils.showClient(tokenClient);
 
         if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
 
