@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.AuthorizationResponse;
 import org.gluu.oxauth.client.AuthorizeClient;
-import org.gluu.oxauth.client.ClientUtils;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxd.common.Command;
@@ -61,7 +60,6 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response = authorizeClient.exec();
 
-        ClientUtils.showClient(authorizeClient);
         if (response != null) {
             getStateService().putState(params.getState());
             return new GetAuthorizationCodeResponse(response.getCode());
