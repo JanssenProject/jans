@@ -64,8 +64,6 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
         authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
-        ClientUtils.showClient(authorizeClient);
-
         final String scope = response1.getScope();
         final String authorizationCode = response1.getCode();
 
@@ -84,7 +82,6 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
             tokenClient1.setExecutor(getHttpService().getClientExecutor());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
-            ClientUtils.showClient(tokenClient1);
 
             if (response2.getStatus() == 200 || response2.getStatus() == 302) { // success or redirect
                 if (Util.allNotBlank(response2.getAccessToken(), response2.getRefreshToken())) {
