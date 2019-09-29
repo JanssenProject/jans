@@ -101,6 +101,11 @@
             <class name="org.gluu.oxd.server.AccessTokenAsJwtTest"/>
         </classes>
     </test>
+    <test name="rp" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.service.RpServiceTest"/>
+        </classes>
+    </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
