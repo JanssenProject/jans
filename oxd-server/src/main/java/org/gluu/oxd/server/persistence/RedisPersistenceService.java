@@ -47,7 +47,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean create(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson2.asJson(rp));
+            put(rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
@@ -58,7 +58,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean update(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson2.asJson(rp));
+            put(rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
