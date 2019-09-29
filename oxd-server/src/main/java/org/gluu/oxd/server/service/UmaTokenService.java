@@ -173,7 +173,7 @@ public class UmaTokenService {
 
         Rp site = rpService.getRp(oxdId);
 
-        if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
+        if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
             expiredAt.setTime(site.getPatCreatedAt());
             expiredAt.add(Calendar.SECOND, site.getPatExpiresIn());
@@ -206,7 +206,7 @@ public class UmaTokenService {
 
         Rp site = rpService.getRp(oxdId);
 
-        if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() > 0) {
+        if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() != null && site.getOauthTokenExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
             expiredAt.setTime(site.getOauthTokenCreatedAt());
             expiredAt.add(Calendar.SECOND, site.getOauthTokenExpiresIn());
