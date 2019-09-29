@@ -83,7 +83,7 @@ public class Rp implements Serializable {
     @JsonProperty(value = "pat")
     private String pat;
     @JsonProperty(value = "pat_expires_in")
-    private int patExpiresIn;
+    private Integer patExpiresIn;
     @JsonProperty(value = "pat_created_at")
     private Date patCreatedAt;
     @JsonProperty(value = "pat_refresh_token")
@@ -93,7 +93,7 @@ public class Rp implements Serializable {
     @JsonProperty(value = "oauth_token")
     private String oauthToken;
     @JsonProperty(value = "oauth_token_expires_in")
-    private int oauthTokenExpiresIn;
+    private Integer oauthTokenExpiresIn;
     @JsonProperty(value = "oauth_token_created_at")
     private Date oauthTokenCreatedAt;
     @JsonProperty(value = "oauth_token_refresh_token")
@@ -373,11 +373,11 @@ public class Rp implements Serializable {
         this.pat = pat;
     }
 
-    public int getPatExpiresIn() {
+    public Integer getPatExpiresIn() {
         return patExpiresIn;
     }
 
-    public void setPatExpiresIn(int patExpiresIn) {
+    public void setPatExpiresIn(Integer patExpiresIn) {
         this.patExpiresIn = patExpiresIn;
     }
 
@@ -397,11 +397,11 @@ public class Rp implements Serializable {
         this.oauthToken = oauthToken;
     }
 
-    public int getOauthTokenExpiresIn() {
+    public Integer getOauthTokenExpiresIn() {
         return oauthTokenExpiresIn;
     }
 
-    public void setOauthTokenExpiresIn(int oauthTokenExpiresIn) {
+    public void setOauthTokenExpiresIn(Integer oauthTokenExpiresIn) {
         this.oauthTokenExpiresIn = oauthTokenExpiresIn;
     }
 
