@@ -12,6 +12,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: cas
 
+dn: ou=samlAcrs,o=gluu
+objectClass: top
+objectClass: organizationalunit
+ou: samlAcrs
+
 dn: inum=F3FB,ou=samlAcrs,o=gluu
 objectClass: top
 objectClass: samlAcr
