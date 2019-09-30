@@ -57,10 +57,16 @@ website: http://www.gluu.org
 zoneinfo: America/Chicago
 memberOf: inum=7890,ou=groups,o=gluu
 memberOf: inum=7891,ou=groups,o=gluu
+memberOf: inum=60B7,ou=groups,o=gluu
 
 ######################################
 # Groups
 ######################################
+dn: inum=60B7,ou=groups,o=gluu
+changetype: modify
+add: member
+member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+
 dn: inum=7890,ou=groups,o=gluu
 changetype: modify
 add: member
