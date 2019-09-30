@@ -168,8 +168,3 @@ dn: ou=sector_identifiers,o=gluu
 objectClass: top
 objectClass: organizationalunit
 ou: sector_identifiers
-
-dn: ou=samlAcrs,o=gluu
-objectClass: top
-objectClass: organizationalunit
-ou: samlAcrs
