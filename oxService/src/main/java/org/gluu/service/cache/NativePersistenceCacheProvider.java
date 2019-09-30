@@ -28,7 +28,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private CacheConfiguration cacheConfiguration;
 
     @Inject
-    PersistenceEntryManager entryManager;
+    private PersistenceEntryManager entryManager;
 
     private String baseDn;
 
@@ -43,12 +43,14 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             }
 
             String branchDn = String.format("ou=cache,%s", baseDn);
-            if (!entryManager.contains(branchDn, SimpleBranch.class)) {
-                SimpleBranch branch = new SimpleBranch();
-                branch.setOrganizationalUnitName("cache");
-                branch.setDn(branchDn);
-
-                entryManager.persist(branch);
+            if (entryManager.hasBranchesSupport(branchDn)) {
+	            if (!entryManager.contains(branchDn, SimpleBranch.class)) {
+	                SimpleBranch branch = new SimpleBranch();
+	                branch.setOrganizationalUnitName("cache");
+	                branch.setDn(branchDn);
+	
+	                entryManager.persist(branch);
+	            }
             }
 
             baseDn = branchDn;
