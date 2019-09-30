@@ -27,8 +27,10 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import org.gluu.exception.ConfigurationException;
+import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
 import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
@@ -154,6 +156,9 @@ public class AppInitializer {
 
 	@Inject
 	private JsonService jsonService;
+	
+	@Inject
+	private ExternalAuthenticationService externalAuthenticationService;
 
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
@@ -553,15 +558,11 @@ public class AppInitializer {
 	}
 
 	private String getActualDefaultAuthenticationMethod(GluuConfiguration configuration) {
-		if (configuration == null) {
-			return null;
+		if ((configuration != null) && (configuration.getAuthenticationMode() != null)) {
+			return configuration.getAuthenticationMode();
 		}
 		
-		if (configuration.getAuthenticationMode() == null) {
-			return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME;
-		}
-
-		return configuration.getAuthenticationMode();
+		return externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE).getName();
 	}
 
 	@Produces
