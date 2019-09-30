@@ -42,7 +42,6 @@
       ["displayName"], 
       ["oxAuthRegistrationAccessToken"], 
       ["uid"], 
-      ["authzCode"], 
       ["oxAuthClaimName"], 
       ["mail"], 
       ["oxId"], 
@@ -95,7 +94,8 @@
 
   "gluu_token": {
     "attributes": [
-      ["del","exp"]
+      ["del","exp"],
+      ["authzCode"]
     ],
     "static" : [
       [["exp", "oxAuthExpiration"], "del=true"],
