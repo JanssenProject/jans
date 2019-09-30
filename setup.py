@@ -4840,7 +4840,9 @@ if __name__ == '__main__':
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     argsp = parser.parse_args()
 
-    resource_checkings()
+    if not argsp.n:
+        resource_checkings()
+    
     #key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
