@@ -221,7 +221,7 @@ public abstract class BaseAuthFilterService {
     public String loadEntryDN(PersistenceEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
-        Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter);
+        Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter).multiValued(false);
         List<DummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), DummyEntry.class, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
