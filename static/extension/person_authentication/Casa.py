@@ -9,6 +9,7 @@ from java.nio.charset import Charset
 
 from org.apache.http.params import CoreConnectionPNames
 
+from org.oxauth.persistence.model.configuration import GluuConfiguration
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService, UserService, EncryptionService, AppInitializer
 from org.gluu.oxauth.service.custom import CustomScriptService
@@ -291,11 +292,11 @@ class PersonAuthentication(PersonAuthenticationType):
 # Miscelaneous
 
     def getLocalPrimaryKey(self):
+        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        config = GluuConfiguration()
+        config = entryManager.find(config.getClass(), "ou=configuration,o=gluu")
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
-        oxAuthInitializer = CdiUtil.bean(AppInitializer)
-        #This call does not create anything, it's like a getter (see oxAuth's AppInitializer)
-        ldapAuthConfigs = oxAuthInitializer.createPersistenceAuthConfigs()
-        uid_attr = ldapAuthConfigs.get(0).getLocalPrimaryKey()
+        uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
 
