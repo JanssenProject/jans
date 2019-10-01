@@ -94,6 +94,7 @@ public class UmaResourceService {
         if (!skipValidation) {
             validate(resource);
         }
+        cacheService.put(resource.getDn(), resource);
         ldapEntryManager.merge(resource);
     }
 
