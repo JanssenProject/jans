@@ -242,15 +242,7 @@ public class AuthorizeAction {
             if (useExternalAuthenticator) {
                 List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
                 if (acrValuesList.isEmpty()) {
-                    if (StringHelper.isNotEmpty(defaultAuthenticationMode.getName())) {
-                        acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
-                    } else {
-                        CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
-                        if (defaultExternalAuthenticator != null) {
-                            acrValuesList = Arrays.asList(defaultExternalAuthenticator.getName());
-                        }
-                    }
-
+                    acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
 
                 CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
