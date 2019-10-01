@@ -305,6 +305,11 @@ public class TokenRequest extends BaseRequest {
     }
 
     public String getClientAssertion() {
+        if (cryptoProvider == null) {
+            LOG.error("Crypto provider is not specified");
+        	return null;
+        }
+
         Jwt clientAssertion = new Jwt();
 
         if (algorithm == null) {
