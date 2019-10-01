@@ -43,10 +43,10 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "oxFaviconImage")
     private String iconUri;
 
-    @AttributeName(name = "oxAuthUmaScope")
+    @AttributeName(name = "oxAuthUmaScope", consistency = true)
     private List<String> scopes;
 
-    @AttributeName(name = "oxScopeExpression")
+    @AttributeName(name = "oxScopeExpression", consistency = true)
     private String scopeExpression;
 
     @AttributeName(name = "oxAssociatedClient", consistency = true)
