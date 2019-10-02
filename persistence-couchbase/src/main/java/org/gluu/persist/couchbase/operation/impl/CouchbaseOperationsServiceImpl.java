@@ -362,8 +362,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         JsonObject result = null;
         SearchException lastException = null;
 		try {
+			System.err.println("!!!!!!!!!!!!!!!! 1");
 			result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+			System.err.println("!!!!!!!!!!!!!!!! 2");
 		} catch (SearchException ex) {
+			System.err.println("!!!!!!!!!!!!!!!! 3");
 			lastException = ex;
 		}
         if ((result == null) || result.isEmpty()) {
@@ -371,14 +374,17 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	if (!useScanConsistency2.equals(useScanConsistency)) {
         		useScanConsistency = useScanConsistency2;
                 secondTry = true; 
-                result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+    			System.err.println("!!!!!!!!!!!!!!!! 4");
+                result = lookupImpl(bucketMapping, key, useScanConsistency2, attributes);
         	} else {
+    			System.err.println("!!!!!!!!!!!!!!!! 5");
         		if (lastException != null) {
             		throw lastException;
         		}
         	}
         }
 
+		System.err.println("!!!!!!!!!!!!!!!! 6");
         String attemptInfo = getScanAttemptLogInfo(scanConsistency, useScanConsistency, secondTry);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
