@@ -17,9 +17,9 @@ public class CouchbaseSampleEntryManager {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("couchbase.servers", "localhost");
+        connectionProperties.put("couchbase.servers", "cb-dev-backend.gluu.org");
         connectionProperties.put("couchbase.auth.userName", "admin");
-        connectionProperties.put("couchbase.auth.userPassword", "secret");
+        connectionProperties.put("couchbase.auth.userPassword", "jun8azar");
 //        connectionProperties.put("couchbase.buckets", "gluu");
         connectionProperties.put("couchbase.buckets", "gluu, gluu_user, gluu_token");
 
