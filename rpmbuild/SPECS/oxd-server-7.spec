@@ -80,7 +80,7 @@ if [ -e /var/run/oxd-server.pid ]; then
     systemctl stop oxd-server > /dev/null 2>&1
 fi
 
-$postun
+%postun
 rm -rf /opt/oxd-server
 rm -rf /var/log/oxd-server
 rm -rf /lib/systemd/system/oxd-server.service
