@@ -287,5 +287,5 @@
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
-    "loggingLevel": "INFO"
+    "loggingLevel": "DEBUG"
 }
