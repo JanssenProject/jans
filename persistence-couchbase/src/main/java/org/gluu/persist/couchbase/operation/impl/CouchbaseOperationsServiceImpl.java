@@ -374,8 +374,8 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         	if (!useScanConsistency2.equals(useScanConsistency)) {
         		useScanConsistency = useScanConsistency2;
                 secondTry = true; 
-    			System.err.println("!!!!!!!!!!!!!!!! 4");
-                result = lookupImpl(bucketMapping, key, useScanConsistency2, attributes);
+    			System.err.println("!!!!!!!!!!!!!!!! 4" + useScanConsistency);
+                result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
         	} else {
     			System.err.println("!!!!!!!!!!!!!!!! 5");
         		if (lastException != null) {
