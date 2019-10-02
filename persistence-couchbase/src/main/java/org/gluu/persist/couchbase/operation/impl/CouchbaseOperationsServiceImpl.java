@@ -359,13 +359,23 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         boolean secondTry = false; 
     	ScanConsistency useScanConsistency = getScanConsistency(scanConsistency, attemptWithoutAttributeScanConsistency);
-        JsonObject result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+        JsonObject result = null;
+        SearchException lastException = null;
+		try {
+			result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+		} catch (SearchException ex) {
+			lastException = ex;
+		}
         if ((result == null) || result.isEmpty()) {
         	ScanConsistency useScanConsistency2 = getScanConsistency(scanConsistency, false);
         	if (!useScanConsistency2.equals(useScanConsistency)) {
         		useScanConsistency = useScanConsistency2;
                 secondTry = true; 
                 result = lookupImpl(bucketMapping, key, useScanConsistency, attributes);
+        	} else {
+        		if (lastException != null) {
+            		throw lastException;
+        		}
         	}
         }
 

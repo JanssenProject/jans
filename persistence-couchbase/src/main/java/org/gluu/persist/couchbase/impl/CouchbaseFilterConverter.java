@@ -284,7 +284,6 @@ public class CouchbaseFilterConverter {
 		}
 
 		return false;
-
 	}
 
 }

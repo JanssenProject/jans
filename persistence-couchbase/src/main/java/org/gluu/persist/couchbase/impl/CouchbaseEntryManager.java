@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
@@ -44,6 +45,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
@@ -346,11 +348,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
 	@Override
-    protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
+    protected List<AttributeData> find(String dn, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null, toInternalAttributes(ldapReturnAttributes));
+            ScanConsistency scanConsistency = getScanConsistency(keyWithInum.getName(), propertiesAnnotationsMap);
+            JsonObject entry = operationService.lookup(keyWithInum.getKey(), scanConsistency, toInternalAttributes(ldapReturnAttributes));
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -874,6 +877,25 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	private ScanConsistency getScanConsistency(ConvertedExpression convertedExpression) {
 		if (convertedExpression.consistency()) {
+			return ScanConsistency.REQUEST_PLUS;
+		}
+
+		return null;
+	}
+
+	private ScanConsistency getScanConsistency(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+		if (StringHelper.isEmpty(attributeName)) {
+			return null;
+		}
+		
+    	PropertyAnnotation propertyAnnotation = propertiesAnnotationsMap.get(attributeName);
+		if ((propertyAnnotation == null) || (propertyAnnotation.getParameterType() == null)) {
+			return null;
+		}
+		AttributeName attributeNameAnnotation = (AttributeName) ReflectHelper.getAnnotationByType(propertyAnnotation.getAnnotations(),
+				AttributeName.class);
+		
+		if (attributeNameAnnotation.consistency()) {
 			return ScanConsistency.REQUEST_PLUS;
 		}
 
