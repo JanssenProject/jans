@@ -27,6 +27,7 @@ public class GenericKeyConverter {
         String[] tokens = dn.split(",");
 
         String orgInum = null;
+        String attributeName = null;
         for (String token : tokens) {
             int pos = token.indexOf("=");
             if (pos == -1) {
@@ -34,6 +35,9 @@ public class GenericKeyConverter {
             }
 
             String name = token.substring(0, pos);
+            if (attributeName == null) {
+            	attributeName = name;
+            }
             String value = token.substring(pos + 1, token.length());
             if (StringHelper.equalsIgnoreCase(name, "o")) {
                 if (!StringHelper.equalsIgnoreCase(value, "gluu")) {
@@ -52,7 +56,7 @@ public class GenericKeyConverter {
             key = key.substring(1);
         }
 
-        return new ParsedKey(key, orgInum);
+        return new ParsedKey(key, attributeName, orgInum);
     }
 
 }

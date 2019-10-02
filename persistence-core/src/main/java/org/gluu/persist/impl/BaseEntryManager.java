@@ -200,6 +200,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Class<?> entryClass = entry.getClass();
 		checkEntryClass(entryClass, isSchemaUpdate);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
 		Object dnValue = getDNValue(entry, entryClass);
 
@@ -216,7 +217,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			List<String> currentLdapReturnAttributesList = getAttributesList(entry, propertiesAnnotations, false);
 			currentLdapReturnAttributesList.add("objectClass");
 
-			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+			attributesFromLdap = find(dnValue.toString(), propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
 		}
 		Map<String, AttributeData> attributesFromLdapMap = getAttributesMap(attributesFromLdap);
 
@@ -233,7 +234,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		merge(dnValue.toString(), attributeDataModifications);
 
-		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations);
+		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations, propertiesAnnotationsMap);
 	}
 
 	protected abstract <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass,
@@ -431,8 +432,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		checkEntryClass(entryClass, true);
-		try {
-			List<AttributeData> results = find(primaryKey, ldapReturnAttributes);
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
+        try {
+			List<AttributeData> results = find(primaryKey, propertiesAnnotationsMap, ldapReturnAttributes);
 			return (results != null) && (results.size() > 0);
 		} catch (EntryPersistenceException ex) {
 			return false;
@@ -482,8 +486,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		checkEntryClass(entryClass, true);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
-		return find(entryClass, primaryKey, ldapReturnAttributes, propertiesAnnotations);
+		return find(entryClass, primaryKey, ldapReturnAttributes, propertiesAnnotations, propertiesAnnotationsMap);
 	}
 
 	protected <T> String[] getAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations,
@@ -495,6 +500,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		return attributes.toArray(new String[0]);
+	}
+
+	protected <T> String[] getAttributes(Map<String, PropertyAnnotation> attributesMap) {
+		if (attributesMap == null) {
+			return null;
+		}
+		return attributesMap.keySet().toArray(new String[0]);
 	}
 
 	protected <T> List<String> getAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
@@ -588,7 +600,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	private <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes,
-			List<PropertyAnnotation> propertiesAnnotations) {
+			List<PropertyAnnotation> propertiesAnnotations, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
 		Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>();
 
 		String[] currentLdapReturnAttributes = ldapReturnAttributes;
@@ -596,14 +608,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
 		}
 
-		List<AttributeData> ldapAttributes = find(primaryKey.toString(), currentLdapReturnAttributes);
+		List<AttributeData> ldapAttributes = find(primaryKey.toString(), propertiesAnnotationsMap, currentLdapReturnAttributes);
 
 		entriesAttributes.put(String.valueOf(primaryKey), ldapAttributes);
 		List<T> results = createEntities(entryClass, propertiesAnnotations, entriesAttributes);
 		return results.get(0);
 	}
 
-	protected abstract List<AttributeData> find(String dn, String... attributes);
+	protected abstract List<AttributeData> find(String dn, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... attributes);
 
 	protected boolean checkEntryClass(Class<?> entryClass, boolean isAllowSchemaEntry) {
 		if (entryClass == null) {

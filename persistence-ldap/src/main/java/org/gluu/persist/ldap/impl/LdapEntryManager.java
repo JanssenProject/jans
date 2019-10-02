@@ -393,7 +393,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
 	@Override
-    protected List<AttributeData> find(String dn, String... ldapReturnAttributes) {
+    protected List<AttributeData> find(String dn, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
             SearchResultEntry entry = this.operationService.lookup(dn, ldapReturnAttributes);
