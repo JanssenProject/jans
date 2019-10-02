@@ -388,7 +388,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	protected List<AttributeData> find(String dn, String... attributes) {
+    protected List<AttributeData> find(String dn, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
