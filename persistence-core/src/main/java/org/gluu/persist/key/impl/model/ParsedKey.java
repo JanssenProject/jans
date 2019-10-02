@@ -13,10 +13,12 @@ package org.gluu.persist.key.impl.model;
 public class ParsedKey {
 
     private final String key;
+    private final String name;
     private final String inum;
 
-    public ParsedKey(final String key, final String inum) {
+    public ParsedKey(final String key, final String name, String inum) {
         this.key = key;
+        this.name = name;
         this.inum = inum;
     }
 
@@ -24,7 +26,11 @@ public class ParsedKey {
         return key;
     }
 
-    public final String getInum() {
+    public String getName() {
+		return name;
+	}
+
+	public final String getInum() {
         return inum;
     }
 
