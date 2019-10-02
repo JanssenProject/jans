@@ -286,5 +286,6 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "openidScopeBackwardCompatibility": false
+    "openidScopeBackwardCompatibility": false,
+    "loggingLevel": "INFO"
 }
