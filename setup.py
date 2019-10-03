@@ -726,6 +726,7 @@ class Setup(object):
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
         self.cbm = None
+        self.cb_query_node = 0
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -2958,27 +2959,42 @@ class Setup(object):
             self.installLdap = False
             self.persistence_type = 'couchbase'
             self.install_couchbase = True
+        
+            cb_query_node = None
 
             while True:
-                self.couchbase_hostname = self.getPrompt("    Couchbase host")
+                self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
                 self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
                 self.ldapPass = self.getPrompt("    Couchbase Admin password")
 
-                self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
-                print "    Checking Couchbase connection"
+                for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
 
-                cbm_result = self.cbm.test_connection()
+                    cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+                    print "    Checking Couchbase connection for " + cb_host
 
-                if cbm_result.ok:
-                    print "    Successfully connected to Couchbase server"
-                    print("{0}Note: The password used for the admin user in "
-                        "Couchbase is also\nassigned to the admin user in "
-                        "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
-                    
-                    break
+                    cbm_result = cbm_.test_connection()
+                    if not cbm_result.ok:
+                        print "    Can't establish connection to Couchbase server with given parameters."
+                        print "**", cbm_result.reason
+                        break
+                    try:
+                        qr = cbm_.exec_query('select * from system:indexes limit 1')
+                        if qr.ok:
+                            cb_query_node = i
+                            self.cb_query_node = i
+                    except:
+                        pass
                 else:
-                    print "    Can't establish connection to Couchbase server with given parameters."
-                    print "**", cbm_result.reason
+
+                    if cbm_result.ok and cb_query_node != None:
+                        print "    Successfully connected to Couchbase server"
+                        print("{0}Note: The password used for the admin user in "
+                            "Couchbase is also\nassigned to the admin user in "
+                            "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
+                        self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
+                        break
+                    if cb_query_node == None:
+                        print "Can't find any query node"
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
@@ -3359,8 +3375,11 @@ class Setup(object):
 
         #Append self.jre_home to OpenDj java.properties        
         opendj_java_properties_fn = os.path.join(self.ldapBaseFolder, 'config/java.properties')
+
+        print "ppend self.jre_home to OpenDj",  opendj_java_properties_fn
         with open(opendj_java_properties_fn,'a') as f:
             f.write('\ndefault.java-home={}\n'.format(self.jre_home))
+        print "File written"
 
         if self.opendj_type == 'opendj':
 
@@ -4305,15 +4324,18 @@ class Setup(object):
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
         
-        cert = self.cbm.get_certificate()
-        with open(self.couchebaseCert, 'w') as w:
-            w.write(cert)
-        
-        cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % self.hostname, \
-                  "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
-                  "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
-                
-        self.run(cmd_args)
+        for cb_host in self.couchbase_hostname.split(','):
+
+            cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            cert = cbm_.get_certificate()
+            with open(self.couchebaseCert, 'w') as w:
+                w.write(cert)
+
+            cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % cb_host, \
+                      "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
+                      "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
+
+            self.run(cmd_args)
 
     def couchbaseDict(self):
         prop_dict = {
@@ -4453,13 +4475,13 @@ class Setup(object):
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
         else:
-            self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
-            self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
         apache_user = 'www-data'
