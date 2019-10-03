@@ -188,10 +188,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getScope() != null) {
-            request.setScopes(params.getScope());
+            request.setScope(params.getScope());
             rp.setScope(params.getScope());
         } else {
-            request.setScopes(rp.getScope());
+            request.setScope(rp.getScope());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
