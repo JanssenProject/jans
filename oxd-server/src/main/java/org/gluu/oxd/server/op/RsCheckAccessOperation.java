@@ -109,7 +109,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             scopes = resource.getScopes();
         }
 
-        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
+        final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
         Response response = null;
         try {
             LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());

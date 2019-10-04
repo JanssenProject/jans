@@ -1,5 +1,6 @@
 package org.gluu.oxd.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
@@ -44,6 +45,18 @@ public class Jackson2 {
 
     public static String asJson(Object p_object) throws IOException {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        return mapper.writeValueAsString(p_object);
+    }
+
+    public static ObjectMapper createRpMapper() {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        return mapper;
+    }
+
+    public static String serializeWithoutNulls(Object p_object) throws IOException {
+        final ObjectMapper mapper = createRpMapper();
         return mapper.writeValueAsString(p_object);
     }
 

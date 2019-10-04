@@ -50,6 +50,8 @@ public enum ErrorResponseCode {
     INVALID_CLIENT_ID_REQUIRED(400, "invalid_client_id", "client_id is required parameter in request (skip client_secret if you wish to dynamically register client.)."),
     UNSUPPORTED_OPERATION(500, "unsupported_operation", "Operation is not supported by server error."),
     INVALID_OP_HOST(400, "invalid_op_host", "Invalid op_host (empty or blank)."),
+    INVALID_ALLOWED_OP_HOST_URL(400, "invalid_allowed_op_host_url", "Please check 1) The urls in allowed_op_hosts field of oxd-server.yml are valid. 2) If op_host url is valid."),
+    RESTRICTED_OP_HOST(400, "restricted_op_host", "oxd server is not allowed to access op_host. Please check if op_host url is present in allowed_op_hosts field of oxd-server.yml."),
     BLANK_ACCESS_TOKEN(403, "blank_access_token", "access_token is blank. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     INVALID_ACCESS_TOKEN(403, "invalid_access_token", "Invalid access_token. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),
     NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE(500, "invalid_introspection_response", "AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later)."),
