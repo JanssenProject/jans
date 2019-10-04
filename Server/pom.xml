@@ -385,13 +385,13 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
-		<dependency>
-    <groupId>net.bootsfaces</groupId>
-    <artifactId>bootsfaces</artifactId>
-    <version>1.4.1</version>
-    <scope>compile</scope>
-       </dependency>
+
+        <dependency>
+            <groupId>net.bootsfaces</groupId>
+            <artifactId>bootsfaces</artifactId>
+            <version>1.4.1</version>
+            <scope>compile</scope>
+        </dependency>
 
 			<!-- OmniFaces -->
 		<dependency>
@@ -783,6 +783,7 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
+                                    <!--suppress UnresolvedMavenProperty -->
                                     <Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
