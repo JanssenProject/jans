@@ -5,14 +5,14 @@ package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.op.OpClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.ws.rs.WebApplicationException;
@@ -42,12 +42,14 @@ public class DiscoveryService {
     private final HttpService httpService;
     private final RpService rpService;
     private final ValidationService validationService;
+    private final OpClientFactory opClientFactory;
 
     @Inject
-    public DiscoveryService(HttpService httpService, RpService rpService, ValidationService validationService) {
+    public DiscoveryService(HttpService httpService, RpService rpService, ValidationService validationService, OpClientFactory opClientFactory) {
         this.httpService = httpService;
         this.rpService = rpService;
         this.validationService = validationService;
+        this.opClientFactory = opClientFactory;
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
@@ -63,13 +65,14 @@ public class DiscoveryService {
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
+        validationService.isOpHostAllowed(opHost);
 
         try {
             final OpenIdConfigurationResponse r = map.get(opHost);
             if (r != null) {
                 return r;
             }
-            final OpenIdConfigurationClient client = new OpenIdConfigurationClient(getConnectDiscoveryUrl(opHost, opDiscoveryPath));
+            final OpenIdConfigurationClient client = opClientFactory.createOpenIdConfigurationClient(getConnectDiscoveryUrl(opHost, opDiscoveryPath));
             client.setExecutor(httpService.getClientExecutor());
             final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
             LOG.trace("Discovery response: {} ", response.getEntity());
@@ -101,13 +104,14 @@ public class DiscoveryService {
 
     public UmaMetadata getUmaDiscovery(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
+        validationService.isOpHostAllowed(opHost);
 
         try {
             final UmaMetadata r = umaMap.get(opHost);
             if (r != null) {
                 return r;
             }
-            final UmaMetadata response = UmaClientFactory.instance().createMetadataService(
+            final UmaMetadata response = opClientFactory.createUmaClientFactory().createMetadataService(
                     getUmaDiscoveryUrl(opHost, opDiscoveryPath), httpService.getClientExecutor()).getMetadata();
             LOG.trace("Uma discovery response: {} ", response);
             umaMap.put(opHost, response);

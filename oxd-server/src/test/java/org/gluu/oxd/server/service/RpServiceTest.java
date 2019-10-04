@@ -1,12 +1,22 @@
 package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
-import org.testng.annotations.*;
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.jersey.validation.Validators;
+import io.dropwizard.testing.ResourceHelpers;
+import org.assertj.core.util.Lists;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.guice.GuiceModule;
 import org.gluu.oxd.server.persistence.PersistenceService;
+import org.testng.annotations.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -30,9 +40,12 @@ public class RpServiceTest {
     RpService service;
     @Inject
     PersistenceService persistenceService;
+    @Inject
+    ValidationService validationService;
 
     @BeforeClass
-    public void setUp() {
+    public void setUp() throws IOException, ConfigurationException {
+        configurationService.setConfiguration(parseConfiguration(ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml")));
         persistenceService.create();
         service.removeAllRps();
         service.load();
@@ -50,7 +63,7 @@ public class RpServiceTest {
         EXECUTOR_SERVICE.shutdown();
     }
 
-    @Test
+    @Test (enabled = false)
     public void load() {
         assertEquals(service.getRps().size(), 1);
     }
@@ -65,7 +78,7 @@ public class RpServiceTest {
         rp.setClientName("Updated name");
         service.update(rp);
 
-        assertEquals(service.getRp(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
         assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
     }
 
@@ -74,17 +87,18 @@ public class RpServiceTest {
         Rp rp = newRp();
 
         service.create(rp);
-        assertNotNull(service.getRp(rp.getOxdId()));
+        assertNotNull(persistenceService.getRp(rp.getOxdId()));
 
         rp.setClientName("Updated name");
         service.update(rp);
 
-        assertEquals(service.getRp(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
         assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
 
         service.remove(rp.getOxdId());
         try {
-            service.getRp(rp.getOxdId());
+            rp = persistenceService.getRp(rp.getOxdId());
+            validationService.validate(rp);
             throw new AssertionError("RP is not removed.");
         } catch (HttpException e) {
             assertEquals(e.getCode(), ErrorResponseCode.INVALID_OXD_ID);
@@ -116,11 +130,55 @@ public class RpServiceTest {
         }
     }
 
-    public Rp newRp() {
+    @Test
+    public void testNullFieldsAreSkipped() throws IOException {
+        Rp rp = newRp();
+        String expectedJson = "{\"oxd_id\":\""+rp.getOxdId()+"\",\"op_host\":\"test.gluu.org\",\"response_types\":[\"code\"],\"scope\":[\"openid\",\"profile\",\"email\"],\"ui_locales\":[\"en\"],\"claims_locales\":[\"en\"],\"acr_values\":[\"\"],\"access_token_as_jwt\":false,\"rpt_as_jwt\":false,\"front_channel_logout_session_required\":false,\"run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims\":false,\"require_auth_time\":false,\"trusted_client\":false}";
+        assertEquals(Jackson2.createRpMapper().readTree(expectedJson), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(rp)));
+    }
+
+    @Test
+    public void testNonNullFieldsAreAlwaysPresent() throws IOException {
+        Rp rp = createRpWithNotNullFields();
+        //here make sure expectedJson contains all non null values, to make sure serialization is correct.
+        String expectedJson = "{\"oxd_id\":\"test_oxd_id\",\"op_host\":\"https://test.gluu.org\",\"redirect_uri\":\"https://localhost:5053/authorization\",\"application_type\":\"web\",\"redirect_uris\":[\"https://localhost:5053/authorization\",\"https://localhost:5053/authorization/page1\",\"https://localhost:5053/authorization/page2\"],\"response_types\":[\"code\"],\"client_id\":\"test_client_id\",\"client_secret\":\"test_client_secret\",\"client_registration_access_token\":\"test_client_registration_access_token\",\"client_registration_client_uri\":\"https://test.gluu.org/oxauth/restv1/register?client_id=test_client_id\",\"scope\":[\"openid\",\"profile\",\"email\"],\"ui_locales\":[\"en\"],\"claims_locales\":[\"en\"],\"acr_values\":[\"\"],\"access_token_as_jwt\":false,\"rpt_as_jwt\":false,\"front_channel_logout_session_required\":false,\"run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims\":false,\"require_auth_time\":false,\"trusted_client\":false}";
+        assertEquals(Jackson2.createRpMapper().readTree(expectedJson), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(rp)));
+    }
+
+    public Rp newRp() throws IOException {
         Rp rp = new Rp(configurationService.defaultRp());
         rp.setOxdId(UUID.randomUUID().toString());
         rp.setOpHost("test.gluu.org");
         return rp;
     }
 
+    public Rp createRpWithNotNullFields() throws IOException {
+        Rp rp = new Rp(configurationService.defaultRp());
+        rp.setOxdId("test_oxd_id");
+        rp.setOpHost("https://test.gluu.org");
+        rp.setRedirectUri("https://localhost:5053/authorization");
+        rp.setApplicationType("web");
+        rp.setRedirectUris(Lists.newArrayList("https://localhost:5053/authorization",
+                "https://localhost:5053/authorization/page1",
+                "https://localhost:5053/authorization/page2"));
+        rp.setResponseTypes(Lists.newArrayList("code"));
+        rp.setClientId("test_client_id");
+        rp.setClientSecret("test_client_secret");
+        rp.setClientRegistrationAccessToken("test_client_registration_access_token");
+        rp.setClientRegistrationClientUri("https://test.gluu.org/oxauth/restv1/register?client_id=test_client_id");
+        return rp;
+    }
+
+    private static OxdServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+
+        File file = new File(pathToYaml);
+        if (!file.exists()) {
+            System.out.println("Failed to find yml configuration file. Please check " + pathToYaml);
+            System.exit(1);
+        }
+
+        DefaultConfigurationFactoryFactory<OxdServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
+        ConfigurationFactory<OxdServerConfiguration> configurationFactory = configurationFactoryFactory.create(OxdServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
+        return configurationFactory.build(file);
+    }
 }

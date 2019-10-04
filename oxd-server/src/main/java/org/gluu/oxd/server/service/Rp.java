@@ -7,10 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,24 +18,20 @@ public class Rp implements Serializable {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
-
     @JsonProperty(value = "op_host")
     private String opHost;
     @JsonProperty(value = "op_discovery_path")
     private String opDiscoveryPath;
-
     @JsonProperty(value = "id_token")
     private String idToken;
     @JsonProperty(value = "access_token")
     private String accessToken;
-
     @JsonProperty(value = "redirect_uri")
     private String redirectUri;
     @JsonProperty(value = "logout_redirect_uri")
     private String postLogoutRedirectUri;
     @JsonProperty(value = "logout_redirect_uris")
     private List<String> postLogoutRedirectUris;
-
     @JsonProperty(value = "application_type")
     private String applicationType;
     @JsonProperty(value = "redirect_uris")
@@ -47,9 +40,8 @@ public class Rp implements Serializable {
     private List<String> claimsRedirectUri;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
-    @JsonProperty(value = "front_channel_logout_uri")
-    private List<String> frontChannelLogoutUri;
-
+    @JsonProperty(value = "front_channel_logout_uris")
+    private List<String> frontChannelLogoutUris;
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "client_secret")
@@ -72,7 +64,6 @@ public class Rp implements Serializable {
     private String tokenEndpointAuthSigningAlg;
     @JsonProperty(value = "token_endpoint_auth_method")
     private String tokenEndpointAuthMethod;
-
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
@@ -85,32 +76,28 @@ public class Rp implements Serializable {
     private List<String> grantType;
     @JsonProperty(value = "contacts")
     private List<String> contacts;
-
     @JsonProperty(value = "user_id")
     private String userId;
     @JsonProperty(value = "user_secret")
     private String userSecret;
-
     @JsonProperty(value = "pat")
     private String pat;
     @JsonProperty(value = "pat_expires_in")
-    private int patExpiresIn;
+    private Integer patExpiresIn;
     @JsonProperty(value = "pat_created_at")
     private Date patCreatedAt;
     @JsonProperty(value = "pat_refresh_token")
     private String patRefreshToken;
     @JsonProperty(value = "uma_protected_resources")
     private List<UmaResource> umaProtectedResources = Lists.newArrayList();
-
     @JsonProperty(value = "oauth_token")
     private String oauthToken;
     @JsonProperty(value = "oauth_token_expires_in")
-    private int oauthTokenExpiresIn;
+    private Integer oauthTokenExpiresIn;
     @JsonProperty(value = "oauth_token_created_at")
     private Date oauthTokenCreatedAt;
     @JsonProperty(value = "oauth_token_refresh_token")
     private String oauthTokenRefreshToken;
-
     @JsonProperty(value = "rpt")
     private String rpt;
     @JsonProperty(value = "rpt_token_type")
@@ -140,6 +127,60 @@ public class Rp implements Serializable {
     @JsonProperty(value = "trusted_client")
     private Boolean trustedClient = false;
 
+    @JsonProperty(value = "logo_uri")
+    private String logoUri;
+    @JsonProperty(value = "client_uri")
+    private String clientUri;
+    @JsonProperty(value = "policy_uri")
+    private String policyUri;
+    @JsonProperty(value = "tos_uri")
+    private String tosUri;
+    @JsonProperty(value = "jwks")
+    private String jwks;
+    @JsonProperty(value = "id_token_binding_cnf")
+    private String idTokenBindingCnf;
+    @JsonProperty(value = "tls_client_auth_subject_dn")
+    private String tlsClientAuthSubjectDn;
+    @JsonProperty(value = "subject_type")
+    private String subjectType;
+    @JsonProperty(value = "run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims")
+    private Boolean runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims = false;
+    @JsonProperty(value = "id_token_signed_response_alg")
+    private String idTokenSignedResponseAlg;
+    @JsonProperty(value = "id_token_encrypted_response_alg")
+    private String idTokenEncryptedResponseAlg;
+    @JsonProperty(value = "id_token_encrypted_response_enc")
+    private String idTokenEncryptedResponseEnc;
+    @JsonProperty(value = "user_info_signed_response_alg")
+    private String userInfoSignedResponseAlg;
+    @JsonProperty(value = "user_info_encrypted_response_alg")
+    private String userInfoEncryptedResponseAlg;
+    @JsonProperty(value = "user_info_encrypted_response_enc")
+    private String userInfoEncryptedResponseEnc;
+    @JsonProperty(value = "request_object_signing_alg")
+    private String requestObjectSigningAlg;
+    @JsonProperty(value = "request_object_encryption_alg")
+    private String requestObjectEncryptionAlg;
+    @JsonProperty(value = "request_object_encryption_enc")
+    private String requestObjectEncryptionEnc;
+    @JsonProperty(value = "default_max_age")
+    private Integer defaultMaxAge;
+    @JsonProperty(value = "initiate_login_uri")
+    private String initiateLoginUri;
+    @JsonProperty(value = "authorized_origins")
+    private List<String> authorizedOrigins;
+    @JsonProperty(value = "access_token_lifetime")
+    private Integer accessTokenLifetime;
+    @JsonProperty(value = "software_id")
+    private String softwareId;
+    @JsonProperty(value = "software_version")
+    private String softwareVersion;
+    @JsonProperty(value = "software_statement")
+    private String softwareStatement;
+    @JsonProperty(value = "custom_attributes")
+    private Map<String, String> customAttributes;
+    @JsonProperty(value = "request_uris")
+    private List<String> requestUris;
 
     public Rp() {
     }
@@ -160,7 +201,7 @@ public class Rp implements Serializable {
         this.redirectUris = conf.redirectUris;
         this.claimsRedirectUri = conf.claimsRedirectUri;
         this.responseTypes = conf.responseTypes;
-        this.frontChannelLogoutUri = conf.frontChannelLogoutUri;
+        this.frontChannelLogoutUris = conf.frontChannelLogoutUris;
 
         this.clientId = conf.clientId;
         this.clientSecret = conf.clientSecret;
@@ -211,6 +252,33 @@ public class Rp implements Serializable {
         this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = conf.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
         this.requireAuthTime = conf.requireAuthTime;
         this.trustedClient = conf.trustedClient;
+
+        this.logoUri = conf.logoUri;
+        this.clientUri = conf.clientUri;
+        this.policyUri = conf.policyUri;
+        this.tosUri = conf.tosUri;
+        this.jwks = conf.jwks;
+        this.idTokenBindingCnf = conf.idTokenBindingCnf;
+        this.tlsClientAuthSubjectDn = conf.tlsClientAuthSubjectDn;
+        this.subjectType = conf.subjectType;
+        this.idTokenSignedResponseAlg = conf.idTokenSignedResponseAlg;
+        this.idTokenEncryptedResponseAlg = conf.idTokenEncryptedResponseAlg;
+        this.idTokenEncryptedResponseEnc = conf.idTokenEncryptedResponseEnc;
+        this.userInfoSignedResponseAlg = conf.userInfoSignedResponseAlg;
+        this.userInfoEncryptedResponseAlg = conf.userInfoEncryptedResponseAlg;
+        this.userInfoEncryptedResponseEnc = conf.userInfoEncryptedResponseEnc;
+        this.requestObjectSigningAlg = conf.requestObjectSigningAlg;
+        this.requestObjectEncryptionAlg = conf.requestObjectEncryptionAlg;
+        this.requestObjectEncryptionEnc = conf.requestObjectEncryptionEnc;
+        this.defaultMaxAge = conf.defaultMaxAge;
+        this.initiateLoginUri = conf.initiateLoginUri;
+        this.authorizedOrigins = conf.authorizedOrigins;
+        this.accessTokenLifetime = conf.accessTokenLifetime;
+        this.softwareId = conf.softwareId;
+        this.softwareVersion = conf.softwareVersion;
+        this.softwareStatement = conf.softwareStatement;
+        this.customAttributes = conf.customAttributes;
+        this.requestUris = requestUris;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -237,12 +305,12 @@ public class Rp implements Serializable {
         this.accessTokenSigningAlg = accessTokenSigningAlg;
     }
 
-    public List<String> getFrontChannelLogoutUri() {
-        return frontChannelLogoutUri;
+    public List<String> getFrontChannelLogoutUris() {
+        return frontChannelLogoutUris;
     }
 
-    public void setFrontChannelLogoutUri(List<String> frontChannelLogoutUri) {
-        this.frontChannelLogoutUri = frontChannelLogoutUri;
+    public void setFrontChannelLogoutUris(List<String> frontChannelLogoutUris) {
+        this.frontChannelLogoutUris = frontChannelLogoutUris;
     }
 
     public String getTokenEndpointAuthSigningAlg() {
@@ -305,11 +373,11 @@ public class Rp implements Serializable {
         this.pat = pat;
     }
 
-    public int getPatExpiresIn() {
+    public Integer getPatExpiresIn() {
         return patExpiresIn;
     }
 
-    public void setPatExpiresIn(int patExpiresIn) {
+    public void setPatExpiresIn(Integer patExpiresIn) {
         this.patExpiresIn = patExpiresIn;
     }
 
@@ -329,11 +397,11 @@ public class Rp implements Serializable {
         this.oauthToken = oauthToken;
     }
 
-    public int getOauthTokenExpiresIn() {
+    public Integer getOauthTokenExpiresIn() {
         return oauthTokenExpiresIn;
     }
 
-    public void setOauthTokenExpiresIn(int oauthTokenExpiresIn) {
+    public void setOauthTokenExpiresIn(Integer oauthTokenExpiresIn) {
         this.oauthTokenExpiresIn = oauthTokenExpiresIn;
     }
 
@@ -710,6 +778,214 @@ public class Rp implements Serializable {
         return null;
     }
 
+    public String getLogoUri() {
+        return logoUri;
+    }
+
+    public void setLogoUri(String logoUri) {
+        this.logoUri = logoUri;
+    }
+
+    public String getClientUri() {
+        return clientUri;
+    }
+
+    public void setClientUri(String clientUri) {
+        this.clientUri = clientUri;
+    }
+
+    public String getPolicyUri() {
+        return policyUri;
+    }
+
+    public void setPolicyUri(String policyUri) {
+        this.policyUri = policyUri;
+    }
+
+    public String getTosUri() {
+        return tosUri;
+    }
+
+    public void setTosUri(String tosUri) {
+        this.tosUri = tosUri;
+    }
+
+    public String getJwks() {
+        return jwks;
+    }
+
+    public void setJwks(String jwks) {
+        this.jwks = jwks;
+    }
+
+    public String getIdTokenBindingCnf() {
+        return idTokenBindingCnf;
+    }
+
+    public void setIdTokenBindingCnf(String idTokenBindingCnf) {
+        this.idTokenBindingCnf = idTokenBindingCnf;
+    }
+
+    public String getTlsClientAuthSubjectDn() {
+        return tlsClientAuthSubjectDn;
+    }
+
+    public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
+        this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public String getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(String subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public String getIdTokenSignedResponseAlg() {
+        return idTokenSignedResponseAlg;
+    }
+
+    public void setIdTokenSignedResponseAlg(String idTokenSignedResponseAlg) {
+        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
+    }
+
+    public String getIdTokenEncryptedResponseAlg() {
+        return idTokenEncryptedResponseAlg;
+    }
+
+    public void setIdTokenEncryptedResponseAlg(String idTokenEncryptedResponseAlg) {
+        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
+    }
+
+    public String getIdTokenEncryptedResponseEnc() {
+        return idTokenEncryptedResponseEnc;
+    }
+
+    public void setIdTokenEncryptedResponseEnc(String idTokenEncryptedResponseEnc) {
+        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
+    }
+
+    public String getUserInfoSignedResponseAlg() {
+        return userInfoSignedResponseAlg;
+    }
+
+    public void setUserInfoSignedResponseAlg(String userInfoSignedResponseAlg) {
+        this.userInfoSignedResponseAlg = userInfoSignedResponseAlg;
+    }
+
+    public String getUserInfoEncryptedResponseAlg() {
+        return userInfoEncryptedResponseAlg;
+    }
+
+    public void setUserInfoEncryptedResponseAlg(String userInfoEncryptedResponseAlg) {
+        this.userInfoEncryptedResponseAlg = userInfoEncryptedResponseAlg;
+    }
+
+    public String getUserInfoEncryptedResponseEnc() {
+        return userInfoEncryptedResponseEnc;
+    }
+
+    public void setUserInfoEncryptedResponseEnc(String userInfoEncryptedResponseEnc) {
+        this.userInfoEncryptedResponseEnc = userInfoEncryptedResponseEnc;
+    }
+
+    public String getRequestObjectSigningAlg() {
+        return requestObjectSigningAlg;
+    }
+
+    public void setRequestObjectSigningAlg(String requestObjectSigningAlg) {
+        this.requestObjectSigningAlg = requestObjectSigningAlg;
+    }
+
+    public String getRequestObjectEncryptionAlg() {
+        return requestObjectEncryptionAlg;
+    }
+
+    public void setRequestObjectEncryptionAlg(String requestObjectEncryptionAlg) {
+        this.requestObjectEncryptionAlg = requestObjectEncryptionAlg;
+    }
+
+    public String getRequestObjectEncryptionEnc() {
+        return requestObjectEncryptionEnc;
+    }
+
+    public void setRequestObjectEncryptionEnc(String requestObjectEncryptionEnc) {
+        this.requestObjectEncryptionEnc = requestObjectEncryptionEnc;
+    }
+
+    public Integer getDefaultMaxAge() {
+        return defaultMaxAge;
+    }
+
+    public void setDefaultMaxAge(Integer defaultMaxAge) {
+        this.defaultMaxAge = defaultMaxAge;
+    }
+
+    public String getInitiateLoginUri() {
+        return initiateLoginUri;
+    }
+
+    public void setInitiateLoginUri(String initiateLoginUri) {
+        this.initiateLoginUri = initiateLoginUri;
+    }
+
+    public List<String> getAuthorizedOrigins() {
+        return authorizedOrigins;
+    }
+
+    public void setAuthorizedOrigins(List<String> authorizedOrigins) {
+        this.authorizedOrigins = authorizedOrigins;
+    }
+
+    public Integer getAccessTokenLifetime() {
+        return accessTokenLifetime;
+    }
+
+    public void setAccessTokenLifetime(Integer accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public String getSoftwareId() {
+        return softwareId;
+    }
+
+    public void setSoftwareId(String softwareId) {
+        this.softwareId = softwareId;
+    }
+
+    public String getSoftwareVersion() {
+        return softwareVersion;
+    }
+
+    public void setSoftwareVersion(String softwareVersion) {
+        this.softwareVersion = softwareVersion;
+    }
+
+    public String getSoftwareStatement() {
+        return softwareStatement;
+    }
+
+    public void setSoftwareStatement(String softwareStatement) {
+        this.softwareStatement = softwareStatement;
+    }
+
+    public Map<String, String> getCustomAttributes() {
+        return customAttributes;
+    }
+
+    public void setCustomAttributes(Map<String, String> customAttributes) {
+        this.customAttributes = customAttributes;
+    }
+
+    public List<String> getRequestUris() {
+        return requestUris;
+    }
+
+    public void setRequestUris(List<String> requestUris) {
+        this.requestUris = requestUris;
+    }
+
     @Override
     public String toString() {
         return "Rp{" +
@@ -723,7 +999,7 @@ public class Rp implements Serializable {
                 ", postLogoutRedirectUris='" + postLogoutRedirectUris + '\'' +
                 ", applicationType='" + applicationType + '\'' +
                 ", redirectUris=" + redirectUris +
-                ", frontChannelLogoutUri=" + frontChannelLogoutUri +
+                ", frontChannelLogoutUris=" + frontChannelLogoutUris +
                 ", claimsRedirectUri=" + claimsRedirectUri +
                 ", responseTypes=" + responseTypes +
                 ", clientId='" + clientId + '\'' +
@@ -747,26 +1023,51 @@ public class Rp implements Serializable {
                 ", patCreatedAt=" + patCreatedAt +
                 ", patRefreshToken='" + patRefreshToken + '\'' +
                 ", oauthToken='" + oauthToken + '\'' +
-                ", oauthTokenExpiresIn=" + oauthTokenExpiresIn +
-                ", oauthTokenCreatedAt=" + oauthTokenCreatedAt +
-                ", oauthTokenRefreshToken='" + oauthTokenRefreshToken + '\'' +
-                ", umaProtectedResources=" + umaProtectedResources +
+                ", oauthTokenExpiresIn='" + oauthTokenExpiresIn +
+                ", oauthTokenCreatedAt='" + oauthTokenCreatedAt +
+                ", oauthTokenRefreshToken=''" + oauthTokenRefreshToken + '\'' +
+                ", umaProtectedResources='" + umaProtectedResources +
                 ", rpt='" + rpt + '\'' +
                 ", rptTokenType='" + rptTokenType + '\'' +
                 ", rptPct='" + rptPct + '\'' +
-                ", rptExpiresAt=" + rptExpiresAt +
-                ", rptCreatedAt=" + rptCreatedAt +
-                ", rptUpgraded=" + rptUpgraded +
-                ", rptAsJwt=" + rptAsJwt +
-                ", tokenEndpointAuthSigningAlg=" + tokenEndpointAuthSigningAlg +
-                ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod +
-                ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
-                ", accessTokenAsJwt=" + accessTokenAsJwt +
-                ", accessTokenSigningAlg=" + accessTokenSigningAlg +
-                ", trusted_client=" + trustedClient +
-                ", frontChannelLogoutSessionRequired=" + frontChannelLogoutSessionRequired +
-                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
-                ", requireAuthTime=" + requireAuthTime +
+                ", rptExpiresAt='" + rptExpiresAt + '\'' +
+                ", rptCreatedAt='" + rptCreatedAt + '\'' +
+                ", rptUpgraded='" + rptUpgraded + '\'' +
+                ", rptAsJwt='" + rptAsJwt + '\'' +
+                ", tokenEndpointAuthSigningAlg='" + tokenEndpointAuthSigningAlg + '\'' +
+                ", tokenEndpointAuthMethod='" + tokenEndpointAuthMethod + '\'' +
+                ", oxdRpProgrammingLanguage='" + oxdRpProgrammingLanguage + '\'' +
+                ", accessTokenAsJwt='" + accessTokenAsJwt + '\'' +
+                ", accessTokenSigningAlg='" + accessTokenSigningAlg + '\'' +
+                ", trusted_client='" + trustedClient + '\'' +
+                ", frontChannelLogoutSessionRequired='" + frontChannelLogoutSessionRequired + '\'' +
+                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims='" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims + '\'' +
+                ", requireAuthTime='" + requireAuthTime + '\'' +
+                ", logoUri='" + logoUri + '\'' +
+                ", clientUri='" + clientUri + '\'' +
+                ", policyUri='" + policyUri + '\'' +
+                ", tosUri='" + tosUri + '\'' +
+                ", jwks='" + jwks + '\'' +
+                ", idTokenBindingCnf='" + idTokenBindingCnf + '\'' +
+                ", tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
+                ", idTokenSignedResponseAlg='" + idTokenSignedResponseAlg + '\'' +
+                ", idTokenEncryptedResponseAlg='" + idTokenEncryptedResponseAlg + '\'' +
+                ", idTokenEncryptedResponseEnc='" + idTokenEncryptedResponseEnc + '\'' +
+                ", userInfoSignedResponseAlg='" + userInfoSignedResponseAlg + '\'' +
+                ", userInfoEncryptedResponseAlg='" + userInfoEncryptedResponseAlg + '\'' +
+                ", userInfoEncryptedResponseEnc='" + userInfoEncryptedResponseEnc + '\'' +
+                ", requestObjectSigningAlg='" + requestObjectSigningAlg + '\'' +
+                ", requestObjectEncryptionAlg='" + requestObjectEncryptionAlg + '\'' +
+                ", requestObjectEncryptionEnc='" + requestObjectEncryptionEnc + '\'' +
+                ", defaultMaxAge='" + defaultMaxAge + '\'' +
+                ", initiateLoginUri='" + initiateLoginUri + '\'' +
+                ", authorizedOrigins='" + authorizedOrigins + '\'' +
+                ", accessTokenLifetime='" + accessTokenLifetime + '\'' +
+                ", softwareId='" + softwareId + '\'' +
+                ", softwareVersion='" + softwareVersion + '\'' +
+                ", softwareStatement='" + softwareStatement + '\'' +
+                ", customAttributes='" + customAttributes + '\'' +
+                ", requestUris='" + requestUris + '\'' +
                 '}';
     }
 }

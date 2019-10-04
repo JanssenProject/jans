@@ -5,14 +5,14 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.service.RpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
-import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.gluu.oxd.server.persistence.PersistenceService;
-import org.gluu.oxd.server.service.RpService;
 
 /**
  * Main class to set up and tear down suite.
@@ -20,7 +20,6 @@ import org.gluu.oxd.server.service.RpService;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 21/08/2013
  */
-
 public class SetUpTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);

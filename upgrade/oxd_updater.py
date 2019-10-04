@@ -101,11 +101,15 @@ commands.insert(0, stop_gluu_command[os_type_str].format(detected_oxd))
 
 
 if package_type == 'deb':
+    
     commands += [
             'curl https://repo.gluu.org/debian/gluu-apt.key | apt-key add -',
             'apt-get update',
             'apt-get install -y oxd-server',
         ]
+
+    if not os.path.exists('/usr/lib/apt/methods/https'):
+        commands.insert(0, 'apt-get install -y apt-transport-https')
 
 elif package_type == 'rpm':
     commands += [
