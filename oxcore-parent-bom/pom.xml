@@ -26,6 +26,7 @@
 
         <jackson.version>2.9.9</jackson.version>
         <jackson.databind.version>2.9.10</jackson.databind.version>
+        <json.version>20180813</json.version>
         <log4j.version>2.11.2</log4j.version>
         <slf4j.version>1.7.26</slf4j.version>
 
@@ -49,6 +50,11 @@
             <name>Gluu repository</name>
             <url>http://ox.gluu.org/maven</url>
         </repository>
+        <repository>
+            <id>bouncycastle</id>
+            <name>Bouncy Castle</name>
+            <url>http://repo2.maven.org/maven2/org/bouncycastle</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -57,6 +63,23 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+
+            <!-- Security -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.54</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>1.54</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>6.3</version>
             </dependency>
 
             <!-- Weld -->
