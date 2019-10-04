@@ -1,6 +1,6 @@
 package org.gluu.oxd.common;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
