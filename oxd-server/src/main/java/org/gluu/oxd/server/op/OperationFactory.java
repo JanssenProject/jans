@@ -4,10 +4,10 @@
 package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.params.IParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Zabrovarnyy

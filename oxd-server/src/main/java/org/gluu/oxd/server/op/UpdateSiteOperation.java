@@ -188,10 +188,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getScope() != null) {
-            request.setScopes(params.getScope());
+            request.setScope(params.getScope());
             rp.setScope(params.getScope());
         } else {
-            request.setScopes(rp.getScope());
+            request.setScope(rp.getScope());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
@@ -200,10 +200,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getClientFrontchannelLogoutUris() != null && !params.getClientFrontchannelLogoutUris().isEmpty()) {
-            rp.setFrontChannelLogoutUri(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
+            rp.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
         } else {
-            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUri());
+            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
@@ -400,6 +400,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
             rp.setTrustedClient(params.getTrustedClient());
+        }
+
+        if (StringUtils.isNotBlank(rp.getOxdId())) {
+            request.addCustomAttribute("oxd_id", rp.getOxdId());
         }
 
         return request;
