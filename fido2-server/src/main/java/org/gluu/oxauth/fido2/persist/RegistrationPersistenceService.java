@@ -73,13 +73,15 @@ public class RegistrationPersistenceService {
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (containsBranch(baseDn)) {
-            List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null);
-    
-            return fido2RegistrationnEntries;
+        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	if (!containsBranch(baseDn)) {
+                return Collections.emptyList();
+        	}
         }
-        
-        return Collections.emptyList();
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null);
+
+        return fido2RegistrationnEntries;
     }
 
     public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
@@ -89,14 +91,16 @@ public class RegistrationPersistenceService {
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (containsBranch(baseDn)) {
-            Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
-            List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
-    
-            return fido2RegistrationnEntries;
+        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	if (!containsBranch(baseDn)) {
+                return Collections.emptyList();
+        	}
         }
-        
-        return Collections.emptyList();
+
+        Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
+
+        return fido2RegistrationnEntries;
     }
 
     public List<Fido2RegistrationEntry> findAllByChallenge(String challenge) {
