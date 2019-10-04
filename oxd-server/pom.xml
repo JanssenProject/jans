@@ -366,11 +366,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency> <!-- added dependency manually because cross-dependency refers to wrong 3.0.12.Final version -->
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-            <version>3.5.1.Final</version>
-        </dependency>
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxauth-model</artifactId>
