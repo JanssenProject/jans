@@ -68,6 +68,13 @@
         <dependencies>
             <dependency>
                 <groupId>org.gluu</groupId>
+                <artifactId>oxcore-parent-bom</artifactId>
+                <version>4.1.0-SNAPSHOT</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
                 <version>4.1.0-SNAPSHOT</version>
             </dependency>
@@ -79,11 +86,6 @@
             <dependency>
                 <groupId>org.gluu</groupId>
                 <artifactId>oxd-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.gluu</groupId>
-                <artifactId>oxd-rp-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -220,67 +222,10 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.5</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>2.6</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-beanutils</groupId>
-                <artifactId>commons-beanutils</artifactId>
-                <version>1.6</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>3.2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-net</groupId>
-                <artifactId>commons-net</artifactId>
-                <version>3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-configuration</groupId>
-                <artifactId>commons-configuration</artifactId>
-                <version>1.6</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>commons-beanutils-core</artifactId>
-                        <groupId>commons-beanutils</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>commons-digester</groupId>
-                <artifactId>commons-digester</artifactId>
-                <version>1.8.1</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>18.0</version>
             </dependency>
-
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -302,25 +247,9 @@
                 <version>2.3</version>
             </dependency>
             <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>6.3.1</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.3</version>
-            </dependency>
-            <dependency><!-- Use this dependency in your licensed application -->
-                <groupId>net.nicholaswilliams.java.licensing</groupId>
-                <artifactId>licensing-core</artifactId>
-                <version>${licensing.version}</version>
-            </dependency>
-            <dependency><!-- Use this dependency in the application that you generate licenses with -->
-                <groupId>net.nicholaswilliams.java.licensing</groupId>
-                <artifactId>licensing-licensor-base</artifactId>
-                <version>${licensing.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
@@ -343,60 +272,6 @@
                 <artifactId>guice-servlet</artifactId>
                 <version>${guice.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.xdi</groupId>
-                <artifactId>oxlicense-client</artifactId>
-                <version>${oxlicense.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-1.2-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.xdi</groupId>
-                <artifactId>oxlicense-validator</artifactId>
-                <version>${oxlicense.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-1.2-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -404,32 +279,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <version>${gwt.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                                <!--goal>generateAsync</goal-->
-                                <goal>test</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.3</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-idea-plugin</artifactId>
-                    <version>2.2</version>
-                    <configuration>
-                        <downloadSources>true</downloadSources>
-                        <downloadJavadocs>true</downloadJavadocs>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
