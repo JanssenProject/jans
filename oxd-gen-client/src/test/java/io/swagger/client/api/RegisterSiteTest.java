@@ -3,10 +3,13 @@ package io.swagger.client.api;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.swagger.client.ApiException;
-import io.swagger.client.model.*;
+import io.swagger.client.model.RegisterSiteParams;
+import io.swagger.client.model.RegisterSiteResponse;
+import io.swagger.client.model.UpdateSiteParams;
+import io.swagger.client.model.UpdateSiteResponse;
+import org.gluu.oxauth.model.common.GrantType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.common.GrantType;
 import org.testng.collections.Maps;
 
 import java.util.ArrayList;
@@ -117,6 +120,7 @@ public class RegisterSiteTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
         params.setClientJwksUri(clientJwksUri);
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setAccessTokenSigningAlg(accessTokenSigningAlg);
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);

@@ -26,6 +26,7 @@ import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.model.Pat;
 import org.gluu.oxd.server.model.Token;
 import org.gluu.oxd.server.model.TokenFactory;
+import org.gluu.oxd.server.op.OpClientFactory;
 import org.gluu.oxd.server.op.RpGetRptOperation;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -49,6 +50,7 @@ public class UmaTokenService {
     private final HttpService httpService;
     private final OxdServerConfiguration configuration;
     private final StateService stateService;
+    private final OpClientFactory opClientFactory;
 
     @Inject
     public UmaTokenService(RpService rpService,
@@ -56,7 +58,8 @@ public class UmaTokenService {
                            DiscoveryService discoveryService,
                            HttpService httpService,
                            OxdServerConfiguration configuration,
-                           StateService stateService
+                           StateService stateService,
+                           OpClientFactory opClientFactory
     ) {
         this.rpService = rpService;
         this.validationService = validationService;
@@ -64,6 +67,7 @@ public class UmaTokenService {
         this.httpService = httpService;
         this.configuration = configuration;
         this.stateService = stateService;
+        this.opClientFactory = opClientFactory;
     }
 
     public RpGetRptResponse getRpt(RpGetRptParams params) throws Exception {
@@ -83,10 +87,10 @@ public class UmaTokenService {
             }
         }
 
-        ClientRequest client = new ClientRequest(discovery.getTokenEndpoint(), httpService.getClientExecutor());
-        client.header("Authorization", "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()))
-                .formParameter("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue())
-                .formParameter("ticket", params.getTicket());
+        ClientRequest client = opClientFactory.createClientRequest(discovery.getTokenEndpoint(), httpService.getClientExecutor());
+        client.header("Authorization", "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()));
+        client.formParameter("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue());
+        client.formParameter("ticket", params.getTicket());
 
         if (params.getClaimToken() != null) {
             client.formParameter("claim_token", params.getClaimToken());
@@ -169,7 +173,7 @@ public class UmaTokenService {
 
         Rp site = rpService.getRp(oxdId);
 
-        if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
+        if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
             expiredAt.setTime(site.getPatCreatedAt());
             expiredAt.add(Calendar.SECOND, site.getPatExpiresIn());
@@ -202,7 +206,7 @@ public class UmaTokenService {
 
         Rp site = rpService.getRp(oxdId);
 
-        if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() > 0) {
+        if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() != null && site.getOauthTokenExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
             expiredAt.setTime(site.getOauthTokenCreatedAt());
             expiredAt.add(Calendar.SECOND, site.getOauthTokenExpiresIn());
@@ -254,7 +258,7 @@ public class UmaTokenService {
     }
 
     private Token obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
-        final TokenClient tokenClient = new TokenClient(discovery.getTokenEndpoint());
+        final TokenClient tokenClient = opClientFactory.createTokenClientWithUmaProtectionScope(discovery.getTokenEndpoint());
         tokenClient.setExecutor(httpService.getClientExecutor());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(scopesAsString(scopeType), site.getClientId(), site.getClientSecret());
         if (response != null) {
@@ -316,8 +320,6 @@ public class UmaTokenService {
         authorizeClient.setRequest(request);
         final AuthorizationResponse response1 = authorizeClient.exec();
 
-        ClientUtils.showClient(authorizeClient);
-
         final String scope = response1.getScope();
         final String authorizationCode = response1.getCode();
         if (!state.equals(response1.getState())) {
@@ -339,7 +341,6 @@ public class UmaTokenService {
             tokenClient1.setRequest(tokenRequest);
             tokenClient1.setExecutor(httpService.getClientExecutor());
             final TokenResponse response2 = tokenClient1.exec();
-            ClientUtils.showClient(authorizeClient);
 
             if (response2.getStatus() == 200 && Util.allNotBlank(response2.getAccessToken())) {
                 final Token token = TokenFactory.newToken(scopeType);

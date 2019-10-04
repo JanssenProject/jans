@@ -3,6 +3,7 @@
  */
 package org.gluu.oxd.server;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +33,7 @@ public class ServerLauncher {
      */
     private static final Logger LOG = LoggerFactory.getLogger(ServerLauncher.class);
 
-    private static final Injector INJECTOR = Guice.createInjector(new GuiceModule());
+    private static Injector INJECTOR = Guice.createInjector(new GuiceModule());
     private static boolean setUpSuite = false;
 
     public static void configureServices(OxdServerConfiguration configuration) {
@@ -125,6 +126,10 @@ public class ServerLauncher {
 
     public static Injector getInjector() {
         return INJECTOR;
+    }
+
+    public static void setInjector(AbstractModule module) {
+        INJECTOR = Guice.createInjector(module);
     }
 
     public static boolean isSetUpSuite() {

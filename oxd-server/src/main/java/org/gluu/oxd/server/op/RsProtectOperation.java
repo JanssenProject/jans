@@ -66,7 +66,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         };
 
-        ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
+        ResourceRegistrar registrar = getOpClientFactory().createResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
         try {
             registrar.register(params.getResources());
         } catch (ClientResponseFailure e) {
