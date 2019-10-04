@@ -4,7 +4,7 @@
 package org.gluu.oxd.common;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
