@@ -4194,7 +4194,15 @@ class Setup(object):
 
             sic = 1
             for attribs, wherec in index_list['static']:
-                attrquoted = ['`{}`'.format(a) for a in attribs]
+                
+                attrquoted = []
+
+                for a in attribs:
+                    if not '(' in a:
+                        attrquoted.append('`{}`'.format(a))
+                    else:
+                        attrquoted.append(a)
+
                 attrquoteds = ', '.join(attrquoted)
                 query = 'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3})\n'.format(bucket, sic, attrquoteds, wherec)
                 W.write(query)
