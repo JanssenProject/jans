@@ -105,6 +105,14 @@
 	<dependencyManagement>
 		<dependencies>
             <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-parent-bom</artifactId>
+                <version>4.1.0-SNAPSHOT</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
                 <groupId>javax.interceptor</groupId>
                 <artifactId>javax.interceptor-api</artifactId>
                 <version>1.2</version>
@@ -276,11 +284,6 @@
 				<version>${uel-impl.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.websocket</groupId>
-				<artifactId>javax.websocket-api</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
 			    <groupId>org.glassfish</groupId>
 			    <artifactId>javax.faces</artifactId>
 				<version>${jsf-impl.version}</version>
@@ -317,21 +320,6 @@
 
 			<!-- Commons libs -->
 			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.7</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>2.6</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>2.6</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
 				<version>1.9.3</version>
@@ -345,11 +333,6 @@
 				<groupId>commons-net</groupId>
 				<artifactId>commons-net</artifactId>
 				<version>3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-configuration</groupId>
-				<artifactId>commons-configuration</artifactId>
-				<version>1.9</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-httpclient</groupId>
@@ -405,34 +388,6 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 
-			<!-- Security -->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.54</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.54</version>
-			</dependency>
-			<dependency>
-				<groupId>com.nimbusds</groupId>
-				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>6.3</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bitbucket.b_c</groupId>
-				<artifactId>jose4j</artifactId>
-				<version>0.6.4</version>
-                <scope>test</scope>
-			</dependency>
-			<dependency>
-			    <groupId>com.nimbusds</groupId>
-			    <artifactId>nimbus-jose-jwt</artifactId>
-			    <version>6.2</version>
-			</dependency>
-
 			<!-- Net -->
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -486,84 +441,6 @@
 				<groupId>com.github.microsoft</groupId>
 				<artifactId>TSS.Java</artifactId>
 				<version>0.3.0</version>
-			</dependency>
-
-			<!-- Jython -->
-			<dependency>
-				<groupId>org.python</groupId>
-				<artifactId>jython-standalone</artifactId>
-				<version>2.7.1</version>
-			</dependency>
-
-			<!-- RestEasy -->
-			<dependency>
-			    <groupId>org.jboss.resteasy</groupId>
-			    <artifactId>resteasy-cdi</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.jboss.resteasy</groupId>
-			    <artifactId>resteasy-client</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-servlet-initializer</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxrs</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxb-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson2-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-
-			<!-- JSON -->
-			<dependency>
-			    <groupId>org.json</groupId>
-			    <artifactId>json</artifactId>
-			    <version>${json.version}</version>
-			</dependency>
-
-			<!-- Jackson -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-			    <groupId>com.fasterxml.jackson.core</groupId>
-			    <artifactId>jackson-annotations</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson.databind.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-json-org</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-cbor</artifactId>
-				<version>${jackson.version}</version>
 			</dependency>
 
 			<!-- Jettison -->
@@ -631,24 +508,18 @@
 			</dependency>
 
 			<!-- Test -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.testng</groupId>
-				<artifactId>testng</artifactId>
-				<version>6.14.3</version>
-				<scope>test</scope>
-			</dependency>
 	        <dependency>
 	            <groupId>org.seleniumhq.selenium</groupId>
 	            <artifactId>selenium-java</artifactId>
 	            <version>3.141.59</version>
 	            <scope>test</scope>
 	        </dependency>
+            <dependency>
+                <groupId>org.bitbucket.b_c</groupId>
+                <artifactId>jose4j</artifactId>
+                <version>0.6.4</version>
+                <scope>test</scope>
+            </dependency>
 			<dependency>
 			    <groupId>net.sourceforge.htmlunit</groupId>
 			    <artifactId>htmlunit</artifactId>
@@ -665,13 +536,6 @@
 			    <groupId>org.seleniumhq.selenium</groupId>
 			    <artifactId>htmlunit-driver</artifactId>
 			    <version>2.35.1</version>
-			</dependency>
-            <!--Can be removed once TestNG dependency contains JCommander 1.74 or newer-->
-            <dependency>
-                <groupId>com.beust</groupId>
-                <artifactId>jcommander</artifactId>
-                <version>1.72</version>
-				<scope>test</scope>
 			</dependency>
 
 	        <dependency>

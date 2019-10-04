@@ -3,7 +3,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gluu</groupId>
 	<artifactId>oxauth-rp</artifactId>
 	<name>oxAuth RP</name>
 	<packaging>war</packaging>
@@ -72,27 +71,27 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<configuration>
-					<connectors>
-						<connector
-							implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>${jetty.http.port}</port>
-							<maxIdleTime>3600000</maxIdleTime>
-						</connector>
-					</connectors>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<webApp>
-						<contextPath>/${project.build.finalName}</contextPath>
-						<!-- <jettyEnvXml>src/main/webapp-jetty/WEB-INF/jetty-env.xml</jettyEnvXml> -->
-					</webApp>
-					<!-- <contextXml>src/main/webapp-jetty/WEB-INF/jetty-context.xml</contextXml> -->
-					<!-- if you don't want to use war:inplace, use this path instead -->
-					<!-- <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory> -->
-				</configuration>
-			</plugin>
+			<!--<plugin>-->
+				<!--<groupId>org.mortbay.jetty</groupId>-->
+				<!--<artifactId>jetty-maven-plugin</artifactId>-->
+				<!--<configuration>-->
+					<!--<connectors>-->
+						<!--<connector-->
+							<!--implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">-->
+							<!--<port>${jetty.http.port}</port>-->
+							<!--<maxIdleTime>3600000</maxIdleTime>-->
+						<!--</connector>-->
+					<!--</connectors>-->
+					<!--<scanIntervalSeconds>10</scanIntervalSeconds>-->
+					<!--<webApp>-->
+						<!--<contextPath>/${project.build.finalName}</contextPath>-->
+						<!--&lt;!&ndash; <jettyEnvXml>src/main/webapp-jetty/WEB-INF/jetty-env.xml</jettyEnvXml> &ndash;&gt;-->
+					<!--</webApp>-->
+					<!--&lt;!&ndash; <contextXml>src/main/webapp-jetty/WEB-INF/jetty-context.xml</contextXml> &ndash;&gt;-->
+					<!--&lt;!&ndash; if you don't want to use war:inplace, use this path instead &ndash;&gt;-->
+					<!--&lt;!&ndash; <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory> &ndash;&gt;-->
+				<!--</configuration>-->
+			<!--</plugin>-->
 		</plugins>
 	</build>
 
@@ -329,7 +328,8 @@
 									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 								</manifest>
 								<manifestEntries>
-									<Implementation-Build>${buildNumber}</Implementation-Build>
+									<!--suppress UnresolvedMavenProperty -->
+                                    <Implementation-Build>${buildNumber}</Implementation-Build>
 								</manifestEntries>
 							</archive>
 
