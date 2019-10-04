@@ -2969,7 +2969,7 @@ class Setup(object):
 
                 for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
 
-                    cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+                    cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
                     print "    Checking Couchbase connection for " + cb_host
 
                     cbm_result = cbm_.test_connection()
@@ -2991,7 +2991,8 @@ class Setup(object):
                         print("{0}Note: The password used for the admin user in "
                             "Couchbase is also\nassigned to the admin user in "
                             "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
-                        self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
+                        cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+                        self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
                         break
                     if cb_query_node == None:
                         print "Can't find any query node"
@@ -4326,7 +4327,7 @@ class Setup(object):
         
         for cb_host in self.couchbase_hostname.split(','):
 
-            cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
             cert = cbm_.get_certificate()
             with open(self.couchebaseCert, 'w') as w:
                 w.write(cert)
@@ -4475,13 +4476,15 @@ class Setup(object):
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
         else:
-            self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
+            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
-            self.cbm = CBM(self.couchbase_hostname.split(',')[self.cb_query_node], self.couchebaseClusterAdmin, self.ldapPass)
+            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
         apache_user = 'www-data'
