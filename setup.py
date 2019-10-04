@@ -4340,7 +4340,7 @@ class Setup(object):
 
     def couchbaseDict(self):
         prop_dict = {
-                    'hostname': self.couchbase_hostname,
+                    'hostname': self.couchbase_hostname.replace(' ','').replace('\t',''),
                     'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
