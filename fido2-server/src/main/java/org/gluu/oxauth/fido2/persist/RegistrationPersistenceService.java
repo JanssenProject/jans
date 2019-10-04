@@ -79,7 +79,9 @@ public class RegistrationPersistenceService {
         	}
         }
 
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, null);
+        Filter userFilter = Filter.createEqualityFilter("personInum", userInum);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, userFilter);
 
         return fido2RegistrationnEntries;
     }
@@ -97,8 +99,11 @@ public class RegistrationPersistenceService {
         	}
         }
 
+        Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
         Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
+        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
 
         return fido2RegistrationnEntries;
     }
