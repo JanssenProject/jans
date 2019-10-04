@@ -64,7 +64,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("insert into rp(id, data) values(?, ?)");
             query.setString(1, rp.getOxdId());
-            query.setString(2, Jackson2.asJson(rp));
+            query.setString(2, Jackson2.serializeWithoutNulls(rp));
             query.executeUpdate();
             query.close();
 
@@ -86,7 +86,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("update rp set data = ? where id = ?");
-            query.setString(1, Jackson2.asJson(rp));
+            query.setString(1, Jackson2.serializeWithoutNulls(rp));
             query.setString(2, rp.getOxdId());
             query.executeUpdate();
             query.close();

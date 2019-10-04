@@ -15,6 +15,7 @@ protect_commands_with_access_token: true
 uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: false
 add_client_credentials_grant_type_automatically_during_client_registration: true
 migration_source_folder_path: ''
+allowed_op_hosts: []
 storage: h2
 storage_configuration:
   dbFileLocation: /opt/oxd-server/data/oxd_db
@@ -66,4 +67,46 @@ defaultSiteConfig:
   ui_locales: ['en']
   claims_locales: ['en']
   contacts: []
-
+  redirect_uris: []
+  logout_redirect_uris: []
+  client_name: ''
+  client_jwks_uri: ''
+  token_endpoint_auth_method: ''
+  token_endpoint_auth_signing_alg: ''
+  request_uris: []
+  front_channel_logout_uris: []
+  sector_identifier_uri: ''
+  claims_redirect_uri: []
+  client_id: ''
+  client_secret: ''
+  trusted_client: false
+  access_token_as_jwt: false
+  access_token_signing_alg: ''
+  rpt_as_jwt: false
+  logo_uri: ''
+  client_uri: ''
+  policy_uri: ''
+  front_channel_logout_session_required: false
+  tos_uri: ''
+  jwks: ''
+  id_token_binding_cnf: ''
+  tls_client_auth_subject_dn: ''
+  run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims: false
+  id_token_signed_response_alg: ''
+  id_token_encrypted_response_alg: ''
+  id_token_encrypted_response_enc: ''
+  user_info_signed_response_alg: ''
+  user_info_encrypted_response_alg: ''
+  user_info_encrypted_response_enc: ''
+  request_object_signing_alg: ''
+  request_object_encryption_alg: ''
+  request_object_encryption_enc: ''
+  default_max_age: null
+  require_auth_time: false
+  initiate_login_uri: ''
+  authorized_origins: []
+  access_token_lifetime: null
+  software_id: ''
+  software_version: ''
+  software_statement: ''
+  custom_attributes: {}
