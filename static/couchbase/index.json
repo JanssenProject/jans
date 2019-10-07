@@ -9,9 +9,9 @@
       ["del","exp"] 
     ],
     "static" : [
+      [["uid"], "objectClass = \"gluuPerson\""], 
       [["DISTINCT(PAIRS(self))"], "objectClass = \"gluuPerson\""], 
       [["exp", "oxAuthExpiration"], "del=true"] 
-      
     ]
   },
 
