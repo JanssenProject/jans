@@ -3377,10 +3377,9 @@ class Setup(object):
         #Append self.jre_home to OpenDj java.properties        
         opendj_java_properties_fn = os.path.join(self.ldapBaseFolder, 'config/java.properties')
 
-        print "ppend self.jre_home to OpenDj",  opendj_java_properties_fn
+        self.logIt("append self.jre_home to OpenDj %s" % opendj_java_properties_fn)
         with open(opendj_java_properties_fn,'a') as f:
             f.write('\ndefault.java-home={}\n'.format(self.jre_home))
-        print "File written"
 
         if self.opendj_type == 'opendj':
 
