@@ -21,7 +21,7 @@ import javax.ws.rs.core.SecurityContext;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Api(value = "/", description = "The Backchannel Device Registration Endpoint is used to register the end-user device for push notifications (FCM).")
 public interface BackchannelDeviceRegistrationRestWebService {
@@ -46,10 +46,9 @@ public interface BackchannelDeviceRegistrationRestWebService {
                     "    The resource owner or OpenID Provider denied the request.")
     })
     Response requestBackchannelDeviceRegistrationPost(
-            // TODO: Do not use login hint
-            @FormParam("login_hint")
-            @ApiParam(value = "A hint to the OpenID Provider regarding the end-user for whom authentication is being requested.", required = true)
-                    String loginHint,
+            @FormParam("id_token_hint")
+            @ApiParam(value = "An ID Token previously issued to the Client by the OpenID Provider being passed back as a hint to identify the end-user for whom the device registration is being requested.", required = true)
+                    String idTokenHint,
             @FormParam("device_registration_token")
             @ApiParam(value = "OAuth 2.0 Client Identifier valid at the Authorization Server. ", required = true)
                     String deviceRegistrationToken,

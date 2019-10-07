@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.gluu.oxauth.interception.CIBAConfigurationInterception;
 import org.gluu.oxauth.interception.CIBAConfigurationInterceptionInterface;
@@ -26,7 +26,7 @@ import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBAConfigurationInterception

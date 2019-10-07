@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
@@ -17,9 +15,10 @@ import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -31,13 +30,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
 import static org.testng.Assert.*;
 
 /**
  * Functional tests for Authorize Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version August 1, 2018
+ * @version October 7, 2019
  */
 public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -151,7 +151,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
-        request.header("X-Gluu-NoRedirect", "");
+        request.header(NO_REDIRECT_HEADER, "");
 
         Response response = request.get();
         String entity = response.readEntity(String.class);
