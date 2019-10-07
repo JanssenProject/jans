@@ -10,9 +10,9 @@ import org.gluu.oxauth.model.error.DefaultErrorResponse;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 public interface CIBADeviceRegistrationValidatorInterceptionInterface {
 
-    DefaultErrorResponse validateParams(String deviceRegistrationToken);
+    DefaultErrorResponse validateParams(String idTokenHint, String deviceRegistrationToken);
 }

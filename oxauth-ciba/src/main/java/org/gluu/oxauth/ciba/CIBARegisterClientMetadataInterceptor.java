@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBARegisterClientMetadataInterception

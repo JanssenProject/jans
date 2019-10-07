@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,7 +27,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBARegisterClientResponseInterception

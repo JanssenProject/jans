@@ -4,18 +4,14 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.gluu.oxauth.client.push.PushTokenDeliveryClient;
 import org.gluu.oxauth.client.push.PushTokenDeliveryRequest;
 import org.gluu.oxauth.client.push.PushTokenDeliveryResponse;
-import org.gluu.oxauth.model.ciba.PushTokenDeliveryRequestParam;
 import org.gluu.oxauth.model.common.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingClient;
-import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingRequest;
-import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingResponse;
 import org.gluu.oxauth.interception.CIBAPushTokenDeliveryInterception;
 import org.gluu.oxauth.interception.CIBAPushTokenDeliveryInterceptionInterface;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -29,7 +25,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBAPushTokenDeliveryInterception
