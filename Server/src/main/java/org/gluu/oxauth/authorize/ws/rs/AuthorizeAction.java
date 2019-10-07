@@ -65,7 +65,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 8, 2018
+ * @version October 7, 2019
  */
 @RequestScoped
 @Named
@@ -163,6 +163,9 @@ public class AuthorizeAction {
     private String codeChallenge;
     private String codeChallengeMethod;
     private String claims;
+
+    // CIBA Request parameter
+    private String authReqId;
 
     // custom oxAuth parameters
     private String sessionId;
@@ -802,6 +805,14 @@ public class AuthorizeAction {
 
     public void setClaims(String claims) {
         this.claims = claims;
+    }
+
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
     }
 
     public String encodeParameters(String url, Map<String, Object> parameters) {

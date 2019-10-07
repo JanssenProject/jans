@@ -14,7 +14,7 @@ import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Stateless
 @Named
@@ -22,6 +22,6 @@ public class CIBAEndUserNotificationProxy implements CIBAEndUserNotificationInte
 
     @Override
     @CIBAEndUserNotificationInterception
-    public void notifyEndUser(String authorizationRequestId, String deviceRegistrationToken) {
+    public void notifyEndUser(String scope, String acrValues, String authReqId, String deviceRegistrationToken) {
     }
 }

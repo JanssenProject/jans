@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBASupportInterception
