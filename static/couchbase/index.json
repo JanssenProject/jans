@@ -2,9 +2,7 @@
   "gluu_user": {
     "attributes": [
       ["objectClass"], 
-      ["creationDate"], 
-      ["sn"],
-      ["uid"], 
+      ["creationDate"],  
       ["del","exp"] 
     ],
     "static" : [
