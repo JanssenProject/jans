@@ -15,7 +15,7 @@ import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Stateless
 @Named
@@ -23,7 +23,7 @@ public class CIBADeviceRegistrationValidatorProxy implements CIBADeviceRegistrat
 
     @Override
     @CIBADeviceRegistationValidatorInterception
-    public DefaultErrorResponse validateParams(String deviceRegistrationToken) {
+    public DefaultErrorResponse validateParams(String idTokenHint, String deviceRegistrationToken) {
         return null;
     }
 }
