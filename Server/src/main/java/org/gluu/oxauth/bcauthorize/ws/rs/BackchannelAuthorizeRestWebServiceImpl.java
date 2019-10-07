@@ -58,7 +58,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * Implementation for request backchannel authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version October 7, 2019
  */
 @Path("/")
 @Api(value = "/oxauth/bc-authorize", description = "Backchannel Authorization Endpoint")
@@ -242,13 +242,14 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             authorizationGrant.setClientNotificationToken(clientNotificationToken);
             authorizationGrant.save(); // call save after object modification!!!
 
-            String authorizationRequestId = authorizationGrant.getCIBAAuthenticationRequestId().getCode();
+            String authReqId = authorizationGrant.getCIBAAuthenticationRequestId().getCode();
 
             // Notify End-User to obtain Consent/Authorization
-            cibaEndUserNotificationProxy.notifyEndUser(authorizationRequestId, deviceRegistrationToken);
+            cibaEndUserNotificationProxy.notifyEndUser(
+                    authorizationGrant.getScopesAsString(), authorizationGrant.getAcrValues(), authReqId, deviceRegistrationToken);
 
             builder.entity(getJSONObject(
-                    authorizationRequestId,
+                    authReqId,
                     expiresIn,
                     interval).toString(4).replace("\\/", "/"));
 

@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.configuration;
+package org.gluu.oxauth.ciba;
 
 import org.apache.logging.log4j.util.Strings;
 import org.jboss.resteasy.client.ClientRequest;
@@ -35,7 +35,7 @@ import static org.gluu.oxauth.model.common.GrantType.CIBA;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 @Interceptor
 @CIBARegisterParamsValidatorInterception

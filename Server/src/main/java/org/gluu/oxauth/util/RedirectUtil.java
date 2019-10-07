@@ -6,8 +6,12 @@
 
 package org.gluu.oxauth.util;
 
-import java.net.MalformedURLException;
-import java.net.URI;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
@@ -15,24 +19,19 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.net.MalformedURLException;
+import java.net.URI;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
 
 /**
- * @version October 1, 2015
+ * @version October 7, 2019
  */
 public class RedirectUtil {
 
-	private final static Logger log = LoggerFactory.getLogger(RedirectUtil.class);
+    private final static Logger log = LoggerFactory.getLogger(RedirectUtil.class);
 
     static String JSON_REDIRECT_PROPNAME = "redirect";
-
-    static String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
 
     static int HTTP_REDIRECT = 302;
 

@@ -36,7 +36,7 @@ import java.util.*;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 8, 2018
+ * @version October 7, 2019
  */
 @Stateless
 @Named
@@ -65,7 +65,8 @@ public class AuthorizeService {
             AuthorizeRequestParam.CODE_CHALLENGE,
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
-            AuthorizeRequestParam.CLAIMS));
+            AuthorizeRequestParam.CLAIMS,
+            AuthorizeRequestParam.AUTH_REQ_ID));
 
     @Inject
     private Logger log;

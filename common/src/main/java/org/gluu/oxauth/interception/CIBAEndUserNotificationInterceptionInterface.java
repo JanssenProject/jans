@@ -8,9 +8,9 @@ package org.gluu.oxauth.interception;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version October 7, 2019
  */
 public interface CIBAEndUserNotificationInterceptionInterface {
 
-    void notifyEndUser(String authorizationRequestId, String deviceRegistrationToken);
+    void notifyEndUser(String scope, String acrValues, String authReqId, String deviceRegistrationToken);
 }

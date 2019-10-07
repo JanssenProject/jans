@@ -15,11 +15,6 @@ import org.gluu.oxauth.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Cookie;
@@ -30,11 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version March 13, 2019
+ * @version October 7, 2019
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -140,7 +137,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
                     if (authorizationRequest.isUseNoRedirectHeader()) {
                         sb.append("\n");
-                        sb.append("X-Gluu-NoRedirect: true");
+                        sb.append(NO_REDIRECT_HEADER + ": true");
                     }
                 }
                 if (request.getAuthorizationMethod() == null) {
@@ -176,7 +173,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
                     if (authorizationRequest.isUseNoRedirectHeader()) {
                         sb.append("\n");
-                        sb.append("X-Gluu-NoRedirect: true");
+                        sb.append(NO_REDIRECT_HEADER + ": true");
                     }
                 }
                 if (request.getAuthorizationMethod() == null) {

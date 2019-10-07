@@ -28,7 +28,7 @@ import javax.ws.rs.core.SecurityContext;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version October 7, 2019
  */
 @Api(value = "/", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
 public interface AuthorizeRestWebService {
@@ -74,10 +74,12 @@ public interface AuthorizeRestWebService {
      *                            is an array of case sensitive strings.
      * @param request             A JWT  encoded OpenID Request Object.
      * @param requestUri          An URL that points to an OpenID Request Object.
-     * @param codeChallenge       PKCE code challenge
-     * @param codeChallengeMethod PKCE code challenge method
      * @param requestSessionId    request session id
      * @param sessionId           session id
+     * @param originHeaders
+     * @param codeChallenge       PKCE code challenge
+     * @param codeChallengeMethod PKCE code challenge method
+     * @param authReqId           A unique identifier to identify the CIBA authentication request made by the Client.
      * @param httpRequest         http request
      * @param securityContext     An injectable interface that provides access to security
      *                            related information.
@@ -229,6 +231,9 @@ public interface AuthorizeRestWebService {
             @QueryParam("claims")
             @ApiParam(value = "Requested Claims.", required = false)
                     String claims,
+            @QueryParam("auth_req_id")
+            @ApiParam(value = "CIBA authentication request Id.", required = false)
+                    String authReqId,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

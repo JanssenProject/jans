@@ -44,6 +44,13 @@
                 <!-- Container for the Table of content -->
                 <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--12-col-desktop">
                     <div class="mdl-card__supporting-text mdl-color-text--grey-600">
+                        <div>
+                            <h4>Authenticate User</h4>
+                            <p id="oxAuthIdToken" style="word-break: break-all;"></p>
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                                    onclick="authenticateUser()">Authenticate User</button>
+                        </div>
+
                         <!-- div to display the generated Instance ID token -->
                         <div id="token_div" style="display: none;">
                             <h4>Instance ID Token</h4>
@@ -99,6 +106,55 @@
         // IDs of divs that display Instance ID token UI or request permission UI.
         const tokenDivId = 'token_div';
         const permissionDivId = 'permission_div';
+
+        var oxAuthIdToken = null;
+        var idTokenHintLoaded = false;
+        if (self.document.location.hash) {
+            var hash = self.document.location.hash.substring(1);
+            hash = decodeURI(hash.replace(/\+/g, " "));
+            var params = hash.split("&amp;");
+
+            if (params != null) {
+                for (var i = 0; i &lt; params.length; i++) {
+                    var param = params[i].split("=");
+
+                    if (param[0] == "access_token") {
+                        var accessToken = param[1];
+                        //alert(accessToken);
+                    } else if (param[0] == "id_token") {
+                        oxAuthIdToken = param[1];
+
+                        document.cookie = "id_token_hint = " + oxAuthIdToken + ";secure";
+                        var tokenElement = document.querySelector('#oxAuthIdToken');
+                        tokenElement.textContent = oxAuthIdToken;
+                        idTokenHintLoaded = true;
+                    }
+                }
+            }
+        }
+        if (!idTokenHintLoaded) {
+            oxAuthIdToken = getCookie('id_token_hint');
+            var tokenElement = document.querySelector('#oxAuthIdToken');
+            tokenElement.textContent = oxAuthIdToken;
+            idTokenHintLoaded = true;
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i &lt; ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
         // [START refresh_token]
         // Callback fired if Instance ID token is updated.
         messaging.onTokenRefresh(function() {
@@ -129,7 +185,7 @@
             // [START_EXCLUDE]
             // Update the UI to include the received message.
             appendMessage(payload);
-            window.location.href = payload.notification.click_action;
+            window.location.href = payload.notification.click_action + '&amp;client_id=fcc1f237-1c84-4d25-8ca5-4fb0030da256';
             // [END_EXCLUDE]
         });
         // [END receive_message]
@@ -168,10 +224,10 @@
         function sendTokenToServer(currentToken) {
             if (!isTokenSentToServer()) {
                 console.log('Sending token to server...');
-                // TODO(developer): Send the current token to your server.
+
                 var http = new XMLHttpRequest();
                 var url = "#{ cibaAuthorizeAction.backchannelDeviceRegistrationEndpoint }";
-                var params = 'login_hint=admin&amp;device_registration_token=' + currentToken;
+                var params = 'id_token_hint=' + oxAuthIdToken + '&amp;device_registration_token=' + currentToken;
                 http.open('POST', url, true);
                 //Send the proper header information along with the request
                 http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -204,6 +260,22 @@
                 div.style = 'display: none';
             }
         }
+
+        function authenticateUser() {
+            console.log('Authenticating user...');
+
+            // TODO: Use configuration
+            var authRequest = 'https://ce.gluu.info:8443/restv1/authorize?' +
+                'response_type=token id_token' + '&amp;' +
+                'client_id=fcc1f237-1c84-4d25-8ca5-4fb0030da256' + '&amp;' +
+                'scope=openid' + '&amp;' +
+                'redirect_uri=https://ce.gluu.info:8443/ciba/home.htm' + '&amp;' +
+                'state=4fa9d703-64bc-4439-9183-495a2c53900b' + '&amp;' +
+                'nonce=2d681c70-6b05-430c-8ac6-ac82b63945cb';
+
+            window.location.href = authRequest;
+        }
+
         function requestPermission() {
             console.log('Requesting permission...');
             // [START request_permission]
@@ -222,6 +294,7 @@
             });
             // [END request_permission]
         }
+
         function deleteToken() {
             // Delete Instance ID token.
             // [START delete_token]
