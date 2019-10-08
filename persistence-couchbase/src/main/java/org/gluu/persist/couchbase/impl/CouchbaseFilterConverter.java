@@ -86,6 +86,11 @@ public class CouchbaseFilterConverter {
                 	if (!canJoinOrFilters) {
                 		continue;
                 	}
+                	
+                	if (tmpFilter.getMultiValued() != null) {
+                		canJoinOrFilters = false;
+                    	continue;
+                	}
 
                 	if ((FilterType.EQUALITY != tmpFilter.getType()) || (tmpFilter.getFilters() != null)) {
                     	canJoinOrFilters = false;
