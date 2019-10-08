@@ -81,24 +81,18 @@ public class LookupService implements Serializable {
         List<DisplayNameEntry> entries = (List<DisplayNameEntry>) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entries == null) {
             Filter searchFilter = buildInumFilter(inums);
-
             entries = ldapEntryManager.findEntries(baseDn, DisplayNameEntry.class, searchFilter);
-
             cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entries);
         }
-
         return entries;
     }
 
     public Filter buildInumFilter(List<String> inums) {
         List<Filter> inumFilters = new ArrayList<Filter>(inums.size());
         for (String inum : inums) {
-            inumFilters.add(Filter.createEqualityFilter(OxConstants.INUM, inum));
+            inumFilters.add(Filter.createEqualityFilter(OxConstants.INUM, inum).multiValued(false));
         }
-
-        Filter searchFilter = Filter.createORFilter(inumFilters);
-
-        return searchFilter;
+       return Filter.createORFilter(inumFilters);
     }
 
     public List<String> getInumsFromDns(List<String> dns) {
