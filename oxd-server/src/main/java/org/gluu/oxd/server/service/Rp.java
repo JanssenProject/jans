@@ -1061,7 +1061,7 @@ public class Rp implements Serializable {
                 ", idTokenEncryptedResponseAlg='" + idTokenEncryptedResponseAlg + '\'' +
                 ", idTokenEncryptedResponseEnc='" + idTokenEncryptedResponseEnc + '\'' +
                 ", userInfoSignedResponseAlg='" + userInfoSignedResponseAlg + '\'' +
-                ", userInfoEngetClientRequestUriscryptedResponseAlg='" + userInfoEncryptedResponseAlg + '\'' +
+                ", userInfoEncryptedResponseAlg='" + userInfoEncryptedResponseAlg + '\'' +
                 ", userInfoEncryptedResponseEnc='" + userInfoEncryptedResponseEnc + '\'' +
                 ", requestObjectSigningAlg='" + requestObjectSigningAlg + '\'' +
                 ", requestObjectEncryptionAlg='" + requestObjectEncryptionAlg + '\'' +
