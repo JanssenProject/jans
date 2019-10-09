@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.gluu</groupId>
         <artifactId>oxauth</artifactId>
-        <version>4.0.rc3</version>
+        <version>4.0.Final</version>
     </parent>
 
     <prerequisites>
