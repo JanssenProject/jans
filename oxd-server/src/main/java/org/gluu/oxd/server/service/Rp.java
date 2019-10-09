@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
@@ -56,8 +57,8 @@ public class Rp implements Serializable {
     private Date clientSecretExpiresAt;
     @JsonProperty(value = "client_name")
     private String clientName;
-    @JsonProperty(value = "sector_identifier_uri")
-    private String sectorIdentifierUri;
+    @JsonProperty(value = "client_sector_identifier_uri")
+    private String clientSectorIdentifierUri;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
     @JsonProperty(value = "token_endpoint_auth_signing_alg")
@@ -178,9 +179,9 @@ public class Rp implements Serializable {
     @JsonProperty(value = "software_statement")
     private String softwareStatement;
     @JsonProperty(value = "custom_attributes")
-    private Map<String, String> customAttributes;
-    @JsonProperty(value = "request_uris")
-    private List<String> requestUris;
+    private Map<String, String> customAttributes = new HashMap<String, String>();
+    @JsonProperty(value = "client_request_uris")
+    private List<String> clientRequestUris;
 
     public Rp() {
     }
@@ -210,7 +211,7 @@ public class Rp implements Serializable {
         this.clientIdIssuedAt = conf.clientIdIssuedAt;
         this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
         this.clientName = conf.clientName;
-        this.sectorIdentifierUri = conf.sectorIdentifierUri;
+        this.clientSectorIdentifierUri = conf.clientSectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
 
         this.tokenEndpointAuthSigningAlg = conf.tokenEndpointAuthSigningAlg;
@@ -278,7 +279,7 @@ public class Rp implements Serializable {
         this.softwareVersion = conf.softwareVersion;
         this.softwareStatement = conf.softwareStatement;
         this.customAttributes = conf.customAttributes;
-        this.requestUris = requestUris;
+        this.clientRequestUris = clientRequestUris;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -421,12 +422,12 @@ public class Rp implements Serializable {
         this.oauthTokenRefreshToken = oauthTokenRefreshToken;
     }
 
-    public String getSectorIdentifierUri() {
-        return sectorIdentifierUri;
+    public String getClientSectorIdentifierUri() {
+        return clientSectorIdentifierUri;
     }
 
-    public void setSectorIdentifierUri(String sectorIdentifierUri) {
-        this.sectorIdentifierUri = sectorIdentifierUri;
+    public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
+        this.clientSectorIdentifierUri = clientSectorIdentifierUri;
     }
 
     public String getAccessToken() {
@@ -978,12 +979,18 @@ public class Rp implements Serializable {
         this.customAttributes = customAttributes;
     }
 
-    public List<String> getRequestUris() {
-        return requestUris;
+    public void addCustomAttribute(String p_name, String p_value) {
+        if (RegisterRequestParam.isCustomParameterValid(p_name)) {
+            this.customAttributes.put(p_name, p_value);
+        }
     }
 
-    public void setRequestUris(List<String> requestUris) {
-        this.requestUris = requestUris;
+    public List<String> getClientRequestUris() {
+        return clientRequestUris;
+    }
+
+    public void setClientRequestUris(List<String> clientRequestUris) {
+        this.clientRequestUris = clientRequestUris;
     }
 
     @Override
@@ -1008,7 +1015,7 @@ public class Rp implements Serializable {
                 ", clientIdIssuedAt=" + clientIdIssuedAt +
                 ", clientSecretExpiresAt=" + clientSecretExpiresAt +
                 ", clientName='" + clientName + '\'' +
-                ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
+                ", clientSectorIdentifierUri='" + clientSectorIdentifierUri + '\'' +
                 ", clientJwksUri='" + clientJwksUri + '\'' +
                 ", scope=" + scope +
                 ", uiLocales=" + uiLocales +
@@ -1054,7 +1061,7 @@ public class Rp implements Serializable {
                 ", idTokenEncryptedResponseAlg='" + idTokenEncryptedResponseAlg + '\'' +
                 ", idTokenEncryptedResponseEnc='" + idTokenEncryptedResponseEnc + '\'' +
                 ", userInfoSignedResponseAlg='" + userInfoSignedResponseAlg + '\'' +
-                ", userInfoEncryptedResponseAlg='" + userInfoEncryptedResponseAlg + '\'' +
+                ", userInfoEngetClientRequestUriscryptedResponseAlg='" + userInfoEncryptedResponseAlg + '\'' +
                 ", userInfoEncryptedResponseEnc='" + userInfoEncryptedResponseEnc + '\'' +
                 ", requestObjectSigningAlg='" + requestObjectSigningAlg + '\'' +
                 ", requestObjectEncryptionAlg='" + requestObjectEncryptionAlg + '\'' +
@@ -1067,7 +1074,7 @@ public class Rp implements Serializable {
                 ", softwareVersion='" + softwareVersion + '\'' +
                 ", softwareStatement='" + softwareStatement + '\'' +
                 ", customAttributes='" + customAttributes + '\'' +
-                ", requestUris='" + requestUris + '\'' +
+                ", clientRequestUris='" + clientRequestUris + '\'' +
                 '}';
     }
 }
