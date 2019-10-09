@@ -699,11 +699,24 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public boolean authenticate(String baseDN, String userName, String password) {
+    public <T> boolean authenticate(String baseDN, Class<T> entryClass, String userName, String password) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to count entries is null");
+        }
+
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+
+        // Find entries
+        Filter searchFilter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, userName);
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(searchFilter, objectClasses);
+        }
+
     	SearchScope scope = SearchScope.SUB;
         try {
-            Filter filter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, userName);
-            SearchResult searchResult = operationService.search(baseDN, toLdapFilter(filter), toLdapSearchScope(scope), null, 0, 1, 1, null, (String[]) null);
+            SearchResult searchResult = operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, (String[]) null);
             if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
                 return false;
             }

@@ -36,7 +36,7 @@ import org.gluu.util.ArrayHelper;
 public interface PersistenceEntryManager extends EntityManager {
 
     boolean authenticate(String primaryKey, String password);
-    boolean authenticate(String primaryKey, String userName, String password);
+    <T> boolean authenticate(String baseDN, Class<T> entryClass, String userName, String password);
 
 	void persist(Object entry);
 
