@@ -26,6 +26,7 @@ import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
+import org.gluu.oxd.server.mapper.RegisterRequestMapper;
 import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
@@ -43,6 +44,8 @@ import java.util.UUID;
 public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
+
+    private final RegisterRequestMapper rpMapper = new RegisterRequestMapper();
 
     private Rp rp;
 
@@ -237,8 +240,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //request_uris
-        if ((params.getClientRequestUris() == null || params.getClientRequestUris().isEmpty()) && (fallback.getRequestUris() != null && !fallback.getRequestUris().isEmpty())) {
-            params.setClientRequestUris(fallback.getRequestUris());
+        if ((params.getClientRequestUris() == null || params.getClientRequestUris().isEmpty()) && (fallback.getClientRequestUris() != null && !fallback.getClientRequestUris().isEmpty())) {
+            params.setClientRequestUris(fallback.getClientRequestUris());
         }
 
         //front_channel_logout_uris
@@ -247,8 +250,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //sector_identifier_uri
-        if (StringUtils.isBlank(params.getClientSectorIdentifierUri()) && StringUtils.isNotBlank(fallback.getSectorIdentifierUri())) {
-            params.setClientSectorIdentifierUri(fallback.getSectorIdentifierUri());
+        if (StringUtils.isBlank(params.getClientSectorIdentifierUri()) && StringUtils.isNotBlank(fallback.getClientSectorIdentifierUri())) {
+            params.setClientSectorIdentifierUri(fallback.getClientSectorIdentifierUri());
         }
 
         //client_id
@@ -420,10 +423,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     private void persistRp(String siteId, RegisterSiteParams params) {
 
         try {
-            rp = createRp(siteId, params);
+            final RegisterRequest registerRequest = createRegisterClientRequest(params, siteId);
+            rp = createRp(registerRequest);
+            rp.setOxdId(siteId);
+            rp.setApplicationType("web");
+            rp.setOpHost(params.getOpHost());
+            rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
+            rp.setUiLocales(params.getUiLocales());
 
             if (!hasClient(params)) {
-                final RegisterResponse registerResponse = registerClient(params);
+                LOG.info("Save RegisterRequest object to register in OP ...");
+                final RegisterResponse registerResponse = registerClient(params, registerRequest);
+
                 rp.setClientId(registerResponse.getClientId());
                 rp.setClientSecret(registerResponse.getClientSecret());
                 rp.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
@@ -431,7 +442,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
                 rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
-
+            LOG.info("Saving Relying Party object in oxd ...");
             getRpService().create(rp);
         } catch (HttpException e) {
             throw e;
@@ -445,7 +456,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         return !Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret());
     }
 
-    private RegisterResponse registerClient(RegisterSiteParams params) {
+    private RegisterResponse registerClient(RegisterSiteParams params, RegisterRequest request) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
+
         final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
@@ -454,7 +467,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         final RegisterClient registerClient = getOpClientFactory().createRegisterClient(registrationEndpoint);
-        registerClient.setRequest(createRegisterClientRequest(params));
+        registerClient.setRequest(request);
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
@@ -474,16 +487,15 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         throw new RuntimeException("Failed to register client for site. Details: " + (response != null ? response.getEntity() : "response is null"));
     }
 
-    private RegisterRequest createRegisterClientRequest(RegisterSiteParams params) {
+    private RegisterRequest createRegisterClientRequest(RegisterSiteParams params, String oxdId) {
         List<ResponseType> responseTypes = Lists.newArrayList();
         for (String type : params.getResponseTypes()) {
             responseTypes.add(ResponseType.fromString(type));
         }
 
-        String clientName = "oxd client for rp: " + rp.getOxdId();
+        String clientName = "oxd client for rp: " + oxdId;
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
-            rp.setClientName(clientName);
         }
 
         final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, params.getRedirectUris());
@@ -502,16 +514,14 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
             request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
-            rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());
         }
 
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
-            rp.setTrustedClient(params.getTrustedClient());
         }
 
-        if (StringUtils.isNotBlank(rp.getOxdId())) {
-            request.addCustomAttribute("oxd_id", rp.getOxdId());
+        if (StringUtils.isNotBlank(oxdId)) {
+            request.addCustomAttribute("oxd_id", oxdId);
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
@@ -521,19 +531,13 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setGrantTypes(grantTypes);
 
         if (params.getClientFrontchannelLogoutUris() != null) {
-            rp.setFrontChannelLogoutUris(params.getClientFrontchannelLogoutUris());
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
-        } else {
-            if (rp.getFrontChannelLogoutUris() != null) {
-                request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
-            }
         }
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getClientTokenEndpointAuthMethod());
             if (authenticationMethod != null) {
                 request.setTokenEndpointAuthMethod(authenticationMethod);
-                rp.setTokenEndpointAuthMethod(params.getClientTokenEndpointAuthMethod());
             }
         }
 
@@ -549,14 +553,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
         request.setRptAsJwt(params.getRptAsJwt());
 
-        if (params.getScope() != null && !params.getScope().isEmpty()) {
-            rp.setScope(params.getScope());
-        }
-
-        if (params.getUiLocales() != null && !params.getUiLocales().isEmpty()) {
-            rp.setUiLocales(params.getUiLocales());
-        }
-
         if (!Strings.isNullOrEmpty(params.getLogoUri())) {
             request.setLogoUri(params.getLogoUri());
         }
@@ -571,7 +567,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (params.getFrontChannelLogoutSessionRequired() != null) {
             request.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
-            rp.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
         }
 
         if (!Strings.isNullOrEmpty(params.getTosUri())) {
@@ -690,9 +685,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (params.getRequireAuthTime() != null) {
             request.setRequireAuthTime(params.getRequireAuthTime());
-            rp.setRequireAuthTime(params.getRequireAuthTime());
-        } else {
-            request.setRequireAuthTime(rp.getRequireAuthTime());
         }
 
         if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
@@ -725,64 +717,13 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             });
         }
 
-        rp.setRptAsJwt(params.getRptAsJwt());
-        rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
-        rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
-        rp.setResponseTypes(params.getResponseTypes());
-        rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
-        rp.setContacts(params.getContacts());
-        rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
-        rp.setRedirectUri(params.getRedirectUris().get(0));
         return request;
     }
 
-    private Rp createRp(String siteId, RegisterSiteParams params) {
+    private Rp createRp(RegisterRequest registerRequest) {
+        final Rp rp = new Rp();
 
-        Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
-
-        final Rp rp = new Rp(getConfigurationService().defaultRp());
-        rp.setOxdId(siteId);
-        rp.setOpHost(params.getOpHost());
-        rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
-        rp.setRedirectUris(params.getRedirectUris());
-        rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
-        rp.setApplicationType("web");
-        rp.setUmaProtectedResources(new ArrayList<UmaResource>());
-        rp.setFrontChannelLogoutUris(params.getClientFrontchannelLogoutUris());
-
-        if (params.getPostLogoutRedirectUris() != null && !params.getPostLogoutRedirectUris().isEmpty()) {
-            rp.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris());
-        }
-
-        if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
-            rp.setAcrValues(params.getAcrValues());
-        }
-
-        if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
-            rp.setClaimsLocales(params.getClaimsLocales());
-        }
-
-        if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
-            rp.setClientId(params.getClientId());
-            rp.setClientSecret(params.getClientSecret());
-            rp.setClientRegistrationAccessToken(params.getClientRegistrationAccessToken());
-            rp.setClientRegistrationClientUri(params.getClientRegistrationClientUri());
-        }
-
-        if (params.getContacts() != null && !params.getContacts().isEmpty()) {
-            rp.setContacts(params.getContacts());
-        }
-
-        rp.setGrantType(params.getGrantTypes());
-        rp.setResponseTypes(params.getResponseTypes());
-
-        if (params.getScope() != null && !params.getScope().isEmpty()) {
-            rp.setScope(params.getScope());
-        }
-
-        if (params.getUiLocales() != null && !params.getUiLocales().isEmpty()) {
-            rp.setUiLocales(params.getUiLocales());
-        }
+        rpMapper.fillRp(rp, registerRequest);
 
         return rp;
     }

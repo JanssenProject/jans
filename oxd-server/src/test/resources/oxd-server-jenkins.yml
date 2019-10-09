@@ -70,9 +70,9 @@ defaultSiteConfig:
   client_jwks_uri: ''
   token_endpoint_auth_method: ''
   token_endpoint_auth_signing_alg: ''
-  request_uris: []
+  client_request_uris: []
   front_channel_logout_uris: []
-  sector_identifier_uri: ''
+  client_sector_identifier_uri: ''
   claims_redirect_uri: []
   client_id: ''
   client_secret: ''
