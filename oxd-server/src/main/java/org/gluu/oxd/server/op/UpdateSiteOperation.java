@@ -22,6 +22,7 @@ import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.UpdateSiteResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
+import org.gluu.oxd.server.mapper.RegisterRequestMapper;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.HttpMethod;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -39,6 +41,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 
+    private final RegisterRequestMapper rpMapper = new RegisterRequestMapper();
+    
+    private Rp rp;
     /**
      * Base constructor
      *
@@ -50,7 +55,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     @Override
     public IOpResponse execute(UpdateSiteParams params) {
-        final Rp rp = getRp();
+        rp = getRp();
 
         LOG.info("Updating rp ... rp: " + rp);
         persistRp(rp, params);
@@ -63,7 +68,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     private void persistRp(Rp rp, UpdateSiteParams params) {
 
         try {
-            updateRegisteredClient(rp, params);
+            RegisterRequest registerRequest = createRegisterClientRequest(rp, params);
+            updateRegisteredClient(rp, registerRequest);
+            rpMapper.fillRp(rp, registerRequest);
             getRpService().update(rp);
 
             LOG.info("RP updated: " + rp);
@@ -72,14 +79,14 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
     }
 
-    private void updateRegisteredClient(Rp rp, UpdateSiteParams params) {
+    private void updateRegisteredClient(Rp rp, RegisterRequest registerRequest) {
         if (StringUtils.isBlank(rp.getClientRegistrationClientUri())) {
             LOG.error("Registration client url is blank.");
             throw new HttpException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
         }
 
         final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());
-        registerClient.setRequest(createRegisterClientRequest(rp, params));
+        registerClient.setRequest(registerRequest);
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
@@ -101,36 +108,21 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private RegisterRequest createRegisterClientRequest(Rp rp, UpdateSiteParams params) {
 
-        final RegisterRequest request = new RegisterRequest(rp.getClientRegistrationAccessToken());
+        final RegisterRequest request = rpMapper.createRegisterRequest(rp);
         request.setHttpMethod(HttpMethod.PUT); // force update
 
-        List<ResponseType> responseTypes = Lists.newArrayList();
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
-            for (String type : params.getResponseTypes()) {
-                responseTypes.add(ResponseType.fromString(type));
-            }
-            request.setResponseTypes(responseTypes);
-            rp.setResponseTypes(params.getResponseTypes());
-
+            request.setResponseTypes(params.getResponseTypes().stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList()));
         }
 
         if (params.getRptAsJwt() != null) {
             request.setRptAsJwt(params.getRptAsJwt());
-            rp.setRptAsJwt(params.getRptAsJwt());
-        } else {
-            request.setRptAsJwt(rp.getRptAsJwt());
         }
 
-        List<GrantType> grantTypes = Lists.newArrayList();
-        for (String grantType : params.getGrantType() != null ? params.getGrantType() : rp.getGrantType()) {
-            GrantType t = GrantType.fromString(grantType);
-            if (t != null) {
-                grantTypes.add(t);
-            }
+        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
+            request.setGrantTypes(params.getGrantType().stream().map(item -> GrantType.fromString(item)).collect(Collectors.toList()));
         }
 
-        request.setGrantTypes(grantTypes);
-        rp.setGrantType(params.getGrantType());
 
         Set<String> redirectUris = Sets.newLinkedHashSet();
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
@@ -141,35 +133,27 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             redirectUris.addAll(params.getRedirectUris());
             List<String> redirectUriList = Lists.newArrayList(redirectUris);
             request.setRedirectUris(redirectUriList);
-            rp.setRedirectUris(redirectUriList);
-            rp.setRedirectUri(redirectUriList.get(0));
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
-            rp.setAcrValues(params.getAcrValues());
             request.setDefaultAcrValues(params.getAcrValues());
-        } else {
-            request.setDefaultAcrValues(rp.getAcrValues());
         }
 
         if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
-            rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
             request.setClaimsRedirectUris(params.getClaimsRedirectUri());
-        } else {
-            request.setClaimsRedirectUris(rp.getClaimsRedirectUri());
         }
+
         if (params.getAccessTokenAsJwt() != null) {
             request.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
-            rp.setAccessTokenAsJwt(params.getAccessTokenAsJwt());
-        } else {
-            request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
         }
 
         if (params.getAccessTokenSigningAlg() != null) {
-            rp.setAccessTokenSigningAlg(params.getAccessTokenSigningAlg());
-            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg()));
-        } else {
-            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(rp.getAccessTokenSigningAlg()));
+            SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getAccessTokenSigningAlg());
+            if (signatureAlgorithms == null) {
+                LOG.error("Received invalid algorithm in `access_token_signing_alg` property. Value: " + params.getAccessTokenSigningAlg() );
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+            request.setAccessTokenSigningAlg(signatureAlgorithms);
         }
 
         if (!Strings.isNullOrEmpty(params.getClientJwksUri())) {
@@ -182,28 +166,18 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getContacts() != null) {
             request.setContacts(params.getContacts());
-            rp.setContacts(params.getContacts());
-        } else {
-            request.setContacts(rp.getContacts());
         }
 
         if (params.getScope() != null) {
             request.setScope(params.getScope());
-            rp.setScope(params.getScope());
-        } else {
-            request.setScope(rp.getScope());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
-            rp.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
         if (params.getClientFrontchannelLogoutUris() != null && !params.getClientFrontchannelLogoutUris().isEmpty()) {
-            rp.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
             request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
-        } else {
-            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
@@ -216,7 +190,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
-            rp.setTokenEndpointAuthSigningAlg(params.getClientTokenEndpointAuthSigningAlg());
             request.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg()));
         }
 
@@ -238,9 +211,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getFrontChannelLogoutSessionRequired() != null) {
             request.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
-            rp.setFrontChannelLogoutSessionRequired(params.getFrontChannelLogoutSessionRequired());
-        } else {
-            request.setFrontChannelLogoutSessionRequired(rp.getFrontChannelLogoutSessionRequired());
         }
 
         if (!Strings.isNullOrEmpty(params.getTosUri())) {
@@ -270,9 +240,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
             request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
-            rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(params.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
-        } else {
-            request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         }
 
         if (!Strings.isNullOrEmpty(params.getIdTokenSignedResponseAlg())) {
@@ -362,9 +329,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getRequireAuthTime() != null) {
             request.setRequireAuthTime(params.getRequireAuthTime());
-            rp.setRequireAuthTime(params.getRequireAuthTime());
-        } else {
-            request.setRequireAuthTime(rp.getRequireAuthTime());
         }
 
         if (!Strings.isNullOrEmpty(params.getInitiateLoginUri())) {
@@ -399,7 +363,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getTrustedClient() != null && params.getTrustedClient()) {
             request.addCustomAttribute("oxAuthTrustedClient", "true");
-            rp.setTrustedClient(params.getTrustedClient());
         }
 
         if (StringUtils.isNotBlank(rp.getOxdId())) {
