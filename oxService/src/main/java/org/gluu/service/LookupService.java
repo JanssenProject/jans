@@ -120,7 +120,7 @@ public class LookupService implements Serializable {
             if (compoundKey.length() > 0) {
                 compoundKey.append("_");
             } else {
-            	compoundKey.append("l_")
+            	compoundKey.append("l_");
             }
             compoundKey.append(inum);
         }
