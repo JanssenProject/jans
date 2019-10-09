@@ -617,12 +617,28 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public boolean authenticate(String baseDN, String userName, String password) {
-        Filter searchFilter = Filter.createEqualityFilter(CouchbaseOperationService.UID, userName);
+    public <T> boolean authenticate(String baseDN, Class<T> entryClass, String userName, String password) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        
+        // Find entries
+        Filter searchFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(CouchbaseOperationService.UID), userName);
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(searchFilter, objectClasses);
+        }
+
+        // Prepare properties types to allow build filter properly
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
 
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toCouchbaseFilter(searchFilter, null);
+			convertedExpression = toCouchbaseFilter(searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter %s to expression", searchFilter));
 		}
