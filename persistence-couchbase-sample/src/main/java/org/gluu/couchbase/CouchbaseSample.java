@@ -70,7 +70,7 @@ public final class CouchbaseSample {
 
         for (SimpleUser user : users) {
             boolean result1 = couchbaseEntryManager.authenticate(user.getDn(), "test");
-            boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=gluu", user.getUserId(), "test");
+            boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=gluu", SimpleUser.class, user.getUserId(), "test");
             System.out.println("authetication result: " + result1 + ", " + result2);
         }
 

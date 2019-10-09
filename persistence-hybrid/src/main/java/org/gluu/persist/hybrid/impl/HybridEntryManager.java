@@ -102,9 +102,9 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
     @Override
-    public boolean authenticate(String baseDN, String userName, String password) {
+    public <T> boolean authenticate(String baseDN, Class<T> entryClass, String userName, String password) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
-    	return persistenceEntryManager.authenticate(baseDN, userName, password);
+    	return persistenceEntryManager.authenticate(baseDN, entryClass, userName, password);
     }
 
     @Override
