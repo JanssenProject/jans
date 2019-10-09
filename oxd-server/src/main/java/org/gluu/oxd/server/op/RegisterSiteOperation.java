@@ -27,7 +27,6 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.mapper.RegisterRequestMapper;
-import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
