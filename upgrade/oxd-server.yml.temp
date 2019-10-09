@@ -77,9 +77,9 @@ defaultSiteConfig:
   client_jwks_uri: {{defaultSiteConfig:client_jwks_uri}}
   token_endpoint_auth_method: {{defaultSiteConfig:token_endpoint_auth_method}}
   token_endpoint_auth_signing_alg: {{defaultSiteConfig:token_endpoint_auth_signing_alg}}
-  request_uris: {{defaultSiteConfig:request_uris}}
+  client_request_uris: {{defaultSiteConfig:client_request_uris}}
   front_channel_logout_uris: {{defaultSiteConfig:front_channel_logout_uris}}
-  sector_identifier_uri: {{defaultSiteConfig:sector_identifier_uri}}
+  client_sector_identifier_uri: {{defaultSiteConfig:client_sector_identifier_uri}}
   claims_redirect_uri: {{defaultSiteConfig:claims_redirect_uri}}
   client_id: {{defaultSiteConfig:client_id}}
   client_secret: {{defaultSiteConfig:client_secret}}
