@@ -50,7 +50,7 @@ public class LookupService implements Serializable {
      * @return DisplayNameEntry object
      */
     public DisplayNameEntry getDisplayNameEntry(String dn) throws Exception {
-        String key = dn;
+        String key = "l_" + dn;
         DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entry == null) {
             entry = ldapEntryManager.find(key, DisplayNameEntry.class, null);
@@ -119,6 +119,8 @@ public class LookupService implements Serializable {
         for (String inum : inums) {
             if (compoundKey.length() > 0) {
                 compoundKey.append("_");
+            } else {
+            	compoundKey.append("l_")
             }
             compoundKey.append(inum);
         }
