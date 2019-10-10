@@ -1036,21 +1036,21 @@ class Setup(object):
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.oxauth_client_id:
-            self.oxauth_client_id = '0008-'+ str(uuid.uuid4())
+            self.oxauth_client_id = 'df6f.4415-'+ str(uuid.uuid4())
         if not self.idp_client_id:
-            self.idp_client_id = '0008-'+ str(uuid.uuid4())
+            self.idp_client_id = '8ebf.44c4-'+ str(uuid.uuid4())
         if not self.scim_rs_client_id:
-            self.scim_rs_client_id = '0008-' + str(uuid.uuid4())
+            self.scim_rs_client_id = '48fd.4f68-' + str(uuid.uuid4())
         if not self.scim_rp_client_id:
-            self.scim_rp_client_id = '0008-' + str(uuid.uuid4())
+            self.scim_rp_client_id = '582b.4ae7-' + str(uuid.uuid4())
         if not self.scim_resource_oxid:
-            self.scim_resource_oxid = '0008-' + str(uuid.uuid4())
+            self.scim_resource_oxid = 'e188.4226-' + str(uuid.uuid4())
         if not self.oxtrust_resource_server_client_id:
-            self.oxtrust_resource_server_client_id = '0008-'  + str(uuid.uuid4())
+            self.oxtrust_resource_server_client_id = 'e327.4498-'  + str(uuid.uuid4())
         if not self.oxtrust_requesting_party_client_id:
-            self.oxtrust_requesting_party_client_id = '0008-'  + str(uuid.uuid4())
+            self.oxtrust_requesting_party_client_id = '8386.4abb-'  + str(uuid.uuid4())
         if not self.oxtrust_resource_id:
-            self.oxtrust_resource_id = '0008-'  + str(uuid.uuid4())
+            self.oxtrust_resource_id = 'b04e.4828-'  + str(uuid.uuid4())
         if not self.admin_inum:
             self.admin_inum = str(uuid.uuid4())
 
@@ -2373,13 +2373,13 @@ class Setup(object):
         self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
 
         if not self.passport_rs_client_id:
-            self.passport_rs_client_id = '0008-' + str(uuid.uuid4())
+            self.passport_rs_client_id = '1f3b.4551-' + str(uuid.uuid4())
         if not self.passport_rp_client_id:
-            self.passport_rp_client_id = '0008-' + str(uuid.uuid4())
+            self.passport_rp_client_id = 'fdce.4f66-' + str(uuid.uuid4())
         if not self.passport_rp_ii_client_id:
-            self.passport_rp_ii_client_id = '0008-'  + str(uuid.uuid4())
+            self.passport_rp_ii_client_id = '9539.46b8-'  + str(uuid.uuid4())
         if not self.passport_resource_id:
-            self.passport_resource_id = '0008-'  + str(uuid.uuid4())
+            self.passport_resource_id = '88a1.4a38-'  + str(uuid.uuid4())
 
         self.templateRenderingDict['passport_oxtrust_config'] = '''
                 "passportUmaClientId":"%(passport_rs_client_id)s",
@@ -4676,9 +4676,9 @@ class Setup(object):
     def install_gluu_radius(self):
         
         if not self.gluu_radius_client_id:
-            self.gluu_radius_client_id = '0008-'  + str(uuid.uuid4())
+            self.gluu_radius_client_id = '6209.4d50-'  + str(uuid.uuid4())
         if not self.ox_radius_client_id:
-            self.ox_radius_client_id = '0008-'  + str(uuid.uuid4())
+            self.ox_radius_client_id = 'ba73.4c1e-'  + str(uuid.uuid4())
 
         source_dir = os.path.join(self.staticFolder, 'radius')
         radius_dir = '/opt/gluu/radius'
