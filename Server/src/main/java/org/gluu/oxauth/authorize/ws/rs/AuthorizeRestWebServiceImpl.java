@@ -725,7 +725,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String sessionId, String claims,
             Map<String, String> customParameters) {
 
-        final URI contextUri = URI.create(servletRequest.getRequestURL().toString()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
+        final URI contextUri =  URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
 
         redirectUriResponse.setBaseRedirectUri(contextUri.toString());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
