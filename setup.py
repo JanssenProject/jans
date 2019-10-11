@@ -1042,9 +1042,9 @@ class Setup(object):
         if not self.scim_rs_client_id:
             self.scim_rs_client_id = '1201.' + str(uuid.uuid4())
         if not self.scim_rp_client_id:
-            self.scim_rp_client_id = '1201.' + str(uuid.uuid4())
+            self.scim_rp_client_id = '1202.' + str(uuid.uuid4())
         if not self.scim_resource_oxid:
-            self.scim_resource_oxid = '1301.' + str(uuid.uuid4())
+            self.scim_resource_oxid = '1203.' + str(uuid.uuid4())
         if not self.oxtrust_resource_server_client_id:
             self.oxtrust_resource_server_client_id = '1401.'  + str(uuid.uuid4())
         if not self.oxtrust_requesting_party_client_id:
@@ -4676,7 +4676,7 @@ class Setup(object):
     def install_gluu_radius(self):
         
         if not self.gluu_radius_client_id:
-            self.gluu_radius_client_id = '1601.'  + str(uuid.uuid4())
+            self.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
         if not self.ox_radius_client_id:
             self.ox_radius_client_id = '1702.'  + str(uuid.uuid4())
 
