@@ -4679,8 +4679,6 @@ class Setup(object):
         
         if not self.gluu_radius_client_id:
             self.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
-        if not self.ox_radius_client_id:
-            self.ox_radius_client_id = '1702.'  + str(uuid.uuid4())
 
         source_dir = os.path.join(self.staticFolder, 'radius')
         radius_dir = '/opt/gluu/radius'
