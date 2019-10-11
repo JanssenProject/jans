@@ -3358,6 +3358,8 @@ class Setup(object):
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.set_ownership()
+        self.run(['chown', 'ldap:ldap', setupPropsFN])
+
         try:
             ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
             setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([ldapSetupCommand,
