@@ -1217,6 +1217,7 @@ class Setup(object):
             backupFile = destFile+'.gluu-{0}-{1}~'.format(self.currentGluuVersion, bc)
             if not os.path.exists(backupFile):
                 break
+            bc += 1
 
         if os.path.exists(destFile):
             self.run(['cp', '-f', destFile, backupFile])
