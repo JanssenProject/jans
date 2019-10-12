@@ -1212,11 +1212,17 @@ class Setup(object):
         else:
             destFile = inFile
 
+        bc = 1
+        while True:
+            backupFile = destFile+'.gluu-{0}-{1}~'.format(self.currentGluuVersion, bc)
+            if not os.path.exists(backupFile):
+                break
+
+        if os.path.exists(destFile):
+            self.run(['cp', '-f', destFile, backupFile])
+
         if not destFile.startswith('/opt'):
-            backupFile = destFile+'.gluu-'+self.currentGluuVersion+'~'
-            if os.path.exists(destFile) and not os.path.exists(backupFile):
-                shutil.copy(destFile, backupFile)
-                self.logOSChanges("File %s was backed up as %s" % (destFile, backupFile))
+            self.logOSChanges("File %s was backed up as %s" % (destFile, backupFile))
 
     def copyFile(self, inFile, destFolder):
         self.backupFile(inFile, destFolder)
