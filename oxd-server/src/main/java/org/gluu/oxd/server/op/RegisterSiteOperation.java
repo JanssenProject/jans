@@ -44,8 +44,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
-    private final RegisterRequestMapper rpMapper = new RegisterRequestMapper();
-
     private Rp rp;
 
     /**
@@ -239,8 +237,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //request_uris
-        if ((params.getClientRequestUris() == null || params.getClientRequestUris().isEmpty()) && (fallback.getClientRequestUris() != null && !fallback.getClientRequestUris().isEmpty())) {
-            params.setClientRequestUris(fallback.getClientRequestUris());
+        if ((params.getClientRequestUris() == null || params.getClientRequestUris().isEmpty()) && (fallback.getRequestUris() != null && !fallback.getRequestUris().isEmpty())) {
+            params.setClientRequestUris(fallback.getRequestUris());
         }
 
         //front_channel_logout_uris
@@ -249,8 +247,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //sector_identifier_uri
-        if (StringUtils.isBlank(params.getClientSectorIdentifierUri()) && StringUtils.isNotBlank(fallback.getClientSectorIdentifierUri())) {
-            params.setClientSectorIdentifierUri(fallback.getClientSectorIdentifierUri());
+        if (StringUtils.isBlank(params.getClientSectorIdentifierUri()) && StringUtils.isNotBlank(fallback.getSectorIdentifierUri())) {
+            params.setClientSectorIdentifierUri(fallback.getSectorIdentifierUri());
         }
 
         //client_id
@@ -431,7 +429,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp.setUiLocales(params.getUiLocales());
 
             if (!hasClient(params)) {
-                LOG.info("Save RegisterRequest object to register in OP ...");
                 final RegisterResponse registerResponse = registerClient(params, registerRequest);
 
                 rp.setClientId(registerResponse.getClientId());
@@ -441,7 +438,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
                 rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
-            LOG.info("Saving Relying Party object in oxd ...");
+
             getRpService().create(rp);
         } catch (HttpException e) {
             throw e;
@@ -722,7 +719,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     private Rp createRp(RegisterRequest registerRequest) {
         final Rp rp = new Rp();
 
-        rpMapper.fillRp(rp, registerRequest);
+        RegisterRequestMapper.fillRp(rp, registerRequest);
 
         return rp;
     }

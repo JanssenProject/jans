@@ -1,7 +1,8 @@
 package org.gluu.oxd.server.mapper;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
@@ -18,269 +19,156 @@ import java.util.stream.Collectors;
 
 public class RegisterRequestMapper {
 
-    public void fillRp(Rp rp, RegisterRequest request) {
+    private RegisterRequestMapper() {
+    }
 
-        if (!Strings.isNullOrEmpty(request.getClientName())) {
-            rp.setClientName(request.getClientName());
-        }
+    public static void fillRp(Rp rp, RegisterRequest request) {
 
-        if (request.getApplicationType() != null) {
-            rp.setApplicationType(request.getApplicationType().toString());
-        }
+        rp.setClientName(request.getClientName());
+        rp.setApplicationType(safeToString(request.getApplicationType()));
+        rp.setTokenEndpointAuthSigningAlg(safeToString(request.getTokenEndpointAuthSigningAlg()));
 
-        if (request.getTokenEndpointAuthSigningAlg() != null && StringUtils.isNotBlank(request.getTokenEndpointAuthSigningAlg().toString())) {
-            rp.setTokenEndpointAuthSigningAlg(request.getTokenEndpointAuthSigningAlg().toString());
-        }
-
-        if (request.getGrantTypes() != null) {
+        if (CollectionUtils.isNotEmpty(request.getGrantTypes())) {
             rp.setGrantType(request.getGrantTypes().stream().map(item -> item.getValue()).collect(Collectors.toList()));
         }
 
-        if (request.getFrontChannelLogoutUris() != null) {
-            rp.setFrontChannelLogoutUris(request.getFrontChannelLogoutUris());
+        rp.setFrontChannelLogoutUris(request.getFrontChannelLogoutUris());
+        rp.setTokenEndpointAuthMethod(safeToString(request.getTokenEndpointAuthMethod()));
+
+        if (CollectionUtils.isNotEmpty(request.getRequestUris())) {
+            rp.setRequestUris(request.getRequestUris());
         }
 
-        if (request.getTokenEndpointAuthMethod() != null && StringUtils.isNotBlank(request.getTokenEndpointAuthMethod().toString())) {
-            rp.setTokenEndpointAuthMethod(request.getTokenEndpointAuthMethod().toString());
-        }
+        rp.setSectorIdentifierUri(request.getSectorIdentifierUri());
 
-        if (request.getRequestUris() != null && !request.getRequestUris().isEmpty()) {
-            rp.setClientRequestUris(request.getRequestUris());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getSectorIdentifierUri())) {
-            rp.setClientSectorIdentifierUri(request.getSectorIdentifierUri());
-        }
-
-        if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getRedirectUris())) {
             rp.setRedirectUris(request.getRedirectUris());
             rp.setRedirectUri(request.getRedirectUris().get(0));
         }
 
-        if (request.getAccessTokenAsJwt() != null) {
-            rp.setAccessTokenAsJwt(request.getAccessTokenAsJwt());
-        }
+        rp.setAccessTokenAsJwt(request.getAccessTokenAsJwt());
+        rp.setAccessTokenSigningAlg(safeToString(request.getAccessTokenSigningAlg()));
+        rp.setRptAsJwt(request.getRptAsJwt());
 
-        if (request.getAccessTokenSigningAlg() != null && StringUtils.isNotBlank(request.getAccessTokenSigningAlg().toString())) {
-            rp.setAccessTokenSigningAlg(request.getAccessTokenSigningAlg().toString());
-        }
-
-        if (request.getRptAsJwt() != null) {
-            rp.setRptAsJwt(request.getRptAsJwt());
-        }
-
-        if (request.getResponseTypes() != null) {
+        if (CollectionUtils.isNotEmpty(request.getResponseTypes())) {
             rp.setResponseTypes(request.getResponseTypes().stream().map(item -> item.getValue()).collect(Collectors.toList()));
         }
 
-        if (request.getDefaultAcrValues() != null && !request.getDefaultAcrValues().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getDefaultAcrValues())) {
             rp.setAcrValues(request.getDefaultAcrValues());
         }
 
-        if (request.getContacts() != null && !request.getContacts().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getContacts())) {
             rp.setContacts(request.getContacts());
         }
 
-        if (request.getPostLogoutRedirectUris() != null && !request.getPostLogoutRedirectUris().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getPostLogoutRedirectUris())) {
             rp.setPostLogoutRedirectUris(request.getPostLogoutRedirectUris());
         }
 
-        if (request.getScope() != null && !request.getScope().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getScope())) {
             rp.setScope(request.getScope());
         }
 
-        if (!Strings.isNullOrEmpty(request.getLogoUri())) {
-            rp.setLogoUri(request.getLogoUri());
-        }
+        rp.setLogoUri(request.getLogoUri());
+        rp.setClientUri(request.getClientUri());
+        rp.setPolicyUri(request.getPolicyUri());
+        rp.setFrontChannelLogoutSessionRequired(request.getFrontChannelLogoutSessionRequired());
+        rp.setTosUri(request.getTosUri());
+        rp.setJwks(request.getJwks());
+        rp.setIdTokenBindingCnf(request.getIdTokenTokenBindingCnf());
+        rp.setTlsClientAuthSubjectDn(request.getTlsClientAuthSubjectDn());
+        rp.setSubjectType(safeToString(request.getSubjectType()));
+        rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(request.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        rp.setIdTokenSignedResponseAlg(safeToString(request.getIdTokenSignedResponseAlg()));
+        rp.setIdTokenEncryptedResponseAlg(safeToString(request.getIdTokenEncryptedResponseAlg()));
+        rp.setIdTokenEncryptedResponseEnc(safeToString(request.getIdTokenEncryptedResponseEnc()));
+        rp.setUserInfoSignedResponseAlg(safeToString(request.getUserInfoSignedResponseAlg()));
+        rp.setUserInfoEncryptedResponseAlg(safeToString(request.getUserInfoEncryptedResponseAlg()));
+        rp.setUserInfoEncryptedResponseEnc(safeToString(request.getUserInfoEncryptedResponseEnc()));
+        rp.setRequestObjectSigningAlg(safeToString(request.getRequestObjectSigningAlg()));
+        rp.setRequestObjectEncryptionAlg(safeToString(request.getRequestObjectEncryptionAlg()));
+        rp.setRequestObjectEncryptionEnc(safeToString(request.getRequestObjectEncryptionEnc()));
+        rp.setDefaultMaxAge(safeToNumber(request.getDefaultMaxAge()));
+        rp.setRequireAuthTime(request.getRequireAuthTime());
+        rp.setInitiateLoginUri(request.getInitiateLoginUri());
 
-        if (!Strings.isNullOrEmpty(request.getClientUri())) {
-            rp.setClientUri(request.getClientUri());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getPolicyUri())) {
-            rp.setPolicyUri(request.getPolicyUri());
-        }
-
-        if (request.getFrontChannelLogoutSessionRequired() != null) {
-            rp.setFrontChannelLogoutSessionRequired(request.getFrontChannelLogoutSessionRequired());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getTosUri())) {
-            rp.setTosUri(request.getTosUri());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getJwks())) {
-            rp.setJwks(request.getJwks());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getIdTokenTokenBindingCnf())) {
-            rp.setIdTokenBindingCnf(request.getIdTokenTokenBindingCnf());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getTlsClientAuthSubjectDn())) {
-            rp.setTlsClientAuthSubjectDn(request.getTlsClientAuthSubjectDn());
-        }
-
-        if (request.getSubjectType() != null && StringUtils.isNotBlank(request.getSubjectType().toString())) {
-            rp.setSubjectType(request.getSubjectType().toString());
-        }
-
-        if (request.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(request.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
-        }
-
-        if (request.getIdTokenSignedResponseAlg() != null && StringUtils.isNotBlank(request.getIdTokenSignedResponseAlg().toString())) {
-            rp.setIdTokenSignedResponseAlg(request.getIdTokenSignedResponseAlg().toString());
-        }
-
-        if (request.getIdTokenEncryptedResponseAlg() != null && StringUtils.isNotBlank(request.getIdTokenEncryptedResponseAlg().toString())) {
-            rp.setIdTokenEncryptedResponseAlg(request.getIdTokenEncryptedResponseAlg().toString());
-        }
-
-        if (request.getIdTokenEncryptedResponseEnc() != null && StringUtils.isNotBlank(request.getIdTokenEncryptedResponseEnc().toString())) {
-            rp.setIdTokenEncryptedResponseEnc(request.getIdTokenEncryptedResponseEnc().toString());
-        }
-
-        if (request.getUserInfoSignedResponseAlg() != null && StringUtils.isNotBlank(request.getUserInfoSignedResponseAlg().toString())) {
-            rp.setUserInfoSignedResponseAlg(request.getUserInfoSignedResponseAlg().toString());
-        }
-
-        if (request.getUserInfoEncryptedResponseAlg() != null && StringUtils.isNotBlank(request.getUserInfoEncryptedResponseAlg().toString())) {
-            rp.setUserInfoEncryptedResponseAlg(request.getUserInfoEncryptedResponseAlg().toString());
-        }
-
-        if (request.getUserInfoEncryptedResponseEnc() != null && StringUtils.isNotBlank(request.getUserInfoEncryptedResponseEnc().toString())) {
-            rp.setUserInfoEncryptedResponseEnc(request.getUserInfoEncryptedResponseEnc().toString());
-        }
-
-        if (request.getRequestObjectSigningAlg() != null && StringUtils.isNotBlank(request.getRequestObjectSigningAlg().toString())) {
-            rp.setRequestObjectSigningAlg(request.getRequestObjectSigningAlg().toString());
-        }
-
-        if (request.getRequestObjectEncryptionAlg() != null && StringUtils.isNotBlank(request.getRequestObjectEncryptionAlg().toString())) {
-            rp.setRequestObjectEncryptionAlg(request.getRequestObjectEncryptionAlg().toString());
-        }
-
-        if (request.getRequestObjectEncryptionEnc() != null && StringUtils.isNotBlank(request.getRequestObjectEncryptionEnc().toString())) {
-            rp.setRequestObjectEncryptionEnc(request.getRequestObjectEncryptionEnc().toString());
-        }
-
-        if (request.getDefaultMaxAge() != null && NumberUtils.isNumber(request.getDefaultMaxAge().toString())) {
-            rp.setDefaultMaxAge(request.getDefaultMaxAge());
-        }
-
-        if (request.getRequireAuthTime() != null) {
-            rp.setRequireAuthTime(request.getRequireAuthTime());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getInitiateLoginUri())) {
-            rp.setInitiateLoginUri(request.getInitiateLoginUri());
-        }
-
-        if (request.getAuthorizedOrigins() != null && !request.getAuthorizedOrigins().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getAuthorizedOrigins())) {
             rp.setAuthorizedOrigins(request.getAuthorizedOrigins());
         }
 
-        if (request.getAccessTokenLifetime() != null && NumberUtils.isNumber(request.getAccessTokenLifetime().toString())) {
-            rp.setAccessTokenLifetime(request.getAccessTokenLifetime());
-        }
+        rp.setAccessTokenLifetime(safeToNumber(request.getAccessTokenLifetime()));
+        rp.setSoftwareId(request.getSoftwareId());
+        rp.setSoftwareVersion(request.getSoftwareVersion());
+        rp.setSoftwareStatement(request.getSoftwareStatement());
 
-        if (!Strings.isNullOrEmpty(request.getSoftwareId())) {
-            rp.setSoftwareId(request.getSoftwareId());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getSoftwareVersion())) {
-            rp.setSoftwareVersion(request.getSoftwareVersion());
-        }
-
-        if (!Strings.isNullOrEmpty(request.getSoftwareStatement())) {
-            rp.setSoftwareStatement(request.getSoftwareStatement());
-        }
-
-        if (request.getCustomAttributes() != null && !request.getCustomAttributes().isEmpty()) {
+        if (MapUtils.isNotEmpty(request.getCustomAttributes())) {
             request.getCustomAttributes().entrySet().stream().forEach(e -> {
                 rp.addCustomAttribute(e.getKey(), e.getValue());
             });
         }
 
-        if (!Strings.isNullOrEmpty(request.getJwksUri())) {
-            rp.setClientJwksUri(request.getJwksUri());
-        }
+        rp.setClientJwksUri(request.getJwksUri());
 
-        if (request.getClaimsRedirectUris() != null && !request.getClaimsRedirectUris().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(request.getClaimsRedirectUris())) {
             rp.setClaimsRedirectUri(request.getClaimsRedirectUris());
         }
 
     }
 
-    public RegisterRequest createRegisterRequest(Rp rp) {
+    public static RegisterRequest createRegisterRequest(Rp rp) {
         final RegisterRequest request = new RegisterRequest(rp.getClientRegistrationAccessToken());
 
         if (!Strings.isNullOrEmpty(rp.getClientName())) {
             request.setClientName(rp.getClientName());
         }
 
-        if (!Strings.isNullOrEmpty(rp.getApplicationType())) {
-            request.setApplicationType(ApplicationType.fromString(rp.getApplicationType()));
-        }
+        request.setApplicationType(ApplicationType.fromString(rp.getApplicationType()));
+        request.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(rp.getTokenEndpointAuthSigningAlg()));
 
-        if (!Strings.isNullOrEmpty(rp.getTokenEndpointAuthSigningAlg())) {
-            request.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(rp.getTokenEndpointAuthSigningAlg()));
-        }
-
-        if (rp.getGrantType() != null) {
+        if (CollectionUtils.isNotEmpty(rp.getGrantType())) {
             request.setGrantTypes(rp.getGrantType().stream().map(item -> GrantType.fromString(item)).collect(Collectors.toList()));
         }
 
-        if (rp.getFrontChannelLogoutUris() != null) {
+        if (CollectionUtils.isNotEmpty(rp.getFrontChannelLogoutUris())) {
             request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
         }
 
-        if (!Strings.isNullOrEmpty(rp.getTokenEndpointAuthMethod())) {
-            request.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()));
+        request.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()));
+
+        if (CollectionUtils.isNotEmpty(rp.getRequestUris())) {
+            request.setRequestUris(rp.getRequestUris());
         }
 
-        if (rp.getClientRequestUris() != null && !rp.getClientRequestUris().isEmpty()) {
-            request.setRequestUris(rp.getClientRequestUris());
+        if (!Strings.isNullOrEmpty(rp.getSectorIdentifierUri())) {
+            request.setSectorIdentifierUri(rp.getSectorIdentifierUri());
         }
 
-        if (!Strings.isNullOrEmpty(rp.getClientSectorIdentifierUri())) {
-            request.setSectorIdentifierUri(rp.getClientSectorIdentifierUri());
-        }
-
-        if (rp.getRedirectUris() != null && !rp.getRedirectUris().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getRedirectUris())) {
             request.setRedirectUris(rp.getRedirectUris());
         }
 
-        if (rp.getAccessTokenAsJwt() != null) {
-            request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
-        }
+        request.setAccessTokenAsJwt(rp.getAccessTokenAsJwt());
+        request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(rp.getAccessTokenSigningAlg()));
+        request.setRptAsJwt(rp.getRptAsJwt());
 
-        if (!Strings.isNullOrEmpty(rp.getAccessTokenSigningAlg())) {
-            request.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(rp.getAccessTokenSigningAlg()));
-        }
-
-        if (rp.getRptAsJwt() != null) {
-            request.setRptAsJwt(rp.getRptAsJwt());
-        }
-
-        if (rp.getResponseTypes() != null) {
+        if (CollectionUtils.isNotEmpty(rp.getResponseTypes())) {
             request.setResponseTypes(rp.getResponseTypes().stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList()));
         }
 
-        if (rp.getAcrValues() != null && !rp.getAcrValues().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getAcrValues())) {
             request.setDefaultAcrValues(rp.getAcrValues());
         }
 
-        if (rp.getContacts() != null && !rp.getContacts().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getContacts())) {
             request.setContacts(rp.getContacts());
         }
 
-        if (rp.getPostLogoutRedirectUris() != null && !rp.getPostLogoutRedirectUris().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getPostLogoutRedirectUris())) {
             request.setPostLogoutRedirectUris(rp.getPostLogoutRedirectUris());
         }
 
-        if (rp.getScope() != null && !rp.getScope().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getScope())) {
             request.setScope(rp.getScope());
         }
 
@@ -296,9 +184,7 @@ public class RegisterRequestMapper {
             request.setPolicyUri(rp.getPolicyUri());
         }
 
-        if (rp.getFrontChannelLogoutSessionRequired() != null) {
-            request.setFrontChannelLogoutSessionRequired(rp.getFrontChannelLogoutSessionRequired());
-        }
+        request.setFrontChannelLogoutSessionRequired(rp.getFrontChannelLogoutSessionRequired());
 
         if (!Strings.isNullOrEmpty(rp.getTosUri())) {
             request.setTosUri(rp.getTosUri());
@@ -320,64 +206,29 @@ public class RegisterRequestMapper {
             request.setSubjectType(SubjectType.fromString(rp.getSubjectType()));
         }
 
-        if (rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
-        }
+        request.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(rp.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+        request.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()));
+        request.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseAlg()));
+        request.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseEnc()));
+        request.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(rp.getUserInfoSignedResponseAlg()));
+        request.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseAlg().toString()));
+        request.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseEnc()));
+        request.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(rp.getRequestObjectSigningAlg()));
+        request.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionAlg()));
+        request.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionEnc()));
 
-        if (!Strings.isNullOrEmpty(rp.getIdTokenSignedResponseAlg())) {
-            request.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()));
-        }
-        if (!Strings.isNullOrEmpty(rp.getIdTokenEncryptedResponseAlg())) {
-            request.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseAlg()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getIdTokenEncryptedResponseEnc())) {
-            request.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseEnc()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getUserInfoSignedResponseAlg())) {
-            request.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(rp.getUserInfoSignedResponseAlg()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getUserInfoEncryptedResponseAlg())) {
-            request.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseAlg().toString()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getUserInfoEncryptedResponseEnc())) {
-            request.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseEnc()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getRequestObjectSigningAlg())) {
-            request.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(rp.getRequestObjectSigningAlg()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getRequestObjectEncryptionAlg())) {
-            request.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionAlg()));
-        }
-
-        if (!Strings.isNullOrEmpty(rp.getRequestObjectEncryptionEnc())) {
-            request.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionEnc()));
-        }
-
-        if (rp.getDefaultMaxAge() != null && NumberUtils.isNumber(rp.getDefaultMaxAge().toString())) {
-            request.setDefaultMaxAge(rp.getDefaultMaxAge());
-        }
-
-        if (rp.getRequireAuthTime() != null) {
-            request.setRequireAuthTime(rp.getRequireAuthTime());
-        }
+        request.setDefaultMaxAge(safeToNumber(rp.getDefaultMaxAge()));
+        request.setRequireAuthTime(rp.getRequireAuthTime());
 
         if (!Strings.isNullOrEmpty(rp.getInitiateLoginUri())) {
             request.setInitiateLoginUri(rp.getInitiateLoginUri());
         }
 
-        if (rp.getAuthorizedOrigins() != null && !rp.getAuthorizedOrigins().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getAuthorizedOrigins())) {
             request.setAuthorizedOrigins(rp.getAuthorizedOrigins());
         }
 
-        if (rp.getAccessTokenLifetime() != null && NumberUtils.isNumber(rp.getAccessTokenLifetime().toString())) {
-            request.setAccessTokenLifetime(rp.getAccessTokenLifetime());
-        }
+        request.setAccessTokenLifetime(safeToNumber(rp.getAccessTokenLifetime()));
 
         if (!Strings.isNullOrEmpty(rp.getSoftwareId())) {
             request.setSoftwareId(rp.getSoftwareId());
@@ -391,7 +242,7 @@ public class RegisterRequestMapper {
             request.setSoftwareStatement(rp.getSoftwareStatement());
         }
 
-        if (rp.getCustomAttributes() != null && !rp.getCustomAttributes().isEmpty()) {
+        if (MapUtils.isNotEmpty(rp.getCustomAttributes())) {
             rp.getCustomAttributes().entrySet().stream().forEach(e -> {
                 request.addCustomAttribute(e.getKey(), e.getValue());
             });
@@ -401,10 +252,22 @@ public class RegisterRequestMapper {
             request.setJwksUri(rp.getClientJwksUri());
         }
 
-        if (rp.getClaimsRedirectUri() != null && !rp.getClaimsRedirectUri().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(rp.getClaimsRedirectUri())) {
             request.setClaimsRedirectUris(rp.getClaimsRedirectUri());
         }
 
         return request;
+    }
+
+    public static String safeToString(Object obj) {
+        if (obj == null)
+            return null;
+        return obj.toString();
+    }
+
+    public static Integer safeToNumber(Object obj) {
+        if (obj == null || !NumberUtils.isNumber(obj.toString()))
+            return null;
+        return Integer.valueOf(obj.toString());
     }
 }

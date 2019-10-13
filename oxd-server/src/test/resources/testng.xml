@@ -51,6 +51,11 @@
             <class name="org.gluu.oxd.server.RegisterSiteTest"/>
         </classes>
     </test>
+    <test name="Register Request Mapper" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.RegisterRequestMapperTest"/>
+        </classes>
+    </test>
     <test name="Remove site" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.RemoveSiteTest"/>
