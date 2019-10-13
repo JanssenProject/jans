@@ -57,8 +57,8 @@ public class Rp implements Serializable {
     private Date clientSecretExpiresAt;
     @JsonProperty(value = "client_name")
     private String clientName;
-    @JsonProperty(value = "client_sector_identifier_uri")
-    private String clientSectorIdentifierUri;
+    @JsonProperty(value = "sector_identifier_uri")
+    private String sectorIdentifierUri;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
     @JsonProperty(value = "token_endpoint_auth_signing_alg")
@@ -127,7 +127,6 @@ public class Rp implements Serializable {
     private Boolean requireAuthTime = false;
     @JsonProperty(value = "trusted_client")
     private Boolean trustedClient = false;
-
     @JsonProperty(value = "logo_uri")
     private String logoUri;
     @JsonProperty(value = "client_uri")
@@ -180,8 +179,8 @@ public class Rp implements Serializable {
     private String softwareStatement;
     @JsonProperty(value = "custom_attributes")
     private Map<String, String> customAttributes = new HashMap<String, String>();
-    @JsonProperty(value = "client_request_uris")
-    private List<String> clientRequestUris;
+    @JsonProperty(value = "request_uris")
+    private List<String> requestUris;
 
     public Rp() {
     }
@@ -211,7 +210,7 @@ public class Rp implements Serializable {
         this.clientIdIssuedAt = conf.clientIdIssuedAt;
         this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
         this.clientName = conf.clientName;
-        this.clientSectorIdentifierUri = conf.clientSectorIdentifierUri;
+        this.sectorIdentifierUri = conf.sectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
 
         this.tokenEndpointAuthSigningAlg = conf.tokenEndpointAuthSigningAlg;
@@ -279,7 +278,7 @@ public class Rp implements Serializable {
         this.softwareVersion = conf.softwareVersion;
         this.softwareStatement = conf.softwareStatement;
         this.customAttributes = conf.customAttributes;
-        this.clientRequestUris = clientRequestUris;
+        this.requestUris = requestUris;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -422,12 +421,12 @@ public class Rp implements Serializable {
         this.oauthTokenRefreshToken = oauthTokenRefreshToken;
     }
 
-    public String getClientSectorIdentifierUri() {
-        return clientSectorIdentifierUri;
+    public String getSectorIdentifierUri() {
+        return sectorIdentifierUri;
     }
 
-    public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
-        this.clientSectorIdentifierUri = clientSectorIdentifierUri;
+    public void setSectorIdentifierUri(String sectorIdentifierUri) {
+        this.sectorIdentifierUri = sectorIdentifierUri;
     }
 
     public String getAccessToken() {
@@ -985,12 +984,12 @@ public class Rp implements Serializable {
         }
     }
 
-    public List<String> getClientRequestUris() {
-        return clientRequestUris;
+    public List<String> getRequestUris() {
+        return requestUris;
     }
 
-    public void setClientRequestUris(List<String> clientRequestUris) {
-        this.clientRequestUris = clientRequestUris;
+    public void setRequestUris(List<String> requestUris) {
+        this.requestUris = requestUris;
     }
 
     @Override
@@ -1015,7 +1014,7 @@ public class Rp implements Serializable {
                 ", clientIdIssuedAt=" + clientIdIssuedAt +
                 ", clientSecretExpiresAt=" + clientSecretExpiresAt +
                 ", clientName='" + clientName + '\'' +
-                ", clientSectorIdentifierUri='" + clientSectorIdentifierUri + '\'' +
+                ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
                 ", clientJwksUri='" + clientJwksUri + '\'' +
                 ", scope=" + scope +
                 ", uiLocales=" + uiLocales +
@@ -1074,7 +1073,7 @@ public class Rp implements Serializable {
                 ", softwareVersion='" + softwareVersion + '\'' +
                 ", softwareStatement='" + softwareStatement + '\'' +
                 ", customAttributes='" + customAttributes + '\'' +
-                ", clientRequestUris='" + clientRequestUris + '\'' +
+                ", requestUris='" + requestUris + '\'' +
                 '}';
     }
 }
