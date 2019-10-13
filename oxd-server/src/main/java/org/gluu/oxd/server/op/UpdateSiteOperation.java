@@ -41,8 +41,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 
-    private final RegisterRequestMapper rpMapper = new RegisterRequestMapper();
-    
     private Rp rp;
     /**
      * Base constructor
@@ -70,7 +68,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         try {
             RegisterRequest registerRequest = createRegisterClientRequest(rp, params);
             updateRegisteredClient(rp, registerRequest);
-            rpMapper.fillRp(rp, registerRequest);
+            RegisterRequestMapper.fillRp(rp, registerRequest);
             getRpService().update(rp);
 
             LOG.info("RP updated: " + rp);
@@ -108,7 +106,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private RegisterRequest createRegisterClientRequest(Rp rp, UpdateSiteParams params) {
 
-        final RegisterRequest request = rpMapper.createRegisterRequest(rp);
+        final RegisterRequest request = RegisterRequestMapper.createRegisterRequest(rp);
         request.setHttpMethod(HttpMethod.PUT); // force update
 
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
