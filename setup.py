@@ -2270,6 +2270,11 @@ class Setup(object):
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
 
+            if self.mappingLocations['user'] == 'couchbase':
+                self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
+            else:
+                self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))'
+
             # Process templates
             self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
             self.renderTemplateInOut(self.idp3_configuration_ldap_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
@@ -2316,6 +2321,7 @@ class Setup(object):
                 couchbase_mappings = self.getMappingType('couchbase')
                 if 'user' in couchbase_mappings:
                     self.saml_couchbase_settings()
+
 
     def install_saml_libraries(self):
         # Unpack oxauth.war to get bcprov-jdk16.jar
