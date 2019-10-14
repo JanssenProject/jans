@@ -8,6 +8,7 @@
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
+      [["LOWER(`mail`)"], "objectClass = \"gluuPerson\""], 
       [["DISTINCT(PAIRS(self))"], "objectClass = \"gluuPerson\""], 
       [["exp", "oxAuthExpiration"], "del=true"] 
     ]
