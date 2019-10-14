@@ -1,4 +1,6 @@
 from org.gluu.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
+from org.gluu.oxauth.service import AuthenticationService
+from org.gluu.service.cdi.util import CdiUtil
 from java.lang import String
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
@@ -7,6 +9,10 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
 
     def init(self, configurationAttributes):
         print "ROPC script. Initializing ..."
+
+        self.usernameParamName  =  "username"
+        self.passwordParamName  =  "password"
+
         print "ROPC script. Initialized successfully"
 
         return True
@@ -19,11 +25,32 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def getApiVersion(self):
         return 1
 
-    # Returns boolean, true - authenticate user, false - ignore script and do not authenticate user.
-    # This method is called after normal ROPC authentication. This method can cancel normal authentication if it returns false and sets `context.setUser(null)`.
+    # Returns True and set user into context when user authenticated succesfully
+    # Returns False when user not authenticated or it's needed to cancel notmal flow
     # Note :
     # context is reference of org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/GluuFederation/oxauth project, )
     def authenticate(self, context):
-        if (context.getHttpRequest().getParameterValues("device_id")[0] == "device_id_1"):
+        print "ROPC script. Authenticate"
+        deviceIdParam = context.getHttpRequest().getParameterValues("device_id")
+        if deviceIdParam != None and (deviceIdParam.lenght > 0 ):
+            result = deviceIdParam[0] == "device_id_1"
+            if not result:
+                return False
+
+            # Set auntenticated user in context
+            # context.setUser(user)
             return True
-        return False
+
+        # Do generic authentication in other cases
+        authService = CdiUtil.bean(AuthenticationService)
+
+        username = context.getHttpRequest().getParameter(self.usernameParamName)
+        password = context.getHttpRequest().getParameter(self.passwordParamName)
+        result = authService.authenticate(username, password)
+        if not result:
+            print "Super-Gluu-RO. Could not authenticate user '%s' " % username
+            return False
+
+        context.setUser(authService.getAuthenticatedUser())
+
+        return True
