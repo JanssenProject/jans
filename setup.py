@@ -2107,6 +2107,10 @@ class Setup(object):
         self.templateRenderingDict['api_rp_client_base64_jwks'] = self.generate_base64_string(self.api_rp_client_jwks, 1)
 
 
+    def getDefaultOption(self, val):
+        return 'Yes' if val else 'No'
+        
+
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
@@ -2950,13 +2954,17 @@ class Setup(object):
                 self.java_type = 'jdk'
                 self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
                 
-        promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
+        promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", 
+                                        self.getDefaultOption(self.installOxAuth)
+                                            )[0].lower()
         if promptForOxAuth == 'y':
             self.installOxAuth = True
         else:
             self.installOxAuth = False
 
-        promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
+        promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?",
+                                            self.getDefaultOption(self.installOxTrust)
+                                            )[0].lower()
         if promptForOxTrust == 'y':
             self.installOxTrust = True
         else:
@@ -3025,14 +3033,18 @@ class Setup(object):
                 self.promptForBackendMappings(backend_types)
 
 
-        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
+        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
+                                        self.getDefaultOption(self.installHTTPD)
+                                        )[0].lower()
         if promptForHTTPD == 'y':
             self.installHttpd = True
         else:
             self.installHttpd = False
 
 
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
+                                            self.getDefaultOption(self.installSaml)
+                                            )[0].lower()
         if promptForShibIDP == 'y':
             self.shibboleth_version = 'v3'
             self.installSaml = True
@@ -3042,20 +3054,26 @@ class Setup(object):
         else:
             self.installSaml = False
 
-        promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
+        promptForOxAuthRP = self.getPrompt("Install oxAuth RP?",
+                                            self.getDefaultOption(self.installOxAuthRP)
+                                            )[0].lower()
         if promptForOxAuthRP == 'y':
             self.installOxAuthRP = True
         else:
             self.installOxAuthRP = False
 
-        promptForPassport = self.getPrompt("Install Passport?", "No")[0].lower()
+        promptForPassport = self.getPrompt("Install Passport?", 
+                                            self.getDefaultOption(self.installPassport)
+                                            )[0].lower()
         if promptForPassport == 'y':
             self.installPassport = True
             self.gluuPassportEnabled = 'true'
         else:
             self.installPassport = False
 
-        promptForGluuRadius = self.getPrompt("Install Gluu Radius?", "No")[0].lower()
+        promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
+                                            self.getDefaultOption(self.installGluuRadius)
+                                            )[0].lower()
         if promptForGluuRadius == 'y':
             self.installGluuRadius = True
             self.oxauth_legacyIdTokenClaims = 'true'
