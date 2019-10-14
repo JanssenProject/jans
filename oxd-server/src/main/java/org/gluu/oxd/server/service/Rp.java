@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
@@ -126,7 +127,6 @@ public class Rp implements Serializable {
     private Boolean requireAuthTime = false;
     @JsonProperty(value = "trusted_client")
     private Boolean trustedClient = false;
-
     @JsonProperty(value = "logo_uri")
     private String logoUri;
     @JsonProperty(value = "client_uri")
@@ -178,7 +178,7 @@ public class Rp implements Serializable {
     @JsonProperty(value = "software_statement")
     private String softwareStatement;
     @JsonProperty(value = "custom_attributes")
-    private Map<String, String> customAttributes;
+    private Map<String, String> customAttributes = new HashMap<String, String>();
     @JsonProperty(value = "request_uris")
     private List<String> requestUris;
 
@@ -976,6 +976,12 @@ public class Rp implements Serializable {
 
     public void setCustomAttributes(Map<String, String> customAttributes) {
         this.customAttributes = customAttributes;
+    }
+
+    public void addCustomAttribute(String p_name, String p_value) {
+        if (RegisterRequestParam.isCustomParameterValid(p_name)) {
+            this.customAttributes.put(p_name, p_value);
+        }
     }
 
     public List<String> getRequestUris() {
