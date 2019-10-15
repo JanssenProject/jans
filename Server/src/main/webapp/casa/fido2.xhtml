@@ -15,7 +15,7 @@
         <script src="../auth/fido2/js/webauthn.js" />
 
         <script>
-			var attestation_request = ${identity.getWorkingParameter('fido2_attestation_request')};
+			var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
 
 			function setStatus(statusText) {
 				  document.getElementById('status').textContent = statusText;
@@ -32,42 +32,36 @@
 			  messages.forEach(addMessage);
 			}
 
-			function startAttestation() {
-				console.log('Executing get attestation Fido2 request', attestation_request);
+			function startAssertion() {
+				console.log('Executing get assertion Fido2 request', assertion_request);
 
-				request = JSON.parse(attestation_request);
-				webauthn.createCredential(request).then(data => {
-					setStatus('Get attestation key data.');
+				request = JSON.parse(assertion_request);
+				webauthn.getAssertion(request).then(data => {
+					setStatus('Get assertion key data.');
 					document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
-					document.getElementById('authMethod').value = 'enroll';
+					document.getElementById('authMethod').value = 'authenticate';
 
 					document.getElementById('fido2_form').submit();
 				}).catch((err) => {
-					setStatus('Registration failed.');
-					console.error('Registration failed', err);
+					setStatus('Authentication failed.');
+					console.error('Authentication failed', err);
 
-					if (err.name === 'NotAllowedError') {
-						if (request.excludeCredentials &amp;&amp; (request.excludeCredentials.length > 0)) {
-							addMessage('Credential creation failed, probably because an already registered credential is avaiable.');
-						} else {
-							addMessage('Credential creation failed for an unknown reason.');
-						}
-					} else if (err.name === 'InvalidStateError') {
+					if (err.name === 'InvalidStateError') {
 						addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
 					} else if (err.name === 'AbortError') {
 						addMessage('This operation is canceled by user.');
-					} else if (err.message) {
+				    } else if (err.message) {
 						addMessage(`${err.name}: ${err.message}`);
-					} else if (err.messages) {
+				    } else if (err.messages) {
 						addMessages(err.messages);
-					}
+				    }
 
 					return false;
 				});
 			}
 
-			if (attestation_request != null) {
-				setTimeout(startAttestation(), 1000);
+			if (assertion_request != null) {
+				setTimeout(startAssertion(), 1000);
 			}
 		</script>
 
