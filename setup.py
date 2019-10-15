@@ -2157,15 +2157,16 @@ class Setup(object):
         return ''.join(random_password)
 
 
-    def prepare_openid_keys_generator(self):
+    def prepare_openid_keys_generator(self, distOxAuthPath=None):
         self.logIt("Preparing files needed to run OpenId keys generator")
         # Unpack oxauth.war to get libs needed to run key generator
-        oxauthWar = 'oxauth.war'
-        distOxAuthPath = '%s/%s' % (self.distGluuFolder, oxauthWar)
+        if not distOxAuthPath:
+            oxauthWar = 'oxauth.war'
+            distOxAuthPath = '%s/%s' % (self.distGluuFolder, oxauthWar)
 
         tmpOxAuthDir = '%s/tmp_oxauth' % self.distGluuFolder
 
-        self.logIt("Unpacking %s..." % oxauthWar)
+        self.logIt("Unpacking %s..." % distOxAuthPath)
         self.removeDirs(tmpOxAuthDir)
         self.createDirs(tmpOxAuthDir)
 
