@@ -87,7 +87,7 @@ import org.slf4j.Logger;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version May 14, 2019
+ * @version October 14, 2019
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -542,7 +542,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
                         if (attributeValue != null) {
-                        	entryManager.decodeTime(user.getDn(), attributeValue.toString());
+                            attribute = entryManager.decodeTime(user.getDn(), attributeValue.toString());
                         }
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
