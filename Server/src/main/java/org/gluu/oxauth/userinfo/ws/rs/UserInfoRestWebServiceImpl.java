@@ -540,9 +540,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                             attribute = value;
                         }
                     } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
-                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                        if (attributeValue != null) {
-                            attribute = entryManager.decodeTime(user.getDn(), attributeValue.toString());
+                        Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+                        if (value instanceof Date) {
+                        	attribute = value;
+                        } else {
+                        	attribute = entryManager.decodeTime(user.getDn(), value.toString());
                         }
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
