@@ -308,6 +308,7 @@ class Setup(object):
                                         'oxauthClient_2_inum': 'AB77-1A2B',
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
+                                        'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
                                      }
 
         # OS commands
@@ -2272,8 +2273,6 @@ class Setup(object):
 
             if self.mappingLocations['user'] == 'couchbase':
                 self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
-            else:
-                self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))'
 
             # Process templates
             self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
