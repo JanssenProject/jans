@@ -108,5 +108,19 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
     }
 }
