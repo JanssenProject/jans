@@ -308,6 +308,7 @@ class Setup(object):
                                         'oxauthClient_2_inum': 'AB77-1A2B',
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
+                                        'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
                                      }
 
         # OS commands
@@ -2156,15 +2157,16 @@ class Setup(object):
         return ''.join(random_password)
 
 
-    def prepare_openid_keys_generator(self):
+    def prepare_openid_keys_generator(self, distOxAuthPath=None):
         self.logIt("Preparing files needed to run OpenId keys generator")
         # Unpack oxauth.war to get libs needed to run key generator
-        oxauthWar = 'oxauth.war'
-        distOxAuthPath = '%s/%s' % (self.distGluuFolder, oxauthWar)
+        if not distOxAuthPath:
+            oxauthWar = 'oxauth.war'
+            distOxAuthPath = '%s/%s' % (self.distGluuFolder, oxauthWar)
 
         tmpOxAuthDir = '%s/tmp_oxauth' % self.distGluuFolder
 
-        self.logIt("Unpacking %s..." % oxauthWar)
+        self.logIt("Unpacking %s..." % distOxAuthPath)
         self.removeDirs(tmpOxAuthDir)
         self.createDirs(tmpOxAuthDir)
 
@@ -2270,6 +2272,9 @@ class Setup(object):
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
 
+            if self.mappingLocations['user'] == 'couchbase':
+                self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
+
             # Process templates
             self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
             self.renderTemplateInOut(self.idp3_configuration_ldap_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
@@ -2316,6 +2321,7 @@ class Setup(object):
                 couchbase_mappings = self.getMappingType('couchbase')
                 if 'user' in couchbase_mappings:
                     self.saml_couchbase_settings()
+
 
     def install_saml_libraries(self):
         # Unpack oxauth.war to get bcprov-jdk16.jar
