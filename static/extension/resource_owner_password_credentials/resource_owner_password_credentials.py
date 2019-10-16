@@ -10,8 +10,8 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def init(self, configurationAttributes):
         print "ROPC script. Initializing ..."
 
-        self.usernameParamName  =  "username"
-        self.passwordParamName  =  "password"
+        self.usernameParamName = "username"
+        self.passwordParamName = "password"
 
         print "ROPC script. Initialized successfully"
 
@@ -48,7 +48,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         password = context.getHttpRequest().getParameter(self.passwordParamName)
         result = authService.authenticate(username, password)
         if not result:
-            print "Super-Gluu-RO. Could not authenticate user '%s' " % username
+            print "ROPC script. Authenticate. Could not authenticate user '%s' " % username
             return False
 
         context.setUser(authService.getAuthenticatedUser())
