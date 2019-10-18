@@ -165,7 +165,7 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket"
     ],
-    "claimsParameterSupported":true,
+    "claimsParameterSupported":false,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
