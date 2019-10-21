@@ -628,7 +628,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         
         // Find entries
-        Filter searchFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(CouchbaseOperationService.UID), userName);
+        Filter searchFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(CouchbaseOperationService.UID), StringHelper.toLowerCase(userName));
         if (objectClasses.length > 0) {
             searchFilter = addObjectClassFilter(searchFilter, objectClasses);
         }
