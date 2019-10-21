@@ -13,6 +13,7 @@ import org.gluu.couchbase.model.SimpleUser;
 import org.gluu.log.LoggingHelper;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.search.filter.Filter;
+import org.gluu.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 09/18/2019
@@ -59,7 +60,7 @@ public final class CouchbaseSampleUserSearchSample {
 	                    	long userUid = Math.round(Math.random() * countUsers);
 	                    	String uid = String.format("user%06d", userUid);
 	                        try {
-		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), uid);
+		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(uid));
 //		                        Filter filter = Filter.createEqualityFilter("uid", uid);
 		                        List<SimpleUser> foundUsers = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		                        if (foundUsers.size() > 0) {
