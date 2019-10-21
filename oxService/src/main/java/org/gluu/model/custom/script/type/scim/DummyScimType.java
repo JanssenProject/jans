@@ -89,4 +89,14 @@ public class DummyScimType implements ScimType {
         return false;
     }
 
+    @Override
+    public boolean getUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
+    @Override
+    public boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
 }

@@ -27,16 +27,20 @@ public interface ScimType extends BaseExternalType {
 
     boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean createGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean createGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean postCreateGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postCreateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean updateGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean updateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean postUpdateGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postUpdateGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean deleteGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean deleteGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean postDeleteGroup(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postDeleteGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    boolean getUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
