@@ -1,0 +1,27 @@
+debug: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+#    org.springframework.boot.autoconfigure: DEBUG
+
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        provider:
+          oxauth:
+            issuer-uri: https://ce-dev5.gluu.org
+        registration:
+          oxauth:
+#            client-id: your-app-client-id
+#            client-secret: your-app-client-secret
+            client-id: a48f0d8c-8c67-472d-9126-0913ebb36e74
+            client-secret: MdoMEajZYTNT5ONqdwINeh24
