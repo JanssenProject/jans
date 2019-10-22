@@ -38,7 +38,7 @@ import java.util.Set;
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version April 19, 2017
+ * @version October 22, 2019
  */
 @Stateless
 @Named
@@ -195,6 +195,22 @@ public class RegisterParamsValidator {
         // Validate Redirect Uris checking the white list and black list
         if (valid) {
             valid = checkWhiteListRedirectUris(redirectUris) && checkBlackListRedirectUris(redirectUris);
+        }
+
+        return valid;
+    }
+
+    public boolean validateInitiateLoginUri(String initiateLoginUri) {
+        boolean valid = false;
+
+        try {
+            URI uri = new URI(initiateLoginUri);
+            if (HTTPS.equalsIgnoreCase(uri.getScheme())) {
+                valid = true;
+            }
+        } catch (URISyntaxException e) {
+            log.debug(e.getMessage(), e);
+            valid = false;
         }
 
         return valid;
