@@ -66,7 +66,7 @@ import static org.gluu.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 13, 2019
+ * @version October 22, 2019
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -179,6 +179,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 if (!registerParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
                     log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
                     throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
+                }
+            }
+
+            if (!Strings.isNullOrEmpty(r.getInitiateLoginUri())) {
+                if (!registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
+                    log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: " + r.getInitiateLoginUri());
+                    throw errorResponseFactory.createWebApplicationException(
+                            Response.Status.BAD_REQUEST,
+                            RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI,
+                            "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
                 }
             }
 
