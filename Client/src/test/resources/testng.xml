@@ -662,6 +662,16 @@
             <class name="org.gluu.oxauth.interop.SupportRequestsWithoutNonce"/>
         </classes>
     </test>
+    <test name="OP-3rd_party-init-login" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.interop.Supports3rdPartyInitLogin"/>
+        </classes>
+    </test>
+    <test name="OP-3rd_party-init-login-nohttps" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.interop.Supports3rdPartyInitLoginNoHttps"/>
+        </classes>
+    </test>
     <test name="OC5. FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
         <classes>
             <class name="org.gluu.oxauth.interop.SupportsCombiningClaimsRequestedWithScopeAndRequestObject"/>
