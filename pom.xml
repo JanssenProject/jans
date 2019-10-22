@@ -100,6 +100,7 @@
 		<module>fido2-client</module>
 		<module>mtls</module>
 		<module>Server</module>
+		<module>rp-spring-boot</module>
   </modules>
 
 	<dependencyManagement>
