@@ -12,12 +12,11 @@ import org.gluu.persist.annotation.*;
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.persistence.Transient;
-
-import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+
+import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,7 +42,7 @@ public class SessionId implements Serializable {
     @AttributeName(name = "oxAuthUserDN")
     private String userDn;
 
-    @AttributeName(name = "oxAuthAuthenticationTime")
+    @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
     @AttributeName(name = "oxState")
@@ -75,6 +74,9 @@ public class SessionId implements Serializable {
 
     @Transient
     private transient boolean persisted;
+
+    @Transient
+    private User user;
 
     public SessionId() {
     }
@@ -156,6 +158,14 @@ public class SessionId implements Serializable {
 
     public void setUserDn(String p_userDn) {
         userDn = p_userDn != null ? p_userDn : "";
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Date getAuthenticationTime() {

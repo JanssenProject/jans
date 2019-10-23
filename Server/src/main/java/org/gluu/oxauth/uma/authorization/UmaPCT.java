@@ -26,7 +26,7 @@ public class UmaPCT extends AbstractToken {
 
     @DN
     private String dn;
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "clnId")
     private String clientId;
     @AttributeName(name = "oxClaimValues")
     private String claimValuesAsJson;

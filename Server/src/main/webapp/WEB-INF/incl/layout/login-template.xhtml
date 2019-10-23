@@ -31,17 +31,16 @@ body {
 	margin-bottom: 3% !important;
 }
 
-.site-footer {
+.footer {
 	position: fixed;
-	bottom: 0;
-	margin-top: 4% !important;
 	bottom: 0;
 	width: 100%;
 	color: white;
-	text-align: center;
 	height: 55px;
 	background-color: #00BE79;
-	margin-top: 4% !important;
+	justify-content: center;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 @media screen and (min-height: 720px) {
@@ -66,17 +65,22 @@ body {
 			<ui:insert name="body" />
 		</div>
 	</h:body>
-	<footer class="site-footer" id="appFooter">
-	<p
-		style="margin-right: 20%; margin-left: 25% !important; padding: 20px; padding-top: 0px !important;">
-		&copy; <a target="_blank"
-			href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
-				value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
-			target="_blank" href="#{client.policyUri}"><h:outputText
-				value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
-			target="_blank" href="#{client.tosUri}"><h:outputText
-				value="#{msgs['common.termsOfService']}" escape="false" /></a>
-	</p>
+	<footer class="footer" id="appFooter">
+	<div class="row" style="margin-top: 20px;">
+		<div class="col-sm-3"></div>
+		<div class="col-sm-6 centered" style="text-align: center;">
+			<p class="centered">
+				&copy; <a target="_blank"
+					href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
+						value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
+					target="_blank" href="#{client.policyUri}"><h:outputText
+						value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
+					target="_blank" href="#{client.tosUri}"><h:outputText
+						value="#{msgs['common.termsOfService']}" escape="false" /></a>
+			</p>
+		</div>
+		<div class="col-sm-3"></div>
+	</div>
 	</footer>
 	<script type="text/javascript">
 		//<![CDATA[ 

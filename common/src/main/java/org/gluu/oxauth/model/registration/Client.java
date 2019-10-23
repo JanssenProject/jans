@@ -78,7 +78,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     @AttributeName(name = "displayName")
     private String clientName;
 
-    @AttributeName(name = "oxIdTokenTokenBindingCnf")
+    @AttributeName(name = "tknBndCnf")
     private String idTokenTokenBindingCnf;
 
     @AttributeName(name = "oxAuthLogoURI")

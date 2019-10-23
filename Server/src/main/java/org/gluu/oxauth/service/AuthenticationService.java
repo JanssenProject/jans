@@ -142,8 +142,8 @@ public class AuthenticationService {
 		metricService.incCounter(metricType);
 
 		if (protectionServiceEnabled) {
-			authenticationProtectionService.storeAttempt(userName, authenticated);
-			authenticationProtectionService.doDelayIfNeeded(userName);
+			authenticationProtectionService.storeAttempt(userId, authenticated);
+			authenticationProtectionService.doDelayIfNeeded(userId);
 		}
 
 		return authenticated;
@@ -259,6 +259,41 @@ public class AuthenticationService {
 	 * Utility method which can be used in custom scripts
 	 */
 	public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
+			String keyValue, String password, String primaryKey, String localPrimaryKey) {
+		boolean authenticated = false;
+		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
+
+		com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+		try {
+			authenticated = authenticateImpl(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+		} finally {
+			timerContext.stop();
+		}
+
+		String userId = keyValue;
+		if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
+			userId = identity.getUser().getUserId();
+		}
+		setAuthenticatedUserSessionAttribute(userId, authenticated);
+
+		MetricType metricType;
+		if (authenticated) {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		}
+
+		metricService.incCounter(metricType);
+
+		if (protectionServiceEnabled) {
+			authenticationProtectionService.storeAttempt(userId, authenticated);
+			authenticationProtectionService.doDelayIfNeeded(userId);
+		}
+
+		return authenticated;
+	}
+
+	private boolean authenticateImpl(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
 			String keyValue, String password, String primaryKey, String localPrimaryKey) {
 		log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey,
 				keyValue, System.identityHashCode(credentials));
@@ -447,8 +482,7 @@ public class AuthenticationService {
 
 		SessionId newSessionId;
 		if (sessionId == null) {
-			newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(),
-					sessionIdAttributes);
+			newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(), sessionIdAttributes);
 		} else {
 			// TODO: Remove after 2.4.5
 			String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
@@ -458,6 +492,7 @@ public class AuthenticationService {
 		}
 
 		identity.setSessionId(sessionId);
+        newSessionId.setUser(user);
 
 		return newSessionId;
 	}
@@ -557,7 +592,7 @@ public class AuthenticationService {
 			return;
 		}
 
-		User user = userService.getUserByDn(sessionUser.getUserDn());
+		User user = sessionIdService.getUser(sessionUser);
 
 		log.info("Attempting to redirect user: User: {}", user);
 
@@ -576,7 +611,7 @@ public class AuthenticationService {
 		if (p_sessionId != null) {
 			try {
 				if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
-					final User user = userService.getUserByDn(p_sessionId.getUserDn());
+					final User user = sessionIdService.getUser(p_sessionId);
 					if (user != null) {
 						return user;
 					} else { // if there is no user than session is invalid
