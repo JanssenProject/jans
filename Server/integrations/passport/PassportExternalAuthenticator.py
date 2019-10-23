@@ -82,6 +82,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             # Get JWT token
             jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 

@@ -9,19 +9,19 @@ package org.gluu.oxauth.service;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.json.JSONException;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.AcrChangedException;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
@@ -37,8 +37,8 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
@@ -112,7 +112,7 @@ public class SessionIdService {
     private RequestParameterService requestParameterService;
 
     @Inject
-    private AbstractCryptoProvider cryptoProvider;
+    private UserService userService;
 
     public String getAcr(SessionId session) {
         if (session == null || session.getSessionAttributes() == null) {
@@ -891,5 +891,27 @@ public class SessionIdService {
         if (sessionId != null) {
             updateSessionId(sessionId, true, true, true);
         }
+    }
+
+    public User getUser(SessionId sessionId) {
+        if (sessionId == null) {
+            return null;
+        }
+
+        if (sessionId.getUser() != null) {
+            return sessionId.getUser();
+        }
+
+        if (StringUtils.isBlank(sessionId.getUserDn())) {
+            return null;
+        }
+
+        final User user = userService.getUserByDn(sessionId.getUserDn());
+        if (user != null) {
+            sessionId.setUser(user);
+            return user;
+        }
+
+        return null;
     }
 }

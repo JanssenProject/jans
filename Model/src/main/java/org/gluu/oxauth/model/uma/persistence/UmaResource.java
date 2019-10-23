@@ -13,6 +13,7 @@ import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "oxUmaResource")
-public class UmaResource {
+public class UmaResource implements Serializable {
 
     @DN
     private String dn;
@@ -42,10 +43,10 @@ public class UmaResource {
     @AttributeName(name = "oxFaviconImage")
     private String iconUri;
 
-    @AttributeName(name = "oxAuthUmaScope")
+    @AttributeName(name = "oxAuthUmaScope", consistency = true)
     private List<String> scopes;
 
-    @AttributeName(name = "oxScopeExpression")
+    @AttributeName(name = "oxScopeExpression", consistency = true)
     private String scopeExpression;
 
     @AttributeName(name = "oxAssociatedClient", consistency = true)
@@ -66,13 +67,13 @@ public class UmaResource {
     @AttributeName(name = "oxType")
     private String type;
 
-    @AttributeName(name = "oxAuthCreation")
+    @AttributeName(name = "iat")
     private Date creationDate;
 
     @AttributeName(name = "oxAuthExpiration")
     private Date expirationDate;
 
-    @AttributeName(name = "oxDeletable")
+    @AttributeName(name = "del")
     private boolean deletable = true;
 
     public boolean isDeletable() {
