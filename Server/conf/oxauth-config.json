@@ -291,6 +291,7 @@
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
+    "loggingLevel": "DEBUG",
     "backchannelTokenDeliveryModesSupported": ["poll", "ping", "push"],
     "backchannelAuthenticationRequestSigningAlgValuesSupported": [
         "RS512",

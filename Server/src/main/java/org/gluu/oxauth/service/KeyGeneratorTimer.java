@@ -156,10 +156,10 @@ public class KeyGeneratorTimer {
                     log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
                             key.getLong(EXPIRATION_TIME));
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
-                } else {
+                } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
                 }
-            } else {
+            } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
                 GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                 expirationTime.add(GregorianCalendar.HOUR, appConfiguration.getKeyRegenerationInterval());
                 expirationTime.add(GregorianCalendar.SECOND, appConfiguration.getIdTokenLifetime());

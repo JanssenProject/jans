@@ -45,7 +45,7 @@ public enum ECEllipticCurve {
     public static ECEllipticCurve fromString(String param) {
         if (param != null) {
             for (ECEllipticCurve ec : ECEllipticCurve.values()) {
-                if (param.equals(ec.name)) {
+                if (param.equals(ec.name) || param.equalsIgnoreCase(ec.name())) {
                     return ec;
                 }
             }
