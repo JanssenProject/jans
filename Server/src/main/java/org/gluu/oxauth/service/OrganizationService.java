@@ -36,15 +36,6 @@ public class OrganizationService extends org.gluu.service.OrganizationService {
 
 	}
 
-	/**
-	 * Check if LDAP server contains organization with specified attributes
-	 * 
-	 * @return True if organization with specified attributes exist
-	 */
-	public boolean containsOrganization(GluuOrganization organization) {
-		return ldapEntryManager.contains(organization);
-	}
-
 	public GluuOrganization getOrganization() {
 		String key = OxConstants.CACHE_ORGANIZATION_KEY;
 		GluuOrganization organization = (GluuOrganization) cacheService.get(key);

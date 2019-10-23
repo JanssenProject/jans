@@ -78,9 +78,13 @@ public class CertificateSelector {
 
 
         String issuerDn = certificate.getIssuerDN().getName();
-        List<X509Certificate> cert = this.certMapping.get(issuerDn.toLowerCase());
-        
-        certs.addAll(certs);
+        List<X509Certificate> mappingCerts = this.certMapping.get(issuerDn.toLowerCase());
+        if (mappingCerts != null) {
+        	certs.addAll(mappingCerts);
+        } else {
+        	// TODO: Review this
+        	certs.addAll(certs);
+        }
 
         if (certs.size() == 0) {
             log.warn("Fido2 authenticator with issuer Dn: '{}' not registered in mapping file");

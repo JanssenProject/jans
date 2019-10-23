@@ -80,6 +80,8 @@ public class LanguageBean implements Serializable {
 		Cookie cookie = new Cookie(COOKIE_NAME, value);
 		cookie.setMaxAge(DEFAULT_MAX_AGE);
 		cookie.setPath(COOKIE_PATH);
+		cookie.setSecure(true);
+		cookie.setVersion(1);
 		response.addCookie(cookie);
 	}
 
