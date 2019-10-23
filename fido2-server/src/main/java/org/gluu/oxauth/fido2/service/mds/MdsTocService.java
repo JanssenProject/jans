@@ -105,7 +105,7 @@ public class MdsTocService {
         String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
         String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
         if (StringHelper.isEmpty(mdsTocRootCertsFolder) || StringHelper.isEmpty(mdsTocFilesFolder)) {
-            log.warn("Fido2 MDS properties should be set");
+            log.warn("Fido2 MDS cert and TOC properties should be set");
             return new HashMap<String, JsonNode>();
         }
         log.info("Populating TOC entries from {}", mdsTocFilesFolder);
@@ -240,6 +240,7 @@ public class MdsTocService {
             }
         }
 
+        // TODO: Check if cert verification works well when there is no root cert 
         X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);
 
         if (JWSAlgorithm.ES256.equals(algorithm)) {

@@ -1,31 +1,29 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-				xmlns:f="http://xmlns.jcp.org/jsf/core"
-				xmlns:h="http://xmlns.jcp.org/jsf/html"
-				template="/WEB-INF/incl/layout/login-template.xhtml">
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
 
-	<ui:param name="showGlobalMessages" value="false"/>
+	<ui:param name="showGlobalMessages" value="false" />
 
 	<ui:define name="body">
-		<div class="section">
+		<div class="section" style="padding-left: 35%;">
 			<h1>#{msgs['error.errorEncountered']}</h1>
 		</div>
-
-		<div class="section">
+		<div class="section" style="padding-left: 30%;">
 			<p>
 				<h:outputFormat value="#{msgs['error.unexpectedError']}">
-					<f:param value="#{pageService.currentDateTime}"/>
+					<f:param value="#{pageService.currentDateTime}" />
 				</h:outputFormat>
 			</p>
 
 			<div class="body">
 				<h:messages id="globalMessage" styleClass="message"
-							errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
-							globalOnly="true" />
+					errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+					globalOnly="true" />
 			</div>
 		</div>
 	</ui:define>
-
 </ui:composition>

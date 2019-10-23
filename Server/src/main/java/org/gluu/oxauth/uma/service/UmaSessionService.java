@@ -211,12 +211,7 @@ public class UmaSessionService {
     }
 
     public User getUser(HttpServletRequest httpRequest, String... returnAttributes) {
-        String userDn = getUserDn(httpRequest);
-        if (StringUtils.isNotBlank(userDn)) {
-            return userService.getUserByDn(userDn, returnAttributes);
-        }
-
-        return null;
+        return sessionIdService.getUser(getConnectSession(httpRequest));
     }
 
     public String getUserDn(HttpServletRequest httpRequest) {

@@ -121,8 +121,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse endSessionResponse2 = endSessionClient2.exec();
 
         showClient(endSessionClient2);
-        assertEquals(endSessionResponse2.getStatus(), Status.BAD_REQUEST.getStatusCode());
+        assertStatusOrRedirect(endSessionResponse2.getStatus(), Status.BAD_REQUEST.getStatusCode());
         assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+    }
+
+    public static void assertStatusOrRedirect(int actualStatus, int expectedStatus) {
+        assertTrue(actualStatus == expectedStatus || actualStatus == Status.FOUND.getStatusCode());
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri", "sectorIdentifierUri"})
@@ -210,7 +214,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse endSessionResponse2 = endSessionClient2.exec();
 
         showClient(endSessionClient2);
-        assertEquals(endSessionResponse2.getStatus(), Status.BAD_REQUEST.getStatusCode());
+        assertStatusOrRedirect(endSessionResponse2.getStatus(), Status.BAD_REQUEST.getStatusCode());
         assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 
@@ -239,7 +243,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse response = endSessionClient.execEndSession("INVALID_ACCESS_TOKEN", postLogoutRedirectUri, state);
 
         showClient(endSessionClient);
-        assertEquals(response.getStatus(), Status.BAD_REQUEST.getStatusCode(), "Unexpected response code. Entity: " + response.getEntity());
+        assertStatusOrRedirect(response.getStatus(), Status.BAD_REQUEST.getStatusCode());
         assertNotNull(response.getEntity(), "The entity is null");
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");

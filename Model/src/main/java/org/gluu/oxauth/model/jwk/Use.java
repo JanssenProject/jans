@@ -44,7 +44,7 @@ public enum Use {
     public static Use fromString(String param) {
         if (param != null) {
             for (Use use : Use.values()) {
-                if (param.equals(use.paramName)) {
+                if (param.equals(use.paramName) || param.equalsIgnoreCase(use.name())) {
                     return use;
                 }
             }

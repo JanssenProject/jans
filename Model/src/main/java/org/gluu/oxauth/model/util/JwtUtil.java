@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
@@ -216,12 +217,16 @@ public class JwtUtil {
     }
 
     public static JSONObject getJSONWebKeys(String jwksUri) {
+        return getJSONWebKeys(jwksUri, null);
+    }
+
+    public static JSONObject getJSONWebKeys(String jwksUri, ClientExecutor executor) {
         log.debug("Retrieving jwks " + jwksUri + "...");
 
         JSONObject jwks = null;
         try {
             if (!StringHelper.isEmpty(jwksUri)) {
-                ClientRequest clientRequest = new ClientRequest(jwksUri);
+                ClientRequest clientRequest = executor != null ? new ClientRequest(jwksUri, executor) : new ClientRequest(jwksUri);
                 clientRequest.setHttpMethod(HttpMethod.GET);
                 ClientResponse<String> clientResponse = clientRequest.get(String.class);
 

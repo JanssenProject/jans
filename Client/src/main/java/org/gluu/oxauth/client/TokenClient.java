@@ -262,7 +262,9 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         } else if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
                 getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
             clientRequest.formParameter("client_assertion_type", ClientAssertionType.JWT_BEARER);
-            clientRequest.formParameter("client_assertion", getRequest().getClientAssertion());
+            if (getRequest().getClientAssertion() != null) {
+            	clientRequest.formParameter("client_assertion", getRequest().getClientAssertion());
+            }
             if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
                 clientRequest.formParameter("client_id", getRequest().getAuthUsername());
             }
