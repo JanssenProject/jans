@@ -829,7 +829,7 @@ class Setup(object):
                                             ],
                                         'memory_allocation': 300,
                                         'mapping': 'people, groups, authorizations',
-                                        'document_key_prefix': ['groups_', 'people_'],
+                                        'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
                                     }),
 
                         ('cache',    {   'ldif': [],
