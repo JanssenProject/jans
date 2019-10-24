@@ -14,6 +14,9 @@ class FakeResult:
     reason = ''
     text = ''
 
+    def json(self):
+        return {'error': True}
+
 class CBM:
 
     def __init__(self, host, admin, password, port=18091, n1qlport=18093):
