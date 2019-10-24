@@ -4438,20 +4438,8 @@ class Setup(object):
                         listAttrib.append(name)
 
 
-    def install_couchbase_server(self):
-        # prepare multivalued list
-        self.prepare_multivalued_list()
-
-        if not self.remoteCouchbase:
-
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-
-            self.couchbaseInstall()
-            self.checkIfGluuBucketReady()
-            self.couchebaseCreateCluster()
-
-        self.couchbaseSSL()
-
+    def create_couchbase_buckets(self):
+        
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
         couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
@@ -4479,19 +4467,42 @@ class Setup(object):
             bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
-            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
             bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
-            if self.couchbaseBucketDict[group]['ldif']:
-                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         if self.installSaml:
             self.logIt("Creating couchbase readonly user for shib")
             self.cbm.create_user('couchbaseShibUser', self.couchbaseShibUserPassword, 'Shibboleth IDP', 'query_select[*]')
+
+    def install_couchbase_server(self):
+        # prepare multivalued list
+        self.prepare_multivalued_list()
+
+        if not self.remoteCouchbase:
+
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
+
+            self.couchbaseInstall()
+            self.checkIfGluuBucketReady()
+            self.couchebaseCreateCluster()
+
+        self.couchbaseSSL()
+
+        self.create_couchbase_buckets()
+
+        couchbase_mappings = self.getMappingType('couchbase')
+
+        if self.mappingLocations['default'] == 'couchbase':
+            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
+
+        for group in couchbase_mappings:
+            bucket = 'gluu_{0}'.format(group)
+            if self.couchbaseBucketDict[group]['ldif']:
+                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         self.couchbaseProperties()
 
