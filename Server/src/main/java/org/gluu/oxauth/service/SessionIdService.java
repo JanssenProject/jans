@@ -205,6 +205,9 @@ public class SessionIdService {
 
             session.setSessionAttributes(currentSessionAttributes);
 
+            // Reset state to unauthenticated
+            session.setState(SessionIdState.UNAUTHENTICATED);
+
             boolean updateResult = updateSessionId(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
