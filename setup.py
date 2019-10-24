@@ -4294,7 +4294,7 @@ class Setup(object):
                     else:
                         n_ = e[0].find('_')
                         document_key_prefix = e[0][:n_+1]
-                        cur_bucket = key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
+                        cur_bucket = 'gluu_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
 
                     query = ''
 
