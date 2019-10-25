@@ -756,7 +756,7 @@
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>5.0.0-M2</version>
+					<version>5.2.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -771,7 +771,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>5.0.0-M2</version>
+				<version>5.2.2</version>
 			</plugin>
 		</plugins>
 	</reporting>
