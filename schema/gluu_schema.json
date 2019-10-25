@@ -4546,6 +4546,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "pattern",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "pattern"
+            ],
+            "oid": "oxAttribute:413",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
         
     ],
@@ -5229,7 +5240,8 @@
                 "oxAuthGroupClaims",
                 "oxId",
                 "oxIconUrl",
-                "oxUmaPolicyScriptDn"
+                "oxUmaPolicyScriptDn",
+                "pattern"
             ],
             "must": [
                 "objectclass"
