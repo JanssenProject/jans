@@ -829,7 +829,7 @@ class Setup(object):
                                             ],
                                         'memory_allocation': 300,
                                         'mapping': 'people, groups, authorizations',
-                                        'document_key_prefix': ['groups_', 'people_'],
+                                        'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
                                     }),
 
                         ('cache',    {   'ldif': [],
@@ -2861,6 +2861,47 @@ class Setup(object):
 
         return detectedHostname
 
+
+    def prompt_remote_couchbase(self):
+        self.installLdap = False
+        self.persistence_type = 'couchbase'
+        self.install_couchbase = True
+    
+        cb_query_node = None
+
+        while True:
+            self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
+            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
+            self.ldapPass = self.getPrompt("    Couchbase Admin password")
+
+            for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
+
+                cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
+                print "    Checking Couchbase connection for " + cb_host
+
+                cbm_result = cbm_.test_connection()
+                if not cbm_result.ok:
+                    print "    Can't establish connection to Couchbase server with given parameters."
+                    print "**", cbm_result.reason
+                    break
+                try:
+                    qr = cbm_.exec_query('select * from system:indexes limit 1')
+                    if qr.ok:
+                        cb_query_node = i
+                        self.cb_query_node = i
+                except:
+                    pass
+            else:
+
+                if cbm_result.ok and cb_query_node != None:
+                    print "    Successfully connected to Couchbase server"
+                    cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
+                    break
+                if cb_query_node == None:
+                    print "Can't find any query node"
+
+
     def promptForProperties(self):
 
         promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
@@ -2977,46 +3018,11 @@ class Setup(object):
             self.installOxTrust = False
 
         if self.remoteCouchbase:
-            self.installLdap = False
-            self.persistence_type = 'couchbase'
-            self.install_couchbase = True
-        
-            cb_query_node = None
-
-            while True:
-                self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
-                self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
-                self.ldapPass = self.getPrompt("    Couchbase Admin password")
-
-                for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
-
-                    cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
-                    print "    Checking Couchbase connection for " + cb_host
-
-                    cbm_result = cbm_.test_connection()
-                    if not cbm_result.ok:
-                        print "    Can't establish connection to Couchbase server with given parameters."
-                        print "**", cbm_result.reason
-                        break
-                    try:
-                        qr = cbm_.exec_query('select * from system:indexes limit 1')
-                        if qr.ok:
-                            cb_query_node = i
-                            self.cb_query_node = i
-                    except:
-                        pass
-                else:
-
-                    if cbm_result.ok and cb_query_node != None:
-                        print "    Successfully connected to Couchbase server"
-                        print("{0}Note: The password used for the admin user in "
-                            "Couchbase is also\nassigned to the admin user in "
-                            "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
-                        cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
-                        self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
-                        break
-                    if cb_query_node == None:
-                        print "Can't find any query node"
+            self.prompt_remote_couchbase()
+            
+            print ("{0}Note: The password used for the admin user in "
+                    "Couchbase is also\nassigned to the admin user in "
+                    "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
@@ -4294,7 +4300,7 @@ class Setup(object):
                     else:
                         n_ = e[0].find('_')
                         document_key_prefix = e[0][:n_+1]
-                        cur_bucket = key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
+                        cur_bucket = 'gluu_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
 
                     query = ''
 
@@ -4438,20 +4444,8 @@ class Setup(object):
                         listAttrib.append(name)
 
 
-    def install_couchbase_server(self):
-        # prepare multivalued list
-        self.prepare_multivalued_list()
-
-        if not self.remoteCouchbase:
-
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-
-            self.couchbaseInstall()
-            self.checkIfGluuBucketReady()
-            self.couchebaseCreateCluster()
-
-        self.couchbaseSSL()
-
+    def create_couchbase_buckets(self):
+        
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
         couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
@@ -4479,19 +4473,42 @@ class Setup(object):
             bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes('gluu')
-            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
             bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
             self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             self.couchebaseCreateIndexes(bucket)
-            if self.couchbaseBucketDict[group]['ldif']:
-                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         if self.installSaml:
             self.logIt("Creating couchbase readonly user for shib")
             self.cbm.create_user('couchbaseShibUser', self.couchbaseShibUserPassword, 'Shibboleth IDP', 'query_select[*]')
+
+    def install_couchbase_server(self):
+        # prepare multivalued list
+        self.prepare_multivalued_list()
+
+        if not self.remoteCouchbase:
+
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
+
+            self.couchbaseInstall()
+            self.checkIfGluuBucketReady()
+            self.couchebaseCreateCluster()
+
+        self.couchbaseSSL()
+
+        self.create_couchbase_buckets()
+
+        couchbase_mappings = self.getMappingType('couchbase')
+
+        if self.mappingLocations['default'] == 'couchbase':
+            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
+
+        for group in couchbase_mappings:
+            bucket = 'gluu_{0}'.format(group)
+            if self.couchbaseBucketDict[group]['ldif']:
+                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
         self.couchbaseProperties()
 

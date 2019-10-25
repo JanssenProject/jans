@@ -165,7 +165,7 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket"
     ],
-    "claimsParameterSupported":true,
+    "claimsParameterSupported":false,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
@@ -244,6 +244,7 @@
     "imgLocation":"",
     "metricReporterInterval":300,
     "metricReporterKeepDataDays":15,
+    "metricReporterEnabled":true,
     "pairwiseIdType":"algorithmic",
     "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
     "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
