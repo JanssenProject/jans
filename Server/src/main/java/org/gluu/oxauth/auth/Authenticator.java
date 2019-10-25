@@ -629,15 +629,10 @@ public class Authenticator {
             return Constants.RESULT_EXPIRED;
         }
 
-        // Set current state into identity to allow use in login form and
-        // authentication scripts
-        identity.setSessionId(sessionId);
-
         if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
             return Constants.RESULT_SUCCESS;
         }
 
-        initCustomAuthenticatorVariables(sessionIdAttributes);
         if (StringHelper.isEmpty(this.authAcr)) {
             return Constants.RESULT_SUCCESS;
         }
@@ -653,6 +648,12 @@ public class Authenticator {
                     this.authAcr);
             return Constants.RESULT_FAILURE;
         }
+
+        // Set current state into identity to allow use in login form and
+        // authentication scripts
+        identity.setSessionId(sessionId);
+
+        initCustomAuthenticatorVariables(sessionIdAttributes);
 
         // Check if all previous steps had passed
         boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
