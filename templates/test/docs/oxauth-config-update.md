@@ -28,12 +28,13 @@ III. These changes should be applied to oxAuth config.
       "urn:ietf:params:oauth:grant-type:uma-ticket"
    ],
 
-5. "legacyIdTokenClaims":true,
-6. "authenticationFiltersEnabled":true,
-7. "clientAuthenticationFiltersEnabled":true,
-8. "keyRegenerationEnabled":true,
+5. "legacyIdTokenClaims":true
+6. "authenticationFiltersEnabled":true
+7. "clientAuthenticationFiltersEnabled":true
+8. "keyRegenerationEnabled":true
 9. "openidScopeBackwardCompatibility":false
-10. umaGrantAccessIfNoPolicies: true
+10. "umaGrantAccessIfNoPolicies": true
+11. "claimsParameterSupported" : true
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies and UMA Claims Gathering scripts.
