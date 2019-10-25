@@ -2861,6 +2861,47 @@ class Setup(object):
 
         return detectedHostname
 
+
+    def prompt_remote_couchbase(self):
+        self.installLdap = False
+        self.persistence_type = 'couchbase'
+        self.install_couchbase = True
+    
+        cb_query_node = None
+
+        while True:
+            self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
+            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
+            self.ldapPass = self.getPrompt("    Couchbase Admin password")
+
+            for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
+
+                cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
+                print "    Checking Couchbase connection for " + cb_host
+
+                cbm_result = cbm_.test_connection()
+                if not cbm_result.ok:
+                    print "    Can't establish connection to Couchbase server with given parameters."
+                    print "**", cbm_result.reason
+                    break
+                try:
+                    qr = cbm_.exec_query('select * from system:indexes limit 1')
+                    if qr.ok:
+                        cb_query_node = i
+                        self.cb_query_node = i
+                except:
+                    pass
+            else:
+
+                if cbm_result.ok and cb_query_node != None:
+                    print "    Successfully connected to Couchbase server"
+                    cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
+                    break
+                if cb_query_node == None:
+                    print "Can't find any query node"
+
+
     def promptForProperties(self):
 
         promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
@@ -2977,46 +3018,11 @@ class Setup(object):
             self.installOxTrust = False
 
         if self.remoteCouchbase:
-            self.installLdap = False
-            self.persistence_type = 'couchbase'
-            self.install_couchbase = True
-        
-            cb_query_node = None
-
-            while True:
-                self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
-                self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
-                self.ldapPass = self.getPrompt("    Couchbase Admin password")
-
-                for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
-
-                    cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
-                    print "    Checking Couchbase connection for " + cb_host
-
-                    cbm_result = cbm_.test_connection()
-                    if not cbm_result.ok:
-                        print "    Can't establish connection to Couchbase server with given parameters."
-                        print "**", cbm_result.reason
-                        break
-                    try:
-                        qr = cbm_.exec_query('select * from system:indexes limit 1')
-                        if qr.ok:
-                            cb_query_node = i
-                            self.cb_query_node = i
-                    except:
-                        pass
-                else:
-
-                    if cbm_result.ok and cb_query_node != None:
-                        print "    Successfully connected to Couchbase server"
-                        print("{0}Note: The password used for the admin user in "
-                            "Couchbase is also\nassigned to the admin user in "
-                            "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
-                        cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
-                        self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
-                        break
-                    if cb_query_node == None:
-                        print "Can't find any query node"
+            self.prompt_remote_couchbase()
+            
+            print ("{0}Note: The password used for the admin user in "
+                    "Couchbase is also\nassigned to the admin user in "
+                    "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
