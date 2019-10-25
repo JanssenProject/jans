@@ -28,6 +28,7 @@ import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentials
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -312,11 +313,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 	                            user = context.getUser();
 	                        }
 	                    } else {
-	                    	authenticated = authenticationService.authenticate(username, password);
-	                        if (authenticated) {
-	                            user = authenticationService.getAuthenticatedUser();
-	                        }
-	                    	
+	                    	try {
+	                    		authenticated = authenticationService.authenticate(username, password);
+		                        if (authenticated) {
+		                            user = authenticationService.getAuthenticatedUser();
+		                        }
+	                    	} catch (AuthenticationException ex ) {
+	                            log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
+	                    	}
 	                    }
                     }
 
