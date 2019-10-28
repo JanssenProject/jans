@@ -39,7 +39,6 @@ import org.testng.annotations.BeforeTest;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -93,7 +92,7 @@ public abstract class BaseTest {
     private String authorizeFormDoNotAllowButton;
 
     @BeforeSuite
-    public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+    public void initTestSuite(ITestContext context) throws IOException {
         SecurityProviderUtility.installBCProvider();
 
         Reporter.log("Invoked init test suite method \n", true);
@@ -101,8 +100,6 @@ public abstract class BaseTest {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
-            //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy_ce_dev3.properties";
-            //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
         FileInputStream conf = new FileInputStream(propertiesFile);
@@ -805,12 +802,6 @@ public abstract class BaseTest {
         System.out.println("#######################################################");
     }
 
-    public void showEntity(String entity) {
-        if (entity != null) {
-            System.out.println("Entity: " + entity.replace("\\n", "\n"));
-        }
-    }
-
     public static void showClient(BaseClient client) {
         ClientUtils.showClient(client);
     }
@@ -866,10 +857,10 @@ public abstract class BaseTest {
 			}
 		}).build();
 		SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-		CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslContextFactory)
-				.setRedirectStrategy(new LaxRedirectStrategy()).build();
-
-		return httpclient;
+		return HttpClients.custom()
+                .setSSLSocketFactory(sslContextFactory)
+				.setRedirectStrategy(new LaxRedirectStrategy())
+                .build();
 	}
 
 	protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
