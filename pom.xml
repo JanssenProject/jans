@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.54</version>
+                <version>1.64</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -338,6 +338,11 @@
                 <artifactId>wss4j</artifactId>
                 <version>1.6.19</version>
             </dependency>
+			<dependency>
+			    <groupId>org.opensaml</groupId>
+			    <artifactId>opensaml</artifactId>
+			    <version>2.6.4</version>
+			</dependency>
 
             <!-- LDAP -->
             <dependency>
