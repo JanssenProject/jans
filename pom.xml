@@ -879,6 +879,18 @@
 				<weld.debug>true</weld.debug>
 			</properties>
 		</profile>
+
+		<profile>
+			<id>cvss-score</id>
+			<activation>
+				<property>
+					<name>!cvss-score</name>
+				</property>
+			</activation>
+			<properties>
+				<cvss-score>8</cvss-score>
+			</properties>
+		</profile>
 	</profiles>
 
 </project>
