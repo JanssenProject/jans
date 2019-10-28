@@ -641,12 +641,6 @@ public class Authenticator {
             return Constants.RESULT_NO_PERMISSIONS;
         }
 
-        // Set current state into identity to allow use in login form and
-        // authentication scripts
-        identity.setSessionId(sessionId);
-
-        initCustomAuthenticatorVariables(sessionIdAttributes);
-
         CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                 .getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
         if (customScriptConfiguration == null) {
@@ -654,6 +648,12 @@ public class Authenticator {
                     this.authAcr);
             return Constants.RESULT_FAILURE;
         }
+
+        // Set current state into identity to allow use in login form and
+        // authentication scripts
+        identity.setSessionId(sessionId);
+
+        initCustomAuthenticatorVariables(sessionIdAttributes);
 
         // Check if all previous steps had passed
         boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
