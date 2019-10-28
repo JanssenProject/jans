@@ -6,6 +6,7 @@
 
 package org.oxauth.persistence.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
@@ -49,7 +50,11 @@ public class Scope implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private Boolean defaultScope;
+    private Boolean defaultScope = false;
+
+
+    @AttributeName(name = "pattern")
+    private String regExpPattern; // for spontaneous scopes
 
     @AttributeName(name = "oxAuthGroupClaims")
     private Boolean oxAuthGroupClaims;
@@ -156,6 +161,14 @@ public class Scope implements Serializable {
         this.umaAuthorizationPolicies = umaAuthorizationPolicies;
     }
 
+    public String getRegExpPattern() {
+        return regExpPattern;
+    }
+
+    public void setRegExpPattern(String regExpPattern) {
+        this.regExpPattern = regExpPattern;
+    }
+
     public Boolean getOxAuthGroupClaims() {
         return oxAuthGroupClaims;
     }
@@ -168,12 +181,17 @@ public class Scope implements Serializable {
         return scopeType != null && ScopeType.UMA.getValue().equalsIgnoreCase(scopeType.getValue());
     }
 
+    public boolean isSpontaneous() {
+        return StringUtils.isNotBlank(regExpPattern);
+    }
+
     @Override
     public String toString() {
         return "Scope{" +
                 "dn='" + dn + '\'' +
                 ", inum='" + inum + '\'' +
                 ", displayName='" + displayName + '\'' +
+                ", regExpPattern='" + regExpPattern + '\'' +
                 ", id='" + id + '\'' +
                 ", iconUrl='" + iconUrl + '\'' +
                 ", description='" + description + '\'' +
