@@ -22,9 +22,12 @@
 			<artifactId>wss4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
+			<groupId>org.apache.ws.security</groupId>
+			<artifactId>wss4j</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.opensaml</groupId>
+		    <artifactId>opensaml</artifactId>
 		</dependency>
 	</dependencies>
 </project>
