@@ -251,6 +251,17 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
+				<configuration>
+					<skipProvidedScope>true</skipProvidedScope>
+					<failBuildOnCVSS>8</failBuildOnCVSS>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 				<executions>
 					<execution>
 						<goals>
