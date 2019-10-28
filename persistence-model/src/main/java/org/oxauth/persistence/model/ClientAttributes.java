@@ -11,13 +11,13 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 213428216912083393L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 213428216912083393L;
 
-	@JsonProperty("tlsClientAuthSubjectDn")
-	private String tlsClientAuthSubjectDn;
+    @JsonProperty("tlsClientAuthSubjectDn")
+    private String tlsClientAuthSubjectDn;
 
     @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
@@ -25,16 +25,28 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("keepClientAuthorizationAfterExpiration")
     private Boolean keepClientAuthorizationAfterExpiration = false;
 
-	public String getTlsClientAuthSubjectDn() {
-		return tlsClientAuthSubjectDn;
-	}
+    @JsonProperty("allowSpontaneousScopes")
+    private Boolean allowSpontaneousScopes = false;
 
-	public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
-		this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
-	}
+    public String getTlsClientAuthSubjectDn() {
+        return tlsClientAuthSubjectDn;
+    }
+
+    public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
+        this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public Boolean getAllowSpontaneousScopes() {
+        if (allowSpontaneousScopes == null) allowSpontaneousScopes = false;
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
 
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-	    if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
+        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
             runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
         }
         return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
@@ -45,7 +57,7 @@ public class ClientAttributes implements Serializable {
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
-	    if (keepClientAuthorizationAfterExpiration == null) {
+        if (keepClientAuthorizationAfterExpiration == null) {
             keepClientAuthorizationAfterExpiration = false;
         }
         return keepClientAuthorizationAfterExpiration;
@@ -61,6 +73,7 @@ public class ClientAttributes implements Serializable {
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
                 ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
+                ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 '}';
     }
 }
