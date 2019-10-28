@@ -255,13 +255,6 @@
 					<skipProvidedScope>true</skipProvidedScope>
 					<failBuildOnCVSS>8</failBuildOnCVSS>
 				</configuration>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>aggregate</report>
-						</reports>
-					</reportSet>
-				</reportSets>
 				<executions>
 					<execution>
 						<goals>
@@ -272,6 +265,23 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<reporting>
+		<plugins>
+			<!-- OWASP plugin -->
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<dependencies>
 		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
