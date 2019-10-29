@@ -53,6 +53,46 @@ public class OxdServerConfiguration extends Configuration {
     private JsonNode storageConfiguration;
     @JsonProperty(value = "defaultSiteConfig")
     private JsonNode defaultSiteConfig;
+    @JsonProperty(value = "tracer")
+    private String tracer;
+    @JsonProperty(value = "tracer_host")
+    private String tracerHost;
+    @JsonProperty(value = "tracer_port")
+    private int tracerPort = 5775;
+    @JsonProperty(value = "enable_tracing")
+    private Boolean enableTracing = false;
+
+    public Boolean getEnableTracing() {
+        return enableTracing;
+    }
+
+    public void setEnableTracing(Boolean enableTracing) {
+        this.enableTracing = enableTracing;
+    }
+
+    public String getTracer() {
+        return tracer;
+    }
+
+    public void setTracer(String tracer) {
+        this.tracer = tracer;
+    }
+
+    public String getTracerHost() {
+        return tracerHost;
+    }
+
+    public void setTracerHost(String tracerHost) {
+        this.tracerHost = tracerHost;
+    }
+
+    public int getTracerPort() {
+        return tracerPort;
+    }
+
+    public void setTracerPort(int tracerPort) {
+        this.tracerPort = tracerPort;
+    }
 
     public JsonNode getDefaultSiteConfig() {
         return defaultSiteConfig;
