@@ -19,6 +19,7 @@ public class HttpException extends WebApplicationException {
     public HttpException(ErrorResponseCode code) {
         super(Response.status(code.getHttpStatus()).type(MediaType.APPLICATION_JSON_TYPE).entity(Jackson2.asJsonSilently(new ErrorResponse(code))).build());
         this.code = code;
+        TracingUtil.errorLog(code.toString());
     }
 
     public ErrorResponseCode getCode() {
