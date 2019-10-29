@@ -16,6 +16,10 @@
   "migration_source_folder_path":"",
   "allowed_op_hosts": [],
   "storage":"redis",
+  "enable_tracing": false,
+  "tracer": "jaeger",
+  "tracer_host": "localhost",
+  "tracer_port": 5775,
   "storage_configuration": {
     "servers":"localhost:6379",
     "redisProviderType":"STANDALONE"
