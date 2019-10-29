@@ -29,10 +29,9 @@ public class TracingUtil {
 
     private static Tracer createTracer(OxdServerConfiguration configuration, String componentName) {
         String tracerName = configuration.getTracer();
-        Tracer tracer = null;
 
         if (!configuration.getEnableTracing() || Strings.isNullOrEmpty(tracerName)) {
-            tracer = NoopTracerFactory.create();
+            return NoopTracerFactory.create();
         } else if ("jaeger".equals(tracerName)) {
             Configuration.SamplerConfiguration samplerConfig = new Configuration.SamplerConfiguration()
                     .withType(ConstSampler.TYPE)
@@ -48,7 +47,7 @@ public class TracingUtil {
                     .withMaxQueueSize(10000)
                     .withSender(senderConfig);
 
-            tracer = new Configuration(componentName)
+            return new Configuration(componentName)
                     .withSampler(samplerConfig)
                     .withReporter(reporterConfig)
                     .getTracer();
@@ -58,15 +57,13 @@ public class TracingUtil {
 
             Reporter<Span> reporter = AsyncReporter.builder(sender).build();
 
-            tracer = BraveTracer.create(Tracing.newBuilder()
+            return BraveTracer.create(Tracing.newBuilder()
                     .localServiceName(componentName)
                     .spanReporter(reporter)
                     .build());
         } else {
-            tracer = NoopTracerFactory.create();
+            return NoopTracerFactory.create();
         }
-
-        return tracer;
     }
 
     private static Tracer getGlobalTracer() {
