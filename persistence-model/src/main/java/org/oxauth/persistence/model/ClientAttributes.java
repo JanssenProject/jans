@@ -2,8 +2,10 @@ package org.oxauth.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,6 +30,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("allowSpontaneousScopes")
     private Boolean allowSpontaneousScopes = false;
 
+    @JsonProperty("spontaneousScopes")
+    private List<String> spontaneousScopes = Lists.newArrayList();
+
     public String getTlsClientAuthSubjectDn() {
         return tlsClientAuthSubjectDn;
     }
@@ -43,6 +48,15 @@ public class ClientAttributes implements Serializable {
 
     public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
         this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopes() {
+        if (spontaneousScopes == null) spontaneousScopes = Lists.newArrayList();
+        return spontaneousScopes;
+    }
+
+    public void setSpontaneousScopes(List<String> spontaneousScopes) {
+        this.spontaneousScopes = spontaneousScopes;
     }
 
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
@@ -74,6 +88,7 @@ public class ClientAttributes implements Serializable {
                 ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
+                ", spontaneousScopes=" + spontaneousScopes +
                 '}';
     }
 }

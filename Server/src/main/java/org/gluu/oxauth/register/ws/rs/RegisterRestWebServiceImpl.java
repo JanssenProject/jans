@@ -409,6 +409,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getAllowSpontaneousScopes() != null) {
             p_client.getAttributes().setAllowSpontaneousScopes(requestObject.getAllowSpontaneousScopes());
         }
+        if (requestObject.getSpontaneousScopes() != null) {
+            p_client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
+        }
         if (requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
             p_client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         }
@@ -714,6 +717,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, RPT_AS_JWT.toString(), client.isRptAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TLS_CLIENT_AUTH_SUBJECT_DN.toString(), client.getAttributes().getTlsClientAuthSubjectDn());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ALLOW_SPONTANEOUS_SCOPES.toString(), client.getAttributes().getAllowSpontaneousScopes());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SPONTANEOUS_SCOPES.toString(), client.getAttributes().getSpontaneousScopes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         Util.addToJSONObjectIfNotNull(responseJsonObject, KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), client.getAttributes().getKeepClientAuthorizationAfterExpiration());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
