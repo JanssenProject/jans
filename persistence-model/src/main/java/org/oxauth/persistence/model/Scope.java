@@ -11,6 +11,7 @@ import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.DeletableEntity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "oxAuthCustomScope")
-public class Scope implements Serializable {
+public class Scope extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
@@ -183,6 +184,8 @@ public class Scope implements Serializable {
                 ", oxAuthGroupClaims=" + oxAuthGroupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
+                ", deletable=" + isDeletable() +
+                ", expirationDate=" + getExpirationDate() +
                 '}';
     }
 }
