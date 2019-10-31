@@ -253,7 +253,7 @@
 				<artifactId>dependency-check-maven</artifactId>
 				<configuration>
 					<skipProvidedScope>true</skipProvidedScope>
-					<failBuildOnCVSS>8</failBuildOnCVSS>
+					<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
 				</configuration>
 				<executions>
 					<execution>
@@ -596,10 +596,6 @@
 		<dependency>
 			<groupId>org.mvel</groupId>
 			<artifactId>mvel2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
 		</dependency>
 
 		<!-- Test -->
