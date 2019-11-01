@@ -5239,9 +5239,10 @@
                 "oxAuthGroupClaims", 
                 "oxId", 
                 "oxIconUrl", 
-                "oxUmaPolicyScriptDn", 
-                "pattern"
-            ], 
+                "oxUmaPolicyScriptDn",
+                "exp",
+                "del"
+            ],
             "must": [
                 "objectclass"
             ], 
