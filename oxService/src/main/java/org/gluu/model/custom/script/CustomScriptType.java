@@ -30,6 +30,8 @@ import org.gluu.model.custom.script.type.scope.DummyDynamicScopeType;
 import org.gluu.model.custom.script.type.scope.DynamicScopeType;
 import org.gluu.model.custom.script.type.session.ApplicationSessionType;
 import org.gluu.model.custom.script.type.session.DummyApplicationSessionType;
+import org.gluu.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
+import org.gluu.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import org.gluu.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyRptPolicyType;
@@ -70,6 +72,7 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyConsentGatheringType()),
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",
             new DummyDynamicScopeType()),
+    SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
     private String value;
