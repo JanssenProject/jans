@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.service;
 
+import com.google.common.collect.Lists;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
@@ -184,7 +185,7 @@ public class AppInitializer {
 				.getString("pythonModulesDir", null));
 
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.values());
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
 
 		supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
 		supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
