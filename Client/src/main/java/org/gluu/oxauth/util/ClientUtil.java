@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,19 @@ public class ClientUtil {
     public static List<String> extractListByKey(JSONObject jsonObject, String key) {
         final List<String> result = new ArrayList<String>();
         if (jsonObject.has(key)) {
-            String listString = jsonObject.getString(key);
-            String[] arrayOfValues = listString.split(" ");
-            for (String c : arrayOfValues) {
-                if (StringUtils.isNotBlank(c)) {
-                    result.add(c);
+            JSONArray arrayOfValues = jsonObject.optJSONArray(key);
+            if (arrayOfValues != null) {
+                for (int i = 0; i < arrayOfValues.length(); i++) {
+                    result.add(arrayOfValues.getString(i));
+                }
+            }
+            String listString = jsonObject.optString(key);
+            if (StringUtils.isNotBlank(listString)) {
+                String[] arrayOfStringValues = listString.split(" ");
+                for (String c : arrayOfStringValues) {
+                    if (StringUtils.isNotBlank(c)) {
+                        result.add(c);
+                    }
                 }
             }
         }
