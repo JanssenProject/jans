@@ -4,5 +4,5 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 
 public interface SpontaneousScopeType extends BaseExternalType {
 
-    boolean allowScope(Object context);
+    void manipulateScopes(Object context);
 }
