@@ -7,8 +7,7 @@ import java.util.Map;
 public class DummySpontaneousScopeType implements SpontaneousScopeType {
 
     @Override
-    public boolean allowScope(Object context) {
-        return false;
+    public void manipulateScopes(Object context) {
     }
 
     @Override
