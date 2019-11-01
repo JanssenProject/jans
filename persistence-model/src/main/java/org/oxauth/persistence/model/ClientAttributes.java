@@ -33,6 +33,10 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("spontaneousScopes")
     private List<String> spontaneousScopes = Lists.newArrayList();
 
+    @JsonProperty("spontaneousScopeScriptDns")
+    private List<String> spontaneousScopeScriptDns = Lists.newArrayList();
+
+
     public String getTlsClientAuthSubjectDn() {
         return tlsClientAuthSubjectDn;
     }
@@ -57,6 +61,15 @@ public class ClientAttributes implements Serializable {
 
     public void setSpontaneousScopes(List<String> spontaneousScopes) {
         this.spontaneousScopes = spontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopeScriptDns() {
+        if (spontaneousScopeScriptDns == null) spontaneousScopeScriptDns = Lists.newArrayList();
+        return spontaneousScopeScriptDns;
+    }
+
+    public void setSpontaneousScopeScriptDns(List<String> spontaneousScopeScriptDns) {
+        this.spontaneousScopeScriptDns = spontaneousScopeScriptDns;
     }
 
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
@@ -89,6 +102,7 @@ public class ClientAttributes implements Serializable {
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 ", spontaneousScopes=" + spontaneousScopes +
+                ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
                 '}';
     }
 }

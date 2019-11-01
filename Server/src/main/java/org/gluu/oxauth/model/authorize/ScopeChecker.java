@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.SpontaneousScopeService;
+import org.gluu.oxauth.service.external.ExternalSpontaneousScopeService;
+import org.gluu.oxauth.service.external.context.SpontaneousScopeExternalContext;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -41,9 +43,12 @@ public class ScopeChecker {
     @Inject
     private SpontaneousScopeService spontaneousScopeService;
 
+    @Inject
+    private ExternalSpontaneousScopeService externalSpontaneousScopeService;
+
     public Set<String> checkScopesPolicy(Client client, String scope) {
         log.debug("Checking scopes policy for: " + scope);
-        Set<String> grantedScopes = new HashSet<String>();
+        Set<String> grantedScopes = new HashSet<>();
 
         if (scope == null || client == null) {
             return grantedScopes;
@@ -68,6 +73,9 @@ public class ScopeChecker {
 
                 spontaneousScopeService.createSpontaneousScopeIfNeeded(scopeRequested);
             }
+
+            SpontaneousScopeExternalContext context = new SpontaneousScopeExternalContext(client, scopeRequested, scopesAllowedIds, spontaneousScopeService);
+            externalSpontaneousScopeService.executeExternalManipulateScope(context);
         }
 
         log.debug("Granted scopes: " + grantedScopes);
