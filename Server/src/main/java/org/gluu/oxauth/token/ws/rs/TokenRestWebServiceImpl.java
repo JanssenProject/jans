@@ -29,6 +29,7 @@ import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCre
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.util.OxConstants;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -326,6 +327,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                        SessionId sessionUser = identity.getSessionId();
+                        if (sessionUser != null) {
+                        	resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+                        	resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionUser.getDn());
+                        	resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
+                        }
+
 
                         RefreshToken reToken = null;
                         if (client.getGrantTypes() != null
