@@ -188,7 +188,7 @@ programmingLanguage: python
 dn: inum=2DAF-AA90,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Introspection sample script
+description: Introspection Sample Script
 displayName: introspection_sample
 oxEnabled: false
 inum: 2DAF-AA90
@@ -196,6 +196,20 @@ oxLevel: 1
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(introspection_introspection)s
+oxScriptType: introspection
+programmingLanguage: python
+
+dn: inum=2DAF-BA90,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Introspection Custom Parameters Sample Script
+displayName: introspection_custom_params
+oxEnabled: false
+inum: 2DAF-BA90
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(introspection_introspection_custom_params)s
 oxScriptType: introspection
 programmingLanguage: python
 
@@ -210,6 +224,20 @@ oxLevel: 1
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(resource_owner_password_credentials_resource_owner_password_credentials)s
+oxScriptType: resource_owner_password_credentials
+programmingLanguage: python
+
+dn: inum=2DAF-BA91,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Resource Owner Password Credentials Custom Parameters Example
+displayName: resource_owner_password_credentials_custom_params_example
+oxEnabled: false
+inum: 2DAF-BA91
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(resource_owner_password_credentials_resource_owner_password_credentials_custom_params)s
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
 
