@@ -326,6 +326,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                        SessionId sessionUser = identity.getSessionId();
+                        if (sessionUser != null) {
+//                        	resourceOwnerPasswordCredentialsGrant.setAcrValues(acrValuesStr);
+                        	resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionUser.getDn());
+                        	resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
+                        }
+
 
                         RefreshToken reToken = null;
                         if (client.getGrantTypes() != null
