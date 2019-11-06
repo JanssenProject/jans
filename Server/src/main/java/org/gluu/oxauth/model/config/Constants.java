@@ -30,5 +30,6 @@ public final class Constants {
 
 	public static final String REMOTE_IP = "remote_ip";
 	public static final String AUTHENTICATED_USER = "auth_user";
+	public static final String AUTHORIZED_GRANT = "authorized_grant";
 
 }

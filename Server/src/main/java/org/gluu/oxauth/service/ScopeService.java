@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.service;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
@@ -77,6 +78,21 @@ public class ScopeService {
         }
 
         return scopes;
+    }
+
+    public List<String> getScopeIdsByDns(List<String> dns) {
+        List<String> names = Lists.newArrayList();
+        if (dns == null || dns.isEmpty()) {
+            return dns;
+        }
+
+        for (String dn : dns) {
+            Scope scope = getScopeByDnSilently(dn);
+            if (scope != null && StringUtils.isNotBlank(scope.getId())) {
+                names.add(scope.getId());
+            }
+        }
+        return names;
     }
 
     /**
@@ -193,5 +209,9 @@ public class ScopeService {
 
     private static String getClaimDnCacheKey(String claimDn) {
         return "claim_dn" + StringHelper.toLowerCase(claimDn);
+    }
+
+    public void persist(Scope scope) {
+        ldapEntryManager.persist(scope);
     }
 }
