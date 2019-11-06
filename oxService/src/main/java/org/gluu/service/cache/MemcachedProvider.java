@@ -27,6 +27,10 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     public MemcachedProvider() {
     }
 
+    public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
+        this.cacheConfiguration = cacheConfiguration;
+    }
+
     @PostConstruct
     public void init() {
         this.memcachedConfiguration = cacheConfiguration.getMemcachedConfiguration();
