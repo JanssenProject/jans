@@ -9,12 +9,17 @@ package org.gluu.oxauth.model.authorize;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ScopeService;
+import org.gluu.oxauth.service.SpontaneousScopeService;
+import org.gluu.oxauth.service.external.ExternalSpontaneousScopeService;
+import org.gluu.oxauth.service.external.context.SpontaneousScopeExternalContext;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,39 +40,46 @@ public class ScopeChecker {
     @Inject
     private ScopeService scopeService;
 
+    @Inject
+    private SpontaneousScopeService spontaneousScopeService;
+
+    @Inject
+    private ExternalSpontaneousScopeService externalSpontaneousScopeService;
+
     public Set<String> checkScopesPolicy(Client client, String scope) {
         log.debug("Checking scopes policy for: " + scope);
-        Set<String> grantedScopes = new HashSet<String>();
+        Set<String> grantedScopes = new HashSet<>();
 
         if (scope == null || client == null) {
             return grantedScopes;
         }
 
         final String[] scopesRequested = scope.split(" ");
-        String[] scopesAllowed = client.getScopes();
-
-        // ocAuth #955
-        if (scopesAllowed == null) {
-            return grantedScopes;
-        }
+        String[] scopesAllowed = client.getScopes() != null ? client.getScopes() : new String[0];
 
         for (String scopeRequested : scopesRequested) {
-            if (StringUtils.isNotBlank(scopeRequested)) {
-                for (String scopeAllowedDn : scopesAllowed) {
-                    org.oxauth.persistence.model.Scope scopeAllowed = scopeService.getScopeByDnSilently(scopeAllowedDn);
-                    if (scopeAllowed != null) {
-                        String scopeAllowedName = scopeAllowed.getId();
-                        if (scopeRequested.equals(scopeAllowedName)) {
-                            grantedScopes.add(scopeRequested);
-                        }
-                    }
-                }
+            if (StringUtils.isBlank(scopeRequested)) {
+                continue;
             }
+
+            List<String> scopesAllowedIds = scopeService.getScopeIdsByDns(Arrays.asList(scopesAllowed));
+            if (scopesAllowedIds.contains(scopeRequested)) {
+                grantedScopes.add(scopeRequested);
+                continue;
+            }
+
+            if (spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeRequested)) {
+                grantedScopes.add(scopeRequested);
+
+                spontaneousScopeService.createSpontaneousScopeIfNeeded(scopeRequested);
+            }
+
+            SpontaneousScopeExternalContext context = new SpontaneousScopeExternalContext(client, scopeRequested, scopesAllowedIds, spontaneousScopeService);
+            externalSpontaneousScopeService.executeExternalManipulateScope(context);
         }
 
         log.debug("Granted scopes: " + grantedScopes);
 
         return grantedScopes;
     }
-
 }

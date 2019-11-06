@@ -45,8 +45,8 @@ public class Certificate {
         } else if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCECPublicKey) {
             BCECPublicKey jceecPublicKey = (BCECPublicKey) x509Certificate.getPublicKey();
 
-            publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getQ().getX().toBigInteger(),
-                    jceecPublicKey.getQ().getY().toBigInteger());
+            publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getQ().getXCoord().toBigInteger(),
+                    jceecPublicKey.getQ().getYCoord().toBigInteger());
         }
 
         return publicKey;
@@ -70,8 +70,8 @@ public class Certificate {
         if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCECPublicKey) {
             BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
 
-            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getX().toBigInteger(),
-                    publicKey.getQ().getY().toBigInteger());
+            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getXCoord().toBigInteger(),
+                    publicKey.getQ().getYCoord().toBigInteger());
         }
 
         return ecdsaPublicKey;

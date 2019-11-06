@@ -183,6 +183,7 @@ public class CleanerTimer {
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getTokens());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getAuthorizations());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getScopes());
 		if (cacheConfiguration.getNativePersistenceConfiguration() != null
 				&& StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
 			cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());

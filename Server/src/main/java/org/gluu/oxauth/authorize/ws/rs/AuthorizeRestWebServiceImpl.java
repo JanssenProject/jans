@@ -17,6 +17,7 @@ import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.*;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
@@ -42,6 +43,7 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -217,6 +219,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 } else {
                     throw e;
                 }
+            }
+            
+            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
+            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
+            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS ==  GrantType.fromString(authorizedGrant)) {
+            	// Remove from session to avoid execution on next AuthZ request 
+            	sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
+
+            	// Reset AuthZ parameters
+                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
+                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+                sessionAttributes.putAll(requestParameterMap);
+                sessionIdService.updateSessionId(sessionUser, true, true, true);
             }
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
