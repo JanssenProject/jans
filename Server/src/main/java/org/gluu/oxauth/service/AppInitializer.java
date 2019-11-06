@@ -6,31 +6,11 @@
 
 package org.gluu.oxauth.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Lists;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
 import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
@@ -41,11 +21,9 @@ import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
-import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.JsonService;
@@ -61,7 +39,6 @@ import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
-import org.gluu.util.OxConstants;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
@@ -70,6 +47,25 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -189,11 +185,12 @@ public class AppInitializer {
 				.getString("pythonModulesDir", null));
 
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION,
-				CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR,
-				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
-				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.INTROSPECTION,
-				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
+
+		supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
+		supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
+		supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
+		supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
 
 		// Start timer
 		initSchedulerService();
