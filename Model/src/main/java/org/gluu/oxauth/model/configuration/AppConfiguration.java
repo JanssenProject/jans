@@ -58,6 +58,7 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
+    private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
     private Set<ResponseMode> responseModesSupported;
@@ -827,6 +828,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaPctLifetime(int umaPctLifetime) {
         this.umaPctLifetime = umaPctLifetime;
+    }
+
+    public int getSpontaneousScopeLifetime() {
+        return spontaneousScopeLifetime;
+    }
+
+    public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
+        this.spontaneousScopeLifetime = spontaneousScopeLifetime;
     }
 
     public int getCleanServiceInterval() {
