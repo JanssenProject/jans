@@ -60,6 +60,8 @@ public enum ScopeType implements AttributeEnum {
 
     UMA("uma", "UMA"),
 
+    SPONTANEOUS("spontaneous", "Spontaneous"),
+
     /**
      * OAuth 2.0 Scopes for any of their API's.
      * This scope type would only have a description, but no claims.

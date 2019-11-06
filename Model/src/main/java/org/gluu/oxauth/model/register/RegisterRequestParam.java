@@ -262,6 +262,16 @@ public enum RegisterRequestParam {
     TLS_CLIENT_AUTH_SUBJECT_DN("tls_client_auth_subject_dn"),
 
     /**
+     * boolean, whether to allow spontaneous scopes for client
+     */
+    ALLOW_SPONTANEOUS_SCOPES("allow_spontaneous_scopes"),
+
+    /**
+     * list of spontaneous scopes
+     */
+    SPONTANEOUS_SCOPES("spontaneous_scopes"),
+
+    /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
      */
     RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS("run_introspection_script_before_access_token_as_jwt_creation_and_include_claims"),
