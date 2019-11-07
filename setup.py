@@ -1725,6 +1725,9 @@ class Setup(object):
 
         serviceConfiguration['installed'] = True
 
+        # don't send header to server
+        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
     def installNodeService(self, serviceName):
         self.logIt("Installing node service %s..." % serviceName)
 
@@ -2241,9 +2244,6 @@ class Setup(object):
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
-
-        # don't send header to server
-        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
     def install_oxtrust(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
