@@ -221,17 +221,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
             
-            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
-            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
-            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS ==  GrantType.fromString(authorizedGrant)) {
-            	// Remove from session to avoid execution on next AuthZ request 
-            	sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
-
-            	// Reset AuthZ parameters
-                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
-                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
-                sessionAttributes.putAll(requestParameterMap);
-                sessionIdService.updateSessionId(sessionUser, true, true, true);
+            if (sessionUser != null) {
+	            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
+	            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
+	            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS ==  GrantType.fromString(authorizedGrant)) {
+	            	// Remove from session to avoid execution on next AuthZ request 
+	            	sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
+	
+	            	// Reset AuthZ parameters
+	                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
+	                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+	                sessionAttributes.putAll(requestParameterMap);
+	                sessionIdService.updateSessionId(sessionUser, true, true, true);
+	            }
             }
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
