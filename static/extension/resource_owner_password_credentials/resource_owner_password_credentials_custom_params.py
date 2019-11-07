@@ -81,7 +81,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         # Add mandatory session parameters
         sessionAttributes = HashMap()
         sessionAttributes.put(Constants.AUTHENTICATED_USER, user.getUserId())
-        sessionAttributes.put('client', client.getClientId())
+        sessionAttributes.put(AuthorizeRequestParam.CLIENT_ID, client.getClientId())
         sessionAttributes.put(AuthorizeRequestParam.PROMPT, "")
 
         # Add custom session parameters
