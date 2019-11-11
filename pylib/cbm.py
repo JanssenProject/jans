@@ -161,6 +161,9 @@ class CBM:
 
         return result
 
+    def whoami(self):
+        result = self._get('whoami')
+        return result.json()
 
 if __name__ == '__main__':
     hostname = raw_input('hostname: ')
