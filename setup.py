@@ -219,12 +219,10 @@ def get_key_from(dn):
     return key
 
 
-
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
         LDIFParser.__init__(self, open(ldif_file,'rb'))
         self.entries = []
-    
 
     def handle(self, dn, entry):
         self.entries.append((dn, entry))
@@ -4191,7 +4189,6 @@ class Setup(object):
         result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
         self.logIt("Creating bucket {0} with type {1} and ramsize {2}".format(bucketName, bucketType, bucketRamsize))
         if result.ok:
-            self.couchbaseBuckets.append(bucketName)
             self.logIt("Bucket {} successfully created".format(bucketName))
         else:
             self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.text), errorLog=True)
@@ -4216,6 +4213,8 @@ class Setup(object):
                 self.exec_n1ql_query(query)
 
     def couchebaseCreateIndexes(self, bucket):
+        
+        self.couchbaseBuckets.append(bucket)
         
         couchbase_index = json.load(open(self.couchbaseIndexJson))
 
@@ -4524,7 +4523,9 @@ class Setup(object):
             else:
                 bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
                 self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
-                self.couchebaseCreateIndexes('gluu')
+
+        if self.mappingLocations['default'] == 'couchbase':
+            self.couchebaseCreateIndexes('gluu')
 
 
         for group in couchbase_mappings:
