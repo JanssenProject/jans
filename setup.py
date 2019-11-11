@@ -75,6 +75,7 @@ suggested_free_disk_space = 40 #in GB
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
+cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 'query_update', 'query_insert', 'query_manage_index']
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -2871,8 +2872,8 @@ class Setup(object):
 
         while True:
             self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
-            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
-            self.ldapPass = self.getPrompt("    Couchbase Admin password")
+            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
+            self.ldapPass = self.getPrompt("    Couchbase Password")
 
             for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
 
@@ -3020,9 +3021,9 @@ class Setup(object):
         if self.remoteCouchbase:
             self.prompt_remote_couchbase()
             
-            print ("{0}Note: The password used for the admin user in "
+            print ("{0}Note: The password used for the {1} user in "
                     "Couchbase is also\nassigned to the admin user in "
-                    "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
+                    "oxTrust.{2}").format(colors.WARNING, self.cbm.auth.username, colors.ENDC)
 
             use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
 
@@ -3044,6 +3045,22 @@ class Setup(object):
             if self.persistence_type == 'hybrid':
                 self.promptForBackendMappings(backend_types)
 
+        couchbase_mappings_ = self.getMappingType('couchbase')
+        buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
+
+        buckets_.append('gluu')
+
+        isCBRoleOK = self.checkCBRoles(buckets_)
+
+        if not isCBRoleOK[0]:
+            print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
+                            colors.DANGER,
+                            self.cbm.auth.username,
+                            ', '.join(cb_bucket_roles),
+                            ', '.join(isCBRoleOK[1]),
+                            colors.ENDC
+                            )
+            sys.exit(False)
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(self.installHTTPD)
@@ -4268,6 +4285,32 @@ class Setup(object):
                 
         return retVal
 
+    def checkCBRoles(self, buckets=[]):
+        result = self.cbm.whoami()
+        bc = buckets[:]
+        bucket_roles = {}
+        if 'roles' in result:
+            
+            for role in result['roles']:
+                if role['role'] == 'admin':
+                    return True, None
+
+                if not role['bucket_name'] in bucket_roles:
+                    bucket_roles[role['bucket_name']] = []
+
+                bucket_roles[role['bucket_name']].append(role['role'])
+
+        for b_ in bc[:]:
+            for r_ in cb_bucket_roles:
+                if not r_ in bucket_roles[b_]:
+                    break
+            else:
+                bc.remove(b_)
+
+        if bc:
+            return False, bc
+
+        return True, None
 
     def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
         
@@ -4466,18 +4509,32 @@ class Setup(object):
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
 
         min_cb_ram *= 1.0
-        
-        if self.mappingLocations['default'] != 'couchbase':
-            self.couchebaseCreateBucket('gluu', bucketRamsize=100)
-        else:
-            bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-            self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
-            self.couchebaseCreateIndexes('gluu')
+
+        existing_buckets = []
+        r = self.cbm.get_buckets()
+
+        if r.ok:
+            b_ = r.json()
+            existing_buckets = [ bucket['name'] for bucket in b_ ]
+
+        if not 'gluu' in existing_buckets:
+
+            if self.mappingLocations['default'] != 'couchbase':
+                self.couchebaseCreateBucket('gluu', bucketRamsize=100)
+            else:
+                bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
+                self.couchebaseCreateIndexes('gluu')
+
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-            self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
+            if not bucket in existing_buckets:
+                bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
+            else:
+                self.logIt("Bucket {} already exists, not creating".format(bucket))
+
             self.couchebaseCreateIndexes(bucket)
 
         if self.installSaml:
