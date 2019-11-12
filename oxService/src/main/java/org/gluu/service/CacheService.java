@@ -25,7 +25,7 @@ public class CacheService extends BaseCacheService {
     private CacheProvider cacheProvider;
 
 	@Override
-	public CacheProvider getCacheProvider() {
+	protected CacheProvider getCacheProvider() {
 		return cacheProvider;
 	}
 

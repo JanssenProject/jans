@@ -98,7 +98,7 @@ public abstract class AttributeService implements Serializable {
 
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getAllAttributes(String baseDn) {
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
 
     	List<GluuAttribute> attributeList = (List<GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
@@ -116,7 +116,7 @@ public abstract class AttributeService implements Serializable {
         return attributeList;
     }
 
-    protected abstract CacheService getCacheService();
+    protected abstract BaseCacheService getCacheService();
 
     public abstract String getDnForAttribute(String inum);
 
