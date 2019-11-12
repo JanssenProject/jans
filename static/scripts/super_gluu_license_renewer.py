@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import urllib
 import os
 import json
@@ -81,8 +83,6 @@ def renew_license():
     if not licenseId:
         print license_fn, " does not include licenseId"
         return
-
-    licenseId = "27c3c5c2-c570-4711-8b78-c2a407146adb"
 
     url_metadata = 'https://license.gluu.org/oxLicense/rest/metadata?licenseId=' + licenseId
 
