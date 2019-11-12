@@ -278,6 +278,7 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
+        self.properties_password = None
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -1329,36 +1330,62 @@ class Setup(object):
             self.logIt("Could not set limits.")
             self.logIt(traceback.format_exc(), True)
 
+    def decrypt_properties(self, fn, passwd):
+        out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
+        cmd = ['openssl', 'enc', '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
+        self.logIt('Running: ' + ' '.join(cmd))
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, err = p.communicate()
+        
+        if 'bad decrypt' in err:
+            print "Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd)
+            self.run(['rm', '-f', out_file])
+            sys.exit(False)
+
+        return out_file
+
     def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
         p = Properties.Properties()
+        
+        if fn.endswith('.enc'):
+            if not self.properties_password:
+                print "setup.properties password was not supplied. Please run with argument -properties-password"
+                sys.exit(False)
+
+            fn = self.decrypt_properties(fn, self.properties_password)
+
         try:
-            p.load(open(fn))
-
-            if p.getProperty('ldap_type') == 'openldap':
-                self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
-                p.setProperty('ldap_type', 'opendj')
-
-            no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
-            properties_list = p.keys()
-            
-            for prop in properties_list:
-                if prop in no_update:
-                    continue
-                try:
-                    self.__dict__[prop] = p[prop]
-                    if prop == 'mappingLocations':
-                        self.__dict__[prop] = json.loads(p[prop])                    
-                    if p[prop] == 'True':
-                        self.__dict__[prop] = True
-                    elif p[prop] == 'False':
-                        self.__dict__[prop] = False
-                except:
-                    self.logIt("Error loading property %s" % prop)
-                    self.logIt(traceback.format_exc(), True)
+            with open(fn) as pf:
+                p.load(pf)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
+
+        if p.getProperty('ldap_type') == 'openldap':
+            self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
+            p.setProperty('ldap_type', 'opendj')
+
+        properties_list = p.keys()
+        no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
+
+        for prop in properties_list:
+            if prop in no_update:
+                continue
+            try:
+                self.__dict__[prop] = p[prop]
+                if prop == 'mappingLocations':
+                    self.__dict__[prop] = json.loads(p[prop])                    
+                if p[prop] == 'True':
+                    self.__dict__[prop] = True
+                elif p[prop] == 'False':
+                    self.__dict__[prop] = False
+            except:
+                self.logIt("Error loading property %s" % prop)
+                self.logIt(traceback.format_exc(), True)
+
+        if fn.endswith('-DEC~'):
+            self.run(['rm', '-f', fn])
 
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
@@ -3378,13 +3405,14 @@ class Setup(object):
                 return str(value)
             else:
                 return ''
+        
         try:
             p = Properties.Properties()
             keys = obj.__dict__.keys()
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles'):
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password'):
                     continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(obj.__dict__[key])
@@ -3398,7 +3426,9 @@ class Setup(object):
             
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.ldapPass])
             
-            print prop_fn+'.enc', "is encrypted with password", self.ldapPass
+            self.post_messages.append(prop_fn+'.enc', "is encrypted with password", self.ldapPass)
+            
+            self.run(['rm', '-f', prop_fn])
             
         except:
             self.logIt("Error saving properties", True)
@@ -4772,9 +4802,12 @@ class Setup(object):
     def load_test_data_exit(self):
         print "Loading test data"
         prop_file = os.path.join(self.install_dir, 'setup.properties.last')
+        
         if not os.path.exists(prop_file):
-            print "setup.properties.last were not found, exiting."
-            sys.exit(1)
+            prop_file += '.enc'
+            if not os.path.exists(prop_file):
+                print "setup.properties.last or setup.properties.last.enc were not found, exiting."
+                sys.exit(1)
 
         self.load_properties(prop_file)
         self.createLdapPw()
@@ -5021,6 +5054,8 @@ if __name__ == '__main__':
     parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
+    parser.add_argument('-properties-password', help="Encoded setup.properties file password")
+    
     argsp = parser.parse_args()
 
     if not argsp.n:
@@ -5099,6 +5134,8 @@ if __name__ == '__main__':
     installObject = Setup(setupOptions['install_dir'])
     attribDataTypes.startup(setupOptions['install_dir'])
 
+    installObject.properties_password = argsp.properties_password
+
     if setupOptions['loadTestDataExit']:
         installObject.load_test_data_exit()
 
@@ -5130,7 +5167,7 @@ if __name__ == '__main__':
     print "Detected Apache:  %s" % installObject.apache_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
+    #print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -5150,8 +5187,11 @@ if __name__ == '__main__':
     elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
         installObject.load_properties(installObject.setup_properties_fn)
+    elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
+        installObject.load_properties(installObject.setup_properties_fn+'.enc')
     else:
-        installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
+        installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
         installObject.promptForProperties()
 
     # Validate Properties
