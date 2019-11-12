@@ -19,6 +19,7 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
+import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
@@ -53,6 +54,9 @@ public class ClientService {
 
 	@Inject
 	private CacheService cacheService;
+
+    @Inject
+    private LocalCacheService localCacheService;
 
 	@Inject
 	private ScopeService scopeService;
@@ -171,8 +175,9 @@ public class ClientService {
 	 * @return Client
 	 */
 	public Client getClientByDn(String dn) {
+    	CacheService usedCacheService = getCacheService();
 	    try {
-            return cacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
+            return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
         } catch (Exception e) {
 	        log.trace(e.getMessage(), e);
 	        return null;
@@ -241,8 +246,9 @@ public class ClientService {
 	}
 
 	private void removeFromCache(Client client) {
+    	CacheService usedCacheService = getCacheService();
 		try {
-			cacheService.remove(client.getDn());
+			usedCacheService.remove(client.getDn());
 		} catch (Exception e) {
 			log.error("Failed to remove client from cache." + client.getDn(), e);
 		}
@@ -339,5 +345,13 @@ public class ClientService {
 	public String encryptSecret(String clientSecret) throws EncryptionException {
 		return encryptionService.encrypt(clientSecret);
 	}
+
+    private CacheService getCacheService() {
+    	if (appConfiguration.getUseLocalCache()) {
+    		return localCacheService;
+    	}
+    	
+    	return cacheService;
+    }
 
 }
