@@ -66,8 +66,8 @@ public class CacheProviderFactory {
     }
 
     @Produces
-    @LocalCache
     @ApplicationScoped
+    @LocalCache
     public CacheProvider<?> getLocalCacheProvider() {
         log.debug("Started to create local cache provider");
 
