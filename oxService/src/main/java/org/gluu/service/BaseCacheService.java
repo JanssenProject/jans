@@ -128,6 +128,6 @@ public abstract class BaseCacheService implements CacheInterface {
         remove(key);
     }
 
-    public abstract CacheProvider getCacheProvider();
+    protected abstract CacheProvider getCacheProvider();
 
 }
