@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
@@ -109,7 +110,7 @@ public class ScopeService {
      * @return Scope
      */
     public org.oxauth.persistence.model.Scope getScopeByDn(String dn) {
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
         final Scope scope = usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Scope.class, dn), 60);
         if (scope != null && StringUtils.isNotBlank(scope.getId())) {
         	usedCacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
@@ -138,7 +139,7 @@ public class ScopeService {
      * @return scope
      */
     public Scope getScopeById(String id) {
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
 
     	final Object cached = usedCacheService.get(id);
         if (cached != null)
@@ -199,7 +200,7 @@ public class ScopeService {
     		return;
     	}
 
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
     	try {
         	String key = getClaimDnCacheKey(claimDn);
         	usedCacheService.put(key, scopes);
@@ -210,7 +211,7 @@ public class ScopeService {
 
     @SuppressWarnings("unchecked")
 	private List<org.oxauth.persistence.model.Scope> fromCacheByClaimDn(String claimDn) {
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
         try {
         	String key = getClaimDnCacheKey(claimDn);
             return (List<org.oxauth.persistence.model.Scope>) usedCacheService.get(key);
@@ -228,7 +229,7 @@ public class ScopeService {
         ldapEntryManager.persist(scope);
     }
 
-    private CacheService getCacheService() {
+    private BaseCacheService getCacheService() {
     	if (appConfiguration.getUseLocalCache()) {
     		return localCacheService;
     	}
