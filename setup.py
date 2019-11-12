@@ -4904,6 +4904,19 @@ class Setup(object):
 
             self.enable_service_at_start('gluu-radius')
 
+    def post_install_tasks(self):
+        super_gluu_lisence_renewer_fn = os.path.join(self.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
+        target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
+        self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+        self.run(['chown', 'root:root', target_fn])
+        self.run(['chmod', '+x', target_fn])
+        cron_service = 'cron'
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+            cron_service = 'crond'
+
+        self.run_service_command(cron_service, 'restart')
+
 
     def print_post_messages(self):
         print
@@ -5222,6 +5235,8 @@ if __name__ == '__main__':
                 installObject.import_custom_ldif(setupOptions['importLDIFDir'])
 
             installObject.deleteLdapPw()
+
+            installObject.post_install_tasks()
 
             installObject.pbar.progress("Completed")
             print
