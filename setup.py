@@ -1339,20 +1339,23 @@ class Setup(object):
                 self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
                 p.setProperty('ldap_type', 'opendj')
 
+            no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
             properties_list = p.keys()
+            
             for prop in properties_list:
-                if not prop in no_update:
-                    try:
-                        self.__dict__[prop] = p[prop]
-                        if prop == 'mappingLocations':
-                            self.__dict__[prop] = json.loads(p[prop])                    
-                        if p[prop] == 'True':
-                            self.__dict__[prop] = True
-                        elif p[prop] == 'False':
-                            self.__dict__[prop] = False
-                    except:
-                        self.logIt("Error loading property %s" % prop)
-                        self.logIt(traceback.format_exc(), True)
+                if prop in no_update:
+                    continue
+                try:
+                    self.__dict__[prop] = p[prop]
+                    if prop == 'mappingLocations':
+                        self.__dict__[prop] = json.loads(p[prop])                    
+                    if p[prop] == 'True':
+                        self.__dict__[prop] = True
+                    elif p[prop] == 'False':
+                        self.__dict__[prop] = False
+                except:
+                    self.logIt("Error loading property %s" % prop)
+                    self.logIt(traceback.format_exc(), True)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -3390,7 +3393,13 @@ class Setup(object):
                     if value != '':
                         p[key] = value
 
-            p.store(open(prop_fn, 'w'))
+            with open(prop_fn, 'w') as f:
+                p.store(f)
+            
+            self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.ldapPass])
+            
+            print prop_fn+'.enc', "is encrypted with password", self.ldapPass
+            
         except:
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
