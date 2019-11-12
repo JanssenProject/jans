@@ -75,7 +75,7 @@ suggested_free_disk_space = 40 #in GB
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
-cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 'query_update', 'query_insert', 'query_manage_index']
+
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
@@ -713,6 +713,7 @@ class Setup(object):
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
+        self.isCouchbaseUserAdmin = False
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
@@ -727,6 +728,11 @@ class Setup(object):
         self.couchbaseBuckets = []
         self.cbm = None
         self.cb_query_node = 0
+        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
+                            'query_update', 'query_insert',
+                            'query_manage_index']
+        self.post_messages = []
+        
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -3054,7 +3060,7 @@ class Setup(object):
             print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
                             colors.DANGER,
                             self.cbm.auth.username,
-                            ', '.join(cb_bucket_roles),
+                            ', '.join(self.cb_bucket_roles),
                             ', '.join(isCBRoleOK[1]),
                             colors.ENDC
                             )
@@ -3375,7 +3381,7 @@ class Setup(object):
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key == 'couchbaseInstallOutput':
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles'):
                     continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(obj.__dict__[key])
@@ -4292,6 +4298,7 @@ class Setup(object):
             
             for role in result['roles']:
                 if role['role'] == 'admin':
+                    self.isCouchbaseUserAdmin = True
                     return True, None
 
                 if not role['bucket_name'] in bucket_roles:
@@ -4300,7 +4307,7 @@ class Setup(object):
                 bucket_roles[role['bucket_name']].append(role['role'])
 
         for b_ in bc[:]:
-            for r_ in cb_bucket_roles:
+            for r_ in self.cb_bucket_roles:
                 if not r_ in bucket_roles[b_]:
                     break
             else:
@@ -4539,8 +4546,18 @@ class Setup(object):
             self.couchebaseCreateIndexes(bucket)
 
         if self.installSaml:
-            self.logIt("Creating couchbase readonly user for shib")
-            self.cbm.create_user('couchbaseShibUser', self.couchbaseShibUserPassword, 'Shibboleth IDP', 'query_select[*]')
+            
+            shib_user = 'couchbaseShibUser'
+            shib_user_password = self.couchbaseShibUserPassword
+            shib_user_roles = 'query_select[*]'
+            if self.isCouchbaseUserAdmin:
+                self.logIt("Creating couchbase readonly user for shib")
+                self.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
+            else:
+                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(colors.WARNING, colors.ENDC))
+                self.post_messages.append('Username: {}'.format(shib_user))
+                self.post_messages.append('Password: {}'.format(shib_user_password))
+                self.post_messages.append('Roles: {}'.format(shib_user_roles))
 
     def install_couchbase_server(self):
         # prepare multivalued list
@@ -4887,6 +4904,12 @@ class Setup(object):
 
             self.enable_service_at_start('gluu-radius')
 
+
+    def print_post_messages(self):
+        print
+        for m in self.post_messages:
+            print m
+
 ############################   Main Loop   #################################################
 
 
@@ -5202,6 +5225,7 @@ if __name__ == '__main__':
 
             installObject.pbar.progress("Completed")
             print
+            installObject.print_post_messages()
             
             if installObject.couchbaseInstallOutput:
                 print
