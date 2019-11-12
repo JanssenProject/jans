@@ -18,6 +18,7 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
@@ -175,7 +176,7 @@ public class ClientService {
 	 * @return Client
 	 */
 	public Client getClientByDn(String dn) {
-    	CacheService usedCacheService = getCacheService();
+		BaseCacheService usedCacheService = getCacheService();
 	    try {
             return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
         } catch (Exception e) {
@@ -246,7 +247,7 @@ public class ClientService {
 	}
 
 	private void removeFromCache(Client client) {
-    	CacheService usedCacheService = getCacheService();
+		BaseCacheService usedCacheService = getCacheService();
 		try {
 			usedCacheService.remove(client.getDn());
 		} catch (Exception e) {
@@ -346,7 +347,7 @@ public class ClientService {
 		return encryptionService.encrypt(clientSecret);
 	}
 
-    private CacheService getCacheService() {
+    private BaseCacheService getCacheService() {
     	if (appConfiguration.getUseLocalCache()) {
     		return localCacheService;
     	}

@@ -16,6 +16,7 @@ import javax.inject.Named;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class AttributeService extends org.gluu.service.AttributeService {
      * @return GluuAttribute
      */
     public GluuAttribute getAttributeByDn(String dn) {
-    	CacheService usedCacheService = getCacheService();
+    	BaseCacheService usedCacheService = getCacheService();
 
     	return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(GluuAttribute.class, dn), 60);
     }
@@ -105,7 +106,7 @@ public class AttributeService extends org.gluu.service.AttributeService {
         return claims;
     }
 
-    protected CacheService getCacheService() {
+    protected BaseCacheService getCacheService() {
     	if (appConfiguration.getUseLocalCache()) {
     		return localCacheService;
     	}
