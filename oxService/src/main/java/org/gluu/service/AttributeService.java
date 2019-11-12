@@ -42,6 +42,9 @@ public abstract class AttributeService implements Serializable {
     @Inject
     protected CacheService cacheService;
 
+    @Inject
+    protected LocalCacheService localCacheService;
+
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
         String[] targetArray = new String[] { attributeValue };
         Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
@@ -95,11 +98,13 @@ public abstract class AttributeService implements Serializable {
 
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getAllAttributes(String baseDn) {
-        List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
+    	CacheService usedCacheService = getCacheService();
+
+    	List<GluuAttribute> attributeList = (List<GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
         if (attributeList == null) {
             attributeList = getAllAtributesImpl(baseDn);
-            cacheService.put(OxConstants.CACHE_ATTRIBUTE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
         }
 
         return attributeList;
@@ -110,6 +115,8 @@ public abstract class AttributeService implements Serializable {
 
         return attributeList;
     }
+
+    protected abstract CacheService getCacheService();
 
     public abstract String getDnForAttribute(String inum);
 
