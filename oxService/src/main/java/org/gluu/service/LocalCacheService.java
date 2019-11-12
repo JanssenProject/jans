@@ -20,15 +20,14 @@ import org.gluu.service.cache.LocalCache;
  */
 @ApplicationScoped
 @Named
-@LocalCache
-public class LocalCacheService extends CacheService {
+public class LocalCacheService extends BaseCacheService {
 
     @Inject
     @LocalCache
     private CacheProvider cacheProvider;
 
 	@Override
-	public CacheProvider getCacheProvider() {
+	protected CacheProvider getCacheProvider() {
 		return cacheProvider;
 	}
 
