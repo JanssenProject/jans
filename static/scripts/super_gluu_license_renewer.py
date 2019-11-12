@@ -82,7 +82,38 @@ def renew_license():
         print license_fn, " does not include licenseId"
         return
 
-    url = "https://license.gluu.org/oxLicense/rest/generate?licenseId=" + licenseId
+    licenseId = "27c3c5c2-c570-4711-8b78-c2a407146adb"
+
+    url_metadata = 'https://license.gluu.org/oxLicense/rest/metadata?licenseId=' + licenseId
+
+    try:
+        url_metadata_fd = urllib.urlopen(url_metadata)
+        metadata_s = url_metadata_fd.read()
+
+    except:
+        print "Can't read from", url_metadata
+        return
+
+    try:
+        metadata = json.loads(metadata_s)
+    except:
+        print "Can't load json from", metadata_s
+        return
+        
+    if 'expiration_date' in metadata: 
+        expiration_date =  metadata['expiration_date']
+    else:
+        print "Can't get expiration_date from json", metadata
+        return
+
+    seconds_left = int(expiration_date/1000) - time.time()
+    a_day = 24*60*60
+
+    if seconds_left >= a_day:
+        print int(seconds_left/a_day), "days left to expire. No need to renew"
+        return
+
+    url = 'https://license.gluu.org/oxLicense/rest/generate?licenseId=' + licenseId
     try:
         url_fd = urllib.urlopen(url)
         data_s = url_fd.read()
