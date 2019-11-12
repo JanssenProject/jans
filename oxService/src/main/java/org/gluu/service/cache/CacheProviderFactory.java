@@ -65,4 +65,22 @@ public class CacheProviderFactory {
         return cacheProvider;
     }
 
+    @Produces
+    @LocalCache
+    @ApplicationScoped
+    public CacheProvider<?> getLocalCacheProvider() {
+        log.debug("Started to create local cache provider");
+
+        CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
+        AbstractCacheProvider<?> cacheProvider = instance.select(InMemoryCacheProvider.class).get();
+
+        if (cacheProvider == null) {
+            throw new RuntimeException("Failed to initialize cacheProvider, cacheProviderType is unsupported: " + cacheProviderType);
+        }
+
+        cacheProvider.create();
+
+        return cacheProvider;
+    }
+
 }
