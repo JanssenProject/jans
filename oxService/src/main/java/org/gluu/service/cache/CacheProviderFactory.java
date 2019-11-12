@@ -68,7 +68,7 @@ public class CacheProviderFactory {
     @Produces
     @ApplicationScoped
     @LocalCache
-    public CacheProvider<?> getLocalCacheProvider() {
+    public CacheProvider getLocalCacheProvider() {
         log.debug("Started to create local cache provider");
 
         CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
