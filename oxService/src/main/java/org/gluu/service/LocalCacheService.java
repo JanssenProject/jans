@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.service.cache.CacheProvider;
+import org.gluu.service.cache.LocalCache;
 
 /**
  * Provides operations with cache
@@ -19,14 +20,17 @@ import org.gluu.service.cache.CacheProvider;
  */
 @ApplicationScoped
 @Named
-public class CacheService extends BaseCacheService {
+@LocalCache
+public class LocalCacheService extends CacheService {
 
     @Inject
+    @LocalCache
     private CacheProvider cacheProvider;
 
 	@Override
 	public CacheProvider getCacheProvider() {
 		return cacheProvider;
 	}
+
 
 }
