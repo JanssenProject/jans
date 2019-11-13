@@ -1434,6 +1434,9 @@ class Setup(object):
             self.run([self.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
+        with open('/var/www/html/index.html','w') as w:
+            w.write('OK')
+
         self.run([service_path, apache_service_name, 'start'])
 
     def copy_output(self):
