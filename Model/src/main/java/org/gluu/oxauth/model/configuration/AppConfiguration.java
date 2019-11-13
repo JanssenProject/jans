@@ -189,6 +189,8 @@ public class AppConfiguration implements Configuration {
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
     // CIBA
+    private String backchannelClientId;
+    private String backchannelRedirectUri;
     private String backchannelAuthenticationEndpoint;
     private String backchannelDeviceRegistrationEndpoint;
     private List<String> backchannelTokenDeliveryModesSupported;
@@ -1469,6 +1471,22 @@ public class AppConfiguration implements Configuration {
 
     public void setErrorHandlingMethod(ErrorHandlingMethod errorHandlingMethod) {
         this.errorHandlingMethod = errorHandlingMethod;
+    }
+
+    public String getBackchannelClientId() {
+        return backchannelClientId;
+    }
+
+    public void setBackchannelClientId(String backchannelClientId) {
+        this.backchannelClientId = backchannelClientId;
+    }
+
+    public String getBackchannelRedirectUri() {
+        return backchannelRedirectUri;
+    }
+
+    public void setBackchannelRedirectUri(String backchannelRedirectUri) {
+        this.backchannelRedirectUri = backchannelRedirectUri;
     }
 
     public String getBackchannelAuthenticationEndpoint() {

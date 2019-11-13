@@ -303,6 +303,8 @@
         "PS384",
         "PS512"
     ],
+    "backchannelClientId": "123-123-123",
+    "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
     "backchannelBindingMessagePattern": "^[A-Z]{1,10}$",
     "backchannelAuthenticationResponseExpiresIn": 3600,
