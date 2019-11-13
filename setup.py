@@ -1437,21 +1437,6 @@ class Setup(object):
         with open('/var/www/html/index.html','w') as w:
             w.write('OK')
 
-        mod_security_conf_src = '/etc/modsecurity/modsecurity.conf-recommended'
-
-        if os.path.exists(mod_security_conf_src):
-            self.run(['cp', '-f', mod_security_conf_src, mod_security_conf_src[:-12]])
-
-        with open(mod_security_conf_src[:-12]) as f:
-            mod_security_conf = f.readlines()
-
-        for i, l in enumerate(mod_security_conf[:]):
-            if l.strip().startswith('SecRuleEngine'):
-                mod_security_conf[i] = 'SecRuleEngine On\n'
-
-        with open(mod_security_conf_src[:-12], 'w') as w:
-            w.write(''.join(mod_security_conf))
-
         self.run([service_path, apache_service_name, 'start'])
 
     def copy_output(self):
