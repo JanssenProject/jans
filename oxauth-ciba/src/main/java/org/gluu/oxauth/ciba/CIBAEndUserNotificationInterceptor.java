@@ -65,6 +65,7 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
 
     @Override
     public void notifyEndUser(String scope, String acrValues, String authReqId, String deviceRegistrationToken) {
+        String clientId = appConfiguration.getBackchannelClientId();
         String url = appConfiguration.getCibaEndUserNotificationConfig().getNotificationUrl();
         String key = appConfiguration.getCibaEndUserNotificationConfig().getNotificationKey();
         String to = deviceRegistrationToken;
@@ -72,10 +73,10 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
         String body = "Client Initiated Backchannel Authentication (CIBA)";
 
         RedirectUri redirectUri = new RedirectUri(appConfiguration.getAuthorizationEndpoint());
+        redirectUri.addResponseParameter(CLIENT_ID, clientId);
         redirectUri.addResponseParameter(RESPONSE_TYPE, "id_token");
         redirectUri.addResponseParameter(SCOPE, scope);
         redirectUri.addResponseParameter(ACR_VALUES, acrValues);
-        //redirectUri.addResponseParameter(CLIENT_ID, "fcc1f237-1c84-4d25-8ca5-4fb0030da256");
         redirectUri.addResponseParameter(REDIRECT_URI, "https://ce.gluu.info:8443/ciba/home.htm");
         redirectUri.addResponseParameter(STATE, UUID.randomUUID().toString());
         redirectUri.addResponseParameter(NONCE, UUID.randomUUID().toString());
