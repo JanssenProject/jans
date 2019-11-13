@@ -3426,7 +3426,7 @@ class Setup(object):
             
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.ldapPass])
             
-            self.post_messages.append(prop_fn+'.enc', "is encrypted with password", self.ldapPass)
+            self.post_messages.append(prop_fn+".enc is encrypted with password " + self.ldapPass)
             
             self.run(['rm', '-f', prop_fn])
             
