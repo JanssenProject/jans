@@ -1452,6 +1452,7 @@ class Setup(object):
         with open(icons_conf_fn, 'w') as w:
             w.write(''.join(icons_conf))
 
+        self.run(['cp', os.path.join(self.templateFolder,'apache/*'), '/var/www/html'])
 
         self.run([service_path, apache_service_name, 'start'])
 
