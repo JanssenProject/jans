@@ -246,7 +246,10 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
-                    authorizationGrant.getScopesAsString(), authorizationGrant.getAcrValues(), authReqId, deviceRegistrationToken);
+                    authorizationGrant.getScopesAsString(),
+                    authorizationGrant.getAcrValues(),
+                    authReqId,
+                    deviceRegistrationToken);
 
             builder.entity(getJSONObject(
                     authReqId,

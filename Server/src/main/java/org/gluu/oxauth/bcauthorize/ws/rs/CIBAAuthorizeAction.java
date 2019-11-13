@@ -16,6 +16,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.service.AuthorizeService;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.util.RedirectUri;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -26,6 +27,9 @@ import javax.inject.Named;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+
+import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
@@ -190,6 +194,26 @@ public class CIBAAuthorizeAction {
 
     public String getPublicVapidKey() {
         return appConfiguration.getCibaEndUserNotificationConfig().getPublicVapidKey();
+    }
+
+    public String getAuthRequest() {
+        String authorizationEndpoint = appConfiguration.getAuthorizationEndpoint();
+        String clientId = appConfiguration.getBackchannelClientId();
+        String redirectUri = appConfiguration.getBackchannelRedirectUri();
+        String responseType = "token id_token";
+        String scope = "openid";
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        RedirectUri authRequest = new RedirectUri(authorizationEndpoint);
+        authRequest.addResponseParameter(CLIENT_ID, clientId);
+        authRequest.addResponseParameter(REDIRECT_URI, redirectUri);
+        authRequest.addResponseParameter(RESPONSE_TYPE, responseType);
+        authRequest.addResponseParameter(SCOPE, scope);
+        authRequest.addResponseParameter(STATE, state);
+        authRequest.addResponseParameter(NONCE, nonce);
+
+        return authRequest.toString();
     }
 
     public String getBackchannelDeviceRegistrationEndpoint() {
