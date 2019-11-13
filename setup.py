@@ -1437,6 +1437,22 @@ class Setup(object):
         with open('/var/www/html/index.html','w') as w:
             w.write('OK')
 
+        if self.os_type in ['centos', 'red', 'fedora']:
+            icons_conf_fn = '/etc/httpd/conf.d/autoindex.conf'
+        else:
+            icons_conf_fn = '/etc/apache2/mods-available/alias.conf'
+
+        with open(icons_conf_fn[:]) as f:
+            icons_conf = f.readlines()
+
+        for i, l in enumerate(icons_conf[:]):
+            if l.strip().startswith('Alias') and ('/icons/' in l.strip().split()):
+                icons_conf[i] =  l.replace('Alias', '#Alias')
+
+        with open(icons_conf_fn, 'w') as w:
+            w.write(''.join(icons_conf))
+
+
         self.run([service_path, apache_service_name, 'start'])
 
     def copy_output(self):
