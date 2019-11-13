@@ -8,7 +8,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Firebase Cloud Messaging Example</title>
+        <title>oxAuth - CIBA</title>
 
         <!-- Material Design Theming -->
         <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.orange-indigo.min.css" />
@@ -185,7 +185,7 @@
             // [START_EXCLUDE]
             // Update the UI to include the received message.
             appendMessage(payload);
-            window.location.href = payload.notification.click_action + '&amp;client_id=fcc1f237-1c84-4d25-8ca5-4fb0030da256';
+            window.location.href = payload.notification.click_action;
             // [END_EXCLUDE]
         });
         // [END receive_message]
@@ -264,14 +264,7 @@
         function authenticateUser() {
             console.log('Authenticating user...');
 
-            // TODO: Use configuration
-            var authRequest = 'https://ce.gluu.info:8443/restv1/authorize?' +
-                'response_type=token id_token' + '&amp;' +
-                'client_id=fcc1f237-1c84-4d25-8ca5-4fb0030da256' + '&amp;' +
-                'scope=openid' + '&amp;' +
-                'redirect_uri=https://ce.gluu.info:8443/ciba/home.htm' + '&amp;' +
-                'state=4fa9d703-64bc-4439-9183-495a2c53900b' + '&amp;' +
-                'nonce=2d681c70-6b05-430c-8ac6-ac82b63945cb';
+            var authRequest = '#{ cibaAuthorizeAction.authRequest }';
 
             window.location.href = authRequest;
         }
