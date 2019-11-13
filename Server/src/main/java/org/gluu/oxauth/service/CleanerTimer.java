@@ -88,9 +88,6 @@ public class CleanerTimer {
 	@Inject
 	private CacheConfiguration cacheConfiguration;
 
-    @Inject
-    private CacheService cacheService;
-
 	@Inject
 	private Event<TimerEvent> cleanerEvent;
 
