@@ -29,7 +29,8 @@ public class SimpleUser implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "uid")
+
+    @AttributeName(name = "uid", consistency = true)
     private String userId;
 
     @AttributeName(name = "oxAuthPersistentJWT")
