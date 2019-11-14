@@ -1456,6 +1456,44 @@ class Setup(object):
 
         self.run([service_path, apache_service_name, 'start'])
 
+        mods_enabled = ['env', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id']
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+
+            for mod_load_fn in glob.glob('/etc/httpd/conf.modules.d/*'):
+
+                with open(mod_load_fn) as f:
+                    mod_load_content = f.readlines()
+
+                modified = False
+                
+                for i, l in enumerate(mod_load_content[:]):
+                    ls = l.strip()
+                    
+                    if ls and not ls.startswith('#'):
+                        lsl = ls.split('/')
+                        module =  lsl[-1][4:-3]
+                        
+                        if not module in mods_enabled:
+                            mod_load_content[i] = l.replace('LoadModule', '#LoadModule')
+                            modified = True
+                        
+                        else:
+                            print module
+
+                if modified:
+                    with open(mod_load_fn, 'w') as w:
+                        w.write(''.join(mod_load_content))
+        else:
+
+            for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*'):
+                mod_load_base_name = os.path.basename(mod_load_fn)
+                f_name, f_ext = os.path.splitext(mod_load_base_name)
+
+                if not f_name in mods_enabled:
+                    os.unlink(mod_load_fn)
+
+
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
 
