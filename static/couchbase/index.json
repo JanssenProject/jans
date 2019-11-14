@@ -4,7 +4,9 @@
       ["objectClass"], 
       ["creationDate"], 
       ["inum"], 
-      ["del","exp"] 
+      ["del","exp"], 
+      ["uid"], 
+      ["mail"] 
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
