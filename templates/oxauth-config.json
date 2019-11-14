@@ -259,8 +259,8 @@
     "legacyIdTokenClaims": %(oxauth_legacyIdTokenClaims)s,
     "customHeadersWithAuthorizationResponse": true,
     "frontChannelLogoutSessionSupported":true,
-    "updateUserLastLogonTime": true,
-    "updateClientAccessTime":true,
+    "updateUserLastLogonTime": false,
+    "updateClientAccessTime":false,
     "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
@@ -307,5 +307,6 @@
         "disableFido2":true
     },
    "loggingLevel": "INFO",
-   "errorHandlingMethod":"internal"
+   "errorHandlingMethod":"internal",
+   "useLocalCache":true
 }
