@@ -1456,6 +1456,7 @@ class Setup(object):
 
         self.run([service_path, apache_service_name, 'start'])
 
+        # we only need these modules
         mods_enabled = ['env', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id']
 
         if self.os_type in ['centos', 'red', 'fedora']:
@@ -1491,7 +1492,7 @@ class Setup(object):
                 f_name, f_ext = os.path.splitext(mod_load_base_name)
 
                 if not f_name in mods_enabled:
-                    os.unlink(mod_load_fn)
+                    self.run(['unlink', mod_load_fn])
 
 
     def copy_output(self):
