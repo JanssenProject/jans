@@ -3143,17 +3143,20 @@ class Setup(object):
 
         buckets_.append('gluu')
 
-        isCBRoleOK = self.checkCBRoles(buckets_)
 
-        if not isCBRoleOK[0]:
-            print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
-                            colors.DANGER,
-                            self.cbm.auth.username,
-                            ', '.join(self.cb_bucket_roles),
-                            ', '.join(isCBRoleOK[1]),
-                            colors.ENDC
-                            )
-            sys.exit(False)
+        if self.persistence_type in ('couchbase','hybrid'):
+
+            isCBRoleOK = self.checkCBRoles(buckets_)
+
+            if not isCBRoleOK[0]:
+                print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
+                                colors.DANGER,
+                                self.cbm.auth.username,
+                                ', '.join(self.cb_bucket_roles),
+                                ', '.join(isCBRoleOK[1]),
+                                colors.ENDC
+                                )
+                sys.exit(False)
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(self.installHTTPD)
@@ -3587,7 +3590,6 @@ class Setup(object):
         if self.mappingLocations['site'] == 'ldap':
             config_changes.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
-                          
         config_changes += [
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                           ['set-connection-handler-prop', '--handler-name', '"JMX Connection Handler"', '--set', 'enabled:false'],
@@ -3597,13 +3599,13 @@ class Setup(object):
                           ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['create-plugin', '--plugin-name', '"Unique mail address"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:mail'],
                           ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
+                          ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
                           ]
         
         if self.opendj_type == 'opendj':
             config_changes.insert(2, ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'])
 
-        
-        
+
         if not self.listenAllInterfaces:
             config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
             config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
