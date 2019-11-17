@@ -173,6 +173,8 @@ public class AppConfiguration implements Configuration, Serializable {
     private int cleanServiceInterval;
     private Boolean enforceEmailUniqueness = true;
 
+    private Boolean useLocalCache = false;
+
     public ScimProperties getScimProperties() {
         return scimProperties;
     }
@@ -1007,4 +1009,13 @@ public class AppConfiguration implements Configuration, Serializable {
 	public void setEnforceEmailUniqueness(Boolean enforceEmailUniqueness) {
 		this.enforceEmailUniqueness = enforceEmailUniqueness;
 	}
+
+	public Boolean getUseLocalCache() {
+		return useLocalCache;
+	}
+
+	public void setUseLocalCache(Boolean useLocalCache) {
+		this.useLocalCache = useLocalCache;
+	}
+
 }
