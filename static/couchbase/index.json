@@ -83,11 +83,9 @@
 
   "gluu_cache": {
     "attributes":[
-      ["del","exp"]
     ],
     "static" : [
-      [["exp", "oxAuthExpiration"], "del=true"],
-      [["oxAuthExpiration"], "objectClass = \"cache\""]
+      [["exp"], "objectClass = \"cache\" and del=true"]
     ]
   },
 
