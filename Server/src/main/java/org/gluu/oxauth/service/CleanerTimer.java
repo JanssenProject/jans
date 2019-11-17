@@ -28,6 +28,7 @@ import org.gluu.service.cdi.event.CleanerEvent;
 import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CleanerTimer {
 
 	public final static int BATCH_SIZE = 1000;
-	private final static int DEFAULT_INTERVAL = 600; // 10 minutes
+	private final static int DEFAULT_INTERVAL = 60; // 1 minute
 
 	@Inject
 	private Logger log;
@@ -91,25 +92,19 @@ public class CleanerTimer {
 	@Inject
 	private Event<TimerEvent> cleanerEvent;
 
+	private long lastFinishedTime;
+
 	private AtomicBoolean isActive;
 
 	public void initTimer() {
 		log.debug("Initializing Cleaner Timer");
 		this.isActive = new AtomicBoolean(false);
 
-		int interval = appConfiguration.getCleanServiceInterval();
-		if (interval < 0) {
-			log.info("Cleaner Timer is disabled.");
-			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
-			return;
-		}
-
-		if (interval == 0) {
-			interval = DEFAULT_INTERVAL;
-		}
-
+		// Schedule to start cleaner every 1 minute
 		cleanerEvent.fire(
-				new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+
+		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	@Asynchronous
@@ -129,12 +124,32 @@ public class CleanerTimer {
 		}
 	}
 
-	public void processImpl() {
-        int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
-        if (chunkSize <= 0)
-            chunkSize = BATCH_SIZE;
+	private boolean isStartProcess() {
+		int interval = appConfiguration.getCleanServiceInterval();
+		if (interval < 0) {
+			log.info("Cleaner Timer is disabled.");
+			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+			return false;
+		}
 
+		long cleaningInterval = interval * 60 * 1000;
+
+		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+
+		return timeDiffrence >= cleaningInterval;
+	}
+
+	public void processImpl() {
         try {
+			if (!isStartProcess()) {
+				log.trace("Starting conditions aren't reached");
+				return;
+			}
+
+			int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+            if (chunkSize <= 0)
+                chunkSize = BATCH_SIZE;
+
             Date now = new Date();
 
 			for (String baseDn : createCleanServiceBaseDns()) {
