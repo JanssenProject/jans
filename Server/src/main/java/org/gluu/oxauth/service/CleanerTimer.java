@@ -163,6 +163,8 @@ public class CleanerTimer {
 
 			this.registrationPersistenceService.cleanup(now, chunkSize);
 			this.authenticationPersistenceService.cleanup(now, chunkSize);
+
+			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Exception e) {
 			log.error("Failed to process clean up.", e);
 		}
