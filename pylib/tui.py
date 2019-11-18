@@ -5,7 +5,7 @@ import npyscreen
 import sys
 import random
 from messages import msg
-
+import textwrap
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -31,9 +31,9 @@ class GluuSetupApp(npyscreen.StandardApp):
 class GluuSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
-        my, mx = self.curses_pad.getmaxyx()
-        self.add(npyscreen.MultiLineEdit, value='─' * mx, max_height=1, rely=my-4, editable=False)
-        self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=my-3, editable=False)
+        self.my, self.mx = self.curses_pad.getmaxyx()
+        self.add(npyscreen.MultiLineEdit, value='─' * self.mx, max_height=1, rely=self.my-4, editable=False)
+        self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.my-3, editable=False)
 
 
     def while_waiting(self):
@@ -45,13 +45,18 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
 class Form1(GluuSetupForm):
     def create(self):
+        my, mx = self.curses_pad.getmaxyx()
+        desc_wrap = textwrap.wrap(msg.decription, mx - 6)
+        
+        
+        self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
+        self.description_label.autowrap = True
+        
 
-        self.description_label = self.add(npyscreen.MultiLineEdit, value=msg.decription, max_height=6, rely=2, editable=False)
+        self.os_type = self.add(npyscreen.TitleFixedText, name="Detected OS", begin_entry_at=18, value=msg.os_type, editable=False)
 
-        self.os_type = self.add(npyscreen.TitleFixedText, name="Detected OS", value=msg.os_type, editable=False)
-
-        self.init_type = self.add(npyscreen.TitleFixedText, name="Detected init", value=msg.os_initdaemon, editable=False)
-        self.httpd_type = self.add(npyscreen.TitleFixedText, name="Apache Version", value=msg.apache_version, editable=False)
+        self.init_type = self.add(npyscreen.TitleFixedText, name="Detected init", begin_entry_at=18, value=msg.os_initdaemon, editable=False)
+        self.httpd_type = self.add(npyscreen.TitleFixedText, name="Apache Version", begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
 
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
 
@@ -96,9 +101,6 @@ class Form1(GluuSetupForm):
 
         self.button_next.rely = my-5
         self.button_next.relx = mx-20
-
-
-
 
 
 class Form2(GluuSetupForm):
