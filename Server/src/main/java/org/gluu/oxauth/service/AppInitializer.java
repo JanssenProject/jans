@@ -178,7 +178,6 @@ public class AppInitializer {
 		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
 
 		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
-		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Initialize python interpreter
 		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration()
@@ -204,6 +203,9 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
 		initTimer();
+
+		// Set default authentication method after 
+		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
@@ -559,7 +561,12 @@ public class AppInitializer {
 			return configuration.getAuthenticationMode();
 		}
 		
-		return externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE).getName();
+		CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
+		if (defaultExternalAuthenticator != null) {
+			return defaultExternalAuthenticator.getName();
+		}
+
+		return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME;
 	}
 
 	@Produces
