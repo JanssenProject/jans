@@ -67,7 +67,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version November 19, 2019
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -588,7 +588,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     boolean includeIdTokenClaims = Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims());
                                     if (authorizationGrant == null) {
                                         includeIdTokenClaims = true;
-                                        authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
+                                        authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
                                                 sessionUser.getAuthenticationTime());
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
@@ -640,7 +640,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
 
                                 if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
-                                    CIBAGrant cibaGrant =  authorizationGrantList.getCIBAGrant(authReqId);
+                                    CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
                                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
 
@@ -698,8 +698,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
             log.error(e.getMessage(), e);
         } catch (InvalidSessionStateException ex) {
-        	// Allow to handle it via GlobalExceptionHandler
-        	throw ex;
+            // Allow to handle it via GlobalExceptionHandler
+            throw ex;
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
             log.error(e.getMessage(), e);
@@ -761,7 +761,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String sessionId, String claims, String authReqId,
             Map<String, String> customParameters) {
 
-        final URI contextUri =  URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
+        final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
 
         redirectUriResponse.setBaseRedirectUri(contextUri.toString());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
