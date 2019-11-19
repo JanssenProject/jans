@@ -75,6 +75,7 @@ suggested_free_disk_space = 40 #in GB
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
+re_split_host = re.compile(r'[^,\s,;]+')
 
 
 try:
@@ -2968,9 +2969,11 @@ class Setup(object):
             self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
             self.ldapPass = self.getPrompt("    Couchbase Password")
 
-            for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
+            cb_hosts = re_split_host.findall(self.couchbase_hostname)
 
-                cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
+            for i, cb_host in enumerate(cb_hosts):
+
+                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
                 print "    Checking Couchbase connection for " + cb_host
 
                 cbm_result = cbm_.test_connection()
@@ -2989,12 +2992,11 @@ class Setup(object):
 
                 if cbm_result.ok and cb_query_node != None:
                     print "    Successfully connected to Couchbase server"
-                    cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+                    cb_host_ = cb_hosts[self.cb_query_node]
                     self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
                     break
                 if cb_query_node == None:
                     print "Can't find any query node"
-
 
     def promptForProperties(self):
 
@@ -4519,7 +4521,7 @@ class Setup(object):
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
         
-        for cb_host in self.couchbase_hostname.split(','):
+        for cb_host in re_split_host.findall(self.couchbase_hostname):
 
             cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
             cert = cbm_.get_certificate()
@@ -4534,7 +4536,7 @@ class Setup(object):
 
     def couchbaseDict(self):
         prop_dict = {
-                    'hostname': self.couchbase_hostname.replace(' ','').replace('\t',''),
+                    'hostname': ','.join(re_split_host.findall(self.couchbase_hostname)),
                     'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
@@ -4704,17 +4706,19 @@ class Setup(object):
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
         ldif_user_files = [ox_auth_test_user_ldif, scim_test_user_ldif]
 
+        cb_hosts = re_split_host.findall(self.couchbase_hostname)
+
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
         else:
-            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+            cb_host = cb_hosts[self.cb_query_node]
             self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
-            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
+            cb_host = cb_hosts[self.cb_query_node]
             self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
