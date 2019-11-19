@@ -274,9 +274,12 @@ public class IdTokenFactory {
             if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
-
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+            String sub = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (sub != null && !sub.isEmpty())
+                jwt.getClaims().setSubjectIdentifier(sub);
+            else
+                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -473,9 +476,12 @@ public class IdTokenFactory {
             if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
-
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+            String sub = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (sub != null && !sub.isEmpty())
+                jwe.getClaims().setSubjectIdentifier(sub);
+            else
+                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
