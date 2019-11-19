@@ -50,7 +50,7 @@ import com.google.common.collect.Sets;
 public class CleanerTimer {
 
 	public final static int BATCH_SIZE = 1000;
-	private final static int DEFAULT_INTERVAL = 60; // 1 minute
+	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	@Inject
 	private Logger log;
