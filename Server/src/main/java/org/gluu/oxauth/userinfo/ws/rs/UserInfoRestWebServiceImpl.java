@@ -76,6 +76,7 @@ import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -484,9 +485,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
-
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
+                subValue = authorizationGrant.getUser().getUserId();
+            }
+            jsonWebResponse.getClaims().setSubjectIdentifier(subValue);
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
