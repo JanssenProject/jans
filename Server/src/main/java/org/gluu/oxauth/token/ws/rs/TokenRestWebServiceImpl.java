@@ -14,6 +14,7 @@ import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.CodeVerifier;
 import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -28,6 +29,8 @@ import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentials
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.util.OxConstants;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,6 +96,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private AttributeService attributeService;
+
+    @Inject
+    private SessionIdService sessionIdService;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -315,16 +321,32 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 	                            user = context.getUser();
 	                        }
 	                    } else {
-	                    	authenticated = authenticationService.authenticate(username, password);
-	                        if (authenticated) {
-	                            user = authenticationService.getAuthenticatedUser();
-	                        }
-	                    	
+	                    	try {
+	                    		authenticated = authenticationService.authenticate(username, password);
+		                        if (authenticated) {
+		                            user = authenticationService.getAuthenticatedUser();
+		                        }
+	                    	} catch (AuthenticationException ex ) {
+	                            log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
+	                    	}
 	                    }
                     }
 
                     if (user != null) {
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                        SessionId sessionId = identity.getSessionId();
+                        if (sessionId != null) {
+                        	resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+                        	resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionId.getDn());
+                        	resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
+                        	
+                        	sessionId.getSessionAttributes().put(Constants.AUTHORIZED_GRANT, gt.getValue());
+                            boolean updateResult = sessionIdService.updateSessionId(sessionId, false, true, true);
+                            if (!updateResult) {
+                                log.debug("Failed to update session entry: '{}'", sessionId.getId());
+                            }
+                        }
+
 
                         RefreshToken reToken = null;
                         if (client.getGrantTypes() != null

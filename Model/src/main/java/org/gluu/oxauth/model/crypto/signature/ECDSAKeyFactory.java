@@ -59,8 +59,8 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
         BCECPrivateKey privateKeySpec = (BCECPrivateKey) keyPair.getPrivate();
         BCECPublicKey publicKeySpec = (BCECPublicKey) keyPair.getPublic();
 
-        BigInteger x = publicKeySpec.getQ().getX().toBigInteger();
-        BigInteger y = publicKeySpec.getQ().getY().toBigInteger();
+        BigInteger x = publicKeySpec.getQ().getXCoord().toBigInteger();
+        BigInteger y = publicKeySpec.getQ().getYCoord().toBigInteger();
         BigInteger d = privateKeySpec.getD();
 
         this.ecdsaPrivateKey = new ECDSAPrivateKey(d);
