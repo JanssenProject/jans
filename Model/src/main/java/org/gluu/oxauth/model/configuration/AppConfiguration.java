@@ -24,7 +24,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 20, 2019
+ * @version November 20, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -58,6 +58,7 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
+    private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
     private Set<ResponseMode> responseModesSupported;
@@ -182,6 +183,8 @@ public class AppConfiguration implements Configuration {
     private Boolean legacyDynamicRegistrationScopeParam;
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
+
+    private Boolean useLocalCache = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -843,6 +846,14 @@ public class AppConfiguration implements Configuration {
         this.umaPctLifetime = umaPctLifetime;
     }
 
+    public int getSpontaneousScopeLifetime() {
+        return spontaneousScopeLifetime;
+    }
+
+    public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
+        this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
     public int getCleanServiceInterval() {
         return cleanServiceInterval;
     }
@@ -1471,6 +1482,14 @@ public class AppConfiguration implements Configuration {
 
     public void setErrorHandlingMethod(ErrorHandlingMethod errorHandlingMethod) {
         this.errorHandlingMethod = errorHandlingMethod;
+    }
+
+    public Boolean getUseLocalCache() {
+        return useLocalCache;
+    }
+
+    public void setUseLocalCache(Boolean useLocalCache) {
+        this.useLocalCache = useLocalCache;
     }
 
     public String getBackchannelClientId() {

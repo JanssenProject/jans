@@ -406,7 +406,11 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
 	public CustomScriptConfiguration getDefaultExternalAuthenticator(AuthenticationScriptUsageType usageType) {
-		return this.defaultExternalAuthenticators.get(usageType);
+		if (this.defaultExternalAuthenticators != null) {
+			return this.defaultExternalAuthenticators.get(usageType);
+		}
+		
+		return null;
 	}
 
 	public CustomScriptConfiguration getCustomScriptConfiguration(AuthenticationScriptUsageType usageType, String name) {

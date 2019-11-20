@@ -80,9 +80,9 @@ input.btn.btn-done {
 </style>
 	</ui:define>
 
-	<ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
+	<ui:define name="pageTitle">#{msgs['otp_sms.pageTitle']}</ui:define>
 	<ui:define name="body">
-		<h:form id="TwilioSmsloginForm">
+		<h:form id="OtpSmsloginForm">
 			<h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
 				<ui:param name="client"
 					value="#{clientService.getClient(redirect.parameters['client_id'])}" />
@@ -93,16 +93,16 @@ input.btn.btn-done {
 
 				<div class="container">
 					<div class="step_bx">
-						<h2>#{msgs['twilio.verification']}</h2>
-						<p>#{msgs['twilio.usedevice']}</p>
+						<h2>#{msgs['otp_sms.verification']}</h2>
+						<p>#{msgs['otp_sms.usedevice']}</p>
 						<img
 							src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
 							alt="phone-ver" />
-						<h4>#{msgs['twilio.verificationcode']}</h4>
+						<h4>#{msgs['otp_sms.verificationcode']}</h4>
 						<p>
-							<h:outputText value="#{msgs['twilio.codesent']} " escape="false" />
+							<h:outputText value="#{msgs['otp_sms.codesent']} " escape="false" />
 							<h:outputText
-								value="#{authenticator.getTwilioNumber()}" />
+								value="#{authenticator.getMaskedNumber()}" />
 						</p>
 						<h:messages style="margin-left:-35px;text-align: center;color:red;" id="messages"
 							globalOnly="true" styleClass="message text-center"
@@ -111,13 +111,13 @@ input.btn.btn-done {
 						<input name="passcode" type="text" class="form-control"
 							placeholder="Enter the 6 digit code" autocomplete="off" />
 						<h:commandButton styleClass="btn btn-done"
-							value="#{msgs['twilio.login']}"
+							value="#{msgs['otp_sms.login']}"
 							action="#{authenticator.authenticate}" />
 					</div>
 				</div>
 				<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
 					<p>
-						<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['twiliosms.termsPrivacy']}</a>
+						<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['otp_sms.termsPrivacy']}</a>
 					</p>
 				</h:panelGroup>
 			</h:panelGroup>

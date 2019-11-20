@@ -55,6 +55,8 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
+    private Boolean allowSpontaneousScopes;
+    private List<String> spontaneousScopes;
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
@@ -162,6 +164,22 @@ public class RegisterRequest extends BaseRequest {
 
     public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
         this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public Boolean getAllowSpontaneousScopes() {
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopes() {
+        return spontaneousScopes;
+    }
+
+    public void setSpontaneousScopes(List<String> spontaneousScopes) {
+        this.spontaneousScopes = spontaneousScopes;
     }
 
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
@@ -1201,6 +1219,12 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
         }
+        if (allowSpontaneousScopes != null) {
+            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            parameters.put(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
+        }
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
         }
@@ -1389,6 +1413,8 @@ public class RegisterRequest extends BaseRequest {
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
+        result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
+        result.setSpontaneousScopes(ClientUtil.extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
         result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
@@ -1480,6 +1506,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (allowSpontaneousScopes != null) {
+            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes);
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            parameters.put(SPONTANEOUS_SCOPES.toString(), toJSONArray(spontaneousScopes));
         }
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
