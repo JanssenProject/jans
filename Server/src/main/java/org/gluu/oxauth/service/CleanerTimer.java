@@ -6,9 +6,18 @@
 
 package org.gluu.oxauth.service;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.model.config.StaticConfiguration;
@@ -19,10 +28,7 @@ import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
-import org.gluu.service.CacheService;
-import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.cache.CacheProvider;
-import org.gluu.service.cache.CacheProviderType;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.CleanerEvent;
 import org.gluu.service.cdi.event.Scheduled;
@@ -30,16 +36,8 @@ import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,13 +50,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CleanerTimer {
 
 	public final static int BATCH_SIZE = 1000;
-	private final static int DEFAULT_INTERVAL = 600; // 10 minutes
+	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	@Inject
 	private Logger log;
 
 	@Inject
-	private PersistenceEntryManager ldapEntryManager;
+	private PersistenceEntryManager entryManager;
 
 	@Inject
 	private UmaPctService umaPctService;
@@ -86,13 +84,9 @@ public class CleanerTimer {
 	private StaticConfiguration staticConfiguration;
 
 	@Inject
-	private CacheConfiguration cacheConfiguration;
-
-    @Inject
-    private CacheService cacheService;
-
-	@Inject
 	private Event<TimerEvent> cleanerEvent;
+
+	private long lastFinishedTime;
 
 	private AtomicBoolean isActive;
 
@@ -100,19 +94,11 @@ public class CleanerTimer {
 		log.debug("Initializing Cleaner Timer");
 		this.isActive = new AtomicBoolean(false);
 
-		int interval = appConfiguration.getCleanServiceInterval();
-		if (interval < 0) {
-			log.info("Cleaner Timer is disabled.");
-			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
-			return;
-		}
-
-		if (interval == 0) {
-			interval = DEFAULT_INTERVAL;
-		}
-
+		// Schedule to start cleaner every 1 minute
 		cleanerEvent.fire(
-				new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+
+		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	@Asynchronous
@@ -132,12 +118,32 @@ public class CleanerTimer {
 		}
 	}
 
-	public void processImpl() {
-        int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
-        if (chunkSize <= 0)
-            chunkSize = BATCH_SIZE;
+	private boolean isStartProcess() {
+		int interval = appConfiguration.getCleanServiceInterval();
+		if (interval < 0) {
+			log.info("Cleaner Timer is disabled.");
+			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+			return false;
+		}
 
+		long cleaningInterval = interval * 1000;
+
+		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+
+		return timeDiffrence >= cleaningInterval;
+	}
+
+	public void processImpl() {
         try {
+			if (!isStartProcess()) {
+				log.trace("Starting conditions aren't reached");
+				return;
+			}
+
+			int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+            if (chunkSize <= 0)
+                chunkSize = BATCH_SIZE;
+
             Date now = new Date();
 
 			for (String baseDn : createCleanServiceBaseDns()) {
@@ -145,15 +151,7 @@ public class CleanerTimer {
 					log.debug("Start clean up for baseDn: " + baseDn);
 					final Stopwatch started = Stopwatch.createStarted();
 
-                    Filter filter = Filter.createANDFilter(
-                            Filter.createEqualityFilter("del", true),
-                            Filter.createORFilter(
-                                    Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeTime(baseDn, now)),
-                                    Filter.createLessOrEqualFilter("exp", ldapEntryManager.encodeTime(baseDn, now))
-
-                            ));
-
-                    final int removed = ldapEntryManager.remove(baseDn, DeletableEntity.class, filter, chunkSize);
+					int removed = cleanup(baseDn, now, chunkSize);
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 				} catch (Exception e) {
@@ -165,6 +163,8 @@ public class CleanerTimer {
 
 			this.registrationPersistenceService.cleanup(now, chunkSize);
 			this.authenticationPersistenceService.cleanup(now, chunkSize);
+
+			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Exception e) {
 			log.error("Failed to process clean up.", e);
 		}
@@ -183,21 +183,36 @@ public class CleanerTimer {
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getTokens());
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getAuthorizations());
-		if (cacheConfiguration.getNativePersistenceConfiguration() != null
-				&& StringUtils.isNotBlank(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
-			cleanServiceBaseDns.add(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn());
-		}
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getScopes());
 
         log.debug("Built-in base dns: " + cleanServiceBaseDns);
 
 		return cleanServiceBaseDns;
 	}
 
+	public int cleanup(final String baseDn, final Date now, final int batchSize) {
+        try {
+            Filter filter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("del", true),
+                    Filter.createORFilter(
+                            Filter.createLessOrEqualFilter("oxAuthExpiration", entryManager.encodeTime(baseDn, now)),
+                            Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now))
+
+                    ));
+
+            int removedCount = entryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
+            
+            return removedCount;
+        } catch (Exception e) {
+            log.error("Failed to perform clean up.", e);
+        }
+        
+        return 0;
+    }
+
 	private void processCache(Date now) {
 		try {
-            if (cacheConfiguration.getCacheProviderType() != CacheProviderType.NATIVE_PERSISTENCE) {
-                cacheProvider.cleanup(now);
-            }
+            cacheProvider.cleanup(now);
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}

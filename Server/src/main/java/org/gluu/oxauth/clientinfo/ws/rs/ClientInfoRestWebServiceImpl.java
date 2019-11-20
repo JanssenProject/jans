@@ -6,11 +6,10 @@
 
 package org.gluu.oxauth.clientinfo.ws.rs;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoParamsValidator;
+import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -18,6 +17,8 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ScopeService;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -80,19 +81,26 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
             if (authorizationGrant == null) {
-                builder = Response.status(400);
-                builder.entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN, "","Unable to find grant object associated with access token."));
-            } else {
-                CacheControl cacheControl = new CacheControl();
-                cacheControl.setPrivate(true);
-                cacheControl.setNoTransform(false);
-                cacheControl.setNoStore(true);
-                builder.cacheControl(cacheControl);
-                builder.header("Pragma", "no-cache");
-
-                builder.entity(getJSonResponse(authorizationGrant.getClient(),
-                        authorizationGrant.getScopes()));
+                log.trace("Failed to find authorization grant for access token.");
+                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN,"","Unable to find grant object associated with access token.")).build();
             }
+
+            final AbstractToken token = authorizationGrant.getAccessToken(accessToken);
+            if (token == null || !token.isValid()) {
+                log.trace("Invalid access token.");
+                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN,"","Invalid access token.")).build();
+            }
+
+            CacheControl cacheControl = new CacheControl();
+            cacheControl.setPrivate(true);
+            cacheControl.setNoTransform(false);
+            cacheControl.setNoStore(true);
+            builder.cacheControl(cacheControl);
+            builder.header("Pragma", "no-cache");
+
+            builder.entity(getJSonResponse(authorizationGrant.getClient(),
+                    authorizationGrant.getScopes()));
+
         }
 
         return builder.build();
