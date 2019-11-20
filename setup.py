@@ -5023,6 +5023,11 @@ class Setup(object):
 
         self.run_service_command(cron_service, 'restart')
 
+        print_version_fn = os.path.join(self.install_dir, 'pylib', 'printVersion.py')
+        show_version_fn = os.path.join(self.gluuOptBinFolder, 'show_version.py')
+        self.run(['cp', '-f', print_version_fn, show_version_fn])
+        self.run(['chmod', '+x', show_version_fn])
+        
 
     def print_post_messages(self):
         print
