@@ -65,6 +65,7 @@ import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
+import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -275,11 +276,11 @@ public class IdTokenFactory {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String sub = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (sub != null && !sub.isEmpty())
-                jwt.getClaims().setSubjectIdentifier(sub);
-            else
-                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
+                subValue = authorizationGrant.getUser().getUserId();
+            }
+            jwt.getClaims().setSubjectIdentifier(subValue);
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -477,11 +478,11 @@ public class IdTokenFactory {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String sub = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (sub != null && !sub.isEmpty())
-                jwe.getClaims().setSubjectIdentifier(sub);
-            else
-                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
+                subValue = authorizationGrant.getUser().getUserId();
+            }
+            jwe.getClaims().setSubjectIdentifier(subValue);
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
