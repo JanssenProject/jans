@@ -808,8 +808,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         send_notification = True
                         
-                        title = "Super-Gluu"
-                        message = "Super-Gluu login request to: %s" % client_redirect_uri
+                        title = "Super Gluu"
+                        message = "Confirm your sign in request to: %s" % client_redirect_uri
 
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)
