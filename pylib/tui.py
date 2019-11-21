@@ -9,23 +9,21 @@ import textwrap
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
-marketing_text_period = 5 
+marketing_text_period = 10 
 
 
 class GluuSetupApp(npyscreen.StandardApp):
 
     exit_reason = str()
     my_counter = 0
+
     def onStart(self):
 
         self.addForm("MAIN", Form1, name="System Information")
         self.addForm("FORM2", Form2, name="Setup Options")
  
- 
     def onCleanExit(self):
-        npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason)
-
-
+        npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
 
 
 class GluuSetupForm(npyscreen.FormBaseNew):
@@ -65,15 +63,25 @@ class Form1(GluuSetupForm):
         self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed)
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed)
 
-        if msg.current_mem_size < msg.suggested_number_of_cpu:
-            warning_text = msg.insufficient_mem.format(msg.current_mem_size, msg.suggested_mem_size)
-            warning_text += '. Do you want to continue?'
-            result = npyscreen.notify_yes_no(warning_text, title="Warning")
-            if not result:
-                self.parentApp.exit_reason = msg.not_to_continue
-                self.parentApp.onCleanExit()
-                sys.exit(False)
 
+        for sys_req in ('file_max', 'mem_size', 'number_of_cpu', 'free_disk_space'):
+            cur_val = getattr(msg, 'current_' + sys_req)
+            req_val = getattr(msg, 'suggested_' + sys_req)
+            if cur_val < req_val:
+                warning_text = getattr(msg, 'insufficient_' + sys_req).format(cur_val, req_val)
+                
+                if sys_req == 'file_max':
+                    self.parentApp.exit_reason = warning_text
+                    self.parentApp.onCleanExit()
+                    time.sleep(3.5)
+                    sys.exit(False)
+                
+                warning_text += '. Do you want to continue?'
+                result = npyscreen.notify_yes_no(warning_text, title="Warning")
+                if not result:
+                    self.parentApp.exit_reason = msg.not_to_continue
+                    self.parentApp.onCleanExit()
+                    sys.exit(False)
 
     def nextButtonPressed(self):
         self.parentApp.my_counter = 0
@@ -107,16 +115,16 @@ class Form2(GluuSetupForm):
     def create(self):
         self.title = self.add(npyscreen.TitleText, name="TitleText2")
 
-
-
-        
 GSA = GluuSetupApp()
 
 msg.os_type = 'CentOS 7'
 msg.os_initdaemon = 'initd'
 msg.test_title = 'Test Title'
 msg.apache_version = "Apache 2.4"
-msg.current_mem_size = 4.2
+msg.current_mem_size = 3.2
+msg.current_number_of_cpu = 1
+msg.current_free_disk_space = 23
+msg.current_file_max = 91200
 
 
 GSA.run()
