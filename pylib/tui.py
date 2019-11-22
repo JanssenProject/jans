@@ -29,7 +29,7 @@ class GluuSetupApp(npyscreen.StandardApp):
     def onStart(self):
 
         self.addForm("MAIN", MainFrom, name="System Information")
-        self.addForm("HostFrom", HostFrom, name="Host and Adresses")
+        self.addForm("HostFrom", HostFrom, name="Supply Information to Generate Certificates")
         self.addForm("ServicesFrom", ServicesFrom, name="Select Services to Install")
  
     def onCleanExit(self):
@@ -76,15 +76,10 @@ class MainFrom(GluuSetupForm):
         self.description_label.autowrap = True
 
         self.os_type = self.add(npyscreen.TitleFixedText, name="Detected OS", begin_entry_at=18, value=msg.os_type, editable=False)
-
         self.init_type = self.add(npyscreen.TitleFixedText, name="Detected init", begin_entry_at=18, value=msg.os_initdaemon, editable=False)
         self.httpd_type = self.add(npyscreen.TitleFixedText, name="Apache Version", begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
-
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
-
         self.warning_text = self.add(npyscreen.MultiLineEdit, value=msg.setup_properties_warning, max_height=4, editable=False)
-
-
 
         for sys_req in ('file_max', 'mem_size', 'number_of_cpu', 'free_disk_space'):
             cur_val = getattr(msg, 'current_' + sys_req)
@@ -197,14 +192,24 @@ class HostFrom(GluuSetupForm):
 
 class ServicesFrom(GluuSetupForm):
 
+    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius')
+
     def create(self):
-        self.title = self.add(npyscreen.TitleText, name="TitleText2")
+        
+        for service in self.services:
+            cb = self.add(npyscreen.Checkbox, scroll_exit=True, name = getattr(msg, 'ask_' + service))  
+            if getattr(msg, service):
+                cb.value = True
+
+            setattr(self, service, cb)
 
     def nextButtonPressed(self):
-        pass
+        for service in self.services:
+            cb_val = getattr(self, service).value
+            setattr(msg, service, cb_val)
 
     def backButtonPressed(self):
-        self.parentApp.switchForm('GluuSetupForm')
+        self.parentApp.switchForm('HostFrom')
         
 
 GSA = GluuSetupApp()
@@ -225,5 +230,12 @@ msg.state = 'TX'
 msg.organization = 'Gluu'
 msg.admin_email = 'support@gluu.org'
 msg.country = 'US'
+
+msg.installHttpd = True
+msg.installSaml = False
+msg.installOxAuthRP = False
+msg.installPassport = False
+msg.installGluuRadius = False
+
 
 GSA.run()
