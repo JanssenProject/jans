@@ -18,7 +18,11 @@ class msg:
     acknowledge_lisence_ask = "Please acknowledge that use of the Gluu Server is under the MIT license"
     setup_properties_warning = "** All clear text passwords contained in\n/install/community-edition-setup/setup.properties.last."
     
-    
+    enter_hostname = "Please enter hostname"
+    enter_hostname_local = "Hostname can't be localhost"
+    enter_valid_email = "Please enter valid email address"
+    enter_valid_ip = "Please enter valid IP Address"
+    enter_valid_country_code = "Please enter two letter country code"
 
 
 
