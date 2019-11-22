@@ -483,12 +483,6 @@ public class AuthenticationService {
 		SessionId newSessionId;
 		if (sessionId == null) {
 			newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(), sessionIdAttributes);
-		} else {
-			// TODO: Remove after 2.4.5
-			String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-			log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
-
-			newSessionId = sessionIdService.setSessionIdStateAuthenticated(getHttpRequest(), sessionId, user.getDn());
 		}
 
 		identity.setSessionId(sessionId);
