@@ -25,4 +25,10 @@ class msg:
     enter_valid_country_code = "Please enter two letter country code"
 
 
+    ask_installHttpd = "Install Apache HTTPD Server"
+    ask_installSaml = "Install Shibboleth SAML IDP"
+    ask_installOxAuthRP  = "Install oxAuth RP"
+    ask_installPassport  = "Install Passport"
+    ask_installGluuRadius = "Install Gluu Radius"
+
 
