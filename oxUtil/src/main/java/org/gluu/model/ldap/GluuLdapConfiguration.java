@@ -38,7 +38,7 @@ public class GluuLdapConfiguration implements Serializable {
     @JsonProperty("servers")
     private List<String> serversStringsList;
 
-    private int maxConnections;
+    private int maxConnections = 2;
     private boolean useSSL;
 
     @JsonIgnore
