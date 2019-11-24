@@ -40,7 +40,7 @@
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
-		<omnifaces.version>2.6.9</omnifaces.version>
+		<omnifaces.version>3.4</omnifaces.version>
 
 		<aws.sns.version>1.11.184</aws.sns.version>
 
