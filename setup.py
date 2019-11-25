@@ -388,7 +388,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/gluu/photos"
         self.oxTrustRemovedFolder = "/var/gluu/identity/removed"
         self.oxTrustCacheRefreshFolder = "/var/gluu/identity/cr-snapshots"
-        self.cache_provider_type = 'IN_MEMORY'
+        self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
