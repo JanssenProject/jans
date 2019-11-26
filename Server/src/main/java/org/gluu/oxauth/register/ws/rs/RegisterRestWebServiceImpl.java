@@ -225,6 +225,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
                 calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
                 client.setClientSecretExpiresAt(calendar.getTime());
+                client.setDeletable(true);
                 client.setExpirationDate(calendar.getTime());
             }
 
