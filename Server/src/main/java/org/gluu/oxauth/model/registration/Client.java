@@ -52,7 +52,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     @AttributeName(name = "oxAuthClientIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @AttributeName(name = "oxAuthClientSecretExpiresAt")
+    @AttributeName(name = "oxAuthExpiration")
     private Date clientSecretExpiresAt;
 
     @AttributeName(name = "oxAuthRedirectURI")
@@ -214,6 +214,9 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     @AttributeName(name = "oxAttributes")
     @JsonObject
     private ClientAttributes attributes;
+
+    @AttributeName(name = "del")
+    private boolean deletable;
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
@@ -1172,7 +1175,15 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
         this.softwareStatement = softwareStatement;
     }
 
-    public static Client instance() {
+    public boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public static Client instance() {
         return new Client();
     }
 
