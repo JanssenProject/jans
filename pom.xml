@@ -133,6 +133,11 @@
                 <artifactId>richfaces-core</artifactId>
                 <version>${richfaces.version}</version>
             </dependency>
+		<dependency>
+			<groupId>org.richfaces</groupId>
+			<artifactId>richfaces-a4j</artifactId>
+			<version>${richfaces.version}</version>
+		</dependency>
 
             <dependency>
                 <groupId>net.jodah</groupId>
