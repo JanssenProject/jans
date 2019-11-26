@@ -134,7 +134,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private boolean silentlyRemoveEntityIfExists(String dn) {
         try {
             if (entryManager.find(NativePersistenceCacheEntity.class, dn) != null) {
-                entryManager.removeRecursively(dn);
+                entryManager.remove(dn);
                 return true;
             }
         } catch (Exception e) {

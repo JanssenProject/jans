@@ -14,7 +14,7 @@ public class NativePersistenceConfiguration implements Serializable {
     private int defaultPutExpiration = 60; // in seconds
 
     @XmlElement(name = "defaultCleanupBatchSize")
-    private int defaultCleanupBatchSize = 25; // 25 objects per iteration
+    private int defaultCleanupBatchSize = 1000; // 1000 objects per iteration
 
     @JsonIgnore
     private String baseDn;
