@@ -480,10 +480,13 @@ public class AuthenticationService {
 
 		User user = getAuthenticatedUser();
 
-		SessionId newSessionId = sessionIdService.generateAuthenticatedSessionId(getHttpRequest(), user.getDn(), sessionIdAttributes);
+		String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
+		log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
+
+		SessionId newSessionId = sessionIdService.setSessionIdStateAuthenticated(getHttpRequest(), sessionId, user.getDn());
 
 		identity.setSessionId(sessionId);
-        newSessionId.setUser(user);
+	        newSessionId.setUser(user);
 
 		return newSessionId;
 	}
