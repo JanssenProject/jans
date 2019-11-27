@@ -105,9 +105,9 @@ public final class CouchbaseSampleBatchJob {
             }
         };
 
-        final Filter filter3 = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
+        final Filter filter3 = Filter.createPresenceFilter("oxAuthExpiration");
         List<SimpleClient> result3 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
-                new String[] {"oxAuthClientSecretExpiresAt"}, clientBatchOperation, 0, 0, 1000);
+                new String[] {"oxAuthExpiration"}, clientBatchOperation, 0, 0, 1000);
 
         LOG.info("Result count (without collecting results): " + result3.size());
 
@@ -124,9 +124,9 @@ public final class CouchbaseSampleBatchJob {
             }
         };
 
-        final Filter filter4 = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
+        final Filter filter4 = Filter.createPresenceFilter("oxAuthExpiration");
         List<SimpleClient> result4 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
-                new String[] {"oxAuthClientSecretExpiresAt"}, clientBatchOperation2, 0, 0, 1000);
+                new String[] {"oxAuthExpiration"}, clientBatchOperation2, 0, 0, 1000);
 
         LOG.info("Result count (with collecting results): " + result4.size());
     }
