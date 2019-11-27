@@ -149,6 +149,13 @@ public class CustomScript extends BaseEntry {
     }
 
     public String getScript() {
+
+        if(script==null && scriptType==CustomScriptType.PERSON_AUTHENTICATION){
+            script=ScriptTemplate.AUTHEN.getValue();
+        }
+        else if(script==null && scriptType!=CustomScriptType.PERSON_AUTHENTICATION){
+            script=ScriptTemplate.NO_AUTHEN.getValue();
+        }
         return script;
     }
 
