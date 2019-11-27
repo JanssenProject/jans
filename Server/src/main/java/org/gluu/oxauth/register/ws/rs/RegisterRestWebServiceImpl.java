@@ -217,7 +217,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
             client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
             client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
-            client.setDeletable(true);
 
             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             client.setClientIdIssuedAt(calendar.getTime());
@@ -225,9 +224,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
                 calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
                 client.setClientSecretExpiresAt(calendar.getTime());
-                client.setDeletable(true);
                 client.setExpirationDate(calendar.getTime());
             }
+            client.setDeletable(client.getClientSecretExpiresAt() != null);
 
             if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
                 try {
