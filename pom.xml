@@ -17,12 +17,12 @@
 	<httpcore.version>4.4.9</httpcore.version>
 	<httpclient.version>4.5.5</httpclient.version>
 
-        <weld.version>3.1.1.Final</weld.version>
+        <weld.version>3.1.2.Final</weld.version>
         <richfaces.version>4.5.17-gluu.Final</richfaces.version>
 
 	<jsf-api.version>2.3.9</jsf-api.version>
 	<jsf-impl.version>2.3.9</jsf-impl.version>
-	<uel-api.version>2.2.1-b05</uel-api.version>
+	<uel-api.version>2.2.1-b04</uel-api.version>
 	<uel-impl.version>2.2.1-b05</uel-impl.version>
 
         <jackson.version>2.9.9</jackson.version>
