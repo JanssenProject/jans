@@ -455,6 +455,8 @@ public class SessionIdService {
 
         if (StringHelper.isNotEmpty(sessionId)) {
             return getSessionId(sessionId);
+        } else {
+        	log.trace("Session cookie not exists");
         }
 
         return null;
