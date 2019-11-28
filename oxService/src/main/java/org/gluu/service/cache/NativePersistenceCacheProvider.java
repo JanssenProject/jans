@@ -231,4 +231,5 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
         this.cacheConfiguration = cacheConfiguration;
     }
+
 }
