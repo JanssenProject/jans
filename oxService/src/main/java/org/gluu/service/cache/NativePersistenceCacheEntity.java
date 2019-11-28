@@ -1,6 +1,7 @@
 package org.gluu.service.cache;
 
 import org.gluu.persist.model.base.Deletable;
+import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
@@ -11,7 +12,7 @@ import java.util.Date;
 
 @DataEntry
 @ObjectClass(value = "cache")
-public class NativePersistenceCacheEntity implements Serializable, Deletable {
+public class NativePersistenceCacheEntity extends DeletableEntity implements Serializable, Deletable {
 
     @DN
     private String dn;
@@ -19,10 +20,6 @@ public class NativePersistenceCacheEntity implements Serializable, Deletable {
     private String id;
     @AttributeName(name = "iat")
     private Date creationDate;
-    @AttributeName(name = "exp")
-    private Date expirationDate;
-    @AttributeName(name = "del")
-    private boolean deletable = true;
     @AttributeName(name = "dat")
     private String data;
 
@@ -50,14 +47,6 @@ public class NativePersistenceCacheEntity implements Serializable, Deletable {
         this.creationDate = creationDate;
     }
 
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
     public String getData() {
         return data;
     }
@@ -66,23 +55,9 @@ public class NativePersistenceCacheEntity implements Serializable, Deletable {
         this.data = data;
     }
 
-    public boolean isDeletable() {
-        return deletable;
-    }
-
-    public void setDeletable(boolean deletable) {
-        this.deletable = deletable;
-    }
-
     @Override
-    public String toString() {
-        return "NativePersistenceCacheEntity{" +
-                "dn='" + dn + '\'' +
-                ", id='" + id + '\'' +
-                ", creationDate=" + creationDate +
-                ", expirationDate=" + expirationDate +
-                ", deletable=" + deletable +
-                ", data='" + data + '\'' +
-                '}';
-    }
+	public String toString() {
+		return "NativePersistenceCacheEntity [dn=" + dn + ", id=" + id + ", creationDate=" + creationDate + ", data=" + data
+				+ ", toString()=" + super.toString() + "]";
+	}
 }
