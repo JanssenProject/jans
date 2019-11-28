@@ -40,3 +40,10 @@ class msg:
     notify_select_backend = "Please select one of the backends either local install or remote" 
     weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
     unselected_storages = "Note: Unselected storages will go Couchbase Server"
+
+    no_help = "No help is provided for this screen."
+    
+    MainFromHelp = "Detected OS type, system init type, and Apache version is displayed. Inorder to continue to next step, you must check lisecnce acknowledgement."
+    HostFromHelp = ("IP Address: ip address of this server. Detected ip address will be provided\n"
+                   "Hostname: hostname of this server. Detected hostname will be provided.\n"
+                   "Organization Name: ......")
