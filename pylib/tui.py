@@ -8,6 +8,7 @@ from messages import msg
 import textwrap
 import re
 import socket
+import curses
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -46,7 +47,7 @@ class GluuSetupApp(npyscreen.StandardApp):
 class GluuSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
-        
+        self.add_handlers({curses.KEY_F1: self.display_help})
         self.add(npyscreen.MultiLineEdit, value='─' * self.columns, max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
 
@@ -73,6 +74,16 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         if notify_result:
             self.parentApp.exit_reason = msg.not_to_continue
             self.parentApp.switchForm(None)
+
+    def display_help(self, code_of_key_pressed):
+        
+        class_name = self.__class__.__name__
+        if hasattr(msg, class_name+'Help'):
+            help_text = getattr(msg, class_name+'Help')
+        else:
+            help_text = msg.no_help
+        
+        npyscreen.notify_confirm(help_text, title="Help", wide=True)
 
 class MainFrom(GluuSetupForm):
     
@@ -107,7 +118,6 @@ class MainFrom(GluuSetupForm):
                     self.parentApp.exit_reason = msg.not_to_continue
                     self.parentApp.onCleanExit()
                     sys.exit(False)
-
 
     def nextButtonPressed(self):
         self.parentApp.my_counter = 0
