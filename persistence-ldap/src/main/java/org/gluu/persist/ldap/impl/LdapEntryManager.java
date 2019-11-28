@@ -327,7 +327,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             searchFilter = filter;
         }
 
-        DeleteBatchOperation batchOperation = new DeleteBatchOperation<DeletableEntity>(this);
+        DeleteBatchOperation batchOperation = new DeleteBatchOperation<T>(this);
         SearchResult searchResult = null;
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
@@ -945,7 +945,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
     }
 
-	private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<DeletableEntity> {
+	private static final class DeleteBatchOperation<T> extends DefaultBatchOperation<T> {
 
 		private int countEntries = 0;
 		private LdapEntryManager ldapEntryManager;
@@ -955,17 +955,18 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		}
 
         @Override
-		public void performAction(List<DeletableEntity> entries) {
-			for (DeletableEntity entity : entries) {
+		public void performAction(List<T> entries) {
+			for (T entity : entries) {
 				try {
-					if (ldapEntryManager.hasBranchesSupport(entity.getDn())) {
-						ldapEntryManager.removeRecursively(entity.getDn());
+					String dnValue = ldapEntryManager.getDNValue(entity).toString();
+					if (ldapEntryManager.hasBranchesSupport(dnValue)) {
+						ldapEntryManager.removeRecursively(dnValue);
 					} else {
-						ldapEntryManager.remove(entity.getDn());
+						ldapEntryManager.remove(dnValue);
 					}
-					LOG.trace("Removed {}", entity.getDn());
+					LOG.trace("Removed {}", dnValue);
 				} catch (Exception e) {
-					LOG.error("Failed to remove entry, dn: " + entity.getDn(), e);
+					LOG.error("Failed to remove entry, entity: " + entity, e);
 				}
 			}
 		}
