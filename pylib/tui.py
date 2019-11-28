@@ -8,6 +8,7 @@ from messages import msg
 import textwrap
 import re
 import socket
+import  weakref 
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -21,16 +22,23 @@ def isIP(address):
     if re.match(r'^((\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])$', address):  
         return True
 
+def checkPassword(pwd):
+    if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
+        return True
+
+
 class GluuSetupApp(npyscreen.StandardApp):
 
     exit_reason = str()
     my_counter = 0
 
     def onStart(self):
-
         self.addForm("MAIN", MainFrom, name="System Information")
         self.addForm("HostFrom", HostFrom, name="Supply Information to Generate Certificates")
         self.addForm("ServicesFrom", ServicesFrom, name="Select Services to Install")
+        self.addForm("DBBackendFrom", DBBackendFrom, name="Choose DB Backend")
+        self.addForm("HybridFrom", HybridFrom, name="Hybrid Storage Selection")
+        self.addForm("InstallStepsForm", InstallStepsForm, name="Installing Gluu Server")
  
     def onCleanExit(self):
         npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
@@ -39,6 +47,7 @@ class GluuSetupApp(npyscreen.StandardApp):
 class GluuSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
+        
         self.add(npyscreen.MultiLineEdit, value='─' * self.columns, max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
 
@@ -51,7 +60,7 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
-
+    
     def while_waiting(self):
         if self.parentApp.my_counter % marketing_text_period == 0:
             self.marketing_label.value = random.choice(random_marketing_strings)
@@ -69,7 +78,7 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 class MainFrom(GluuSetupForm):
     
     def create(self):
-        
+ 
         desc_wrap = textwrap.wrap(msg.decription, self.columns - 6)
         
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
@@ -100,6 +109,7 @@ class MainFrom(GluuSetupForm):
                     self.parentApp.onCleanExit()
                     sys.exit(False)
 
+
     def nextButtonPressed(self):
         self.parentApp.my_counter = 0
         if not self.license_confirm.value:
@@ -107,7 +117,7 @@ class MainFrom(GluuSetupForm):
             return
         
         self.parentApp.switchForm("HostFrom")
-
+        
 
     def on_cancel(self):
         self.title.value = "Hello World!"
@@ -208,9 +218,155 @@ class ServicesFrom(GluuSetupForm):
             cb_val = getattr(self, service).value
             setattr(msg, service, cb_val)
 
+        self.parentApp.switchForm('DBBackendFrom')
+
     def backButtonPressed(self):
         self.parentApp.switchForm('HostFrom')
+
+
+def make_title(text):
+    return '─'*10 + ' '+  text +' '+ '─'*10
+
+
+class DBBackendFrom(GluuSetupForm):
+    def create(self):
+        self.editw = 2
+        self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install))
+
+        wrends_val = 0
+        if msg.wrends_remote:
+            wrends_val = 2
+        if msg.wrends_install:
+            wrends_val = 1
+
+        self.ask_wrends = self.add(npyscreen.SelectOne, max_height=3, value = [wrends_val,], 
+                values = msg.wrends_install_options, scroll_exit=True)
+        self.ask_wrends.value_changed_callback = self.wrends_option_changed
+
+        self.wrends_password = self.add(npyscreen.TitleText, name="Password", value=msg.wrends_password)
+        self.wrends_hosts = self.add(npyscreen.TitleText, name="Hosts", value=msg.wrends_hosts)
+        self.wrends_option_changed(self.ask_wrends)
+        self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10)
+
+        cb_val = 0
+        if msg.cb_remote:
+            cb_val = 2
+        if msg.cb_install:
+            cb_val = 1
+
+        self.ask_cb = self.add(npyscreen.SelectOne, max_height=3, value = [cb_val,], 
+                values = msg.wrends_install_options, scroll_exit=True)
+        self.ask_cb.value_changed_callback = self.cb_option_changed
+
+        self.cb_admin = self.add(npyscreen.TitleText, name="Username", value=msg.cb_username)
+        self.cb_password = self.add(npyscreen.TitleText, name="Password", value=msg.cb_password)
+        self.cb_hosts = self.add(npyscreen.TitleText, name="Hosts", value=msg.cb_hosts)
+        self.cb_option_changed(self.ask_cb)
+
+    def nextButtonPressed(self):
+        if self.ask_wrends.value[0] == 0:
+            msg.wrends_install = False
+        elif self.ask_wrends.value[0] == 1:
+            msg.wrends_install = True
+            msg.wrends_remote = False
+            msg.wrends_hosts = 'localhost'
+            msg.wrends_password = self.wrends_password.value
+        elif self.ask_wrends.value[0] == 2:
+            msg.wrends_install = False
+            msg.wrends_remote = True
+            msg.wrends_hosts = self.wrends_hosts.value
+            msg.wrends_password = self.wrends_password.value
+
+        if self.ask_cb.value[0] == 0:
+            msg.cb_install = False
+        elif self.ask_cb.value[0] == 1:
+            msg.cb_install = True
+            msg.cb_remote = False
+            msg.cb_hosts = 'localhost'
+            msg.cb_password = self.cb_password.value
+        elif self.ask_cb.value[0] == 2:
+            msg.cb_install = False
+            msg.cb_remote = True
+            msg.cb_hosts = self.cb_hosts.value
+            msg.cb_password = self.cb_password.value
+
+        if not checkPassword(msg.wrends_password):
+            npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
+            return
+
+        if not checkPassword(msg.cb_password):
+            npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
+            return
+
+        if (self.ask_wrends.value[0] in (1,2)) or (self.ask_cb.value[0] in (1,2)):
+            if (self.ask_wrends.value[0] in (1,2)) and (self.ask_cb.value[0] in (1,2)):
+                self.parentApp.switchForm('HybridFrom')
+            else:
+                self.parentApp.switchForm('InstallStepsForm')
+        else:
+            npyscreen.notify_confirm(msg.notify_select_backend, title="Warning")
+            return
+
+    def wrends_option_changed(self, widget):
+        if not self.ask_wrends.value[0]:
+            self.wrends_password.hidden = True
+            self.wrends_hosts.hidden = True
+        elif self.ask_wrends.value[0] == 1:
+            self.wrends_password.hidden = False
+            self.wrends_hosts.hidden = True
+        elif self.ask_wrends.value[0] == 2:
+            self.wrends_password.hidden = False
+            self.wrends_hosts.hidden = False
+            
+        self.wrends_password.update()
+        self.wrends_hosts.update()
+
+    def cb_option_changed(self, widget):
+        if not self.ask_cb.value[0]:
+            self.cb_admin.hidden = True
+            self.cb_password.hidden = True
+            self.cb_hosts.hidden = True
+        elif self.ask_cb.value[0] == 1:
+            self.cb_admin.hidden = False
+            self.cb_hosts.hidden = False
+            self.cb_password.hidden = False
+            self.cb_hosts.hidden = True
+        elif self.ask_cb.value[0] == 2:
+            self.cb_admin.hidden = False
+            self.cb_password.hidden = False
+            self.cb_hosts.hidden = False
         
+        self.cb_admin.update()
+        self.cb_password.update()
+        self.cb_hosts.update()
+
+    def backButtonPressed(self):
+        self.parentApp.switchForm('ServicesFrom')
+
+
+
+class HybridFrom(GluuSetupForm):
+    def create(self):
+        pass
+
+    def backButtonPressed(self):
+        pass
+
+    def nextButtonPressed(self):
+        pass
+
+class InstallStepsForm(GluuSetupForm):
+    def create(self):
+        pass
+
+    def backButtonPressed(self):
+        pass
+
+    def nextButtonPressed(self):
+        pass
+
+
+
 
 GSA = GluuSetupApp()
 
@@ -236,6 +392,21 @@ msg.installSaml = False
 msg.installOxAuthRP = False
 msg.installPassport = False
 msg.installGluuRadius = False
+
+
+msg.wrends_install = False
+msg.wrends_remote = True
+msg.wrends_hosts = 'localhost'
+msg.wrends_password = 'lk1*98.P'
+
+msg.cb_install = True
+msg.cb_remote = False
+msg.cb_password = '!98Ls-Ux'
+msg.cb_username = 'admin'
+
+msg.cb_hosts = 'c1.gluu.org,c2.gluu.org'
+
+msg.wrends_storage_list = ['default', 'user', 'cache', 'site', 'token']
 
 
 GSA.run()
