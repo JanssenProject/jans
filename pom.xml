@@ -31,7 +31,7 @@
 
 		<jetty.version>9.4.19.v20190610</jetty.version>
 
-        <arquillian.version>1.4.0.1.Final</arquillian.version>
+        <arquillian.version>1.4.0.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
