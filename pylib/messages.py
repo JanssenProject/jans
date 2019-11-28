@@ -31,4 +31,12 @@ class msg:
     ask_installPassport  = "Install Passport"
     ask_installGluuRadius = "Install Gluu Radius"
 
+    ask_wrends_install = "WrenDS Installation"
+    wrends_install_options = ["Don't Install","Install Locally","Use Remote WrenDS"]
+
+    ask_cb_install = "Couchbase Installation"
+    cb_install_options = ["Don't Install","Install Locally","Use Remote Couchbase"]
+    
+    notify_select_backend = "Please select one of the backends either local install or remote" 
+    weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
 
