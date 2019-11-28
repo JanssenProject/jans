@@ -1677,6 +1677,12 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return result;
 	}
 
+	protected <T> Object getDNValue(Object entry) {
+		Class<?> entryClass = entry.getClass();
+		
+		return getDNValue(entryClass, entryClass);
+	}
+
 	protected <T> Object getDNValue(Object entry, Class<T> entryClass) {
 		// Check if entry has DN property
 		String dnProperty = getDNPropertyName(entryClass);
