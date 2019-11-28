@@ -8,7 +8,6 @@ from messages import msg
 import textwrap
 import re
 import socket
-import  weakref 
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -37,7 +36,7 @@ class GluuSetupApp(npyscreen.StandardApp):
         self.addForm("HostFrom", HostFrom, name="Supply Information to Generate Certificates")
         self.addForm("ServicesFrom", ServicesFrom, name="Select Services to Install")
         self.addForm("DBBackendFrom", DBBackendFrom, name="Choose DB Backend")
-        self.addForm("HybridFrom", HybridFrom, name="Hybrid Storage Selection")
+        self.addForm("StorageSelectionFrom", StorageSelectionFrom, name="Hybrid Storage Selection")
         self.addForm("InstallStepsForm", InstallStepsForm, name="Installing Gluu Server")
  
     def onCleanExit(self):
@@ -231,7 +230,7 @@ def make_title(text):
 class DBBackendFrom(GluuSetupForm):
     def create(self):
         self.editw = 2
-        self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install))
+        self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install), editable=False)
 
         wrends_val = 0
         if msg.wrends_remote:
@@ -246,7 +245,9 @@ class DBBackendFrom(GluuSetupForm):
         self.wrends_password = self.add(npyscreen.TitleText, name="Password", value=msg.wrends_password)
         self.wrends_hosts = self.add(npyscreen.TitleText, name="Hosts", value=msg.wrends_hosts)
         self.wrends_option_changed(self.ask_wrends)
-        self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10)
+        
+        
+        self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10, editable=False)
 
         cb_val = 0
         if msg.cb_remote:
@@ -300,7 +301,7 @@ class DBBackendFrom(GluuSetupForm):
 
         if (self.ask_wrends.value[0] in (1,2)) or (self.ask_cb.value[0] in (1,2)):
             if (self.ask_wrends.value[0] in (1,2)) and (self.ask_cb.value[0] in (1,2)):
-                self.parentApp.switchForm('HybridFrom')
+                self.parentApp.switchForm('StorageSelectionFrom')
             else:
                 self.parentApp.switchForm('InstallStepsForm')
         else:
@@ -344,16 +345,34 @@ class DBBackendFrom(GluuSetupForm):
         self.parentApp.switchForm('ServicesFrom')
 
 
-
-class HybridFrom(GluuSetupForm):
+class StorageSelectionFrom(GluuSetupForm):
     def create(self):
-        pass
+
+        storage_val = []
+
+        for i, s in enumerate(msg.storage_list):
+            if s in msg.wrends_storages:
+                storage_val.append(i)
+        
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, max_height = len(msg.storage_list), begin_entry_at=25, value = storage_val, name="Store on WrenDS", 
+            values = [ s.title() for s in msg.storage_list ], scroll_exit=True)
+        
+        self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storage_list)+4, editable=False, color='STANDOUT')
 
     def backButtonPressed(self):
-        pass
+        self.parentApp.switchForm('DBBackendFrom')
 
     def nextButtonPressed(self):
-        pass
+        
+        tmp_ = []
+
+        for s in self.wrends_storage.value:
+            tmp_.append(msg.storage_list[s])
+
+        msg.wrends_storages = tmp_
+        
+        self.parentApp.switchForm('InstallStepsForm')
+        
 
 class InstallStepsForm(GluuSetupForm):
     def create(self):
@@ -406,7 +425,8 @@ msg.cb_username = 'admin'
 
 msg.cb_hosts = 'c1.gluu.org,c2.gluu.org'
 
-msg.wrends_storage_list = ['default', 'user', 'cache', 'site', 'token']
+msg.storage_list = ['default', 'user', 'cache', 'site', 'token']
+msg.wrends_storages = ['user', 'token']
 
 
 GSA.run()
