@@ -9,6 +9,10 @@ import textwrap
 import re
 import socket
 import curses
+import string
+
+#Todo: check min lines:25 comumns: 80
+
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -26,6 +30,31 @@ def checkPassword(pwd):
     if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
         return True
 
+def getPW(size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
+        
+        if not special:
+            random_password = [random.choice(chars) for _ in range(size)]
+        else:
+            ndigit = random.randint(1, 3)
+            nspecial = random.randint(1, 2)
+
+
+            ncletter = random.randint(2, 5)
+            nsletter = size - ndigit - nspecial - ncletter
+            
+            random_password = []
+            
+            for n, rc in ((ndigit, string.digits), (nspecial, special),
+                        (ncletter, string.ascii_uppercase),
+                        (nsletter, string.lowercase)):
+            
+                random_password += [random.choice(rc) for _ in range(n)]
+            
+        random.shuffle(random_password)
+                
+        return ''.join(random_password)
+        
+
 
 class GluuSetupApp(npyscreen.StandardApp):
 
@@ -34,7 +63,7 @@ class GluuSetupApp(npyscreen.StandardApp):
 
     def onStart(self):
         self.addForm("MAIN", MainFrom, name="System Information")
-        self.addForm("HostFrom", HostFrom, name="Supply Information to Generate Certificates")
+        self.addForm("HostFrom", HostFrom, name="Gathering Information")
         self.addForm("ServicesFrom", ServicesFrom, name="Select Services to Install")
         self.addForm("DBBackendFrom", DBBackendFrom, name="Choose DB Backend")
         self.addForm("StorageSelectionFrom", StorageSelectionFrom, name="Hybrid Storage Selection")
@@ -144,6 +173,7 @@ class HostFrom(GluuSetupForm):
     
     def create(self):
 
+        self.add(npyscreen.FixedText, value=make_title(msg.cert_info_label), editable=False)
         self.ip = self.add(npyscreen.TitleText, name="IP Address", begin_entry_at=25, value=msg.ip)
         self.hostname = self.add(npyscreen.TitleText, name="Hostname", begin_entry_at=25, value=msg.hostname)        
         self.organization = self.add(npyscreen.TitleText, name="Organization Name", begin_entry_at=25, value=msg.organization)
@@ -151,6 +181,11 @@ class HostFrom(GluuSetupForm):
         self.city = self.add(npyscreen.TitleText, name="City or Locality", begin_entry_at=25, value=msg.city)
         self.state = self.add(npyscreen.TitleText, name="State or Province", begin_entry_at=25, value=msg.state)
         self.country = self.add(npyscreen.TitleText, name="Country Code", begin_entry_at=25, value=msg.country)
+
+        self.add(npyscreen.FixedText, value=make_title(msg.sys_info_label), rely=12, editable=False)
+        self.max_ram = self.add(npyscreen.TitleText, name=msg.max_ram_label, begin_entry_at=25, value=str(msg.max_ram))
+        self.oxtrust_admin_password = self.add(npyscreen.TitleText, name=msg.oxtrust_admin_password_label, begin_entry_at=25, value=msg.oxtrust_admin_password)
+
 
         """
         zone_fn = '/usr/share/zoneinfo/iso3166.tab'
@@ -201,7 +236,18 @@ class HostFrom(GluuSetupForm):
         if len(msg.country) < 2:
             npyscreen.notify_confirm(msg.enter_valid_country_code, title="Info")
             return
-    
+        
+        if len(self.oxtrust_admin_password.value) < 6:
+            npyscreen.notify_confirm(msg.oxtrust_admin_password_warning, title="Info")
+            return
+
+        try:
+            msg.max_ram = int(self.max_ram.value)
+        except:
+            npyscreen.notify_confirm(msg.max_ram_int_warning, title="Info")
+            return
+
+        msg.oxtrust_admin_password = self.oxtrust_admin_password.value
         msg.country = msg.country[:2].upper()
 
         self.parentApp.switchForm('ServicesFrom')
@@ -416,6 +462,9 @@ msg.organization = 'Gluu'
 msg.admin_email = 'support@gluu.org'
 msg.country = 'US'
 
+msg.max_ram = 3072
+msg.oxtrust_admin_password = getPW(special='.*=!%&+/-')
+
 msg.installHttpd = True
 msg.installSaml = False
 msg.installOxAuthRP = False
@@ -426,11 +475,11 @@ msg.installGluuRadius = False
 msg.wrends_install = False
 msg.wrends_remote = True
 msg.wrends_hosts = 'localhost'
-msg.wrends_password = 'lk1*98.P'
+msg.wrends_password = getPW(special='.*=!%&+/-')
 
 msg.cb_install = True
 msg.cb_remote = False
-msg.cb_password = '!98Ls-Ux'
+msg.cb_password = getPW(special='.*=!%&+/-')
 msg.cb_username = 'admin'
 
 msg.cb_hosts = 'c1.gluu.org,c2.gluu.org'
