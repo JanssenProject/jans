@@ -29,6 +29,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Inject
     private PersistenceEntryManager entryManager;
+    
+    private boolean deleteExpiredImmediately = false;
+    private boolean tryToDeleteBeforePut = false;
 
     private String baseDn;
 
@@ -80,7 +83,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getNewExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
-                    remove(key);
+                    if (deleteExpiredImmediately) {
+                    	remove(key);
+                    }
                     return null;
                 }
                 Object o = fromString(entity.getData());
@@ -124,7 +129,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setNewExpirationDate(expirationDate.getTime());
             entity.setDeletable(true);
 
-            silentlyRemoveEntityIfExists(entity.getDn());
+            if (tryToDeleteBeforePut) {
+            	silentlyRemoveEntityIfExists(entity.getDn());
+            }
             entryManager.persist(entity);
         } catch (Exception e) {
             log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
