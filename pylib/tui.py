@@ -99,25 +99,8 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
-        if form_name == 'DisplaySummaryForm':
-
-            wrends_storages_widget = getattr(self, 'wrends_storages')
-
-            for wn in dir(self):
-                w = getattr(self, wn)
-                if getClassName(w) == 'TitleFixedText':
-                    
-                    val = getattr(msg, wn)
-                    if wn == 'backend_types':
-                        if len(val) > 1:
-                            wrends_storages_widget.hidden = False
-                        else:
-                            wrends_storages_widget.hidden = True
-
-                    if type(val) == type([]):
-                        tmp_ = [str(v) for v in val]
-                        val = ', '.join(tmp_)
-                    w.value = str(val)
+        if hasattr(self, 'update_ui'):
+            self.update_ui()
     
     def while_waiting(self):
         if self.parentApp.my_counter % marketing_text_period == 0:
@@ -209,7 +192,7 @@ class HostForm(GluuSetupForm):
         self.admin_email = self.add(npyscreen.TitleText, name=msg.admin_email_label, begin_entry_at=25, value=msg.admin_email)
         self.city = self.add(npyscreen.TitleText, name=msg.city_label, begin_entry_at=25, value=msg.city)
         self.state = self.add(npyscreen.TitleText, name=msg.state_label, begin_entry_at=25, value=msg.state)
-        self.country = self.add(npyscreen.TitleText, name=msg.country_label, begin_entry_at=25, value=msg.country)
+        self.countryCode = self.add(npyscreen.TitleText, name=msg.countryCode_label, begin_entry_at=25, value=msg.countryCode)
 
         self.add(npyscreen.FixedText, value=make_title(msg.sys_info_label), rely=12, editable=False)
         self.max_ram = self.add(npyscreen.TitleText, name=msg.max_ram_label, begin_entry_at=25, value=str(msg.max_ram))
@@ -218,7 +201,7 @@ class HostForm(GluuSetupForm):
         
     def nextButtonPressed(self):
 
-        for k in ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'country'):
+        for k in ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'countryCode'):
             setattr(msg, k, getattr(self, k).value)
 
         if not msg.hostname:
@@ -237,8 +220,8 @@ class HostForm(GluuSetupForm):
             npyscreen.notify_confirm(msg.enter_valid_ip, title="Info")
             return
 
-        if len(msg.country) < 2:
-            npyscreen.notify_confirm(msg.enter_valid_country_code, title="Info")
+        if len(msg.countryCode) < 2:
+            npyscreen.notify_confirm(msg.enter_valid_countryCode, title="Info")
             return
         
         if len(self.oxtrust_admin_password.value) < 6:
@@ -252,7 +235,7 @@ class HostForm(GluuSetupForm):
             return
 
         msg.oxtrust_admin_password = self.oxtrust_admin_password.value
-        msg.country = msg.country[:2].upper()
+        msg.countryCode = msg.countryCode[:2].upper()
 
         self.parentApp.switchForm('ServicesForm')
 
@@ -446,13 +429,33 @@ class DisplaySummaryForm(GluuSetupForm):
 
     def create(self):
 
-        for wn in ("hostname", "orgName", "os_type", "city", "state", "country",
+        for wn in ("hostname", "orgName", "os_type", "city", "state", "countryCode",
                    "max_ram", "installOxAuth", "installOxTrust", 
                     "installHttpd", "installSaml", "installOxAuthRP",
                     "installPassport", "installGluuRadius", "java_type",
                     "backend_types", 'wrends_storages'):
             hidden = True if wn == 'wrends_storages' else False
             setattr(self, wn, self.add(npyscreen.TitleFixedText, name=getattr(msg, wn+'_label'), value="", begin_entry_at=24, editable=False, hidden=hidden))
+
+    def update_ui(self):
+        wrends_storages_widget = getattr(self, 'wrends_storages')
+
+        for wn in dir(self):
+            w = getattr(self, wn)
+            if getClassName(w) == 'TitleFixedText':
+                
+                val = getattr(msg, wn)
+                if wn == 'backend_types':
+                    if len(val) > 1:
+                        wrends_storages_widget.hidden = False
+                    else:
+                        wrends_storages_widget.hidden = True
+
+                if type(val) == type([]):
+                    tmp_ = [str(v) for v in val]
+                    val = ', '.join(tmp_)
+                w.value = str(val)
+
 
     def backButtonPressed(self):
         if len(msg.backend_types) > 1:
@@ -496,7 +499,7 @@ msg.city = 'Austin'
 msg.state = 'TX'
 msg.orgName = 'Gluu'
 msg.admin_email = 'support@gluu.org'
-msg.country = 'US'
+msg.countryCode = 'US'
 
 msg.max_ram = 3072
 msg.oxtrust_admin_password = getPW(special='.*=!%&+/-')
