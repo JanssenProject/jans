@@ -14,6 +14,10 @@ import inspect
 
 #Todo: check min lines:25 comumns: 80
 
+#install types
+NONE = 0
+LOCAL = 1
+REMOTE = 2
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -276,33 +280,18 @@ class DBBackendForm(GluuSetupForm):
         self.editw = 2
         self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install), editable=False)
 
-        wrends_val = 0
-        if msg.wrends_remote:
-            wrends_val = 2
-        if msg.wrends_install:
-            wrends_val = 1
-
-        self.ask_wrends = self.add(npyscreen.SelectOne, max_height=3, value = [wrends_val,], 
+        self.ask_wrends = self.add(npyscreen.SelectOne, max_height=3, value = [msg.wrends_install], 
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_wrends.value_changed_callback = self.wrends_option_changed
-
         self.wrends_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.wrends_password)
         self.wrends_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.wrends_hosts)
         self.wrends_option_changed(self.ask_wrends)
-        
-        
+
         self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10, editable=False)
 
-        cb_val = 0
-        if msg.cb_remote:
-            cb_val = 2
-        if msg.cb_install:
-            cb_val = 1
-
-        self.ask_cb = self.add(npyscreen.SelectOne, max_height=3, value = [cb_val,], 
+        self.ask_cb = self.add(npyscreen.SelectOne, max_height=3, value = [msg.cb_install], 
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_cb.value_changed_callback = self.cb_option_changed
-
         self.cb_admin = self.add(npyscreen.TitleText, name=msg.username_label, value=msg.cb_username)
         self.cb_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.cb_password)
         self.cb_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.cb_hosts)
@@ -312,47 +301,38 @@ class DBBackendForm(GluuSetupForm):
 
         msg.backend_types = []
 
-        if self.ask_wrends.value[0] == 0:
-            msg.wrends_install = False
-        elif self.ask_wrends.value[0] == 1:
-            msg.wrends_install = True
-            msg.wrends_remote = False
+        msg.wrends_install = self.ask_wrends.value[0]
+
+        if msg.wrends_install == LOCAL:
             msg.wrends_hosts = 'localhost'
             msg.wrends_password = self.wrends_password.value
-        elif self.ask_wrends.value[0] == 2:
-            msg.wrends_install = False
-            msg.wrends_remote = True
+            msg.backend_types.append('wrends')
+        elif msg.wrends_install == REMOTE:
             msg.wrends_hosts = self.wrends_hosts.value
             msg.wrends_password = self.wrends_password.value
+            msg.backend_types.append('wrends[R]')
 
-        if self.ask_cb.value[0] == 0:
-            msg.cb_install = False
-        elif self.ask_cb.value[0] == 1:
-            msg.cb_install = True
-            msg.cb_remote = False
+        msg.cb_install = self.ask_cb.value[0]
+
+        if msg.cb_install == LOCAL:
             msg.cb_hosts = 'localhost'
             msg.cb_password = self.cb_password.value
-        elif self.ask_cb.value[0] == 2:
-            msg.cb_install = False
-            msg.cb_remote = True
+            msg.backend_types.append('couchbase')
+        elif msg.cb_install == REMOTE:
             msg.cb_hosts = self.cb_hosts.value
             msg.cb_password = self.cb_password.value
+            msg.backend_types.append('couchbase[R]')
 
-        if not checkPassword(msg.wrends_password):
+        if msg.wrends_install and not checkPassword(msg.wrends_password):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if not checkPassword(msg.cb_password):
+        if msg.cb_install and not checkPassword(msg.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
-        if self.ask_wrends.value[0] in (1,2):
-            msg.backend_types.append('wrends')
-        if self.ask_cb.value[0] in (1,2):
-            msg.backend_types.append('couchbase')
-
-        if (self.ask_wrends.value[0] in (1,2)) or (self.ask_cb.value[0] in (1,2)):
-            if (self.ask_wrends.value[0] in (1,2)) and (self.ask_cb.value[0] in (1,2)):
+        if msg.wrends_install or msg.cb_install:
+            if len(msg.backend_types) > 1:
                 self.parentApp.switchForm('StorageSelectionForm')
             else:
                 self.parentApp.switchForm('DisplaySummaryForm')
@@ -364,10 +344,10 @@ class DBBackendForm(GluuSetupForm):
         if not self.ask_wrends.value[0]:
             self.wrends_password.hidden = True
             self.wrends_hosts.hidden = True
-        elif self.ask_wrends.value[0] == 1:
+        elif self.ask_wrends.value[0] == LOCAL:
             self.wrends_password.hidden = False
             self.wrends_hosts.hidden = True
-        elif self.ask_wrends.value[0] == 2:
+        elif self.ask_wrends.value[0] == REMOTE:
             self.wrends_password.hidden = False
             self.wrends_hosts.hidden = False
             
@@ -379,12 +359,12 @@ class DBBackendForm(GluuSetupForm):
             self.cb_admin.hidden = True
             self.cb_password.hidden = True
             self.cb_hosts.hidden = True
-        elif self.ask_cb.value[0] == 1:
+        elif self.ask_cb.value[0] == LOCAL:
             self.cb_admin.hidden = False
             self.cb_hosts.hidden = False
             self.cb_password.hidden = False
             self.cb_hosts.hidden = True
-        elif self.ask_cb.value[0] == 2:
+        elif self.ask_cb.value[0] == REMOTE:
             self.cb_admin.hidden = False
             self.cb_password.hidden = False
             self.cb_hosts.hidden = False
@@ -514,13 +494,11 @@ msg.installPassport = False
 msg.installGluuRadius = False
 
 msg.backend_types = []
-msg.wrends_install = False
-msg.wrends_remote = True
+msg.wrends_install = LOCAL
 msg.wrends_hosts = 'localhost'
 msg.wrends_password = getPW(special='.*=!%&+/-')
 
-msg.cb_install = True
-msg.cb_remote = False
+msg.cb_install = REMOTE
 msg.cb_password = getPW(special='.*=!%&+/-')
 msg.cb_username = 'admin'
 
