@@ -78,7 +78,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             key = hashKey(key);
             NativePersistenceCacheEntity entity = entryManager.find(NativePersistenceCacheEntity.class, createDn(key));
             if (entity != null && entity.getData() != null) {
-                if (isExpired(entity.getExpirationDate()) && entity.isDeletable()) {
+                if (isExpired(entity.getNewExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
                     remove(key);
                     return null;
