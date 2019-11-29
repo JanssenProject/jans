@@ -29,16 +29,18 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Inject
     private PersistenceEntryManager entryManager;
-    
-    private boolean deleteExpiredImmediately = false;
-    private boolean tryToDeleteBeforePut = false;
 
     private String baseDn;
+
+	private boolean deleteExpiredOnGetRequest;
+	private boolean deleteBeforePut;
 
     @Override
     public void create() {
         try {
             baseDn = cacheConfiguration.getNativePersistenceConfiguration().getBaseDn();
+            deleteExpiredOnGetRequest = cacheConfiguration.getNativePersistenceConfiguration().isDeleteExpiredOnGetRequest();
+            deleteBeforePut = cacheConfiguration.getNativePersistenceConfiguration().isDeleteBeforePut();
 
             if (StringUtils.isBlank(baseDn)) {
                 log.error("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in LdapCacheConfiguration is not initialized. It has to be set by client application (e.g. oxAuth has to set it in ApplicationFactory.)");
@@ -83,7 +85,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getNewExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
-                    if (deleteExpiredImmediately) {
+                    if (deleteExpiredOnGetRequest) {
                     	remove(key);
                     }
                     return null;
@@ -103,7 +105,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         return String.format("uuid=%s,%s", key, baseDn);
     }
 
-    private static String hashKey(String key) {
+    public static String hashKey(String key) {
         return DigestUtils.sha256Hex(key);
     }
 
@@ -129,7 +131,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setNewExpirationDate(expirationDate.getTime());
             entity.setDeletable(true);
 
-            if (tryToDeleteBeforePut) {
+            if (deleteBeforePut) {
             	silentlyRemoveEntityIfExists(entity.getDn());
             }
             entryManager.persist(entity);

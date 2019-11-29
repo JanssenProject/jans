@@ -16,7 +16,7 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
 
     @DN
     private String dn;
-    @AttributeName(name = "uuid", consistency = true /* get by key requires scan consistency too */)
+    @AttributeName(name = "uuid")
     private String id;
     @AttributeName(name = "iat")
     private Date creationDate;
