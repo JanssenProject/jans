@@ -1680,7 +1680,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	protected <T> Object getDNValue(Object entry) {
 		Class<?> entryClass = entry.getClass();
 		
-		return getDNValue(entryClass, entryClass);
+		return getDNValue(entry, entryClass);
 	}
 
 	protected <T> Object getDNValue(Object entry, Class<T> entryClass) {
