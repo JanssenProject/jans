@@ -35,6 +35,7 @@ class msg:
     installPassport_label = "Install Passport" 
     installGluuRadius_label = "Install Radius"
     wrends_storages_label = "Store on WrenDS"
+    installing_label = "Installing"
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
