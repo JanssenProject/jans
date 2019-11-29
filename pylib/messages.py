@@ -20,7 +20,7 @@ class msg:
     admin_email_label = "Support Email"
     city_label = "City or Locality"
     state_label = "State or Province"
-    country_label = "Country Code"
+    countryCode_label = "Country Code"
     password_label = "Password"
     hosts_label = "Hosts"
     username_label = "Username"
@@ -64,7 +64,7 @@ class msg:
     enter_hostname_local = "Hostname can't be localhost"
     enter_valid_email = "Please enter valid email address"
     enter_valid_ip = "Please enter valid IP Address"
-    enter_valid_country_code = "Please enter two letter country code"
+    enter_valid_countryCode = "Please enter two letter country code"
 
 
     ask_installHttpd = "Install Apache HTTPD Server"
