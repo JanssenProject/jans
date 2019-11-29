@@ -1,4 +1,14 @@
 class msg:
+    
+    MAIN_label = "System Information"
+    HostForm_label = "Gathering Information"
+    ServicesForm_label = "Select Services to Install"
+    DBBackendForm_label = "Choose DB Backend"
+    StorageSelectionForm_label = "Hybrid Storage Selection"
+    InstallStepsForm_label = "Installing Gluu Server"
+    DisplaySummaryForm_label = "Installing Gluu Server"
+
+    
     decription = "Use setup.py to configure your Gluu Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup."
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
