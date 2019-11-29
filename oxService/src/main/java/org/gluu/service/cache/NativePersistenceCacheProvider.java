@@ -121,12 +121,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setId(key);
             entity.setDn(createDn(key));
             entity.setCreationDate(creationDate);
-            entity.setExpirationDate(expirationDate.getTime());
+            entity.setNewExpirationDate(expirationDate.getTime());
             entity.setDeletable(true);
 
             silentlyRemoveEntityIfExists(entity.getDn());
             entryManager.persist(entity);
-        } catch (Exception e) {
+        } catch (Exception e) {e.printStackTrace();
             log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
     }
