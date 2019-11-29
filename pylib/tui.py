@@ -56,10 +56,10 @@ def getPW(size=12, chars=string.ascii_uppercase + string.digits + string.lowerca
         return ''.join(random_password)
         
 def getClassName(c):
-    return getattr(c, '__class__').__name__
-
-
-
+    try:
+        return getattr(c, '__class__').__name__
+    except:
+        return ''
 
 class GluuSetupApp(npyscreen.StandardApp):
 
@@ -81,11 +81,16 @@ class GluuSetupApp(npyscreen.StandardApp):
 class GluuSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
+        
+        self.parentApp.my_counter = 0
+        
         self.add_handlers({curses.KEY_F1: self.display_help})
         self.add(npyscreen.MultiLineEdit, value='─' * self.columns, max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
 
-        next_x = 20 if  getClassName(self) == 'MAIN' else 28
+        form_name = getClassName(self)
+
+        next_x = 20 if  form_name == 'MAIN' else 28
         
         self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed, rely=self.lines-5, relx=self.columns - next_x)
         
@@ -94,6 +99,25 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
+        if form_name == 'DisplaySummaryForm':
+
+            wrends_storages_widget = getattr(self, 'wrends_storages')
+
+            for wn in dir(self):
+                w = getattr(self, wn)
+                if getClassName(w) == 'TitleFixedText':
+                    
+                    val = getattr(msg, wn)
+                    if wn == 'backend_types':
+                        if len(val) > 1:
+                            wrends_storages_widget.hidden = False
+                        else:
+                            wrends_storages_widget.hidden = True
+
+                    if type(val) == type([]):
+                        tmp_ = [str(v) for v in val]
+                        val = ', '.join(tmp_)
+                    w.value = str(val)
     
     def while_waiting(self):
         if self.parentApp.my_counter % marketing_text_period == 0:
@@ -154,7 +178,7 @@ class MAIN(GluuSetupForm):
                     sys.exit(False)
 
     def nextButtonPressed(self):
-        self.parentApp.my_counter = 0
+    
         if not self.license_confirm.value:
             npyscreen.notify_confirm(msg.acknowledge_lisence_ask, title="Info")
             return
@@ -181,7 +205,7 @@ class HostForm(GluuSetupForm):
         self.add(npyscreen.FixedText, value=make_title(msg.cert_info_label), editable=False)
         self.ip = self.add(npyscreen.TitleText, name=msg.ip_label, begin_entry_at=25, value=msg.ip)
         self.hostname = self.add(npyscreen.TitleText, name=msg.hostname_label, begin_entry_at=25, value=msg.hostname)        
-        self.organization = self.add(npyscreen.TitleText, name=msg.organization_label, begin_entry_at=25, value=msg.organization)
+        self.orgName = self.add(npyscreen.TitleText, name=msg.orgName_label, begin_entry_at=25, value=msg.orgName)
         self.admin_email = self.add(npyscreen.TitleText, name=msg.admin_email_label, begin_entry_at=25, value=msg.admin_email)
         self.city = self.add(npyscreen.TitleText, name=msg.city_label, begin_entry_at=25, value=msg.city)
         self.state = self.add(npyscreen.TitleText, name=msg.state_label, begin_entry_at=25, value=msg.state)
@@ -193,9 +217,8 @@ class HostForm(GluuSetupForm):
 
         
     def nextButtonPressed(self):
-        self.parentApp.my_counter = 0
 
-        for k in ('ip', 'hostname', 'city', 'state', 'organization', 'admin_email', 'country'):
+        for k in ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'country'):
             setattr(msg, k, getattr(self, k).value)
 
         if not msg.hostname:
@@ -256,6 +279,7 @@ class ServicesForm(GluuSetupForm):
 
         self.parentApp.switchForm('DBBackendForm')
 
+
     def backButtonPressed(self):
         self.parentApp.switchForm('HostForm')
 
@@ -302,6 +326,9 @@ class DBBackendForm(GluuSetupForm):
         self.cb_option_changed(self.ask_cb)
 
     def nextButtonPressed(self):
+
+        msg.backend_types = []
+
         if self.ask_wrends.value[0] == 0:
             msg.wrends_install = False
         elif self.ask_wrends.value[0] == 1:
@@ -335,6 +362,11 @@ class DBBackendForm(GluuSetupForm):
         if not checkPassword(msg.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
+
+        if self.ask_wrends.value[0] in (1,2):
+            msg.backend_types.append('wrends')
+        if self.ask_cb.value[0] in (1,2):
+            msg.backend_types.append('couchbase')
 
         if (self.ask_wrends.value[0] in (1,2)) or (self.ask_cb.value[0] in (1,2)):
             if (self.ask_wrends.value[0] in (1,2)) and (self.ask_cb.value[0] in (1,2)):
@@ -391,7 +423,7 @@ class StorageSelectionForm(GluuSetupForm):
             if s in msg.wrends_storages:
                 storage_val.append(i)
         
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, max_height = len(msg.storage_list), begin_entry_at=25, value = storage_val, name="Store on WrenDS", 
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, max_height = len(msg.storage_list), begin_entry_at=25, value = storage_val, name=msg.DBBackendForm_label, 
             values = [ s.title() for s in msg.storage_list ], scroll_exit=True)
         
         self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storage_list)+4, editable=False, color='STANDOUT')
@@ -407,15 +439,27 @@ class StorageSelectionForm(GluuSetupForm):
             tmp_.append(msg.storage_list[s])
 
         msg.wrends_storages = tmp_
-        
+
         self.parentApp.switchForm('DisplaySummaryForm')
 
 class DisplaySummaryForm(GluuSetupForm):
+
     def create(self):
-        pass
+
+        for wn in ("hostname", "orgName", "os_type", "city", "state", "country",
+                   "max_ram", "installOxAuth", "installOxTrust", 
+                    "installHttpd", "installSaml", "installOxAuthRP",
+                    "installPassport", "installGluuRadius", "java_type",
+                    "backend_types", 'wrends_storages'):
+            hidden = True if wn == 'wrends_storages' else False
+            setattr(self, wn, self.add(npyscreen.TitleFixedText, name=getattr(msg, wn+'_label'), value="", begin_entry_at=24, editable=False, hidden=hidden))
 
     def backButtonPressed(self):
-        pass
+        if len(msg.backend_types) > 1:
+            self.parentApp.switchForm('StorageSelectionForm')
+        else:
+            self.parentApp.switchForm('DBBackendForm')
+        
 
     def nextButtonPressed(self):
         pass
@@ -450,20 +494,23 @@ msg.ip = "192.168.56.112"
 msg.hostname = 'c1.gluu.org'
 msg.city = 'Austin'
 msg.state = 'TX'
-msg.organization = 'Gluu'
+msg.orgName = 'Gluu'
 msg.admin_email = 'support@gluu.org'
 msg.country = 'US'
 
 msg.max_ram = 3072
 msg.oxtrust_admin_password = getPW(special='.*=!%&+/-')
 
+msg.java_type = 'Oracle corretto'
+msg.installOxAuth = True
+msg.installOxTrust = True
 msg.installHttpd = True
 msg.installSaml = False
 msg.installOxAuthRP = False
 msg.installPassport = False
 msg.installGluuRadius = False
 
-
+msg.backend_types = []
 msg.wrends_install = False
 msg.wrends_remote = True
 msg.wrends_hosts = 'localhost'
