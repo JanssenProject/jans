@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -15,8 +14,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 @ApplicationScoped
 public class PageService {
-
-    private static final DateFormat CURRENT_DATE_TIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+	
+	private final String CURRENT_DATE_TIME_FORMATTER = "yyyy-MM-dd hh:mm:ss a";
 
     public String getRootUrlByRequest(HttpServletRequest request) {
         String url = request.getRequestURL().toString();
@@ -24,7 +23,8 @@ public class PageService {
     }
 
     public String getCurrentDateTime() {
-        return CURRENT_DATE_TIME_FORMATTER.format(new Date());
+        DateFormat dateFormat = new SimpleDateFormat(CURRENT_DATE_TIME_FORMATTER);
+        return dateFormat.format(new Date());
     }
 
 }
