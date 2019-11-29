@@ -67,6 +67,8 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  */
 public class CouchbaseEntryManager extends BaseEntryManager implements Serializable {
 
+	private static final String JSON_DATA_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
 	private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
@@ -76,8 +78,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     private final CouchbaseFilterConverter FILTER_CONVERTER;
     private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter();
-
-    private SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     private CouchbaseOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
@@ -595,6 +595,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             	} else if (attributeObject instanceof String) {
                		Object value = attributeObject.toString();
                     try {
+                        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(JSON_DATA_FORMAT);
                     	value = jsonDateFormat.parse(attributeObject.toString());
                     } catch (Exception ex) {}
             		attributeValueObjects = new Object[] { value };
@@ -833,6 +834,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             return null;
         }
 
+        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(JSON_DATA_FORMAT);
         return jsonDateFormat.format(date);
     }
 
@@ -847,10 +849,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             return null;
         }
 
+        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(JSON_DATA_FORMAT);
         Date decodedDate;
         try {
             decodedDate = jsonDateFormat.parse(date);
-        } catch (ParseException ex) {
+        } catch (Exception ex) {
             LOG.error("Failed to decode generalized time '{}'", date, ex);
 
             return null;
