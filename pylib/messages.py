@@ -12,6 +12,13 @@ class msg:
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
     
+    cert_info_label = "Information to Generate Certificates"
+    sys_info_label =  "System Information"
+    max_ram_label = "Maximum RAM in MB"
+    oxtrust_admin_password_label = "oxTrust Admin Password"
+    oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
+    max_ram_int_warning = "Please enter and integer value for Max ram"
+    
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
     acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the MIT license"
