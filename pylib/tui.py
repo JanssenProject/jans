@@ -94,12 +94,13 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
         form_name = getClassName(self)
 
-        next_x = 20 if  form_name == 'MAIN' else 28
-        
-        self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed, rely=self.lines-5, relx=self.columns - next_x)
-        
-        if next_x == 28:
-            self.button_back = self.add(npyscreen.ButtonPress, name="Back", when_pressed_function=self.backButtonPressed, rely=self.lines-5, relx=self.columns - 20)
+        if form_name != 'InstallStepsForm':
+
+            next_x = 20 if  form_name == 'MAIN' else 28
+            self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed, rely=self.lines-5, relx=self.columns - next_x)
+            
+            if next_x == 28:
+                self.button_back = self.add(npyscreen.ButtonPress, name="Back", when_pressed_function=self.backButtonPressed, rely=self.lines-5, relx=self.columns - 20)
         
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
@@ -113,6 +114,8 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
         self.parentApp.my_counter += 1
 
+        if hasattr(self, 'do_while_waiting'):
+            self.do_while_waiting()
 
     def quitButtonPressed(self):
         notify_result = npyscreen.notify_ok_cancel("Are you sure want to quit?", title= 'Warning')
@@ -445,21 +448,36 @@ class DisplaySummaryForm(GluuSetupForm):
         
 
     def nextButtonPressed(self):
-        pass
+        self.parentApp.switchForm('InstallStepsForm')
 
-
+class InputBox(npyscreen.BoxTitle):
+    _contained_widget = npyscreen.MultiLineEdit
 
 class InstallStepsForm(GluuSetupForm):
     def create(self):
-        pass
+        self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number, rely=4, editable=False, name="Progress")
+        self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)
+        self.description = self.add(InputBox, name="", max_height=6, rely=8)
+        
+        
+
+    
+    def do_while_waiting(self):
+        if self.prgress_percantage.value < msg.installation_step_number:
+            self.prgress_percantage.value += 0.5
+            self.prgress_percantage.update()
+        
+        self.description.value = random.choice(random_marketing_strings)
+        self.description.update()
+        
+        self.installing.value = random.choice(random_marketing_strings)
+        self.installing.update()
 
     def backButtonPressed(self):
         pass
 
     def nextButtonPressed(self):
         pass
-
-
 
 
 GSA = GluuSetupApp()
@@ -506,6 +524,6 @@ msg.cb_hosts = 'c1.gluu.org,c2.gluu.org'
 
 msg.storage_list = ['default', 'user', 'cache', 'site', 'token']
 msg.wrends_storages = ['user', 'token']
-
+msg.installation_step_number = 16
 
 GSA.run()
