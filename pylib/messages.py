@@ -6,7 +6,7 @@ class msg:
     DBBackendForm_label = "Choose DB Backend"
     StorageSelectionForm_label = "Hybrid Storage Selection"
     InstallStepsForm_label = "Installing Gluu Server"
-    DisplaySummaryForm_label = "Installing Gluu Server"
+    DisplaySummaryForm_label = "Gluu Server Installation Summary"
 
     decription = "Use setup.py to configure your Gluu Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup."
 
@@ -15,7 +15,8 @@ class msg:
     httpd_type_label = "Apache Version"
     ip_label = "IP Address"
     hostname_label = "Hostname"
-    organization_label = "Organization Name"
+    orgName_label = "Organization Name"
+    state_label = "State"
     admin_email_label = "Support Email"
     city_label = "City or Locality"
     state_label = "State or Province"
@@ -23,6 +24,17 @@ class msg:
     password_label = "Password"
     hosts_label = "Hosts"
     username_label = "Username"
+    
+    installOxAuth_label = "Install OxAuth"
+    installOxTrust_label = "Install OxTrust"
+    backend_types_label = "Backend Types"
+    java_type_label = "Java Type"
+    installHttpd_label = "Install Apache" 
+    installSaml_label = "Install Saml" 
+    installOxAuthRP_label = "Install OxAuthRP" 
+    installPassport_label = "Install Passport" 
+    installGluuRadius_label = "Install Radius"
+    wrends_storages_label = "Store on WrenDS"
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
