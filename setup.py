@@ -3047,7 +3047,7 @@ class Setup(object):
                 break
             else:
                 print("Please enter valid email address")
-            
+
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
 
