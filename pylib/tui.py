@@ -67,16 +67,13 @@ class GluuSetupApp(npyscreen.StandardApp):
     my_counter = 0
 
     def onStart(self):
-        
-        
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
-        
+
         for obj in globals().items():
             if not obj[0]=='GluuSetupForm' and obj[0].endswith('Form') and inspect.isclass(obj[1]):
                 print "Adding form", obj[0]
                 self.addForm(obj[0], obj[1], name=getattr(msg, obj[0]+'_label'))
- 
- 
+
     def onCleanExit(self):
         npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
 
@@ -131,9 +128,9 @@ class MAIN(GluuSetupForm):
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
         self.description_label.autowrap = True
 
-        self.os_type = self.add(npyscreen.TitleFixedText, name="Detected OS", begin_entry_at=18, value=msg.os_type, editable=False)
-        self.init_type = self.add(npyscreen.TitleFixedText, name="Detected init", begin_entry_at=18, value=msg.os_initdaemon, editable=False)
-        self.httpd_type = self.add(npyscreen.TitleFixedText, name="Apache Version", begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
+        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=msg.os_type, editable=False)
+        self.init_type = self.add(npyscreen.TitleFixedText, name=msg.init_type_label, begin_entry_at=18, value=msg.os_initdaemon, editable=False)
+        self.httpd_type = self.add(npyscreen.TitleFixedText, name=msg.httpd_type_label, begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
         self.warning_text = self.add(npyscreen.MultiLineEdit, value=msg.setup_properties_warning, max_height=4, editable=False)
 
@@ -182,13 +179,13 @@ class HostForm(GluuSetupForm):
     def create(self):
 
         self.add(npyscreen.FixedText, value=make_title(msg.cert_info_label), editable=False)
-        self.ip = self.add(npyscreen.TitleText, name="IP Address", begin_entry_at=25, value=msg.ip)
-        self.hostname = self.add(npyscreen.TitleText, name="Hostname", begin_entry_at=25, value=msg.hostname)        
-        self.organization = self.add(npyscreen.TitleText, name="Organization Name", begin_entry_at=25, value=msg.organization)
-        self.admin_email = self.add(npyscreen.TitleText, name="Support Email", begin_entry_at=25, value=msg.admin_email)
-        self.city = self.add(npyscreen.TitleText, name="City or Locality", begin_entry_at=25, value=msg.city)
-        self.state = self.add(npyscreen.TitleText, name="State or Province", begin_entry_at=25, value=msg.state)
-        self.country = self.add(npyscreen.TitleText, name="Country Code", begin_entry_at=25, value=msg.country)
+        self.ip = self.add(npyscreen.TitleText, name=msg.ip_label, begin_entry_at=25, value=msg.ip)
+        self.hostname = self.add(npyscreen.TitleText, name=msg.hostname_label, begin_entry_at=25, value=msg.hostname)        
+        self.organization = self.add(npyscreen.TitleText, name=msg.organization_label, begin_entry_at=25, value=msg.organization)
+        self.admin_email = self.add(npyscreen.TitleText, name=msg.admin_email_label, begin_entry_at=25, value=msg.admin_email)
+        self.city = self.add(npyscreen.TitleText, name=msg.city_label, begin_entry_at=25, value=msg.city)
+        self.state = self.add(npyscreen.TitleText, name=msg.state_label, begin_entry_at=25, value=msg.state)
+        self.country = self.add(npyscreen.TitleText, name=msg.country_label, begin_entry_at=25, value=msg.country)
 
         self.add(npyscreen.FixedText, value=make_title(msg.sys_info_label), rely=12, editable=False)
         self.max_ram = self.add(npyscreen.TitleText, name=msg.max_ram_label, begin_entry_at=25, value=str(msg.max_ram))
@@ -282,8 +279,8 @@ class DBBackendForm(GluuSetupForm):
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_wrends.value_changed_callback = self.wrends_option_changed
 
-        self.wrends_password = self.add(npyscreen.TitleText, name="Password", value=msg.wrends_password)
-        self.wrends_hosts = self.add(npyscreen.TitleText, name="Hosts", value=msg.wrends_hosts)
+        self.wrends_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.wrends_password)
+        self.wrends_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.wrends_hosts)
         self.wrends_option_changed(self.ask_wrends)
         
         
@@ -299,9 +296,9 @@ class DBBackendForm(GluuSetupForm):
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_cb.value_changed_callback = self.cb_option_changed
 
-        self.cb_admin = self.add(npyscreen.TitleText, name="Username", value=msg.cb_username)
-        self.cb_password = self.add(npyscreen.TitleText, name="Password", value=msg.cb_password)
-        self.cb_hosts = self.add(npyscreen.TitleText, name="Hosts", value=msg.cb_hosts)
+        self.cb_admin = self.add(npyscreen.TitleText, name=msg.username_label, value=msg.cb_username)
+        self.cb_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.cb_password)
+        self.cb_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.cb_hosts)
         self.cb_option_changed(self.ask_cb)
 
     def nextButtonPressed(self):
