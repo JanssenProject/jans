@@ -126,8 +126,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
             silentlyRemoveEntityIfExists(entity.getDn());
             entryManager.persist(entity);
-        } catch (Exception e) {e.printStackTrace();
-            log.trace("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
+        } catch (Exception e) {
+            log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
     }
 
