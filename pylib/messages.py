@@ -8,8 +8,21 @@ class msg:
     InstallStepsForm_label = "Installing Gluu Server"
     DisplaySummaryForm_label = "Installing Gluu Server"
 
-    
     decription = "Use setup.py to configure your Gluu Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup."
+
+    os_type_label = "Detected OS"
+    init_type_label = "Detected init"
+    httpd_type_label = "Apache Version"
+    ip_label = "IP Address"
+    hostname_label = "Hostname"
+    organization_label = "Organization Name"
+    admin_email_label = "Support Email"
+    city_label = "City or Locality"
+    state_label = "State or Province"
+    country_label = "Country Code"
+    password_label = "Password"
+    hosts_label = "Hosts"
+    username_label = "Username"
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
