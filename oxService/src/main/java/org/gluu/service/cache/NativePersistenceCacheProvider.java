@@ -33,14 +33,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private String baseDn;
 
 	private boolean deleteExpiredOnGetRequest;
-	private boolean deleteBeforePut;
 
     @Override
     public void create() {
         try {
             baseDn = cacheConfiguration.getNativePersistenceConfiguration().getBaseDn();
             deleteExpiredOnGetRequest = cacheConfiguration.getNativePersistenceConfiguration().isDeleteExpiredOnGetRequest();
-            deleteBeforePut = cacheConfiguration.getNativePersistenceConfiguration().isDeleteBeforePut();
 
             if (StringUtils.isBlank(baseDn)) {
                 log.error("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in LdapCacheConfiguration is not initialized. It has to be set by client application (e.g. oxAuth has to set it in ApplicationFactory.)");
@@ -131,9 +129,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             entity.setNewExpirationDate(expirationDate.getTime());
             entity.setDeletable(true);
 
-            if (deleteBeforePut) {
-            	silentlyRemoveEntityIfExists(entity.getDn());
-            }
+        	silentlyRemoveEntityIfExists(entity.getDn());
             entryManager.persist(entity);
         } catch (Exception e) {
             log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
