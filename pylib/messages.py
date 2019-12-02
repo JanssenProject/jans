@@ -90,3 +90,11 @@ class msg:
     HostFromHelp = ("IP Address: ip address of this server. Detected ip address will be provided\n"
                    "Hostname: hostname of this server. Detected hostname will be provided.\n"
                    "Organization Name: ......")
+
+    installation_completed = "Gluu Server installation successful! Point your browser to https://{}"
+
+    installation_description_jre = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard and is available on Linux, Windows, and macOS. It includes patches from Amazon that have proven useful in running our own services."
+    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization. Its easy installation process, combined with the power of the Java platform makes OpenDJ the simplest, fastest directory to deploy and manage."
+    installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
+
+    installation_error = "The following error was occurred while installing Gluu Server:"
