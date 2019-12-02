@@ -2929,13 +2929,13 @@ class Setup(object):
         while True:
             self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
             self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
-            self.ldapPass = self.getPrompt("    Couchbase Password")
+            self.cb_password =self.getPrompt("    Couchbase Password")
 
             cb_hosts = re_split_host.findall(self.couchbase_hostname)
 
             for i, cb_host in enumerate(cb_hosts):
 
-                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
                 print "    Checking Couchbase connection for " + cb_host
 
                 cbm_result = cbm_.test_connection()
@@ -2955,7 +2955,7 @@ class Setup(object):
                 if cbm_result.ok and cb_query_node != None:
                     print "    Successfully connected to Couchbase server"
                     cb_host_ = cb_hosts[self.cb_query_node]
-                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
+                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.cb_password)
                     break
                 if cb_query_node == None:
                     print "Can't find any query node"
