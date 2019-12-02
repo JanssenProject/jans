@@ -6,8 +6,32 @@
 
 package org.gluu.oxauth.service;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
@@ -40,66 +64,8 @@ import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.slf4j.Logger;
-import org.xdi.oxauth.audit.ApplicationAuditLogger;
-import org.xdi.oxauth.model.audit.Action;
-import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.config.WebKeysConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.AcrChangedException;
-import org.xdi.oxauth.model.exception.InvalidSessionStateException;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
-import org.xdi.oxauth.model.token.JwtSigner;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
-import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.CacheService;
-import org.xdi.util.StringHelper;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -571,10 +537,10 @@ public class SessionIdService {
             final String sessionState = JwtUtil.bytesToHex(JwtUtil.getMessageDigestSHA256(
                     clientId + " " + clientOrigin + " " + opbs + " " + salt)) + "." + salt;
             return sessionState;
-        } catch (NoSuchProviderException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | UnsupportedEncodingException | URISyntaxException e) {
             log.error("Failed generating session state! " + e.getMessage(), e);
             throw new RuntimeException(e);
-        }
+		}
     }
 
     private String getClientOrigin(String redirectUri) throws URISyntaxException {
@@ -592,7 +558,7 @@ public class SessionIdService {
         final String opbs = UUID.randomUUID().toString();
         final String redirectUri = sessionIdAttributes.get("redirect_uri");
         final String sessionState = computeSessionState(clientId, redirectUri, opbs, salt);
-        final String dn = dn(sid);
+        final String dn = sid;
         sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
 
         if (StringUtils.isBlank(dn)) {
