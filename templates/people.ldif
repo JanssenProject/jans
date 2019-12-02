@@ -9,7 +9,7 @@ middleName: Admin
 nickname: Admin
 preferredUsername: admin
 sn: User
-userPassword: %(encoded_ldap_pw)s
+userPassword: %(encoded_oxtrust_admin_password)s
 gluuStatus: active
 memberOf: inum=60B7,ou=groups,o=gluu
 displayName: Default Admin User
