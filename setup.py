@@ -68,6 +68,10 @@ class colors:
     UNDERLINE = '\033[4m'
     DANGER = '\033[31m'
 
+#install types
+NONE = 0
+LOCAL = 1
+REMOTE = 2
 
 suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
@@ -91,6 +95,11 @@ try:
     from pylib.cbm import CBM
 except:
     pass
+
+
+def checkPassword(pwd):
+    if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
+        return True
 
 class ProgressBar:
 
@@ -345,11 +354,14 @@ class Setup(object):
         self.oxtrust_admin_password = None
         self.cb_password = None        
 
+        #DB installation types
+        self.wrends_install = LOCAL
+        self.cb_install = NONE
+
         # Gluu components installation status
         self.loadData = True
         self.installOxAuth = True
         self.installOxTrust = True
-        self.installLdap = False
         self.installHttpd = True
         self.installSaml = False
         self.installOxAuthRP = False
@@ -537,7 +549,6 @@ class Setup(object):
         self.ldap_type = 'opendj'
         self.opendj_type = 'wrends'
         self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
-        self.install_couchbase = None
 
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
@@ -546,7 +557,6 @@ class Setup(object):
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
-        self.remoteLdap = False
 
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
@@ -725,7 +735,6 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
@@ -880,10 +889,22 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            txt += 'Install Backend'.ljust(30) + repr(self.installLdap or self.install_couchbase).rjust(35) + "\n"
             
-            if (self.installLdap and not self.remoteLdap) or (self.install_couchbase and not self.remoteCouchbase):
-                txt += 'Backend Type'.ljust(30) + self.persistence_type.title().rjust(35) + "\n"
+            bc = []
+            if self.wrends_install:
+                t_ = 'wrends'
+                if self.wrends_install == REMOTE:
+                    t_ += '[R]'
+                bc.append(t_)
+            if self.cb_install:
+                t_ = 'couchbase'
+                if self.cb_install == REMOTE:
+                    t_ += '[R]'
+                bc.append(t_)
+
+            if bc:
+                bct = ', '.join(bc)
+                txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             
@@ -1719,7 +1740,7 @@ class Setup(object):
         if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if self.remoteLdap or self.remoteCouchbase:
+        if self.wrends_install == REMOTE or self.cb_install == REMOTE:
             changeTo = ''
 
         if changeTo != None:
@@ -1887,7 +1908,10 @@ class Setup(object):
         try:
             self.encoded_oxtrust_admin_password = self.ldap_encode(self.oxtrust_admin_password)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
-            self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            if self.ldapPass:
+                self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            if self.cb_password:
+                self.encoded_cb_password = self.obscure(self.cb_password)
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
 
             self.oxauthClient_pw = self.getPW()
@@ -2594,12 +2618,11 @@ class Setup(object):
 
     def install_gluu_components(self):
         
-        if self.installLdap:
-            if self.ldap_type == 'opendj':
-                self.pbar.progress("Installing Gluu components: LDAP", False)
-                self.install_ldap_server()
+        if self.wrends_install:
+            self.pbar.progress("Installing Gluu components: LDAP", False)
+            self.install_ldap_server()
 
-        if self.install_couchbase:
+        if self.cb_install:
             self.pbar.progress("Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
@@ -2831,63 +2854,6 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
 
-    def promptBackendType(self, backend_types):
-
-        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
-        
-        if promptForLDAP == 'y':
-
-            option = None
-            
-            if len(backend_types) == 2:
-                self.ldap_type = backend_types[0][1]
-                self.installLdap = True
-            
-            else:
-                prompt_text = 'Install '
-                options = []
-                for i, backend in enumerate(backend_types):
-                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
-                    options.append(str(i+1))
-
-                prompt_text += '[{0}]'.format('|'.join(options))
-                option=None
-
-                while not option in options:
-                    option=self.getPrompt(prompt_text, options[0])
-                    if not option in options:
-                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
-
-                persistence_type = backend_types[int(option)-1][1]
-
-                if persistence_type == 'wrends':
-                    self.opendj_type = 'wrends'
-
-                if persistence_type in ('opendj', 'wrends', 'hybrid'):
-                    self.installLdap = True
-
-                if persistence_type in ('couchbase', 'hybrid'):
-                    self.cache_provider_type = 'NATIVE_PERSISTENCE'
-                    print ('  Please note that you have to update your firewall configuration to\n'
-                            '  allow connections to the following ports:\n'
-                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                    self.install_couchbase = True
-                
-                if persistence_type == 'couchbase':
-                    self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
-
-                self.persistence_type = persistence_type
-                
-                if self.persistence_type in ('opendj', 'wrends'):
-                    self.persistence_type = 'ldap'
-                
-        else:
-            self.installLdap = False
-
-
     def getBackendTypes(self):
 
         if self.os_type in ('ubuntu', 'debian'):
@@ -2898,33 +2864,26 @@ class Setup(object):
 
         backend_types = []
 
-        if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
-            backend_types.append(('Gluu OpenDj','opendj'))
-            self.ldap_type = 'opendj'
-        
         if self.allowPreReleasedFeatures and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
-            backend_types.append(('Wren:DS','wrends'))
+            backend_types.append('wrends')
 
         if glob.glob(self.distFolder+'/couchbase/couchbase-server-enterprise*.'+suffix):
-            backend_types.append(('Couchbase','couchbase'))
-
-        
-        backend_types.append(('Hybrid', 'hybrid'))
+            backend_types.append('couchbase')
 
         return backend_types
 
-    def promptForBackendMappings(self, backend_types):
+    def promptForBackendMappings(self):
 
         options = []
         options_text = []
         
         bucket_list = self.couchbaseBucketDict.keys()
-        
+
         for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
-        options_text = 'Use {0} to store {1}'.format(backend_types[0][0], ' '.join(options_text))
+        options_text = 'Use WrenDS to store {}'.format(' '.join(options_text))
 
         re_pattern = '^[1-{0}]+$'.format(len(self.couchbaseBucketDict))
 
@@ -2964,9 +2923,6 @@ class Setup(object):
 
 
     def prompt_remote_couchbase(self):
-        self.installLdap = False
-        self.persistence_type = 'couchbase'
-        self.install_couchbase = True
     
         cb_query_node = None
 
@@ -3058,7 +3014,7 @@ class Setup(object):
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
         
         oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
-        
+
         while True:
             oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
             if len(oxtrust_admin_password) > 5:
@@ -3069,19 +3025,33 @@ class Setup(object):
         self.oxtrust_admin_password = oxtrust_admin_password
 
 
-        if not (self.remoteCouchbase or self.remoteLdap):
+        available_backends = self.getBackendTypes()
+
+        localWrendsOnly = False
+
+        if (self.wrends_install != REMOTE) and (not self.cb_install) and (available_backends == ['wrends']):
+            self.wrends_install = LOCAL
+            
+        elif self.wrends_install != REMOTE and (self.cb_install == REMOTE or 'couchbase' in available_backends):
+            promptForLDAP = self.getPrompt("Install Local WrenDS Server?", "Yes")[0].lower()
+            if promptForLDAP[0] == 'y':
+                self.wrends_install = LOCAL
+            else:
+                self.wrends_install = NONE
+
+        if self.wrends_install == LOCAL:
 
             while True:
                 ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
 
-                if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
+                if checkPassword(ldapPass):
                     break
                 else:
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
-            
+
             self.ldapPass = ldapPass
 
-        elif self.remoteLdap:
+        elif self.wrends_install == REMOTE:
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
@@ -3090,11 +3060,51 @@ class Setup(object):
                     conn.simple_bind_s(self.opendj_ldap_binddn, ldapPass)
                     break
                 except Exception as e:
-                    print "Error connecting to LDAP server:", e
+                    print "    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, str(e), colors.ENDC)
 
             self.ldapPass = ldapPass
             self.ldap_hostname = ldapHost
-            self.installLdap = True
+
+        if self.cb_install == REMOTE:
+            self.prompt_remote_couchbase()
+
+        elif 'couchbase' in available_backends:
+            promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
+            if promptForCB[0] == 'y':
+                self.cb_install = LOCAL
+        
+                while True:
+                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), self.oxtrust_admin_password)
+
+                    if checkPassword(cbPass):
+                        break
+                    else:
+                        print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+
+                self.cb_password = cbPass
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.cb_password)
+
+        if not (self.wrends_install or self.cb_install):
+            print "{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC)
+            sys.exit(False)
+
+        if self.cb_install:
+            self.cache_provider_type = 'NATIVE_PERSISTENCE'
+            print ('  Please note that you have to update your firewall configuration to\n'
+                    '  allow connections to the following ports:\n'
+                    '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                    '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
+            print "{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC)
+
+
+        if not self.wrends_install and self.cb_install:
+            self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
+            self.persistence_type = 'couchbase'
+
+        elif self.wrends_install and self.cb_install:
+            self.promptForBackendMappings()
+            self.persistence_type = 'hybrid'
 
         if setupOptions['allowPreReleasedFeatures']:
             while True:
@@ -3129,40 +3139,14 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        if self.remoteCouchbase:
-            self.prompt_remote_couchbase()
-            
-            print ("{0}Note: The password used for the {1} user in "
-                    "Couchbase is also\nassigned to the admin user in "
-                    "oxTrust.{2}").format(colors.WARNING, self.cbm.auth.username, colors.ENDC)
-
-            use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
-
-            if use_hybrid[0].lower() in 'yt':
-                self.installLdap = True
-                self.persistence_type = 'hybrid'
-                backend_types = self.getBackendTypes()
-                backend_types.insert(1,'couchbase')
-                self.promptForBackendMappings(backend_types)
-            else:
-                self.persistence_type = 'couchbase'
-                self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
-        else:
-
-            backend_types = self.getBackendTypes()
-
-            self.promptBackendType(backend_types)
-
-            if self.persistence_type == 'hybrid':
-                self.promptForBackendMappings(backend_types)
-
         couchbase_mappings_ = self.getMappingType('couchbase')
         buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
 
         buckets_.append('gluu')
 
 
-        if self.persistence_type in ('couchbase','hybrid'):
+
+        if self.cb_install == REMOTE:
 
             isCBRoleOK = self.checkCBRoles(buckets_)
 
@@ -3175,6 +3159,8 @@ class Setup(object):
                                 colors.ENDC
                                 )
                 sys.exit(False)
+
+
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(self.installHTTPD)
@@ -3504,7 +3490,7 @@ class Setup(object):
             with open(prop_fn, 'w') as f:
                 p.store(f)
             
-            self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.ldapPass])
+            self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.oxtrust_admin_password])
             
             self.post_messages.append(prop_fn+".enc is encrypted with password " + self.oxtrust_admin_password)
             
@@ -3931,7 +3917,7 @@ class Setup(object):
             self.run([service_path, apache_service_name, 'start'])
 
         # LDAP services
-        if self.installLdap:
+        if self.wrends_install == LOCAL:
             if self.ldap_type == 'opendj':
                 self.run_service_command('opendj', 'stop')
                 self.run_service_command('opendj', 'start')
@@ -4539,7 +4525,7 @@ class Setup(object):
         
         for cb_host in re_split_host.findall(self.couchbase_hostname):
 
-            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
+            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.cb_password)
             cert = cbm_.get_certificate()
             with open(self.couchebaseCert, 'w') as w:
                 w.write(cert)
@@ -4554,7 +4540,7 @@ class Setup(object):
         prop_dict = {
                     'hostname': ','.join(re_split_host.findall(self.couchbase_hostname)),
                     'couchbase_server_user': self.couchebaseClusterAdmin,
-                    'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
+                    'encoded_couchbase_server_pw': self.encoded_cb_password,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'encryption_method': 'SSHA-256',
@@ -4680,10 +4666,7 @@ class Setup(object):
         # prepare multivalued list
         self.prepare_multivalued_list()
 
-        if not self.remoteCouchbase:
-
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-
+        if self.cb_install == LOCAL:
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.couchebaseCreateCluster()
@@ -4728,14 +4711,14 @@ class Setup(object):
             self.import_ldif_opendj(ldif_files)
         else:
             cb_host = cb_hosts[self.cb_query_node]
-            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
             cb_host = cb_hosts[self.cb_query_node]
-            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
         apache_user = 'www-data'
@@ -4902,12 +4885,12 @@ class Setup(object):
             oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
             changed = False
             
-            if self.install_couchbase and not self.remoteCouchbase:
+            if self.cb_install == LOCAL:
                 oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
                 oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
                 changed = True
             
-            elif self.remoteLdap or self.remoteCouchbase:
+            elif self.wrends_install != LOCAL:
                 oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', '')
                 oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', '')
                 changed = True
@@ -5155,7 +5138,7 @@ if __name__ == '__main__':
         'downloadWars': False,
         'installOxAuth': True,
         'installOxTrust': True,
-        'installLDAP': False,
+        'wrends_install': LOCAL,
         'installHTTPD': True,
         'installSaml': False,
         'installOxAuthRP': False,
@@ -5164,8 +5147,7 @@ if __name__ == '__main__':
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
-        'remoteCouchbase': False,
-        'remoteLdap': False,
+        'cb_install': NONE,
         'loadTestDataExit': False,
         'loadData': True,
     }
@@ -5196,8 +5178,12 @@ if __name__ == '__main__':
     setupOptions['loadTestDataExit'] = argsp.x
     setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
-    setupOptions['remoteCouchbase'] = argsp.remote_couchbase
-    setupOptions['remoteLdap'] = argsp.remote_ldap
+    
+    if argsp.remote_ldap:
+        setupOptions['wrends_install'] = REMOTE
+    
+    if argsp.remote_couchbase:
+        setupOptions['cb_install'] = REMOTE
 
     if argsp.no_data:
         setupOptions['loadData'] = False
