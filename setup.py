@@ -68,10 +68,10 @@ class colors:
     UNDERLINE = '\033[4m'
     DANGER = '\033[31m'
 
+
 suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
-
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -340,6 +340,10 @@ class Setup(object):
         self.apache_version = None
         self.opendj_version = None
 
+        #passwords
+        self.ldapPass = None
+        self.oxtrust_admin_password = None
+        self.cb_password = None        
 
         # Gluu components installation status
         self.loadData = True
@@ -485,7 +489,6 @@ class Setup(object):
         self.state = None
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
-        self.encoded_ldap_pw = None
         self.encoded_shib_jks_pw = None
         self.application_max_ram = None    # in MB
         self.encode_salt = None
@@ -1388,6 +1391,9 @@ class Setup(object):
         if fn.endswith('-DEC~'):
             self.run(['rm', '-f', fn])
 
+        if not 'oxtrust_admin_password' in prop:
+            self.oxtrust_admin_password = prop['ldapPass']
+
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
         try:
@@ -1879,7 +1885,7 @@ class Setup(object):
     def encode_passwords(self):
         self.logIt("Encoding passwords")
         try:
-            self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
+            self.encoded_oxtrust_admin_password = self.ldap_encode(self.oxtrust_admin_password)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
@@ -3050,13 +3056,23 @@ class Setup(object):
 
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
+        
+        oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
+        
+        while True:
+            oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
+            if len(oxtrust_admin_password) > 5:
+                break
+            else:
+                print("Password must be at least 6 characters")
+        
+        self.oxtrust_admin_password = oxtrust_admin_password
+
 
         if not (self.remoteCouchbase or self.remoteLdap):
 
-            ldapPass = self.getPW(special='.*=!%&+/-')
-
             while True:
-                ldapPass = self.getPrompt("Optional: enter password for oxTrust and DB superuser", ldapPass)
+                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
 
                 if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
                     break
@@ -3490,7 +3506,7 @@ class Setup(object):
             
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.ldapPass])
             
-            self.post_messages.append(prop_fn+".enc is encrypted with password " + self.ldapPass)
+            self.post_messages.append(prop_fn+".enc is encrypted with password " + self.oxtrust_admin_password)
             
             self.run(['rm', '-f', prop_fn])
             
